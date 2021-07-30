@@ -155,7 +155,7 @@ def test_us_transducer_as_sensor():
     else:
         print(f'kspaceFirstOrder-OMP.exe -i {input_file_full_path} -o {output_file_full_path} --p_final --p_max')
 
-    assert compare_against_ref('example_us_transducer_as_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_us_transducer_as_sensor', input_file_full_path), 'Files do not match!'
 
     # extract a single scan line from the sensor data using the current
     # beamforming settings
