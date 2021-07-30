@@ -176,3 +176,7 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
         # exit matlab computation if required
         if options.save_to_disk_exit:
             return
+
+    # TODO => write it as a decorator
+    # run the CPP code
+    # load the generated data

@@ -253,5 +253,3 @@ def test_us_bmode_linear_transducer():
         # save example_us_bmode_scan_lines scan_lines;
     else:
         raise NotImplementedError
-
-test_us_bmode_linear_transducer()
