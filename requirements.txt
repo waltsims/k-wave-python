@@ -6,3 +6,5 @@ opencv-python==4.4.0.46
 omegaconf==2.0.5
 deepdiff==5.2.3
 matplotlib==3.3.4
+sphinx==4.1.2
+furo==2021.7.31b41
