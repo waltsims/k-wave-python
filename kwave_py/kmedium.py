@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 from warnings import warn
 
 import numpy as np
@@ -8,22 +9,38 @@ import kwave_py.utils.checkutils
 
 @dataclass
 class kWaveMedium(object):
-    sound_speed                 : np.array             # [m/s] | required to be defined
-    sound_speed_ref             : np.array = None
-    density                     : np.array = None      # [kg/m^3]
-    alpha_coeff                 : np.array = None      # [dB/(MHz^y cm)]
-    alpha_power                 : np.array = None
-    alpha_mode                  : np.array = None
-    alpha_filter                : np.array = None
-    alpha_sign                  : np.array = None
-    BonA                        : np.array = None
-    absorbing                   : bool     = False
-    stokes                      : bool     = False
+    sound_speed                 : np.array             #: sound speed distribution within the acoustic medium [m/s] | required to be defined
+    sound_speed_ref             : np.array = None      #: reference sound speed used within the k-space operator (phase correction term) [m/s]
+    density                     : np.array = None      #: density distribution within the acoustic medium [kg/m^3]
+    alpha_coeff                 : np.array = None      #: power law absorption coefficient [dB/(MHz^y cm)]
+    alpha_power                 : np.array = None      #: power law absorption exponent
+    alpha_mode                  : np.array = None      #: optional input to force either the absorption or dispersion terms in the equation of state to be excluded; valid inputs are 'no_absorption' or 'no_dispersion'
+    alpha_filter                : np.array = None      #: frequency domain filter applied to the absorption and dispersion terms in the equation of state
+    alpha_sign                  : np.array = None      #: two element array used to control the sign of absorption and dispersion terms in the equation of state
+    BonA                        : np.array = None      #: parameter of nonlinearity
+    absorbing                   : bool     = False     #: is the medium absorbing?
+    stokes                      : bool     = False     #: is the medium absorbing stokes?
+
+   #  """
+   #     Note: For heterogeneous medium parameters, medium.sound_speed and
+   #     medium.density must be given in matrix form with the same dimensions as
+   #     kgrid. For homogeneous medium parameters, these can be given as single
+   #     numeric values. If the medium is homogeneous and velocity inputs or
+   #     outputs are not required, it is not necessary to specify medium.density.
+   # """
 
     def __post_init__(self):
         self.sound_speed                    = np.atleast_1d(self.sound_speed)
 
-    def check_fields(self, kgrid_shape):
+    def check_fields(self, kgrid_shape: np.ndarray) -> None:
+        """
+            Check whether the given properties are valid
+        Args:
+            kgrid_shape: Shape of the kWaveGrid
+
+        Returns:
+            None
+        """
         # check the absorption mode input is valid
         if self.alpha_mode is not None:
             assert self.alpha_mode in ['no_absorption', 'no_dispersion', 'stokes'], \
@@ -41,17 +58,31 @@ class kWaveMedium(object):
         if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):
             raise ValueError('medium.alpha_coeff must be non-negative and real.')
 
-    def is_defined(self, *fields):
+    def is_defined(self, *fields) -> List[bool]:
+        """
+            Check if the field(s) are defined or None
+        Args:
+            *fields: String list of the fields
+        Returns:
+            Boolean list
+        """
         results = []
         for f in fields:
             results.append(getattr(self, f) is not None)
         return results
 
-    def ensure_defined(self, *fields):
+    def ensure_defined(self, *fields) -> None:
+        """
+            Assert that the field(s) are defined (not None)
+        Args:
+            *fields: String list of the fields
+        Returns:
+            None
+        """
         for f in fields:
             assert getattr(self, f) is not None, f'The field {f} must be not be None'
 
-    def is_nonlinear(self):
+    def is_nonlinear(self) -> bool:
         """
             Check if the medium is nonlinear
         Returns:
@@ -59,7 +90,15 @@ class kWaveMedium(object):
         """
         return self.BonA is not None
 
-    def set_absorbing(self, is_absorbing, is_stokes=False):
+    def set_absorbing(self, is_absorbing, is_stokes=False) -> None:
+        """
+            Change medium's absorbing and stokes properties
+        Args:
+            is_absorbing: Is the medium absorbing
+            is_stokes: Is the medium stokes
+        Returns:
+            None
+        """
         # only stokes absorption is supported in the axisymmetric code
         self.absorbing, self.stokes = is_absorbing, is_stokes
         if is_absorbing:
@@ -68,7 +107,12 @@ class kWaveMedium(object):
             else:
                 self._check_absorbing_without_stokes()
 
-    def _check_absorbing_without_stokes(self):
+    def _check_absorbing_without_stokes(self) -> None:
+        """
+            Check if the medium properties are set correctly for absorbing simulation without stokes
+        Returns:
+            None
+        """
         # enforce both absorption parameters
         self.ensure_defined('alpha_coeff', 'alpha_power')
 
@@ -88,6 +132,11 @@ class kWaveMedium(object):
                 critical, this error can also be avoided by setting medium.alpha_mode to 'no_dispersion'"""
 
     def _check_absorbing_with_stokes(self):
+        """
+            Check if the medium properties are set correctly for absorbing simulation with stokes
+        Returns:
+            None
+        """
         # enforce absorption coefficient
         self.ensure_defined('alpha_coeff')
 
@@ -115,24 +164,42 @@ class kWaveMedium(object):
 
     @property
     def sound_speed_shear(self):  # pragma: no cover
+        """
+            Shear sound speed (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_ref_shear(self):  # pragma: no cover
+        """
+            Shear sound speed reference (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_compression(self):  # pragma: no cover
+        """
+            Compression sound speed (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_ref_compression(self):  # pragma: no cover
+        """
+            Compression sound speed reference (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def alpha_coeff_compression(self):  # pragma: no cover
+        """
+            Compression alpha coefficient (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def alpha_coeff_shear(self):  # pragma: no cover
+        """
+            Shear alpha coefficient (used in elastic simulations | not supported currently!)
+        """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
