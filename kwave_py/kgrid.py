@@ -28,34 +28,32 @@ class kWaveGrid(object):
         N, spacing = np.atleast_1d(N), np.atleast_1d(spacing)  # if inputs are lists
         assert N.ndim == 1 and spacing.ndim == 1  # ensure no multidimensional lists
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
-        self.N = N.astype(int)
-        self.spacing = spacing
-        self.dim = self.N.size
 
-        # non-uniform grid
-        self.nonuniform = False
+        self.N = N.astype(int)              #: grid size in each dimension [grid points]
+        self.spacing = spacing              #: grid point spacing in each direction [m]
+        self.dim = self.N.size              #: Number of dimensions (1, 2 or 3)
 
-        # size of time step [s]
-        self.dt = 'auto'
+        self.nonuniform = False             #: flag that indicates grid non-uniformity
+        self.dt = 'auto'                    #: size of time step [s]
+        self.Nt = 'auto'                    #: number of time steps [s]
 
-        # number of time steps [s]
-        self.Nt = 'auto'
+        # originally there was [xn_vec, yn_vec, zn_vec]
+        self.n_vec      = Array([0] * self.dim)  #: position vectors for the grid points in [0, 1]
+        # originally there was [xn_vec_sgx, yn_vec_sgy, zn_vec_sgz]
+        self.n_vec_sg   = Array([0] * self.dim)  #: position vectors for the staggered grid points in [0, 1]
 
-        # position vectors for the staggered grid points in [0, 1]
-        self.n_vec      = Array([0] * self.dim)  # originally there was [xn_vec, yn_vec, zn_vec]
-        self.n_vec_sg   = Array([0] * self.dim)  # originally there was [xn_vec_sgx, yn_vec_sgy, zn_vec_sgz]
-
-        # transformation gradients between uniform and staggered grids
-        self.dudn       = Array([0] * self.dim)  # originally there was [dxudxn, dyudyn, dzudzn]
-        self.dudn_sg    = Array([0] * self.dim)  # originally there was [dxudxn_sgx, dyudyn_sgy, dzudzn_sgz]
+        # originally there was [dxudxn, dyudyn, dzudzn]
+        self.dudn       = Array([0] * self.dim)  #: transformation gradients between uniform and staggered grids
+        # originally there was [dxudxn_sgx, dyudyn_sgy, dzudzn_sgz]
+        self.dudn_sg    = Array([0] * self.dim)  #: transformation gradients between uniform and staggered grids
 
         # assign the grid parameters for the x spatial direction
-        # Nx x 1 vector of wavenumber components in the x-direction [rad/m]
-        self.k_vec = Array([self.makeDim(self.Nx, self.dx)])  # originally kx_vec
+        # originally kx_vec
+        self.k_vec = Array([self.makeDim(self.Nx, self.dx)])  #: Nx x 1 vector of wavenumber components in the x-direction [rad/m]
 
         if self.dim == 1:
             # define the scalar wavenumber based on the wavenumber components
-            self.k = abs(self.k_vec.x)
+            self.k = abs(self.k_vec.x)  #: scalar wavenumber
 
         if self.dim >= 2:
             # assign the grid parameters for the x and y spatial directions
@@ -67,7 +65,7 @@ class kWaveGrid(object):
                 self.k = np.zeros((self.Nx, self.Ny))
                 self.k = np.reshape(self.k_vec.x, (-1, 1)) ** 2 + self.k
                 self.k = np.reshape(self.k_vec.y, (1, -1)) ** 2 + self.k
-                self.k = np.sqrt(self.k)
+                self.k = np.sqrt(self.k)  #: scalar wavenumber
 
         if self.dim == 3:
             # assign the grid parameters for the x, y, and z spatial directions
@@ -79,11 +77,14 @@ class kWaveGrid(object):
             self.k = np.reshape(self.k_vec.x, (-1, 1, 1)) ** 2 + self.k
             self.k = np.reshape(self.k_vec.y, (1, -1, 1)) ** 2 + self.k
             self.k = np.reshape(self.k_vec.z, (1, 1, -1)) ** 2 + self.k
-            self.k = np.sqrt(self.k)
+            self.k = np.sqrt(self.k)  #: scalar wavenumber
 
 
     @property
     def t_array(self):
+        """
+            time array [s]
+        """
         if self.Nt == 'auto' or self.dt == 'auto':
             return 'auto'
         else:
@@ -117,7 +118,15 @@ class kWaveGrid(object):
             self.Nt = Nt_temp
             self.dt = dt_temp
 
-    def setTime(self, Nt, dt):
+    def setTime(self, Nt, dt) -> None:
+        """
+            Set Nt and dt based on user input
+        Args:
+            Nt:
+            dt:
+
+        Returns: None
+        """
         # check the value for Nt
         assert (isinstance(Nt, int) or np.issubdtype(Nt, np.int)) and Nt > 0, 'Nt must be a positive integer.'
 
@@ -130,35 +139,59 @@ class kWaveGrid(object):
 
     @property
     def Nx(self):
+        """
+            grid size in x-direction [grid points]
+        """
         return self.N[0]
 
     @property
     def Ny(self):
+        """
+           grid size in y-direction [grid points]
+        """
         return self.N[1] if self.N.size >= 2 else 0
 
     @property
     def Nz(self):
+        """
+           grid size in z-direction [grid points]
+        """
         return self.N[2] if self.N.size == 3 else 0
 
     @property
     def dx(self):
+        """
+            grid point spacing in x-direction [m]
+        """
         return self.spacing[0]
 
     @property
     def dy(self):
+        """
+            grid point spacing in y-direction [m]
+        """
         return self.spacing[1] if self.spacing.size >= 2 else 0
 
     @property
     def dz(self):
+        """
+            grid point spacing in z-direction [m]
+        """
         return self.spacing[2] if self.spacing.size == 3 else 0
 
     @property
     def x_vec(self):
+        """
+           Nx x 1 vector of the grid coordinates in the x-direction [m]
+        """
         # calculate x_vec based on kx_vec
         return self.size[0] * self.k_vec.x * self.dx / (2 * np.pi)
 
     @property
     def y_vec(self):
+        """
+           Ny x 1 vector of the grid coordinates in the y-direction [m]
+        """
         # calculate y_vec based on ky_vec
         if self.dim < 2:
             return np.nan
@@ -166,6 +199,9 @@ class kWaveGrid(object):
 
     @property
     def z_vec(self):
+        """
+            Nz x 1 vector of the grid coordinates in the z-direction [m]
+        """
         # calculate z_vec based on kz_vec
         if self.dim < 3:
             return np.nan
@@ -173,27 +209,36 @@ class kWaveGrid(object):
 
     @property
     def x(self):
-        # Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]
+        """
+            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]
+        """
         return self.size[0] * self.kx * self.dx / (2 * math.pi)
 
     @property
     def y(self):
-        # Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
+        """
+            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
+        """
         if self.dim < 2:
             return np.nan
         return self.size[1] * self.ky * self.dy / (2 * math.pi)
 
     @property
     def z(self):
-        # Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
+        """
+            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
+        """
         if self.dim < 3:
             return np.nan
         return self.size[2] * self.kz * self.dz / (2 * math.pi)
 
     @property
     def xn(self):
-        # 3D plaid non-uniform spatial grids
-        # subfunction to return plaid xn matrix
+        """
+            3D plaid non-uniform spatial grids
+        Returns:
+            plaid xn matrix
+        """
         if self.dim == 1:
             return self.n_vec.x if self.nonuniform else 0
         elif self.dim == 2:
@@ -203,8 +248,11 @@ class kWaveGrid(object):
 
     @property
     def yn(self):
-        # 3D plaid non-uniform spatial grids
-        # subfunction to return plaid yn matrix
+        """
+            3D plaid non-uniform spatial grids
+        Returns:
+            plaid yn matrix
+        """
         if self.dim < 2:
             return np.nan
         if self.dim == 2:
@@ -214,19 +262,27 @@ class kWaveGrid(object):
 
     @property
     def zn(self):
-        # 3D plaid non-uniform spatial grids
-        # subfunction to return plaid zn matrix
+        """
+            3D plaid non-uniform spatial grids
+        Returns:
+            plaid zn matrix
+        """
         if self.dim < 3:
             return np.nan
         return np.tile(np.transpose(self.n_vec.z, (1, 2, 0)), (self.Nx, self.Ny, 1)) if self.nonuniform else 0
 
     @property
     def size(self):
-        # size of grid in the all directions [m]
+        """
+            Size of grid in the all directions [m]
+        """
         return self.N * self.spacing
 
     @property
-    def total_grid_points(self):
+    def total_grid_points(self) -> np.ndarray:
+        """
+            Total number of grid points (equal to Nx * Ny * Nz)
+        """
         return np.prod(self.N)
 
     @property
@@ -270,12 +326,16 @@ class kWaveGrid(object):
 
     @property
     def y_size(self):
-        # size of grid in the y-direction [m]
+        """
+            Size of grid in the y-direction [m]
+        """
         return self.Ny * self.dy
 
     @property
     def z_size(self):
-        # size of grid in the z-direction [m]
+        """
+            Size of grid in the z-direction [m]
+        """
         return self.Nz * self.dz
 
     @property
@@ -305,9 +365,17 @@ class kWaveGrid(object):
     ########################################
     # functions that can only be accessed by class members
     ########################################
-    # subfunction to create the grid parameters for a single spatial direction
     @staticmethod
     def makeDim(num_points, spacing):
+        """
+            Create the grid parameters for a single spatial direction
+        Args:
+            num_points:
+            spacing:
+
+        Returns:
+
+        """
         # define the discretisation of the spatial dimension such that there is always a DC component
         if num_points % 2 == 0:
             # grid dimension has an even number of points
@@ -325,8 +393,15 @@ class kWaveGrid(object):
         res = (2 * math.pi / spacing) * nx
         return res[:, None]
 
-    # calculate highest prime factors
-    def highest_prime_factors(self, axisymmetric=None):
+    def highest_prime_factors(self, axisymmetric=None) -> np.ndarray:
+        """
+            calculate highest prime factors
+        Args:
+            axisymmetric: Axisymmetric code or None
+
+        Returns:
+            Vector of three elements
+        """
         if axisymmetric is not None:
             if axisymmetric == 'WSWA':
                 prime_facs = [largest_prime_factor(self.Nx),
@@ -388,25 +463,54 @@ class kWaveGrid(object):
     #### FUNCTIONS BELOW WERE NOT TESTED FOR CORRECTNESS!
     ####
     ##################################################
-    # compute the DTT wavenumber vector in the x-direction
     def kx_vec_dtt(self, dtt_type):
+        """
+            Compute the DTT wavenumber vector in the x-direction
+        Args:
+            dtt_type:
+
+        Returns:
+
+        """
         kx_vec_dtt, M = self.makeDTTDim(self.Nx, self.dx, dtt_type)
         return kx_vec_dtt, M
 
-    # compute the DTT wavenumber vector in the x-direction
     def ky_vec_dtt(self, dtt_type):
+        """
+            Compute the DTT wavenumber vector in the y-direction
+        Args:
+            dtt_type:
+
+        Returns:
+
+        """
         ky_vec_dtt, M = self.makeDTTDim(self.Ny, self.dy, dtt_type)
         return ky_vec_dtt, M
 
-    # compute the DTT wavenumber vector in the x-direction
     def kz_vec_dtt(self, dtt_type):
+        """
+            Compute the DTT wavenumber vector in the z-direction
+        Args:
+            dtt_type:
+
+        Returns:
+
+        """
         kz_vec_dtt, M = self.makeDTTDim(self.Nz, self.dz, dtt_type)
         return kz_vec_dtt, M
 
-    # subfunction to create the DTT grid parameters for a single
-    # spatial direction
     @staticmethod
     def makeDTTDim(Nx, dx, dtt_type):
+        """
+            Create the DTT grid parameters for a single spatial direction
+        Args:
+            Nx:
+            dx:
+            dtt_type:
+
+        Returns:
+
+        """
 
         # compute the implied period of the input function
         if dtt_type == 1:
@@ -454,9 +558,19 @@ class kWaveGrid(object):
     ########################################
     # functions for non-uniform grids
     ########################################
-    # subfunction to set non-uniform grid parameters in specified
-    # dimension
     def setNUGrid(self, dim, n_vec, dudn, n_vec_sg, dudn_sg):
+        """
+            Function to set non-uniform grid parameters in specified dimension
+        Args:
+            dim:
+            n_vec:
+            dudn:
+            n_vec_sg:
+            dudn_sg:
+
+        Returns:
+
+        """
 
         # check the dimension to set the nonuniform grid is appropriate
         assert dim <= self.dim, f'Cannot set nonuniform parameters for dimension {dim} of {self.dim}-dimensional grid.'
