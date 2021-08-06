@@ -28,6 +28,12 @@ kSource
     :members:
     :undoc-members:
 
+Simulation Options
+==================
+.. automodule:: kwave_py.options
+    :members:
+    :undoc-members:
+
 Array
 =====
 .. automodule:: kwave_py.data

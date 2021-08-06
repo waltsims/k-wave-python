@@ -10,36 +10,36 @@ class SimulationOptions(object):
     # =========================================================================
 
     # flags which control the behaviour of the simulations
-    pml_inside                = True                 # put the PML inside the grid defined by the user
-    save_to_disk              = False                # save the input data to a HDF5 file
-    save_to_disk_exit         = True                 # exit the simulation after saving the HDF5 file
-    scale_source_terms        = True                 # apply the source scaling term to time varying sources
-    smooth_c0                 = False                # smooth the sound speed distribution
-    smooth_rho0               = False                # smooth the density distribution
-    smooth_p0                 = True                 # smooth the initial pressure distribution
-    use_kspace                = True                 # use the k-space correction
-    use_sg                    = True                 # use a staggered grid
-    pml_auto                  = False                # automatically choose the PML size to give small prime factors
-    create_log                = False                # create a log using diary
-    use_finite_difference     = False                # use finite difference gradients instead of spectral (in 1D)
-    stream_to_disk            = False                # buffer the sensor data to disk (in 3D)
-    data_recast               = False                # recast the sensor data back to double precision
+    pml_inside                = True                 #: put the PML inside the grid defined by the user
+    save_to_disk              = False                #: save the input data to a HDF5 file
+    save_to_disk_exit         = True                 #: exit the simulation after saving the HDF5 file
+    scale_source_terms        = True                 #: apply the source scaling term to time varying sources
+    smooth_c0                 = False                #: smooth the sound speed distribution
+    smooth_rho0               = False                #: smooth the density distribution
+    smooth_p0                 = True                 #: smooth the initial pressure distribution
+    use_kspace                = True                 #: use the k-space correction
+    use_sg                    = True                 #: use a staggered grid
+    pml_auto                  = False                #: automatically choose the PML size to give small prime factors
+    create_log                = False                #: create a log using diary
+    use_finite_difference     = False                #: use finite difference gradients instead of spectral (in 1D)
+    stream_to_disk            = False                #: buffer the sensor data to disk (in 3D)
+    data_recast               = False                #: recast the sensor data back to double precision
 
     # =========================================================================
     # VARIABLES THAT CAN BE CHANGED USING OPTIONAL INPUTS (THESE CAN BE MODIFIED)
     # =========================================================================
 
     # general settings
-    cartesian_interp                = 'linear'                          # interpolation mode for Cartesian sensor mask
-    hdf_compression_level           = None                              # zip compression level for HDF5 input files
-    data_cast                       = 'off'                             # data cast
-    pml_search_range                = [10, 40]                          # search range used when automatically determining PML size
-    radial_symmetry                 = 'WSWA-FFT'                        # radial symmetry used in axisymmetric code
-    multi_axial_PML_ratio           = 0.1                               # MPML settings
+    cartesian_interp                = 'linear'                          #: interpolation mode for Cartesian sensor mask
+    hdf_compression_level           = None                              #: zip compression level for HDF5 input files
+    data_cast                       = 'off'                             #: data cast
+    pml_search_range                = [10, 40]                          #: search range used when automatically determining PML size
+    radial_symmetry                 = 'WSWA-FFT'                        #: radial symmetry used in axisymmetric code
+    multi_axial_PML_ratio           = 0.1                               #: MPML settings
 
     # default PML properties and plot scale
-    pml_x_alpha, pml_y_alpha, pml_z_alpha = None, None, None  # farid | for now
-    pml_x_size, pml_y_size, pml_z_size = None, None, None  # farid | for now
+    pml_x_alpha, pml_y_alpha, pml_z_alpha = None, None, None  #: PML Alpha
+    pml_x_size, pml_y_size, pml_z_size = None, None, None  #: PML Size
 
     def __post_init__(self):
         # load the HDF5 literals (for the default compression level)
@@ -48,6 +48,37 @@ class SimulationOptions(object):
 
     @staticmethod
     def init(kgrid, elastic_code: bool, axisymmetric: bool, **kwargs):
+        """
+            Initialize the Simulation Options
+        Args:
+            kgrid: kWaveGrid instance
+            elastic_code: Flag that indicates whether elastic simulation is used
+            axisymmetric: Flag that indicates whether axisymmetric simulation is used
+            **kwargs: Dictionary that holds following optional simulation properties:
+
+                * CartInterp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest' and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = 'linear').
+                * CreateLog: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).
+                * DataCast: String input of the data type that variables are cast to before computation. For example, setting to 'single' will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision.  This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting 'DataCast' to 'gpuArray-single' (default = 'off').
+                * DataRecast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the 'DataCast' option.
+                * HDFCompressionLevel: Compression level used for writing the input HDF5 file when using 'SaveToDisk' or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.
+                * MultiAxialPMLRatio: MPML settings
+                * PMLAlpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
+                * PMLInside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by PMLSize before running the simulation (default = true).
+                * PMLRange: Search range used when automatically determining PML size. Tuple of two elements
+                * PMLSize: Size of the perfectly matched layer in grid  points. By default, the PML is added evenly to all sides of the grid, however, both PMLSize and PMLAlpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate PMLAlpha to zero rather than forcing the PML to be of zero size (default = 10).
+                * RadialSymmetry: Radial symmetry used in axisymmetric code
+                * StreamToDisk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of times steps that are taken before the data is saved to disk (default = 200).
+                * SaveToDisk: String containing a filename (including  pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
+                * SaveToDiskExit: Exit the simulation after saving the HDF5 file
+                * ScaleSourceTerms: Apply the source scaling term to time varying sources
+                * Smooth: Boolean controlling whether source.p0, medium.sound_speed, and medium.density are smoothed using smooth before computation. 'Smooth' can either be given as a single Boolean value or as a 3 element array to control the smoothing of source.p0, medium.sound_speed, and medium.density, independently (default = [true, false, false]).
+                * UseFD: Use finite difference gradients instead of spectral (in 1D)
+                * UsekSpace: use the k-space correction
+                * UseSG: Use a staggered grid
+
+        Returns:
+            SimulationOptions instance
+        """
         # =========================================================================
         # FIXED LITERALS USED IN THE CODE (THESE CAN BE MODIFIED)
         # =========================================================================
