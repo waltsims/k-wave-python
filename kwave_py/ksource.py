@@ -9,33 +9,39 @@ from kwave_py.utils import num_dim2, matlab_find
 
 @dataclass
 class kSource(object):
-    _p0             = None      #: initial pressure within the acoustic medium
+    _p0             = None
     p               = None      #: time varying pressure at each of the source positions given by source.p_mask
     p_mask          = None      #: binary matrix specifying the positions of the time varying pressure source distribution
     p_mode          = None      #: optional input to control whether the input pressure is injected as a mass source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
-    p_frequency_ref = None
+    p_frequency_ref = None      #: Pressure reference frequency
 
     ux              = None      #: time varying particle velocity in the x-direction at each of the source positions given by source.u_mask
     uy              = None      #: time varying particle velocity in the y-direction at each of the source positions given by source.u_mask
     uz              = None      #: time varying particle velocity in the z-direction at each of the source positions given by source.u_mask
     u_mask          = None      #: binary matrix specifying the positions of the time varying particle velocity distribution
     u_mode          = None      #: optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
-    u_frequency_ref = None
+    u_frequency_ref = None      #: Velocity reference frequency
 
-    sxx             = None
-    syy             = None
-    szz             = None
-    sxy             = None
-    sxz             = None
-    syz             = None
-    s_mask          = None
-    s_mode          = None
+    sxx             = None      #: Stress source in x -> x direction
+    syy             = None      #: Stress source in y -> y direction
+    szz             = None      #: Stress source in z -> z direction
+    sxy             = None      #: Stress source in x -> y direction
+    sxz             = None      #: Stress source in x -> z direction
+    syz             = None      #: Stress source in y -> z direction
+    s_mask          = None      #: Stress source mask
+    s_mode          = None      #: Stress source mode
 
-    def is_p0_empty(self):
+    def is_p0_empty(self) -> bool:
+        """
+            Check if the `p0` field is set and not empty
+        """
         return self.p0 is None or len(self.p0) == 0 or (np.sum(self.p0 != 0) == 0)
 
     @property
     def p0(self):
+        """
+            Initial pressure within the acoustic medium
+        """
         return self._p0
 
     @p0.setter
@@ -47,7 +53,15 @@ class kSource(object):
         else:
             self._p0 = val
 
-    def validate(self, kgrid: kWaveGrid):
+    def validate(self, kgrid: kWaveGrid) -> None:
+        """
+            Validate the object fields for correctness
+        Args:
+            kgrid: Instance of `~kwave_py.kgrid.kWaveGrid` class
+
+        Returns:
+            None
+        """
         if self.p0 is not None:
             if self.p0.shape != kgrid.k.shape:
                 # throw an error if p0 is not the correct size
@@ -286,19 +300,31 @@ class kSource(object):
                     raise ValueError('The number of time series in source.sxx (etc) must match the number of labelled source elements in source.u_mask.')
 
     @property
-    def flag_ux(self):  # time-varying particle velocity
-        # set source flgs to the length of the sources, this allows the
-        # inputs to be defined independently and be of any length
+    def flag_ux(self):
+        """
+            Get the length of the sources in X-direction, this allows the
+            inputs to be defined independently and be of any length
+        Returns:
+            Length of the sources
+        """
         return len(self.ux[0]) if self.ux is not None else 0
 
     @property
-    def flag_uy(self):  # time-varying particle velocity
-        # set source flgs to the length of the sources, this allows the
-        # inputs to be defined independently and be of any length
+    def flag_uy(self):
+        """
+            Get the length of the sources in X-direction, this allows the
+            inputs to be defined independently and be of any length
+        Returns:
+            Length of the sources
+        """
         return len(self.uy[0]) if self.uy is not None else 0
 
     @property
-    def flag_uz(self):  # time-varying particle velocity
-        # set source flgs to the length of the sources, this allows the
-        # inputs to be defined independently and be of any length
+    def flag_uz(self):
+        """
+            Get the length of the sources in X-direction, this allows the
+            inputs to be defined independently and be of any length
+        Returns:
+            Length of the sources
+        """
         return len(self.uz[0]) if self.uz is not None else 0
