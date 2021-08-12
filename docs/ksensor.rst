@@ -1,5 +1,11 @@
 kSensor
 =======
 .. automodule:: kwave_py.ksensor
+
+.. currentmodule:: kwave_py.ksensor
+
+.. autoclass:: kSensor
     :members:
-    :undoc-members:
+
+.. autoclass:: kSensorDirectivity
+    :members:
