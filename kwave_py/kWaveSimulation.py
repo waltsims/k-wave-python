@@ -32,44 +32,51 @@ class kWaveSimulation(object):
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
         # flags which control the type of simulation
+        #: Whether simulation type is axisymmetric
         self.userarg_axisymmetric      = kwargs['axisymmetric']
 
         # flags which control the characteristics of the sensor
+        #: Whether time reversal simulation is enabled
         self.userarg_time_rev          = kwargs['time_rev']
-        self.reorder_data              = False                      # true if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask and thus must be re-ordered
-        self.binary_sensor_mask        = True                       # true if sensor.mask is a binary mask
+
+        #: Whether sensor.mask should be re-ordered.
+        #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
+        #: and thus must be re-ordered
+        self.reorder_data              = False
+
+        #: Whether the sensor.mask is binary
+        self.binary_sensor_mask        = True
+
+        #: If the sensor.mask is a list of cuboid corners
         self.userarg_cuboid_corners    = kwargs['cuboid_corners']
-        self.transducer_sensor         = False                      # true if sensor is an object of the kWaveTransducer class
+
+        #: If tse sensor is an object of the kWaveTransducer class
+        self.transducer_sensor         = False
 
         self.record = Recorder()
 
         # transducer source flags
-        self.transducer_source         = False                # transducer is object of kWaveTransducer class
+        #: transducer is object of kWaveTransducer class
+        self.transducer_source         = False
+
+        #: Apply receive elevation focus on the transducer
         self.transducer_receive_elevation_focus = False
 
         # general
-        self.COLOR_MAP                       = get_color_map()      # default color map
-        self.ESTIMATE_SIM_TIME_STEPS         = 50                   # time steps used to estimate simulation time
-        self.HIGHEST_PRIME_FACTOR_WARNING    = 7                    # largest prime factor before warning
-        self.KSPACE_CFL                      = 0.3                  # default CFL value used if kgrid.t_array is set to 'auto'
-        self.PSTD_CFL                        = 0.1                  # default CFL value used if kgrid.t_array is set to 'auto'
+        self.COLOR_MAP                       = get_color_map()      #: default color map
+        self.ESTIMATE_SIM_TIME_STEPS         = 50                   #: time steps used to estimate simulation time
+        self.HIGHEST_PRIME_FACTOR_WARNING    = 7                    #: largest prime factor before warning
+        self.KSPACE_CFL                      = 0.3                  #: default CFL value used if kgrid.t_array is set to 'auto'
+        self.PSTD_CFL                        = 0.1                  #: default CFL value used if kgrid.t_array is set to 'auto'
 
         # source types
-        self.SOURCE_S_MODE_DEF               = 'additive'           # source mode for stress sources
-        self.SOURCE_P_MODE_DEF               = 'additive'           # source mode for pressure sources
-        self.SOURCE_U_MODE_DEF               = 'additive'           # source mode for velocity sources
+        self.SOURCE_S_MODE_DEF               = 'additive'           #: source mode for stress sources
+        self.SOURCE_P_MODE_DEF               = 'additive'           #: source mode for pressure sources
+        self.SOURCE_U_MODE_DEF               = 'additive'           #: source mode for velocity sources
 
         # filenames
-        self.STREAM_TO_DISK_FILENAME         = 'temp_sensor_data.bin'
-        self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]
-
-        # maximum scaling between p0 and plot scale before warning
-        if kgrid.dim == 1:
-            self.PLOT_SCALE_WARNING = 5
-        elif kgrid.dim == 2:
-            self.PLOT_SCALE_WARNING = 10
-        elif kgrid.dim == 3:
-            self.PLOT_SCALE_WARNING = 20
+        self.STREAM_TO_DISK_FILENAME         = 'temp_sensor_data.bin'   #: default disk stream filename
+        self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]  #: default log filename
 
         del kwargs['axisymmetric']
         del kwargs['cuboid_corners']
@@ -81,12 +88,22 @@ class kWaveSimulation(object):
 
         self.c_ref, self.c_ref_compression, self.c_ref_shear = [None] * 3
         self.transducer_input_signal = None
+
+        #: Indexing variable corresponding to the location of all the pressure source elements
         self.p_source_pos_index = None
+        #: Indexing variable corresponding to the location of all the velocity source elements
         self.u_source_pos_index = None
+        #: Indexing variable corresponding to the location of all the stress source elements
         self.s_source_pos_index = None
+
+        #: Delay mask that accounts for the beamforming delays and elevation focussing
         self.delay_mask = None
 
-        self.absorb_nabla1 = self.absorb_nabla2 = self.absorb_tau = self.absorb_eta = None
+        self.absorb_nabla1  = None  #: absorbing fractional Laplacian operator
+        self.absorb_tau     = None  #: absorbing fractional Laplacian coefficient
+        self.absorb_nabla2  = None  #: dispersive fractional Laplacian operator
+        self.absorb_eta     = None  #: dispersive fractional Laplacian coefficient
+
         self.dt = self.rho0 = self.c0 = None
         self.index_data_type = None
 
@@ -129,21 +146,29 @@ class kWaveSimulation(object):
 
     @property
     def elastic_code(self):
-        # check whether the calling function is a fluid or elastic code
-        # true if elastic simulation
+        """
+            Whether the simulation is elastic or fluid
+        Returns:
+            True if elastic simulation
+        """
         return self.calling_func_name.startswith(('pstdElastic', 'kspaceElastic'))
 
     @property
     def kspace_elastic_code(self):
-        # set additional flag if elastic code is a k-space code, as this
-        # requires some additional variables
-        # true if elastic simulation with k-space correction
+        """
+            Whether the simulation is k-space elastic code or an ordinary elastic code
+        Returns:
+            True if elastic simulation with k-space correction
+        """
         return self.calling_func_name.startswith('kspaceElastic')
 
     @property
     def axisymmetric(self):
-        # check whether the code is axisymmetric
-        # true if fluid axisymmetric simulation
+        """
+            Whether the code is axisymmetric
+        Returns:
+            True if fluid axisymmetric simulation
+        """
         if self.calling_func_name.startswith('kspaceFirstOrderAS'):
             return True
         else:
@@ -151,18 +176,27 @@ class kWaveSimulation(object):
 
     @property
     def kelvin_voigt_model(self):
-        # true if elastic simulation with absorption
+        """
+            Whether the simulation is elastic with absorption
+        """
         return False
 
     @property
     def nonuniform_grid(self):
-        # check for nonuniform grid and assign to flag
-        # true if the computational grid is non-uniform
+        """
+            Whether the grid is nonuniform
+        Returns:
+            True if the computational grid is non-uniform
+        """
         return self.kgrid.nonuniform
 
     @property
     def time_rev(self):
-        # true for time reversal simulaions using sensor.time_reversal_boundary_data
+        """
+            Whether the simulation is time reversal
+        Returns:
+            True for time reversal simulaions using sensor.time_reversal_boundary_data
+        """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
                 return True
@@ -171,12 +205,20 @@ class kWaveSimulation(object):
 
     @property
     def elastic_time_rev(self):
-        # true if using time reversal with the elastic code
+        """
+            Whether the simulation is time reversal and elastic code
+        Returns:
+            True if using time reversal with the elastic code
+        """
         return False
 
     @property
     def compute_directivity(self):
-        # true if directivity calculations in 2D are used by setting sensor.directivity_angle
+        """
+            Whether the directivity should be computed
+        Returns:
+            True if directivity calculations in 2D are used by setting sensor.directivity_angle
+        """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if self.kgrid.dim == 2:
                 # check for sensor directivity input and set flag
@@ -187,7 +229,9 @@ class kWaveSimulation(object):
 
     @property
     def cuboid_corners(self):
-        # true if sensor.mask is a list of cuboid corners
+        """
+            Whether the sensor.mask is a list of cuboid corners
+        """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if not self.blank_sensor and self.sensor.mask.shape[0] == 2 * self.kgrid.dim:
                 return True
@@ -198,6 +242,9 @@ class kWaveSimulation(object):
     ##############
     @property
     def source_p0(self):  # initial pressure
+        """
+            Whether initial pressure source is present (default=False)
+        """
         flag = False  # default
         if not isinstance(self.source, NotATransducer) and self.source.p0 is not None:
             # set flag
@@ -206,11 +253,17 @@ class kWaveSimulation(object):
 
     @property
     def source_p0_elastic(self):  # initial pressure in the elastic code
+        """
+            Whether initial pressure source is present in the elastic code (default=False)
+        """
         # Not clear where this flag is set
         return False
 
     @property
-    def source_p(self):  # # time-varying pressure
+    def source_p(self):
+        """
+            Whether time-varying pressure source is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
             # set source flag to the length of the source, this allows source.p
@@ -220,12 +273,11 @@ class kWaveSimulation(object):
 
     @property
     def source_p_labelled(self):  # time-varying pressure with labelled source mask
-        '''
-
+        """
+            Whether time-varying pressure source with labelled source mask is present (default=False)
         Returns:
-            True    => labelled source mask
-            False   => binary source mask
-        '''
+            True/False if labelled/binary source mask, respectively.
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
             # check if the mask is binary or labelled
@@ -234,7 +286,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_ux(self):  # time-varying particle velocity
+    def source_ux(self) -> bool:
+        """
+            Whether time-varying particle velocity source is used in X-direction
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.ux is not None:
             # set source flgs to the length of the sources, this allows the
@@ -243,7 +298,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_uy(self):  # time-varying particle velocity
+    def source_uy(self) -> bool:
+        """
+            Whether time-varying particle velocity source is used in Y-direction
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uy is not None:
             # set source flgs to the length of the sources, this allows the
@@ -252,7 +310,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_uz(self):  # time-varying particle velocity
+    def source_uz(self) -> bool:
+        """
+            Whether time-varying particle velocity source is used in Z-direction
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uz is not None:
             # set source flgs to the length of the sources, this allows the
@@ -261,7 +322,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_u_labelled(self):  # time-varying particle velocity with labelled source mask
+    def source_u_labelled(self):
+        """
+            Whether time-varying velocity source with labelled source mask is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.u_mask is not None:
             # check if the mask is binary or labelled
@@ -275,49 +339,70 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_sxx(self):  # time-varying stress
+    def source_sxx(self):
+        """
+            Whether time-varying stress source in X->X direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxx is not None:
             flag = len(self.source.sxx[0])
         return flag
 
     @property
-    def source_syy(self):  # time-varying stress
+    def source_syy(self):
+        """
+            Whether time-varying stress source in Y->Y direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syy is not None:
             flag = len(self.source.syy[0])
         return flag
 
     @property
-    def source_szz(self):  # time-varying stress
+    def source_szz(self):
+        """
+            Whether time-varying stress source in Z->Z direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.szz is not None:
             flag = len(self.source.szz[0])
         return flag
 
     @property
-    def source_sxy(self):  # time-varying stress
+    def source_sxy(self):
+        """
+            Whether time-varying stress source in X->Y direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxy is not None:
             flag = len(self.source.sxy[0])
         return flag
 
     @property
-    def source_sxz(self):  # time-varying stress
+    def source_sxz(self):
+        """
+            Whether time-varying stress source in X->Z direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxz is not None:
             flag = len(self.source.sxz[0])
         return flag
 
     @property
-    def source_syz(self):  # time-varying stress
+    def source_syz(self):
+        """
+            Whether time-varying stress source in Y->Z direction is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syz is not None:
             flag = len(self.source.syz[0])
         return flag
 
     @property
-    def source_s_labelled(self):  # time-varying stress with labelled source mask
+    def source_s_labelled(self):
+        """
+            Whether time-varying stress source with labelled source mask is present (default=False)
+        """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.s_mask is not None:
             # check if the mask is binary or labelled
@@ -331,7 +416,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def use_w_source_correction_p(self):  # use the w source correction instead of the k-space source correction for p sources
+    def use_w_source_correction_p(self):
+        """
+            Whether to use the w source correction instead of the k-space source correction for pressure sources
+        """
         flag = False
         if not isinstance(self.source, NotATransducer):
             if self.source.p is not None and self.source.p_frequency_ref is not None:
@@ -339,7 +427,10 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def use_w_source_correction_u(self):  # use the w source correction instead of the k-space source correction for u sources
+    def use_w_source_correction_u(self):
+        """
+            Whether to use the w source correction instead of the k-space source correction for velocity sources
+        """
         flag = False
         if not isinstance(self.source, NotATransducer):
             if any([(getattr(self.source, k) is not None) for k in ['ux', 'uy', 'uz', 'u_mask']]):
@@ -412,8 +503,15 @@ class kWaveSimulation(object):
             assert kgrid_dim == 3, f'kgrid has the wrong dimensionality for {calling_func_name}.'
 
     @staticmethod
-    def print_start_status(is_elastic_code):
-        # update command line status with the start time
+    def print_start_status(is_elastic_code) -> None:
+        """
+            Update command-line status with the start time
+        Args:
+            is_elastic_code: is the simulation elastic
+
+        Returns:
+            None
+        """
         if is_elastic_code:  # pragma: no cover
             print('Running k-Wave elastic simulation...')
         else:
