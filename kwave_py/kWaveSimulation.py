@@ -104,7 +104,9 @@ class kWaveSimulation(object):
         self.absorb_nabla2  = None  #: dispersive fractional Laplacian operator
         self.absorb_eta     = None  #: dispersive fractional Laplacian coefficient
 
-        self.dt = self.rho0 = self.c0 = None
+        self.dt             = None  #: Alias to kgrid.dt
+        self.rho0           = None  #: Alias to medium.density
+        self.c0             = None  #: Alias to medium.sound_speed
         self.index_data_type = None
 
     @property
@@ -438,7 +440,15 @@ class kWaveSimulation(object):
                     flag = True
         return flag
 
-    def input_checking(self, calling_func_name):
+    def input_checking(self, calling_func_name) -> None:
+        """
+            Check the input fields for correctness and validness
+        Args:
+            calling_func_name: Name of the script that calls this function
+
+        Returns:
+            None
+        """
         self.calling_func_name = calling_func_name
 
         k_dim = self.kgrid.dim
@@ -482,15 +492,15 @@ class kWaveSimulation(object):
         self.create_pml_indices(self.kgrid.dim, Array(self.kgrid.N), pml_size, opt.pml_inside, self.axisymmetric)
 
     @staticmethod
-    def check_calling_func_name_and_dim(calling_func_name, kgrid_dim):
+    def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
         """
-            check correct function has been called for the dimensionality of kgrid
+            Check correct function has been called for the dimensionality of kgrid
         Args:
-            calling_func_name:
-            kgrid_dim:
+            calling_func_name: Name of the script that makes calls to kWaveSimulation
+            kgrid_dim: Dimensionality of the kWaveGrid
 
         Returns:
-
+            None
         """
         assert not calling_func_name.startswith(('pstdElastic', 'kspaceElastic')), \
             "Elastic simulation is not supported."
@@ -518,22 +528,29 @@ class kWaveSimulation(object):
             print('Running k-Wave simulation...')
         print(f'  start time: {get_date_string()}')
 
-    def set_index_data_type(self):
-        # =========================================================================
-        # INDEX DATA TYPES
-        # =========================================================================
-
-        # pre-calculate the data type needed to store the matrix indices given the
-        # total number of grid points: indexing variables will be created using
-        # this data type to save memory
+    def set_index_data_type(self) -> None:
+        """
+            Pre-calculate the data type needed to store the matrix indices given the
+            total number of grid points: indexing variables will be created using this data type to save memory
+        Returns:
+            None
+        """
         total_grid_points = self.kgrid.total_grid_points
         self.index_data_type = get_smallest_possible_type(total_grid_points, 'uint', default='double')
 
     @staticmethod
     def check_medium(medium, kgrid_k, is_elastic, is_axisymmetric):
-        # =========================================================================
-        # CHECK MEDIUM STRUCTURE INPUTS
-        # =========================================================================
+        """
+            Check the properties of the medium structure for correctness and validity
+        Args:
+            medium: kWaveMedium instance
+            kgrid_k: kWaveGrid.k matrix
+            is_elastic: Whether the simulation is elastic
+            is_axisymmetric: Whether the simulation is axisymmetric
+
+        Returns:
+            Medium Density
+        """
 
         # if using the fluid code, allow the density field to be blank if the medium is homogeneous
         if not is_elastic and medium.density is None and medium.sound_speed.size == 1:
@@ -552,7 +569,15 @@ class kWaveSimulation(object):
             medium.check_fields(kgrid_k.shape)
         return user_medium_density_input
 
-    def check_source(self, kgrid_dim):
+    def check_source(self, kgrid_dim) -> None:
+        """
+            Check the source properties for correctness and validity
+        Args:
+            kgrid_dim: kWaveGrid dimension
+
+        Returns:
+            None
+        """
         # =========================================================================
         # CHECK SENSOR STRUCTURE INPUTS
         # =========================================================================
@@ -766,7 +791,16 @@ class kWaveSimulation(object):
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
             warn('WARNING: sensor directivity fields are not used for time reversal.')
 
-    def check_sensor(self, k_dim, k_Nt):
+    def check_sensor(self, k_dim, k_Nt) -> None:
+        """
+            Check the Sensor properties for correctness and validity
+        Args:
+            k_dim: kWaveGrid dimensionality
+            k_Nt: Number of time steps in kWaveGrid
+
+        Returns:
+            None
+        """
         # =========================================================================
         # CHECK SOURCE STRUCTURE INPUTS
         # =========================================================================
@@ -943,10 +977,12 @@ class kWaveSimulation(object):
             # clean up unused variables
             del active_elements_mask
 
-    def check_kgrid_time(self):
-        # =========================================================================
-        # CHECK KGRID TIME INPUTS
-        # =========================================================================
+    def check_kgrid_time(self) -> None:
+        """
+            Check time-related kWaveGrid inputs
+        Returns:
+            None
+        """
 
         # check kgrid for t_array existance, and create if not defined
         if isinstance(self.kgrid.t_array, str) and self.kgrid.t_array == 'auto':
@@ -979,10 +1015,14 @@ class kWaveSimulation(object):
 
     @staticmethod
     def select_precision(opt: SimulationOptions):
-        # =========================================================================
-        # CREATE ANONYMOUS FUNCTIONS FOR ALLOCATING VARIABLES
-        # =========================================================================
+        """
+            Select the minimal precision for storing the data
+        Args:
+            opt: SimulationOptions instance
 
+        Returns:
+            Minimal precision for variable allocation
+        """
         # set storage variable type based on data_cast - this enables the
         # output variables to be directly created in the data_cast format,
         # rather than creating them in double precision and then casting them
@@ -1004,7 +1044,19 @@ class kWaveSimulation(object):
             raise ValueError("'Unknown ''DataCast'' option'")
         return precision
 
-    def check_input_combinations(self, opt: SimulationOptions, user_medium_density_input: bool, k_dim, pml_size, kgrid_N):
+    def check_input_combinations(self, opt: SimulationOptions, user_medium_density_input: bool, k_dim, pml_size, kgrid_N) -> None:
+        """
+            Check the input combinations for correctness and validity
+        Args:
+            opt: SimulationOptions instance
+            user_medium_density_input: Medium Density
+            k_dim: kWaveGrid dimensionality
+            pml_size: Size of the PML
+            kgrid_N: kWaveGrid size in each direction
+
+        Returns:
+            None
+        """
         # =========================================================================
         # CHECK FOR VALID INPUT COMBINATIONS
         # =========================================================================
@@ -1081,10 +1133,19 @@ class kWaveSimulation(object):
             if k.endswith('_DEF'):
                 delattr(self, k)
 
-    def smooth_and_enlarge(self, source, k_dim, kgrid_N, opt: SimulationOptions):
-        # =========================================================================
-        # SMOOTH AND ENLARGE GRIDS
-        # =========================================================================
+    def smooth_and_enlarge(self, source, k_dim, kgrid_N, opt: SimulationOptions) -> None:
+        """
+            Smooth and enlarge grids
+
+        Args:
+            source: kWaveSource instance
+            k_dim: kWaveGrid dimensionality
+            kgrid_N: kWaveGrid size in each direction
+            opt: SimulationOptions
+
+        Returns:
+            None
+        """
 
         # smooth the initial pressure distribution p0 if required, and then restore
         # the maximum magnitude
@@ -1191,7 +1252,12 @@ class kWaveSimulation(object):
             print('smoothing density distribution...')
             ev('medium.density = smooth(medium.density);')
 
-    def create_sensor_variables(self):
+    def create_sensor_variables(self) -> None:
+        """
+            Create the sensor related variables
+        Returns:
+            None
+        """
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
             if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
@@ -1269,23 +1335,40 @@ class kWaveSimulation(object):
             self.reorder_data                       = result.reorder_data
             self.transducer_receive_elevation_focus = result.transducer_receive_elevation_focus
 
-    def create_absorption_vars(self):
-        # run subscript to create absorption variables for the fluid code based on
-        # the expanded and smoothed values of the medium parameters (if not saving
-        # to disk)
+    def create_absorption_vars(self) -> None:
+        """
+            Create absorption variables for the fluid code based on
+            the expanded and smoothed values of the medium parameters (if not saving to disk)
+        Returns:
+            None
+        """
         if not self.elastic_code and not isinstance(self.options.save_to_disk, str):
             self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(self.kgrid, self.medium, self.equation_of_state)
 
-    def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid):
-        # now that grids have been enlarged and smoothed, shorten commonly used
-        # field names (these act only as pointers provided that the values aren't modified)
+    def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:
+        """
+            Shorten commonly used field names (these act only as pointers provided that the values aren't modified)
+            (done after enlarging and smoothing the grids)
+        Args:
+            medium: kWaveMedium instance
+            kgrid: kWaveGrid instance
+
+        Returns:
+            None
+        """
         self.dt = float(kgrid.dt)
         self.rho0 = medium.density
         self.c0 = medium.sound_speed
 
-    def scale_source_terms(self, is_scale_source_terms):
-        # run subscript to scale the source terms based on the expanded and
-        # smoothed values of the medium parameters
+    def scale_source_terms(self, is_scale_source_terms) -> None:
+        """
+            Scale the source terms based on the expanded and smoothed values of the medium parameters
+        Args:
+            is_scale_source_terms: Should the source terms be scaled
+
+        Returns:
+            None
+        """
         if not is_scale_source_terms:
             return
         try:
@@ -1327,8 +1410,19 @@ class kWaveSimulation(object):
         )
 
     def create_pml_indices(self, kgrid_dim, kgrid_N: Array, pml_size, pml_inside, is_axisymmetric):
-        # define index variables to remove the PML from the display if the optional
-        # input 'PlotPML' is set to false
+        """
+            Define index variables to remove the PML from the display if the optional
+            input 'PlotPML' is set to false
+        Args:
+            kgrid_dim: kWaveGrid dimensinality
+            kgrid_N: kWaveGrid size in each direction
+            pml_size: Size of the PML
+            pml_inside: Whether the PML is inside the grid defined by the user
+            is_axisymmetric: Whether the simulation is axisymmetric
+
+        Returns:
+
+        """
         # comment by Farid: PlotPML is always False in Python version,
         #                       therefore if statement removed
         if kgrid_dim == 1:
