@@ -8,6 +8,30 @@ from .interputils import interpolate2D
 
 
 def expand_matrix(matrix, exp_coeff, edge_val=None):
+    """
+        Enlarge a matrix by extending the edge values.
+
+        expandMatrix enlarges an input matrix by extension of the values at
+        the outer faces of the matrix (endpoints in 1D, outer edges in 2D,
+        outer surfaces in 3D). Alternatively, if an input for edge_val is
+        given, all expanded matrix elements will have this value. The values
+        for exp_coeff are forced to be real positive integers (or zero).
+
+        Note, indexing is done inline with other k-Wave functions using
+        mat(x) in 1D, mat(x, y) in 2D, and mat(x, y, z) in 3D.
+    Args:
+        matrix: the matrix to enlarge
+        exp_coeff: the number of elements to add in each dimension
+                    in 1D: [a] or [x_start, x_end]
+                    in 2D: [a] or [x, y] or
+                           [x_start, x_end, y_start, y_end]
+                    in 3D: [a] or [x, y, z] or
+                           [x_start, x_end, y_start, y_end, z_start, z_end]
+                           (here 'a' is applied to all dimensions)
+        edge_val: value to use in the matrix expansion
+    Returns:
+        expanded matrix
+    """
     opts = {}
 
     if edge_val is None:
