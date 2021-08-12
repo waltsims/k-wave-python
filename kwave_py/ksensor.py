@@ -7,13 +7,14 @@ from kwave_py.utils import expand_matrix
 class kSensor(object):
 
     def __init__(self, mask=None, record=None):
-        self._mask = mask
-        self.record = record
-        self._record_start_index = 1        # record the time series from the beginning by default
+        self._mask = mask                   #: binary matrix or a set of Cartesian points where the pressure is recorded at each time-step
+        self.record = record                #: cell array of the acoustic parameters to record in the form Recorder
+        # record the time series from the beginning by default
+        self._record_start_index = 1        #: time index at which the sensor should start recording the data specified by sensor.record
         self.record_mode = None
         self.directivity = None
-        self.time_reversal_boundary_data = None
-        self.frequency_response = None
+        self.time_reversal_boundary_data = None     #: time varying pressure enforced as a Dirichlet boundary condition over sensor.mask
+        self.frequency_response = None              #: two element array specifying the center frequency and percentage bandwidth of a frequency domain Gaussian filter applied to the sensor_data
 
     @property
     def mask(self):

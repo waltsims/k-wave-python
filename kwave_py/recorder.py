@@ -9,24 +9,24 @@ class Recorder(object):
 
     def __init__(self):
         # flags which control which parameters are recorded
-        self.p                  = True     # time-varying pressure
-        self.p_max              = False    # maximum pressure over simulation
-        self.p_min              = False    # minimum pressure over simulation
-        self.p_rms              = False    # root-mean-squared pressure over simulation
-        self.p_max_all          = False    # maximum pressure over simulation at all grid points
-        self.p_min_all          = False    # minimum pressure over simulation at all grid points
-        self.p_final            = False    # final pressure field at all grid points
-        self.u                  = False    # time-varying particle velocity
-        self.u_split_field      = False    # compressional and shear components of time-varying particle velocity
-        self.u_non_staggered    = False    # time-varying particle velocity on non-staggered grid
-        self.u_max              = False    # maximum particle velocity over simulation
-        self.u_min              = False    # minimum particle velocity over simulation
-        self.u_rms              = False    # root-mean-squared particle velocity over simulation
-        self.u_max_all          = False    # maximum particle velocity over simulation at all grid points
-        self.u_min_all          = False    # minimum particle velocity over simulation at all grid points
-        self.u_final            = False    # final particle velocity field at all grid points
-        self.I                  = False    # time-varying acoustic intensity
-        self.I_avg              = False    # time-averaged acoustic intensity
+        self.p                  = True     #: time-varying acoustic pressure
+        self.p_max              = False    #: maximum pressure over simulation
+        self.p_min              = False    #: minimum pressure over simulation
+        self.p_rms              = False    #: root-mean-squared pressure over simulation
+        self.p_max_all          = False    #: maximum pressure over simulation at all grid points
+        self.p_min_all          = False    #: minimum pressure over simulation at all grid points
+        self.p_final            = False    #: final pressure field at all grid points
+        self.u                  = False    #: time-varying particle velocity
+        self.u_split_field      = False    #: compressional and shear components of time-varying particle velocity
+        self.u_non_staggered    = False    #: time-varying particle velocity on non-staggered grid
+        self.u_max              = False    #: maximum particle velocity over simulation
+        self.u_min              = False    #: minimum particle velocity over simulation
+        self.u_rms              = False    #: root-mean-squared particle velocity over simulation
+        self.u_max_all          = False    #: maximum particle velocity over simulation at all grid points
+        self.u_min_all          = False    #: minimum particle velocity over simulation at all grid points
+        self.u_final            = False    #: final particle velocity field at all grid points
+        self.I                  = False    #: time-varying acoustic intensity
+        self.I_avg              = False    #: time-averaged acoustic intensity
 
         self.cuboid_corners_list = None
 

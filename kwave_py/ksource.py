@@ -9,17 +9,17 @@ from kwave_py.utils import num_dim2, matlab_find
 
 @dataclass
 class kSource(object):
-    _p0             = None
-    p               = None
-    p_mask          = None
-    p_mode          = None
+    _p0             = None      #: initial pressure within the acoustic medium
+    p               = None      #: time varying pressure at each of the source positions given by source.p_mask
+    p_mask          = None      #: binary matrix specifying the positions of the time varying pressure source distribution
+    p_mode          = None      #: optional input to control whether the input pressure is injected as a mass source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
     p_frequency_ref = None
 
-    ux              = None
-    uy              = None
-    uz              = None
-    u_mask          = None
-    u_mode          = None
+    ux              = None      #: time varying particle velocity in the x-direction at each of the source positions given by source.u_mask
+    uy              = None      #: time varying particle velocity in the y-direction at each of the source positions given by source.u_mask
+    uz              = None      #: time varying particle velocity in the z-direction at each of the source positions given by source.u_mask
+    u_mask          = None      #: binary matrix specifying the positions of the time varying particle velocity distribution
+    u_mode          = None      #: optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
     u_frequency_ref = None
 
     sxx             = None

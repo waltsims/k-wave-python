@@ -6,40 +6,22 @@ Welcome to kWave-py's documentation!
    :caption: Contents:
 
 
-kWaveGrid
-=========
-.. automodule:: kwave_py.kgrid
-    :members:
+.. toctree::
+   :maxdepth: 1
+   :caption: Base Modules
 
-kMedium
-=======
-.. automodule:: kwave_py.kmedium
-    :members:
+   kgrid
+   kmedium
+   ksensor
+   ksource
 
-kSensor
-=======
-.. automodule:: kwave_py.ksensor
-    :members:
-    :undoc-members:
 
-kSource
-=======
-.. automodule:: kwave_py.ksource
-    :members:
-    :undoc-members:
+.. toctree::
+   :maxdepth: 1
+   :caption: Helper Modules
 
-Simulation Options
-==================
-.. automodule:: kwave_py.options
-    :members:
-    :undoc-members:
-
-Array
-=====
-.. automodule:: kwave_py.data
-    :members:
-    :undoc-members:
-
+   simopt
+   array
 
 
 Indices and tables
