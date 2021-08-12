@@ -17,6 +17,15 @@ MACHINE_PRECISION = 100 * sys.float_info.epsilon
 
 @dataclass
 class kWaveGrid(object):
+    """
+        kWaveGrid is the grid class used across the k-Wave Toolbox. An object
+        of the kWaveGrid class contains the grid coordinates and wavenumber
+        matrices used within the simulation and reconstruction functions in
+        k-Wave. The grid matrices are indexed as: (x, 1) in 1D; (x, y) in
+        2D; and (x, y, z) in 3D. The grid is assumed to be a regularly spaced
+        Cartesian grid, with grid spacing given by dx, dy, dz (typically the
+        grid spacing in each direction is constant).
+    """
 
     def __init__(self, N, spacing):
         """
