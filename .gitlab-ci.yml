@@ -33,7 +33,7 @@ test cpp_io_in_parts:
     stage: test_cpp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_cpp_io_in_parts.py
+        - pytest --cov=kwave/ tests/test_cpp_io_in_parts.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -45,7 +45,7 @@ test cpp_running_simulations:
     stage: test_cpp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_cpp_running_simulations.py
+        - pytest --cov=kwave/ tests/test_cpp_running_simulations.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -57,7 +57,7 @@ test us_transducer_as_sensor:
     stage: test_us
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_us_transducer_as_sensor.py
+        - pytest --cov=kwave/ tests/test_us_transducer_as_sensor.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -69,7 +69,7 @@ test us_defining_transducer:
     stage: test_us
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_us_defining_transducer.py
+        - pytest --cov=kwave/ tests/test_us_defining_transducer.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -81,7 +81,7 @@ test us_bmode_linear_transducer:
     stage: test_bmode
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_us_bmode_linear_transducer.py
+        - pytest --cov=kwave/ tests/test_us_bmode_linear_transducer.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -92,13 +92,13 @@ test us_bmode_linear_transducer:
 #test us_bmode_phased_array:
 #    stage: test_bmode
 #    script:
-#        - pytest --cov=kwave_py/ tests/test_us_bmode_phased_array.py
+#        - pytest --cov=kwave/ tests/test_us_bmode_phased_array.py
 
 test pr_3D_FFT_planar_sensor:
     stage: test_pr
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_pr_3D_FFT_planar_sensor.py
+        - pytest --cov=kwave/ tests/test_pr_3D_FFT_planar_sensor.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -110,7 +110,7 @@ test tvsp_homogeneous_medium_monopole:
     stage: test_tvsp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_tvsp_homogeneous_medium_monopole.py
+        - pytest --cov=kwave/ tests/test_tvsp_homogeneous_medium_monopole.py
         - *handle-coverage-report
     artifacts:
         reports:
@@ -120,7 +120,7 @@ test tvsp_homogeneous_medium_dipole:
     stage: test_tvsp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_tvsp_homogeneous_medium_dipole.py
+        - pytest --cov=kwave/ tests/test_tvsp_homogeneous_medium_dipole.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -132,7 +132,7 @@ test ivp_axisymmetric_simulation:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_axisymmetric_simulation.py
+        - pytest --cov=kwave/ tests/test_ivp_axisymmetric_simulation.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -144,7 +144,7 @@ test ivp_3D_simulation:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_3D_simulation.py
+        - pytest --cov=kwave/ tests/test_ivp_3D_simulation.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -156,7 +156,7 @@ test ivp_opposing_corners_sensor_mask:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_opposing_corners_sensor_mask.py
+        - pytest --cov=kwave/ tests/test_ivp_opposing_corners_sensor_mask.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -168,7 +168,7 @@ test sd_directional_array_elements:
     stage: test_sd
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_sd_directional_array_elements.py
+        - pytest --cov=kwave/ tests/test_sd_directional_array_elements.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -180,7 +180,7 @@ test sd_directivity_modelling_2D:
     stage: test_sd
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_sd_directivity_modelling_2D.py
+        - pytest --cov=kwave/ tests/test_sd_directivity_modelling_2D.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -192,7 +192,7 @@ test sd_directivity_modelling_3D:
     stage: test_sd
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_sd_directivity_modelling_3D.py
+        - pytest --cov=kwave/ tests/test_sd_directivity_modelling_3D.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -204,7 +204,7 @@ test sd_sensor_directivity_2D:
     stage: test_sd
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_sd_sensor_directivity_2D.py
+        - pytest --cov=kwave/ tests/test_sd_sensor_directivity_2D.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -216,7 +216,7 @@ test sd_focussed_detector_2D:
     stage: test_sd
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_sd_focussed_detector_2D.py
+        - pytest --cov=kwave/ tests/test_sd_focussed_detector_2D.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -228,7 +228,7 @@ test ivp_loading_external_image:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_loading_external_image.py
+        - pytest --cov=kwave/ tests/test_ivp_loading_external_image.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -240,7 +240,7 @@ test ivp_comparison_modelling_functions:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_comparison_modelling_functions.py
+        - pytest --cov=kwave/ tests/test_ivp_comparison_modelling_functions.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -252,7 +252,7 @@ test ivp_homogeneous_medium:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_homogeneous_medium.py
+        - pytest --cov=kwave/ tests/test_ivp_homogeneous_medium.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -264,7 +264,7 @@ test ivp_heterogeneous_medium:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_heterogeneous_medium.py
+        - pytest --cov=kwave/ tests/test_ivp_heterogeneous_medium.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -276,7 +276,7 @@ test ivp_sensor_frequency_response:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_sensor_frequency_response.py
+        - pytest --cov=kwave/ tests/test_ivp_sensor_frequency_response.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -288,7 +288,7 @@ test ivp_binary_sensor_mask:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_binary_sensor_mask.py
+        - pytest --cov=kwave/ tests/test_ivp_binary_sensor_mask.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -300,7 +300,7 @@ test ivp_photoacoustic_waveforms:
     stage: test_ivp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_ivp_photoacoustic_waveforms.py
+        - pytest --cov=kwave/ tests/test_ivp_photoacoustic_waveforms.py
         - *handle-coverage-report
     artifacts:
         reports:
@@ -310,7 +310,7 @@ test na_controlling_the_PML:
     stage: test_na
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_na_controlling_the_PML.py
+        - pytest --cov=kwave/ tests/test_na_controlling_the_PML.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -322,7 +322,7 @@ test na_optimising_performance:
     stage: test_na
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_na_optimising_performance.py
+        - pytest --cov=kwave/ tests/test_na_optimising_performance.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -334,7 +334,7 @@ test tvsp_3D_simulation:
     stage: test_tvsp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_tvsp_3D_simulation.py
+        - pytest --cov=kwave/ tests/test_tvsp_3D_simulation.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -346,7 +346,7 @@ test tvsp_doppler_effect:
     stage: test_tvsp
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_tvsp_doppler_effect.py
+        - pytest --cov=kwave/ tests/test_tvsp_doppler_effect.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -358,7 +358,7 @@ test us_beam_patterns:
     stage: test_us
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_us_beam_patterns.py
+        - pytest --cov=kwave/ tests/test_us_beam_patterns.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -370,7 +370,7 @@ test pr_2D_TR_circular_sensor:
     stage: test_pr
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_pr_2D_TR_circular_sensor.py
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_circular_sensor.py
         - *handle-coverage-report
     artifacts:
         reports:
@@ -380,7 +380,7 @@ test pr_2D_TR_line_sensor:
     stage: test_pr
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_pr_2D_TR_line_sensor.py
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_line_sensor.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -392,7 +392,7 @@ test pr_2D_FFT_line_sensor:
     stage: test_pr
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_pr_2D_FFT_line_sensor.py
+        - pytest --cov=kwave/ tests/test_pr_2D_FFT_line_sensor.py
         - *handle-coverage-report
     artifacts:
         paths:
@@ -404,7 +404,7 @@ test pr_2D_TR_directional_sensors:
     stage: test_pr
     script:
         - pip install pytest pytest-cov
-        - pytest --cov=kwave_py/ tests/test_pr_2D_TR_directional_sensors.py
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_directional_sensors.py
         - *handle-coverage-report
     artifacts:
         paths:

@@ -81,7 +81,7 @@ class kSensorDirectivity(object):
         """
             Set the element size based on the kGrid
         Args:
-            kgrid: Instance of `~kwave_py.kgrid.kWaveGrid` class
+            kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
         Returns:
             None
         """
@@ -103,7 +103,7 @@ class kSensorDirectivity(object):
         """
             Assign the wavenumber vectors
         Args:
-            kgrid: Instance of `~kwave_py.kgrid.kWaveGrid` class
+            kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
         Returns:
             None
         """

@@ -57,7 +57,7 @@ class kSource(object):
         """
             Validate the object fields for correctness
         Args:
-            kgrid: Instance of `~kwave_py.kgrid.kWaveGrid` class
+            kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
 
         Returns:
             None
