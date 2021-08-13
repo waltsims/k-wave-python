@@ -11,13 +11,13 @@ from tempfile import gettempdir
 # noinspection PyUnresolvedReferences
 import setup_test
 
-from kwave_py.ksource import kSource
-from kwave_py.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave_py.ktransducer import *
-from kwave_py.utils import *
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.ktransducer import *
+from kwave.utils import *
 from tests.diff_utils import compare_against_ref
-from kwave_py.kmedium import kWaveMedium
-from kwave_py.utils import dotdict
+from kwave.kmedium import kWaveMedium
+from kwave.utils import dotdict
 import os
 
 

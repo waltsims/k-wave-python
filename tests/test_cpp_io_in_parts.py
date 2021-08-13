@@ -9,8 +9,8 @@ import setup_test
 from tempfile import gettempdir
 import numpy as np
 
-from kwave_py.kgrid import kWaveGrid
-from kwave_py.utils import *
+from kwave.kgrid import kWaveGrid
+from kwave.utils import *
 from tests.diff_utils import compare_against_ref
 import os
 

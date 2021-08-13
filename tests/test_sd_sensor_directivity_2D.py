@@ -11,14 +11,14 @@ import setup_test
 import os
 import numpy as np
 from tempfile import gettempdir
-from kwave_py.kgrid import *
-from kwave_py.ksensor import kSensorDirectivity
-from kwave_py.ksource import kSource
-from kwave_py.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave_py.utils import dotdict
-from kwave_py.ktransducer import *
+from kwave.kgrid import *
+from kwave.ksensor import kSensorDirectivity
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.utils import dotdict
+from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave_py.kmedium import kWaveMedium
+from kwave.kmedium import kWaveMedium
 from copy import deepcopy
 
 

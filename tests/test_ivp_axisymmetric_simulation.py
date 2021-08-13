@@ -11,13 +11,13 @@ import setup_test
 import os
 from tempfile import gettempdir
 
-from kwave_py.ksource import kSource
-from kwave_py.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave_py.utils.maputils import makeDisc
-from kwave_py.utils import dotdict
-from kwave_py.ktransducer import *
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
+from kwave.utils.maputils import makeDisc
+from kwave.utils import dotdict
+from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave_py.kmedium import kWaveMedium
+from kwave.kmedium import kWaveMedium
 
 
 def test_ivp_axisymmetric_simulation():

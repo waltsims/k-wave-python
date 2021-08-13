@@ -11,14 +11,14 @@ import setup_test
 import os
 from tempfile import gettempdir
 
-from kwave_py.ksource import kSource
-from kwave_py.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave_py.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave_py.utils.maputils import makeBall, makeDisc
-from kwave_py.utils import dotdict
-from kwave_py.ktransducer import *
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
+from kwave.utils.maputils import makeBall, makeDisc
+from kwave.utils import dotdict
+from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave_py.kmedium import kWaveMedium
+from kwave.kmedium import kWaveMedium
 from copy import deepcopy
 
 

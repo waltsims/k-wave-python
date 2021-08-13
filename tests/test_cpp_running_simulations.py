@@ -12,14 +12,14 @@ import os
 import h5py
 import numpy as np
 from tempfile import gettempdir
-from kwave_py.ksource import kSource
-from kwave_py.kgrid import kWaveGrid
-from kwave_py.ksensor import kSensor
-from kwave_py.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
-from kwave_py.utils import *
+from kwave.ksource import kSource
+from kwave.kgrid import kWaveGrid
+from kwave.ksensor import kSensor
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
+from kwave.utils import *
 from tests.diff_utils import compare_against_ref
-from kwave_py.utils import dotdict
-from kwave_py.kmedium import kWaveMedium
+from kwave.utils import dotdict
+from kwave.kmedium import kWaveMedium
 
 
 def test_cpp_running_simulations():
