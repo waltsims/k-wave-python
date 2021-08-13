@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from kwave_py.data import Array
 from kwave_py.kgrid import kWaveGrid
@@ -34,7 +35,16 @@ class Recorder(object):
         self.y1_inside, self.y2_inside = None, None
         self.z1_inside, self.z2_inside = None, None
 
-    def set_flags_from_list(self, flags_list, is_elastic_code):
+    def set_flags_from_list(self, flags_list: List[str], is_elastic_code: bool) -> None:
+        """
+            Set Recorder flags that are present in the string list to True
+        Args:
+            flags_list: String list of flags that should be set to True
+            is_elastic_code: Is the simulation elastic
+
+        Returns:
+            None
+        """
         # check the contents of the cell array are valid inputs
         allowed_flags = self.get_allowed_flags(is_elastic_code)
         for record_element in flags_list:
@@ -49,7 +59,18 @@ class Recorder(object):
         # is given and 'p' is not set (default is true)
         self.p = ('p' in flags_list)
 
-    def set_index_variables(self, kgrid: kWaveGrid, pml_size: Array, is_pml_inside: bool, is_axisymmetric: bool):
+    def set_index_variables(self, kgrid: kWaveGrid, pml_size: Array, is_pml_inside: bool, is_axisymmetric: bool) -> None:
+        """
+            Assign the index variables
+        Args:
+            kgrid: kWaveGrid instance
+            pml_size: Size of the PML
+            is_pml_inside: Whether the PML is inside the grid defined by the user
+            is_axisymmetric: Whether the simulation is axisymmetric
+
+        Returns:
+            None
+        """
         if not is_pml_inside:
             self.x1_inside = pml_size.x + 1.0
             self.x2_inside = kgrid.Nx - pml_size.x
@@ -76,6 +97,14 @@ class Recorder(object):
 
     @staticmethod
     def get_allowed_flags(is_elastic_code):
+        """
+            Get the list of allowed flags for a given simulation type
+        Args:
+            is_elastic_code: Whether the simulation is axisymmetric
+
+        Returns:
+            List of allowed flags for a given simulation type
+        """
         allowed_flags = ['p', 'p_max', 'p_min', 'p_rms', 'p_max_all', 'p_min_all', 'p_final',
                          'u', 'u_max', 'u_min', 'u_rms', 'u_max_all', 'u_min_all', 'u_final',
                          'u_non_staggered', 'I', 'I_avg']
@@ -83,5 +112,13 @@ class Recorder(object):
             allowed_flags += ['u_split_field']
         return allowed_flags
 
-    def is_set(self, attrs: list):
+    def is_set(self, attrs: List[str]) -> List[bool]:
+        """
+            Check if the attributes are set
+        Args:
+            attrs: Attributes to check
+
+        Returns:
+            List of individual boolean results
+        """
         return [getattr(self, a) for a in attrs]
