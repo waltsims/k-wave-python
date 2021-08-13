@@ -15,7 +15,7 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Base Modules
 
    kgrid
@@ -27,7 +27,7 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Helper Modules
 
    simopt

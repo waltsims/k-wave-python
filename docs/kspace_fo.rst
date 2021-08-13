@@ -2,27 +2,27 @@ kSpace First Order
 ==================
 
 Decorator
----------
+*******************
 .. automodule:: kwave_py.kspaceFirstOrder
     :members:
 
 
-kSpaceFirstOrder 1D
--------------------
-.. automodule:: kwave_py.kspaceFirstOrder1D
+kSpaceFirstOrder 2D
+*******************
+
+.. automodule:: kwave_py.kspaceFirstOrder2D
     :members:
 
-kSpaceFirstOrder 2D
--------------------
-.. automodule:: kwave_py.kspaceFirstOrder1D
-    :members:
 
 kSpaceFirstOrder 3D
--------------------
-.. automodule:: kwave_py.kspaceFirstOrder1D
+*******************
+
+.. automodule:: kwave_py.kspaceFirstOrder3D
     :members:
 
+
 kSpaceFirstOrder Axisymmetric
------------------------------
-.. automodule:: kwave_py.kspaceFirstOrder1D
+*****************************
+
+.. automodule:: kwave_py.kspaceFirstOrderAS
     :members:

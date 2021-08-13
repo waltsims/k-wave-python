@@ -7,18 +7,232 @@ from kwave_py.utils import *
 
 @kspaceFirstOrderG
 def kspaceFirstOrder2DG(**kwargs):
+    """
+    2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.
+
+    kspaceFirstOrder2DG provides a blind interface to the C++/CUDA
+    version of kspaceFirstOrder2D (called kspaceFirstOrder-CUDA) in the
+    same way as kspaceFirstOrder3DC. Note, the C++ code does not support
+    all input options, and all display options are ignored (only command
+    line outputs are given). See the k-Wave user manual for more
+    information.
+    The function works by appending the optional input 'SaveToDisk' to
+    the user inputs and then calling kspaceFirstOrder2D to save the input
+    files to disk. The contents of sensor.record (if set) are parsed as
+    input flags, and the C++ code is run using the system command. The
+    output files are then automatically loaded from disk and returned in
+    the same fashion as kspaceFirstOrder2D. The input and output files
+    are saved to the temporary directory native to the operating system,
+    and are deleted after the function runs.
+    This function requires the C++ binary/executable of
+    kspaceFirstOrder-CUDA to be downloaded from
+    http://www.k-wave.org/download.php and placed in the "binaries"
+    directory of the k-Wave toolbox (the 2D and 3D code use the same
+    binary). Alternatively, the name and location of the binary can be
+    specified using the optional input parameters 'BinaryName' and
+    'BinariesPath'.
+
+    This function is essentially a wrapper and directly uses the capabilities
+    of kspaceFirstOrder3DC by replacing the binary name with the name of the
+    GPU binary.
+    """
     sensor_data = kspaceFirstOrder2DC(**kwargs)  # pass inputs to CPU version
     return sensor_data
 
 
 @kspaceFirstOrderC()
 def kspaceFirstOrder2DC(**kwargs):
+    """
+    2D time-domain simulation of wave propagation using C++ code.
+
+    kspaceFirstOrder2DC provides a blind interface to the C++ version of
+    kspaceFirstOrder2D (called kspaceFirstOrder-OMP) in the same way as
+    kspaceFirstOrder3DC. Note, the C++ code does not support all input
+    options, and all display options are ignored (only command line
+    outputs are given). See the k-Wave user manual for more information.
+    The function works by appending the optional input 'SaveToDisk' to
+    the user inputs and then calling kspaceFirstOrder2D to save the input
+    files to disk. The contents of sensor.record (if set) are parsed as
+    input flags, and the C++ code is run using the system command. The
+    output files are then automatically loaded from disk and returned in
+    the same fashion as kspaceFirstOrder2D. The input and output files
+    are saved to the temporary directory native to the operating system,
+    and are deleted after the function runs.
+    For small simulations, running the simulation on a smaller number of
+    cores can improve performance as the matrices are often small enough
+    to fit within cache. It is recommended to adjust the value of
+    'NumThreads' to optimise performance for a given simulation size and
+    computer hardware. By default, simulations smaller than 128^2 are
+    set to run using a single thread (this behaviour can be over-ridden
+    using the 'NumThreads' option). In some circumstances, for very small
+    simulations, the C++ code can be slower than the MATLAB code.
+    This function requires the C++ binary/executable of
+    kspaceFirstOrder-OMP to be downloaded from
+    http://www.k-wave.org/download.php and placed in the "binaries"
+    directory of the k-Wave toolbox (the same binary is used for
+    simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,
+    the name and location of the binary can be  specified using the
+    optional input parameters 'BinaryName' and 'BinariesPath'.
+
+    This function is essentially a wrapper and directly uses the capabilities
+    of kspaceFirstOrder3DC by replacing the binary name with the name of the
+    GPU binary.
+    Args:
+        **kwargs:
+
+    Returns:
+
+    """
     # generate the input file and save to disk
     kspaceFirstOrder2D(**kwargs)
     return kwargs['SaveToDisk']
 
 
 def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
+    """
+        2D time-domain simulation of wave propagation.
+
+        kspaceFirstOrder2D simulates the time-domain propagation of
+        compressional waves through a two-dimensional homogeneous or
+        heterogeneous acoustic medium given four input structures: kgrid,
+        medium, source, and sensor. The computation is based on a first-order
+        k-space model which accounts for power law absorption and a
+        heterogeneous sound speed and density. If medium.BonA is specified,
+        cumulative nonlinear effects are also modelled. At each time-step
+        (defined by kgrid.dt and kgrid.Nt or kgrid.t_array), the acoustic
+        field parameters at the positions defined by sensor.mask are recorded
+        and stored. If kgrid.t_array is set to 'auto', this array is
+        automatically generated using the makeTime method of the kWaveGrid
+        class. An anisotropic absorbing boundary layer called a perfectly
+        matched layer (PML) is implemented to prevent waves that leave one
+        side of the domain being reintroduced from the opposite side (a
+        consequence of using the FFT to compute the spatial derivatives in
+        the wave equation). This allows infinite domain simulations to be
+        computed using small computational grids.
+
+        For a homogeneous medium the formulation is exact and the time-steps
+        are only limited by the effectiveness of the perfectly matched layer.
+        For a heterogeneous medium, the solution represents a leap-frog
+        pseudospectral method with a k-space correction that improves the
+        accuracy of computing the temporal derivatives. This allows larger
+        time-steps to be taken for the same level of accuracy compared to
+        conventional pseudospectral time-domain methods. The computational
+        grids are staggered both spatially and temporally.
+
+        An initial pressure distribution can be specified by assigning a
+        matrix (the same size as the computational grid) of arbitrary numeric
+        values to source.p0. A time varying pressure source can similarly be
+        specified by assigning a binary matrix (i.e., a matrix of 1's and 0's
+        with the same dimensions as the computational grid) to source.p_mask
+        where the 1's represent the grid points that form part of the source.
+        The time varying input signals are then assigned to source.p. This
+        can be a single time series (in which case it is applied to all
+        source elements), or a matrix of time series following the source
+        elements using MATLAB's standard column-wise linear matrix index
+        ordering. A time varying velocity source can be specified in an
+        analogous fashion, where the source location is specified by
+        source.u_mask, and the time varying input velocity is assigned to
+        source.ux and source.uy.
+
+        The field values are returned as arrays of time series at the sensor
+        locations defined by sensor.mask. This can be defined in three
+        different ways. (1) As a binary matrix (i.e., a matrix of 1's and 0's
+        with the same dimensions as the computational grid) representing the
+        grid points within the computational grid that will collect the data.
+        (2) As the grid coordinates of two opposing corners of a rectangle in
+        the form [x1; y1; x2; y2]. This is equivalent to using a binary
+        sensor mask covering the same region, however, the output is indexed
+        differently as discussed below. (3) As a series of Cartesian
+        coordinates within the grid which specify the location of the
+        pressure values stored at each time step. If the Cartesian
+        coordinates don't exactly match the coordinates of a grid point, the
+        output values are calculated via interpolation. The Cartesian points
+        must be given as a 2 by N matrix corresponding to the x and y
+        positions, respectively, where the Cartesian origin is assumed to be
+        in the center of the grid. If no output is required, the sensor input
+        can be replaced with an empty array [].
+
+        If sensor.mask is given as a set of Cartesian coordinates, the
+        computed sensor_data is returned in the same order. If sensor.mask is
+        given as a binary matrix, sensor_data is returned using MATLAB's
+        standard column-wise linear matrix index ordering. In both cases, the
+        recorded data is indexed as sensor_data(sensor_point_index,
+        time_index). For a binary sensor mask, the field values at a
+        particular time can be restored to the sensor positions within the
+        computation grid using unmaskSensorData. If sensor.mask is given as a
+        list of opposing corners of a rectangle, the recorded data is indexed
+        as sensor_data(rect_index).p(x_index, y_index, time_index), where
+        x_index and y_index correspond to the grid index within the
+        rectangle, and rect_index corresponds to the number of rectangles if
+        more than one is specified.
+
+        By default, the recorded acoustic pressure field is passed directly
+        to the output sensor_data. However, other acoustic parameters can
+        also be recorded by setting sensor.record to a cell array of the form
+        {'p', 'u', 'p_max', ...}. For example, both the particle velocity and
+        the acoustic pressure can be returned by setting sensor.record =
+        {'p', 'u'}. If sensor.record is given, the output sensor_data is
+        returned as a structure with the different outputs appended as
+        structure fields. For example, if sensor.record = {'p', 'p_final',
+        'p_max', 'u'}, the output would contain fields sensor_data.p,
+        sensor_data.p_final, sensor_data.p_max, sensor_data.ux, and
+        sensor_data.uy. Most of the output parameters are recorded at the
+        given sensor positions and are indexed as
+        sensor_data.field(sensor_point_index, time_index) or
+        sensor_data(rect_index).field(x_index, y_index, time_index) if using
+        a sensor mask defined as opposing rectangular corners. The exceptions
+        are the averaged quantities ('p_max', 'p_rms', 'u_max', 'p_rms',
+        'I_avg'), the 'all' quantities ('p_max_all', 'p_min_all',
+        'u_max_all', 'u_min_all'), and the final quantities ('p_final',
+        'u_final'). The averaged quantities are indexed as
+        sensor_data.p_max(sensor_point_index) or
+        sensor_data(rect_index).p_max(x_index, y_index) if using rectangular
+        corners, while the final and 'all' quantities are returned over the
+        entire grid and are always indexed as sensor_data.p_final(nx, ny),
+        regardless of the type of sensor mask.
+
+        kspaceFirstOrder2D may also be used for time reversal image
+        reconstruction by assigning the time varying pressure recorded over
+        an arbitrary sensor surface to the input field
+        sensor.time_reversal_boundary_data. This data is then enforced in
+        time reversed order as a time varying Dirichlet boundary condition
+        over the sensor surface given by sensor.mask. The boundary data must
+        be indexed as sensor.time_reversal_boundary_data(sensor_point_index,
+        time_index). If sensor.mask is given as a set of Cartesian
+        coordinates, the boundary data must be given in the same order. An
+        equivalent binary sensor mask (computed using nearest neighbour
+        interpolation) is then used to place the pressure values into the
+        computational grid at each time step. If sensor.mask is given as a
+        binary matrix of sensor points, the boundary data must be ordered
+        using MATLAB's standard column-wise linear matrix indexing. If no
+        additional inputs are required, the source input can be replaced with
+        an empty array [].
+
+        Acoustic attenuation compensation can also be included during time
+        reversal image reconstruction by assigning the absorption parameters
+        medium.alpha_coeff and medium.alpha_power and reversing the sign of
+        the absorption term by setting medium.alpha_sign = [-1, 1]. This
+        forces the propagating waves to grow according to the absorption
+        parameters instead of decay. The reconstruction should then be
+        regularised by assigning a filter to medium.alpha_filter (this can be
+        created using getAlphaFilter).
+
+        Note: To run a simple photoacoustic image reconstruction example
+        using time reversal (that commits the 'inverse crime' of using the
+        same numerical parameters and model for data simulation and image
+        reconstruction), the sensor_data returned from a k-Wave simulation
+        can be passed directly to sensor.time_reversal_boundary_data with the
+        input fields source.p0 and source.p removed or set to zero.
+    Args:
+        kgrid: kWaveGrid instance
+        medium: kWaveMedium instance
+        source: kWaveSource instance
+        sensor: kWaveSensor instance
+        **kwargs:
+
+    Returns:
+
+    """
     # start the timer and store the start time
     TicToc.tic()
 

@@ -23,7 +23,7 @@ def kspaceFirstOrderG(func):
         func: kspaceFirstOrderNDG function where 1 <= N <= 3
 
     Returns:
-
+        Function wrapper
     """
     @functools.wraps(func)
     def wrapper(**kwargs):
@@ -41,7 +41,7 @@ def kspaceFirstOrderC():
         func: kspaceFirstOrderNDC function where 1 <= N <= 3
 
     Returns:
-
+        Function wrapper
     """
     def decorator(func):
         @functools.wraps(func)
