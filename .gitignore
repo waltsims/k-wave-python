@@ -5,3 +5,4 @@ test_local.sh
 tests/reference_outputs
 /.coverage
 /docs/_build/
+build/

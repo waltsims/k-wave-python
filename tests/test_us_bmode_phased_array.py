@@ -69,7 +69,7 @@ def test_us_bmode_phased_array():
     c0 = 1540
     rho0 = 1000
 
-    medium = kWaveMedium(alpha_coeff=0.75, alpha_power=1.5, BonA=6)
+    medium = kWaveMedium(alpha_coeff=0.75, alpha_power=1.5, BonA=6, sound_speed=c0)
 
     # create the time array
     t_end = (Nx * dx) * 2.2 / c0   # [s]
@@ -207,7 +207,7 @@ def test_us_bmode_phased_array():
 
             # run the simulation
             kspaceFirstOrder3DC(**{
-                'medium': medium,
+                'medium': deepcopy(medium),
                 'kgrid': kgrid,
                 'source': not_transducer,
                 'sensor': not_transducer,
