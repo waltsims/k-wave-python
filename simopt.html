@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulation Options &mdash; kWave-py  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Array" href="array.html" />
+    <link rel="prev" title="kWaveSimulation" href="ksimulation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> kWave-py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">kWave-py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Simulation Options</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/simopt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-kwave.options">
+<span id="simulation-options"></span><h1>Simulation Options<a class="headerlink" href="#module-kwave.options" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">kwave.options.</span></span><span class="sig-name descname"><span class="pre">SimulationOptions</span></span><a class="headerlink" href="#kwave.options.SimulationOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.init">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elastic_code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.options.SimulationOptions.init" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Initialize the Simulation Options</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kgrid</strong> – kWaveGrid instance</p></li>
+<li><p><strong>elastic_code</strong> – Flag that indicates whether elastic simulation is used</p></li>
+<li><p><strong>axisymmetric</strong> – Flag that indicates whether axisymmetric simulation is used</p></li>
+<li><p><strong>**kwargs</strong> – <p>Dictionary that holds following optional simulation properties:</p>
+<ul>
+<li><p>CartInterp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to ‘nearest’ and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = ‘linear’).</p></li>
+<li><p>CreateLog: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).</p></li>
+<li><p>DataCast: String input of the data type that variables are cast to before computation. For example, setting to ‘single’ will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision.  This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting ‘DataCast’ to ‘gpuArray-single’ (default = ‘off’).</p></li>
+<li><p>DataRecast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the ‘DataCast’ option.</p></li>
+<li><p>HDFCompressionLevel: Compression level used for writing the input HDF5 file when using ‘SaveToDisk’ or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.</p></li>
+<li><p>MultiAxialPMLRatio: MPML settings</p></li>
+<li><p>PMLAlpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).</p></li>
+<li><p>PMLInside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by PMLSize before running the simulation (default = true).</p></li>
+<li><p>PMLRange: Search range used when automatically determining PML size. Tuple of two elements</p></li>
+<li><p>PMLSize: Size of the perfectly matched layer in grid  points. By default, the PML is added evenly to all sides of the grid, however, both PMLSize and PMLAlpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate PMLAlpha to zero rather than forcing the PML to be of zero size (default = 10).</p></li>
+<li><p>RadialSymmetry: Radial symmetry used in axisymmetric code</p></li>
+<li><p>StreamToDisk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of times steps that are taken before the data is saved to disk (default = 200).</p></li>
+<li><p>SaveToDisk: String containing a filename (including  pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.</p></li>
+<li><p>SaveToDiskExit: Exit the simulation after saving the HDF5 file</p></li>
+<li><p>ScaleSourceTerms: Apply the source scaling term to time varying sources</p></li>
+<li><p>Smooth: Boolean controlling whether source.p0, medium.sound_speed, and medium.density are smoothed using smooth before computation. ‘Smooth’ can either be given as a single Boolean value or as a 3 element array to control the smoothing of source.p0, medium.sound_speed, and medium.density, independently (default = [true, false, false]).</p></li>
+<li><p>UseFD: Use finite difference gradients instead of spectral (in 1D)</p></li>
+<li><p>UsekSpace: use the k-space correction</p></li>
+<li><p>UseSG: Use a staggered grid</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SimulationOptions instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.cartesian_interp">
+<span class="sig-name descname"><span class="pre">cartesian_interp</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'linear'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.cartesian_interp" title="Permalink to this definition"></a></dt>
+<dd><p>interpolation mode for Cartesian sensor mask</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.create_log">
+<span class="sig-name descname"><span class="pre">create_log</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.create_log" title="Permalink to this definition"></a></dt>
+<dd><p>create a log using diary</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_cast">
+<span class="sig-name descname"><span class="pre">data_cast</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'off'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_cast" title="Permalink to this definition"></a></dt>
+<dd><p>data cast</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_recast">
+<span class="sig-name descname"><span class="pre">data_recast</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_recast" title="Permalink to this definition"></a></dt>
+<dd><p>recast the sensor data back to double precision</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.hdf_compression_level">
+<span class="sig-name descname"><span class="pre">hdf_compression_level</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.hdf_compression_level" title="Permalink to this definition"></a></dt>
+<dd><p>zip compression level for HDF5 input files</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.multi_axial_PML_ratio">
+<span class="sig-name descname"><span class="pre">multi_axial_PML_ratio</span></span><em class="property"> <span class="pre">=</span> <span class="pre">0.1</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.multi_axial_PML_ratio" title="Permalink to this definition"></a></dt>
+<dd><p>MPML settings</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_auto">
+<span class="sig-name descname"><span class="pre">pml_auto</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_auto" title="Permalink to this definition"></a></dt>
+<dd><p>automatically choose the PML size to give small prime factors</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_inside">
+<span class="sig-name descname"><span class="pre">pml_inside</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_inside" title="Permalink to this definition"></a></dt>
+<dd><p>put the PML inside the grid defined by the user</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_search_range">
+<span class="sig-name descname"><span class="pre">pml_search_range</span></span><em class="property"> <span class="pre">=</span> <span class="pre">[10,</span> <span class="pre">40]</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_search_range" title="Permalink to this definition"></a></dt>
+<dd><p>search range used when automatically determining PML size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_alpha">
+<span class="sig-name descname"><span class="pre">pml_x_alpha</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_alpha" title="Permalink to this definition"></a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_size">
+<span class="sig-name descname"><span class="pre">pml_x_size</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_size" title="Permalink to this definition"></a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_alpha">
+<span class="sig-name descname"><span class="pre">pml_y_alpha</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_alpha" title="Permalink to this definition"></a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_size">
+<span class="sig-name descname"><span class="pre">pml_y_size</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_size" title="Permalink to this definition"></a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_alpha">
+<span class="sig-name descname"><span class="pre">pml_z_alpha</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_alpha" title="Permalink to this definition"></a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_size">
+<span class="sig-name descname"><span class="pre">pml_z_size</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_size" title="Permalink to this definition"></a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.radial_symmetry">
+<span class="sig-name descname"><span class="pre">radial_symmetry</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'WSWA-FFT'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.radial_symmetry" title="Permalink to this definition"></a></dt>
+<dd><p>radial symmetry used in axisymmetric code</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.save_to_disk">
+<span class="sig-name descname"><span class="pre">save_to_disk</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.save_to_disk" title="Permalink to this definition"></a></dt>
+<dd><p>save the input data to a HDF5 file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.save_to_disk_exit">
+<span class="sig-name descname"><span class="pre">save_to_disk_exit</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.save_to_disk_exit" title="Permalink to this definition"></a></dt>
+<dd><p>exit the simulation after saving the HDF5 file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.scale_source_terms">
+<span class="sig-name descname"><span class="pre">scale_source_terms</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.scale_source_terms" title="Permalink to this definition"></a></dt>
+<dd><p>apply the source scaling term to time varying sources</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_c0">
+<span class="sig-name descname"><span class="pre">smooth_c0</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_c0" title="Permalink to this definition"></a></dt>
+<dd><p>smooth the sound speed distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_p0">
+<span class="sig-name descname"><span class="pre">smooth_p0</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_p0" title="Permalink to this definition"></a></dt>
+<dd><p>smooth the initial pressure distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_rho0">
+<span class="sig-name descname"><span class="pre">smooth_rho0</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_rho0" title="Permalink to this definition"></a></dt>
+<dd><p>smooth the density distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.stream_to_disk">
+<span class="sig-name descname"><span class="pre">stream_to_disk</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.stream_to_disk" title="Permalink to this definition"></a></dt>
+<dd><p>buffer the sensor data to disk (in 3D)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_finite_difference">
+<span class="sig-name descname"><span class="pre">use_finite_difference</span></span><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_finite_difference" title="Permalink to this definition"></a></dt>
+<dd><p>use finite difference gradients instead of spectral (in 1D)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_kspace">
+<span class="sig-name descname"><span class="pre">use_kspace</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_kspace" title="Permalink to this definition"></a></dt>
+<dd><p>use the k-space correction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_sg">
+<span class="sig-name descname"><span class="pre">use_sg</span></span><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_sg" title="Permalink to this definition"></a></dt>
+<dd><p>use a staggered grid</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ksimulation.html" class="btn btn-neutral float-left" title="kWaveSimulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="array.html" class="btn btn-neutral float-right" title="Array" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

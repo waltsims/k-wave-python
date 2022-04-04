@@ -1,0 +1,437 @@
+image: faridyagubbayli/pumba:0.1.1
+
+stages:
+    - info
+    - test_cpp
+    - test_us
+    - test_pr
+    - test_tvsp
+    - test_ivp
+    - test_sd
+    - test_na
+    - test_bmode
+    - report
+    - publish
+
+default:
+    before_script:
+        - pip install pytest pytest-cov
+
+.handle-coverage-report: &handle-coverage-report
+        - echo "Execute this script first"
+        - coverage xml
+        - mkdir $CI_JOB_ID
+        - cp .coverage $CI_JOB_ID/.coverage
+
+print_info:
+    stage: info
+    script:
+        - cat /proc/cpuinfo # CPU
+        - cat /proc/meminfo # RAM
+
+test cpp_io_in_parts:
+    stage: test_cpp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_cpp_io_in_parts.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test cpp_running_simulations:
+    stage: test_cpp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_cpp_running_simulations.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test us_transducer_as_sensor:
+    stage: test_us
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_us_transducer_as_sensor.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test us_defining_transducer:
+    stage: test_us
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_us_defining_transducer.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test us_bmode_linear_transducer:
+    stage: test_bmode
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_us_bmode_linear_transducer.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+#test us_bmode_phased_array:
+#    stage: test_bmode
+#    script:
+#        - pytest --cov=kwave/ tests/test_us_bmode_phased_array.py
+
+test pr_3D_FFT_planar_sensor:
+    stage: test_pr
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_pr_3D_FFT_planar_sensor.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test tvsp_homogeneous_medium_monopole:
+    stage: test_tvsp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_tvsp_homogeneous_medium_monopole.py
+        - *handle-coverage-report
+    artifacts:
+        reports:
+            cobertura: coverage.xml
+
+test tvsp_homogeneous_medium_dipole:
+    stage: test_tvsp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_tvsp_homogeneous_medium_dipole.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_axisymmetric_simulation:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_axisymmetric_simulation.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_3D_simulation:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_3D_simulation.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_opposing_corners_sensor_mask:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_opposing_corners_sensor_mask.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test sd_directional_array_elements:
+    stage: test_sd
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_sd_directional_array_elements.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test sd_directivity_modelling_2D:
+    stage: test_sd
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_sd_directivity_modelling_2D.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test sd_directivity_modelling_3D:
+    stage: test_sd
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_sd_directivity_modelling_3D.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test sd_sensor_directivity_2D:
+    stage: test_sd
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_sd_sensor_directivity_2D.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test sd_focussed_detector_2D:
+    stage: test_sd
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_sd_focussed_detector_2D.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_loading_external_image:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_loading_external_image.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_comparison_modelling_functions:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_comparison_modelling_functions.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_homogeneous_medium:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_homogeneous_medium.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_heterogeneous_medium:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_heterogeneous_medium.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_sensor_frequency_response:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_sensor_frequency_response.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_binary_sensor_mask:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_binary_sensor_mask.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test ivp_photoacoustic_waveforms:
+    stage: test_ivp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_ivp_photoacoustic_waveforms.py
+        - *handle-coverage-report
+    artifacts:
+        reports:
+            cobertura: coverage.xml
+
+test na_controlling_the_PML:
+    stage: test_na
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_na_controlling_the_PML.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test na_optimising_performance:
+    stage: test_na
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_na_optimising_performance.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test tvsp_3D_simulation:
+    stage: test_tvsp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_tvsp_3D_simulation.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test tvsp_doppler_effect:
+    stage: test_tvsp
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_tvsp_doppler_effect.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test us_beam_patterns:
+    stage: test_us
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_us_beam_patterns.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test pr_2D_TR_circular_sensor:
+    stage: test_pr
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_circular_sensor.py
+        - *handle-coverage-report
+    artifacts:
+        reports:
+            cobertura: coverage.xml
+
+test pr_2D_TR_line_sensor:
+    stage: test_pr
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_line_sensor.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test pr_2D_FFT_line_sensor:
+    stage: test_pr
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_pr_2D_FFT_line_sensor.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+test pr_2D_TR_directional_sensors:
+    stage: test_pr
+    script:
+        - pip install pytest pytest-cov
+        - pytest --cov=kwave/ tests/test_pr_2D_TR_directional_sensors.py
+        - *handle-coverage-report
+    artifacts:
+        paths:
+            - $CI_JOB_ID
+        reports:
+            cobertura: coverage.xml
+
+report coverage:
+    stage: report
+    script:
+        - coverage combine */.coverage
+        - coverage html
+        - ls
+        - coverage report
+    artifacts:
+        paths:
+            - htmlcov/
+
+pages:
+    stage: publish
+    script:
+        - mkdir public
+        - cp -R htmlcov/* public/
+    #        - apt-get install ruby-full build-essential zlib1g-dev -y
+    #        - gem install jekyll bundler
+    #        - bundle install
+    #        - bundle exec jekyll build -d public
+    artifacts:
+        paths:
+            - public

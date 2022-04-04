@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kSource &mdash; kWave-py  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="kSpace First Order" href="kspace_fo.html" />
+    <link rel="prev" title="kSensor" href="ksensor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> kWave-py
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="simopt.html">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">kWave-py</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>kSource</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ksource.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-kwave.ksource">
+<span id="ksource"></span><h1>kSource<a class="headerlink" href="#module-kwave.ksource" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="kwave.ksource.kSource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">kwave.ksource.</span></span><span class="sig-name descname"><span class="pre">kSource</span></span><a class="headerlink" href="#kwave.ksource.kSource" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.is_p0_empty">
+<span class="sig-name descname"><span class="pre">is_p0_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#kwave.ksource.kSource.is_p0_empty" title="Permalink to this definition"></a></dt>
+<dd><p>Check if the <cite>p0</cite> field is set and not empty</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><span class="pre">kwave.kgrid.kWaveGrid</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#kwave.ksource.kSource.validate" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Validate the object fields for correctness</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kgrid</strong> – Instance of <cite>~kwave.kgrid.kWaveGrid</cite> class</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.flag_ux">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">flag_ux</span></span><a class="headerlink" href="#kwave.ksource.kSource.flag_ux" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Get the length of the sources in X-direction, this allows the</dt><dd><p>inputs to be defined independently and be of any length</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of the sources</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.flag_uy">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">flag_uy</span></span><a class="headerlink" href="#kwave.ksource.kSource.flag_uy" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Get the length of the sources in X-direction, this allows the</dt><dd><p>inputs to be defined independently and be of any length</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of the sources</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.flag_uz">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">flag_uz</span></span><a class="headerlink" href="#kwave.ksource.kSource.flag_uz" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Get the length of the sources in X-direction, this allows the</dt><dd><p>inputs to be defined independently and be of any length</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of the sources</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.p">
+<span class="sig-name descname"><span class="pre">p</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.p" title="Permalink to this definition"></a></dt>
+<dd><p>time varying pressure at each of the source positions given by source.p_mask</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.p0">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#kwave.ksource.kSource.p0" title="Permalink to this definition"></a></dt>
+<dd><p>Initial pressure within the acoustic medium</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.p_frequency_ref">
+<span class="sig-name descname"><span class="pre">p_frequency_ref</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.p_frequency_ref" title="Permalink to this definition"></a></dt>
+<dd><p>Pressure reference frequency</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.p_mask">
+<span class="sig-name descname"><span class="pre">p_mask</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.p_mask" title="Permalink to this definition"></a></dt>
+<dd><p>binary matrix specifying the positions of the time varying pressure source distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.p_mode">
+<span class="sig-name descname"><span class="pre">p_mode</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.p_mode" title="Permalink to this definition"></a></dt>
+<dd><p>optional input to control whether the input pressure is injected as a mass source or enforced as a dirichlet boundary condition; valid inputs are ‘additive’ (the default) or ‘dirichlet’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.s_mask">
+<span class="sig-name descname"><span class="pre">s_mask</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.s_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source mask</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.s_mode">
+<span class="sig-name descname"><span class="pre">s_mode</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.s_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.sxx">
+<span class="sig-name descname"><span class="pre">sxx</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.sxx" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in x -&gt; x direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.sxy">
+<span class="sig-name descname"><span class="pre">sxy</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.sxy" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in x -&gt; y direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.sxz">
+<span class="sig-name descname"><span class="pre">sxz</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.sxz" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in x -&gt; z direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.syy">
+<span class="sig-name descname"><span class="pre">syy</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.syy" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in y -&gt; y direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.syz">
+<span class="sig-name descname"><span class="pre">syz</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.syz" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in y -&gt; z direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.szz">
+<span class="sig-name descname"><span class="pre">szz</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.szz" title="Permalink to this definition"></a></dt>
+<dd><p>Stress source in z -&gt; z direction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.u_frequency_ref">
+<span class="sig-name descname"><span class="pre">u_frequency_ref</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.u_frequency_ref" title="Permalink to this definition"></a></dt>
+<dd><p>Velocity reference frequency</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.u_mask">
+<span class="sig-name descname"><span class="pre">u_mask</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.u_mask" title="Permalink to this definition"></a></dt>
+<dd><p>binary matrix specifying the positions of the time varying particle velocity distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.u_mode">
+<span class="sig-name descname"><span class="pre">u_mode</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.u_mode" title="Permalink to this definition"></a></dt>
+<dd><p>optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet boundary condition; valid inputs are ‘additive’ (the default) or ‘dirichlet’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.ux">
+<span class="sig-name descname"><span class="pre">ux</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.ux" title="Permalink to this definition"></a></dt>
+<dd><p>time varying particle velocity in the x-direction at each of the source positions given by source.u_mask</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.uy">
+<span class="sig-name descname"><span class="pre">uy</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.uy" title="Permalink to this definition"></a></dt>
+<dd><p>time varying particle velocity in the y-direction at each of the source positions given by source.u_mask</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.ksource.kSource.uz">
+<span class="sig-name descname"><span class="pre">uz</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#kwave.ksource.kSource.uz" title="Permalink to this definition"></a></dt>
+<dd><p>time varying particle velocity in the z-direction at each of the source positions given by source.u_mask</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ksensor.html" class="btn btn-neutral float-left" title="kSensor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="kspace_fo.html" class="btn btn-neutral float-right" title="kSpace First Order" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

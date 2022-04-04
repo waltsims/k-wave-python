@@ -1,0 +1,8 @@
+.idea/
+difference.py
+transfer_temp/
+test_local.sh
+tests/reference_outputs
+/.coverage
+/docs/_build/
+build/
