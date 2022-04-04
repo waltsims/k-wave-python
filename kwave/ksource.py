@@ -56,6 +56,7 @@ class kSource(object):
     def validate(self, kgrid: kWaveGrid) -> None:
         """
             Validate the object fields for correctness
+
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
 
@@ -304,6 +305,7 @@ class kSource(object):
         """
             Get the length of the sources in X-direction, this allows the
             inputs to be defined independently and be of any length
+
         Returns:
             Length of the sources
         """
@@ -314,6 +316,7 @@ class kSource(object):
         """
             Get the length of the sources in X-direction, this allows the
             inputs to be defined independently and be of any length
+
         Returns:
             Length of the sources
         """
@@ -324,6 +327,7 @@ class kSource(object):
         """
             Get the length of the sources in X-direction, this allows the
             inputs to be defined independently and be of any length
+
         Returns:
             Length of the sources
         """

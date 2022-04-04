@@ -19,6 +19,7 @@ from kwave.utils import is_unix
 def kspaceFirstOrderG(func):
     """
         Decorator for the kspaceFO-GPU functions
+
     Args:
         func: kspaceFirstOrderNDG function where 1 <= N <= 3
 
@@ -37,6 +38,7 @@ def kspaceFirstOrderG(func):
 def kspaceFirstOrderC():
     """
         Decorator for the kspaceFO-CPU functions
+
     Args:
         func: kspaceFirstOrderNDC function where 1 <= N <= 3
 

@@ -114,7 +114,6 @@ class kWaveSimulation(object):
         """
             Set equation of state variable
         Returns:
-
         """
         if self.medium.absorbing:
             if self.medium.stokes:
@@ -443,6 +442,7 @@ class kWaveSimulation(object):
     def input_checking(self, calling_func_name) -> None:
         """
             Check the input fields for correctness and validness
+
         Args:
             calling_func_name: Name of the script that calls this function
 
@@ -495,6 +495,7 @@ class kWaveSimulation(object):
     def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
         """
             Check correct function has been called for the dimensionality of kgrid
+
         Args:
             calling_func_name: Name of the script that makes calls to kWaveSimulation
             kgrid_dim: Dimensionality of the kWaveGrid
@@ -516,6 +517,7 @@ class kWaveSimulation(object):
     def print_start_status(is_elastic_code) -> None:
         """
             Update command-line status with the start time
+
         Args:
             is_elastic_code: is the simulation elastic
 
@@ -532,6 +534,7 @@ class kWaveSimulation(object):
         """
             Pre-calculate the data type needed to store the matrix indices given the
             total number of grid points: indexing variables will be created using this data type to save memory
+
         Returns:
             None
         """
@@ -542,6 +545,7 @@ class kWaveSimulation(object):
     def check_medium(medium, kgrid_k, is_elastic, is_axisymmetric):
         """
             Check the properties of the medium structure for correctness and validity
+
         Args:
             medium: kWaveMedium instance
             kgrid_k: kWaveGrid.k matrix
@@ -572,6 +576,7 @@ class kWaveSimulation(object):
     def check_source(self, kgrid_dim) -> None:
         """
             Check the source properties for correctness and validity
+
         Args:
             kgrid_dim: kWaveGrid dimension
 
@@ -794,6 +799,7 @@ class kWaveSimulation(object):
     def check_sensor(self, k_dim, k_Nt) -> None:
         """
             Check the Sensor properties for correctness and validity
+
         Args:
             k_dim: kWaveGrid dimensionality
             k_Nt: Number of time steps in kWaveGrid
@@ -980,6 +986,7 @@ class kWaveSimulation(object):
     def check_kgrid_time(self) -> None:
         """
             Check time-related kWaveGrid inputs
+
         Returns:
             None
         """
@@ -1017,11 +1024,13 @@ class kWaveSimulation(object):
     def select_precision(opt: SimulationOptions):
         """
             Select the minimal precision for storing the data
+
         Args:
             opt: SimulationOptions instance
 
         Returns:
             Minimal precision for variable allocation
+
         """
         # set storage variable type based on data_cast - this enables the
         # output variables to be directly created in the data_cast format,
@@ -1047,6 +1056,7 @@ class kWaveSimulation(object):
     def check_input_combinations(self, opt: SimulationOptions, user_medium_density_input: bool, k_dim, pml_size, kgrid_N) -> None:
         """
             Check the input combinations for correctness and validity
+
         Args:
             opt: SimulationOptions instance
             user_medium_density_input: Medium Density
@@ -1255,6 +1265,7 @@ class kWaveSimulation(object):
     def create_sensor_variables(self) -> None:
         """
             Create the sensor related variables
+
         Returns:
             None
         """
@@ -1339,6 +1350,7 @@ class kWaveSimulation(object):
         """
             Create absorption variables for the fluid code based on
             the expanded and smoothed values of the medium parameters (if not saving to disk)
+
         Returns:
             None
         """
@@ -1349,6 +1361,7 @@ class kWaveSimulation(object):
         """
             Shorten commonly used field names (these act only as pointers provided that the values aren't modified)
             (done after enlarging and smoothing the grids)
+
         Args:
             medium: kWaveMedium instance
             kgrid: kWaveGrid instance
@@ -1363,6 +1376,7 @@ class kWaveSimulation(object):
     def scale_source_terms(self, is_scale_source_terms) -> None:
         """
             Scale the source terms based on the expanded and smoothed values of the medium parameters
+
         Args:
             is_scale_source_terms: Should the source terms be scaled
 
@@ -1413,6 +1427,7 @@ class kWaveSimulation(object):
         """
             Define index variables to remove the PML from the display if the optional
             input 'PlotPML' is set to false
+
         Args:
             kgrid_dim: kWaveGrid dimensinality
             kgrid_N: kWaveGrid size in each direction

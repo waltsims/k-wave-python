@@ -33,6 +33,7 @@ class kSensor(object):
         """
             Enlarge the sensor mask (for Cartesian sensor masks and cuboid corners,
             this has already been converted to a binary mask for display in inputChecking)
+
         Args:
             expand_size: the number of elements to add in each dimension
 
@@ -80,8 +81,10 @@ class kSensorDirectivity(object):
     def set_default_size(self, kgrid) -> None:
         """
             Set the element size based on the kGrid
+
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
+
         Returns:
             None
         """
@@ -91,6 +94,7 @@ class kSensorDirectivity(object):
     def set_unique_angles(self, sensor_mask) -> None:
         """
             Assign unique_angles from sensor_mask
+
         Args:
             sensor_mask:
 
@@ -102,8 +106,10 @@ class kSensorDirectivity(object):
     def set_wavenumbers(self, kgrid) -> None:
         """
             Assign the wavenumber vectors
+
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
+
         Returns:
             None
         """

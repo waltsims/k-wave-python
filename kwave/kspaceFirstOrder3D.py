@@ -37,6 +37,7 @@ def kspaceFirstOrder3DG(**kwargs):
         This function is essentially a wrapper and directly uses the capabilities
         of kspaceFirstOrder3DC by replacing the binary name with the name of the
         GPU binary.
+
     Args:
         **kwargs:
 

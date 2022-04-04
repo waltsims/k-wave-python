@@ -77,6 +77,7 @@ def kspaceFirstOrder2DC(**kwargs):
     This function is essentially a wrapper and directly uses the capabilities
     of kspaceFirstOrder3DC by replacing the binary name with the name of the
     GPU binary.
+
     Args:
         **kwargs:
 
@@ -223,6 +224,7 @@ def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
         reconstruction), the sensor_data returned from a k-Wave simulation
         can be passed directly to sensor.time_reversal_boundary_data with the
         input fields source.p0 and source.p removed or set to zero.
+
     Args:
         kgrid: kWaveGrid instance
         medium: kWaveMedium instance

@@ -130,6 +130,7 @@ class kWaveGrid(object):
     def setTime(self, Nt, dt) -> None:
         """
             Set Nt and dt based on user input
+
         Args:
             Nt:
             dt:
@@ -245,6 +246,7 @@ class kWaveGrid(object):
     def xn(self):
         """
             3D plaid non-uniform spatial grids
+
         Returns:
             plaid xn matrix
         """
@@ -259,6 +261,7 @@ class kWaveGrid(object):
     def yn(self):
         """
             3D plaid non-uniform spatial grids
+
         Returns:
             plaid yn matrix
         """
@@ -298,6 +301,7 @@ class kWaveGrid(object):
     def kx(self):
         """
             Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]
+
         Returns:
             plaid xn matrix
         """
@@ -312,6 +316,7 @@ class kWaveGrid(object):
     def ky(self):
         """
             Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]
+
         Returns:
             plaid yn matrix
         """
@@ -325,6 +330,7 @@ class kWaveGrid(object):
     def kz(self):
         """
             # Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]
+
         Returns:
             plaid zn matrix
         """
@@ -351,6 +357,7 @@ class kWaveGrid(object):
     def k_max(self):  # added by us, not the same as kWave k_max (see k_max_all for KwaveGrid.k_max)
         """
             Maximum supported spatial frequency in the 3 directions [rad/m]
+
         Returns:
             Vector of 3 elements each in [rad/m]. Value for higher dimensions set to NaN
         """
@@ -365,6 +372,7 @@ class kWaveGrid(object):
         """
             Maximum supported spatial frequency in all directions [rad/m]
             Originally k_max in kWave.kWaveGrid!
+
         Returns:
             Scalar in [rad/m]
         """
@@ -378,6 +386,7 @@ class kWaveGrid(object):
     def makeDim(num_points, spacing):
         """
             Create the grid parameters for a single spatial direction
+
         Args:
             num_points:
             spacing:
@@ -405,6 +414,7 @@ class kWaveGrid(object):
     def highest_prime_factors(self, axisymmetric=None) -> np.ndarray:
         """
             calculate highest prime factors
+
         Args:
             axisymmetric: Axisymmetric code or None
 
@@ -436,6 +446,7 @@ class kWaveGrid(object):
             corner. Note, if c is given as a matrix, the calculation for dt
             is based on the maximum value, and the calculation for t_end
             based on the minimum value.
+
         Args:
             c:
             cfl:
@@ -475,6 +486,7 @@ class kWaveGrid(object):
     def kx_vec_dtt(self, dtt_type):
         """
             Compute the DTT wavenumber vector in the x-direction
+
         Args:
             dtt_type:
 
@@ -487,6 +499,7 @@ class kWaveGrid(object):
     def ky_vec_dtt(self, dtt_type):
         """
             Compute the DTT wavenumber vector in the y-direction
+
         Args:
             dtt_type:
 
@@ -499,6 +512,7 @@ class kWaveGrid(object):
     def kz_vec_dtt(self, dtt_type):
         """
             Compute the DTT wavenumber vector in the z-direction
+
         Args:
             dtt_type:
 
@@ -512,6 +526,7 @@ class kWaveGrid(object):
     def makeDTTDim(Nx, dx, dtt_type):
         """
             Create the DTT grid parameters for a single spatial direction
+
         Args:
             Nx:
             dx:
@@ -570,6 +585,7 @@ class kWaveGrid(object):
     def setNUGrid(self, dim, n_vec, dudn, n_vec_sg, dudn_sg):
         """
             Function to set non-uniform grid parameters in specified dimension
+
         Args:
             dim:
             n_vec:
@@ -610,17 +626,19 @@ class kWaveGrid(object):
 
     def k_dtt(self, dtt_type):  # Not tested for correctness!
         """
-            compute the individual wavenumber vectors, where dtt_type is the
-            type of discrete trigonometric transform, which corresponds to
-            the assumed input symmetry of the input function, where:
-               1: DCT-I    WSWS
-               2: DCT-II   HSHS
-               3: DCT-III  WSWA
-               4: DCT-IV   HSHA
-               5: DST-I    WAWA
-               6: DST-II   HAHA
-               7: DST-III  WAWS
-               8: DST-IV   HAHS
+           compute the individual wavenumber vectors, where dtt_type is the
+           type of discrete trigonometric transform, which corresponds to
+           the assumed input symmetry of the input function, where:
+
+           1. DCT-I    WSWS
+           2. DCT-II   HSHS
+           3. DCT-III  WSWA
+           4. DCT-IV   HSHA
+           5. DST-I    WAWA
+           6. DST-II   HAHA
+           7. DST-III  WAWS
+           8. DST-IV   HAHS
+
         Args:
             dtt_type:
 

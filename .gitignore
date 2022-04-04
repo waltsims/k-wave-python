@@ -2,6 +2,7 @@
 difference.py
 transfer_temp/
 test_local.sh
+.DS_Store
 tests/reference_outputs
 /.coverage
 /docs/_build/

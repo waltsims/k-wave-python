@@ -50,6 +50,7 @@ class SimulationOptions(object):
     def init(kgrid, elastic_code: bool, axisymmetric: bool, **kwargs):
         """
             Initialize the Simulation Options
+
         Args:
             kgrid: kWaveGrid instance
             elastic_code: Flag that indicates whether elastic simulation is used

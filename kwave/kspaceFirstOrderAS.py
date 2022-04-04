@@ -45,11 +45,11 @@ def kspaceFirstOrderASC(**kwargs):
         This function is essentially a wrapper and directly uses the capabilities
         of kspaceFirstOrder3DC by replacing the binary name with the name of the
         GPU binary.
+
     Args:
         **kwargs:
 
     Returns:
-
     """
     # generate the input file and save to disk
     kspaceFirstOrderAS(**kwargs)
@@ -108,6 +108,7 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
         kgrid. For homogeneous medium parameters, these can be given as single
         numeric values. If the medium is homogeneous and velocity inputs or
         outputs are not required, it is not necessary to specify medium.density.
+
     Args:
         kgrid: kWaveGrid instance
         medium: kWaveMedium instance
@@ -131,6 +132,7 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
 
     # interpolate the values of the density at the staggered grid locations
     # where sgx = (x + dx/2, y, z), sgy = (x, y + dy/2, z), sgz = (x, y, z + dz/2)
+
     k_sim.rho0 = np.atleast_1d(k_sim.rho0)
     if num_dim2(k_sim.rho0) == 2 and options.use_sg:
         # rho0 is heterogeneous and staggered grids are used

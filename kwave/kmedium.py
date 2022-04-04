@@ -35,6 +35,7 @@ class kWaveMedium(object):
     def check_fields(self, kgrid_shape: np.ndarray) -> None:
         """
             Check whether the given properties are valid
+
         Args:
             kgrid_shape: Shape of the kWaveGrid
 
@@ -61,8 +62,10 @@ class kWaveMedium(object):
     def is_defined(self, *fields) -> List[bool]:
         """
             Check if the field(s) are defined or None
+
         Args:
             *fields: String list of the fields
+
         Returns:
             Boolean list
         """
@@ -74,8 +77,10 @@ class kWaveMedium(object):
     def ensure_defined(self, *fields) -> None:
         """
             Assert that the field(s) are defined (not None)
+
         Args:
             *fields: String list of the fields
+
         Returns:
             None
         """
@@ -85,6 +90,7 @@ class kWaveMedium(object):
     def is_nonlinear(self) -> bool:
         """
             Check if the medium is nonlinear
+
         Returns:
             whether the fluid simulation is nonlinear
         """
@@ -93,6 +99,7 @@ class kWaveMedium(object):
     def set_absorbing(self, is_absorbing, is_stokes=False) -> None:
         """
             Change medium's absorbing and stokes properties
+
         Args:
             is_absorbing: Is the medium absorbing
             is_stokes: Is the medium stokes
@@ -110,6 +117,7 @@ class kWaveMedium(object):
     def _check_absorbing_without_stokes(self) -> None:
         """
             Check if the medium properties are set correctly for absorbing simulation without stokes
+
         Returns:
             None
         """
@@ -134,6 +142,7 @@ class kWaveMedium(object):
     def _check_absorbing_with_stokes(self):
         """
             Check if the medium properties are set correctly for absorbing simulation with stokes
+
         Returns:
             None
         """
