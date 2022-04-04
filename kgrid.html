@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kWaveGrid &mdash; kWave-py  documentation</title>
+  <title>kWaveGrid &mdash; k-Wave-python  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/sphinx-toolbox-code.css" type="text/css" />
@@ -27,7 +27,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> kWave-py
+            <a href="index.html" class="icon icon-home"> k-Wave-python
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -66,7 +66,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">kWave-py</a>
+          <a href="index.html">k-Wave-python</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -119,16 +119,16 @@ grid spacing in each direction is constant).</p>
 <div><p>compute the individual wavenumber vectors, where dtt_type is the
 type of discrete trigonometric transform, which corresponds to
 the assumed input symmetry of the input function, where:</p>
-<blockquote>
-<div><p>1: DCT-I    WSWS
-2: DCT-II   HSHS
-3: DCT-III  WSWA
-4: DCT-IV   HSHA
-5: DST-I    WAWA
-6: DST-II   HAHA
-7: DST-III  WAWS
-8: DST-IV   HAHS</p>
-</div></blockquote>
+<ol class="arabic simple">
+<li><p>DCT-I    WSWS</p></li>
+<li><p>DCT-II   HSHS</p></li>
+<li><p>DCT-III  WSWA</p></li>
+<li><p>DCT-IV   HSHA</p></li>
+<li><p>DST-I    WAWA</p></li>
+<li><p>DST-II   HAHA</p></li>
+<li><p>DST-III  WAWS</p></li>
+<li><p>DST-IV   HAHS</p></li>
+</ol>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -358,8 +358,12 @@ based on the minimum value.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.k_max">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">k_max</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_max" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum supported spatial frequency in the 3 directions [rad/m]
-:returns: Vector of 3 elements each in [rad/m]. Value for higher dimensions set to NaN</p>
+<dd><p>Maximum supported spatial frequency in the 3 directions [rad/m]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Vector of 3 elements each in [rad/m]. Value for higher dimensions set to NaN</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -385,22 +389,34 @@ based on the minimum value.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kx">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">kx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kx" title="Permalink to this definition"></a></dt>
-<dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]
-:returns: plaid xn matrix</p>
+<dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>plaid xn matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.ky">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ky</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.ky" title="Permalink to this definition"></a></dt>
-<dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]
-:returns: plaid yn matrix</p>
+<dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>plaid yn matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kz">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">kz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kz" title="Permalink to this definition"></a></dt>
-<dd><p># Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]
-:returns: plaid zn matrix</p>
+<dd><p># Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>plaid zn matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -460,8 +476,12 @@ based on the minimum value.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.xn">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.xn" title="Permalink to this definition"></a></dt>
-<dd><p>3D plaid non-uniform spatial grids
-:returns: plaid xn matrix</p>
+<dd><p>3D plaid non-uniform spatial grids</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>plaid xn matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -485,8 +505,12 @@ based on the minimum value.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.yn">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">yn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.yn" title="Permalink to this definition"></a></dt>
-<dd><p>3D plaid non-uniform spatial grids
-:returns: plaid yn matrix</p>
+<dd><p>3D plaid non-uniform spatial grids</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>plaid yn matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'kWave-py'
+project = 'k-Wave-python'
 copyright = '2021, Walter Simson, Farid Yagubbayli'
 author = 'Walter Simson, Farid Yagubbayli'
 
