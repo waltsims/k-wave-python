@@ -1,6 +1,6 @@
-# Kwave.py
+# k-Wave-python
 
-This project is a Python interface to the [kWave simulation binaries](http://www.k-wave.org/download.php).
+This project is a Python interface to the [k-Wave simulation binaries](http://www.k-wave.org/download.php).
 
 The documentation can be found [here](http://waltersimson.com/k-wave-python/)
 ## Installation
