@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+h5py = "==2.9.0"
+scipy = "==1.5.2"
+opencv-python = "==4.4.0.46"
+omegaconf = "==2.0.5"
+deepdiff = "==5.2.3"
+matplotlib = "==3.3.4"
+furo = "==2021.7.31b41"
+PyYAML = "==5.3.1"
+Flask = "==1.1.1"
+Sphinx = "==4.1.2"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
