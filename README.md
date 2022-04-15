@@ -29,3 +29,8 @@ binary_name=kspaceFirstOrder-CUDA
     -o <output_filename> \
     --p_raw
 ```
+
+
+## Development
+
+If your're enjoying k-Wave-pyhton and want to contribute, development instructions can befound [here](https://waltersimson.com/k-wave-python/development/development_environment.html).

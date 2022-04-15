@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-setup(name='kWave-interface',
+setup(name='k-Wave-python',
       version='0.1',
       description='Acoustics toolbox for time domain acoustic '
                   'and ultrasound simulations in complex and tissue-realistic media.',
