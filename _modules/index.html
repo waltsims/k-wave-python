@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Development Environment &mdash; k-Wave-python  documentation</title>
+  <title>Overview: module code &mdash; k-Wave-python  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sphinx-toolbox-code.css" type="text/css" />
@@ -17,8 +17,7 @@
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Recorder" href="../recorder.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -59,8 +58,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../recorder.html">Recorder</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Development Environment</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/development_environment.html">Development Environment</a></li>
 </ul>
 
         </div>
@@ -77,9 +76,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Development Environment</li>
+      <li>Overview: module code</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/development/development_environment.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -87,29 +85,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="development-environment">
-<h1>Development Environment<a class="headerlink" href="#development-environment" title="Permalink to this headline"></a></h1>
-<p>Currently, this package serves as an interface to the cpp binaries of k-Wave.
-For this reason, the k-Wave binaries are packaged with the code in this repository.
-The k-Wave binaries can currently be found on the <a class="reference external" href="http://www.k-wave.org/download.php">k-Wave download page</a>.</p>
-<p>In order to correctly set up your development environment for this repository, clone the repository from github, and install the project dependencies..</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/waltsims/k-wave-python
-<span class="nb">cd</span> k-wave-python
-pip install -r requirements.txt
-</pre></div>
-</div>
-<p>Next, download all k-Wave binaries from the <a class="reference external" href="http://www.k-wave.org/download.php">k-Wave download page</a>.</p>
-<p>Lastly, place the contents of the linux-binaries, and windows-executables directories in the project directory structure under <code class="docutils literal notranslate"><span class="pre">kwave/bin/linux/</span></code> and <code class="docutils literal notranslate"><span class="pre">kwave/bin/windows</span></code> respectively.</p>
-<p>Now your development environment has been set up, and you can run and build the <code class="docutils literal notranslate"><span class="pre">k-Wave-python</span></code> codebase.</p>
-<p>If you have any issues or questions, please join the <a class="reference external" href="https://t.me/+ILL4yGgcX0A2Y2Y6">k-Wave-python Development Telegram group</a> to discuss. We look forward to interacting with you.</p>
-</div>
-
+  <h1>All modules for which code is available</h1>
+<ul><li><a href="kwave/data.html">kwave.data</a></li>
+<li><a href="kwave/kWaveSimulation.html">kwave.kWaveSimulation</a></li>
+<li><a href="kwave/kgrid.html">kwave.kgrid</a></li>
+<li><a href="kwave/kmedium.html">kwave.kmedium</a></li>
+<li><a href="kwave/ksensor.html">kwave.ksensor</a></li>
+<li><a href="kwave/ksource.html">kwave.ksource</a></li>
+<li><a href="kwave/kspaceFirstOrder.html">kwave.kspaceFirstOrder</a></li>
+<li><a href="kwave/kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D</a></li>
+<li><a href="kwave/kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D</a></li>
+<li><a href="kwave/kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS</a></li>
+<li><a href="kwave/options.html">kwave.options</a></li>
+<li><a href="kwave/recorder.html">kwave.recorder</a></li>
+</ul>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../recorder.html" class="btn btn-neutral float-left" title="Recorder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
+          <footer>
 
   <hr/>
 

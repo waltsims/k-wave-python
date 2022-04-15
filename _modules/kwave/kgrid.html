@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kwave.kgrid &mdash; k-Wave-python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> k-Wave-python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksensor.html">kSensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksource.html">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../simopt.html">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../recorder.html">Recorder</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">k-Wave-python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>kwave.kgrid</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for kwave.kgrid</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">kwave.enums</span> <span class="kn">import</span> <span class="n">DiscreteCosine</span><span class="p">,</span> <span class="n">DiscreteSine</span>
+<span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">largest_prime_factor</span>
+
+<span class="c1"># default CFL number</span>
+<span class="n">CFL_DEFAULT</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+<span class="c1"># machine precision</span>
+<span class="n">MACHINE_PRECISION</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">epsilon</span>
+
+
+<div class="viewcode-block" id="kWaveGrid"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">kWaveGrid</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        kWaveGrid is the grid class used across the k-Wave Toolbox. An object</span>
+<span class="sd">        of the kWaveGrid class contains the grid coordinates and wavenumber</span>
+<span class="sd">        matrices used within the simulation and reconstruction functions in</span>
+<span class="sd">        k-Wave. The grid matrices are indexed as: (x, 1) in 1D; (x, y) in</span>
+<span class="sd">        2D; and (x, y, z) in 3D. The grid is assumed to be a regularly spaced</span>
+<span class="sd">        Cartesian grid, with grid spacing given by dx, dy, dz (typically the</span>
+<span class="sd">        grid spacing in each direction is constant).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">spacing</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            N: grid size in each dimension [grid points]</span>
+<span class="sd">            spacing: grid point spacing in each direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">spacing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span>  <span class="c1"># if inputs are lists</span>
+        <span class="k">assert</span> <span class="n">N</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">spacing</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># ensure no multidimensional lists</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">spacing</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># ensure valid dimensionality</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>              <span class="c1">#: grid size in each dimension [grid points]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span> <span class="o">=</span> <span class="n">spacing</span>              <span class="c1">#: grid point spacing in each direction [m]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">size</span>              <span class="c1">#: Number of dimensions (1, 2 or 3)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="o">=</span> <span class="kc">False</span>             <span class="c1">#: flag that indicates grid non-uniformity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>                    <span class="c1">#: size of time step [s]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>                    <span class="c1">#: number of time steps [s]</span>
+
+        <span class="c1"># originally there was [xn_vec, yn_vec, zn_vec]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span>      <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>  <span class="c1">#: position vectors for the grid points in [0, 1]</span>
+        <span class="c1"># originally there was [xn_vec_sgx, yn_vec_sgy, zn_vec_sgz]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vec_sg</span>   <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>  <span class="c1">#: position vectors for the staggered grid points in [0, 1]</span>
+
+        <span class="c1"># originally there was [dxudxn, dyudyn, dzudzn]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dudn</span>       <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>  <span class="c1">#: transformation gradients between uniform and staggered grids</span>
+        <span class="c1"># originally there was [dxudxn_sgx, dyudyn_sgy, dzudzn_sgz]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dudn_sg</span>    <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>  <span class="c1">#: transformation gradients between uniform and staggered grids</span>
+
+        <span class="c1"># assign the grid parameters for the x spatial direction</span>
+        <span class="c1"># originally kx_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span> <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">makeDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">)])</span>  <span class="c1">#: Nx x 1 vector of wavenumber components in the x-direction [rad/m]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># define the scalar wavenumber based on the wavenumber components</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>  <span class="c1">#: scalar wavenumber</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># assign the grid parameters for the x and y spatial directions</span>
+            <span class="c1"># Ny x 1 vector of wavenumber components in the y-direction [rad/m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># define the wavenumber based on the wavenumber components</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>  <span class="c1">#: scalar wavenumber</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># assign the grid parameters for the x, y, and z spatial directions</span>
+            <span class="c1"># Nz x 1 vector of wavenumber components in the z-direction [rad/m]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">))</span>
+
+            <span class="c1"># define the wavenumber based on the wavenumber components</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>  <span class="c1">#: scalar wavenumber</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">t_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            time array [s]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;auto&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@t_array</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">t_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_array</span><span class="p">):</span>
+        <span class="c1"># check for &#39;auto&#39; input</span>
+        <span class="k">if</span> <span class="n">t_array</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="c1"># set values to auto</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># extract property values</span>
+            <span class="n">Nt_temp</span> <span class="o">=</span> <span class="n">t_array</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">dt_temp</span> <span class="o">=</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># check the time array begins at zero</span>
+            <span class="k">assert</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;t_array must begin at zero.&#39;</span>
+
+            <span class="c1"># check the time array is evenly spaced</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">t_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dt_temp</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">MACHINE_PRECISION</span><span class="p">,</span> \
+                <span class="s1">&#39;t_array must be evenly spaced.&#39;</span>
+
+            <span class="c1"># check the time steps are increasing</span>
+            <span class="k">assert</span> <span class="n">dt_temp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;t_array must be monotonically increasing.&#39;</span>
+
+            <span class="c1"># assign values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="n">Nt_temp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt_temp</span>
+
+<div class="viewcode-block" id="kWaveGrid.setTime"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.setTime">[docs]</a>    <span class="k">def</span> <span class="nf">setTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nt</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Set Nt and dt based on user input</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Nt:</span>
+<span class="sd">            dt:</span>
+
+<span class="sd">        Returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check the value for Nt</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">Nt</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">Nt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">))</span> <span class="ow">and</span> <span class="n">Nt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Nt must be a positive integer.&#39;</span>
+
+        <span class="c1"># check the value for dt</span>
+        <span class="k">assert</span> <span class="n">dt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;dt must be positive.&#39;</span>
+
+        <span class="c1"># assign values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="n">Nt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Nx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            grid size in x-direction [grid points]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Ny</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           grid size in y-direction [grid points]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Nz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           grid size in z-direction [grid points]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            grid point spacing in x-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            grid point spacing in y-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            grid point spacing in z-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           Nx x 1 vector of the grid coordinates in the x-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate x_vec based on kx_vec</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           Ny x 1 vector of the grid coordinates in the y-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate y_vec based on ky_vec</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nz x 1 vector of the grid coordinates in the z-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate z_vec based on kz_vec</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">kx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ky</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">kz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            3D plaid non-uniform spatial grids</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid xn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">yn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            3D plaid non-uniform spatial grids</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid yn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">zn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            3D plaid non-uniform spatial grids</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid zn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Size of grid in the all directions [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_grid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Total number of grid points (equal to Nx * Ny * Nz)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid xn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ky</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid yn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plaid zn matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Size of grid in the y-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">z_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Size of grid in the z-direction [m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># added by us, not the same as kWave k_max (see k_max_all for KwaveGrid.k_max)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Maximum supported spatial frequency in the 3 directions [rad/m]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Vector of 3 elements each in [rad/m]. Value for higher dimensions set to NaN</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#</span>
+        <span class="n">kx_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">ky_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">kz_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="n">Array</span><span class="p">([</span><span class="n">kx_max</span><span class="p">,</span> <span class="n">ky_max</span><span class="p">,</span> <span class="n">kz_max</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_max_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Maximum supported spatial frequency in all directions [rad/m]</span>
+<span class="sd">            Originally k_max in kWave.kWaveGrid!</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Scalar in [rad/m]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">k_max</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+
+    <span class="c1">########################################</span>
+    <span class="c1"># functions that can only be accessed by class members</span>
+    <span class="c1">########################################</span>
+<div class="viewcode-block" id="kWaveGrid.makeDim"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.makeDim">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">makeDim</span><span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="n">spacing</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Create the grid parameters for a single spatial direction</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_points:</span>
+<span class="sd">            spacing:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># define the discretisation of the spatial dimension such that there is always a DC component</span>
+        <span class="k">if</span> <span class="n">num_points</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># grid dimension has an even number of points</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">num_points</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num_points</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_points</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># grid dimension has an odd number of points</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_points</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># force middle value to be zero in case 1/Nx is a recurring</span>
+        <span class="c1"># number and the series doesn&#39;t give exactly zero</span>
+        <span class="n">nx</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">num_points</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># define the wavenumber vector components</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">spacing</span><span class="p">)</span> <span class="o">*</span> <span class="n">nx</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.highest_prime_factors"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.highest_prime_factors">[docs]</a>    <span class="k">def</span> <span class="nf">highest_prime_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            calculate highest prime factors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axisymmetric: Axisymmetric code or None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Vector of three elements</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axisymmetric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">axisymmetric</span> <span class="o">==</span> <span class="s1">&#39;WSWA&#39;</span><span class="p">:</span>
+                <span class="n">prime_facs</span> <span class="o">=</span> <span class="p">[</span><span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">),</span>
+                              <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ny</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+                              <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="n">axisymmetric</span> <span class="o">==</span> <span class="s1">&#39;WSWS&#39;</span><span class="p">:</span>
+                <span class="n">prime_facs</span> <span class="o">=</span> <span class="p">[</span><span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">),</span>
+                              <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span>
+                              <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown axisymmetric symmetry.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prime_facs</span> <span class="o">=</span> <span class="p">[</span><span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">),</span>
+                          <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">),</span>
+                          <span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">prime_facs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.makeTime"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.makeTime">[docs]</a>    <span class="k">def</span> <span class="nf">makeTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cfl</span><span class="o">=</span><span class="n">CFL_DEFAULT</span><span class="p">,</span> <span class="n">t_end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compute Nt and dt based on the cfl number and grid size, where</span>
+<span class="sd">            the number of time-steps is chosen based on the time it takes to</span>
+<span class="sd">            travel from one corner of the grid to the geometrically opposite</span>
+<span class="sd">            corner. Note, if c is given as a matrix, the calculation for dt</span>
+<span class="sd">            is based on the maximum value, and the calculation for t_end</span>
+<span class="sd">            based on the minimum value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            c:</span>
+<span class="sd">            cfl:</span>
+<span class="sd">            t_end:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Nothing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if c is a matrix, find the minimum and maximum values</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">c_min</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">c</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="c1"># check for user define t_end, otherwise set the simulation</span>
+        <span class="c1"># length based on the size of the grid diagonal and the maximum</span>
+        <span class="c1"># sound speed in the medium</span>
+        <span class="k">if</span> <span class="n">t_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t_end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">c_min</span>
+
+        <span class="c1"># extract the smallest grid spacing</span>
+        <span class="n">min_grid_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+        <span class="c1"># assign time step based on CFL stability criterion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">cfl</span> <span class="o">*</span> <span class="n">min_grid_dim</span> <span class="o">/</span> <span class="n">c_max</span>
+
+        <span class="c1"># assign number of time steps based on t_end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t_end</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># catch case were dt is a recurring number</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">t_end</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">!=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">t_end</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">t_end</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nt</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+    <span class="c1">##################################################</span>
+    <span class="c1">####</span>
+    <span class="c1">#### FUNCTIONS BELOW WERE NOT TESTED FOR CORRECTNESS!</span>
+    <span class="c1">####</span>
+    <span class="c1">##################################################</span>
+<div class="viewcode-block" id="kWaveGrid.kx_vec_dtt"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.kx_vec_dtt">[docs]</a>    <span class="k">def</span> <span class="nf">kx_vec_dtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compute the DTT wavenumber vector in the x-direction</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dtt_type:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeDTTDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="n">M</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.ky_vec_dtt"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.ky_vec_dtt">[docs]</a>    <span class="k">def</span> <span class="nf">ky_vec_dtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compute the DTT wavenumber vector in the y-direction</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dtt_type:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeDTTDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="n">M</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.kz_vec_dtt"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.kz_vec_dtt">[docs]</a>    <span class="k">def</span> <span class="nf">kz_vec_dtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compute the DTT wavenumber vector in the z-direction</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dtt_type:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kz_vec_dtt</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeDTTDim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kz_vec_dtt</span><span class="p">,</span> <span class="n">M</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.makeDTTDim"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.makeDTTDim">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">makeDTTDim</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Create the DTT grid parameters for a single spatial direction</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Nx:</span>
+<span class="sd">            dx:</span>
+<span class="sd">            dtt_type:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># compute the implied period of the input function</span>
+        <span class="k">if</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Nx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Nx</span>
+
+        <span class="c1"># calculate the wavenumbers</span>
+        <span class="k">if</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="n">DiscreteCosine</span><span class="o">.</span><span class="n">TYPE_1</span><span class="p">:</span>
+            <span class="c1"># whole-wavenumber DTT</span>
+            <span class="c1"># WSWS / DCT-I</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">kx_vec</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">M</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="n">DiscreteCosine</span><span class="o">.</span><span class="n">TYPE_2</span><span class="p">:</span>
+            <span class="c1"># whole-wavenumber DTT</span>
+            <span class="c1"># HSHS / DCT-II</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">kx_vec</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">M</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="n">DiscreteSine</span><span class="o">.</span><span class="n">TYPE_1</span><span class="p">:</span>
+            <span class="c1"># whole-wavenumber DTT</span>
+            <span class="c1"># WAWA / DST-I</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">kx_vec</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">M</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtt_type</span> <span class="o">==</span> <span class="n">DiscreteSine</span><span class="o">.</span><span class="n">TYPE_2</span><span class="p">:</span>
+            <span class="c1"># whole-wavenumber DTT</span>
+            <span class="c1"># HAHA / DST-II</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">kx_vec</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">M</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtt_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">DiscreteCosine</span><span class="o">.</span><span class="n">TYPE_3</span><span class="p">,</span> <span class="n">DiscreteCosine</span><span class="o">.</span><span class="n">TYPE_4</span><span class="p">,</span>
+                          <span class="n">DiscreteSine</span><span class="o">.</span><span class="n">TYPE_3</span><span class="p">,</span>   <span class="n">DiscreteSine</span><span class="o">.</span><span class="n">TYPE_4</span><span class="p">]:</span>
+            <span class="c1"># half-wavenumber DTTs</span>
+            <span class="c1"># WSWA / DCT-III</span>
+            <span class="c1"># HSHA / DCT-IV</span>
+            <span class="c1"># WAWS / DST-III</span>
+            <span class="c1"># HAHS / DST-IV</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">kx_vec</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">M</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+
+        <span class="k">return</span> <span class="n">kx_vec</span><span class="p">,</span> <span class="n">M</span></div>
+
+    <span class="c1">########################################</span>
+    <span class="c1"># functions for non-uniform grids</span>
+    <span class="c1">########################################</span>
+<div class="viewcode-block" id="kWaveGrid.setNUGrid"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.setNUGrid">[docs]</a>    <span class="k">def</span> <span class="nf">setNUGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">n_vec</span><span class="p">,</span> <span class="n">dudn</span><span class="p">,</span> <span class="n">n_vec_sg</span><span class="p">,</span> <span class="n">dudn_sg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Function to set non-uniform grid parameters in specified dimension</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dim:</span>
+<span class="sd">            n_vec:</span>
+<span class="sd">            dudn:</span>
+<span class="sd">            n_vec_sg:</span>
+<span class="sd">            dudn_sg:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check the dimension to set the nonuniform grid is appropriate</span>
+        <span class="k">assert</span> <span class="n">dim</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Cannot set nonuniform parameters for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="si">}</span><span class="s1">-dimensional grid.&#39;</span>
+
+        <span class="c1"># force non-uniform grid spacing to be column vectors, and the</span>
+        <span class="c1"># gradients to be in the correct direction for use with bsxfun</span>
+        <span class="n">n_vec</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_vec</span><span class="p">,</span>    <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">n_vec_sg</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_vec_sg</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dudn</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn</span><span class="p">,</span>     <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">dudn_sg</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn_sg</span><span class="p">,</span>  <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dudn</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn</span><span class="p">,</span>     <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">dudn_sg</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn_sg</span><span class="p">,</span>  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">dudn</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn</span><span class="p">,</span>     <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">dudn_sg</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dudn_sg</span><span class="p">,</span>  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vec</span><span class="o">.</span><span class="n">assign_dim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">n_vec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_vec_sg</span><span class="o">.</span><span class="n">assign_dim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">n_vec_sg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dudn</span><span class="o">.</span><span class="n">assign_dim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dudn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dudn_sg</span><span class="o">.</span><span class="n">assign_dim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dudn_sg</span><span class="p">,</span> <span class="n">dudn_sg</span><span class="p">)</span>
+
+        <span class="c1"># set non-uniform flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonuniform</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="kWaveGrid.k_dtt"><a class="viewcode-back" href="../../kgrid.html#kwave.kgrid.kWaveGrid.k_dtt">[docs]</a>    <span class="k">def</span> <span class="nf">k_dtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtt_type</span><span class="p">):</span>  <span class="c1"># Not tested for correctness!</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           compute the individual wavenumber vectors, where dtt_type is the</span>
+<span class="sd">           type of discrete trigonometric transform, which corresponds to</span>
+<span class="sd">           the assumed input symmetry of the input function, where:</span>
+
+<span class="sd">           1. DCT-I    WSWS</span>
+<span class="sd">           2. DCT-II   HSHS</span>
+<span class="sd">           3. DCT-III  WSWA</span>
+<span class="sd">           4. DCT-IV   HSHA</span>
+<span class="sd">           5. DST-I    WAWA</span>
+<span class="sd">           6. DST-II   HAHA</span>
+<span class="sd">           7. DST-III  WAWS</span>
+<span class="sd">           8. DST-IV   HAHS</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dtt_type:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check dtt_type is a scalar or a vector the same size self.dim</span>
+        <span class="n">dtt_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">dtt_type</span><span class="o">.</span><span class="n">size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">]),</span> <span class="sa">f</span><span class="s1">&#39;dtt_type must be a scalar, or </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="si">}</span><span class="s1">D vector&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kx_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">M</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># assign the grid parameters for the x and y spatial directions</span>
+            <span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="n">Mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kx_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="n">My</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ky_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># define the wavenumber based on the wavenumber components</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kx_vec_dtt</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+            <span class="c1"># define product of implied period</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">Mx</span> <span class="o">*</span> <span class="n">My</span>
+            <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">M</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># assign the grid parameters for the x, y, and z spatial directions</span>
+            <span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="n">Mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kx_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="n">My</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ky_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
+            <span class="n">kz_vec_dtt</span><span class="p">,</span> <span class="n">Mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kz_vec_dtt</span><span class="p">(</span><span class="n">dtt_type</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># define the wavenumber based on the wavenumber components</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nz</span><span class="p">))</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kx_vec_dtt</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ky_vec_dtt</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kz_vec_dtt</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+            <span class="c1"># define product of implied period</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">Mx</span> <span class="o">*</span> <span class="n">My</span> <span class="o">*</span> <span class="n">Mz</span>
+            <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">M</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

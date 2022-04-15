@@ -80,7 +80,7 @@
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>kWaveGrid</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/kgrid.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/kgrid.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -92,7 +92,7 @@
 <span id="kwavegrid"></span><h1>kWaveGrid<a class="headerlink" href="#module-kwave.kgrid" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">kwave.kgrid.</span></span><span class="sig-name descname"><span class="pre">kWaveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">kwave.kgrid.</span></span><span class="sig-name descname"><span class="pre">kWaveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid" title="Permalink to this definition"></a></dt>
 <dd><p>kWaveGrid is the grid class used across the k-Wave Toolbox. An object
 of the kWaveGrid class contains the grid coordinates and wavenumber
 matrices used within the simulation and reconstruction functions in
@@ -102,7 +102,7 @@ Cartesian grid, with grid spacing given by dx, dy, dz (typically the
 grid spacing in each direction is constant).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.highest_prime_factors">
-<span class="sig-name descname"><span class="pre">highest_prime_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.highest_prime_factors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">highest_prime_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.highest_prime_factors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.highest_prime_factors" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>calculate highest prime factors</p>
 </div></blockquote>
@@ -118,7 +118,7 @@ grid spacing in each direction is constant).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.k_dtt">
-<span class="sig-name descname"><span class="pre">k_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_dtt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">k_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.k_dtt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_dtt" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>compute the individual wavenumber vectors, where dtt_type is the
 type of discrete trigonometric transform, which corresponds to
@@ -144,7 +144,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kx_vec_dtt">
-<span class="sig-name descname"><span class="pre">kx_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kx_vec_dtt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">kx_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.kx_vec_dtt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kx_vec_dtt" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Compute the DTT wavenumber vector in the x-direction</p>
 </div></blockquote>
@@ -158,7 +158,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.ky_vec_dtt">
-<span class="sig-name descname"><span class="pre">ky_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.ky_vec_dtt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ky_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.ky_vec_dtt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.ky_vec_dtt" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Compute the DTT wavenumber vector in the y-direction</p>
 </div></blockquote>
@@ -172,7 +172,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kz_vec_dtt">
-<span class="sig-name descname"><span class="pre">kz_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kz_vec_dtt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">kz_vec_dtt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.kz_vec_dtt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kz_vec_dtt" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Compute the DTT wavenumber vector in the z-direction</p>
 </div></blockquote>
@@ -186,7 +186,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.makeDTTDim">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDTTDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDTTDim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDTTDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDTTDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDTTDim" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Create the DTT grid parameters for a single spatial direction</p>
 </div></blockquote>
@@ -204,7 +204,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.makeDim">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDim" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Create the grid parameters for a single spatial direction</p>
 </div></blockquote>
@@ -221,7 +221,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.makeTime">
-<span class="sig-name descname"><span class="pre">makeTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeTime" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">makeTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeTime" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Compute Nt and dt based on the cfl number and grid size, where
 the number of time-steps is chosen based on the time it takes to
@@ -246,7 +246,7 @@ based on the minimum value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.setNUGrid">
-<span class="sig-name descname"><span class="pre">setNUGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dudn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_vec_sg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dudn_sg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.setNUGrid" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setNUGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dudn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_vec_sg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dudn_sg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.setNUGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.setNUGrid" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Function to set non-uniform grid parameters in specified dimension</p>
 </div></blockquote>
@@ -266,7 +266,7 @@ based on the minimum value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.setTime">
-<span class="sig-name descname"><span class="pre">setTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.setTime" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.setTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.setTime" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Set Nt and dt based on user input</p>
 </div></blockquote>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kwave.kmedium &mdash; k-Wave-python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> k-Wave-python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksensor.html">kSensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksource.html">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../simopt.html">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../recorder.html">Recorder</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">k-Wave-python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>kwave.kmedium</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for kwave.kmedium</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">kwave.utils.misc</span> <span class="k">as</span> <span class="nn">util</span>
+<span class="kn">import</span> <span class="nn">kwave.utils.checkutils</span>
+
+
+<div class="viewcode-block" id="kWaveMedium"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">kWaveMedium</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">sound_speed</span>                 <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span>             <span class="c1">#: sound speed distribution within the acoustic medium [m/s] | required to be defined</span>
+    <span class="n">sound_speed_ref</span>             <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: reference sound speed used within the k-space operator (phase correction term) [m/s]</span>
+    <span class="n">density</span>                     <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: density distribution within the acoustic medium [kg/m^3]</span>
+    <span class="n">alpha_coeff</span>                 <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: power law absorption coefficient [dB/(MHz^y cm)]</span>
+    <span class="n">alpha_power</span>                 <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: power law absorption exponent</span>
+    <span class="n">alpha_mode</span>                  <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: optional input to force either the absorption or dispersion terms in the equation of state to be excluded; valid inputs are &#39;no_absorption&#39; or &#39;no_dispersion&#39;</span>
+    <span class="n">alpha_filter</span>                <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: frequency domain filter applied to the absorption and dispersion terms in the equation of state</span>
+    <span class="n">alpha_sign</span>                  <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: two element array used to control the sign of absorption and dispersion terms in the equation of state</span>
+    <span class="n">BonA</span>                        <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: parameter of nonlinearity</span>
+    <span class="n">absorbing</span>                   <span class="p">:</span> <span class="nb">bool</span>     <span class="o">=</span> <span class="kc">False</span>     <span class="c1">#: is the medium absorbing?</span>
+    <span class="n">stokes</span>                      <span class="p">:</span> <span class="nb">bool</span>     <span class="o">=</span> <span class="kc">False</span>     <span class="c1">#: is the medium absorbing stokes?</span>
+
+   <span class="c1">#  &quot;&quot;&quot;</span>
+   <span class="c1">#     Note: For heterogeneous medium parameters, medium.sound_speed and</span>
+   <span class="c1">#     medium.density must be given in matrix form with the same dimensions as</span>
+   <span class="c1">#     kgrid. For homogeneous medium parameters, these can be given as single</span>
+   <span class="c1">#     numeric values. If the medium is homogeneous and velocity inputs or</span>
+   <span class="c1">#     outputs are not required, it is not necessary to specify medium.density.</span>
+   <span class="c1"># &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sound_speed</span>                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="kWaveMedium.check_fields"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium.check_fields">[docs]</a>    <span class="k">def</span> <span class="nf">check_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_shape</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check whether the given properties are valid</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kgrid_shape: Shape of the kWaveGrid</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check the absorption mode input is valid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;no_absorption&#39;</span><span class="p">,</span> <span class="s1">&#39;no_dispersion&#39;</span><span class="p">,</span> <span class="s1">&#39;stokes&#39;</span><span class="p">],</span> \
+                <span class="s2">&quot;medium.alpha_mode must be set to &#39;no_absorption&#39;, &#39;no_dispersion&#39;, or &#39;stokes&#39;.&quot;</span>
+
+        <span class="c1"># check the absorption filter input is valid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_filter</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">kgrid_shape</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.alpha_filter must be the same size as the computational grid.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check the absorption sign input is valid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_sign</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwave</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">checkutils</span><span class="o">.</span><span class="n">is_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_sign</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_sign</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.alpha_sign must be given as a 2 element numerical array controlling absorption and dispersion, respectively.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check alpha_coeff is non-negative and real</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coeff</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.alpha_coeff must be non-negative and real.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="kWaveMedium.is_defined"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium.is_defined">[docs]</a>    <span class="k">def</span> <span class="nf">is_defined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if the field(s) are defined or None</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *fields: String list of the fields</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Boolean list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="kWaveMedium.ensure_defined"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium.ensure_defined">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_defined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Assert that the field(s) are defined (not None)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *fields: String list of the fields</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be not be None&#39;</span></div>
+
+<div class="viewcode-block" id="kWaveMedium.is_nonlinear"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium.is_nonlinear">[docs]</a>    <span class="k">def</span> <span class="nf">is_nonlinear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if the medium is nonlinear</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            whether the fluid simulation is nonlinear</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">BonA</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="kWaveMedium.set_absorbing"><a class="viewcode-back" href="../../kmedium.html#kwave.kmedium.kWaveMedium.set_absorbing">[docs]</a>    <span class="k">def</span> <span class="nf">set_absorbing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_absorbing</span><span class="p">,</span> <span class="n">is_stokes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Change medium&#39;s absorbing and stokes properties</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            is_absorbing: Is the medium absorbing</span>
+<span class="sd">            is_stokes: Is the medium stokes</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># only stokes absorption is supported in the axisymmetric code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">absorbing</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stokes</span> <span class="o">=</span> <span class="n">is_absorbing</span><span class="p">,</span> <span class="n">is_stokes</span>
+        <span class="k">if</span> <span class="n">is_absorbing</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_stokes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_check_absorbing_with_stokes</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_check_absorbing_without_stokes</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_absorbing_without_stokes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if the medium properties are set correctly for absorbing simulation without stokes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># enforce both absorption parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_defined</span><span class="p">(</span><span class="s1">&#39;alpha_coeff&#39;</span><span class="p">,</span> <span class="s1">&#39;alpha_power&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check y is a scalar</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span><span class="p">),</span> <span class="s1">&#39;medium.alpha_power must be scalar.&#39;</span>
+
+        <span class="c1"># check y is real and within 0 to 3</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coeff</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">,</span> \
+            <span class="s1">&#39;medium.alpha_power must be a real number between 0 and 3.&#39;</span>
+
+        <span class="c1"># display warning if y is close to 1 and the dispersion term has not been set to zero</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">!=</span> <span class="s1">&#39;no_dispersion&#39;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">,</span> \
+                <span class="sd">&quot;&quot;&quot;The power law dispersion term in the equation of state is not valid for medium.alpha_power = 1.</span>
+<span class="sd">                This error can be avoided by choosing a power law exponent close to, but not exactly, 1.</span>
+<span class="sd">                If modelling acoustic absorption for medium.alpha_power = 1 is important and modelling dispersion is not</span>
+<span class="sd">                critical, this error can also be avoided by setting medium.alpha_mode to &#39;no_dispersion&#39;&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_check_absorbing_with_stokes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if the medium properties are set correctly for absorbing simulation with stokes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># enforce absorption coefficient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_defined</span><span class="p">(</span><span class="s1">&#39;alpha_coeff&#39;</span><span class="p">)</span>
+
+        <span class="c1"># give warning if y is specified</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;WARNING: the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># overwrite y value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1"># don&#39;t allow medium.alpha_mode with the axisymmetric code</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;no_absorption&#39;</span><span class="p">,</span> <span class="s1">&#39;no_dispersion&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Input option medium.alpha_mode is not supported with the axisymmetric code &#39;</span>
+                                      <span class="s1">&#39;or medium.alpha_mode = &#39;&#39;stokes&#39;&#39;.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># don&#39;t allow alpha_filter with stokes absorption (no variables are applied in k-space)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> \
+            <span class="s2">&quot;Input option medium.alpha_filter is not supported with the axisymmetric code &quot;</span> \
+            <span class="s2">&quot;or medium.alpha_mode = &#39;stokes&#39;. &quot;</span>
+
+    <span class="c1">##########################################</span>
+    <span class="c1"># Elastic-code related properties - raise error when accessed</span>
+    <span class="c1">##########################################</span>
+    <span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span> <span class="o">=</span> <span class="s1">&#39;Elastic simulation and related properties are not supported!&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sound_speed_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Shear sound speed (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sound_speed_ref_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Shear sound speed reference (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sound_speed_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compression sound speed (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sound_speed_ref_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compression sound speed reference (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">alpha_coeff_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Compression alpha coefficient (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">alpha_coeff_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Shear alpha coefficient (used in elastic simulations | not supported currently!)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

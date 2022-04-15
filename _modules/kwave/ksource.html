@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kwave.ksource &mdash; k-Wave-python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> k-Wave-python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksensor.html">kSensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksource.html">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../simopt.html">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../recorder.html">Recorder</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">k-Wave-python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>kwave.ksource</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for kwave.ksource</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">num_dim2</span><span class="p">,</span> <span class="n">matlab_find</span>
+
+
+<div class="viewcode-block" id="kSource"><a class="viewcode-back" href="../../ksource.html#kwave.ksource.kSource">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">kSource</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_p0</span>             <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">p</span>               <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: time varying pressure at each of the source positions given by source.p_mask</span>
+    <span class="n">p_mask</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: binary matrix specifying the positions of the time varying pressure source distribution</span>
+    <span class="n">p_mode</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: optional input to control whether the input pressure is injected as a mass source or enforced as a dirichlet boundary condition; valid inputs are &#39;additive&#39; (the default) or &#39;dirichlet&#39;</span>
+    <span class="n">p_frequency_ref</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Pressure reference frequency</span>
+
+    <span class="n">ux</span>              <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: time varying particle velocity in the x-direction at each of the source positions given by source.u_mask</span>
+    <span class="n">uy</span>              <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: time varying particle velocity in the y-direction at each of the source positions given by source.u_mask</span>
+    <span class="n">uz</span>              <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: time varying particle velocity in the z-direction at each of the source positions given by source.u_mask</span>
+    <span class="n">u_mask</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: binary matrix specifying the positions of the time varying particle velocity distribution</span>
+    <span class="n">u_mode</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet boundary condition; valid inputs are &#39;additive&#39; (the default) or &#39;dirichlet&#39;</span>
+    <span class="n">u_frequency_ref</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Velocity reference frequency</span>
+
+    <span class="n">sxx</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in x -&gt; x direction</span>
+    <span class="n">syy</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in y -&gt; y direction</span>
+    <span class="n">szz</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in z -&gt; z direction</span>
+    <span class="n">sxy</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in x -&gt; y direction</span>
+    <span class="n">sxz</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in x -&gt; z direction</span>
+    <span class="n">syz</span>             <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source in y -&gt; z direction</span>
+    <span class="n">s_mask</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source mask</span>
+    <span class="n">s_mode</span>          <span class="o">=</span> <span class="kc">None</span>      <span class="c1">#: Stress source mode</span>
+
+<div class="viewcode-block" id="kSource.is_p0_empty"><a class="viewcode-back" href="../../ksource.html#kwave.ksource.kSource.is_p0_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_p0_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if the `p0` field is set and not empty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Initial pressure within the acoustic medium</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p0</span>
+
+    <span class="nd">@p0</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="c1"># check size and contents</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># if the initial pressure is empty, remove field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_p0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_p0</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="kSource.validate"><a class="viewcode-back" href="../../ksource.html#kwave.ksource.kSource.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Validate the object fields for correctness</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kgrid: Instance of `~kwave.kgrid.kWaveGrid` class</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="c1"># throw an error if p0 is not the correct size</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;source.p0 must be the same size as the computational grid.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># if using the elastic code, reformulate source.p0 in terms of the</span>
+            <span class="c1"># stress source terms using the fact that source.p = [0.5 0.5] /</span>
+            <span class="c1"># (2*CFL) is the same as source.p0 = 1</span>
+            <span class="c1"># if self.elastic_code:</span>
+            <span class="c1">#     raise NotImplementedError</span>
+
+        <span class="c1"># check for a time varying pressure source input</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># force p_mask to be given if p is given</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="c1"># check mask is the correct size</span>
+            <span class="c1"># noinspection PyTypeChecker</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">num_dim2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;source.p_mask must be the same size as the computational grid.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check mask is not empty</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;source.p_mask must be a binary grid with at least one element set to 1.&#39;</span>
+
+            <span class="c1"># don&#39;t allow both source.p0 and source.p in the same simulation</span>
+            <span class="c1"># USERS: please contact us via http://www.k-wave.org/forum if this</span>
+            <span class="c1"># is a problem</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;source.p0 and source.p can&#39;t be defined in the same simulation.&quot;</span>
+
+            <span class="c1"># check the source mode input is valid</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">,</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="s1">&#39;additive-no-correction&#39;</span><span class="p">],</span> \
+                    <span class="s2">&quot;source.p_mode must be set to &#39;&#39;additive&#39;&#39;, &#39;&#39;additive-no-correction&#39;&#39;, or &#39;&#39;dirichlet&#39;&#39;.&quot;</span>
+
+            <span class="c1"># check if a reference frequency is defined</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_frequency_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># check frequency is a scalar, positive number</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_frequency_ref</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_frequency_ref</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+                <span class="c1"># check frequency is within range</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_frequency_ref</span> <span class="o">&lt;=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k_max_all</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> \
+                    <span class="s1">&#39;source.p_frequency_ref is higher than the maximum frequency supported by the spatial grid.&#39;</span>
+
+                <span class="c1"># change source mode to no include k-space correction</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">p_mode</span> <span class="o">=</span> <span class="s1">&#39;additive-no-correction&#39;</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.p has more time points than kgrid.Nt, remaining time points will not be used.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check if the mask is binary or labelled</span>
+            <span class="n">p_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span><span class="p">)</span>
+
+            <span class="c1"># create a second indexing variable</span>
+            <span class="k">if</span> <span class="n">p_unique</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">p_unique</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements, or the number</span>
+                <span class="c1"># of labelled sources</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.p must match the number of source elements in source.p_mask.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># check the source labels are monotonic, and start from 1</span>
+                <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;(sum(p_unique(2:end) - p_unique(1:end-1)) != (numel(p_unique) - 1)) || (~any(p_unique == 1))&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If using a labelled source.p_mask, the source labels must be monotonically increasing and start from 1.&#39;</span><span class="p">)</span>
+
+                <span class="c1"># make sure the correct number of input signals are given</span>
+                <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.p, 1) != (numel(p_unique) - 1)&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.p must match the number of labelled source elements in source.p_mask.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check for time varying velocity source input and set source flag</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">,</span> <span class="s1">&#39;uz&#39;</span><span class="p">,</span> <span class="s1">&#39;u_mask&#39;</span><span class="p">]]):</span>
+
+            <span class="c1"># force u_mask to be given</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="c1"># check mask is the correct size</span>
+            <span class="k">assert</span> <span class="n">num_dim2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span><span class="p">)</span> <span class="o">==</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> \
+                <span class="s1">&#39;source.u_mask must be the same size as the computational grid.&#39;</span>
+
+            <span class="c1"># check mask is not empty</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> \
+                <span class="s1">&#39;source.u_mask must be a binary grid with at least one element set to 1.&#39;</span>
+
+            <span class="c1"># check the source mode input is valid</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">,</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="s1">&#39;additive-no-correction&#39;</span><span class="p">],</span> \
+                    <span class="s2">&quot;source.u_mode must be set to &#39;&#39;additive&#39;&#39;, &#39;&#39;additive-no-correction&#39;&#39;, or &#39;&#39;dirichlet&#39;&#39;.&quot;</span>
+
+            <span class="c1"># check if a reference frequency is defined</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_frequency_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># check frequency is a scalar, positive number</span>
+                <span class="n">u_frequency_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_frequency_ref</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">u_frequency_ref</span><span class="p">)</span> <span class="ow">and</span> <span class="n">u_frequency_ref</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+                <span class="c1"># check frequency is within range</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_frequency_ref</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k_max_all</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> \
+                    <span class="s2">&quot;source.u_frequency_ref is higher than the maximum frequency supported by the spatial grid.&quot;</span>
+
+                <span class="c1"># change source mode to no include k-space correction</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">u_mode</span> <span class="o">=</span> <span class="s1">&#39;additive-no-correction&#39;</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ux</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_ux</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nt</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.ux has more time points than kgrid.Nt, remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_uy</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nt</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.uy has more time points than kgrid.Nt, remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_uz</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nt</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.uz has more time points than kgrid.Nt, remaining time points will not be used.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check if the mask is binary or labelled</span>
+            <span class="n">u_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span><span class="p">)</span>
+
+            <span class="c1"># create a second indexing variable</span>
+            <span class="k">if</span> <span class="n">u_unique</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">u_unique</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements</span>
+                <span class="n">ux_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ux</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">uy_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">uz_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">u_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_mask</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_ux</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ux_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uy_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uz_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_ux</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ux_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uy_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uz_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">)):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.ux (etc) must match the number of source elements in source.u_mask.&#39;</span><span class="p">)</span>
+
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_ux</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ux_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uy_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uz_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_ux</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ux_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uy_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag_uz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">uz_size</span> <span class="o">!=</span> <span class="n">u_sum</span><span class="p">)):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.ux (etc) must match the number of source elements in source.u_mask.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+                <span class="c1"># check the source labels are monotonic, and start from 1</span>
+                <span class="c1"># if (sum(u_unique(2:end) - u_unique(1:end-1)) != (numel(u_unique) - 1)) or (~any(u_unique == 1))</span>
+                <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;(sum(u_unique(2:end) - u_unique(1:end-1)) ~= (numel(u_unique) - 1)) || (~any(u_unique == 1))&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If using a labelled source.u_mask, the source labels must be monotonically increasing and start from 1.&#39;</span><span class="p">)</span>
+
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements</span>
+                <span class="c1"># if (flgs.source_ux and (size(source.ux, 1) != (numel(u_unique) - 1))) or (flgs.source_uy and (size(source.uy, 1) != (numel(u_unique) - 1))) or (flgs.source_uz and (size(source.uz, 1) != (numel(u_unique) - 1)))</span>
+                <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;(flgs.source_ux &amp;&amp; (size(source.ux, 1) ~= (numel(u_unique) - 1))) || (flgs.source_uy &amp;&amp; (size(source.uy, 1) ~= (numel(u_unique) - 1))) || (flgs.source_uz &amp;&amp; (size(source.uz, 1) ~= (numel(u_unique) - 1)))&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.ux (etc) must match the number of labelled source elements in source.u_mask.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check for time varying stress source input and set source flag</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sxx&#39;</span><span class="p">,</span> <span class="s1">&#39;syy&#39;</span><span class="p">,</span> <span class="s1">&#39;szz&#39;</span><span class="p">,</span> <span class="s1">&#39;sxy&#39;</span><span class="p">,</span> <span class="s1">&#39;sxz&#39;</span><span class="p">,</span> <span class="s1">&#39;syz&#39;</span><span class="p">,</span> <span class="s1">&#39;s_mask&#39;</span><span class="p">]]):</span>
+
+            <span class="c1"># force s_mask to be given</span>
+            <span class="n">enforce_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;s_mask&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check mask is the correct size</span>
+            <span class="c1"># if (numDim(source.s_mask) != kgrid.dim) or (all(size(source.s_mask) != size(kgrid.k)))</span>
+            <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;(numDim(source.s_mask) ~= kgrid.dim) || (all(size(source.s_mask) ~= size(kgrid.k)))&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;source.s_mask must be the same size as the computational grid.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check mask is not empty</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">getfield</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;s_mask&#39;</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> \
+                <span class="s2">&quot;source.s_mask must be a binary grid with at least one element set to 1.&quot;</span>
+
+            <span class="c1"># check the source mode input is valid</span>
+            <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">isfield</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;s_mode&#39;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">eng</span><span class="o">.</span><span class="n">getfield</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;s_mode&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">,</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">],</span> \
+                    <span class="s2">&quot;source.s_mode must be set to &#39;&#39;additive&#39;&#39; or &#39;&#39;dirichlet&#39;&#39;.&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">eng</span><span class="o">.</span><span class="n">setfield</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;s_mode&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SOURCE_S_MODE_DEF</span><span class="p">)</span>
+
+            <span class="c1"># set source flgs to the length of the sources, this allows the</span>
+            <span class="c1"># inputs to be defined independently and be of any length</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sxx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_sxx</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.sxx has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">syy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_syy</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.syy has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">szz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_szz</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.szz has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_sxy</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.sxy has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sxz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_sxz</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.sxz has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">syz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">self_syz</span> <span class="o">&gt;</span> <span class="n">k_Nt</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  WARNING: source.syz has more time points than kgrid.Nt,&#39;</span>
+                     <span class="s1">&#39; remaining time points will not be used.&#39;</span><span class="p">)</span>
+
+            <span class="c1"># create an indexing variable corresponding to the location of all</span>
+            <span class="c1"># the source elements</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+            <span class="c1"># check if the mask is binary or labelled</span>
+            <span class="s1">&#39;s_unique = unique(source.s_mask);&#39;</span>
+
+            <span class="c1"># create a second indexing variable</span>
+            <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;numel(s_unique) &lt;= 2 &amp;&amp; sum(s_unique) == 1&#39;</span><span class="p">):</span>
+                <span class="n">s_mask</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">getfield</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;s_mask&#39;</span><span class="p">)</span>
+                <span class="n">s_mask_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s_mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxx</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxx(:,1)) &gt; 1))&#39;</span><span class="p">)))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.syy(:,1)) &gt; 1))&#39;</span><span class="p">)))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_szz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.szz(:,1)) &gt; 1))&#39;</span><span class="p">)))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxy(:,1)) &gt; 1))&#39;</span><span class="p">)))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxz(:,1)) &gt; 1))&#39;</span><span class="p">)))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.syz(:,1)) &gt; 1))&#39;</span><span class="p">))):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxx</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxx(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">))</span> <span class="ow">or</span> \
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.syy(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">))</span> <span class="ow">or</span> \
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_szz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.szz(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">))</span> <span class="ow">or</span> \
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxy(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">))</span> <span class="ow">or</span> \
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.sxz(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">))</span> <span class="ow">or</span> \
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;length(source.syz(:,1))&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">s_mask_sum</span><span class="p">)):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.sxx (etc) must match the number of source elements in source.s_mask.&#39;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># check the source labels are monotonic, and start from 1</span>
+                <span class="c1"># if (sum(s_unique(2:end) - s_unique(1:end-1)) != (numel(s_unique) - 1)) or (~any(s_unique == 1))</span>
+                <span class="k">if</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;(sum(s_unique(2:end) - s_unique(1:end-1)) ~= (numel(s_unique) - 1)) || (~any(s_unique == 1))&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If using a labelled source.s_mask, the source labels must be monotonically increasing and start from 1.&#39;</span><span class="p">)</span>
+
+                <span class="n">numel_s_unique</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;numel(s_unique) - 1;&#39;</span><span class="p">)</span>
+                <span class="c1"># if more than one time series is given, check the number of time</span>
+                <span class="c1"># series given matches the number of source elements</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxx</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.sxx, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.syy, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_szz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.szz, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxy</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.sxy, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_sxz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.sxz, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">))</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_syz</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;size(source.syz, 1)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numel_s_unique</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of time series in source.sxx (etc) must match the number of labelled source elements in source.u_mask.&#39;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag_ux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Get the length of the sources in X-direction, this allows the</span>
+<span class="sd">            inputs to be defined independently and be of any length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Length of the sources</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ux</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ux</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag_uy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Get the length of the sources in X-direction, this allows the</span>
+<span class="sd">            inputs to be defined independently and be of any length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Length of the sources</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag_uz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Get the length of the sources in X-direction, this allows the</span>
+<span class="sd">            inputs to be defined independently and be of any length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Length of the sources</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

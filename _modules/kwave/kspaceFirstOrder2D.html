@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kwave.kspaceFirstOrder2D &mdash; k-Wave-python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-toolbox-code.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> k-Wave-python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../kgrid.html">kWaveGrid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kmedium.html">kMedium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksensor.html">kSensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksource.html">kSource</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kspace_fo.html">kSpace First Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ksimulation.html">kWaveSimulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../simopt.html">Simulation Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../array.html">Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../recorder.html">Recorder</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">k-Wave-python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>kwave.kspaceFirstOrder2D</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for kwave.kspaceFirstOrder2D</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span>
+<span class="kn">from</span> <span class="nn">kwave.kWaveSimulation</span> <span class="kn">import</span> <span class="n">kWaveSimulation</span>
+<span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
+<span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="kspaceFirstOrder2DG"><a class="viewcode-back" href="../../kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG">[docs]</a><span class="nd">@kspaceFirstOrderG</span>
+<span class="k">def</span> <span class="nf">kspaceFirstOrder2DG</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.</span>
+
+<span class="sd">    kspaceFirstOrder2DG provides a blind interface to the C++/CUDA</span>
+<span class="sd">    version of kspaceFirstOrder2D (called kspaceFirstOrder-CUDA) in the</span>
+<span class="sd">    same way as kspaceFirstOrder3DC. Note, the C++ code does not support</span>
+<span class="sd">    all input options, and all display options are ignored (only command</span>
+<span class="sd">    line outputs are given). See the k-Wave user manual for more</span>
+<span class="sd">    information.</span>
+<span class="sd">    The function works by appending the optional input &#39;SaveToDisk&#39; to</span>
+<span class="sd">    the user inputs and then calling kspaceFirstOrder2D to save the input</span>
+<span class="sd">    files to disk. The contents of sensor.record (if set) are parsed as</span>
+<span class="sd">    input flags, and the C++ code is run using the system command. The</span>
+<span class="sd">    output files are then automatically loaded from disk and returned in</span>
+<span class="sd">    the same fashion as kspaceFirstOrder2D. The input and output files</span>
+<span class="sd">    are saved to the temporary directory native to the operating system,</span>
+<span class="sd">    and are deleted after the function runs.</span>
+<span class="sd">    This function requires the C++ binary/executable of</span>
+<span class="sd">    kspaceFirstOrder-CUDA to be downloaded from</span>
+<span class="sd">    http://www.k-wave.org/download.php and placed in the &quot;binaries&quot;</span>
+<span class="sd">    directory of the k-Wave toolbox (the 2D and 3D code use the same</span>
+<span class="sd">    binary). Alternatively, the name and location of the binary can be</span>
+<span class="sd">    specified using the optional input parameters &#39;BinaryName&#39; and</span>
+<span class="sd">    &#39;BinariesPath&#39;.</span>
+
+<span class="sd">    This function is essentially a wrapper and directly uses the capabilities</span>
+<span class="sd">    of kspaceFirstOrder3DC by replacing the binary name with the name of the</span>
+<span class="sd">    GPU binary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">kspaceFirstOrder2DC</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pass inputs to CPU version</span>
+    <span class="k">return</span> <span class="n">sensor_data</span></div>
+
+
+<div class="viewcode-block" id="kspaceFirstOrder2DC"><a class="viewcode-back" href="../../kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">[docs]</a><span class="nd">@kspaceFirstOrderC</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">kspaceFirstOrder2DC</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2D time-domain simulation of wave propagation using C++ code.</span>
+
+<span class="sd">    kspaceFirstOrder2DC provides a blind interface to the C++ version of</span>
+<span class="sd">    kspaceFirstOrder2D (called kspaceFirstOrder-OMP) in the same way as</span>
+<span class="sd">    kspaceFirstOrder3DC. Note, the C++ code does not support all input</span>
+<span class="sd">    options, and all display options are ignored (only command line</span>
+<span class="sd">    outputs are given). See the k-Wave user manual for more information.</span>
+<span class="sd">    The function works by appending the optional input &#39;SaveToDisk&#39; to</span>
+<span class="sd">    the user inputs and then calling kspaceFirstOrder2D to save the input</span>
+<span class="sd">    files to disk. The contents of sensor.record (if set) are parsed as</span>
+<span class="sd">    input flags, and the C++ code is run using the system command. The</span>
+<span class="sd">    output files are then automatically loaded from disk and returned in</span>
+<span class="sd">    the same fashion as kspaceFirstOrder2D. The input and output files</span>
+<span class="sd">    are saved to the temporary directory native to the operating system,</span>
+<span class="sd">    and are deleted after the function runs.</span>
+<span class="sd">    For small simulations, running the simulation on a smaller number of</span>
+<span class="sd">    cores can improve performance as the matrices are often small enough</span>
+<span class="sd">    to fit within cache. It is recommended to adjust the value of</span>
+<span class="sd">    &#39;NumThreads&#39; to optimise performance for a given simulation size and</span>
+<span class="sd">    computer hardware. By default, simulations smaller than 128^2 are</span>
+<span class="sd">    set to run using a single thread (this behaviour can be over-ridden</span>
+<span class="sd">    using the &#39;NumThreads&#39; option). In some circumstances, for very small</span>
+<span class="sd">    simulations, the C++ code can be slower than the MATLAB code.</span>
+<span class="sd">    This function requires the C++ binary/executable of</span>
+<span class="sd">    kspaceFirstOrder-OMP to be downloaded from</span>
+<span class="sd">    http://www.k-wave.org/download.php and placed in the &quot;binaries&quot;</span>
+<span class="sd">    directory of the k-Wave toolbox (the same binary is used for</span>
+<span class="sd">    simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,</span>
+<span class="sd">    the name and location of the binary can be  specified using the</span>
+<span class="sd">    optional input parameters &#39;BinaryName&#39; and &#39;BinariesPath&#39;.</span>
+
+<span class="sd">    This function is essentially a wrapper and directly uses the capabilities</span>
+<span class="sd">    of kspaceFirstOrder3DC by replacing the binary name with the name of the</span>
+<span class="sd">    GPU binary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        **kwargs:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># generate the input file and save to disk</span>
+    <span class="n">kspaceFirstOrder2D</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDisk&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="kspaceFirstOrder2D"><a class="viewcode-back" href="../../kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrder2D</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        2D time-domain simulation of wave propagation.</span>
+
+<span class="sd">        kspaceFirstOrder2D simulates the time-domain propagation of</span>
+<span class="sd">        compressional waves through a two-dimensional homogeneous or</span>
+<span class="sd">        heterogeneous acoustic medium given four input structures: kgrid,</span>
+<span class="sd">        medium, source, and sensor. The computation is based on a first-order</span>
+<span class="sd">        k-space model which accounts for power law absorption and a</span>
+<span class="sd">        heterogeneous sound speed and density. If medium.BonA is specified,</span>
+<span class="sd">        cumulative nonlinear effects are also modelled. At each time-step</span>
+<span class="sd">        (defined by kgrid.dt and kgrid.Nt or kgrid.t_array), the acoustic</span>
+<span class="sd">        field parameters at the positions defined by sensor.mask are recorded</span>
+<span class="sd">        and stored. If kgrid.t_array is set to &#39;auto&#39;, this array is</span>
+<span class="sd">        automatically generated using the makeTime method of the kWaveGrid</span>
+<span class="sd">        class. An anisotropic absorbing boundary layer called a perfectly</span>
+<span class="sd">        matched layer (PML) is implemented to prevent waves that leave one</span>
+<span class="sd">        side of the domain being reintroduced from the opposite side (a</span>
+<span class="sd">        consequence of using the FFT to compute the spatial derivatives in</span>
+<span class="sd">        the wave equation). This allows infinite domain simulations to be</span>
+<span class="sd">        computed using small computational grids.</span>
+
+<span class="sd">        For a homogeneous medium the formulation is exact and the time-steps</span>
+<span class="sd">        are only limited by the effectiveness of the perfectly matched layer.</span>
+<span class="sd">        For a heterogeneous medium, the solution represents a leap-frog</span>
+<span class="sd">        pseudospectral method with a k-space correction that improves the</span>
+<span class="sd">        accuracy of computing the temporal derivatives. This allows larger</span>
+<span class="sd">        time-steps to be taken for the same level of accuracy compared to</span>
+<span class="sd">        conventional pseudospectral time-domain methods. The computational</span>
+<span class="sd">        grids are staggered both spatially and temporally.</span>
+
+<span class="sd">        An initial pressure distribution can be specified by assigning a</span>
+<span class="sd">        matrix (the same size as the computational grid) of arbitrary numeric</span>
+<span class="sd">        values to source.p0. A time varying pressure source can similarly be</span>
+<span class="sd">        specified by assigning a binary matrix (i.e., a matrix of 1&#39;s and 0&#39;s</span>
+<span class="sd">        with the same dimensions as the computational grid) to source.p_mask</span>
+<span class="sd">        where the 1&#39;s represent the grid points that form part of the source.</span>
+<span class="sd">        The time varying input signals are then assigned to source.p. This</span>
+<span class="sd">        can be a single time series (in which case it is applied to all</span>
+<span class="sd">        source elements), or a matrix of time series following the source</span>
+<span class="sd">        elements using MATLAB&#39;s standard column-wise linear matrix index</span>
+<span class="sd">        ordering. A time varying velocity source can be specified in an</span>
+<span class="sd">        analogous fashion, where the source location is specified by</span>
+<span class="sd">        source.u_mask, and the time varying input velocity is assigned to</span>
+<span class="sd">        source.ux and source.uy.</span>
+
+<span class="sd">        The field values are returned as arrays of time series at the sensor</span>
+<span class="sd">        locations defined by sensor.mask. This can be defined in three</span>
+<span class="sd">        different ways. (1) As a binary matrix (i.e., a matrix of 1&#39;s and 0&#39;s</span>
+<span class="sd">        with the same dimensions as the computational grid) representing the</span>
+<span class="sd">        grid points within the computational grid that will collect the data.</span>
+<span class="sd">        (2) As the grid coordinates of two opposing corners of a rectangle in</span>
+<span class="sd">        the form [x1; y1; x2; y2]. This is equivalent to using a binary</span>
+<span class="sd">        sensor mask covering the same region, however, the output is indexed</span>
+<span class="sd">        differently as discussed below. (3) As a series of Cartesian</span>
+<span class="sd">        coordinates within the grid which specify the location of the</span>
+<span class="sd">        pressure values stored at each time step. If the Cartesian</span>
+<span class="sd">        coordinates don&#39;t exactly match the coordinates of a grid point, the</span>
+<span class="sd">        output values are calculated via interpolation. The Cartesian points</span>
+<span class="sd">        must be given as a 2 by N matrix corresponding to the x and y</span>
+<span class="sd">        positions, respectively, where the Cartesian origin is assumed to be</span>
+<span class="sd">        in the center of the grid. If no output is required, the sensor input</span>
+<span class="sd">        can be replaced with an empty array [].</span>
+
+<span class="sd">        If sensor.mask is given as a set of Cartesian coordinates, the</span>
+<span class="sd">        computed sensor_data is returned in the same order. If sensor.mask is</span>
+<span class="sd">        given as a binary matrix, sensor_data is returned using MATLAB&#39;s</span>
+<span class="sd">        standard column-wise linear matrix index ordering. In both cases, the</span>
+<span class="sd">        recorded data is indexed as sensor_data(sensor_point_index,</span>
+<span class="sd">        time_index). For a binary sensor mask, the field values at a</span>
+<span class="sd">        particular time can be restored to the sensor positions within the</span>
+<span class="sd">        computation grid using unmaskSensorData. If sensor.mask is given as a</span>
+<span class="sd">        list of opposing corners of a rectangle, the recorded data is indexed</span>
+<span class="sd">        as sensor_data(rect_index).p(x_index, y_index, time_index), where</span>
+<span class="sd">        x_index and y_index correspond to the grid index within the</span>
+<span class="sd">        rectangle, and rect_index corresponds to the number of rectangles if</span>
+<span class="sd">        more than one is specified.</span>
+
+<span class="sd">        By default, the recorded acoustic pressure field is passed directly</span>
+<span class="sd">        to the output sensor_data. However, other acoustic parameters can</span>
+<span class="sd">        also be recorded by setting sensor.record to a cell array of the form</span>
+<span class="sd">        {&#39;p&#39;, &#39;u&#39;, &#39;p_max&#39;, ...}. For example, both the particle velocity and</span>
+<span class="sd">        the acoustic pressure can be returned by setting sensor.record =</span>
+<span class="sd">        {&#39;p&#39;, &#39;u&#39;}. If sensor.record is given, the output sensor_data is</span>
+<span class="sd">        returned as a structure with the different outputs appended as</span>
+<span class="sd">        structure fields. For example, if sensor.record = {&#39;p&#39;, &#39;p_final&#39;,</span>
+<span class="sd">        &#39;p_max&#39;, &#39;u&#39;}, the output would contain fields sensor_data.p,</span>
+<span class="sd">        sensor_data.p_final, sensor_data.p_max, sensor_data.ux, and</span>
+<span class="sd">        sensor_data.uy. Most of the output parameters are recorded at the</span>
+<span class="sd">        given sensor positions and are indexed as</span>
+<span class="sd">        sensor_data.field(sensor_point_index, time_index) or</span>
+<span class="sd">        sensor_data(rect_index).field(x_index, y_index, time_index) if using</span>
+<span class="sd">        a sensor mask defined as opposing rectangular corners. The exceptions</span>
+<span class="sd">        are the averaged quantities (&#39;p_max&#39;, &#39;p_rms&#39;, &#39;u_max&#39;, &#39;p_rms&#39;,</span>
+<span class="sd">        &#39;I_avg&#39;), the &#39;all&#39; quantities (&#39;p_max_all&#39;, &#39;p_min_all&#39;,</span>
+<span class="sd">        &#39;u_max_all&#39;, &#39;u_min_all&#39;), and the final quantities (&#39;p_final&#39;,</span>
+<span class="sd">        &#39;u_final&#39;). The averaged quantities are indexed as</span>
+<span class="sd">        sensor_data.p_max(sensor_point_index) or</span>
+<span class="sd">        sensor_data(rect_index).p_max(x_index, y_index) if using rectangular</span>
+<span class="sd">        corners, while the final and &#39;all&#39; quantities are returned over the</span>
+<span class="sd">        entire grid and are always indexed as sensor_data.p_final(nx, ny),</span>
+<span class="sd">        regardless of the type of sensor mask.</span>
+
+<span class="sd">        kspaceFirstOrder2D may also be used for time reversal image</span>
+<span class="sd">        reconstruction by assigning the time varying pressure recorded over</span>
+<span class="sd">        an arbitrary sensor surface to the input field</span>
+<span class="sd">        sensor.time_reversal_boundary_data. This data is then enforced in</span>
+<span class="sd">        time reversed order as a time varying Dirichlet boundary condition</span>
+<span class="sd">        over the sensor surface given by sensor.mask. The boundary data must</span>
+<span class="sd">        be indexed as sensor.time_reversal_boundary_data(sensor_point_index,</span>
+<span class="sd">        time_index). If sensor.mask is given as a set of Cartesian</span>
+<span class="sd">        coordinates, the boundary data must be given in the same order. An</span>
+<span class="sd">        equivalent binary sensor mask (computed using nearest neighbour</span>
+<span class="sd">        interpolation) is then used to place the pressure values into the</span>
+<span class="sd">        computational grid at each time step. If sensor.mask is given as a</span>
+<span class="sd">        binary matrix of sensor points, the boundary data must be ordered</span>
+<span class="sd">        using MATLAB&#39;s standard column-wise linear matrix indexing. If no</span>
+<span class="sd">        additional inputs are required, the source input can be replaced with</span>
+<span class="sd">        an empty array [].</span>
+
+<span class="sd">        Acoustic attenuation compensation can also be included during time</span>
+<span class="sd">        reversal image reconstruction by assigning the absorption parameters</span>
+<span class="sd">        medium.alpha_coeff and medium.alpha_power and reversing the sign of</span>
+<span class="sd">        the absorption term by setting medium.alpha_sign = [-1, 1]. This</span>
+<span class="sd">        forces the propagating waves to grow according to the absorption</span>
+<span class="sd">        parameters instead of decay. The reconstruction should then be</span>
+<span class="sd">        regularised by assigning a filter to medium.alpha_filter (this can be</span>
+<span class="sd">        created using getAlphaFilter).</span>
+
+<span class="sd">        Note: To run a simple photoacoustic image reconstruction example</span>
+<span class="sd">        using time reversal (that commits the &#39;inverse crime&#39; of using the</span>
+<span class="sd">        same numerical parameters and model for data simulation and image</span>
+<span class="sd">        reconstruction), the sensor_data returned from a k-Wave simulation</span>
+<span class="sd">        can be passed directly to sensor.time_reversal_boundary_data with the</span>
+<span class="sd">        input fields source.p0 and source.p removed or set to zero.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kgrid: kWaveGrid instance</span>
+<span class="sd">        medium: kWaveMedium instance</span>
+<span class="sd">        source: kWaveSource instance</span>
+<span class="sd">        sensor: kWaveSensor instance</span>
+<span class="sd">        **kwargs:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># start the timer and store the start time</span>
+    <span class="n">TicToc</span><span class="o">.</span><span class="n">tic</span><span class="p">()</span>
+
+    <span class="n">k_sim</span> <span class="o">=</span> <span class="n">kWaveSimulation</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">input_checking</span><span class="p">(</span><span class="s1">&#39;kspaceFirstOrder2D&#39;</span><span class="p">)</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID</span>
+    <span class="c1"># =========================================================================</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span>
+
+    <span class="c1"># interpolate the values of the density at the staggered grid locations</span>
+    <span class="c1"># where sgx = (x + dx/2, y, z), sgy = (x, y + dy/2, z), sgz = (x, y, z + dz/2)</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">use_sg</span><span class="p">:</span>
+        <span class="c1"># rho0 is heterogeneous and staggered grids are used</span>
+        <span class="n">grid_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx</span> <span class="o">=</span> <span class="n">interpolate2D</span><span class="p">(</span><span class="n">grid_points</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span><span class="p">,</span> <span class="p">[</span><span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">y</span><span class="p">])</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy</span> <span class="o">=</span> <span class="n">interpolate2D</span><span class="p">(</span><span class="n">grid_points</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span><span class="p">,</span> <span class="p">[</span><span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># rho0 is homogeneous or staggered grids are not used</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgz</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># invert rho0 so it doesn&#39;t have to be done each time step</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx_inv</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy_inv</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy</span>
+
+    <span class="c1"># clear unused variables if not using them in _saveToDisk</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx</span>
+        <span class="k">del</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># PREPARE DERIVATIVE AND PML OPERATORS</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="c1"># get the PML operators based on the reference sound speed and PML settings</span>
+    <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dt</span>
+    <span class="n">pml_x_alpha</span><span class="p">,</span> <span class="n">pml_y_alpha</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_x_alpha</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_y_alpha</span>
+    <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_y_size</span>
+    <span class="n">c_ref</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">c_ref</span>
+
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">pml_x</span>     <span class="o">=</span> <span class="n">get_pml</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_x_alpha</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">pml_x_sgx</span> <span class="o">=</span> <span class="n">get_pml</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_x_alpha</span><span class="p">,</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">use_sg</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">pml_y</span>     <span class="o">=</span> <span class="n">get_pml</span><span class="p">(</span><span class="n">Ny</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_y_alpha</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">pml_y_sgy</span> <span class="o">=</span> <span class="n">get_pml</span><span class="p">(</span><span class="n">Ny</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_y_alpha</span><span class="p">,</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">use_sg</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># define the k-space derivative operators, multiply by the staggered</span>
+    <span class="c1"># grid shift operators, and then re-order using ifftshift (the option</span>
+    <span class="c1"># flgs.use_sg exists for debugging)</span>
+    <span class="n">kx_vec</span><span class="p">,</span> <span class="n">ky_vec</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k_vec</span>
+    <span class="n">kx_vec</span><span class="p">,</span> <span class="n">ky_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kx_vec</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ky_vec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">use_sg</span><span class="p">:</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="o">*</span> <span class="n">dx</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="o">*</span> <span class="n">dx</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="o">*</span> <span class="n">dy</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="o">*</span> <span class="n">dy</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kx_vec</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky_vec</span> <span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="c1"># force the derivative and shift operators to be in the correct direction for use with BSXFUN</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_pos</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_pos</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_neg</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k_shift_neg</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># create k-space operators (the option flgs.use_kspace exists for debugging)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">use_kspace</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">(</span><span class="n">c_ref</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">k_sim</span><span class="o">.</span><span class="n">source_p</span> <span class="ow">and</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">p_mode</span> <span class="o">==</span> <span class="s1">&#39;additive&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">((</span><span class="n">k_sim</span><span class="o">.</span><span class="n">source_ux</span> <span class="ow">or</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_uy</span> <span class="ow">or</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_uz</span><span class="p">)</span> <span class="ow">and</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">u_mode</span> <span class="o">==</span> <span class="s1">&#39;additive&#39;</span><span class="p">):</span>
+            <span class="n">k_sim</span><span class="o">.</span><span class="n">source_kappa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">c_ref</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">kappa</span>          <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">source_kappa</span>   <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># SAVE DATA TO DISK FOR RUNNING SIMULATION EXTERNAL TO MATLAB</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="c1"># save to disk option for saving the input matrices to disk for running</span>
+    <span class="c1"># simulations using k-Wave++</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
+        <span class="c1"># store the pml size for resizing transducer object below</span>
+        <span class="n">retract_size</span> <span class="o">=</span> <span class="p">[[</span><span class="n">options</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_z_size</span><span class="p">]]</span>
+
+        <span class="c1"># run subscript to save files to disk</span>
+        <span class="n">save_to_disk_func</span><span class="p">(</span><span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+                          <span class="n">dotdict</span><span class="p">({</span>
+                              <span class="s1">&#39;ddx_k_shift_pos&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_pos</span><span class="p">,</span>
+                              <span class="s1">&#39;ddx_k_shift_neg&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">ddx_k_shift_neg</span><span class="p">,</span>
+                              <span class="s1">&#39;dt&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span>
+                              <span class="s1">&#39;c0&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">c0</span><span class="p">,</span>
+                              <span class="s1">&#39;c_ref&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">c_ref</span><span class="p">,</span>
+                              <span class="s1">&#39;rho0&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0</span><span class="p">,</span>
+                              <span class="s1">&#39;rho0_sgx&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgx</span><span class="p">,</span>
+                              <span class="s1">&#39;rho0_sgy&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgy</span><span class="p">,</span>
+                              <span class="s1">&#39;rho0_sgz&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">rho0_sgz</span><span class="p">,</span>
+                              <span class="s1">&#39;p_source_pos_index&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">p_source_pos_index</span><span class="p">,</span>
+                              <span class="s1">&#39;u_source_pos_index&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">u_source_pos_index</span><span class="p">,</span>
+                              <span class="s1">&#39;s_source_pos_index&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">s_source_pos_index</span><span class="p">,</span>
+                              <span class="s1">&#39;transducer_input_signal&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">transducer_input_signal</span><span class="p">,</span>
+                              <span class="s1">&#39;delay_mask&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">delay_mask</span><span class="p">,</span>
+                              <span class="s1">&#39;sensor_mask_index&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">sensor_mask_index</span><span class="p">,</span>
+                              <span class="s1">&#39;record&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">record</span><span class="p">,</span>
+                          <span class="p">}),</span>
+                          <span class="n">dotdict</span><span class="p">({</span>
+                            <span class="s1">&#39;source_p&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_p</span><span class="p">,</span>
+                            <span class="s1">&#39;source_p0&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_p0</span><span class="p">,</span>
+
+                            <span class="s1">&#39;source_ux&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_ux</span><span class="p">,</span>
+                            <span class="s1">&#39;source_uy&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_uy</span><span class="p">,</span>
+                            <span class="s1">&#39;source_uz&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_uz</span><span class="p">,</span>
+
+                            <span class="s1">&#39;source_sxx&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_sxx</span><span class="p">,</span>
+                            <span class="s1">&#39;source_syy&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_syy</span><span class="p">,</span>
+                            <span class="s1">&#39;source_szz&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_szz</span><span class="p">,</span>
+                            <span class="s1">&#39;source_sxy&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_sxy</span><span class="p">,</span>
+                            <span class="s1">&#39;source_sxz&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_sxz</span><span class="p">,</span>
+                            <span class="s1">&#39;source_syz&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">source_syz</span><span class="p">,</span>
+
+                            <span class="s1">&#39;transducer_source&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">transducer_source</span><span class="p">,</span>
+                            <span class="s1">&#39;nonuniform_grid&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">,</span>
+                            <span class="s1">&#39;elastic_code&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span>
+                            <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
+                            <span class="s1">&#39;cuboid_corners&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">cuboid_corners</span><span class="p">,</span>
+                        <span class="p">}))</span>
+
+        <span class="c1"># run subscript to resize the transducer object if the grid has been expanded</span>
+        <span class="n">retract_transducer_grid_size</span><span class="p">(</span><span class="n">k_sim</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="p">,</span> <span class="n">retract_size</span><span class="p">,</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">)</span>
+
+        <span class="c1"># exit matlab computation if required</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">save_to_disk_exit</span><span class="p">:</span>
+            <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
