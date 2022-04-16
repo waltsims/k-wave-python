@@ -1,13 +1,12 @@
-import numpy as np
 import scipy.io
 
+from examples.example_utils import download_from_gdrive_if_does_not_exist
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
 from tests import setup_test
 from tempfile import gettempdir
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *
-from tests.diff_utils import compare_against_ref
 from kwave.kmedium import kWaveMedium
 
 
@@ -124,8 +123,11 @@ if __name__ == '__main__':
     # define a large image size to move across
     number_scan_lines = 96
 
-    phantom_path = '/Users/faridyagubbayli/Work/pumba_linux/november/18_19_nov/phantom_data.mat'
-    phantom = scipy.io.loadmat(phantom_path)
+    phantom_data_path = 'phantom_data.mat'
+    PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
+    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
+
+    phantom = scipy.io.loadmat(phantom_data_path)
     sound_speed_map     = phantom['sound_speed_map']
     density_map         = phantom['density_map']
 
@@ -149,7 +151,7 @@ if __name__ == '__main__':
 
         # loop through the scan lines
         for scan_line_index in range(1, number_scan_lines + 1):
-        # for scan_line_index in range(1, 10):
+            # for scan_line_index in range(1, 10):
             # update the command line status
             print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
 
@@ -197,10 +199,14 @@ if __name__ == '__main__':
             medium_position = medium_position + transducer.element_width
 
         simulation_data = np.stack(simulation_data, axis=0)
-        scipy.io.savemat('sensor_data_py.mat', {'sensor_data_all_lines': simulation_data})
+        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
-        simulation_data = scipy.io.loadmat('sensor_data_py.mat')['sensor_data_all_lines']
+        SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
+        sensor_data_path = 'sensor_data.mat'
+        download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
+
+        simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
         # temporary fix for dimensionality
         simulation_data = simulation_data[None, :]
 
