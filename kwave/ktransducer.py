@@ -655,4 +655,46 @@ class NotATransducer(kSensor):
     #
     #     # form the a-line summing across the elements
     #     line = sum(sensor_data)
-    #     return line
+    #     return lin
+
+    def combine_sensor_data(self, sensor_data):
+        # check the data is the correct size
+        if sensor_data.shape[0] != (self.number_active_elements * self.transducer.element_width * self.transducer.element_length):
+            raise ValueError('The number of time series in the input sensor_data must match the number of grid points in the active tranducer elements.')
+
+        # get index of which element each time series belongs to
+        # Tricky things going on here
+        ind = self.indexed_active_elements_mask[0].T[self.indexed_active_elements_mask[0].T > 0]
+
+        # create empty output
+        sensor_data_sum = np.zeros((int(self.number_active_elements), sensor_data.shape[1]))
+
+        # check if an elevation focus is set
+        if np.isinf(self.elevation_focus_distance):
+
+            raise NotImplementedError
+
+            # # loop over time series and sum
+            # for ii = 1:length(ind)
+            #     sensor_data_sum(ind(ii), :) = sensor_data_sum(ind(ii), :) + sensor_data(ii, :);
+            # end
+
+        else:
+
+            # get the elevation delay for each grid point of each
+            # active transducer element (this is given in units of grid
+            # points)
+            dm = self.delay_mask(2)
+            # dm = dm[self.active_elements_mask != 0]
+            dm = dm[0].T[self.active_elements_mask[0].T != 0]
+            dm = dm.astype(np.int32)
+
+            # loop over time series, shift and sum
+            for ii in range(len(ind)):
+                # FARID: something nasty can be here
+                end = -dm[ii] if dm[ii] != 0 else sensor_data_sum.shape[-1]
+                sensor_data_sum[ind[ii]-1, 0:end] = sensor_data_sum[ind[ii]-1, 0:end] + sensor_data[ii, dm[ii]:]
+
+        # divide by number of time series in each element
+        sensor_data_sum = sensor_data_sum * (1 / (self.transducer.element_width * self.transducer.element_length))
+        return sensor_data_sum
