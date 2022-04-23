@@ -196,8 +196,9 @@ if __name__ == '__main__':
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
         simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
-        # temporary fix for dimensionality
-        simulation_data = simulation_data[None, :]
+
+    # temporary fix for dimensionality
+    simulation_data = simulation_data[None, :]
 
     sampling_frequency = 2.772000000000000e+07
     prf = 10000
