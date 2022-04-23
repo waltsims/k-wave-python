@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = False
+    RUN_SIMULATION = True
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
@@ -168,32 +168,21 @@ if __name__ == '__main__':
                 'PMLSize': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
                 'DataCast': DATA_CAST,
                 'DataRecast': True,
-                'SaveToDisk': input_file_full_path
+                'SaveToDisk': input_file_full_path,
+                'SaveToDiskExit': False,
             }
 
             # DEFINE
 
             # run the simulation
-            kspaceFirstOrder3DC(**{
+            sensor_data = kspaceFirstOrder3DC(**{
                 'medium': medium,
                 'kgrid': kgrid,
                 'source': not_transducer,
                 'sensor': not_transducer,
                 **input_args
             })
-
-            # RUN
-            input_filename = f'/tmp/example_input_{scan_line_index}.h5'
-            output_filename = f'/tmp/example_output_{scan_line_index}.h5'
-
-            os.system(f'export LD_LIBRARY_PATH=; {system_string} cd {binary_path}; '
-                      f'./{binary_name} -i {input_filename} -o {output_filename} {options_string}')
-
-            # LOAD
-            with h5py.File(output_filename, 'r') as hf:
-                sensor_data = np.array(hf['p'])[0].T
-                sensor_data = not_transducer.combine_sensor_data(sensor_data)
-                simulation_data.append(sensor_data)
+            simulation_data.append(sensor_data)
 
             # update medium position
             medium_position = medium_position + transducer.element_width
