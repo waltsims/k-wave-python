@@ -12,7 +12,7 @@ pip install -r requirements.txt
 ```
 
 ## Getting started
-![](/Users/waltersimson/git/k-wave-python/docs/images/example_bmode.png)
+![](docs/images/example_bmode.png)
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
