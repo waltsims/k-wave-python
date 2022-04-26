@@ -3,7 +3,6 @@ import scipy.io
 from example_utils import download_from_gdrive_if_does_not_exist
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
-from tests import setup_test
 from tempfile import gettempdir
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *

@@ -8,15 +8,16 @@ The documentation can be found [here](http://waltersimson.com/k-wave-python/)
 ```commandline
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-pip install -r requirements.txt
+python setup.py install
 ```
-
+jk
 ## Getting started
 ![](docs/images/example_bmode.png)
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
 ```bash
+pip install -r example_requirements.txt
 python3 examples/bmode_reconstruction_example.py
 ```
 
