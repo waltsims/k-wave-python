@@ -281,7 +281,6 @@ def kspaceFirstOrderC():
                 kwargs['SaveToDisk'] = input_filename
                 kwargs['SaveToDiskExit'] = True
             res = func(kgrid=kgrid, medium=medium, source=source, sensor=sensor, **args, **kwargs)
-            print('Command:', options_string)
             return res
         return wrapper
     return decorator

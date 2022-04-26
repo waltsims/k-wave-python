@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 from uff import UFF, ChannelData
 from matplotlib import pyplot as plt
 import kwave.reconstruction.tools as tools
-from kwave.reconstruction.add_position import AddPosition
+from uff.position import Position
 from kwave.reconstruction.shifted_transform import ShiftedTransform
 
 
@@ -81,9 +81,9 @@ def beamform(channel_data: ChannelData):
             element_number = element_number[0]  # Changed by Farid
 
             # todo: why are element positions saved as transformations?
-            element_position = AddPosition.deserialize(
+            element_position = Position.deserialize(
                 probe.element[element_number - 1].transform.translation.serialize())
-            element_location = AddPosition.deserialize(transform(element_position).serialize())
+            element_location = Position.deserialize(transform(element_position).serialize())
 
             pixel_element_lateral_distance = abs(pixel_positions[:, 0] - element_location[0])
             # print(pixel_element_lateral_distance)

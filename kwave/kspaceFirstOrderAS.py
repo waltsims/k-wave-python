@@ -1,3 +1,5 @@
+import tempfile
+
 from kwave.executor import Executor
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.kspaceFirstOrder import *
@@ -311,7 +313,7 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
             return
 
         input_filename = k_sim.options.save_to_disk
-        output_filename = f'/tmp/output.h5'
+        output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
 
         executor = Executor(use_gpu_if_possible=True)
         sensor_data = executor.run_simulation(input_filename, output_filename, options='--p_raw')

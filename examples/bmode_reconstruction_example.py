@@ -1,6 +1,6 @@
 import scipy.io
 
-from examples.example_utils import download_from_gdrive_if_does_not_exist
+from example_utils import download_from_gdrive_if_does_not_exist
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
 from tests import setup_test
@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = True
+    RUN_SIMULATION = False
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
@@ -140,11 +140,6 @@ if __name__ == '__main__':
 
         # set medium position
         medium_position = 0
-
-        binary_path = '/data/code/Work/k-wave-toolbox-version-1.3/k-Wave/binaries/'
-        system_string = 'OMP_PLACES=cores;  OMP_PROC_BIND=SPREAD; '
-        binary_name = 'kspaceFirstOrder-CUDA'
-        options_string = ' --p_raw'
 
         # preallocate the storage
         simulation_data = []
