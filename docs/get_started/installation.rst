@@ -7,4 +7,4 @@ to install run:
 
     git clone https://github.com/waltsims/k-wave-python
     cd k-wave-python
-    pip install -r requirements.txt   
+    python setup.py install

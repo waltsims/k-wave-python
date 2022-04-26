@@ -10,7 +10,7 @@ git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
 python setup.py install
 ```
-jk
+
 ## Getting started
 ![](docs/images/example_bmode.png)
 

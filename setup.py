@@ -11,5 +11,5 @@ setup(name='k-Wave-python',
       maintainer='Walter Simson',
       maintainer_email='walter.simson@tum.de',
       url='http://www.k-wave.org/',
-      packages=['kwave', 'kwave.utils', 'kwave.kWaveSimulation_helper'],
+      packages=['kwave', 'kwave.utils','kwave.reconstruction', 'kwave.kWaveSimulation_helper'],
       )

@@ -291,7 +291,7 @@ def makePixelMap(Nx, Ny, Nz=None, *args):
     %     parameter 'Shift' can be used to control the location of the
     %     centerpoint.
     %
-    %     Examples for a 2D pixel map:
+    %     examples for a 2D pixel map:
     %
     %     Single pixel origin size for odd and even (with 'Shift' = [1 1] and
     %     [0 0], respectively) grid sizes:
