@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>First Steps &mdash; k-Wave-python  documentation</title>
+  <title>B-mode Reconstruction &mdash; k-Wave-python  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sphinx-toolbox-code.css" type="text/css" />
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Contribution" href="contrib.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="kWaveGrid" href="../kgrid.html" />
+    <link rel="prev" title="License" href="../get_started/license.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,11 +38,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">First Steps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contrib.html">Contribution</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">B-mode Reconstruction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul>
@@ -78,9 +81,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>First Steps</li>
+      <li>B-mode Reconstruction</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/get_started/first_steps.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/examples/bmode.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -88,28 +91,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="first-steps">
-<h1>First Steps<a class="headerlink" href="#first-steps" title="Permalink to this headline"></a></h1>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="p">;</span>
-<span class="nb">export</span> <span class="nv">OMP_PLACES</span><span class="o">=</span>cores<span class="p">;</span>
-<span class="nb">export</span> <span class="nv">OMP_PROC_BIND</span><span class="o">=</span>SPREAD<span class="p">;</span>
-
-<span class="nv">binary_name</span><span class="o">=</span>kspaceFirstOrder-CUDA
-
-&lt;PATH_TO_KWAVE_BINARIES_FOLDER&gt;/<span class="nv">$binary_name</span> <span class="se">\</span>
-    -i &lt;input_filename&gt; <span class="se">\</span>
-    -o &lt;output_filename&gt; <span class="se">\</span>
-    --p_raw
+  <div class="section" id="b-mode-reconstruction">
+<h1>B-mode Reconstruction<a class="headerlink" href="#b-mode-reconstruction" title="Permalink to this headline"></a></h1>
+<p>After installation, run the B-mode reconstruction example in the <cite>examples</cite> directory of the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r example_requirements.txt
+python3 examples/bmode_reconstruction_example.py
 </pre></div>
 </div>
+<dl class="simple">
+<dt>This example file steps through the process of:</dt><dd><ol class="arabic simple">
+<li><p>Generating a simulation medium</p></li>
+<li><p>Configuring a transducer</p></li>
+<li><p>Running the simulation</p></li>
+<li><p>Reconstructing the simulation</p></li>
+</ol>
+</dd>
+</dl>
+<img alt="../_images/example_bmode.png" src="../_images/example_bmode.png" />
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="contrib.html" class="btn btn-neutral float-right" title="Contribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../get_started/license.html" class="btn btn-neutral float-left" title="License" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../kgrid.html" class="btn btn-neutral float-right" title="kWaveGrid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

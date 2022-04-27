@@ -38,9 +38,12 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bmode.html">B-mode Reconstruction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul>
@@ -87,7 +90,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for kwave.kspaceFirstOrderAS</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
+<span></span><span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">kwave.executor</span> <span class="kn">import</span> <span class="n">Executor</span>
+<span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
 <span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation</span> <span class="kn">import</span> <span class="n">kWaveSimulation</span>
 <span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="o">*</span>
@@ -396,7 +402,14 @@
 
         <span class="c1"># exit matlab computation if required</span>
         <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">save_to_disk_exit</span><span class="p">:</span>
-            <span class="k">return</span></div>
+            <span class="k">return</span>
+
+        <span class="n">input_filename</span> <span class="o">=</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span>
+        <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;output.h5&#39;</span><span class="p">)</span>
+
+        <span class="n">executor</span> <span class="o">=</span> <span class="n">Executor</span><span class="p">(</span><span class="n">use_gpu_if_possible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s1">&#39;--p_raw&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">combine_sensor_data</span><span class="p">(</span><span class="n">sensor_data</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

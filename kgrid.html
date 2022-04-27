@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="kMedium" href="kmedium.html" />
-    <link rel="prev" title="License" href="get_started/license.html" /> 
+    <link rel="prev" title="B-mode Reconstruction" href="examples/bmode.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,9 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="get_started/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_started/first_steps.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/bmode.html">B-mode Reconstruction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul class="current">
@@ -92,7 +95,7 @@
 <span id="kwavegrid"></span><h1>kWaveGrid<a class="headerlink" href="#module-kwave.kgrid" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">kwave.kgrid.</span></span><span class="sig-name descname"><span class="pre">kWaveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.kgrid.</span></span><span class="sig-name descname"><span class="pre">kWaveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid" title="Permalink to this definition"></a></dt>
 <dd><p>kWaveGrid is the grid class used across the k-Wave Toolbox. An object
 of the kWaveGrid class contains the grid coordinates and wavenumber
 matrices used within the simulation and reconstruction functions in
@@ -186,7 +189,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.makeDTTDim">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDTTDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDTTDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDTTDim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">makeDTTDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtt_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDTTDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDTTDim" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Create the DTT grid parameters for a single spatial direction</p>
 </div></blockquote>
@@ -204,7 +207,7 @@ the assumed input symmetry of the input function, where:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.makeDim">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">makeDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">makeDim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid.makeDim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid.makeDim" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Create the grid parameters for a single spatial direction</p>
 </div></blockquote>
@@ -295,19 +298,19 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.Nx">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Nx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Nx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Nx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Nx" title="Permalink to this definition"></a></dt>
 <dd><p>grid size in x-direction [grid points]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.Ny">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Ny</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Ny" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ny</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Ny" title="Permalink to this definition"></a></dt>
 <dd><p>grid size in y-direction [grid points]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.Nz">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Nz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Nz" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Nz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.Nz" title="Permalink to this definition"></a></dt>
 <dd><p>grid size in z-direction [grid points]</p>
 </dd></dl>
 
@@ -337,19 +340,19 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.dx">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dx" title="Permalink to this definition"></a></dt>
 <dd><p>grid point spacing in x-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.dy">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dy" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dy" title="Permalink to this definition"></a></dt>
 <dd><p>grid point spacing in y-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.dz">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dz" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.dz" title="Permalink to this definition"></a></dt>
 <dd><p>grid point spacing in z-direction [m]</p>
 </dd></dl>
 
@@ -361,7 +364,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.k_max">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">k_max</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_max" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_max</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_max" title="Permalink to this definition"></a></dt>
 <dd><p>Maximum supported spatial frequency in the 3 directions [rad/m]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -372,7 +375,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.k_max_all">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">k_max_all</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_max_all" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_max_all</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.k_max_all" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Maximum supported spatial frequency in all directions [rad/m]</dt><dd><p>Originally k_max in kWave.kWaveGrid!</p>
 </dd>
@@ -392,7 +395,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kx">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">kx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kx</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kx" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -403,7 +406,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.ky">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ky</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.ky" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ky</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.ky" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -414,7 +417,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.kz">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">kz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kz" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kz</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.kz" title="Permalink to this definition"></a></dt>
 <dd><p># Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -443,7 +446,7 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.size">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.size" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.size" title="Permalink to this definition"></a></dt>
 <dd><p>Size of grid in the all directions [m]</p>
 </dd></dl>
 
@@ -455,31 +458,31 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.t_array">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">t_array</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.t_array" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_array</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.t_array" title="Permalink to this definition"></a></dt>
 <dd><p>time array [s]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.total_grid_points">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">total_grid_points</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#kwave.kgrid.kWaveGrid.total_grid_points" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_grid_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#kwave.kgrid.kWaveGrid.total_grid_points" title="Permalink to this definition"></a></dt>
 <dd><p>Total number of grid points (equal to Nx * Ny * Nz)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.x">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.x" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.x" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.x_vec">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.x_vec" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.x_vec" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x 1 vector of the grid coordinates in the x-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.xn">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.xn" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.xn" title="Permalink to this definition"></a></dt>
 <dd><p>3D plaid non-uniform spatial grids</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -490,25 +493,25 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.y">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.y_size">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">y_size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y_size" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y_size" title="Permalink to this definition"></a></dt>
 <dd><p>Size of grid in the y-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.y_vec">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">y_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y_vec" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.y_vec" title="Permalink to this definition"></a></dt>
 <dd><p>Ny x 1 vector of the grid coordinates in the y-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.yn">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">yn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.yn" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.yn" title="Permalink to this definition"></a></dt>
 <dd><p>3D plaid non-uniform spatial grids</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -519,25 +522,25 @@ based on the minimum value.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.z">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z" title="Permalink to this definition"></a></dt>
 <dd><p>Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.z_size">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">z_size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z_size" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_size</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z_size" title="Permalink to this definition"></a></dt>
 <dd><p>Size of grid in the z-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.z_vec">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">z_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z_vec" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_vec</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.z_vec" title="Permalink to this definition"></a></dt>
 <dd><p>Nz x 1 vector of the grid coordinates in the z-direction [m]</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.zn">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">zn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.zn" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zn</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.zn" title="Permalink to this definition"></a></dt>
 <dd><p>3D plaid non-uniform spatial grids
 :returns: plaid zn matrix</p>
 </dd></dl>
@@ -550,7 +553,7 @@ based on the minimum value.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="get_started/license.html" class="btn btn-neutral float-left" title="License" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples/bmode.html" class="btn btn-neutral float-left" title="B-mode Reconstruction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="kmedium.html" class="btn btn-neutral float-right" title="kMedium" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

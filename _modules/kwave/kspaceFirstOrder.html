@@ -38,9 +38,12 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../get_started/first_steps.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/contrib.html">Contribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bmode.html">B-mode Reconstruction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul>
@@ -370,7 +373,6 @@
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDisk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_filename</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDiskExit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Command:&#39;</span><span class="p">,</span> <span class="n">options_string</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">res</span>
         <span class="k">return</span> <span class="n">wrapper</span>
     <span class="k">return</span> <span class="n">decorator</span></div>
