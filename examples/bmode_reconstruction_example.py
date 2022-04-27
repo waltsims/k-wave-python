@@ -20,6 +20,7 @@ if __name__ == '__main__':
     # =========================================================================
     # DEFINE THE K-WAVE GRID
     # =========================================================================
+    print("Setting up the k-wave grid...")
 
     # set the size of the perfectly matched layer (PML)
     PML_X_SIZE = 20            # [grid points]
@@ -45,7 +46,6 @@ if __name__ == '__main__':
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
     # =========================================================================
-
     # define the properties of the propagation medium
     c0 = 1540
     rho0 = 1000
@@ -64,6 +64,7 @@ if __name__ == '__main__':
     # =========================================================================
     # DEFINE THE INPUT SIGNAL
     # =========================================================================
+    print("Defining the input signal...")
 
     # define properties of the input signal
     source_strength = 1e6          # [Pa]
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     # =========================================================================
     # DEFINE THE ULTRASOUND TRANSDUCER
     # =========================================================================
+    print("Setting up the transducer configuration...")
 
     # physical properties of the transducer
     transducer = dotdict()
@@ -122,6 +124,7 @@ if __name__ == '__main__':
     # define a large image size to move across
     number_scan_lines = 96
 
+    print("Fetching phantom data...")
     phantom_data_path = 'phantom_data.mat'
     PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
     download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
@@ -133,9 +136,10 @@ if __name__ == '__main__':
     # =========================================================================
     # RUN THE SIMULATION
     # =========================================================================
-
+    print(f"RUN_SIMULATION set to {RUN_SIMULATION}")
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:
+        print("Running simulation locally...")
 
         # set medium position
         medium_position = 0
@@ -166,8 +170,6 @@ if __name__ == '__main__':
                 'SaveToDiskExit': False,
             }
 
-            # DEFINE
-
             # run the simulation
             sensor_data = kspaceFirstOrder3DC(**{
                 'medium': medium,
@@ -185,6 +187,7 @@ if __name__ == '__main__':
         scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
+        print("Downloading data from remote server...")
         SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
         sensor_data_path = 'sensor_data.mat'
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
@@ -200,4 +203,5 @@ if __name__ == '__main__':
     channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
                                       sampling_frequency, prf, focal_depth)
 
+    print("Beamforming channel data and reconstructing the image...")
     beamform(channel_data)
