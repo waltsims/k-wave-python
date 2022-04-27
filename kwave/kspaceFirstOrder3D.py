@@ -1,5 +1,6 @@
-from numpy.fft import ifftshift
+import tempfile
 
+from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.kspaceFirstOrder import *
@@ -88,8 +89,8 @@ def kspaceFirstOrder3DC(**kwargs):
 
     """
     # generate the input file and save to disk
-    kspaceFirstOrder3D(**kwargs)
-    return kwargs['SaveToDisk']
+    sensor_data = kspaceFirstOrder3D(**kwargs)
+    return sensor_data
 
 
 def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
@@ -404,6 +405,9 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
         if options.save_to_disk_exit:
             return
 
-    # TODO => write it as a decorator
-    # run the CPP code
-    # load the generated data
+        input_filename = k_sim.options.save_to_disk
+        output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
+
+        executor = Executor(use_gpu_if_possible=True)
+        sensor_data = executor.run_simulation(input_filename, output_filename, options='--p_raw')
+        return k_sim.sensor.combine_sensor_data(sensor_data)

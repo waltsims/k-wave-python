@@ -8,29 +8,25 @@ The documentation can be found [here](http://waltersimson.com/k-wave-python/)
 ```commandline
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-pip install -r requirements.txt
+python setup.py install
 ```
-
 
 ## Getting started
+![](docs/images/example_bmode.png)
 
-Currently, this project creates the HDF5 file that can be used to run
-the accelerated kWave binaries.
+After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
-```commandline
-export LD_LIBRARY_PATH=;
-export OMP_PLACES=cores;  
-export OMP_PROC_BIND=SPREAD;
-
-binary_name=kspaceFirstOrder-CUDA
-
-<PATH_TO_KWAVE_BINARIES_FOLDER>/$binary_name \
-    -i <input_filename> \
-    -o <output_filename> \
-    --p_raw
+```bash
+pip install -r example_requirements.txt
+python3 examples/bmode_reconstruction_example.py
 ```
 
+This example file steps through the process of:
+ 1. Generating a simulation medium
+ 2. Configuring a transducer
+ 3. Running the simulation
+ 4. Reconstructing the simulation
 
 ## Development
 
-If your're enjoying k-Wave-pyhton and want to contribute, development instructions can befound [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
+If your're enjoying k-Wave-python and want to contribute, development instructions can be found [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
