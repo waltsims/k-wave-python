@@ -5,7 +5,7 @@ project_dir_in_container='/k-wave-python'
 docker build -t $image_name .
 
 docker run -it \
-  --volume $(pwd):$project_dir_in_container \  # attach project folder into container
-  --workdir $project_dir_in_container \        # set working directory to project folder
+  --volume $(pwd):$project_dir_in_container \
+  --workdir $project_dir_in_container \
   $image_name \
   pytest    # run pytest
