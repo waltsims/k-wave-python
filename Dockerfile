@@ -5,3 +5,4 @@ RUN apt-get install -y gfortran libopenblas-dev liblapack-dev libgl1-mesa-glx li
 RUN pip install --upgrade pip
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN pip install pytest
