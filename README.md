@@ -17,8 +17,6 @@ If you would like to get involved, open an issue letting us know, or message us 
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
-### Requirements
-
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 pip install -r example_requirements.txt
@@ -31,6 +29,7 @@ This example file steps through the process of:
  3. Running the simulation
  4. Reconstructing the simulation
 
+### Requirements
 This example expects an NVIDIA GPU by default to simulate with k-Wave.
 
 To test the reconstruction on a machine without a GPU, set `RUN_SIMULATION` [on line 14 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L18) to `False` and the exmaple will run with pre-computed data.
