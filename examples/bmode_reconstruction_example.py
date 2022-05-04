@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = False
+    RUN_SIMULATION = True
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
