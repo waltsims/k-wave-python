@@ -1,6 +1,6 @@
 # k-Wave-python
 
-This project is a Python interface to the [k-Wave simulation binaries](http://www.k-wave.org/download.php).
+This project is a Python interface to the pre-compiled v1.3 of [k-Wave simulation binaries](http://www.k-wave.org/download.php) which support NVIDIA sm 3.0 to sm 7.5.
 
 The documentation for this Python interface is compiled in a Read the Docs page [here](http://waltersimson.com/k-wave-python/)
 ## Installation
