@@ -17,7 +17,7 @@ If you would like to get involved, open an issue letting us know, or message us 
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
-### Reuirements
+### Requirements
 
 ```bash
 git clone https://github.com/waltsims/k-wave-python
