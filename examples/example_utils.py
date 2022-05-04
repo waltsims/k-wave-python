@@ -9,7 +9,7 @@ def download_from_gdrive(file_id, output_path):
         raise AssertionError('This example requires `gdown` to be installed. '
                              'Please install using `pip install gdown`')
 
-    url = f'https://drive.google.com/uc?id={file_id}'
+    url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
     gdown.download(url, output_path, quiet=False)
 
 
