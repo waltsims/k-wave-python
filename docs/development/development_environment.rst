@@ -26,6 +26,7 @@ You can now build the package via:
 Or install the package locally via:
 
 .. code-block:: bash
+
     python3 setup.py install
 
 If you have any issues or questions, please join the `k-Wave-python Development Telegram group <https://t.me/+ILL4yGgcX0A2Y2Y6>`_ to discuss. We look forward to interacting with you.
