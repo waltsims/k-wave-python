@@ -21,7 +21,7 @@ def scale_time(seconds):
     # calculate hours, minutes, and seconds
     hours = floor(seconds / (60 * 60))
     seconds = seconds - hours * 60 * 60
-    minutes = floor( seconds / 60 )
+    minutes = floor(seconds / 60)
     seconds = seconds - minutes * 60
 
     # write out as a string, to keep the output manageable, only the largest
@@ -122,8 +122,104 @@ def scale_SI(x):
 
 
 def db2neper(alpha, y=1):
+    """
+    DB2NEPER Convert decibels to nepers.
+
+    DESCRIPTION:
+    db2neper converts an attenuation coefficient in units of
+    dB / (MHz ^ y cm) to units of Nepers / ((rad / s) ^ y m).
+
+    USAGE:
+    alpha = db2neper(alpha)
+    alpha = db2neper(alpha, y)
+
+    INPUTS:
+    alpha - attenuation in dB / (MHz ^ y cm)
+
+    OPTIONAL INPUTS:
+    y - power law exponent(default=1)
+
+    OUTPUTS:
+    alpha - attenuation in Nepers / ((rad / s) ^ y m)
+
+    ABOUT:
+    author - Bradley Treeby
+    date - 27 th March 2009
+    last update - 4 th June 2017
+
+    This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
+    Copyright(C) 2009 - 2017 Bradley Treeby
+
+    See also neper2db
+
+    This file is part of k - Wave.k - Wave is free software: you can
+    redistribute it and / or modify it under the terms of the GNU Lesser
+    General Public License as published by the Free Software Foundation,
+    either version 3 of the License, or (at your option) any later version.
+
+    k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
+    more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
+
+    set default y value if not given by user
+    """
+
     # calculate conversion
-    alpha = 100 * alpha * ((1e-6 / (2*math.pi))**y) / (20 * math.log10(math.exp(1)))
+    alpha = 100 * alpha * (1e-6 / (2 * math.pi)) ** y / (20 * np.log10(np.exp(1)))
+    return alpha
+
+
+def neper2db(alpha, y=1):
+    """
+    NEPER2DB Convert nepers to decibels.
+
+    DESCRIPTION:
+    % neper2db converts an attenuation coefficient in units of
+    % Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
+    %
+    % USAGE:
+    % alpha = neper2db(alpha)
+    % alpha = neper2db(alpha, y)
+    %
+    % INPUTS:
+    % alpha - attenuation in Nepers / ((rad / s) ^ y m)
+    %
+    % OPTIONAL INPUTS:
+    % y - power law exponent(default=1)
+    %
+    % OUTPUTS:
+    % alpha - attenuation in dB / (MHz ^ y cm)
+    %
+    % ABOUT:
+    % author - Bradley Treeby
+    % date - 3 rd December 2009
+    % last update - 7 th June 2017
+    %
+    % This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
+    % Copyright(C) 2009 - 2017 Bradley Treeby
+    %
+    % See also db2neper
+
+    % This file is part of k - Wave.k - Wave is free software: you can
+    % redistribute it and / or modify it under the terms of the GNU Lesser
+    % General Public License as published by the Free Software Foundation,
+    % either version 3 of the License, or (at your option) any later version.
+    %
+    % k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
+    % WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    % FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
+        % more details.
+    %
+    % You should have received a copy of the GNU Lesser General Public License
+    % along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
+    """
+
+    # calculate conversion
+    alpha = 20 * math.log10(math.exp(1)) * alpha * (2 * math.pi * 1e6) ** y / 100
     return alpha
 
 

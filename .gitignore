@@ -6,9 +6,9 @@ test_local.sh
 tests/reference_outputs
 /.coverage
 /docs/_build/
-build/
 Pipfile.lock
 kwave/bin/windows
 kwave/bin/linux
 /k_Wave_python.egg-info/
 *.mat
+/build/

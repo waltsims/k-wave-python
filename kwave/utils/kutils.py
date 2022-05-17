@@ -76,7 +76,7 @@ def check_stability(kgrid, medium):
 
         else:
             # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
-            dt_stability_limit = 2/(c_ref * kmax) * np.asin(c_ref/medium.sound_speed.max())
+            dt_stability_limit = 2 / (c_ref * kmax) * np.asin(c_ref / medium.sound_speed.max())
 
     else:
 
@@ -89,13 +89,14 @@ def check_stability(kgrid, medium):
 
         # calculate the absorption constant
         if medium.alpha_mode == 'no_absorption':
-            absorb_tau = -2 * medium.alpha_coeff * medium.sound_speed**(medium.alpha_power - 1)
+            absorb_tau = -2 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1)
         else:
             absorb_tau = np.array([0])
 
         # calculate the dispersion constant
         if medium.alpha_mode == 'no_dispersion':
-            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed**medium.alpha_power * np.tan(np.pi * medium.alpha_power / 2)
+            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed ** medium.alpha_power * np.tan(
+                np.pi * medium.alpha_power / 2)
         else:
             absorb_eta = np.array([0])
 
@@ -104,9 +105,9 @@ def check_stability(kgrid, medium):
         # absorb_tau and absorb_eta are negative quantities)
         medium.sound_speed = np.atleast_1d(medium.sound_speed)
 
-        temp1 = medium.sound_speed.max() * absorb_tau.min() * kmax**(medium.alpha_power - 1)
-        temp2 = 1 - absorb_eta.min() * kmax**(medium.alpha_power - 1)
-        dt_estimate = (temp1 + np.sqrt(temp1**2 + 4 * temp2)) / (temp2 * kmax * medium.sound_speed.max())
+        temp1 = medium.sound_speed.max() * absorb_tau.min() * kmax ** (medium.alpha_power - 1)
+        temp2 = 1 - absorb_eta.min() * kmax ** (medium.alpha_power - 1)
+        dt_estimate = (temp1 + np.sqrt(temp1 ** 2 + 4 * temp2)) / (temp2 * kmax * medium.sound_speed.max())
 
         # use a fixed point iteration to find the correct timestep, assuming
         # now that kappa = kappa(dt), using the previous estimate as a starting
@@ -117,10 +118,11 @@ def check_stability(kgrid, medium):
             return sinc(c_ref * kmax * dt / 2)
 
         def temp3(dt):
-            return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax**(medium.alpha_power - 1)
+            return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax ** (medium.alpha_power - 1)
 
         def func_to_solve(dt):
-            return (temp3(dt) + np.sqrt((temp3(dt))**2 + 4 * temp2)) / (temp2 * kmax * kappa(dt) * medium.sound_speed.max())
+            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2 + 4 * temp2)) / (
+                    temp2 * kmax * kappa(dt) * medium.sound_speed.max())
 
         # run the fixed point iteration
         dt_stability_limit = dt_estimate
@@ -130,6 +132,41 @@ def check_stability(kgrid, medium):
             dt_stability_limit = func_to_solve(dt_stability_limit)
 
     return dt_stability_limit
+
+
+def add_noise(signal, snr, mode="rms"):
+    """
+
+    Args:
+        signal (np.array):      input signal
+        snr (float):            desired signal snr (signal-to-noise ratio) in decibels after adding noise
+        mode (str):             'rms' (default) or 'peak'
+
+    Returns:
+        signal (np.array):      signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.
+
+    """
+    if mode == "rms":
+        reference = np.sqrt(np.mean(signal ** 2))
+    elif mode == "peak":
+        reference = max(signal)
+    else:
+        raise ValueError(f"Unknown parameter '{mode}' for input mode.")
+
+    # calculate the standard deviation of the Gaussian noise
+    std_dev = reference / (10 ** (snr / 20))
+
+    # calculate noise
+    noise = std_dev * np.random.randn(signal.size)
+
+    # check the snr
+    noise_rms = np.sqrt(np.mean(noise ** 2))
+    snr = 20. * np.log10(reference / noise_rms)
+
+    # add noise to the recorded sensor data
+    signal = signal + noise
+
+    return signal
 
 
 def get_win(N, type_, *args):
@@ -142,6 +179,7 @@ def get_win(N, type_, *args):
         %     input 'Rotation' to true. The coherent gain of the window can also be
         %     returned.
     Args:
+        type_:
         N: - number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D
         type: - window type. Supported values are
         %                   'Bartlett'
@@ -251,7 +289,7 @@ def get_win(N, type_, *args):
                 param = args[input_index + 1]
                 if param > param_ub:
                     param = param_ub
-                elif param <  param_lb:
+                elif param < param_lb:
                     param = param_lb
             elif args[input_index] == 'Rotation':
                 rotation = args[input_index + 1]
@@ -261,7 +299,8 @@ def get_win(N, type_, *args):
                 symmetric = args[input_index + 1]
 
                 # check type
-                assert isinstance(symmetric, bool) or symmetric.dtype == bool, 'Optional input Symmetric must be Boolean.'
+                assert isinstance(symmetric,
+                                  bool) or symmetric.dtype == bool, 'Optional input Symmetric must be Boolean.'
 
                 # check size
                 assert len(symmetric) in [1, len(N)], 'Optional input Symmetric must have 1 or numel(N) elements.'
@@ -292,35 +331,35 @@ def get_win(N, type_, *args):
         n = np.arange(0, N)
 
         if type_ == 'Bartlett':
-            win = (2 / (N - 1) * ( (N - 1) / 2 - abs(n - (N - 1) / 2))).T
+            win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Bartlett-Hanning':
-            win = (0.62 - 0.48 * abs(n / (N - 1) - 1/2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
+            win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Blackman':
-            win = cosineSeries(n, N, [(1 - param)/2, 0.5, param/2])
+            win = cosineSeries(n, N, [(1 - param) / 2, 0.5, param / 2])
         elif type_ == 'Blackman-Harris':
             win = cosineSeries(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
         elif type_ == 'Blackman-Nuttall':
             win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Cosine':
-            win = (np.cos(np.pi * n / (N - 1) - np.pi/2)).T
+            win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
         elif type_ == 'Flattop':
             win = cosineSeries(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
             ylim = [-0.2, 1]
         elif type_ == 'Gaussian':
-            win = (np.exp(-0.5 * ( (n - (N - 1) / 2) / (param * (N - 1) / 2))**2)).T
+            win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
         elif type_ == 'HalfBand':
             win = np.ones((N, 1))
             ramp_length = round(N / 4)
             ramp = 1 / 2 + 9 / 16 * np.cos(np.pi * np.arange(0, ramp_length) / (2 * ramp_length)) - 1 / 16 * np.cos(
                 3 * np.pi * np.arange(0, ramp_length) / (2 * ramp_length))
             win[0:ramp_length] = np.fliplr(ramp)
-            win[- ramp_length+1:] = ramp
+            win[- ramp_length + 1:] = ramp
         elif type_ == 'Hamming':
             win = (0.54 - 0.46 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Hanning':
             win = (0.5 - 0.5 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Kaiser':
-            win = (besseli(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1)**2)) / besseli(0, np.pi * param)).T
+            win = (besseli(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1) ** 2)) / besseli(0, np.pi * param)).T
         elif type_ == 'Lanczos':
             win = sinc(2 * np.pi * n / (N - 1) - np.pi).T
         elif type_ == 'Nuttall':
@@ -334,7 +373,7 @@ def get_win(N, type_, *args):
             index = np.arange(0, N * param / 2)
             param = param * N
             win[0: len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
-            win[np.arange(-1, -len(index)-1, -1)] = win[0:len(index)]
+            win[np.arange(-1, -len(index) - 1, -1)] = win[0:len(index)]
             win = win.squeeze(axis=-1)
         else:
             raise ValueError(f'Unknown window type: {type_}')
@@ -346,7 +385,7 @@ def get_win(N, type_, *args):
         win = np.expand_dims(win, axis=-1)
 
         # calculate the coherent gain
-        cg = sum(win)/N
+        cg = sum(win) / N
     elif N.size == 2:
         # create the 2D window
         if rotation:
@@ -357,14 +396,14 @@ def get_win(N, type_, *args):
             win_lin = np.squeeze(win_lin)
 
             # create the reference axis
-            radius = (L - 1)/2
+            radius = (L - 1) / 2
             ll = np.linspace(-radius, radius, L)
 
             # create the 2D window using rotation
             xx = np.linspace(-radius, radius, N[0])
             yy = np.linspace(-radius, radius, N[1])
             [x, y] = ndgrid(xx, yy)
-            r = np.sqrt(x**2 + y**2)
+            r = np.sqrt(x ** 2 + y ** 2)
             r[r > radius] = radius
             interp_func = scipy.interpolate.interp1d(ll, win_lin)
             win = interp_func(r)
@@ -384,7 +423,7 @@ def get_win(N, type_, *args):
         win = win[0:N[0], 0:N[1]]
 
         # calculate the coherent gain
-        cg = win.sum()/np.prod(N)
+        cg = win.sum() / np.prod(N)
     elif N.size == 3:
         # create the 3D window
         if rotation:
@@ -394,7 +433,7 @@ def get_win(N, type_, *args):
             win_lin, _ = get_win(L, type_, *input_options)
 
             # create the reference axis
-            radius = (L - 1)/2
+            radius = (L - 1) / 2
             ll = np.linspace(-radius, radius, L)
 
             # create the 3D window using rotation
@@ -402,7 +441,7 @@ def get_win(N, type_, *args):
             yy = np.linspace(-radius, radius, N[1])
             zz = np.linspace(-radius, radius, N[2])
             [x, y, z] = ndgrid(xx, yy, zz)
-            r = np.sqrt(x**2 + y**2 + z**2)
+            r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
             r[r > radius] = radius
 
             win_lin = np.squeeze(win_lin)
@@ -440,13 +479,13 @@ def get_win(N, type_, *args):
         win_sq = win
         win = np.zeros(N_orig)
         if N.size == 2:
-            index1 = round((N(1) - L)/2) + 1
-            index2 = round((N(2) - L)/2) + 1
+            index1 = round((N(1) - L) / 2) + 1
+            index2 = round((N(2) - L) / 2) + 1
             win[index1:index1 + L, index2:index2 + L] = win_sq
         elif N.size == 3:
-            index1 = floor((N_orig(1) - L)/2) + 1
-            index2 = floor((N_orig(2) - L)/2) + 1
-            index3 = floor((N_orig(3) - L)/2) + 1
+            index1 = floor((N_orig(1) - L) / 2) + 1
+            index2 = floor((N_orig(2) - L) / 2) + 1
+            index3 = floor((N_orig(3) - L) / 2) + 1
             win[index1:index1 + L, index2:index2 + L, index3:index3 + L] = win_sq
 
     if plot_win:
@@ -455,85 +494,71 @@ def get_win(N, type_, *args):
     return win, cg
 
 
-def toneBurst(sample_freq, signal_freq, num_cycles, *args):
+def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=[],
+              signal_offset=0):
     """
         Create an enveloped single frequency tone burst.
-        %     toneBurst creates an enveloped single frequency tone burst for use in
-        %     ultrasound simulations. If an array is given for the optional input
-        %     'SignalOffset', a matrix of tone bursts is created where each row
-        %     corresponds to a tone burst for each value of the 'SignalOffset'. If
-        %     a value for the optional input 'SignalLength' is  given, the tone
-        %     burst/s are zero padded to this length (in samples).
+        toneBurst creates an enveloped single frequency tone burst for use in
+        ultrasound simulations. If an array is given for the optional input
+        'SignalOffset', a matrix of tone bursts is created where each row
+        corresponds to a tone burst for each value of the 'SignalOffset'. If
+        a value for the optional input 'SignalLength' is  given, the tone
+        burst/s are zero padded to this length (in samples).
     Args:
+        plot_signal:
+        signal_offset:
+        signal_length:
+        plot:
         sample_freq: sampling frequency [Hz]
         signal_freq: frequency of the tone burst signal [Hz]
         num_cycles: number of sinusoidal oscillations
-        *args:
-        % OPTIONAL INPUTS:
-        %     Optional 'string', value pairs that may be used to modify the default
-        %     computational settings.
-        %
-        %     'Envelope'      - Envelope used to taper the tone burst. Valid inputs
-        %                       are:
-        %
-        %                           'Gaussian' (the default)
-        %                           'Rectangular'
-        %                           [num_ring_up_cycles, num_ring_down_cycles]
-        %
-        %                       The last option generates a continuous wave signal
-        %                       with a cosine taper of the specified length at the
-        %                       beginning and end.
-        %
-        %     'Plot'          - Boolean controlling whether the created tone
-        %                       burst is plotted.
-        %     'SignalLength'  - Signal length in number of samples, if longer
-        %                       than the tone burst length, the signal is
-        %                       appended with zeros.
-        %     'SignalOffset'  - Signal offset before the tone burst starts in
-        %                       number of samples.
+        envelope:
+        OPTIONAL INPUTS:
+            Optional 'string', value pairs that may be used to modify the default
+            computational settings.
+
+            'Envelope'      - Envelope used to taper the tone burst. Valid inputs
+                              are:
+
+                                  'Gaussian' (the default)
+                                  'Rectangular'
+                                  [num_ring_up_cycles, num_ring_down_cycles]
+
+                              The last option generates a continuous wave signal
+                              with a cosine taper of the specified length at the
+                              beginning and end.
+
+            'Plot'          - Boolean controlling whether the created tone
+                              burst is plotted.
+            'SignalLength'  - Signal length in number of samples, if longer
+                              than the tone burst length, the signal is
+                              appended with zeros.
+            'SignalOffset'  - Signal offset before the tone burst starts in
+                              number of samples.
 
     Returns: created tone burst
 
     """
-    # set usage defaults
-    num_req_input_variables = 3
-    envelope = 'Gaussian'
-    signal_length = []
-    signal_offset = 0
-    plot_signal = False
-
-    # replace with user defined values if provided
-    if len(args) != 0:
-        for input_index in range(0, len(args), 2):
-            if args[input_index] == 'Envolope':
-                envelope = args[input_index + 1]
-            elif args[input_index] == 'Plot':
-                plot_signal = args[input_index + 1]
-            elif args[input_index] == 'SignalOffset':
-                signal_offset = args[input_index + 1]
-                signal_offset = np.round(signal_offset).astype(np.int)  # force integer
-            elif args[input_index] == 'SignalLength':
-                signal_length = args[input_index + 1]
-                signal_length = np.round(signal_length).astype(np.int)  # force integer
-            else:
-                raise ValueError('Unknown optional input.')
+    assert isinstance(signal_offset, int), "signal_offset must be integer"
+    # TODO: make this more consistent. Only one type.
+    assert isinstance(signal_length, list) or isinstance(signal_length, int), "signal_length must be integer"
 
     # calculate the temporal spacing
-    dt = 1 / sample_freq
+    dt = 1 / sample_freq  # [s]
 
     # create the tone burst
-    tone_length = num_cycles / signal_freq
-    # Matlab compatibility if-else statement
-    # Basically, we want to include endpoint but only if it's divisible by the stepsize
+    tone_length = num_cycles / signal_freq  # [s]
+    # We want to include the endpoint but only if it's divisible by the stepsize
     if tone_length % dt < 1e-18:
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
         tone_t = np.arange(0, tone_length, dt)
-    tone_burst = np.sin(2 * np.pi * signal_freq * tone_t)[:, None]
+
+    tone_burst = np.sin(2 * np.pi * signal_freq * tone_t)
     tone_index = round(signal_offset)
 
     # check for ring up and ring down input
-    if (isinstance(envelope, list) or isinstance(envelope, np.ndarray)) and envelope.size == 2:
+    if isinstance(envelope, list) or isinstance(envelope, np.ndarray):  # and envelope.size == 2:
 
         # assign the inputs
         num_ring_up_cycles, num_ring_down_cycles = envelope
@@ -546,14 +571,14 @@ def toneBurst(sample_freq, signal_freq, num_cycles, *args):
         period = 1 / signal_freq
 
         # create x-axis for ramp between 0 and pi
-        up_ramp_length_points   = round(num_ring_up_cycles * period / dt)
+        up_ramp_length_points = round(num_ring_up_cycles * period / dt)
         down_ramp_length_points = round(num_ring_down_cycles * period / dt)
-        up_ramp_axis            = np.arange(0, np.pi + 1e-8, np.pi / (up_ramp_length_points - 1))
-        down_ramp_axis          = np.arange(0, np.pi + 1e-8, np.pi / (down_ramp_length_points - 1))
+        up_ramp_axis = np.arange(0, np.pi + 1e-8, np.pi / (up_ramp_length_points - 1))
+        down_ramp_axis = np.arange(0, np.pi + 1e-8, np.pi / (down_ramp_length_points - 1))
 
         # create ramp using a shifted cosine
-        up_ramp                 = (-np.cos(up_ramp_axis)   + 1) * 0.5
-        down_ramp               = (np.cos(down_ramp_axis) + 1) * 0.5
+        up_ramp = (-np.cos(up_ramp_axis) + 1) * 0.5
+        down_ramp = (np.cos(down_ramp_axis) + 1) * 0.5
 
         # apply the ramps
         tone_burst[0:up_ramp_length_points] = tone_burst[1:up_ramp_length_points] * up_ramp
@@ -564,21 +589,21 @@ def toneBurst(sample_freq, signal_freq, num_cycles, *args):
         # create the envelope
         if envelope == 'Gaussian':
             x_lim = 3
-            window_x = np.arange(-x_lim, x_lim+1e-8, 2 * x_lim / (len(tone_burst) - 1))
+            window_x = np.arange(-x_lim, x_lim + 1e-8, 2 * x_lim / (len(tone_burst) - 1))
             window = gaussian(window_x, 1, 0, 1)
-        if envelope == 'Rectangular':
+        elif envelope == 'Rectangular':
             window = np.ones_like(tone_burst)
-        if envelope == 'RingUpDown':
-            pass
+        elif envelope == 'RingUpDown':
+            raise NotImplementedError("RingUpDown not yet implemented")
         else:
-            ValueError(f'Unknown envelope {envelope}.')
+            raise ValueError(f'Unknown envelope {envelope}.')
 
         # apply the envelope
-        tone_burst = tone_burst * window[:, None]
+        tone_burst = tone_burst * window
 
         # force the ends to be zero by applying a second window
         if envelope == 'Gaussian':
-            tone_burst = tone_burst * get_win(len(tone_burst), 'Tukey', 'Param', 0.05)[0]
+            tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), 'Tukey', 'Param', 0.05)[0])
 
     # calculate the expected FWHM in the frequency domain
     # t_var = tone_length/(2*x_lim);
@@ -594,7 +619,7 @@ def toneBurst(sample_freq, signal_freq, num_cycles, *args):
         signal = np.zeros(tone_index.size, signal_length)
 
     for offset in range(tone_index.size):
-        signal[offset, tone_index[offset]:tone_index[offset] + len(tone_burst)] = tone_burst[:, 0]
+        signal[offset, tone_index[offset]:tone_index[offset] + len(tone_burst)] = tone_burst.T
 
     # plot the signal if required
     if plot_signal:
