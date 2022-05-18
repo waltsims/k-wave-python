@@ -59,8 +59,8 @@ def test_add_noise():
     p_sig = np.sqrt(np.mean(input_signal ** 2))
     p_noise = np.sqrt(np.mean((output - input_signal) ** 2))
     snr = 20 * np.log10(p_sig / p_noise)
-    assert (
-            abs(5 - snr) < 1), "add_noise produced signal with incorrect SNR, this is a stochastic process. perhaps test again?"
+    assert (abs(5 - snr) < 2),\
+        "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
     return
 
 
