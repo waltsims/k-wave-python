@@ -127,7 +127,7 @@ def tenenbaum_sharpness(im):
     ndim = len(np.squeeze(im).shape)
     if ndim == 2:
         sobel = scipy.ndimage.sobel(im)
-    elif ndim ==3:
+    elif ndim == 3:
         sobel = scipy.ndimage.sobel(im)
 
     else:
@@ -389,8 +389,8 @@ def filterTimeSeries(kgrid, medium, signal, *args):
     # filter the signal if required
     if points_per_wavelength != 0:
         filtered_signal = apply_filter(signal, Fs, float(filter_cutoff_f), 'LowPass',
-                                      'ZeroPhase', zero_phase, 'StopBandAtten', float(stop_band_atten),
-                                      'TransitionWidth', transition_width, 'Plot', plot_spectrums)
+                                       zero_phase=zero_phase, stop_band_atten=float(stop_band_atten),
+                                       transition_width=transition_width)
 
     # add a start-up ramp if required
     if ramp_points_per_wavelength != 0:
@@ -448,11 +448,11 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
 
         # apply the low pass filter
         func_filt_lp = apply_filter(signal, Fs, cutoff_f(2), 'LowPass', 'StopBandAtten', stop_band_atten,
-                                   'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
+                                    'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
 
         # apply the high pass filter
         filtered_signal = apply_filter(func_filt_lp, Fs, cutoff_f(1), 'HighPass', 'StopBandAtten', stop_band_atten,
-                                      'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
+                                       'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
 
     else:
 
