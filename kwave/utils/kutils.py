@@ -1,5 +1,6 @@
 from copy import deepcopy
 from math import floor
+from typing import Union, List, Optional
 
 import numpy as np
 import scipy
@@ -169,7 +170,13 @@ def add_noise(signal, snr, mode="rms"):
     return signal
 
 
-def get_win(N, type_, *args):
+def get_win(N: Union[int, List[int]],
+            type_: str,   # TODO change this to enum in the future
+            plot_win: bool = False,
+            param: Optional[float] = None,
+            rotation: bool = False,
+            symmetric: bool = True,
+            square: bool = False):
     """
         Return a frequency domain windowing function
         %     getWin returns a 1D, 2D, or 3D frequency domain window of the
@@ -179,7 +186,6 @@ def get_win(N, type_, *args):
         %     input 'Rotation' to true. The coherent gain of the window can also be
         %     returned.
     Args:
-        type_:
         N: - number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D
         type: - window type. Supported values are
         %                   'Bartlett'
@@ -251,78 +257,41 @@ def get_win(N, type_, *args):
             series = series + (-1) ** (index) * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
         return series.T
 
-    if isinstance(N, int):
-        N = np.array(N)
+    # Check if N is either `int` or `list of ints`
+    # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
+    N = np.array(N, dtype=int)
 
-    # set usage defaults
-    num_req_input_variables = 2
-    plot_win = False
-    rotation = False
-    symmetric = True
-    square = False
-    ylim = [0, 1]
+    # Check if symmetric is either `bool` or `list of bools`
+    # assert isinstance(symmetric, int) or isinstance(symmetric, list)
+    symmetric = np.array(symmetric, dtype=bool)
+
+    # Set default value for `param` if type is one of the special ones
+    assert not plot_win, NotImplementedError('Plotting is not implemented.')
     if type_ == 'Tukey':
-        param = 0.5
-        param_ub = 1
-        param_lb = 0
+        if param is None:
+            param = 0.5
+        param = np.clip(param, a_min=0, a_max=1)
     elif type_ == 'Blackman':
-        param = 0.16
-        param_ub = 1
-        param_lb = 0
+        if param is None:
+            param = 0.16
+        param = np.clip(param, a_min=0, a_max=1)
     elif type_ == 'Gaussian':
-        param = 0.5
-        param_ub = 0.5
-        param_lb = 0
+        if param is None:
+            param = 0.5
+        param = np.clip(param, a_min=0, a_max=0.5)
     elif type_ == 'Kaiser':
-        param = 3
-        param_ub = 100
-        param_lb = 0
-    else:
-        param = 0
-
-    # replace with user defined values if provided
-    if len(args) != 0:
-        for input_index in range(0, len(args), 2):
-            if args[input_index] == 'Plot':
-                plot_win = args[input_index + 1]
-            elif args[input_index] == 'Param':
-                param = args[input_index + 1]
-                if param > param_ub:
-                    param = param_ub
-                elif param < param_lb:
-                    param = param_lb
-            elif args[input_index] == 'Rotation':
-                rotation = args[input_index + 1]
-                assert isinstance(rotation, bool), 'Optional input Rotation must be Boolean.'
-            elif args[input_index] == 'Symmetric':
-                # assign input
-                symmetric = args[input_index + 1]
-
-                # check type
-                assert isinstance(symmetric,
-                                  bool) or symmetric.dtype == bool, 'Optional input Symmetric must be Boolean.'
-
-                # check size
-                assert len(symmetric) in [1, len(N)], 'Optional input Symmetric must have 1 or numel(N) elements.'
-            elif args[input_index] == 'Square':
-                square = args[input_index + 1]
-                assert isinstance(square, bool), 'Optional input Square must be Boolean.'
-            else:
-                raise AttributeError('Unknown optional input.')
-
-    # set any required input options for recursive function calls
-    input_options = {}
-    if type_ in {'Tukey', 'Blackman', 'Kaiser', 'Gaussian'}:
-        input_options = ['Param', param]
+        if param is None:
+            param = 3
+        param = np.clip(param, a_min=0, a_max=100)
 
     # if a non-symmetrical window is required, enlarge the window size (note,
     # this expands each dimension individually if symmetric is a vector)
-    N = N + 1 * (1 - np.array(symmetric).astype(int))
+    N = N + 1 * (1 - symmetric.astype(int))
 
     # if a square window is required, replace grid sizes with smallest size and
     # store a copy of the original size
     if square and (N.size != 1):
-        N_orig = N
+        N_orig = np.copy(N)
         L = min(N)
         N[:] = L
 
@@ -331,49 +300,55 @@ def get_win(N, type_, *args):
         n = np.arange(0, N)
 
         if type_ == 'Bartlett':
-            win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
+            win = (2 / (N - 1) * ( (N - 1) / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Bartlett-Hanning':
-            win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
+            win = (0.62 - 0.48 * abs(n / (N - 1) - 1/2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Blackman':
-            win = cosineSeries(n, N, [(1 - param) / 2, 0.5, param / 2])
+            win = cosineSeries(n, N, [(1 - param)/2, 0.5, param/2])
         elif type_ == 'Blackman-Harris':
             win = cosineSeries(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
         elif type_ == 'Blackman-Nuttall':
             win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Cosine':
-            win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
+            win = (np.cos(np.pi * n / (N - 1) - np.pi/2)).T
         elif type_ == 'Flattop':
             win = cosineSeries(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
             ylim = [-0.2, 1]
         elif type_ == 'Gaussian':
-            win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
+            win = (np.exp(-0.5 * ( (n - (N - 1) / 2) / (param * (N - 1) / 2))**2)).T
         elif type_ == 'HalfBand':
-            win = np.ones((N, 1))
-            ramp_length = round(N / 4)
-            ramp = 1 / 2 + 9 / 16 * np.cos(np.pi * np.arange(0, ramp_length) / (2 * ramp_length)) - 1 / 16 * np.cos(
-                3 * np.pi * np.arange(0, ramp_length) / (2 * ramp_length))
-            win[0:ramp_length] = np.fliplr(ramp)
-            win[- ramp_length + 1:] = ramp
+            win = np.ones(N)
+            # why not to just round? => because rounding 0.5 introduces unexpected behaviour
+            # round(0.5) should be 1 but it is 0
+            ramp_length = round(N/4 + 1e-8)
+            ramp = 1 / 2 + 9 / 16 * np.cos(np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length)) - 1 / 16 * np.cos(
+                3 * np.pi * np.arange(1, ramp_length+1) / (2 * ramp_length))
+            if ramp_length > 0:
+                win[0:ramp_length] = np.flip(ramp)
+                win[-ramp_length:] = ramp
         elif type_ == 'Hamming':
             win = (0.54 - 0.46 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Hanning':
             win = (0.5 - 0.5 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Kaiser':
-            win = (besseli(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1) ** 2)) / besseli(0, np.pi * param)).T
+            part_1 = scipy.special.iv(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1)**2))
+            part_2 = scipy.special.iv(0, np.pi * param)
+            win = part_1 / part_2
         elif type_ == 'Lanczos':
-            win = sinc(2 * np.pi * n / (N - 1) - np.pi).T
+            win = 2 * np.pi * n / (N - 1) - np.pi
+            win = sinc(win + 1e-12).T
         elif type_ == 'Nuttall':
             win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Rectangular':
-            win = np.ones((N, 1))
+            win = np.ones(N)
         elif type_ == 'Triangular':
             win = (2 / N * (N / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Tukey':
             win = np.ones((N, 1))
-            index = np.arange(0, N * param / 2)
+            index = np.arange(0, (N-1) * param / 2 + 1e-8)
             param = param * N
             win[0: len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
-            win[np.arange(-1, -len(index) - 1, -1)] = win[0:len(index)]
+            win[np.arange(-1, -len(index)-1, -1)] = win[0:len(index)]
             win = win.squeeze(axis=-1)
         else:
             raise ValueError(f'Unknown window type: {type_}')
@@ -385,35 +360,41 @@ def get_win(N, type_, *args):
         win = np.expand_dims(win, axis=-1)
 
         # calculate the coherent gain
-        cg = sum(win) / N
+        cg = sum(win)/N
     elif N.size == 2:
+        input_options = {
+            "param": param,
+            "rotation": rotation,
+            "symmetric": symmetric,
+            "square": square
+        }
+
         # create the 2D window
         if rotation:
 
             # create the window in one dimension using getWin recursively
             L = max(N)
-            win_lin, _ = get_win(L, type_, *input_options)
+            win_lin, _ = get_win(L, type_, param=param)
             win_lin = np.squeeze(win_lin)
 
             # create the reference axis
-            radius = (L - 1) / 2
+            radius = (L - 1)/2
             ll = np.linspace(-radius, radius, L)
 
             # create the 2D window using rotation
             xx = np.linspace(-radius, radius, N[0])
             yy = np.linspace(-radius, radius, N[1])
             [x, y] = ndgrid(xx, yy)
-            r = np.sqrt(x ** 2 + y ** 2)
+            r = np.sqrt(x**2 + y**2)
             r[r > radius] = radius
             interp_func = scipy.interpolate.interp1d(ll, win_lin)
             win = interp_func(r)
             win[r <= radius] = interp_func(r[r <= radius])
 
         else:
-
             # create the window in each dimension using getWin recursively
-            win_x = get_win(N[0], type_, *input_options)
-            win_y = get_win(N[1], type_, *input_options)
+            win_x, _ = get_win(N[0], type_, param=param)
+            win_y, _ = get_win(N[1], type_, param=param)
 
             # create the 2D window using the outer product
             win = (win_y * win_x.T).T
@@ -423,17 +404,17 @@ def get_win(N, type_, *args):
         win = win[0:N[0], 0:N[1]]
 
         # calculate the coherent gain
-        cg = win.sum() / np.prod(N)
+        cg = win.sum()/np.prod(N)
     elif N.size == 3:
         # create the 3D window
         if rotation:
 
             # create the window in one dimension using getWin recursively
             L = N.max()
-            win_lin, _ = get_win(L, type_, *input_options)
+            win_lin, _ = get_win(L, type_, param=param)
 
             # create the reference axis
-            radius = (L - 1) / 2
+            radius = (L - 1)/2
             ll = np.linspace(-radius, radius, L)
 
             # create the 3D window using rotation
@@ -441,7 +422,7 @@ def get_win(N, type_, *args):
             yy = np.linspace(-radius, radius, N[1])
             zz = np.linspace(-radius, radius, N[2])
             [x, y, z] = ndgrid(xx, yy, zz)
-            r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+            r = np.sqrt(x**2 + y**2 + z**2)
             r[r > radius] = radius
 
             win_lin = np.squeeze(win_lin)
@@ -452,9 +433,9 @@ def get_win(N, type_, *args):
         else:
 
             # create the window in each dimension using getWin recursively
-            win_x = get_win(N[0], type_, *input_options)
-            win_y = get_win(N[1], type_, *input_options)
-            win_z = get_win(N[2], type_, *input_options)
+            win_x, _ = get_win(N[0], type_, param=param)
+            win_y, _ = get_win(N[1], type_, param=param)
+            win_z, _ = get_win(N[2], type_, param=param)
 
             # create the 2D window using the outer product
             win_2D = (win_x * win_z.T)
@@ -479,17 +460,14 @@ def get_win(N, type_, *args):
         win_sq = win
         win = np.zeros(N_orig)
         if N.size == 2:
-            index1 = round((N(1) - L) / 2) + 1
-            index2 = round((N(2) - L) / 2) + 1
-            win[index1:index1 + L, index2:index2 + L] = win_sq
+            index1 = round((N[0] - L)/2)
+            index2 = round((N[1] - L)/2)
+            win[index1:(index1 + L), index2:(index2 + L)] = win_sq
         elif N.size == 3:
-            index1 = floor((N_orig(1) - L) / 2) + 1
-            index2 = floor((N_orig(2) - L) / 2) + 1
-            index3 = floor((N_orig(3) - L) / 2) + 1
+            index1 = floor((N_orig[0] - L)/2)
+            index2 = floor((N_orig[1] - L)/2)
+            index3 = floor((N_orig[2] - L)/2)
             win[index1:index1 + L, index2:index2 + L, index3:index3 + L] = win_sq
-
-    if plot_win:
-        raise NotImplementedError
 
     return win, cg
 
