@@ -360,7 +360,7 @@ def get_win(N: Union[int, List[int]],
         win = np.expand_dims(win, axis=-1)
 
         # calculate the coherent gain
-        cg = sum(win)/N
+        cg = win.sum() / N
     elif N.size == 2:
         input_options = {
             "param": param,
@@ -404,7 +404,7 @@ def get_win(N: Union[int, List[int]],
         win = win[0:N[0], 0:N[1]]
 
         # calculate the coherent gain
-        cg = win.sum()/np.prod(N)
+        cg = win.sum() / np.prod(N)
     elif N.size == 3:
         # create the 3D window
         if rotation:
