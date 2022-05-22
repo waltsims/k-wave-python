@@ -581,7 +581,7 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
 
         # force the ends to be zero by applying a second window
         if envelope == 'Gaussian':
-            tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), 'Tukey', 'Param', 0.05)[0])
+            tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), type_='Tukey', param=0.05)[0])
 
     # calculate the expected FWHM in the frequency domain
     # t_var = tone_length/(2*x_lim);

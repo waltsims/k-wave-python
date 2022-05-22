@@ -154,7 +154,7 @@ def test_create_cw_signals():
     t_array = np.arange(0, 10 * T, dt)
 
     # define amplitude and phase
-    amp, cg = get_win(9, 'Gaussian')
+    amp, cg = get_win(9, type_='Gaussian')
     phase = np.arange(0, 2 * pi, 9).T
 
     # create signals and plot

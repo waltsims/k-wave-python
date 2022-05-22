@@ -560,7 +560,7 @@ class NotATransducer(kSensor):
             # if the number of active elements is greater than 1,
             # create apodization using getWin, otherwise, assign 1
             if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), self.transmit_apodization)
+                apodization, _ = get_win(int(self.number_active_elements), type_=self.transmit_apodization)
             else:
                 apodization = 1
         apodization = np.array(apodization)

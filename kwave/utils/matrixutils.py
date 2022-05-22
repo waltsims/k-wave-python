@@ -214,7 +214,8 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    win, _ = get_win(grid_size, window_type, 'Rotation', DEF_USE_ROTATION, 'Symmetric', window_symmetry)
+    win, _ = get_win(grid_size, type_=window_type,
+                     rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
 
     # rotate window if input mat is (1, N)
