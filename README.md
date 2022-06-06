@@ -1,4 +1,6 @@
 # k-Wave-python
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fwaltsims%2Fk-wave-python.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fwaltsims%2Fk-wave-python?ref=badge_shield)
+
 
 This project is a Python interface to the pre-compiled v1.3 of [k-Wave simulation binaries](http://www.k-wave.org/download.php) which support NVIDIA sm 3.0 to sm 7.5.
 
@@ -37,3 +39,7 @@ To test the reconstruction on a machine without a GPU, set `RUN_SIMULATION` [on 
 ## Development
 
 If you're enjoying k-Wave-python and want to contribute, development instructions can be found [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fwaltsims%2Fk-wave-python.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fwaltsims%2Fk-wave-python?ref=badge_large)
