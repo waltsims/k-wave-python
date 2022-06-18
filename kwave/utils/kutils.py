@@ -604,3 +604,23 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
         raise NotImplementedError
 
     return signal
+
+
+def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarray):
+    """
+
+    Args:
+        sensor_data: N x K
+        reorder_index: N
+
+    Returns:
+
+    """
+    reorder_index = np.squeeze(reorder_index)
+    assert sensor_data.ndim == 2
+    assert reorder_index.ndim == 1
+
+    return sensor_data[reorder_index.argsort()]
+
+
+
