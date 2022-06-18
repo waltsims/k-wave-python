@@ -79,8 +79,8 @@ def scale_SI(x):
             4: ('p', 'pico', 1e12),
             5: ('f', 'femto', 1e15),
             6: ('a', 'atto', 1e18),
-            7: ('a', 'zepto', 1e21),
-            8: ('a', 'yocto', 1e24),
+            7: ('z', 'zepto', 1e21),
+            8: ('y', 'yocto', 1e24),
         }
         prefix, prefix_fullname, scale = units[sym_index]
 
@@ -116,7 +116,11 @@ def scale_SI(x):
         scale = 1
 
     # form scaling into a string
-    x_sc = x_sc.round(4)
+    round_decimals = 6  # TODO this needs to be tuned
+    x_sc = x_sc.round(round_decimals)
+    if (x_sc - int(x_sc)) < (0.1 ** round_decimals):
+        # avoid values like X.0, instead have only X
+        x_sc = int(x_sc)
     x_sc = f'-{x_sc}{prefix}' if negative else f'{x_sc}{prefix}'
     return x_sc, scale, prefix, prefix_fullname
 
