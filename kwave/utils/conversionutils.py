@@ -33,11 +33,19 @@ def scale_time(seconds):
     elif days > 0:
         time = f'{days} days, {hours} hours, and {minutes} min'
     elif hours > 0:
-        time = f'{hours} hours {minutes} min seconds s'
+        seconds = np.round(seconds, 4)
+        if np.abs(seconds - int(seconds)) < 1e-4:
+            seconds = int(seconds)
+        time = f'{hours}hours {minutes}min {seconds}s'
     elif minutes > 0:
-        time = f'{minutes} min {seconds} s'
+        seconds = np.round(seconds, 4)
+        if np.abs(seconds - int(seconds)) < 1e-4:
+            seconds = int(seconds)
+        time = f'{minutes}min {seconds}s'
     else:
-        time = f'{seconds} s'
+        precision = 10  # manually tuned number
+        seconds = round(seconds, precision)
+        time = f'{seconds}s'
     return time
 
 
