@@ -525,7 +525,8 @@ def gaussian_filter(signal, Fs, frequency, bandwidth):
     return signal
 
 
-def filterTimeSeries(kgrid, medium, signal, *args):
+def filterTimeSeries(kgrid, medium, signal, ppw=3, rppw=0, stop_band_atten=60, transition_width=0.1, zerophase=False,
+                     plot_spectrums=False, plot_signals=False):
     """
         Filter signal using the Kaiser windowing method
         filterTimeSeries filters an input time domain signal using a low pass
@@ -540,46 +541,16 @@ def filterTimeSeries(kgrid, medium, signal, *args):
         kgrid:
         medium:
         signal:
-        *args:
+        ppw:        Points-Per-Wavelength (default 3)
+        rppw:       Ramp-Points-Per-Wavelength (default 0)
+        stop_band_atten:        Stop-Band-Attenuation (default 60)
+        transition_width:         Transition-width (default 0.1)
+        zero-phase: (default False)
+
 
     Returns:
 
     """
-    # default filter cut-off frequency
-    points_per_wavelength = 3
-
-    # default ramp length
-    ramp_points_per_wavelength = 0
-
-    # default settings for the Kaiser window
-    stop_band_atten = 60
-    transition_width = 0.1
-    zero_phase = False
-
-    # default plot settings
-    plot_signals = False
-    plot_spectrums = False
-
-    # replace with user defined values if provided
-    for input_index in range(0, len(args), 2):
-        if args[input_index] == 'PlotSignals':
-            plot_signals = args[input_index + 1]
-        elif args[input_index] == 'PlotSpectrums':
-            plot_spectrums = args[input_index + 1]
-        elif args[input_index] == 'PPW':
-            points_per_wavelength = args[input_index + 1]
-        elif args[input_index] == 'RampPPW':
-            ramp_points_per_wavelength = args[input_index + 1]
-            if isinstance(ramp_points_per_wavelength, bool) and ramp_points_per_wavelength:
-                ramp_points_per_wavelength = points_per_wavelength
-        elif args[input_index] == 'StopBandAtten':
-            stop_band_atten = args[input_index + 1]
-        elif args[input_index] == 'TransitionWidth':
-            transition_width = args[input_index + 1]
-        elif args[input_index] == 'ZeroPhase':
-            zero_phase = args[input_index + 1]
-        else:
-            raise ValueError('Unknown optional input.')
 
     # check the input is a row vector
     if num_dim2(signal) == 1:
@@ -626,21 +597,21 @@ def filterTimeSeries(kgrid, medium, signal, *args):
     f_max = kgrid.k_max_all * c0 / (2 * np.pi)
 
     # calculate the filter cut-off frequency
-    filter_cutoff_f = 2 * f_max / points_per_wavelength
+    filter_cutoff_f = 2 * f_max / ppw
 
     # calculate the wavelength of the filter cut-off frequency as a number of time steps
     filter_wavelength = ((2 * np.pi / filter_cutoff_f) / kgrid.dt)
 
     # filter the signal if required
-    if points_per_wavelength != 0:
+    if ppw != 0:
         filtered_signal = apply_filter(signal, Fs, float(filter_cutoff_f), 'LowPass',
-                                       zero_phase=zero_phase, stop_band_atten=float(stop_band_atten),
+                                       zero_phase=zerophase, stop_band_atten=float(stop_band_atten),
                                        transition_width=transition_width)
 
     # add a start-up ramp if required
-    if ramp_points_per_wavelength != 0:
+    if rppw != 0:
         # calculate the length of the ramp in time steps
-        ramp_length = round(ramp_points_per_wavelength * filter_wavelength / (2 * points_per_wavelength))
+        ramp_length = round(rppw * filter_wavelength / (2 * ppw))
 
         # create the ramp
         ramp = (-np.cos(np.arange(0, ramp_length - 1 + 1) * np.pi / ramp_length) + 1) / 2
@@ -654,15 +625,15 @@ def filterTimeSeries(kgrid, medium, signal, *args):
 
     # update the command line status
     print(f'  maximum frequency supported by kgrid: {scale_SI(f_max)}Hz (2 PPW)')
-    if points_per_wavelength != 0:
-        print(f'  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({points_per_wavelength} PPW)')
-    if ramp_points_per_wavelength != 0:
+    if ppw != 0:
+        print(f'  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({ppw} PPW)')
+    if rppw != 0:
         print(
             f'  ramp frequency: {scale_SI(2 * np.pi / (2 * ramp_length * kgrid.dt))}Hz (ramp_points_per_wavelength PPW)')
     print('  computation complete.')
 
     # plot signals if required
-    if plot_signals:
+    if plot_signals or plot_spectrums:
         raise NotImplementedError
 
     return filtered_signal
@@ -752,7 +723,7 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
 
         # modify to make a high_pass filter
         if high_pass:
-            hw = (-1 * np.ones((1, len(hw))) ** (np.arange(1, len(hw)+1))) * hw
+            hw = (-1 * np.ones((1, len(hw))) ** (np.arange(1, len(hw) + 1))) * hw
 
         # add some zeros to allow the reverse (zero phase) filtering room to work
         L = signal.size  # length of original input signal
