@@ -18,7 +18,7 @@ def ndgrid(*args):
 
 
 def sinc(x):
-    return np.sin(x) / x
+    return np.sinc(x / np.pi)
 
 
 def round_even(x):
