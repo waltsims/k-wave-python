@@ -2,10 +2,9 @@ from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
-from kwave.utils.filterutils import extract_amp_phase, spect
+from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
 import numpy as np
 from phantominator import shepp_logan
-
 
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,
                          0.02355139, 0.02753738, 0.02966112, 0.02907933, 0.02502059,
@@ -130,7 +129,7 @@ def test_spect():
     a = np.array([0, 1.111111111, 2.222222222, 3.3333333333, 4.444444444]) * 1e6
     b = [0.0000, 0.1850, 0.3610, 0.2905, 0.0841]
     c = [3.1416, 1.9199, -0.8727, 2.6180, -0.1745]
-    a_t, b_t, c_t =spect(toneBurst(10e6, 2.5e6, 2), 10e6)
+    a_t, b_t, c_t = spect(toneBurst(10e6, 2.5e6, 2), 10e6)
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 0.0001).all()
@@ -144,3 +143,30 @@ def test_extract_amp_phase():
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
 
+
+def test_apply_filter_lowpass():
+    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
+    expected_signal = [0.00000000e+00, 2.76028757e-24, -3.59205956e-24,
+                       1.46416820e-23, 3.53059551e-22, 1.00057133e-21,
+                       -3.57207790e-21, -1.10602408e-20, 1.60600278e-20]
+    assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
+    pass
+
+
+def test_apply_filter_highpass():
+    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
+    expected_signal = [0.00000000e+00, 1.40844920e-10, 1.82974394e-09,
+                       7.00097845e-09, 9.76890695e-09, -4.62418007e-09,
+                       -6.61859580e-08, -2.38415184e-07, -6.35274380e-07]
+    assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
+    pass
+
+
+def test_apply_filter_bandpass():
+    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
+    expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
+    pass

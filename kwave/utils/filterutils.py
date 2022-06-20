@@ -8,7 +8,6 @@ from scipy.fftpack import fft, ifft, ifftshift, fftshift
 import math
 from math import pi
 
-from .misc import sinc
 from .conversionutils import scale_SI
 from .checkutils import num_dim, num_dim2
 
@@ -690,13 +689,15 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
 
     # for a bandpass filter, use applyFilter recursively
     if filter_type == 'BandPass':
+        assert isinstance(cutoff_f, list), "List of two frequencies required as for filter type 'BandPass'"
+        assert len(cutoff_f) == 2, "List of two frequencies required as for filter type 'BandPass'"
 
         # apply the low pass filter
-        func_filt_lp = apply_filter(signal, Fs, cutoff_f(2), 'LowPass', stop_band_atten=stop_band_atten,
+        func_filt_lp = apply_filter(signal, Fs, cutoff_f[1], 'LowPass', stop_band_atten=stop_band_atten,
                                     transition_width=transition_width, zero_phase=zero_phase)
 
         # apply the high pass filter
-        filtered_signal = apply_filter(func_filt_lp, Fs, cutoff_f(1), 'HighPass', stop_band_atten=stop_band_atten,
+        filtered_signal = apply_filter(func_filt_lp[np.newaxis], Fs, cutoff_f[0], 'HighPass', stop_band_atten=stop_band_atten,
                                        transition_width=transition_width, zero_phase=zero_phase)
 
     else:
@@ -708,7 +709,7 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
             high_pass = True
             cutoff_f = (Fs / 2 - cutoff_f)
         else:
-            ValueError(f'Unknown filter type {filter_type}')
+            raise ValueError(f'Unknown filter type {filter_type}. Options are "LowPass, HighPass, BandPass"')
 
         # make sure input is the correct way around
         m, n = signal.shape
@@ -726,9 +727,10 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
         # construct impulse response of ideal bandpass filter h(n), a sinc function
         fc = cutoff_f / Fs  # normalised cut-off
         n = np.arange(-N / 2, N / 2)
-        h = 2 * fc * sinc(2 * np.pi * fc * n)
+        h = 2 * fc * np.sinc(2 * np.pi * fc * n)
 
         # if no window is given, use a Kaiser window
+        # TODO: there is no window argument
         if 'w' not in locals():
 
             # compute Kaiser window parameter beta
@@ -749,18 +751,18 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
 
         # modify to make a high_pass filter
         if high_pass:
-            hw = (-1 * np.ones((1, len(hw)))) ** (np.arange(1, len(hw))) * hw
+            hw = (-1 * np.ones((1, len(hw))) ** (np.arange(1, len(hw)+1))) * hw
 
         # add some zeros to allow the reverse (zero phase) filtering room to work
         L = signal.size  # length of original input signal
-        filtered_signal = np.hstack([np.zeros((1, N)), signal])
+        filtered_signal = np.hstack([np.zeros((1, N)), signal]).squeeze()
 
         # apply the filter
-        filtered_signal = lfilter(hw, 1, filtered_signal);
+        filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal)
         if zero_phase:
-            filtered_signal = np.fliplr(lfilter(hw, 1, filtered_signal(np.arange(L + N, 1, -1))))
+            filtered_signal = np.fliplr(lfilter(hw.squeeze(), 1, filtered_signal[np.arange(L + N, 1, -1)]))
 
         # remove the part of the signal corresponding to the added zeros
-        filtered_signal = filtered_signal[:, N:]
+        filtered_signal = filtered_signal[N:]
 
     return filtered_signal
