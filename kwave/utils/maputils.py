@@ -23,33 +23,11 @@ def water_absorption(f, temp):
     OUTPUTS:
     abs - absorption[dB / cm]
 
-    ABOUT:
-    author - Bradley Treeby
-    date - 10 th November 2008
-    last update - 4 th April 2019
-
     REFERENCES:
     [1] Pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
     and its Relation to Molecular Constitution, " Proceedings of the
     Physical Society.Section B, 2, 129 - 141
 
-    This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
-    Copyright(C) 2008 - 2019 Bradley Treeby
-
-    See also waterDensity, waterNonlinearity, waterSoundSpeed
-
-    This file is part of k - Wave.k - Wave is free software: you can
-    redistribute it and / or modify it under the terms of the GNU Lesser
-    General Public License as published by the Free Software Foundation,
-    either version 3 of the License, or (at your option) any later version.
-
-    k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
-    more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
     """
     NEPER2DB = 8.686
     # check temperature is within range
@@ -80,6 +58,11 @@ def hounsfield2soundspeed(ct_data):
     Calclulates the soundspeed of a medium given a CT of the medium.
     For soft-tissue, the approximate sound speed can also be returned
     using the empirical relationship given by Mast.
+
+    Mast, T. D., "Empirical relationships between acoustic parameters
+    in human soft tissues," Acoust. Res. Lett. Online, 1(2), pp. 37-42
+    (2000).
+
     Args:
         ct_data: 
 
@@ -149,32 +132,10 @@ def water_sound_speed(temp):
      OUTPUTS:
          c             - sound speed [m/s]
 
-     ABOUT:
-         author        - Bradley E. Treeby
-         date          - 11th August 2008
-         last update   - 4th April 2019
-
      REFERENCES:
          [1] Marczak (1997) "Water as a standard in the measurements of speed
          of sound in liquids," J. Acoust. Soc. Am., 102, 2776-2779.
 
-     This function is part of the k-Wave Toolbox (http://www.k-wave.org)
-     Copyright (C) 2008-2019 Bradley Treeby
-
-     See also waterAbsorption, waterDensity, waterNonlinearity
-
-     This file is part of k-Wave. k-Wave is free software: you can
-     redistribute it and/or modify it under the terms of the GNU Lesser
-     General Public License as published by the Free Software Foundation,
-     either version 3 of the License, or (at your option) any later version.
-
-     k-Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-     FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-     more details.
-
-     You should have received a copy of the GNU Lesser General Public License
-     along with k-Wave. If not, see <http://www.gnu.org/licenses/>.
     """
 
     # check limits
@@ -211,24 +172,6 @@ def water_density(temp):
      [1] F.E.Jones and G.L.Harris(1992) "ITS-90 Density of Water
      Formulation for Volumetric Standards Calibration, " J. Res. Natl.
      Inst.Stand.Technol., 97(3), 335 - 340.
-
-     This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
-     Copyright(C) 2018 - 2019 Bradley Treeby
-
-     See also waterAttenuation, waterNonlinearity, waterSoundSpeed
-
-     This file is part of k - Wave.k - Wave is free software: you can
-     redistribute it and / or modify it under the terms of the GNU Lesser
-     General Public License as published by the Free Software Foundation,
-     either version 3 of the License, or (at your option) any later version.
-
-     k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-     FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
-     more details.
-
-     You should have received a copy of the GNU Lesser General Public License
-     along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
      """
     # check limits
     assert 5 <= temp <= 40, "T must be between 5 and 40."
@@ -240,48 +183,31 @@ def water_density(temp):
 
 def water_non_linearity(temp):
     """
-    # WATERNONLINEARITY Calculate B/A of water with temperature.
-    #
-    # DESCRIPTION:
-    #     waterNonlinearity calculates the parameter of nonlinearity B/A at a
-    #     given temperature using a fourth-order polynomial fitted to the data
-    #     given by Beyer (1960).
-    #
-    # USAGE:
-    #     BonA = waterNonlinearity(T)
-    #
-    # INPUTS:
-    #     T             - water temperature in the range 0 to 100 [degC]
-    #
-    # OUTPUTS:
-    #     BonA          - parameter of nonlinearity
-    #
-    # ABOUT:
-    #     author        - Bradley E. Treeby
-    #     date          - 22nd February 2018
-    #     last update   - 4th April 2019
-    #
-    # REFERENCES:
-    #     [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
-    #     Acoust. Soc. Am., 32(6), 719-721.
-    #
-    # This function is part of the k-Wave Toolbox (http://www.k-wave.org)
-    # Copyright (C) 2018-2019 Bradley Treeby
-    #
-    # See also waterAbsorption, waterDensity, waterSoundSpeed
+     WATERNONLINEARITY Calculate B/A of water with temperature.
 
-    # This file is part of k-Wave. k-Wave is free software: you can
-    # redistribute it and/or modify it under the terms of the GNU Lesser
-    # General Public License as published by the Free Software Foundation,
-    # either version 3 of the License, or (at your option) any later version.
-    #
-    # k-Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-    # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    # FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-    # more details.
-    #
-    # You should have received a copy of the GNU Lesser General Public License
-    # along with k-Wave. If not, see <http://www.gnu.org/licenses/>.
+     DESCRIPTION:
+         waterNonlinearity calculates the parameter of nonlinearity B/A at a
+         given temperature using a fourth-order polynomial fitted to the data
+         given by Beyer (1960).
+
+     USAGE:
+         BonA = waterNonlinearity(T)
+
+     INPUTS:
+         T             - water temperature in the range 0 to 100 [degC]
+
+     OUTPUTS:
+         BonA          - parameter of nonlinearity
+
+     ABOUT:
+         author        - Bradley E. Treeby
+         date          - 22nd February 2018
+         last update   - 4th April 2019
+
+     REFERENCES:
+         [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
+         Acoust. Soc. Am., 32(6), 719-721.
+
     """
 
     # check limits
@@ -295,14 +221,14 @@ def water_non_linearity(temp):
 
 def makeBall(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
     """
-    %MAKEBALL Create a binary map of a filled ball within a 3D grid.
-    %
-    % DESCRIPTION:
-    %     makeBall creates a binary map of a filled ball within a
-    %     three-dimensional grid (the ball position is denoted by 1's in the
-    %     matrix with 0's elsewhere). A single grid point is taken as the ball
-    %     centre thus the total diameter of the ball will always be an odd
-    %     number of grid points.
+    MAKEBALL Create a binary map of a filled ball within a 3D grid.
+
+    DESCRIPTION:
+         makeBall creates a binary map of a filled ball within a
+         three-dimensional grid (the ball position is denoted by 1's in the
+         matrix with 0's elsewhere). A single grid point is taken as the ball
+         centre thus the total diameter of the ball will always be an odd
+         number of grid points.
     Args:
         Nx: size of the 3D grid in x-dimension [grid points]
         Ny: size of the 3D grid in y-dimension [grid points]
@@ -365,14 +291,14 @@ def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
     """
         Create a binary map of a filled disc within a 2D grid.
 
-        %     makeDisc creates a binary map of a filled disc within a
-        %     two-dimensional grid (the disc position is denoted by 1's in the
-        %     matrix with 0's elsewhere). A single grid point is taken as the disc
-        %     centre thus the total diameter of the disc will always be an odd
-        %     number of grid points. As the returned disc has a constant radius, if
-        %     used within a k-Wave grid where dx ~= dy, the disc will appear oval
-        %     shaped. If part of the disc overlaps the grid edge, the rest of the
-        %     disc will wrap to the grid edge on the opposite side.
+             makeDisc creates a binary map of a filled disc within a
+             two-dimensional grid (the disc position is denoted by 1's in the
+             matrix with 0's elsewhere). A single grid point is taken as the disc
+             centre thus the total diameter of the disc will always be an odd
+             number of grid points. As the returned disc has a constant radius, if
+             used within a k-Wave grid where dx ~= dy, the disc will appear oval
+             shaped. If part of the disc overlaps the grid edge, the rest of the
+             disc will wrap to the grid edge on the opposite side.
     Args:
         Nx:
         Ny:
@@ -427,15 +353,15 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
     """
         Create a binary map of a circle within a 2D grid.
 
-        %     makeCircle creates a binary map of a circle or arc (using the
-        %     midpoint circle algorithm) within a two-dimensional grid (the circle
-        %     position is denoted by 1's in the matrix with 0's elsewhere). A
-        %     single grid point is taken as the circle centre thus the total
-        %     diameter will always be an odd number of grid points.
-        %
-        %     Note: The centre of the circle and the radius are not constrained by
-        %     the grid dimensions, so it is possible to create sections of circles,
-        %     or a blank image if none of the circle intersects the grid.
+             makeCircle creates a binary map of a circle or arc (using the
+             midpoint circle algorithm) within a two-dimensional grid (the circle
+             position is denoted by 1's in the matrix with 0's elsewhere). A
+             single grid point is taken as the circle centre thus the total
+             diameter will always be an odd number of grid points.
+
+             Note: The centre of the circle and the radius are not constrained by
+             the grid dimensions, so it is possible to create sections of circles,
+             or a blank image if none of the circle intersects the grid.
     Args:
         Nx:
         Ny:
@@ -528,9 +454,9 @@ def makeCartCircle(radius, num_points, center_pos=None, arc_angle=(2 * np.pi), p
     """
         Create a 2D Cartesian circle or arc.
 
-        %     MakeCartCircle creates a 2 x num_points array of the Cartesian
-        %     coordinates of points evenly distributed over a circle or arc (if
-        %     arc_angle is given).
+             MakeCartCircle creates a 2 x num_points array of the Cartesian
+             coordinates of points evenly distributed over a circle or arc (if
+             arc_angle is given).
     Args:
 
     Returns:
@@ -571,38 +497,38 @@ def makeCartCircle(radius, num_points, center_pos=None, arc_angle=(2 * np.pi), p
 
 def makePixelMap(Nx, Ny, Nz=None, *args):
     """
-    %MAKEPIXELMAP Create matrix of grid point distances from the centre point.
-    %
-    % DESCRIPTION:
-    %     makePixelMap generates a matrix populated with values of how far each
-    %     pixel in a grid is from the centre (given in pixel coordinates). Both
-    %     single and double pixel centres can be used by setting the optional
-    %     input parameter 'OriginSize'. For grids where the dimension size and
-    %     centre pixel size are not both odd or even, the optional input
-    %     parameter 'Shift' can be used to control the location of the
-    %     centerpoint.
-    %
-    %     examples for a 2D pixel map:
-    %
-    %     Single pixel origin size for odd and even (with 'Shift' = [1 1] and
-    %     [0 0], respectively) grid sizes:
-    %
-    %     x x x       x x x x         x x x x
-    %     x 0 x       x x x x         x 0 x x
-    %     x x x       x x 0 x         x x x x
-    %                 x x x x         x x x x
-    %
-    %     Double pixel origin size for even and odd (with 'Shift' = [1 1] and
-    %     [0 0], respectively) grid sizes:
-    %
-    %     x x x x      x x x x x        x x x x x
-    %     x 0 0 x      x x x x x        x 0 0 x x
-    %     x 0 0 x      x x 0 0 x        x 0 0 x x
-    %     x x x x      x x 0 0 x        x x x x x
-    %                  x x x x x        x x x x x
-    %
-    %     By default a single pixel centre is used which is shifted towards
-    %     the final row and column.
+    MAKEPIXELMAP Create matrix of grid point distances from the centre point.
+
+     DESCRIPTION:
+         makePixelMap generates a matrix populated with values of how far each
+         pixel in a grid is from the centre (given in pixel coordinates). Both
+         single and double pixel centres can be used by setting the optional
+         input parameter 'OriginSize'. For grids where the dimension size and
+         centre pixel size are not both odd or even, the optional input
+         parameter 'Shift' can be used to control the location of the
+         centerpoint.
+
+         examples for a 2D pixel map:
+
+         Single pixel origin size for odd and even (with 'Shift' = [1 1] and
+         [0 0], respectively) grid sizes:
+
+         x x x       x x x x         x x x x
+         x 0 x       x x x x         x 0 x x
+         x x x       x x 0 x         x x x x
+                     x x x x         x x x x
+
+         Double pixel origin size for even and odd (with 'Shift' = [1 1] and
+         [0 0], respectively) grid sizes:
+
+         x x x x      x x x x x        x x x x x
+         x 0 0 x      x x x x x        x 0 0 x x
+         x 0 0 x      x x 0 0 x        x 0 0 x x
+         x x x x      x x 0 0 x        x x x x x
+                      x x x x x        x x x x x
+
+         By default a single pixel centre is used which is shifted towards
+         the final row and column.
     Args:
         *args:
 

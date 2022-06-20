@@ -1,5 +1,6 @@
 import numpy
 import numpy as np
+from kwave.utils.kutils import get_win
 import scipy
 from scipy.signal import lfilter
 from scipy.fftpack import fft, ifft, ifftshift, fftshift
@@ -9,7 +10,250 @@ from math import pi
 
 from .misc import sinc
 from .conversionutils import scale_SI
-from .checkutils import num_dim2
+from .checkutils import num_dim, num_dim2
+
+
+# Compute the next highest power of 2 of a 32–bit number `n`
+def next_pow2(n):
+    # decrement `n` (to handle cases when `n` itself is a power of 2)
+    n = n - 1
+
+    # set all bits after the last set bit
+    n |= n >> 1
+    n |= n >> 2
+    n |= n >> 4
+    n |= n >> 8
+    n |= n >> 16
+
+    # increment `n` and return
+    return n + 1
+
+
+def single_sided_correction(func_fft, fft_len, dim):
+    """
+     correct the single - sided magnitude by multiplying the symmetric points by
+     2(the DC and Nyquist components are unique and are not multiplied by 2
+     and the Nyquist component only exists for even numbered FFT lengths)
+    """
+    if fft_len % 2:
+
+        # odd FFT length switch dim case
+        if dim == 0:
+            func_fft[1:, :] = func_fft[1:, :] * 2
+        elif dim == 1:
+            func_fft[:, 1:] = func_fft[:, 1:] * 2
+        elif dim == 2:
+            func_fft[:, :, 1:] = func_fft[:, :, 1:] * 2
+        elif dim == 3:
+            func_fft[:, :, :, 1:] = func_fft[:, :, :, 1:] * 2
+    else:
+
+        # even FFT length
+        if dim == 0:
+            func_fft[1: -1, :, :, :] = func_fft[1: -1, :, :, :] * 2
+        elif dim == 2:
+            func_fft[:, 1: -1, :, :] = func_fft[:, 1: -1, :, :] * 2
+        elif dim == 3:
+            func_fft[:, :, 1: -1, :] = func_fft[:, :, 1: -1, :] * 2
+        elif dim == 4:
+            func_fft[:, :, :, 1: -1] = func_fft[:, :, :, 1: -1] * 2
+
+    return func_fft
+
+
+def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window='Rectangular'):
+    """
+
+    Args:
+        func:          signal to analyse
+        Fs:            sampling frequency [Hz]
+        dim:           dimension over which the spectrum is calculated
+        fft_len:       length of FFT. If the set
+                       length is smaller than the signal length, the default
+                       value is used instead (default = signal length).
+        power_two:     Boolean controlling whether the FFT length is forced to
+                       be the next highest power of 2 (default = false).
+        unwrap (bool):
+        window:        parameter string controlling the window type used to
+                       filter the signal before the FFT is taken (default =
+                       'Rectangular'). Any valid input types for getWin may be
+                       used.
+
+    Returns:
+        f:             frequency array
+        func_as:       single-sided amplitude spectrum
+        func_ps:       single-sided phase spectrum
+
+    """
+
+    # check the size of the input
+    sz = func.shape
+
+    # check input isn't scalar
+    if np.size(func) == 1:
+        raise ValueError('Input signal cannot be scalar.')
+
+    # check input doesn't have more than 4 dimensions
+    if len(sz) > 4:
+        raise ValueError('Input signal must have 1, 2, 3, or 4 dimensions.')
+
+    # automatically set dimension to first non - singleton dimension
+    if dim == 'auto':
+        dim_index = 0
+        while dim_index <= len(sz):
+            if sz[dim_index] > 1:
+                dim = dim_index
+                break
+            dim_index = dim_index + 1
+
+    # assign the number of points being analysed
+    func_length = sz[dim]
+
+    # set the length of the FFT
+    if not fft_len > func_length:
+        if power_two:
+            # find an appropriate FFT length of the form 2 ^ N that is equal to or
+            # larger than the length of the input signal
+            fft_len = 2 ** (next_pow2(func_length))
+        else:
+            # set the FFT length to the function length
+            fft_len = func_length
+
+    # window the signal, reshaping the window to be in the correct direction
+    win, coherent_gain = get_win(func_length, window, symmetric=False)
+    win = np.reshape(win, tuple(([1] * dim + [func_length] + [1] * (len(sz) - 2))))
+    func = win * func
+
+    # compute the fft using the defined FFT length, if fft_len >
+    # func_length, the input signal is padded with zeros
+    func_fft = fft(func, fft_len, dim)
+
+    # correct for the magnitude scaling of the FFT and the coherent gain of the
+    # window(note that the correction is equal to func_length NOT fft_len)
+    func_fft = func_fft / (func_length * coherent_gain)
+
+    # reduce to a single sided spectrum where the number of unique points for
+    # even numbered FFT lengths is given by N / 2 + 1, and for odd(N + 1) / 2
+    num_unique_pts = int(np.ceil((fft_len + 1) / 2))
+    if dim == 0:
+        func_fft = func_fft[0:num_unique_pts]
+    elif dim == 1:
+        func_fft = func_fft[:, 0: num_unique_pts]
+    elif dim == 2:
+        func_fft = func_fft[:, :, 0: num_unique_pts]
+    elif dim == 3:
+        func_fft = func_fft[:, :, :, 0: num_unique_pts]
+
+    func_fft = single_sided_correction(func_fft, fft_len, dim)
+
+    # create the frequency axis variable
+    f = np.arange(0, func_fft.shape[dim]) * Fs / fft_len
+
+    # calculate the amplitude spectrum
+    func_as = np.abs(func_fft)
+
+    # calculate the phase spectrum
+    func_ps = np.angle(func_fft)
+
+    # unwrap the phase spectrum if required
+    if unwrap:
+        func_ps = unwrap(func_ps, [], dim)
+
+    return f, func_as, func_ps
+
+
+def find_closest(A, a):
+    """
+    find_closest returns the value and index of the item in A that is
+    closest to the value a. For vectors, value and index correspond to
+    the closest element in A. For matrices, value and index are row
+    vectors corresponding to the closest element from each column. For
+    N-D arrays, the function finds the closest value along the first
+    matrix dimension (singleton dimensions are removed before the
+    search). If there is more than one element with the closest value,
+    the index of the first one is returned.
+
+    Args:
+        A: matrix to search
+        a: value to find
+
+    Returns:
+        val
+        idx
+    """
+    idx = np.unravel_index(numpy.argmin(abs(A - a)), A.shape)
+    return A[idx], idx
+
+
+def extract_amp_phase(data, Fs, source_freq, dim='auto', fft_padding=3, window='Hanning'):
+    """
+         extract_amp_phase extracts the amplitude and phase information at a
+         specified frequency from a vector or matrix of time series data. By
+         default the time dimension is set to the highest non-singleton
+         dimension. The amplitude and phase are extracted from the frequency
+         spectrum, which is calculated using a windowed and zero padded FFT.
+         The values are extracted at the frequency closest to source_freq.
+
+    Args:
+
+     data:               matrix of time signals [s]
+     Fs:                 sampling frequency [Hz]
+     source_freq:        frequency at which the amplitude and phase should be
+                         extracted [Hz]
+     dim:
+     fft_padding:
+     window:
+
+    Returns:
+
+    """
+
+    # check for the dim input
+    if dim == 'auto':
+        dim = num_dim(data)
+        if dim == 2 and data.shape[1] == 1:
+            dim = 1
+
+    # create 1D window and reshape to be oriented in the time dimension of the
+    # input data
+    win, coherent_gain = get_win(data.shape[dim], window)
+    # this list magic in Python comes from the use of ones in MATLAB
+    # TODO: simplify this
+    win = np.reshape(win, [1] * (dim - 1) + [len(win)])
+
+    # apply window to time dimension of input data
+    data = win * data
+
+    # compute amplitude and phase spectra
+    f, func_as, func_ps = spect(data, Fs, fft_len=fft_padding * data.shape[dim], dim=dim)
+
+    # correct for coherent gain
+    func_as = func_as / coherent_gain
+
+    # find the index of the frequency component closest to source_freq
+    _, f_index = find_closest(f, source_freq)
+
+    # get size of output variable, collapsing the time dimension
+    sz = list(data.shape)
+    sz[dim - 1] = 1
+
+    # extract amplitude and relative phase at freq_index
+    if dim == 0:
+        amp = func_as[f_index]
+        phase = func_ps[f_index]
+    elif dim == 1:
+        amp = func_as[:, f_index]
+        phase = func_ps[:, f_index]
+    elif dim == 2:
+        amp = func_as[:, :, f_index]
+        phase = func_ps[:, :, f_index]
+    elif dim == 3:
+        amp = func_as[:, :, :, f_index]
+        phase = func_ps[:, :, :, f_index]
+    else:
+        raise ValueError('dim must be 0, 1, 2, or 3');
+
+    return amp.squeeze(), phase.squeeze(), f[f_index]
 
 
 def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
@@ -375,7 +619,8 @@ def filterTimeSeries(kgrid, medium, signal, *args):
 
     else:
         raise ValueError(
-            'The input fields medium.sound_speed or medium.sound_speed_compression and medium.sound_speed_shear must be defined.')
+            'The input fields medium.sound_speed or medium.sound_speed_compression and medium.sound_speed_shear must '
+            'be defined.')
 
     # extract the maximum supported frequency (two points per wavelength)
     f_max = kgrid.k_max_all * c0 / (2 * np.pi)
@@ -447,12 +692,12 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
     if filter_type == 'BandPass':
 
         # apply the low pass filter
-        func_filt_lp = apply_filter(signal, Fs, cutoff_f(2), 'LowPass', 'StopBandAtten', stop_band_atten,
-                                    'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
+        func_filt_lp = apply_filter(signal, Fs, cutoff_f(2), 'LowPass', stop_band_atten=stop_band_atten,
+                                    transition_width=transition_width, zero_phase=zero_phase)
 
         # apply the high pass filter
-        filtered_signal = apply_filter(func_filt_lp, Fs, cutoff_f(1), 'HighPass', 'StopBandAtten', stop_band_atten,
-                                       'TransitionWidth', transition_width, 'ZeroPhase', zero_phase);
+        filtered_signal = apply_filter(func_filt_lp, Fs, cutoff_f(1), 'HighPass', stop_band_atten=stop_band_atten,
+                                       transition_width=transition_width, zero_phase=zero_phase)
 
     else:
 

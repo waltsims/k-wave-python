@@ -2,8 +2,10 @@ from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
+from kwave.utils.filterutils import extract_amp_phase, spect
 import numpy as np
 from phantominator import shepp_logan
+
 
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,
                          0.02355139, 0.02753738, 0.02966112, 0.02907933, 0.02502059,
@@ -59,7 +61,7 @@ def test_add_noise():
     p_sig = np.sqrt(np.mean(input_signal ** 2))
     p_noise = np.sqrt(np.mean((output - input_signal) ** 2))
     snr = 20 * np.log10(p_sig / p_noise)
-    assert (abs(5 - snr) < 2),\
+    assert (abs(5 - snr) < 2), \
         "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
     return
 
@@ -119,7 +121,26 @@ def test_tone_burst_ring():
 
 
 def test_num_dim():
-    assert num_dim([1, 2, 3]) == 1, " num_dim fails for len 3"
-    assert num_dim([1, 2]) == 1, "num_dim fails for len 2"
-    assert num_dim([1, 2, 5, 6, 7, 89]) == 1, "num_dim fails for len 7"
+    assert num_dim(np.ones((1, 2))) == 1, " num_dim fails for len 3"
+    assert num_dim(np.ones((2, 2))) == 2, "num_dim fails for len 2"
     return
+
+
+def test_spect():
+    a = np.array([0, 1.111111111, 2.222222222, 3.3333333333, 4.444444444]) * 1e6
+    b = [0.0000, 0.1850, 0.3610, 0.2905, 0.0841]
+    c = [3.1416, 1.9199, -0.8727, 2.6180, -0.1745]
+    a_t, b_t, c_t =spect(toneBurst(10e6, 2.5e6, 2), 10e6)
+    assert (abs(a_t - a) < 0.01).all()
+    assert (abs(b_t - b) < 0.0001).all()
+    assert (abs(c_t - c) < 0.0001).all()
+
+
+def test_extract_amp_phase():
+    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10 ** 6)
+    a, b, c = 0.6547, -1.8035, 2.5926e06
+    assert (abs(a_t - a) < 0.01).all()
+    assert (abs(b_t - b) < 0.0001).all()
+    assert (abs(c_t - c) < 100).all()
+

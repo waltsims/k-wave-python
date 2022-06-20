@@ -1,8 +1,13 @@
 import unittest.mock
 import logging
+import sys
 from kwave.executor import Executor
+import pytest
+
+check_is_linux = pytest.mark.skipif(not sys.platform.startswith('linux'), reason="Currently only implemented for linux.")
 
 
+@check_is_linux
 class TestExecutor(unittest.TestCase):
 
     @unittest.mock.patch('os.system')

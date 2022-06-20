@@ -23,7 +23,7 @@ def check_field_names(dictionary, *fields):
 
 def num_dim(x):
     # get the size collapsing any singleton dimensions
-    return len(np.squeeze(x).shape)
+    return len(x.squeeze().shape)
 
 
 def num_dim2(x: np.ndarray):

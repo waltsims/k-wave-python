@@ -8,6 +8,71 @@ import scipy
 from .misc import sinc, ndgrid, gaussian
 from .conversionutils import db2neper
 
+import math
+
+
+def primefactors(n):
+    # even number divisible
+    factors = []
+    while n % 2 == 0:
+        factors.append(2),
+        n = n / 2
+
+    # n became odd
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+
+        while (n % i == 0):
+            factors.append(i)
+            n = n / i
+
+    if n > 2:
+        factors.append(n)
+
+    return factors
+
+
+def check_factors(min_number, max_number):
+    """
+        Return the maximum prime factor for a range of numbers.
+
+        checkFactors loops through the given range of numbers and finds the
+        numbers with the smallest maximum prime factors. This allows suitable
+        grid sizes to be selected to maximise the speed of the FFT (this is
+        fastest for FFT lengths with small prime factors). The output is
+        printed to the command line, and a plot of the factors is generated.
+
+    Args:
+        min_number: integer specifying the lower bound of values to test
+        max_number: integer specifying the upper bound of values to test
+
+    Returns:
+
+    """
+
+    # extract factors
+    facs = np.zeros(1, max_number - min_number)
+    fac_max = facs
+    for index in range(min_number, max_number):
+        facs[index - min_number + 1] = len(primefactors(index))
+        fac_max[index - min_number + 1] = max(primefactors(index))
+
+    # compute best factors in range
+    print('Numbers with a maximum prime factor of 2')
+    ind = min_number + np.argwhere(fac_max == 2)
+    print(ind)
+    print('Numbers with a maximum prime factor of 3')
+    ind = min_number + np.argwhere(fac_max == 3)
+    print(ind)
+    print('Numbers with a maximum prime factor of 5')
+    ind = min_number + np.argwhere(fac_max == 5)
+    print(ind)
+    print('Numbers with a maximum prime factor of 7')
+    ind = min_number + np.argwhere(fac_max == 7)
+    print(ind)
+    print('Numbers to avoid (prime numbers)')
+    nums = np.arange(min_number, max_number)
+    print(nums[fac_max == nums])
+
 
 def check_stability(kgrid, medium):
     """
@@ -171,7 +236,7 @@ def add_noise(signal, snr, mode="rms"):
 
 
 def get_win(N: Union[int, List[int]],
-            type_: str,   # TODO change this to enum in the future
+            type_: str,  # TODO change this to enum in the future
             plot_win: bool = False,
             param: Optional[float] = None,
             rotation: bool = False,
@@ -179,61 +244,59 @@ def get_win(N: Union[int, List[int]],
             square: bool = False):
     """
         Return a frequency domain windowing function
-        %     getWin returns a 1D, 2D, or 3D frequency domain window of the
-        %     specified type of the given dimensions. By default, higher
-        %     dimensional windows are created using the outer product. The windows
-        %     can alternatively be created using rotation by setting the optional
-        %     input 'Rotation' to true. The coherent gain of the window can also be
-        %     returned.
+        getWin returns a 1D, 2D, or 3D frequency domain window of the
+        specified type of the given dimensions. By default, higher
+        dimensional windows are created using the outer product. The windows
+        can alternatively be created using rotation by setting the optional
+        input 'Rotation' to true. The coherent gain of the window can also be
+        returned.
     Args:
         N: - number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D
-        type: - window type. Supported values are
-        %                   'Bartlett'
-        %                   'Bartlett-Hanning'
-        %                   'Blackman'
-        %                   'Blackman-Harris'
-        %                   'Blackman-Nuttall'
-        %                   'Cosine'
-        %                   'Flattop'
-        %                   'Gaussian'
-        %                   'HalfBand'
-        %                   'Hamming'
-        %                   'Hanning'
-        %                   'Kaiser'
-        %                   'Lanczos'
-        %                   'Nuttall'
-        %                   'Rectangular'
-        %                   'Triangular'
-        %                   'Tukey'
-        *args: OPTIONAL INPUTS:
-        %
-        %     'Plot'      - Boolean controlling whether the window is displayed
-        %                   (default = false).
-        %
-        %     'Param' -     Control parameter for the Tukey, Blackman, Gaussian,
-        %                   and Kaiser windows:
-        %
-        %                   Tukey: taper ratio (default = 0.5)
-        %                   Blackman: alpha (default = 0.16)
-        %                   Gaussian: standard deviation (default = 0.5)
-        %                   Kaiser: alpha (default = 3)
-        %
-        %     'Rotation'  - Boolean controlling whether 2D and 3D windows are
-        %                   created via rotation or the outer product (default =
-        %                   false). Windows created via rotation will have edge
-        %                   values outside the window radius set to the first
-        %                   window value.
-        %
-        %     'Symmetric' - Boolean controlling whether the window is symmetrical
-        %                   (default = true). If set to false, a window of length N
-        %                   + 1 is created and the first N points are returned. For
-        %                   2D and 3D windows, 'Symmetric' can be defined as a
-        %                   vector defining the symmetry in each matrix dimension.
-        %
-        %     'Square'    - Boolean controlling whether the window is forced to
-        %                   be square (default = false). If set to true and Nx
-        %                   and Nz are not equal, the window is created using the
-        %                   smaller variable, and then padded with zeros.
+        type_: - window type. Supported values are
+                           'Bartlett'
+                           'Bartlett-Hanning'
+                           'Blackman'
+                           'Blackman-Harris'
+                           'Blackman-Nuttall'
+                           'Cosine'
+                           'Flattop'
+                           'Gaussian'
+                           'HalfBand'
+                           'Hamming'
+                           'Hanning'
+                           'Kaiser'
+                           'Lanczos'
+                           'Nuttall'
+                           'Rectangular'
+                           'Triangular'
+                           'Tukey'
+             plot_win:      - Boolean controlling whether the window is displayed
+                           (default = false).
+
+             param:     Control parameter for the Tukey, Blackman, Gaussian,
+                           and Kaiser windows:
+
+                           Tukey: taper ratio (default = 0.5)
+                           Blackman: alpha (default = 0.16)
+                           Gaussian: standard deviation (default = 0.5)
+                           Kaiser: alpha (default = 3)
+
+             rotation:  - Boolean controlling whether 2D and 3D windows are
+                           created via rotation or the outer product (default =
+                           false). Windows created via rotation will have edge
+                           values outside the window radius set to the first
+                           window value.
+
+             symmetric: - Boolean controlling whether the window is symmetrical
+                           (default = true). If set to false, a window of length N
+                           + 1 is created and the first N points are returned. For
+                           2D and 3D windows, 'Symmetric' can be defined as a
+                           vector defining the symmetry in each matrix dimension.
+
+             square:    - Boolean controlling whether the window is forced to
+                           be square (default = false). If set to true and Nx
+                           and Nz are not equal, the window is created using the
+                           smaller variable, and then padded with zeros.
 
     Returns:
         win: the window
@@ -300,29 +363,29 @@ def get_win(N: Union[int, List[int]],
         n = np.arange(0, N)
 
         if type_ == 'Bartlett':
-            win = (2 / (N - 1) * ( (N - 1) / 2 - abs(n - (N - 1) / 2))).T
+            win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Bartlett-Hanning':
-            win = (0.62 - 0.48 * abs(n / (N - 1) - 1/2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
+            win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Blackman':
-            win = cosineSeries(n, N, [(1 - param)/2, 0.5, param/2])
+            win = cosineSeries(n, N, [(1 - param) / 2, 0.5, param / 2])
         elif type_ == 'Blackman-Harris':
             win = cosineSeries(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
         elif type_ == 'Blackman-Nuttall':
             win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Cosine':
-            win = (np.cos(np.pi * n / (N - 1) - np.pi/2)).T
+            win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
         elif type_ == 'Flattop':
             win = cosineSeries(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
             ylim = [-0.2, 1]
         elif type_ == 'Gaussian':
-            win = (np.exp(-0.5 * ( (n - (N - 1) / 2) / (param * (N - 1) / 2))**2)).T
+            win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
         elif type_ == 'HalfBand':
             win = np.ones(N)
             # why not to just round? => because rounding 0.5 introduces unexpected behaviour
             # round(0.5) should be 1 but it is 0
-            ramp_length = round(N/4 + 1e-8)
+            ramp_length = round(N / 4 + 1e-8)
             ramp = 1 / 2 + 9 / 16 * np.cos(np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length)) - 1 / 16 * np.cos(
-                3 * np.pi * np.arange(1, ramp_length+1) / (2 * ramp_length))
+                3 * np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length))
             if ramp_length > 0:
                 win[0:ramp_length] = np.flip(ramp)
                 win[-ramp_length:] = ramp
@@ -331,7 +394,7 @@ def get_win(N: Union[int, List[int]],
         elif type_ == 'Hanning':
             win = (0.5 - 0.5 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Kaiser':
-            part_1 = scipy.special.iv(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1)**2))
+            part_1 = scipy.special.iv(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1) ** 2))
             part_2 = scipy.special.iv(0, np.pi * param)
             win = part_1 / part_2
         elif type_ == 'Lanczos':
@@ -345,10 +408,10 @@ def get_win(N: Union[int, List[int]],
             win = (2 / N * (N / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Tukey':
             win = np.ones((N, 1))
-            index = np.arange(0, (N-1) * param / 2 + 1e-8)
+            index = np.arange(0, (N - 1) * param / 2 + 1e-8)
             param = param * N
             win[0: len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
-            win[np.arange(-1, -len(index)-1, -1)] = win[0:len(index)]
+            win[np.arange(-1, -len(index) - 1, -1)] = win[0:len(index)]
             win = win.squeeze(axis=-1)
         else:
             raise ValueError(f'Unknown window type: {type_}')
@@ -378,14 +441,14 @@ def get_win(N: Union[int, List[int]],
             win_lin = np.squeeze(win_lin)
 
             # create the reference axis
-            radius = (L - 1)/2
+            radius = (L - 1) / 2
             ll = np.linspace(-radius, radius, L)
 
             # create the 2D window using rotation
             xx = np.linspace(-radius, radius, N[0])
             yy = np.linspace(-radius, radius, N[1])
             [x, y] = ndgrid(xx, yy)
-            r = np.sqrt(x**2 + y**2)
+            r = np.sqrt(x ** 2 + y ** 2)
             r[r > radius] = radius
             interp_func = scipy.interpolate.interp1d(ll, win_lin)
             win = interp_func(r)
@@ -414,7 +477,7 @@ def get_win(N: Union[int, List[int]],
             win_lin, _ = get_win(L, type_, param=param)
 
             # create the reference axis
-            radius = (L - 1)/2
+            radius = (L - 1) / 2
             ll = np.linspace(-radius, radius, L)
 
             # create the 3D window using rotation
@@ -422,7 +485,7 @@ def get_win(N: Union[int, List[int]],
             yy = np.linspace(-radius, radius, N[1])
             zz = np.linspace(-radius, radius, N[2])
             [x, y, z] = ndgrid(xx, yy, zz)
-            r = np.sqrt(x**2 + y**2 + z**2)
+            r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
             r[r > radius] = radius
 
             win_lin = np.squeeze(win_lin)
@@ -460,13 +523,13 @@ def get_win(N: Union[int, List[int]],
         win_sq = win
         win = np.zeros(N_orig)
         if N.size == 2:
-            index1 = round((N[0] - L)/2)
-            index2 = round((N[1] - L)/2)
+            index1 = round((N[0] - L) / 2)
+            index2 = round((N[1] - L) / 2)
             win[index1:(index1 + L), index2:(index2 + L)] = win_sq
         elif N.size == 3:
-            index1 = floor((N_orig[0] - L)/2)
-            index2 = floor((N_orig[1] - L)/2)
-            index3 = floor((N_orig[2] - L)/2)
+            index1 = floor((N_orig[0] - L) / 2)
+            index2 = floor((N_orig[1] - L) / 2)
+            index3 = floor((N_orig[2] - L) / 2)
             win[index1:index1 + L, index2:index2 + L, index3:index3 + L] = win_sq
 
     return win, cg
@@ -584,8 +647,8 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
             tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), type_='Tukey', param=0.05)[0])
 
     # calculate the expected FWHM in the frequency domain
-    # t_var = tone_length/(2*x_lim);
-    # w_var = 1/(4*pi^2*t_var);
+    # t_var = tone_length/(2*x_lim)
+    # w_var = 1/(4*pi^2*t_var)
     # fw = 2 * sqrt(2 * log(2) * w_var)
 
     # create the signal with the offset tone burst
@@ -621,6 +684,3 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
     assert reorder_index.ndim == 1
 
     return sensor_data[reorder_index.argsort()]
-
-
-
