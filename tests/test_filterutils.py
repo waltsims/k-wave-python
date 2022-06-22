@@ -1,5 +1,6 @@
 import numpy as np
-from kwave.utils.filterutils import gaussian, gaussian_filter, create_cw_signals, fwhm, envelope_detection, sharpness
+from kwave.utils.filterutils import gaussian, gaussian_filter, create_cw_signals, fwhm, envelope_detection, sharpness, \
+    smooth
 from kwave.utils.kutils import get_win
 from math import pi
 
@@ -159,3 +160,15 @@ def test_create_cw_signals():
 
     # create signals and plot
     cw_signal = create_cw_signals(t_array, f, amp, phase)
+
+
+def test_smooth():
+    A = np.diag(np.ones(6))
+    A_sm = np.array(smooth(A))
+    expected_A_sm = np.array([[0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705, 0.23343146],
+                     [0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705],
+                     [0.09246705, 0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708],
+                     [0.03313708, 0.09246705, 0.23343146, 0.3150659, 0.23343146, 0.09246705],
+                     [0.09246705, 0.03313708, 0.09246705, 0.23343146, 0.3150659, 0.23343146],
+                     [0.23343146, 0.09246705, 0.03313708, 0.09246705, 0.23343146, 0.3150659]])
+    assert (A_sm - expected_A_sm < 0.001).all()

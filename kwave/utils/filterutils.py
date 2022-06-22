@@ -3,7 +3,7 @@ import numpy as np
 from kwave.utils.kutils import get_win
 import scipy
 from scipy.signal import lfilter
-from scipy.fftpack import fft, ifft, ifftshift, fftshift
+from scipy.fftpack import fft, ifft, ifftshift, fftshift, fftn, ifftn
 # from scipy.stats import norm
 import math
 from math import pi
@@ -76,7 +76,7 @@ def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window
         unwrap (bool):
         window:        parameter string controlling the window type used to
                        filter the signal before the FFT is taken (default =
-                       'Rectangular'). Any valid input types for getWin may be
+                       'Rectangular'). Any valid input types for get_win may be
                        used.
 
     Returns:
@@ -279,7 +279,7 @@ def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
         t_array = np.arange(0, 10*T, dt)
 
         # define amplitude and phase
-        amp = getWin(9, 'Gaussian')
+        amp = get_win(9, 'Gaussian')
         phase = np.arange(0, 2*pi, 9).T
 
         # create signals and plot
@@ -738,3 +738,52 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
         filtered_signal = filtered_signal[N:]
 
     return filtered_signal[np.newaxis]
+
+
+def smooth(A, restore_max=False, window_type="Blackman"):
+    """
+    Smooth a matrix.
+
+    DESCRIPTION:
+    smooth filters an input matrix using an n - dimensional frequency
+    domain window created using get_win. If no window type is specified, a
+    Blackman window is used.
+
+    Args:
+        A: spatial distribution to smooth
+        restore_max:  Boolean controlling whether the maximum value is restored after smoothing(default=false).
+        window_type:  shape of the smoothing window; any valid inputs to get_win are supported(default='Blackman').
+
+    OUTPUTS:
+    A_sm - smoothed
+   """
+    # get the grid size
+    grid_size = A.shape
+
+    # remove singleton dimensions
+    if num_dim(A) is not len(grid_size):
+        A = A.squeeze()
+        grid_size = A.shape
+
+    # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
+    # even grid sizes to ensure the DC component of the window has a value of
+    # unity
+    window_symmetry = [bool(n % 2) for n in grid_size]
+
+    # get the window, taking the absolute value to discard machine precision
+    # negative values
+    win_tmp, _ = get_win(grid_size, window_type, rotation=True, symmetric=window_symmetry)
+    win = abs(win_tmp)
+
+    # rotate window if input A is (1, N)
+    if win.shape[0] == 1:
+        win = win.transpose()
+
+    # apply the filter
+    A_sm = np.real(ifftn(fftn(A) * ifftshift(win)))
+
+    # restore magnitude if required
+    if restore_max:
+        A_sm = (max(abs(A[:])) / max(abs(A_sm[:]))) * A_sm
+
+    return A_sm
