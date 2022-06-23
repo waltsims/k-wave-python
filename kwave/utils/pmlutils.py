@@ -90,12 +90,6 @@ def getOptimalPMLSize(grid_size, pml_range=None, axisymmetric=None):
     from kwave.kgrid import kWaveGrid
     if isinstance(grid_size, kWaveGrid):
         grid_size = grid_size.N
-        # if grid_size.dim == 1:
-        #     grid_size = [grid_size.Nx]
-        # if grid_size.dim == 2:
-        #     grid_size = [grid_size.Nx, grid_size.Ny]
-        # if grid_size.dim == 3:
-        #     grid_size = [grid_size.Nx, grid_size.Ny, grid_size.Nz]
 
     # assign grid size
     grid_dim = len(grid_size)
@@ -134,7 +128,7 @@ def getOptimalPMLSize(grid_size, pml_range=None, axisymmetric=None):
     # create array of PML values to search
     pml_size = np.arange(pml_range[0], pml_range[1] + 1)
 
-    # extract largest prime factor for each dimension for each pml size
+    # extract the largest prime factor for each dimension for each pml size
     facs = np.zeros((grid_dim, len(pml_size)))
     from kwave.utils import largest_prime_factor
     for dim in range(0, grid_dim):
