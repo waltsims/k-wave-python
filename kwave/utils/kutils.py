@@ -1,6 +1,8 @@
 from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
+from kwave.utils.checkutils import num_dim
+from kwave.utils.conversionutils import scale_SI
 
 import numpy as np
 import scipy
@@ -323,6 +325,7 @@ def get_win(N: Union[int, List[int]],
     # Check if N is either `int` or `list of ints`
     # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
     N = np.array(N, dtype=int)
+    N = N if np.size(N) > 1 else int(N)
 
     # Check if symmetric is either `bool` or `list of bools`
     # assert isinstance(symmetric, int) or isinstance(symmetric, list)
@@ -684,3 +687,113 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
     assert reorder_index.ndim == 1
 
     return sensor_data[reorder_index.argsort()]
+
+
+def getAlphaFilter1D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
+    filter_cutoff_x = filter_cutoff
+
+    return alpha_filter
+
+
+def getAlphaFilter2D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
+    filter_cutoff_x, filter_cutoff_y = filter_cutoff
+    return alpha_filter
+
+
+def getAlphaFilter3D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
+    filter_cutoff_x, filter_cutoff_y, filter_cutoff_z = filter_cutoff
+    return alpha_filter
+
+
+def calc_max_freq(n_samples, max_spat_freq, c):
+    filter_size = n_samples
+    filter_cutoff_freq = max_spat_freq * c / (2 * np.pi)
+    return filter_cutoff_freq
+
+
+def freq2wavenumber(N, k_max, filter_cutoff, c, k_dim):
+    """
+    Args:
+        N:
+        k_max:
+        filter_cutoff:
+        c:
+        k_dim:
+
+    Returns:
+
+    """
+    k_cutoff = 2 * np.pi * filter_cutoff / c
+
+    # set the alpha_filter size
+    filter_size = round(N * k_cutoff / k_dim[-1])
+
+    # check the alpha_filter size
+    if filter_size > N:
+        # set the alpha_filter size to be the same as the grid size
+        filter_size = N
+        filter_cutoff = k_max * c / (2 * np.pi)
+    return filter_size, filter_cutoff
+
+
+def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
+    """
+     getAlphaFilter uses get_win to create a Tukey window via rotation to
+     pass to the medium.alpha_filter input field of the first order
+     simulation functions (kspaceFirstOrder1D, kspaceFirstOrder2D, and
+     kspaceFirstOrder3D). This parameter is used to regularise time
+     reversal image reconstruction when absorption compensation is
+     included.
+
+    Args:
+        kgrid (kWaveGrid):
+        medium (Medium):
+        filter_cutoff (list): Any of the filter_cutoff inputs may be set to 'max' to set the cutoff frequency to the maximum frequency supported by the grid
+        taper_ratio:
+
+    Returns:
+        alpha_filter:
+    """
+
+    dim = num_dim(kgrid.k)
+    print(f'    taber ratio: {taper_ratio}')
+    # extract the maximum sound speed
+    c = max(medium.sound_speed)
+
+    assert len(filter_cutoff) == dim, f"Input filter_cutoff must have {dim} elements for a {dim}D grid"
+
+    # parse cutoff freqs
+    filter_size = []
+    for idx, freq in enumerate(filter_cutoff):
+        if freq == 'max':
+            filter_cutoff[idx] = calc_max_freq(kgrid.N[idx], kgrid.k_max[idx], c)
+            filter_size_local = kgrid.N[idx]
+        else:
+
+            filter_size_local, filter_cutoff[idx] = freq2wavenumber(kgrid.N[idx], kgrid.k_max[idx], filter_cutoff[idx],
+                                                                c, kgrid.k[idx])
+        filter_size.append(filter_size_local)
+
+    # create the alpha_filter
+    filter_sec, _ = get_win(filter_size, 'Tukey', param=taper_ratio, rotation=True)
+
+    # enlarge the alpha_filter to the size of the grid
+    alpha_filter = np.zeros(kgrid.N)
+    indexes = [round((kgrid.N[idx] - filter_size[idx]) / 2) for idx in range(len(filter_size))]
+    # x_index = round((kgrid.Nx - filter_size_x) / 2) + 1
+    # y_index = round((kgrid.Ny - filter_size_y) / 2) + 1
+    # z_index = round((kgrid.Nz - filter_size_z) / 2) + 1
+
+    if dim == 1:
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0]]
+    elif dim == 2:
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1]] = filter_sec
+    elif dim == 3:
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1], indexes[2]:indexes[2] + filter_size[2]] = filter_sec
+
+    dim_string = lambda cutoff_vals: "".join([str(scale_SI(co)[0]) + " Hz by " for co in cutoff_vals])
+    # update the command line status
+    print(f'  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
+
+
+    return alpha_filter

@@ -1,4 +1,4 @@
-from kwave.utils.kutils import check_stability, primefactors, toneBurst
+from kwave.utils.kutils import check_stability, primefactors, toneBurst, get_alpha_filter
 from kwave import kWaveMedium, kWaveGrid
 import numpy as np
 
@@ -44,4 +44,87 @@ def test_prime_factors():
     assert ((np.array(expected_res) - np.array(primefactors(144))) == 0).all()
 
 
+def test_get_alpha_filters_2D():
+    # =========================================================================
+    # SETTINGS
+    # =========================================================================
 
+    # size of the computational grid
+    Nx = 64  # number of grid points in the x (row) direction
+    x = 1e-3  # size of the domain in the x direction [m]
+    dx = x / Nx  # grid point spacing in the x direction [m]
+
+    # define the properties of the propagation medium
+    medium = kWaveMedium(sound_speed=1500)
+
+    # size of the initial pressure distribution
+    source_radius = 2  # [grid points]
+
+    # distance between the centre of the source and the sensor
+    source_sensor_distance = 10  # [grid points]
+
+    # time array
+    dt = 2e-9  # [s]
+    t_end = 300e-9  # [s]
+
+    # =========================================================================
+    # TWO DIMENSIONAL SIMULATION
+    # =========================================================================
+
+    # create the computational grid
+    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+
+    # create the time array
+    kgrid.setTime(round(t_end / dt) + 1, dt)
+
+    filter = get_alpha_filter(kgrid, medium, ['max', 'max'])
+
+    assert (filter[32] - np.array([0., 0.00956799, 0.03793968, 0.08406256, 0.14616399,
+                                   0.22185752, 0.30823458, 0.40197633, 0.4994812, 0.59700331,
+                                   0.69079646, 0.7772581, 0.85306778, 0.91531474, 0.9616098,
+                                   0.99017714, 0.99992254, 1., 1., 1.,
+                                   1., 1., 1., 1., 1.,
+                                   1., 1., 1., 1., 1.,
+                                   1., 1., 1., 1., 1.,
+                                   1., 1., 1., 1., 1.,
+                                   1., 1., 1., 1., 1.,
+                                   1., 1., 0.99992254, 0.99017714, 0.9616098,
+                                   0.91531474, 0.85306778, 0.7772581, 0.69079646, 0.59700331,
+                                   0.4994812, 0.40197633, 0.30823458, 0.22185752, 0.14616399,
+                                   0.08406256, 0.03793968, 0.00956799, 0.]) < 0.01).all()
+
+
+def test_get_alpha_filters_1D():
+    # =========================================================================
+    # SETTINGS
+    # =========================================================================
+
+    # size of the computational grid
+    Nx = 64  # number of grid points in the x (row) direction
+    x = 1e-3  # size of the domain in the x direction [m]
+    dx = x / Nx  # grid point spacing in the x direction [m]
+
+    # define the properties of the propagation medium
+    medium = kWaveMedium(sound_speed=1500)
+
+    # size of the initial pressure distribution
+    source_radius = 2  # [grid points]
+
+    # distance between the centre of the source and the sensor
+    source_sensor_distance = 10  # [grid points]
+
+    # time array
+    dt = 2e-9  # [s]
+    t_end = 300e-9  # [s]
+
+    # =========================================================================
+    # TWO DIMENSIONAL SIMULATION
+    # =========================================================================
+
+    # create the computational grid
+    kgrid = kWaveGrid(Nx, dx)
+
+    # create the time array
+    kgrid.setTime(round(t_end / dt) + 1, dt)
+
+    get_alpha_filter(kgrid, medium, ['max'])
