@@ -689,22 +689,6 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
     return sensor_data[reorder_index.argsort()]
 
 
-def getAlphaFilter1D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
-    filter_cutoff_x = filter_cutoff
-
-    return alpha_filter
-
-
-def getAlphaFilter2D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
-    filter_cutoff_x, filter_cutoff_y = filter_cutoff
-    return alpha_filter
-
-
-def getAlphaFilter3D(kgrid, medium, filter_cutoff, c, taper_ratio=0.5):
-    filter_cutoff_x, filter_cutoff_y, filter_cutoff_z = filter_cutoff
-    return alpha_filter
-
-
 def calc_max_freq(n_samples, max_spat_freq, c):
     filter_size = n_samples
     filter_cutoff_freq = max_spat_freq * c / (2 * np.pi)
