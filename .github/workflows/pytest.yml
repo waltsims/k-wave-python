@@ -1,4 +1,4 @@
-name: Python package
+name: pytest
 
 on: [push]
 
@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-
+        python-version: [3.7] # ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -17,6 +16,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          apt-get update && apt-get install -y python3-opencv
           python -m pip install --upgrade pip
           pip install pytest
           if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
