@@ -689,8 +689,7 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
     return sensor_data[reorder_index.argsort()]
 
 
-def calc_max_freq(n_samples, max_spat_freq, c):
-    filter_size = n_samples
+def calc_max_freq(max_spat_freq, c):
     filter_cutoff_freq = max_spat_freq * c / (2 * np.pi)
     return filter_cutoff_freq
 
@@ -750,12 +749,11 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     filter_size = []
     for idx, freq in enumerate(filter_cutoff):
         if freq == 'max':
-            filter_cutoff[idx] = calc_max_freq(kgrid.N[idx], kgrid.k_max[idx], c)
+            filter_cutoff[idx] = calc_max_freq(kgrid.k_max[idx], c)
             filter_size_local = kgrid.N[idx]
         else:
-
             filter_size_local, filter_cutoff[idx] = freq2wavenumber(kgrid.N[idx], kgrid.k_max[idx], filter_cutoff[idx],
-                                                                c, kgrid.k[idx])
+                                                                    c, kgrid.k[idx])
         filter_size.append(filter_size_local)
 
     # create the alpha_filter
@@ -764,20 +762,17 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     # enlarge the alpha_filter to the size of the grid
     alpha_filter = np.zeros(kgrid.N)
     indexes = [round((kgrid.N[idx] - filter_size[idx]) / 2) for idx in range(len(filter_size))]
-    # x_index = round((kgrid.Nx - filter_size_x) / 2) + 1
-    # y_index = round((kgrid.Ny - filter_size_y) / 2) + 1
-    # z_index = round((kgrid.Nz - filter_size_z) / 2) + 1
 
     if dim == 1:
         alpha_filter[indexes[0]: indexes[0] + filter_size[0]]
     elif dim == 2:
         alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1]] = filter_sec
     elif dim == 3:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1], indexes[2]:indexes[2] + filter_size[2]] = filter_sec
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1],
+        indexes[2]:indexes[2] + filter_size[2]] = filter_sec
 
     dim_string = lambda cutoff_vals: "".join([str(scale_SI(co)[0]) + " Hz by " for co in cutoff_vals])
     # update the command line status
     print(f'  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
-
 
     return alpha_filter
