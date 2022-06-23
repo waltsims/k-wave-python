@@ -1,7 +1,100 @@
 import math
 from math import floor
-
 import numpy as np
+from scipy import optimize
+
+from kwave.utils.conversionutils import db2neper, neper2db
+
+
+def get_spaced_points(start, stop, n=100, spacing='linear'):
+    """
+    getSpacedPoints generates a row vector of either logarithmically or
+    linearly spaced points between X1 and X2. When spacing is set to
+    'linear', the function is identical to the inbuilt np.linspace
+    function. When spacing is set to 'log', the function is similar to
+    the inbuilt np.logspace function, except that X1 and X2 define the start
+    and end numbers, not decades. For logarithmically spaced points, X1
+    must be > 0. If N < 2, X2 is returned.
+    Args:
+        start:
+        stop:
+        n:
+        spacing:
+
+    Returns:
+        points:
+    """
+    # check if the end point is larger than the start point
+    if stop <= start:
+        raise ValueError('X2 must be larger than X1.')
+
+    if spacing == 'linear':
+        return np.linspace(start, stop, num=n)
+    elif spacing == 'log':
+        return np.geomspace(start, stop, num=n)
+    else:
+        raise ValueError(f"spacing {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
+
+
+def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
+    """
+
+    fit_power_law_params calculates the absorption parameters that should
+    be defined in the simulation functions given the desired power law
+    absorption behaviour defined by a0 and y. This takes into account the
+    actual absorption behaviour exhibited by the fractional Laplacian
+    wave equation.
+
+    This fitting is required when using large absorption values or high
+    frequencies, as the fractional Laplacian wave equation solved in
+    kspaceFirstOrderND and kspaceSecondOrder no longer encapsulates
+    absorption of the form a = a0*f^y.
+
+    The returned values should be used to define the medium.alpha_coeff
+    and medium.alpha_power within the simulation functions. The
+    absorption behaviour over the frequency range f_min:f_max will then
+    follow the power law defined by a0 and y.Add testing for getOptimalPMLSize()
+
+    Args:
+        a0:
+        y:
+        c0:
+        f_min:
+        f_max:
+        plot_fit:
+
+    Returns:
+        a0_fit:
+        y_fit:
+
+    """
+    # define frequency axis
+    f = get_spaced_points(f_min, f_max, 200)
+    w = 2 * np.pi * f
+    # convert user defined a0 to Nepers/((rad/s)^y m)
+    a0_np = db2neper(a0, y)
+
+    desired_absorption = a0_np * w ** y
+
+    def abs_func(trial_vals):
+        """Second-order absorption error"""
+        a0_np_trial, y_trial = trial_vals
+
+        actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) * \
+                            a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (y_trial - 1))
+
+        absorption_error = np.sqrt(np.sum((desired_absorption - actual_absorption) ** 2))
+
+        return absorption_error
+
+    a0_np_fit, y_fit = optimize.fmin(abs_func, [a0_np, y])
+
+    a0_fit = neper2db(a0_np_fit, y_fit)
+
+    if plot_fit:
+        raise NotImplementedError
+
+    return a0_fit, y_fit
 
 
 def water_absorption(f, temp):

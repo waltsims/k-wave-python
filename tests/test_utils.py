@@ -1,5 +1,5 @@
 from kwave.utils.checkutils import num_dim
-from kwave.utils.maputils import hounsfield2density
+from kwave.utils.maputils import hounsfield2density, fit_power_law_params
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
@@ -169,4 +169,12 @@ def test_apply_filter_bandpass():
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
+    pass
+
+
+def test_fit_power_law_params():
+    a, b = fit_power_law_params(1, 2, 1540, 5e6, 7e6)
+
+    assert abs(a - 1.0) < 0.001
+    assert abs(b - 2.0) < 0.001
     pass

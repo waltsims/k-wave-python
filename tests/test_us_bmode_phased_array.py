@@ -8,16 +8,12 @@
 """
 # noinspection PyUnresolvedReferences
 import setup_test
-import os
+import pytest
 from tempfile import gettempdir
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import toneBurst
-from kwave.utils.maputils import makeBall
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
 from kwave.kmedium import kWaveMedium
-
 
 """
     Differences compared to original example:
@@ -40,23 +36,23 @@ def test_us_bmode_phased_array():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 15            # [grid points]
-    PML_Y_SIZE = 10            # [grid points]
-    PML_Z_SIZE = 10            # [grid points]
+    PML_X_SIZE = 15  # [grid points]
+    PML_Y_SIZE = 10  # [grid points]
+    PML_Z_SIZE = 10  # [grid points]
 
     # set total number of grid points not including the PML
     sc = 1
-    Nx = 256//sc - 2*PML_X_SIZE    # [grid points]
-    Ny = 256//sc - 2*PML_Y_SIZE    # [grid points]
-    Nz = 128//sc - 2*PML_Z_SIZE     # [grid points]
+    Nx = 256 // sc - 2 * PML_X_SIZE  # [grid points]
+    Ny = 256 // sc - 2 * PML_Y_SIZE  # [grid points]
+    Nz = 128 // sc - 2 * PML_Z_SIZE  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 50e-3                  # [m]
+    x = 50e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x / Nx                # [m]
-    dy = dx                    # [m]
-    dz = dx                    # [m]
+    dx = x / Nx  # [m]
+    dy = dx  # [m]
+    dz = dx  # [m]
 
     # create the k-space grid
     kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
@@ -72,7 +68,7 @@ def test_us_bmode_phased_array():
     medium = kWaveMedium(alpha_coeff=0.75, alpha_power=1.5, BonA=6, sound_speed=c0)
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0   # [s]
+    t_end = (Nx * dx) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -80,12 +76,12 @@ def test_us_bmode_phased_array():
     # =========================================================================
 
     # define properties of the input signal
-    source_strength = 1e6          # [Pa]
-    tone_burst_freq = 1e6 / sc     # [Hz]
+    source_strength = 1e6  # [Pa]
+    tone_burst_freq = 1e6 / sc  # [Hz]
     tone_burst_cycles = 4
 
     # create the input signal using toneBurst
-    input_signal = toneBurst(1/kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    input_signal = toneBurst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)
@@ -97,25 +93,26 @@ def test_us_bmode_phased_array():
 
     # physical properties of the transducer
     transducer = dotdict()
-    transducer.number_elements = 64 // sc   # total number of transducer elements
-    transducer.element_width = 1            # width of each element [grid points/voxels]
-    transducer.element_length = 40 // sc    # length of each element [grid points/voxels]
-    transducer.element_spacing = 0          # spacing (kerf  width) between the elements [grid points/voxels]
+    transducer.number_elements = 64 // sc  # total number of transducer elements
+    transducer.element_width = 1  # width of each element [grid points/voxels]
+    transducer.element_length = 40 // sc  # length of each element [grid points/voxels]
+    transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
     # transducer.radius = float('inf')        # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
+    transducer_width = transducer.number_elements * transducer.element_width + (
+                transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny/2 - transducer_width/2, Nz/2 - transducer.element_length/2])
+    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
-    not_transducer.sound_speed = c0                    # sound speed [m/s]
-    not_transducer.focus_distance = 30e-3              # focus distance [m]
-    not_transducer.elevation_focus_distance = 30e-3    # focus distance in the elevation plane [m]
-    not_transducer.steering_angle = 0                  # steering angle [degrees]
-    not_transducer.steering_angle_max = 32             # steering angle [degrees]
+    not_transducer.sound_speed = c0  # sound speed [m/s]
+    not_transducer.focus_distance = 30e-3  # focus distance [m]
+    not_transducer.elevation_focus_distance = 30e-3  # focus distance in the elevation plane [m]
+    not_transducer.steering_angle = 0  # steering angle [degrees]
+    not_transducer.steering_angle_max = 32  # steering angle [degrees]
 
     # apodization
     not_transducer.transmit_apodization = 'Hanning'
@@ -138,7 +135,8 @@ def test_us_bmode_phased_array():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones([Nx, Ny, Nz])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * np.ones(
+        [Nx, Ny, Nz])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones([Nx, Ny, Nz])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
@@ -157,10 +155,11 @@ def test_us_bmode_phased_array():
     rounding_eps = 1e-12
 
     # define a sphere for a highly scattering region
-    radius = 8e-3          # [m]
-    x_pos = 32e-3          # [m]
-    y_pos = dy * (Ny/2)    # [m]
-    scattering_region1 = makeBall(Nx, Ny, Nz, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz / 2, round(radius / dx + rounding_eps))
+    radius = 8e-3  # [m]
+    x_pos = 32e-3  # [m]
+    y_pos = dy * (Ny / 2)  # [m]
+    scattering_region1 = makeBall(Nx, Ny, Nz, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps),
+                                  Nz / 2, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -186,7 +185,8 @@ def test_us_bmode_phased_array():
         medium_position = 0
 
         # loop through the scan lines
-        for angle_index in range(1, number_scan_lines + 1):
+        # for angle_index in range(1, number_scan_lines + 1):
+        for angle_index in range(1, 2):  # only compare first to angles to speed up test
             # update the command line status
             print(f'Computing scan line {angle_index} of {number_scan_lines}')
 
@@ -194,7 +194,7 @@ def test_us_bmode_phased_array():
             not_transducer.steering_angle = steering_angles[angle_index - 1]
 
             # set the input settings
-            input_filename  = f'example_input_{angle_index}.h5'
+            input_filename = f'example_input_{angle_index}.h5'
             input_file_full_path = os.path.join(pathname, input_filename)
             # set the input settings
             input_args = {
@@ -214,7 +214,8 @@ def test_us_bmode_phased_array():
                 **input_args
             })
 
-            assert compare_against_ref(f'out_us_bmode_phased_array/input_{angle_index}', input_file_full_path, precision=6), \
+            assert compare_against_ref(f'out_us_bmode_phased_array/input_{angle_index}', input_file_full_path,
+                                       precision=6), \
                 'Files do not match!'
 
             # extract the scan line from the sensor data
