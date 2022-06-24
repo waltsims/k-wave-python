@@ -264,7 +264,7 @@ def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
     if nx % 2:
         # odd
         k_min = -np.pi / dx + dk / 2
-        k_max = np.pi / dx -dk / 2
+        k_max = np.pi / dx - dk / 2
     else:
         # even
         k_min = -np.pi / dx

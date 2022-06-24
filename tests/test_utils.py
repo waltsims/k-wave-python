@@ -1,10 +1,11 @@
 from kwave.utils.checkutils import num_dim
-from kwave.utils.maputils import hounsfield2density, fit_power_law_params
+from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
 from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
 import numpy as np
+import pytest
 from phantominator import shepp_logan
 
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,
@@ -188,3 +189,13 @@ def test_get_bli():
     assert x_fine[-1] == 8
     assert abs(bli[-1] - -4.8572e-17) < 0.001
     pass
+
+
+def test_power_kramers_kronig():
+    assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 2.5)
+    assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 1)
+    with pytest.warns(UserWarning):
+        ans = power_law_kramers_kronig(1, 1, 1540, 1, 4)
+        assert ans == 1540
+    assert abs(-1.4311 - power_law_kramers_kronig(3, 1, 1540, 1, 1)) < 0.001
+    assert abs(1.4285 - power_law_kramers_kronig(1, 3, 1540, 1, 1)) < 0.001

@@ -2,6 +2,7 @@ import math
 from math import floor
 import numpy as np
 from scipy import optimize
+import warnings
 
 from kwave.utils.conversionutils import db2neper, neper2db
 
@@ -81,7 +82,8 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
         a0_np_trial, y_trial = trial_vals
 
         actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) * \
-                            a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (y_trial - 1))
+                                                          a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (
+                                                                      y_trial - 1))
 
         absorption_error = np.sqrt(np.sum((desired_absorption - actual_absorption) ** 2))
 
@@ -97,9 +99,51 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
     return a0_fit, y_fit
 
 
+def power_law_kramers_kronig(w, w0, c0, a0, y):
+    """
+     POWERLAWKRAMERSKRONIG Calculate dispersion for power law absorption.
+
+     DESCRIPTION:
+         powerLawKramersKronig computes the variation in sound speed for an
+         attenuating medium using the Kramers-Kronig for power law
+         attenuation where att = a0*w^y. The power law parameters must be in
+         Nepers / m, with the frequency in rad/s. The variation is given
+         about the sound speed c0 at a reference frequency w0.
+
+     USAGE:
+         c_kk = power_law_kramers_kronig(w, w0, c0, a0, y)
+
+     INPUTS:
+
+     OUTPUTS:
+
+    Args:
+         w:             input frequency array [rad/s]
+         w0:            reference frequency [rad/s]
+         c0:            sound speed at w0 [m/s]
+         a0:            power law coefficient [Nepers/((rad/s)^y m)]
+         y:             power law exponent, where 0 < y < 3
+
+    Returns:
+         c_kk           variation of sound speed with w [m/s]
+
+    """
+    if 0 >= y or y >= 3:
+        warnings.warn("y must be within the interval (0,3)", UserWarning)
+        c_kk = c0 * np.ones_like(w)
+    elif y == 1:
+        # Kramers-Kronig for y = 1
+        c_kk = 1 / (1 / c0 - 2 * a0 * np.log(w / w0) / np.pi)
+    else:
+        # Kramers-Kronig for 0 < y < 1 and 1 < y < 3
+        c_kk = 1 / (1 / c0 + a0 * np.tan(y * np.pi / 2) * (w ** (y - 1) - w0 ** (y - 1)))
+
+    return c_kk
+
+
 def water_absorption(f, temp):
     """
-    WATERABSORPTION Calculate ultrasound absorption in distilled water.
+    water_absorption Calculate ultrasound absorption in distilled water.
 
     DESCRIPTION:
     waterAbsorption calculates the ultrasonic absorption in distilled
@@ -122,6 +166,7 @@ def water_absorption(f, temp):
     Physical Society.Section B, 2, 129 - 141
 
     """
+
     NEPER2DB = 8.686
     # check temperature is within range
     if not 0 <= temp <= 60:
