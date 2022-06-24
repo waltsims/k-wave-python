@@ -1,16 +1,14 @@
-import numpy
 import numpy as np
 from kwave.utils.kutils import get_win
+from kwave.utils.misc import find_closest, sinc
 import scipy
 from scipy.signal import lfilter
 from scipy.fftpack import fft, ifft, ifftshift, fftshift, fftn, ifftn
-# from scipy.stats import norm
 import math
 from math import pi
 
-from .misc import sinc
-from .conversionutils import scale_SI
-from .checkutils import num_dim, num_dim2
+from kwave.utils.conversionutils import scale_SI
+from kwave.utils.checkutils import num_dim, num_dim2
 
 
 # Compute the next highest power of 2 of a 32–bit number `n`
@@ -160,29 +158,6 @@ def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window
         func_ps = unwrap(func_ps, [], dim)
 
     return f, func_as, func_ps
-
-
-def find_closest(A, a):
-    """
-    find_closest returns the value and index of the item in A that is
-    closest to the value a. For vectors, value and index correspond to
-    the closest element in A. For matrices, value and index are row
-    vectors corresponding to the closest element from each column. For
-    N-D arrays, the function finds the closest value along the first
-    matrix dimension (singleton dimensions are removed before the
-    search). If there is more than one element with the closest value,
-    the index of the first one is returned.
-
-    Args:
-        A: matrix to search
-        a: value to find
-
-    Returns:
-        val
-        idx
-    """
-    idx = np.unravel_index(numpy.argmin(abs(A - a)), A.shape)
-    return A[idx], idx
 
 
 def extract_amp_phase(data, Fs, source_freq, dim='auto', fft_padding=3, window='Hanning'):

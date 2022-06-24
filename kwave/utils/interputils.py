@@ -1,6 +1,7 @@
 from typing import List
 
 import numpy as np
+from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 
 
@@ -239,3 +240,42 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
     if num_discarded_points != 0:
         print(f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
     return grid_data, order_index, reorder_index
+
+
+def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
+    """
+
+    Args:
+        func: 1d input function
+        dx: spatial sampling [m] (default=1)
+        up_sampling_factor: up-sampling factor used to sample the underlying BLI (default=20)
+        plot:
+
+    Returns:
+        bli:    band-limited interpolant
+        x_fine: x-grid for BLI
+    """
+
+    func = np.squeeze(func)
+    assert len(func.shape) == 1, f"func not 1D but rather {len(func.shape)}D"
+    nx = len(func)
+
+    dk = 2 * np.pi / (dx * nx)
+    if nx % 2:
+        # odd
+        k_min = -np.pi / dx + dk / 2
+        k_max = np.pi / dx -dk / 2
+    else:
+        # even
+        k_min = -np.pi / dx
+        k_max = np.pi / dx - dk
+
+    k = np.arange(start=k_min, stop=k_max+dk, step=dk,)
+    x_fine = np.arange(start=0, stop=((nx - 1) * dx) + dx / up_sampling_factor, step=dx / up_sampling_factor)
+
+    func_k = fftshift(fft(func)) / nx
+
+    bli = np.real(np.sum(np.matmul(func_k[np.newaxis], np.exp(1j * np.outer(k,  x_fine))), axis=0))
+    if plot:
+        raise NotImplementedError
+    return bli, x_fine

@@ -2,6 +2,7 @@ from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density, fit_power_law_params
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
+from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
 import numpy as np
 from phantominator import shepp_logan
@@ -177,4 +178,13 @@ def test_fit_power_law_params():
 
     assert abs(a - 1.0) < 0.001
     assert abs(b - 2.0) < 0.001
+    pass
+
+
+def test_get_bli():
+    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    bli, x_fine = get_bli(test_signal)
+
+    assert x_fine[-1] == 8
+    assert abs(bli[-1] - -4.8572e-17) < 0.001
     pass

@@ -1,4 +1,5 @@
 from datetime import datetime
+import numpy as np
 
 import numpy as np
 
@@ -46,3 +47,31 @@ def round_odd(x):
 
     """
     return 2 * round((x + 1) / 2) - 1
+
+
+def find_closest(A, a):
+    """
+    find_closest returns the value and index of the item in A that is
+    closest to the value a. For vectors, value and index correspond to
+    the closest element in A. For matrices, value and index are row
+    vectors corresponding to the closest element from each column. For
+    N-D arrays, the function finds the closest value along the first
+    matrix dimension (singleton dimensions are removed before the
+    search). If there is more than one element with the closest value,
+    the index of the first one is returned.
+
+    Args:
+        A: matrix to search
+        a: value to find
+
+    Returns:
+        val
+        idx
+    """
+
+    assert isinstance(A, np.ndarray), "A must be an np.array"
+
+    idx = np.unravel_index(np.argmin(abs(A - a)), A.shape)
+    return A[idx], idx
+
+
