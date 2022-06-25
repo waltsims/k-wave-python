@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def get_pml(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, axisymmetric=False):
     """
         getPML returns a 1D perfectly matched layer variable based on the given size and absorption coefficient.
@@ -145,6 +146,6 @@ def getOptimalPMLSize(grid_size, pml_range=None, axisymmetric=None):
     ind_opt = np.argmin(facs, 1)
 
     # assign output
-    pml_sz = np.array([pml_size[idx] for idx in ind_opt])
+    pml_sz = pml_size[ind_opt]
 
     return pml_sz
