@@ -3,11 +3,13 @@ import logging
 import sys
 from kwave.executor import Executor
 import pytest
+import os
 
 check_is_linux = pytest.mark.skipif(not sys.platform.startswith('linux'), reason="Currently only implemented for linux.")
 
 
 @check_is_linux
+@pytest.mark.skipif(os.environ.get("CI"), reason="Running in GitHub Workflow.")
 class TestExecutor(unittest.TestCase):
 
     @unittest.mock.patch('os.system')
