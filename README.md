@@ -1,10 +1,10 @@
 # k-Wave-python
 
-This project is a Python implementation of most of the MATLAB toolbox k-wave as well as an interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 3.0 to sm 7.5.
+This project is a Python implementation of most of the [MATLAB toolbox k-wave](http://www.k-wave.org/) as well as an interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 3.0 to sm 7.5.
 
 ## Mission
 
-With this project, we hope to increase accessibility and reproducablitiy of k-Wave simulation for medical imaging, algorithmic prototyping and testing. Many tools and methods of k-wave can be found here, but this project has and will continue to diverge from the original k-wave APIs in order to leverage pythonic practices.
+With this project, we hope to increase accessibility and reproducablitiy of [k-Wave](http://www.k-wave.org/) simulations for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs in order to leverage pythonic practices.
 
 ## Documentation
 
