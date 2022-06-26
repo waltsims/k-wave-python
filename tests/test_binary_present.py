@@ -1,13 +1,16 @@
 import setup_test
+import pytest
 import os
 
 
+@pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Running in GitHub Workflow.")
 def test_linux_binaries_present():
     assert os.path.exists('kwave/bin/linux/acousticFieldPropagator-OMP')
     assert os.path.exists('kwave/bin/linux/kspaceFirstOrder-OMP')
     assert os.path.exists('kwave/bin/linux/kspaceFirstOrder-CUDA')
 
 
+@pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Running in GitHub Workflow.")
 def test_windows_binaries_present():
     assert os.path.exists('kwave/bin/windows/acousticFieldPropagator-OMP.exe')
     assert os.path.exists('kwave/bin/windows/kspaceFirstOrder-CUDA.exe')
