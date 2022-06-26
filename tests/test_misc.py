@@ -1,5 +1,4 @@
-from kwave.utils.misc import round_even, round_odd, find_closest, get_bli
-from kwave.utils.kutils import toneBurst
+from kwave.utils.misc import round_even, round_odd, find_closest
 
 
 import numpy as np
