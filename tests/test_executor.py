@@ -9,7 +9,7 @@ check_is_linux = pytest.mark.skipif(not sys.platform.startswith('linux'), reason
 
 
 @check_is_linux
-@pytest.mark.skipif(os.environ.get("CI"), reason="Running in GitHub Workflow.")
+@pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Running in GitHub Workflow.")
 class TestExecutor(unittest.TestCase):
 
     @unittest.mock.patch('os.system')
