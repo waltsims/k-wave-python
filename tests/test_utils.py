@@ -4,6 +4,7 @@ from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise
 from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
+from kwave.utils.matrixutils import gradient_FD
 import numpy as np
 import pytest
 from phantominator import shepp_logan
@@ -199,3 +200,55 @@ def test_power_kramers_kronig():
         assert ans == 1540
     assert abs(-1.4311 - power_law_kramers_kronig(3, 1, 1540, 1, 1)) < 0.001
     assert abs(1.4285 - power_law_kramers_kronig(1, 3, 1540, 1, 1)) < 0.001
+
+
+def test_gradient_FD():
+    f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
+    grad = gradient_FD(f)
+    assert (abs(np.array(grad) - np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5])) < 0.001).all()
+
+
+def test_gradient_spacing():
+    f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
+    dx = 2
+    grad = gradient_FD(f, dx)
+    assert (abs(np.array(grad) - np.array([0.5, 0.75, 1.25, 1.75, 2.25, 2.5])) < 0.001).all()
+
+
+def test_gradient_spacing_ndim():
+    f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
+    x = np.arange(f.size)
+    grad = gradient_FD(f, x)
+    assert (abs(grad - np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.])) < 0.001).all()
+
+
+def test_gradeint_spacing_uneven():
+    f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
+    x = np.array([0., 1., 1.5, 3.5, 4., 6.], dtype=float)
+    grad = gradient_FD(f, x)
+    assert (abs(grad - np.array([1., 3., 3.5, 6.7, 6.9, 2.5])) < 0.001).all()
+
+
+def test_gradient_FD_2D():
+    f = np.array([[1, 2, 6], [3, 4, 5]], dtype=float)
+    grad = gradient_FD(f)
+
+    assert len(grad) == 2, "gradient_FD did not return two gradient matrices."
+    assert (abs(np.array(grad) - [np.array([[2., 2., -1.], [2., 2., -1.]]),
+                                  np.array([[1., 2.5, 4.], [1., 1., 1.]])]) < 0.001).all()
+
+    pass
+
+
+# def test_gradient_FD_2D_ndim_spacing():
+#     f = np.array([[1, 2, 6], [3, 4, 5]], dtype=float)
+#     dx = 2
+#     y = [1., 1.5, 3.5]
+#     grad = gradient_FD(f, dx, y)
+#
+#     assert len(grad) == 2, "gradient_FD did not return two gradient matrices."
+#     assert (abs(np.array(grad) - np.array([np.array([[1., 1., -0.5],
+#                                                      [1., 1., -0.5]]), np.array([[2., 2., 2.],
+#                                                                                  [2., 1.7, 0.5]])])) < 0.001).all()
+#
+#     pass

@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 
 from .kutils import get_win
 from .tictoc import TicToc
@@ -229,3 +230,53 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
     if restore_max:
         mat_sm = (np.abs(mat).max() / np.abs(mat_sm).max()) * mat_sm
     return mat_sm
+
+
+def gradient_FD(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
+    """
+    A wrapper of the numpy gradient method for use in the k-wave library.
+
+    gradient_FD calculates the gradient of an n-dimensional input matrix
+    using the finite-difference method. For one-dimensional inputs, the
+    gradient is always computed along the non-singleton dimension. For
+    higher dimensional inputs, the gradient for singleton dimensions is
+    returned as 0. For elements in the centre of the grid, the gradient
+    is computed using centered finite-differences. For elements on the
+    edge of the grid, the gradient is computed using forward or backward
+    finite-differences. The order of accuracy of the finite-difference
+    approximation is controlled by accuracy_order (default = 2). The
+    calculations are done using sparse multiplication, so the input
+    matrix is always cast to double precision.
+
+    Args:
+        f:
+        dx:                 array of values for the grid point spacing in each
+                            dimension. If a value for dim is given, dn is the
+                            spacing in dimension dim.
+        dim:                optional input to specify a single dimension over which to compute the gradient for
+                            n-dimension input functions
+        deriv_order:        order of the derivative to compute, e.g., use 1 to
+                            compute df/dx, 2 to compute df^2/dx^2, etc.
+                            (default = 1)
+        accuracy_order:     order of accuracy for the finite difference
+                            coefficients. Because centered differences are
+                            used, this must be set to an integer multiple of
+                            2 (default = 2)
+
+    Returns:
+        fx, fy, ...         gradient
+
+    """
+    if deriv_order:
+        warnings.warn("deriv_order is no longer a supported argument.", DeprecationWarning)
+    if accuracy_order:
+        warnings.warn("accuracy_order is no longer a supported argument.", DeprecationWarning)
+
+    if dim is not None and dx is not None:
+        return np.gradient(f, dx, axis=dim)
+    elif dim is not None:
+        return np.gradient(f, axis=dim)
+    elif dx is not None:
+        return np.gradient(f, dx)
+    else:
+        return np.gradient(f)
