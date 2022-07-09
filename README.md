@@ -25,8 +25,9 @@ Currently, we are looking for beta testers on Windows.
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
 ```bash
-git clone https://github.com/waltsims/k-wave-python
-pip install -r example_requirements.txt
+git clone -b v0.1.0 https://github.com/waltsims/k-wave-python
+cd k-wave-python
+pip install -r ./requirements/example.txt
 python3 examples/bmode_reconstruction_example.py
 ```
 
