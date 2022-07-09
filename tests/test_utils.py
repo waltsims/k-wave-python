@@ -1,7 +1,7 @@
 from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.conversionutils import db2neper, neper2db
-from kwave.utils.kutils import toneBurst, add_noise
+from kwave.utils.kutils import toneBurst, add_noise, gradient_spect
 from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
 from kwave.utils.matrixutils import gradient_FD
@@ -252,3 +252,21 @@ def test_gradient_FD_2D():
 #                                                                                  [2., 1.7, 0.5]])])) < 0.001).all()
 #
 #     pass
+
+def test_gradient_spect_1D():
+    # compute gradient of a 2 period sinusoid
+    x = np.arange(start=np.pi / 20, stop=4 * np.pi + np.pi / 20, step=np.pi / 20)
+    y = np.sin(x)
+    dydx = gradient_spect(y, np.pi / 20)
+
+    assert abs(dydx - np.cos(x)).all() < 0.001
+    pass
+
+
+def test_gradient_spect_2D():
+    x = np.arange(start=np.pi / 20, stop=4 * np.pi + np.pi / 20, step=np.pi / 20)
+    y = np.arange(start=np.pi / 20, stop=4 * np.pi + np.pi / 20, step=np.pi / 20)
+    X, Y = np.meshgrid(x, y)
+    z = np.sin(X) * np.sin(Y)
+    dydx = gradient_spect(z, (np.pi / 20, np.pi / 20))
+    pass
