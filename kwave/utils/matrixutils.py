@@ -56,12 +56,12 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
         if n_coeff == 2:
             opts['pad_width'] = exp_coeff
         if n_coeff == 4:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[2]), (exp_coeff[1], exp_coeff[3])]
+            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:
         if n_coeff == 3:
             opts['pad_width'] = np.tile(np.expand_dims(exp_coeff, axis=-1), [1, 2])
         if n_coeff == 6:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[3]), (exp_coeff[1], exp_coeff[4]), (exp_coeff[2], exp_coeff[5])]
+            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3]), (exp_coeff[4], exp_coeff[5])]
 
     return np.pad(matrix, **opts)
 
