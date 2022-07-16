@@ -9,7 +9,7 @@ class TicToc(object):
         TicToc.start_time = perf_counter()
 
     @staticmethod
-    def toc(reset: bool = False):
+    def toc(reset: bool = False) -> float:
         passed_time = perf_counter() - TicToc.start_time
         if reset:
             TicToc.tic()

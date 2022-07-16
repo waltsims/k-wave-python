@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import warnings
 
@@ -280,3 +282,17 @@ def gradient_FD(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
         return np.gradient(f, dx)
     else:
         return np.gradient(f)
+
+
+def min_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
+    min_val, linear_index = np.min(matrix), matrix.argmin()
+    numpy_index = np.unravel_index(linear_index, matrix.shape)
+    matlab_index = tuple(idx + 1 for idx in numpy_index)
+    return min_val, matlab_index
+
+
+def max_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
+    max_val, linear_index = np.max(matrix), matrix.argmax()
+    numpy_index = np.unravel_index(linear_index, matrix.shape)
+    matlab_index = tuple(idx + 1 for idx in numpy_index)
+    return max_val, matlab_index
