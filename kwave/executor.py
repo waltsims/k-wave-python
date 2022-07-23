@@ -12,9 +12,7 @@ import numpy as np
 class Executor:
 
     def __init__(self, device):
-        self._is_linux = sys.platform.startswith('linux')
 
-        binary_folder = 'linux' if self._is_linux else 'windows'
         binary_name = 'kspaceFirstOrder'
         if device == 'gpu':
             binary_name += '-CUDA'
@@ -22,9 +20,18 @@ class Executor:
             binary_name += '-OMP'
         else:
             raise ValueError("Unrecognized value passed as target device. Options are 'gpu' or 'cpu'.")
-        
-        if binary_folder == 'windows':
+
+        self._is_linux = sys.platform.startswith('linux')
+        self._is_windows = sys.platform.startswith(('win', 'cygwin'))
+        self._is_darwin = sys.platform.startswith('darwin')
+
+        if self._is_linux:
+            binary_folder = 'linux'
+        elif self._is_windows:
+            binary_folder = 'windows'
             binary_name += '.exe'
+        elif self._is_darwin:
+            raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 
         path_of_this_file = Path(__file__).parent.resolve()
         self.binary_path = path_of_this_file / 'bin' / binary_folder / binary_name
@@ -41,7 +48,7 @@ class Executor:
             'OMP_PROC_BIND': 'SPREAD',
         }
         os.environ.update(env_variables)
-        
+
         command = f'{self.binary_path} -i {input_filename} -o {output_filename} {options}'
 
         return_code = os.system(command)
