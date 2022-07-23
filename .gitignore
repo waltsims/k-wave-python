@@ -12,3 +12,5 @@ kwave/bin/windows
 kwave/bin/linux
 /k_Wave_python.egg-info/
 *.mat
+examples/__pycache__/
+src/
