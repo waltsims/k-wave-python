@@ -258,9 +258,9 @@ def test_gradient_spect_1D():
     x = np.arange(start=np.pi / 20, stop=4 * np.pi + np.pi / 20, step=np.pi / 20)
     y = np.sin(x)
     dydx = gradient_spect(y, np.pi / 20)
+    test_val = np.cos(x)
 
-    assert abs(dydx - np.cos(x)).all() < 0.001
-    pass
+    assert np.isclose(dydx, test_val).all()
 
 
 def test_gradient_spect_2D():

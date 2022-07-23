@@ -846,8 +846,9 @@ def get_wave_number(Nx, dx, dim):
 
     kx = ifftshift((2 * np.pi / dx) * nx)
 
-    # TODO correct dimension for multiplication with mutli-dimensional data
-
+    # Correct dimension for multiplication with mutli-dimensional data
+    if dim >= 1:
+        kx = np.reshape(kx, np.append(np.ones((1, dim), int), Nx))
     return kx
 
 
@@ -890,7 +891,9 @@ def gradient_spect(f, dn, dim=None, deriv_order=1):
         # calculate derivative and assign output
         grads = np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim))
     else:
-        warnings.warn("This implementation is not tested.")
+        # warnings.warn("This implementation is not tested.")
+        # get the wavenumber
+        # kx = get_wave_number(sz(dim), dn[dim], dim)
 
         assert len(dn) == len(sz), ValueError(f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
 
