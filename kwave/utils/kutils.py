@@ -7,6 +7,7 @@ from kwave.utils.conversionutils import scale_SI
 import numpy as np
 import warnings
 import scipy
+from numpy.fft import ifftshift, fft, ifft, fftshift
 
 from .misc import sinc, ndgrid, gaussian
 from .conversionutils import db2neper
@@ -594,7 +595,7 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
 
     # create the tone burst
     tone_length = num_cycles / signal_freq  # [s]
-    # We want to include the endpoint but only if it's divisible by the stepsize
+    # We want to include the endpoint but only if it's divisible by the step-size
     if tone_length % dt < 1e-18:
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
@@ -834,3 +835,78 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     warnings.warn("This method is not fully migrated, might be depricated and is untested.", PendingDeprecationWarning)
     return signal_mat
+
+
+def get_wave_number(Nx, dx, dim):
+    if Nx % 2 == 0:
+        # even
+        nx = np.arange(start=-Nx/2, stop=Nx/2) / Nx
+    else:
+        nx = np.arange(start=-(Nx-1)/2, stop=(Nx-1)/2 + 1) / Nx
+
+    kx = ifftshift((2 * np.pi / dx) * nx)
+
+    # Correct dimension for multiplication with mutli-dimensional data
+    if dim >= 1:
+        kx = np.reshape(kx, np.append(np.ones((1, dim), int), Nx))
+    return kx
+
+
+def gradient_spect(f, dn, dim=None, deriv_order=1):
+    """
+    gradient_spect calculates the gradient of an n-dimensional input
+    matrix using the Fourier collocation spectral method. The gradient
+    for singleton dimensions is returned as 0.
+
+    Args:
+        f:
+        dn:
+        dim:
+        deriv_order:
+
+    Returns:
+
+    """
+
+    # get size of the input function
+    sz = f.shape
+
+    # check if input is 1D or user defined input dimension is given
+    if dim or len(sz) == 1:
+
+        # check if a single dn value is given, if not, extract the required value
+        if not (isinstance(dn, int) or isinstance(dn, float)):
+            dn = dn[dim]
+
+        # get the grid size along the specified dimension, or the longest dimension if 1D
+        if max(sz) == np.prod(sz):
+            dim = np.argmax(sz)
+            Nx = sz[dim]
+        else:
+            Nx = sz[dim]
+
+        # get the wavenumber
+        kx = get_wave_number(Nx, dn, dim)
+
+        # calculate derivative and assign output
+        grads = np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim))
+    else:
+        # warnings.warn("This implementation is not tested.")
+        # get the wavenumber
+        # kx = get_wave_number(sz(dim), dn[dim], dim)
+
+        assert len(dn) == len(sz), ValueError(f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
+
+        grads = []
+        # calculate the gradeint for each non-singleton dimension
+        for dim in range(num_dim(f)):
+            if sz[dim] > 1:
+                # get the wavenumber
+                kx = get_wave_number(sz[dim], dn[dim], dim)
+                # calculate derivative and assign output
+                grads.append(np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim)))
+            else:
+                # assign the derivate for singleton dimensions to be 0
+                grads.append(0)
+
+    return grads

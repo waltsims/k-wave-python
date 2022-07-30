@@ -1,3 +1,3 @@
--r requirements.txt
+k-wave-python>=0.1.0
 git+https://github.com/waltsims/uff.py
-gdown
+gdown==4.4.0

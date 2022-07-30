@@ -1,6 +1,5 @@
 from kwave.utils.conversionutils import scale_SI
 
-from kwave.utils import reorder_binary_sensor_data
 from scipy.io import loadmat
 import numpy as np
 import os
