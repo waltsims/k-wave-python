@@ -45,7 +45,7 @@ To test the reconstruction on a machine without a GPU, set `RUN_SIMULATION` [on 
 ## Development
 
 If you're enjoying k-Wave-python and want to contribute, development instructions can be found [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
-If you would like to get involved, open an issue letting us know, or message us on the [k-Wave-python Telegram chat](https://t.me/+ILL4yGgcX0A2Y2Y6) 
+
 
 ## Contact
 e-mail [walter.simson@tum.de](mailto:walter.simson@tum.de).
