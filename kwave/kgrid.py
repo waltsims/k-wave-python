@@ -6,7 +6,6 @@ import sys
 
 from kwave.data import Array
 from kwave.enums import DiscreteCosine, DiscreteSine
-from kwave.utils import largest_prime_factor
 
 # default CFL number
 CFL_DEFAULT = 0.3
@@ -421,6 +420,8 @@ class kWaveGrid(object):
         Returns:
             Vector of three elements
         """
+        # import statement place here in order to avoid circular dependencies
+        from kwave.utils import largest_prime_factor
         if axisymmetric is not None:
             if axisymmetric == 'WSWA':
                 prime_facs = [largest_prime_factor(self.Nx),

@@ -3,7 +3,6 @@ from typing import Tuple
 import numpy as np
 import warnings
 
-from .kutils import get_win
 from .tictoc import TicToc
 from .conversionutils import scale_time
 from .checkutils import num_dim2, is_number
@@ -217,6 +216,7 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
+    from .kutils import get_win
     win, _ = get_win(grid_size, type_=window_type,
                      rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)

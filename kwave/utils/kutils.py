@@ -1,6 +1,9 @@
 from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
+
+from kwave.utils.matrixutils import unflatten_matlab_mask
+
 from kwave.utils.checkutils import num_dim
 from kwave.utils.conversionutils import scale_SI
 
@@ -910,3 +913,23 @@ def gradient_spect(f, dn, dim=None, deriv_order=1):
                 grads.append(0)
 
     return grads
+
+
+def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    # create an empty matrix
+    if kgrid.k == 1:
+        unmasked_sensor_data = np.zeros((kgrid.Nx, 1))
+    elif kgrid.k == 2:
+        unmasked_sensor_data = np.zeros((kgrid.Nx, kgrid.Ny))
+    elif kgrid.k == 3:
+        unmasked_sensor_data = np.zeros((kgrid.Nx, kgrid.Ny, kgrid.Nz))
+    else:
+        raise NotImplementedError
+
+    # reorder input data
+    flat_sensor_mask = (sensor.mask != 0).flatten('F')
+    assignment_mask = unflatten_matlab_mask(unmasked_sensor_data, np.where(flat_sensor_mask)[0])
+    # unmasked_sensor_data.flatten('F')[flat_sensor_mask] = sensor_data.flatten()
+    unmasked_sensor_data[assignment_mask] = sensor_data.flatten()
+    # unmasked_sensor_data[unflatten_matlab_mask(unmasked_sensor_data, sensor.mask != 0)] = sensor_data
+    return unmasked_sensor_data
