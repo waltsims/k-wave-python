@@ -15,6 +15,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -93,13 +94,13 @@
            <div itemprop="articleBody">
              
   <section id="module-kwave.kmedium">
-<span id="kmedium"></span><h1>kMedium<a class="headerlink" href="#module-kwave.kmedium" title="Permalink to this headline"></a></h1>
+<span id="kmedium"></span><h1>kMedium<a class="headerlink" href="#module-kwave.kmedium" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.kmedium.</span></span><span class="sig-name descname"><span class="pre">kWaveMedium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sound_speed:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed_ref:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_coeff:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_power:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_mode:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_filter:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_sign:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BonA:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absorbing:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stokes:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.check_fields">
-<span class="sig-name descname"><span class="pre">check_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.check_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.check_fields" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.check_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.check_fields" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Check whether the given properties are valid</p>
 </div></blockquote>
@@ -179,7 +180,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.BonA">
-<span class="sig-name descname"><span class="pre">BonA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.BonA" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">BonA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.BonA" title="Permalink to this definition"></a></dt>
 <dd><p>parameter of nonlinearity</p>
 </dd></dl>
 
@@ -191,7 +192,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_coeff">
-<span class="sig-name descname"><span class="pre">alpha_coeff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_coeff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alpha_coeff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_coeff" title="Permalink to this definition"></a></dt>
 <dd><p>power law absorption coefficient [dB/(MHz^y cm)]</p>
 </dd></dl>
 
@@ -209,37 +210,37 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_filter">
-<span class="sig-name descname"><span class="pre">alpha_filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_filter" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alpha_filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_filter" title="Permalink to this definition"></a></dt>
 <dd><p>frequency domain filter applied to the absorption and dispersion terms in the equation of state</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_mode">
-<span class="sig-name descname"><span class="pre">alpha_mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_mode" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alpha_mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_mode" title="Permalink to this definition"></a></dt>
 <dd><p>optional input to force either the absorption or dispersion terms in the equation of state to be excluded; valid inputs are ‘no_absorption’ or ‘no_dispersion’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_power">
-<span class="sig-name descname"><span class="pre">alpha_power</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_power" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alpha_power</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_power" title="Permalink to this definition"></a></dt>
 <dd><p>power law absorption exponent</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_sign">
-<span class="sig-name descname"><span class="pre">alpha_sign</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_sign" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alpha_sign</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_sign" title="Permalink to this definition"></a></dt>
 <dd><p>two element array used to control the sign of absorption and dispersion terms in the equation of state</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.density">
-<span class="sig-name descname"><span class="pre">density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.density" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.density" title="Permalink to this definition"></a></dt>
 <dd><p>density distribution within the acoustic medium [kg/m^3]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed">
-<span class="sig-name descname"><span class="pre">sound_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sound_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed" title="Permalink to this definition"></a></dt>
 <dd><p>sound speed distribution within the acoustic medium [m/s] | required to be defined</p>
 </dd></dl>
 
@@ -251,7 +252,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_ref">
-<span class="sig-name descname"><span class="pre">sound_speed_ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_ref" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sound_speed_ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_ref" title="Permalink to this definition"></a></dt>
 <dd><p>reference sound speed used within the k-space operator (phase correction term) [m/s]</p>
 </dd></dl>
 
