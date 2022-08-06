@@ -104,18 +104,19 @@ def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
 
 def cart2grid(kgrid, cart_data, axisymmetric=False):
     """
-        Interpolate a set of Cartesian points onto a binary grid.
+    Interpolate a set of Cartesian points onto a binary grid.
+
     Args:
         kgrid:
         cart_data:
         axisymmetric:
 
     Returns:
-        %     cart2grid interpolates the set of Cartesian points defined by
-        %     cart_data onto a binary matrix defined by the kWaveGrid object
-        %     kgrid using nearest neighbour interpolation. An error is returned if
-        %     the Cartesian points are outside the computational domain defined by
-        %     kgrid.
+        cart2grid interpolates the set of Cartesian points defined by
+        cart_data onto a binary matrix defined by the kWaveGrid object
+        kgrid using nearest neighbour interpolation. An error is returned if
+        the Cartesian points are outside the computational domain defined by
+        kgrid.
     """
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:
