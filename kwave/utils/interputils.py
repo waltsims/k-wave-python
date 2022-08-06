@@ -183,7 +183,10 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
             grid_data[data_x[data_index], data_y[data_index]] = point_index[data_index]
 
         # extract reordering index
-        reorder_index = np.reshape(grid_data[grid_data != 0], (-1, 1))
+        reorder_index = grid_data.flatten(order='F')[
+            grid_data.flatten(order='F') != 0
+        ]
+        reorder_index = reorder_index[:, None]  # [N] => [N, 1]
 
     elif kgrid.dim == 3:
 
@@ -205,7 +208,7 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
 
         # check if the points all lie within the grid
         assert 1 <= data_x.min() and 1 <= data_y.min() and 1 <= data_z.min() and \
-               data_x.max() <= kgrid.Nx and data_y.max() <= kgrid.Ny and data_z.max() <= kgrid.Ny, \
+               data_x.max() <= kgrid.Nx and data_y.max() <= kgrid.Ny and data_z.max() <= kgrid.Nz, \
             "Cartesian points must lie within the grid defined by kgrid."
 
         # create empty grid
@@ -219,17 +222,21 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
             grid_data[data_x[data_index], data_y[data_index], data_z[data_index]] = point_index[data_index]
 
         # extract reordering index
-        reorder_index = np.reshape(grid_data[grid_data != 0], (-1, 1, 1))
+        reorder_index = grid_data.flatten(order='F')[
+            grid_data.flatten(order='F') != 0
+            ]
+        reorder_index = reorder_index[:, None, None]  # [N] => [N, 1, 1]
     else:
         raise ValueError('Input cart_data must be a 1, 2, or 3 dimensional matrix.')
 
     # compute the reverse ordering index (i.e., what is the index of each point
     # in the reordering vector)
-    order_index = np.ones((reorder_index.size, 2))
+    order_index = np.ones((reorder_index.size, 2), dtype=int)
     order_index[:, 0] = np.squeeze(reorder_index)
     order_index[:, 1] = np.arange(1, reorder_index.size + 1)
-    order_index = sortrows(order_index, 1)
+    order_index = sortrows(order_index, 0)
     order_index = order_index[:, 1]
+    order_index = order_index[:, None]  # [N] => [N, 1]
 
     # reset binary grid values
     grid_data[grid_data != 0] = 1
