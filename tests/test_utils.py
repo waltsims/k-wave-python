@@ -4,8 +4,10 @@ from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise, gradient_spect
 from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
-from kwave.utils.matrixutils import gradient_FD
+from kwave.utils.matrixutils import gradient_FD, resize
+from kwave.utils.ioutils import loadImage
 import numpy as np
+from utils import *
 import pytest
 from phantominator import shepp_logan
 
@@ -269,4 +271,86 @@ def test_gradient_spect_2D():
     X, Y = np.meshgrid(x, y)
     z = np.sin(X) * np.sin(Y)
     dydx = gradient_spect(z, (np.pi / 20, np.pi / 20))
+    # TODO: assert a value here
     pass
+
+
+def test_resize_2D_splinef2d():
+    mat = np.ones([10, 10])
+    out = resize(mat, [20, 20], 'splinef2d')
+
+
+def test_resize_2D_linear_larger():
+    # assign the grid size and create the computational grid
+    new_size = [20, 3]
+    p0 = np.zeros([10, 2])
+    p0[:, 1] = 1
+
+    # resize the input image to the desired number of grid points
+    p1 = resize(p0, new_size, interp_mode='linear')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1 == [0., 0.5, 1.])
+
+    # now test transpose
+    p0 = p0.T
+    new_size = [3, 20]
+    p1 = resize(p0, new_size, interp_mode='linear')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1.T == [0., 0.5, 1.])
+
+
+def test_resize_2D_linear_smaller():
+    # assign the grid size and create the computational grid
+    p0 = np.zeros([20, 3])
+    p0[:, 1:3] = [0.5, 1]
+    new_size = [10, 2]
+
+    # resize the input image to the desired number of grid points
+    p1 = resize(p0, new_size, interp_mode='linear')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1 == [0., 1.])
+
+    # now test transpose
+    p0 = p0.T
+    new_size = [2, 10]
+    p1 = resize(p0, new_size, interp_mode='linear')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1.T == [0., 1.])
+
+
+def test_resize_2D_nearest_larger():
+    # assign the grid size and create the computational grid
+    p0 = np.zeros([10, 2])
+    p0[:, 1] = 1
+    new_size = [20, 3]
+
+    # resize the input image to the desired number of grid points
+    p1 = resize(p0, new_size, interp_mode='nearest')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1 == [0., 0., 1.])
+
+    # now test transpose
+    p0 = p0.T
+    new_size = [3, 20]
+    p1 = resize(p0, new_size, interp_mode='nearest')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1.T == [0., 0., 1.])
+
+
+def test_resize_2D_nearest_smaller():
+    # assign the grid size and create the computational grid
+    p0 = np.zeros([20, 3])
+    p0[:, 1:4] = 1
+    new_size = [10, 2]
+
+    # resize the input image to the desired number of grid points
+    p1 = resize(p0, new_size, interp_mode='nearest')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1 == [0., 1.])
+
+    # now test the transpose
+    p0 = p0.T
+    new_size = [2, 10]
+    p1 = resize(p0, new_size, interp_mode='nearest')
+    assert p1.shape == tuple(new_size)
+    assert np.all(p1.T == [0., 1.])

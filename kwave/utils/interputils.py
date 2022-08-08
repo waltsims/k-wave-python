@@ -56,7 +56,7 @@ def interpolate3D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
-def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray], copy_nans=True) -> np.ndarray:
+def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray], method='linear', copy_nans=True) -> np.ndarray:
     """
         Interpolates input grid values at the given locations
         Added by Farid
@@ -66,6 +66,7 @@ def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
         We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
         While mapping we assume that only one axis per 3D grid changes throughout the grid.
     Args:
+        copy_nans:
         grid_points: List of 1D or 3D Numpy arrays
         grid_values: A 3D Numpy array which holds values at grid_points
         interp_locs: List of 1D or 3D Numpy arrays
@@ -92,7 +93,7 @@ def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     queries = queries.reshape(2, -1).T
 
     # Out of bound points will get NaN values
-    result = interpn((g_x, g_y), grid_values, queries, method='linear', bounds_error=False, fill_value=np.nan)
+    result = interpn((g_x, g_y), grid_values, queries, method=method, bounds_error=False, fill_value=np.nan)
     # Go back from list of interpolated values to 3D volume
     result = result.reshape((q_x.size, q_y.size))
     if copy_nans:
