@@ -1,5 +1,7 @@
 import math
 from math import floor
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 import warnings
@@ -530,13 +532,19 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
 
     # check for zero values
     if cx == 0:
-        cx = int(floor(Nx / 2)) + 1
+        cx = int(floor(Nx / 2))
+    else:
+        # handle Matlab's convention of starting from 1
+        cx -= 1
 
     if cy == 0:
-        cy = int(floor(Ny / 2)) + 1
+        cy = int(floor(Ny / 2))
+    else:
+        # handle Matlab's convention of starting from 1
+        cy -= 1
 
     # create empty matrix
-    circle = np.zeros((Nx, Ny))
+    circle = np.zeros((Nx, Ny), dtype=int)
 
     # initialise loop variables
     x = 0
@@ -583,7 +591,10 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
                     circle[px[point_index], py[point_index]] = MAGNITUDE
 
     if plot_circle:
-        raise NotImplementedError
+        plt.imshow(circle, cmap='gray_r')
+        plt.ylabel('x-position [grid points]')
+        plt.xlabel('y-position [grid points]')
+        plt.show()
 
     return circle
 
