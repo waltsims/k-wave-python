@@ -2,7 +2,7 @@ from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
 
-from kwave.utils.matrixutils import unflatten_matlab_mask
+from kwave.utils.matrixutils import unflatten_matlab_mask, matlab_mask
 
 from kwave.utils.checkutils import num_dim
 from kwave.utils.conversionutils import scale_SI
@@ -933,3 +933,32 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     unmasked_sensor_data[assignment_mask] = sensor_data.flatten()
     # unmasked_sensor_data[unflatten_matlab_mask(unmasked_sensor_data, sensor.mask != 0)] = sensor_data
     return unmasked_sensor_data
+
+
+def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    # check simulation is 2D
+    if kgrid.dim != 2:
+        raise ValueError('The simulation must be 2D.')
+
+    # check sensor.mask is a binary mask
+    if sensor.mask.dtype != bool and set(np.unique(sensor.mask).tolist()) != {0, 1}:
+        raise ValueError('The sensor must be defined as a binary mask.')
+
+    # find the coordinates of the sensor points
+    x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
+    x_sensor = np.squeeze(x_sensor)
+    y_sensor = matlab_mask(kgrid.y, sensor.mask == 1)
+    y_sensor = np.squeeze(y_sensor)
+
+    # find the angle of each sensor point (from the centre)
+    angle = np.arctan2(-x_sensor, -y_sensor)
+    angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+
+    # sort the sensor points in order of increasing angle
+    indices_new = np.argsort(angle)
+    # [angle_sorted, indices_new] = sort(angle, 'ascend'); %#ok<ASGLU>
+
+    # reorder the measure time series so that adjacent time series correspond
+    # to adjacent sensor points.
+    reordered_sensor_data = sensor_data[indices_new]
+    return reordered_sensor_data
