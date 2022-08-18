@@ -544,7 +544,7 @@ def get_win(N: Union[int, List[int]],
 
 
 
-def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=[],
+def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
               signal_offset=0):
     """
         Create an enveloped single frequency tone burst.
@@ -590,8 +590,7 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
 
     """
     assert isinstance(signal_offset, int), "signal_offset must be integer"
-    # TODO: make this more consistent. Only one type.
-    assert isinstance(signal_length, list) or isinstance(signal_length, int), "signal_length must be integer"
+    assert isinstance(signal_length, int), "signal_length must be integer"
 
     # calculate the temporal spacing
     dt = 1 / sample_freq  # [s]
@@ -631,8 +630,8 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
         down_ramp = (np.cos(down_ramp_axis) + 1) * 0.5
 
         # apply the ramps
-        tone_burst[0:up_ramp_length_points] = tone_burst[1:up_ramp_length_points] * up_ramp
-        tone_burst[-down_ramp_length_points + 1:] = tone_burst[-down_ramp_length_points + 1:] * down_ramp
+        tone_burst[0:up_ramp_length_points] = tone_burst[0:up_ramp_length_points] * up_ramp
+        tone_burst[-down_ramp_length_points :] = tone_burst[-down_ramp_length_points :] * down_ramp
 
     else:
 
@@ -663,10 +662,10 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
     # create the signal with the offset tone burst
     tone_index = np.array([tone_index])
     signal_offset = np.array(signal_offset)
-    if len(signal_length) == 0:
+    if signal_length == 0:
         signal = np.zeros((tone_index.size, signal_offset.max() + len(tone_burst)))
     else:
-        signal = np.zeros(tone_index.size, signal_length)
+        signal = np.zeros([tone_index.size, signal_length])
 
     for offset in range(tone_index.size):
         signal[offset, tone_index[offset]:tone_index[offset] + len(tone_burst)] = tone_burst.T
@@ -840,6 +839,13 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     return signal_mat
 
 
+
+
+def broadcast_axis(data, ndims, axis):
+    newshape = [1] * ndims
+    newshape[axis] = -1
+    return data.reshape(*newshape)
+
 def get_wave_number(Nx, dx, dim):
     if Nx % 2 == 0:
         # even
@@ -849,9 +855,7 @@ def get_wave_number(Nx, dx, dim):
 
     kx = ifftshift((2 * np.pi / dx) * nx)
 
-    # Correct dimension for multiplication with mutli-dimensional data
-    if dim >= 1:
-        kx = np.reshape(kx, np.append(np.ones((1, dim), int), Nx))
+
     return kx
 
 
@@ -888,29 +892,26 @@ def gradient_spect(f, dn, dim=None, deriv_order=1):
         else:
             Nx = sz[dim]
 
-        # get the wavenumber
+        # get the wave number
         kx = get_wave_number(Nx, dn, dim)
 
         # calculate derivative and assign output
         grads = np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim))
     else:
         # warnings.warn("This implementation is not tested.")
-        # get the wavenumber
+        # get the wave number
         # kx = get_wave_number(sz(dim), dn[dim], dim)
 
         assert len(dn) == len(sz), ValueError(f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
 
         grads = []
-        # calculate the gradeint for each non-singleton dimension
+        # calculate the gradient for each non-singleton dimension
         for dim in range(num_dim(f)):
-            if sz[dim] > 1:
-                # get the wavenumber
-                kx = get_wave_number(sz[dim], dn[dim], dim)
-                # calculate derivative and assign output
-                grads.append(np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim)))
-            else:
-                # assign the derivate for singleton dimensions to be 0
-                grads.append(0)
+            # get the wave number
+            kx = get_wave_number(sz[dim], dn[dim], dim)
+            # calculate derivative and assign output
+            kx = broadcast_axis(kx, num_dim(f), dim)
+            grads.append(np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim)))
 
     return grads
 
