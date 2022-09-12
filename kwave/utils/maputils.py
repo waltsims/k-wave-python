@@ -532,16 +532,10 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
 
     # check for zero values
     if cx == 0:
-        cx = int(floor(Nx / 2))
-    else:
-        # handle Matlab's convention of starting from 1
-        cx -= 1
+        cx = int(floor(Nx / 2)) + 1
 
     if cy == 0:
-        cy = int(floor(Ny / 2))
-    else:
-        # handle Matlab's convention of starting from 1
-        cy -= 1
+        cy = int(floor(Ny / 2)) + 1
 
     # create empty matrix
     circle = np.zeros((Nx, Ny), dtype=int)
