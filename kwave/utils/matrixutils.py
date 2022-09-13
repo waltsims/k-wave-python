@@ -197,6 +197,8 @@ def resize(mat, new_size, interp_mode='linear'):
         res_mat:            "resized" matrix
 
     """
+    # TODO: wrap scikit image resize
+    #  https://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
     # start the timer
     TicToc.tic()
 
