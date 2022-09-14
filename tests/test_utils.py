@@ -1,8 +1,10 @@
+import scipy.signal
+
 from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.conversionutils import db2neper, neper2db
 from kwave.utils.kutils import toneBurst, add_noise, gradient_spect, grid2cart
-from kwave.utils.interputils import get_bli
+from kwave.utils.interputils import get_bli, interpftn
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
 from kwave.utils.matrixutils import gradient_FD, resize
 from kwave.utils.ioutils import loadImage
@@ -3185,4 +3187,49 @@ def test_grid2cart_3D():
     [cart_data, order_index] = grid2cart(test_grid, test_selection)
     assert np.isclose(cart_data, [[-0.1, 0., 0.1], [-0.1, -0.1, 0.1], [-0.1, -0.1, -0.1]]).all()
     assert np.isclose(order_index, [[1, 1, 1], [2, 1, 1], [3, 3, 1]]).all()
+    pass
+
+
+def test_interpftn():
+    x = np.zeros([5, 5])
+    y = interpftn(x, [10, 10])
+    assert y.shape == (10, 10)
+    assert (y == 0.).all()
+
+    # Test window option.
+    x = np.zeros([5, 5])
+    y = interpftn(x, [10, 10], win='boxcar')
+    assert y.shape == (10, 10)
+    assert (y == 0.).all()
+
+    # Test non-homogeneous x
+    x = np.zeros([5, 5])
+    x[0, :] = 1
+    y = interpftn(x, [10, 10])
+    y_prime = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+               [0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958,
+                0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958],
+               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+               [-0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958,
+                -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958],
+               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+               [0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000,
+                0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000],
+               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+               [-0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958,
+                -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958],
+               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+               [0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958,
+                0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958]]
+    assert y.shape == (10, 10)
+    assert np.isclose(y, y_prime).all()
+
+    # test 1D x case
+    x = np.zeros((5, 1))
+    x[:2] = 1
+    y = interpftn(x, (10,))
+    assert np.isclose(y.squeeze(), np.array(
+        [1, 1.29442719099992, 1, 0.400000000000000, -4.44089209850063e-17, -0.0472135954999580, -4.44089209850063e-17,
+         -0.0472135954999579, 0, 0.400000000000000])).all()
+    # TODO: test 3D x
     pass

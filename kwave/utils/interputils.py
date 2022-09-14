@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
+from scipy.signal import resample
 
 
 def sortrows(arr: np.ndarray, index: int):
@@ -288,3 +289,36 @@ def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
     if plot:
         raise NotImplementedError
     return bli, x_fine
+
+
+def interpftn(x, sz:tuple, win=None):
+    """
+     Resamples an N-D matrix to the size given in sz using Fourier interpolation.
+
+     USAGE:
+         y = interpftn(x, sz)
+         y = interpftn(x, sz, win)
+
+     Args:
+         x:           matrix to interpolate
+         sz:          list or tupple of new size
+         win:         (optional) name of windowing function to use
+
+     Returns:
+         y:           resampled matrix
+    """
+
+    # extract the size of the input matrix
+    x_sz = x.shape
+
+    # check enough coefficients have been given
+    if sum([x != 1 for x in x_sz]) != len(sz):
+        raise ValueError('The number of scaling coefficients must equal the number of dimensions in x.')
+
+    # interpolate for each matrix dimension (dimensions with no interpolation required are skipped)
+    y = x
+    for p_idx, p in enumerate(sz):
+        if p != x_sz[p_idx]:
+            y = resample(y, p, axis=p_idx, window=win)
+
+    return y
