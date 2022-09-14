@@ -36,6 +36,7 @@ class kWaveGrid(object):
         N, spacing = np.atleast_1d(N), np.atleast_1d(spacing)  # if inputs are lists
         assert N.ndim == 1 and spacing.ndim == 1  # ensure no multidimensional lists
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
+        assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
 
         self.N = N.astype(int)              #: grid size in each dimension [grid points]
         self.spacing = spacing              #: grid point spacing in each direction [m]
