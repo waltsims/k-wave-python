@@ -1,12 +1,13 @@
 from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
-
+from numpy import ndarray, array
 from kwave.utils.matrixutils import unflatten_matlab_mask, matlab_mask
 
 from kwave.utils.checkutils import num_dim
 from kwave.utils.conversionutils import scale_SI
 
+from kwave.kgrid import kWaveGrid
 import numpy as np
 import warnings
 import scipy
@@ -240,6 +241,43 @@ def add_noise(signal, snr, mode="rms"):
     signal = signal + noise
 
     return signal
+
+
+def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):
+    """
+    Returns the Cartesian coordinates of the non-zero points of a binary grid.
+
+    DESCRIPTION:
+        grid2cart returns the set of Cartesian coordinates corresponding to
+        the non-zero elements in the binary matrix grid_data, in the
+        coordinate framework defined in kgrid.
+
+    USAGE:
+        [cart_data, order_index] = grid2cart(kgrid, grid_data)
+
+    args:
+        input_kgrid:       k-Wave grid object returned by kWaveGrid
+        grid_selection:    binary grid with the same dimensions as the k-Wave grid kgrid
+
+    Returns:
+        cart_data:    1 x N, 2 x N, or 3 x N (for 1, 2, and 3
+                      dimensions) array of Cartesian sensor points
+        order_index:  returns a list of indices of the returned card_data coordinates.
+    """
+    grid_data = np.array((grid_selection != 0), dtype=bool)
+    cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
+
+    if input_kgrid.dim > 0:
+        cart_data[0, :] = input_kgrid.x[grid_data]
+    if input_kgrid.dim > 1:
+        cart_data[1, :] = input_kgrid.y[grid_data]
+    if input_kgrid.dim > 2:
+        cart_data[2, :] = input_kgrid.z[grid_data]
+    if 0 <= input_kgrid.dim > 3:
+        raise ValueError("kGrid with unsupported size passed.")
+
+    order_index = np.argwhere(grid_data.squeeze() != 0)
+    return cart_data.squeeze(), order_index
 
 
 def get_win(N: Union[int, List[int]],
@@ -543,7 +581,6 @@ def get_win(N: Union[int, List[int]],
     return win, cg
 
 
-
 def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
               signal_offset=0):
     """
@@ -631,7 +668,7 @@ def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_si
 
         # apply the ramps
         tone_burst[0:up_ramp_length_points] = tone_burst[0:up_ramp_length_points] * up_ramp
-        tone_burst[-down_ramp_length_points :] = tone_burst[-down_ramp_length_points :] * down_ramp
+        tone_burst[-down_ramp_length_points:] = tone_burst[-down_ramp_length_points:] * down_ramp
 
     else:
 
@@ -833,12 +870,10 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     # for src_idx, delay in enumerate(rel_delay):
     #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
-    #signal_mat[rel_delay, delay:max_delay - delay] = input_signal
+    # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
 
     warnings.warn("This method is not fully migrated, might be depricated and is untested.", PendingDeprecationWarning)
     return signal_mat
-
-
 
 
 def broadcast_axis(data, ndims, axis):
@@ -846,15 +881,15 @@ def broadcast_axis(data, ndims, axis):
     newshape[axis] = -1
     return data.reshape(*newshape)
 
+
 def get_wave_number(Nx, dx, dim):
     if Nx % 2 == 0:
         # even
-        nx = np.arange(start=-Nx/2, stop=Nx/2) / Nx
+        nx = np.arange(start=-Nx / 2, stop=Nx / 2) / Nx
     else:
-        nx = np.arange(start=-(Nx-1)/2, stop=(Nx-1)/2 + 1) / Nx
+        nx = np.arange(start=-(Nx - 1) / 2, stop=(Nx - 1) / 2 + 1) / Nx
 
     kx = ifftshift((2 * np.pi / dx) * nx)
-
 
     return kx
 
@@ -902,7 +937,8 @@ def gradient_spect(f, dn, dim=None, deriv_order=1):
         # get the wave number
         # kx = get_wave_number(sz(dim), dn[dim], dim)
 
-        assert len(dn) == len(sz), ValueError(f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
+        assert len(dn) == len(sz), ValueError(
+            f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
 
         grads = []
         # calculate the gradient for each non-singleton dimension
