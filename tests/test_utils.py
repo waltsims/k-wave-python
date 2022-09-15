@@ -63,6 +63,13 @@ def test_hounsfield2soundspeed():
     return
 
 
+def signal_to_noise(signal, noisy_signal):
+    p_sig = np.sqrt(np.mean(signal ** 2))
+    p_noise = np.sqrt(np.mean((noisy_signal - signal) ** 2))
+    snr = 20 * np.log10(p_sig / p_noise)
+    return snr
+
+
 def test_add_noise():
     output = add_noise(input_signal, 5)
     p_sig = np.sqrt(np.mean(input_signal ** 2))
@@ -71,6 +78,16 @@ def test_add_noise():
     assert (abs(5 - snr) < 2), \
         "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
     return
+
+
+def test_add_noise_peak():
+    # test add noise with peak flag set
+    signal_to_noise_ratio = 40  # [dB]
+    sensor_data = add_noise(input_signal, signal_to_noise_ratio, 'peak')
+    snr = signal_to_noise(input_signal, sensor_data)
+    assert np.isclose(snr, 40., atol=10), \
+        "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
+    pass
 
 
 def test_tone_burst_gaussian():

@@ -223,7 +223,7 @@ def add_noise(signal, snr, mode="rms"):
     if mode == "rms":
         reference = np.sqrt(np.mean(signal ** 2))
     elif mode == "peak":
-        reference = max(signal)
+        reference = np.max(signal)
     else:
         raise ValueError(f"Unknown parameter '{mode}' for input mode.")
 
@@ -231,7 +231,7 @@ def add_noise(signal, snr, mode="rms"):
     std_dev = reference / (10 ** (snr / 20))
 
     # calculate noise
-    noise = std_dev * np.random.randn(signal.size)
+    noise = std_dev * np.random.randn(*signal.shape)
 
     # check the snr
     noise_rms = np.sqrt(np.mean(noise ** 2))
@@ -281,6 +281,8 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):
 
 
 def get_win(N: Union[int, List[int]],
+            # TODO: replace and refactor for scipy.signal.get_window
+            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
             type_: str,  # TODO change this to enum in the future
             plot_win: bool = False,
             param: Optional[float] = None,
