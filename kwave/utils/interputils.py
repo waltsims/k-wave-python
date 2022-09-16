@@ -4,11 +4,14 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
+from kwave.utils.tictoc import TicToc
+from kwave.utils.checkutils import num_dim
+from kwave.utils.conversionutils import scale_time
 
 
 def sortrows(arr: np.ndarray, index: int):
     assert arr.ndim == 2, "'sortrows' currently supports only 2-dimensional matrices"
-    return arr[arr[:, index].argsort(), ]
+    return arr[arr[:, index].argsort(),]
 
 
 def interpolate3D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray]) -> np.ndarray:
@@ -57,7 +60,8 @@ def interpolate3D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
-def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray], method='linear', copy_nans=True) -> np.ndarray:
+def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray],
+                  method='linear', copy_nans=True) -> np.ndarray:
     """
         Interpolates input grid values at the given locations
         Added by Farid
@@ -134,7 +138,7 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
         data_x = np.round(data_x / kgrid.dx).astype(int)
 
         # shift pixel coordinates to coincide with matrix indexing
-        data_x = data_x + np.floor(kgrid.Nx//2).astype(int)
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
 
         # check if the points all lie within the grid
         if data_x.max() > kgrid.Nx or data_x.min() < 1:
@@ -165,9 +169,9 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
 
         # shift pixel coordinates to coincide with matrix indexing (leave
         # y-direction = radial-direction if axisymmetric)
-        data_x = data_x + np.floor(kgrid.Nx//2).astype(int)
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
         if not axisymmetric:
-            data_y = data_y + np.floor(kgrid.Ny//2).astype(int)
+            data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
         else:
             data_y = data_y + 1
 
@@ -188,7 +192,7 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
         # extract reordering index
         reorder_index = grid_data.flatten(order='F')[
             grid_data.flatten(order='F') != 0
-        ]
+            ]
         reorder_index = reorder_index[:, None]  # [N] => [N, 1]
 
     elif kgrid.dim == 3:
@@ -205,9 +209,9 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
         data_z = np.round(data_z / kgrid.dz).astype(int)
 
         # shift pixel coordinates to coincide with matrix indexing
-        data_x = data_x + np.floor(kgrid.Nx//2).astype(int)
-        data_y = data_y + np.floor(kgrid.Ny//2).astype(int)
-        data_z = data_z + np.floor(kgrid.Nz//2).astype(int)
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
+        data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
+        data_z = data_z + np.floor(kgrid.Nz // 2).astype(int)
 
         # check if the points all lie within the grid
         assert 1 <= data_x.min() and 1 <= data_y.min() and 1 <= data_z.min() and \
@@ -280,18 +284,132 @@ def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
         k_min = -np.pi / dx
         k_max = np.pi / dx - dk
 
-    k = np.arange(start=k_min, stop=k_max+dk, step=dk,)
+    k = np.arange(start=k_min, stop=k_max + dk, step=dk, )
     x_fine = np.arange(start=0, stop=((nx - 1) * dx) + dx / up_sampling_factor, step=dx / up_sampling_factor)
 
     func_k = fftshift(fft(func)) / nx
 
-    bli = np.real(np.sum(np.matmul(func_k[np.newaxis], np.exp(1j * np.outer(k,  x_fine))), axis=0))
+    bli = np.real(np.sum(np.matmul(func_k[np.newaxis], np.exp(1j * np.outer(k, x_fine))), axis=0))
     if plot:
         raise NotImplementedError
     return bli, x_fine
 
 
-def interpftn(x, sz:tuple, win=None):
+def interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp='nearest'):
+    """
+     interpCartData takes a matrix of time-series data recorded over a set
+     of Cartesian sensor points given by cart_sensor_mask and computes the
+     equivalent time-series at each sensor position on the binary sensor
+     mask binary_sensor_mask using interpolation. The properties of
+     binary_sensor_mask are defined by the k-Wave grid object kgrid.
+     Two and three dimensional data are supported.
+
+     Usage:
+         binary_sensor_data = interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+         binary_sensor_data = interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)
+
+     Args:
+         kgrid:                k-Wave grid object returned by kWaveGrid
+         cart_sensor_data:     original sensor data measured over
+                              cart_sensor_mask indexed as
+                              cart_sensor_data(sensor position, time)
+         cart_sensor_mask:     Cartesian sensor mask over which
+                              cart_sensor_data is measured
+         binary_sensor_mask:   binary sensor mask at which equivalent
+                              time-series are computed via interpolation
+
+         interp:               (optional) interpolation mode used to compute the
+                              time-series, both 'nearest' and 'linear'
+                              (two-point) modes are supported
+                              (default = 'nearest')
+
+     returns:
+         binary_sensor_data:   array of time-series corresponding to the
+                               sensor positions given by binary_sensor_mask
+    """
+
+    # make timer
+    timer = TicToc()
+    # start the clock
+    timer.tic()
+
+    # extract the number of data points
+    num_cart_data_points, num_time_points = cart_sensor_data.shape
+    num_binary_sensor_points = np.sum(binary_sensor_mask.flatten())
+
+    # update command line status
+    print('Interpolating Cartesian sensor data...')
+    print(f'  interpolation mode: {interp}')
+    print(f'  number of Cartesian sensor points:  {num_cart_data_points}')
+    print(f'  number of binary sensor points: {num_binary_sensor_points}')
+
+    binary_sensor_data = np.zeros((num_binary_sensor_points, num_time_points))
+
+    # Check dimensionality of data passed
+    if kgrid.dim not in [2, 3]:
+        raise ValueError('Data must be two- or three-dimensional.')
+    if kgrid.dim == 3:
+        raise Warning('This method is untested for 3D case.')
+
+    from kwave.utils.kutils import grid2cart
+    cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
+
+    # nearest neighbour interpolation of the data points
+    for point_index in range(num_binary_sensor_points):
+
+        # find the measured data point that is closest
+        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, ord=2, axis=1)
+        if interp == 'nearest':
+
+            dist_min_index = np.argmin(dist)
+
+            # assign value
+            binary_sensor_data[point_index, :] = cart_sensor_data[dist_min_index, :]
+
+        elif interp == 'linear':
+            # raise NotImplementedError
+            # append the distance information onto the data set
+            cart_sensor_data_ro = cart_sensor_data
+            np.append(cart_sensor_data_ro, dist[:, None], axis=1)
+            new_col_pos = -1
+
+            # reorder the data set based on distance information
+            cart_sensor_data_ro = sortrows(cart_sensor_data_ro, new_col_pos)
+
+            # linearly interpolate between the two closest points
+            perc = cart_sensor_data_ro[2, new_col_pos] / (
+                    cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
+            binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + \
+                                                    (1 - perc) * cart_sensor_data_ro[2, :]
+
+        else:
+            raise ValueError('Unknown interpolation option.')
+
+        # elif interp == 'linear':
+        #
+        #         # dist = np.sqrt((cart_bsm[0, point_index] - cart_sensor_mask[0, :])**2 + (cart_bsm[1, point_index] - cart_sensor_mask[1, :])**2)
+        #         # dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, axis=1)
+        #         # append the distance information onto the data set
+        #         new_col_pos = len(cart_sensor_data[1, :]) -1
+        #         cart_sensor_data_ro = cart_sensor_data
+        #         cart_sensor_data_ro[:, new_col_pos] = dist
+        #
+        #         # reorder the data set based on distance information
+        #         cart_sensor_data_ro = sortrows(cart_sensor_data_ro, new_col_pos)
+        #
+        #         # linearly interpolate between the two closest points
+        #         perc = cart_sensor_data_ro[1, new_col_pos] / (cart_sensor_data_ro[0, new_col_pos] + cart_sensor_data_ro[1, new_col_pos] )
+        #         binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :new_col_pos - 1] + (1 - perc) * cart_sensor_data_ro[1, :new_col_pos - 1]
+        #
+        # else:
+        #     raise ValueError('Unknown interpolation option.')
+
+    # update command line status
+    print(f'  computation completed in {scale_time(timer.toc())}')
+    return binary_sensor_data
+
+
+def interpftn(x, sz: tuple, win=None):
     """
      Resamples an N-D matrix to the size given in sz using Fourier interpolation.
 

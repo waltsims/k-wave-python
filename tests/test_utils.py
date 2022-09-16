@@ -1,19 +1,13 @@
-import scipy.signal
-
-from kwave.utils.checkutils import num_dim
-from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
-from kwave.utils.conversionutils import db2neper, neper2db
-from kwave.utils.kutils import toneBurst, add_noise, gradient_spect, grid2cart
-from kwave.utils.interputils import get_bli, interpftn
-from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
-from kwave.utils.matrixutils import gradient_FD, resize
-from kwave.utils.ioutils import loadImage
-import numpy as np
-from utils import *
 import pytest
 from phantominator import shepp_logan
 from kwave import kgrid
+# noinspection PyUnresolvedReferences
+from kwave.ksource import kSource
+from kwave.ksensor import kSensor
+from kwave.kmedium import kWaveMedium
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 
+from kwave.utils import *
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,
                          0.02355139, 0.02753738, 0.02966112, 0.02907933, 0.02502059,
                          0.01690274, 0.00445909, -0.01214073, -0.03219275, -0.05440197,
@@ -3249,4 +3243,54 @@ def test_interpftn():
         [1, 1.29442719099992, 1, 0.400000000000000, -4.44089209850063e-17, -0.0472135954999580, -4.44089209850063e-17,
          -0.0472135954999579, 0, 0.400000000000000])).all()
     # TODO: test 3D x
+    pass
+
+
+def test_interp_cart_data():
+    # assign the grid size and create the computational grid
+    PML_size = 20  # size of the PML in grid points
+    Nx = 256 - 2 * PML_size  # number of grid points in the x direction
+    Ny = 256 - 2 * PML_size  # number of grid points in the y direction
+    x = 10e-3  # total grid size [m]
+    y = 10e-3  # total grid size [m]
+    dx = x / Nx  # grid point spacing in the x direction [m]
+    dy = y / Ny  # grid point spacing in the y direction [m]
+
+    sim_kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+
+    # define the properties of the propagation medium
+    medium = kWaveMedium(sound_speed=1500)
+    # define a centered Cartesian circular sensor
+    sensor_radius = 4.5e-3              # [m]
+    sensor_angle = 3 * np.pi / 2        # [rad]
+    sensor_pos = [0, 0]                 # [m]
+    num_sensor_points = 70
+    cart_sensor_mask = makeCartCircle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
+
+    # create the time array
+    sim_kgrid.makeTime(medium.sound_speed)
+
+    # mock the sim
+    sensor_data = np.repeat(np.linspace(start=0, stop=1000, num=1091)[np.newaxis, :], 70, axis=0)
+
+    # create a second computation grid for the reconstruction to avoid the
+    # inverse crime
+    Nx = 300  # number of grid points in the x direction
+    Ny = 300  # number of grid points in the y direction
+    dx = x / Nx  # grid point spacing in the x direction [m]
+    dy = y / Ny  # grid point spacing in the y direction [m]
+    kgrid_recon = kWaveGrid([Nx, Ny], [dx, dy])
+    sensor_radius_grid_points = round(sensor_radius / kgrid_recon.dx)
+
+    binary_sensor_mask = makeCircle(kgrid_recon.Nx, kgrid_recon.Ny, kgrid_recon.Nx / 2 + 1, kgrid_recon.Ny / 2 + 1,
+                                    sensor_radius_grid_points, sensor_angle)
+
+    time_reversal_boundary_data = interpCartData(kgrid_recon, sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+    assert time_reversal_boundary_data.shape == (574, 1091)
+    assert (time_reversal_boundary_data[0, :] == time_reversal_boundary_data[:, :]).all()
+
+    time_reversal_boundary_data = interpCartData(kgrid_recon, sensor_data, cart_sensor_mask, binary_sensor_mask, interp='linear')
+    assert time_reversal_boundary_data.shape == (574, 1091)
+    assert (time_reversal_boundary_data[0, :] == time_reversal_boundary_data[:, :]).all()
     pass
