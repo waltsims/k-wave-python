@@ -35,6 +35,7 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
         expanded matrix
     """
     opts = {}
+    matrix = np.squeeze(matrix)
 
     if edge_val is None:
         opts['mode'] = 'edge'
