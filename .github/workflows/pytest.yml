@@ -48,6 +48,20 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
+      - name: Download collectedValues
+        uses: actions/download-artifact@v3
+        with:
+          name: collectedValues
+          path: tests/matlab_test_data_collectors/python_testers/
+      - name: unpack collectedValues
+        uses: a7ul/tar-action@v1.1.0
+        with:
+          command: x
+          cwd: ./tests/matlab_test_data_collectors/python_testers/
+          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+      - name: where are the files?
+        run: |
+          ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
@@ -55,20 +69,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements/test.txt
-      - name: Download collectedValues
-        uses: actions/download-artifact@v3
-        with:
-          name: collectedValues
-          path: tests/python_testers/
-      - name: unpack collectedValues
-        uses: a7ul/tar-action@v1.1.0
-        with:
-          command: x
-          cwd: ./tests/python_testers/
-          files: ./tests/python_testers/collectedValues.tar.gz
-      - name: where are the files?
-        run: |
-          ls ./tests/python_testers/
       - name: Test with pytest
         run: |
           pytest
