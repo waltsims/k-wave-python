@@ -22,7 +22,15 @@ jobs:
       - name: run reference generation
         uses: matlab-actions/run-command@v1
         with:
-          command: ls; addpath('k-Wave-python'); addpath('k-Wave'); cd  k-Wave-python/tests/matlab_test_data_collectors; run_all_collectors;
+          command: |
+            addpath('k-Wave-python','k-Wave');
+            cd k-Wave-python/tests/matlab_test_data_collectors;
+            run_all_collectors;
+      - name: Archive reference values
+        uses: actions/upload-artifact@v3
+        with:
+          name: collectedValues
+          path: k-Wave-python/tests/matlab_test_data_collectors/collectedValues.zip
   test:
     needs: collect_references
     strategy:
