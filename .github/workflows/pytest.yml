@@ -53,7 +53,7 @@ jobs:
           name: collectedValues
           path: k-Wave-python/tests/python_testers
       - name: unzip collectedValues
-      - uses: montudor/action-zip@v1
+        uses: montudor/action-zip@v1
         with:
           args: unzip -qq k-Wave-python/tests/python_testers/collectedValues.zip -d k-Wave-python/tests/python_testers/collectedValues
       - name: Test with pytest
