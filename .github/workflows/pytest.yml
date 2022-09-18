@@ -10,7 +10,7 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v3
         with:
-          path: main
+          path: k-Wave-python
       - name: checkout reference k-Wave repo
         uses: actions/checkout@v3
         with:
@@ -22,7 +22,7 @@ jobs:
       - name: run reference generation
         uses: matlab-actions/run-command@v1
         with:
-          command: ls; addpath('main'); addpath('k-Wave'); ls main; run_all_collectors;
+          command: ls; addpath('k-Wave-python'); addpath('k-Wave'); ls k-Wave-python/tests/; run_all_collectors;
   test:
     needs: collect_references
     strategy:
