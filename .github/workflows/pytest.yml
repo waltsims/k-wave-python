@@ -10,7 +10,7 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v3
         with:
-          path: k-Wave-python
+          path: main
       - name: checkout reference k-Wave repo
         uses: actions/checkout@v3
         with:
