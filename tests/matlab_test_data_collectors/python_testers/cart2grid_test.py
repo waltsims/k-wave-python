@@ -10,9 +10,9 @@ import os
 import pytest
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="Missing cart2grid collector")
 def test_cart2grid():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_cart2grid'
+    collected_values_folder = os.path.join(os.path.curdir, 'collectedValues/cart2grid')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

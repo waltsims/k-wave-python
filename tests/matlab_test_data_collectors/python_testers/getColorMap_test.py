@@ -1,14 +1,13 @@
-import pytest
 from scipy.io import loadmat
 import numpy as np
 import os
+from pathlib import Path
 
 from kwave.utils.colormap import get_color_map
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_get_color_map():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_getColorMap'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/getColorMap')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

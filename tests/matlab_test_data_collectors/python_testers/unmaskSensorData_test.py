@@ -1,16 +1,17 @@
 from unittest.mock import Mock
 
-import pytest
 from scipy.io import loadmat
 import numpy as np
 import os
+from pathlib import Path
+import pytest
 
 from kwave.utils import unmask_sensor_data
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="Data collector broken.")
 def test_unmask_sensor_data():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_unmaskSensorData'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/unmaskSensorData')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

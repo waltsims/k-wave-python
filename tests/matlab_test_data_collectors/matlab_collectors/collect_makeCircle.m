@@ -25,6 +25,6 @@ for idx=1:length(params)
     circle = makeCircle(Nx, Ny, cx, cy, radius, arc_angle);
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeCircle/' idx_padded '.mat'];
+    filename = ['collectedValues/makeCircle/' idx_padded '.mat'];
     save(filename, 'Nx', 'Ny', 'cx', 'cy', 'radius', 'arc_angle', 'circle');
 end

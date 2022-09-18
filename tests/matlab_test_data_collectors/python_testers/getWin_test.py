@@ -1,15 +1,17 @@
 from kwave.utils import get_win
+
 from scipy.io import loadmat
 import numpy as np
-import pytest
+from pathlib import Path
+import os
 
 
-@pytest.mark.skip(reason="Reference files to not always exist.")
 def test_get_win():
     data = []
+    directory_path = os.path.join(Path(__file__).parent, 'collectedValues/getWin')
     for i in range(5440):
         print('i: => ', i)
-        filepath = f'/data/code/Work/collectedValues/{i:06d}.mat'
+        filepath = os.path.join(directory_path, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
         N = recorded_data['N']

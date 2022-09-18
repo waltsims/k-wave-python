@@ -15,7 +15,7 @@ for idx=1:length(matrix_sizes)
     [min_val, ind] = minND(matrix);
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_minND/' idx_padded '.mat'];
+    filename = ['collectedValues/minND/' idx_padded '.mat'];
     save(filename, 'matrix', 'min_val', 'ind');
 end
 

@@ -15,6 +15,6 @@ for idx=1:length(matrix_sizes)
     [max_val, ind] = maxND(matrix);
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_maxND/' idx_padded '.mat'];
+    filename = ['collectedValues/maxND/' idx_padded '.mat'];
     save(filename, 'matrix', 'max_val', 'ind');
 end

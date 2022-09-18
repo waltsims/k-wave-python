@@ -3,7 +3,28 @@ name: pytest
 on: [push]
 
 jobs:
-  build:
+  collect_references:
+    name: collect_references
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: k-Wave-python
+      - name: checkout reference k-Wave repo
+        uses: actions/checkout@v3
+        with:
+          repository: waltsims/k-Wave
+          path: k-Wave
+          ref: v1.3.0
+      - name: setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
+      - name: run reference generation
+        uses: matlab-actions/run-command@v1
+        with:
+          command: cd k-Wave-python/tests/matlab_test_data_collectors; run_all_collectors;
+  test:
+    needs: collect_references
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
