@@ -22,7 +22,7 @@ jobs:
       - name: run reference generation
         uses: matlab-actions/run-command@v1
         with:
-          command: ls; run_all_collectors;
+          command: ls; addpath(main); addpath(k-Wave); cd main/tests/matlab_collectors; run_all_collectors;
   test:
     needs: collect_references
     strategy:
