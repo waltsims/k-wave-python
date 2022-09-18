@@ -66,6 +66,9 @@ jobs:
           command: x
           cwd: ./k-Wave-python/tests/python_testers/
           files: ./k-Wave-python/tests/python_testers/collectedValues.tar.gz
+      - name: where are the files?
+        run: |
+          ls ./k-Wave-python/tests/python_testers/
       - name: Test with pytest
         run: |
           pytest
