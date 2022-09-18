@@ -26,7 +26,7 @@ jobs:
             addpath('k-Wave-python','k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
-      - name: Archive reference values
+      - name: upload reference values artifact
         uses: actions/upload-artifact@v3
         with:
           name: collectedValues
@@ -52,6 +52,10 @@ jobs:
         with:
           name: collectedValues
           path: k-Wave-python/tests/python_testers
+      - name: unzip collectedValues
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq k-Wave-python/tests/python_testers/collectedValues.zip -d k-Wave-python/tests/python_testers/collectedValues
       - name: Test with pytest
         run: |
           pytest
