@@ -13,8 +13,6 @@ for idx=1:length(files)
         run(fullfile(directory, files{idx}));
 end
 
-zip('collectedValues', 'matlab_collectors/collectedValues')
-
 function files = getListOfFiles(directory)
     list    = dir(fullfile(directory, '*.m'));
     files = {list.name};

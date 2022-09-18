@@ -26,11 +26,19 @@ jobs:
             addpath('k-Wave-python','k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
+      - name: compress artifact
+        uses: a7ul/tar-action@v1.1.0
+        with:
+          command: c
+          cwd: k-Wave-python/tests/matlab_test_data_collectors
+          files: |
+            ./collectedValues
+          outPath: collectedValues.tar.gz
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
         with:
           name: collectedValues
-          path: k-Wave-python/tests/matlab_test_data_collectors/collectedValues.zip
+          path: k-Wave-python/tests/matlab_test_data_collectors/collectedValues.tar.gz
   test:
     needs: collect_references
     strategy:
@@ -52,10 +60,12 @@ jobs:
         with:
           name: collectedValues
           path: k-Wave-python/tests/python_testers
-      - name: unzip collectedValues
-        uses: montudor/action-zip@v1
+      - name: unpack collectedValues
+        uses: a7ul/tar-action@v1.1.0
         with:
-          args: unzip -qq k-Wave-python/tests/python_testers/collectedValues.zip -d k-Wave-python/tests/python_testers/collectedValues
+          command: x
+          cwd: k-Wave-python/tests/python_testers/
+          files: collectedValues.tar.gz
       - name: Test with pytest
         run: |
           pytest
