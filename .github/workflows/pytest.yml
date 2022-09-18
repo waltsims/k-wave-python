@@ -26,9 +26,6 @@ jobs:
             addpath('k-Wave-python','k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
-      - name: debug
-        run: |
-          ls k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/;
       - name: compress artifact
         uses: a7ul/tar-action@v1.1.0
         with:
@@ -37,6 +34,9 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
+      - name: debug
+        run: |
+          ls k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/;
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
         with:
@@ -67,8 +67,8 @@ jobs:
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
-          cwd: tests/python_testers/
-          files: collectedValues.tar.gz
+          cwd: ./k-Wave-python/tests/python_testers/
+          files: ./collectedValues.tar.gz
       - name: Test with pytest
         run: |
           pytest
