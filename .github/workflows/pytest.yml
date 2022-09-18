@@ -30,7 +30,7 @@ jobs:
         uses: a7ul/tar-action@v1.1.0
         with:
           command: c
-          cwd: k-Wave-python/tests/matlab_test_data_collectors
+          cwd: tests/matlab_test_data_collectors
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
@@ -64,7 +64,7 @@ jobs:
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
-          cwd: k-Wave-python/tests/python_testers/
+          cwd: tests/python_testers/
           files: collectedValues.tar.gz
       - name: Test with pytest
         run: |
