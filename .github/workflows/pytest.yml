@@ -36,12 +36,12 @@ jobs:
           outPath: collectedValues.tar.gz
       - name: debug
         run: |
-          ls k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/;
+          ls;
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
         with:
           name: collectedValues
-          path: k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/collectedValues.tar.gz
+          path: collectedValues.tar.gz
   test:
     needs: collect_references
     strategy:
