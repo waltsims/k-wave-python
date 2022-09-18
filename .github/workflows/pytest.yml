@@ -47,6 +47,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements/test.txt
+      - name: Download collectedValues
+        uses: actions/download-artifact@v3
+        with:
+          name: collectedValues
+          path: k-Wave-python/tests/python_testers
       - name: Test with pytest
         run: |
           pytest
