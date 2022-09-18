@@ -34,9 +34,6 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-      - name: debug
-        run: |
-          ls;
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
         with:
