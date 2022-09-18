@@ -33,7 +33,7 @@ jobs:
         uses: a7ul/tar-action@v1.1.0
         with:
           command: c
-          cwd: tests/matlab_test_data_collectors/matlab_collectors/
+          cwd: ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
