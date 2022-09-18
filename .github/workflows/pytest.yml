@@ -59,16 +59,16 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: collectedValues
-          path: k-Wave-python/tests/python_testers
+          path: tests/python_testers/
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
-          cwd: ./k-Wave-python/tests/python_testers/
-          files: ./k-Wave-python/tests/python_testers/collectedValues.tar.gz
+          cwd: ./tests/python_testers/
+          files: ./tests/python_testers/collectedValues.tar.gz
       - name: where are the files?
         run: |
-          ls ./k-Wave-python/tests/python_testers/
+          ls ./tests/python_testers/
       - name: Test with pytest
         run: |
           pytest
