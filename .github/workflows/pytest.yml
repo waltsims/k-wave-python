@@ -26,6 +26,9 @@ jobs:
             addpath('k-Wave-python','k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
+      - name: debug
+        run: |
+          ls k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/;
       - name: compress artifact
         uses: a7ul/tar-action@v1.1.0
         with:
