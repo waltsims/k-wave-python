@@ -4,12 +4,10 @@ from scipy.io import loadmat
 import numpy as np
 import os
 from pathlib import Path
-import pytest
 
 from kwave.utils import unmask_sensor_data
 
 
-@pytest.mark.skip(reason="Data collector broken.")
 def test_unmask_sensor_data():
     collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/unmaskSensorData')
     num_collected_values = len(os.listdir(collected_values_folder))

@@ -12,3 +12,4 @@ kwave/bin/linux
 /k_Wave_python.egg-info/
 *.mat
 /build/
+*.h5
