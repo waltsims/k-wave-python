@@ -1150,3 +1150,108 @@ def makeLine(
                 line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
 
     return line
+
+
+def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+    # force integer input values
+    grid_size = grid_size.round().astype(int)
+    arc_pos   = arc_pos.round().astype(int)
+    diameter  = int(round(diameter))
+    focus_pos = focus_pos.round().astype(int)
+
+    try:
+        radius = int(radius)
+    except OverflowError:
+        radius = float(radius)
+
+    # check the input ranges
+    if np.any(grid_size < 1):
+        raise ValueError('The grid size must be positive.')
+    if radius <= 0:
+        raise ValueError('The radius must be positive.')
+
+    if diameter <= 0:
+        raise ValueError('The diameter must be positive.')
+
+    if np.any(arc_pos < 1) or np.any(arc_pos > grid_size):
+        raise ValueError('The centre of the arc must be within the grid.')
+
+    if diameter > 2 * radius:
+        raise ValueError('The diameter of the arc must be less than twice the radius of curvature.')
+
+    if diameter % 2 != 1:
+        raise ValueError('The diameter must be an odd number of grid points.')
+
+    if np.all(arc_pos == focus_pos):
+        raise ValueError('The focus_pos must be different to the arc_pos.')
+
+    # assign variable names to vector components
+    Nx, Ny = grid_size
+    ax, ay = arc_pos
+    fx, fy = focus_pos
+
+    # =========================================================================
+    # CREATE ARC
+    # =========================================================================
+
+    if not np.isinf(radius):
+
+        # find half the arc angle
+        half_arc_angle = np.arcsin(diameter / 2 / radius)
+
+        # find centre of circle on which the arc lies
+        distance_cf = np.sqrt( (ax - fx)**2 + (ay - fy)**2 )
+        cx = round(radius / distance_cf * (fx - ax) + ax)
+        cy = round(radius / distance_cf * (fy - ay) + ay)
+        c = np.array([cx, cy])
+
+        # create circle
+        arc = makeCircle(Nx, Ny, cx, cy, radius)
+
+        # form vector from the geometric arc centre to the arc midpoint
+        v1 = arc_pos - c
+
+        # calculate length of vector
+        l1 = np.sqrt(sum((arc_pos - c)**2))
+
+        # extract all points that form part of the arc
+        arc_ind = matlab_find(arc, mode='eq', val=1)
+
+        # loop through the arc points
+        for arc_ind_i in arc_ind:
+
+            # extract the indices of the current point
+            x_ind, y_ind = ind2sub([Nx, Ny], arc_ind_i)
+            p = np.array([x_ind, y_ind])
+
+            # form vector from the geometric arc centre to the current point
+            v2 = p - c
+
+            # calculate length of vector
+            l2 = np.sqrt(sum((p - c)**2))
+
+            # find the angle between the two vectors using the dot product,
+            # normalised using the vector lengths
+            theta = np.arccos(sum( v1 * v2 / (l1 * l2) ))
+
+            # if the angle is greater than the half angle of the arc, remove
+            # it from the arc
+            if theta > half_arc_angle:
+                arc[x_ind - 1, y_ind - 1] = 0   # FARID NOTE: Possibly won't work due to indexing differences
+    else:
+
+        # calculate arc direction angle, then rotate by 90 degrees
+        ang = np.arctan( (fx - ax) / (fy - ay) ) + np.pi/2
+
+        # draw lines to create arc with infinite radius
+        arc = np.logical_or(
+            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1)//2),
+            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1)//2)
+        )
+    return arc
+
+
+def ind2sub(array_shape, ind):
+    # Matlab style ind2sub
+    row, col = np.unravel_index(ind - 1, array_shape, order='F')
+    return row[0] + 1, col[0] + 1
