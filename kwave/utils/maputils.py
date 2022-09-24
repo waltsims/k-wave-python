@@ -548,18 +548,18 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
     d = 1 - radius
 
     if (cx >= 1) and (cx <= Nx) and ((cy - y) >= 1) and ((cy - y) <= Ny):
-        circle[cx, cy - y] = MAGNITUDE
+        circle[cx - 1, cy - y - 1] = MAGNITUDE
 
     # draw the remaining cardinal points
     px = [cx, cx + y, cx - y]
     py = [cy + y, cy, cy]
-    for point_index in range(len(px)):
+    for point_index, (px_i, py_i) in enumerate(zip(px, py)):
         # check whether the point is within the arc made by arc_angle, and lies
         # within the grid
-        if (np.arctan2(px[point_index] - cx, py[point_index] - cy) + np.pi) <= arc_angle:
-            if (px[point_index] >= 1) and (px[point_index] <= Nx) and (py[point_index] >= 1) and (
-                    py[point_index] <= Ny):
-                circle[px[point_index], py[point_index]] = MAGNITUDE
+        if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
+            if (px_i >= 1) and (px_i <= Nx) and (py_i >= 1) and (
+                    py_i <= Ny):
+                circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     # loop through the remaining points using the midpoint circle algorithm
     while x < (y - 1):
@@ -577,14 +577,13 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
         py = [y + cy, x + cy, -x + cy, -y + cy, -y + cy, -x + cy, x + cy, y + cy]
 
         # loop through each point
-        for point_index in range(len(px)):
+        for point_index, (px_i, py_i) in enumerate(zip(px, py)):
 
             # check whether the point is within the arc made by arc_angle, and
             # lies within the grid
-            if (np.arctan2(px[point_index] - cx, py[point_index] - cy) + np.pi) <= arc_angle:
-                if (px[point_index] >= 1) and (px[point_index] <= Nx) and (py[point_index] >= 1) and (
-                        py[point_index] <= Ny):
-                    circle[px[point_index], py[point_index]] = MAGNITUDE
+            if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
+                if (px_i >= 1) and (px_i <= Nx) and (py_i >= 1) and (py_i <= Ny):
+                    circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     if plot_circle:
         plt.imshow(circle, cmap='gray_r')
@@ -878,11 +877,11 @@ def makeLine(
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
-                x = poss_x[index[0]]
-                y = poss_y[index[0]]
+                x = poss_x[index[0] - 1]
+                y = poss_y[index[0] - 1]
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
         elif not np.isinf(abs(m)):
 
@@ -970,7 +969,7 @@ def makeLine(
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
                 line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
@@ -1018,7 +1017,7 @@ def makeLine(
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
                 line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
@@ -1045,7 +1044,7 @@ def makeLine(
                 y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
-                if (x < 0) or (y < 0):
+                if (x < 1) or (y < 1):
                     break
 
                 # add the point to the line
@@ -1066,7 +1065,7 @@ def makeLine(
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
                 line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
@@ -1089,18 +1088,18 @@ def makeLine(
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
-                x = poss_x[index[0]]
-                y = poss_y[index[0]]
+                x = poss_x[index[0] - 1]
+                y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
                 if (x > Nx) or (y < 1):
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])^2 + (y - startpoint[1])^2)
+                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
 
         elif angle == -np.pi/2:
 
@@ -1114,10 +1113,10 @@ def makeLine(
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])^2 + (y - startpoint[1])^2)
+                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
 
         elif (angle < -np.pi/2) and (angle > -np.pi):
 
@@ -1137,17 +1136,17 @@ def makeLine(
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
-                x = poss_x[index[0]]
-                y = poss_y[index[0]]
+                x = poss_x[index[0] - 1]
+                y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
                 if (x > Nx) or (y > Ny):
                     break
 
                 # add the point to the line
-                line[x, y] = 1
+                line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])^2 + (y - startpoint[1])^2)
+                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
 
     return line
