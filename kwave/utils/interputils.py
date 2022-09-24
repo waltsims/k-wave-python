@@ -108,6 +108,46 @@ def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
+def interpolate2D_with_queries(
+        grid_points: List[np.ndarray],
+        grid_values: np.ndarray,
+        queries: np.ndarray,
+        method='linear',
+        copy_nans=True
+) -> np.ndarray:
+    """
+        Interpolates input grid values at the given locations
+        Added by Farid
+
+        Simplified version of `interpolate2D_coords`.
+        Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.
+        Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!
+        WARNING: supposed to support only 2D interpolation!
+    Args:
+        copy_nans:
+        grid_points: List of 1D or 3D Numpy arrays
+        grid_values: A 3D Numpy array which holds values at grid_points
+        queries: Numpy array with shape [N, 2]
+    Returns:
+
+    """
+    assert len(grid_points) == 2, 'interpolate2D supports only 2D interpolation'
+
+    g_x, g_y = grid_points
+
+    assert g_x.ndim == 1  # is a list
+    assert g_y.ndim == 1  # is a list
+    assert queries.ndim == 2 and queries.shape[1] == 2
+
+    # Out of bound points will get NaN values
+    result = interpn((g_x, g_y), grid_values, queries, method=method, bounds_error=False, fill_value=np.nan)
+    if copy_nans:
+        assert result.shape == grid_values.shape
+        # set values outside the interpolation range to original values
+        result[np.isnan(result)] = grid_values[np.isnan(result)]
+    return result
+
+
 def cart2grid(kgrid, cart_data, axisymmetric=False):
     """
     Interpolate a set of Cartesian points onto a binary grid.
