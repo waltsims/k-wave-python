@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.mark.skip(reason="no way of currently testing this")
-def tst_makeArc():
+def test_makeArc():
     collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_makeArc'
     num_collected_values = len(os.listdir(collected_values_folder))
 
@@ -29,7 +29,3 @@ def tst_makeArc():
         assert np.allclose(expected_arc, arc)
 
     print('makeArc(..) works as expected!')
-
-
-if __name__ == '__main__':
-    tst_makeArc()
