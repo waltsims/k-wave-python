@@ -12,7 +12,7 @@ import os
 import pytest
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_makeLine():
     collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_makeLine'
     num_collected_values = len(os.listdir(collected_values_folder))
