@@ -89,6 +89,12 @@ def unflatten_matlab_mask(arr, mask, diff=None):
     else:
         return np.unravel_index(mask.ravel(order='F') + diff, arr.shape, order='F')
 
+def matlab_assign(matrix: np.ndarray, indices, values):
+    original_shape = matrix.shape
+    matrix = matrix.flatten(order='F')
+    matrix[indices] = values
+    return matrix.reshape(original_shape, order='F')
+
 # def _resize1D():
 #     # extract the original number of pixels from the size of the matrix
 #     [Nx_input, Ny_input] = size(mat);

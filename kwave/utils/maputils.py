@@ -4,7 +4,7 @@ from typing import Tuple, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-from kwave.utils.matrixutils import matlab_find
+from kwave.utils.matrixutils import matlab_find, matlab_assign
 from scipy import optimize
 import warnings
 
@@ -1253,5 +1253,660 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
 
 def ind2sub(array_shape, ind):
     # Matlab style ind2sub
-    row, col = np.unravel_index(ind - 1, array_shape, order='F')
-    return row[0] + 1, col[0] + 1
+    # row, col = np.unravel_index(ind - 1, array_shape, order='F')
+    # return np.squeeze(row) + 1, np.squeeze(col) + 1
+
+    indices = np.unravel_index(ind - 1, array_shape, order='F')
+    indices = (np.squeeze(index) + 1 for index in indices)
+    return indices
+
+def sub2ind(array_shape, x, y, z) -> np.ndarray:
+    results = []
+    x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
+    for x_i, y_i, z_i in zip(x, y, z):
+        index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order='F')
+        results.append(index)
+    return np.array(results)
+
+
+def makePixelMapPoint(grid_size, centre_pos) -> np.ndarray:
+    # check for number of dimensions
+    num_dim = len(grid_size)
+
+    # check that centre_pos has the same dimensions
+    if len(grid_size) != len(centre_pos):
+        raise ValueError('The inputs centre_pos and grid_size must have the same number of dimensions.')
+
+    if num_dim == 2:
+        # assign inputs and force to be integers
+        Nx, Ny = grid_size.astype(int)
+        cx, cy = centre_pos.astype(int)
+
+        # generate index vectors in each dimension
+        nx = np.arange(0, Nx) - cx + 1
+        ny = np.arange(0, Ny) - cy + 1
+
+        # combine index matrices
+        pixel_map = np.zeros((Nx, Ny))
+        pixel_map += (nx**2)[:, None]
+        pixel_map += (ny**2)[None, :]
+        pixel_map = np.sqrt(pixel_map)
+
+    elif num_dim == 3:
+
+        # assign inputs and force to be integers
+        Nx, Ny, Nz = grid_size.astype(int)
+        cx, cy, cz = centre_pos.astype(int)
+
+        # generate index vectors in each dimension
+        nx = np.arange(0, Nx) - cx + 1
+        ny = np.arange(0, Ny) - cy + 1
+        nz = np.arange(0, Nz) - cz + 1
+
+        # combine index matrices
+        pixel_map = np.zeros((Nx, Ny, Nz))
+        pixel_map += (nx**2)[:, None, None]
+        pixel_map += (ny**2)[None, :, None]
+        pixel_map += (nz**2)[None, None, :]
+        pixel_map = np.sqrt(pixel_map)
+
+    else:
+        # throw error
+        raise ValueError('Grid size must be 2 or 3D.')
+
+    return pixel_map
+
+
+def makePixelMapPlane(grid_size, normal, point):
+    # error checking
+    if np.all(normal == 0):
+        raise ValueError('Normal vector should not be zero.')
+
+    # check for number of dimensions
+    num_dim = len(grid_size)
+
+    if num_dim == 2:
+        # assign inputs and force to be integers
+        Nx = round(grid_size[0])
+        Ny = round(grid_size[1])
+
+        # create coordinate meshes
+        [px, py]         = np.meshgrid(Nx, Ny)
+        [pointx, pointy] = np.meshgrid(np.ones((1, Nx)) * point[0],  np.ones(1, Ny) * point[1])
+        [nx, ny]         = np.meshgrid(np.ones((1, Nx)) * normal[0], np.ones(1, Ny) * normal[2])
+
+        # calculate distance according to Eq. (6) at
+        # http://mathworld.wolfram.com/Point-PlaneDistance.html
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny) / np.sqrt(sum(normal**2))
+
+    elif num_dim == 3:
+
+        # assign inputs and force to be integers
+        Nx = np.round(grid_size[0])
+        Ny = np.round(grid_size[1])
+        Nz = np.round(grid_size[2])
+
+        # create coordinate meshes
+        px, py, pz             = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1))
+        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0],  np.ones(Ny) * point[1],  np.ones(Nz) * point[2])
+        nx, ny, nz             = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2])
+
+        # calculate distance according to Eq. (6) at
+        # http://mathworld.wolfram.com/Point-PlaneDistance.html
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny + (pz - pointz) * nz) / np.sqrt(sum(normal**2))
+
+    else:
+        # throw error
+        raise ValueError('Grid size must be 2 or 3D.')
+
+    return pixel_map
+
+
+def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
+    # =========================================================================
+    # DEFINE LITERALS
+    # =========================================================================
+
+    # threshold used to find the closest point to the radius
+    THRESHOLD               = 0.5
+
+    # number of grid points to expand the bounding box compared to
+    # sqrt(2)*diameter
+    BOUNDING_BOX_EXP        = 2
+    
+    # =========================================================================
+    # INPUT CHECKING
+    # =========================================================================
+    
+    # force integer input values
+    grid_size = np.round(grid_size).astype(int)
+    bowl_pos  = np.round(bowl_pos).astype(int)
+    focus_pos = np.round(focus_pos).astype(int)
+    diameter  = np.round(diameter)
+    radius    = np.round(radius)
+
+    # check the input ranges
+    if np.any(grid_size < 1):
+        raise ValueError('The grid size must be positive.')
+    if np.any(bowl_pos < 1) or np.any(bowl_pos > grid_size):
+        raise ValueError('The centre of the bowl must be within the grid.')
+    if radius <= 0:
+        raise ValueError('The radius must be positive.')
+    if diameter <= 0:
+        raise ValueError('The diameter must be positive.')
+    if diameter > (2*radius):
+        raise ValueError('The diameter of the bowl must be less than twice the radius of curvature.')
+    if diameter % 2 == 0:
+        raise ValueError('The diameter must be an odd number of grid points.')
+    if np.all(bowl_pos == focus_pos):
+        raise ValueError('The focus_pos must be different to the bowl_pos.')
+
+    # =========================================================================
+    # BOUND THE GRID TO SPEED UP CALCULATION
+    # =========================================================================
+
+    # create bounding box slightly larger than bowl diameter * sqrt(2)
+    Nx = np.round(np.sqrt(2) * diameter).astype(int) + BOUNDING_BOX_EXP
+    Ny = Nx
+    Nz = Nx
+    grid_size_sm = np.array([Nx, Ny, Nz])
+
+    # set the bowl position to be the centre of the bounding box
+    bx = np.ceil(Nx/2).astype(int)
+    by = np.ceil(Ny/2).astype(int)
+    bz = np.ceil(Nz/2).astype(int)
+    bowl_pos_sm = np.array([bx, by, bz])
+
+    # set the focus position to be in the direction specified by the user
+    fx = bx + (focus_pos[0] - bowl_pos[0])
+    fy = by + (focus_pos[1] - bowl_pos[1])
+    fz = bz + (focus_pos[2] - bowl_pos[2])
+    focus_pos_sm = [fx, fy, fz]
+
+    # preallocate storage variable
+    if binary:
+        bowl_sm = np.zeros((Nx, Ny, Nz), dtype=bool)
+    else:
+        bowl_sm = np.zeros((Nx, Ny, Nz))
+
+    # =========================================================================
+    # CREATE DISTANCE MATRIX
+    # =========================================================================
+
+    if not np.isinf(radius):
+
+        # find half the arc angle
+        half_arc_angle = np.arcsin(diameter / (2 * radius))
+
+        # find centre of sphere on which the bowl lies
+        distance_cf = np.sqrt( (bx - fx)**2 + (by - fy)**2 + (bz - fz)**2 )
+        cx = round(radius / distance_cf * (fx - bx) + bx)
+        cy = round(radius / distance_cf * (fy - by) + by)
+        cz = round(radius / distance_cf * (fz - bz) + bz)
+        c = np.array([cx, cy, cz])
+
+        # generate matrix with distance from the centre
+        pixel_map = makePixelMapPoint(grid_size_sm, c)
+
+        # set search radius to bowl radius
+        search_radius = radius
+
+    else:
+
+        # generate matrix with distance from the centre
+        pixel_map = makePixelMapPlane(grid_size_sm, bowl_pos_sm - focus_pos_sm, bowl_pos_sm)
+
+        # set search radius to 0 (the disc is flat)
+        search_radius = 0
+
+    # calculate distance from search radius
+    pixel_map = np.abs(pixel_map - search_radius)
+
+    # =========================================================================
+    # DIMENSION 1
+    # =========================================================================
+
+    # find the grid point that corresponds to the outside of the bowl in the
+    # first dimension in both directions (the index gives the distance along
+    # this dimension)
+    value_forw, index_forw = pixel_map.min(axis=0), pixel_map.argmin(axis=0)
+    value_back, index_back = np.flip(pixel_map, axis=0).min(axis=0), np.flip(pixel_map, axis=0).argmin(axis=0)
+
+    # extract the linear index in the y-z plane of the values that lie on the
+    # bowl surface
+    yz_ind_forw = matlab_find(value_forw < THRESHOLD)
+    yz_ind_back = matlab_find(value_back < THRESHOLD)
+
+    # use these subscripts to extract the x-index of the grid points that lie
+    # on the bowl surface
+    x_ind_forw = index_forw.flatten(order='F')[yz_ind_forw - 1] + 1
+    x_ind_back = index_back.flatten(order='F')[yz_ind_back - 1] + 1
+
+    # convert the linear index to equivalent subscript values
+    y_ind_forw, z_ind_forw = ind2sub([Ny, Nz], yz_ind_forw)
+    y_ind_back, z_ind_back = ind2sub([Ny, Nz], yz_ind_back)
+
+    # combine x-y-z indices into a linear index
+    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw-1, y_ind_forw-1, z_ind_forw-1) + 1
+    linear_index_back = sub2ind([Nx, Ny, Nz], Nx - x_ind_back, y_ind_back-1, z_ind_back-1) + 1
+
+    # assign these values to the bowl
+    bowl_sm = matlab_assign(bowl_sm, linear_index_forw - 1, 1)
+    bowl_sm = matlab_assign(bowl_sm, linear_index_back - 1, 1)
+
+    # set existing bowl values to a distance of zero in the pixel map (this
+    # avoids problems with overlapping pixels)
+    pixel_map[bowl_sm == 1] = 0
+
+    # =========================================================================
+    # DIMENSION 2
+    # =========================================================================
+
+    # find the grid point that corresponds to the outside of the bowl in the
+    # second dimension in both directions (the pixel map is first re-ordered to
+    # [X, Y, Z] -> [Y, Z, X])
+    pixel_map_temp = np.transpose(pixel_map, (1, 2, 0))
+    value_forw, index_forw = pixel_map_temp.min(axis=0), pixel_map_temp.argmin(axis=0)
+    value_back, index_back = np.flip(pixel_map_temp, axis=0).min(axis=0), np.flip(pixel_map_temp, axis=0).argmin(axis=0)
+    del pixel_map_temp
+
+    # extract the linear index in the y-z plane of the values that lie on the
+    # bowl surface
+    zx_ind_forw = matlab_find(value_forw < THRESHOLD)
+    zx_ind_back = matlab_find(value_back < THRESHOLD)
+
+    # use these subscripts to extract the y-index of the grid points that lie
+    # on the bowl surface
+    y_ind_forw = index_forw.flatten(order='F')[zx_ind_forw - 1] + 1
+    y_ind_back = index_back.flatten(order='F')[zx_ind_back - 1] + 1
+
+    # convert the linear index to equivalent subscript values
+    z_ind_forw, x_ind_forw = ind2sub([Nz, Nx], zx_ind_forw)
+    z_ind_back, x_ind_back = ind2sub([Nz, Nx], zx_ind_back)
+
+    # combine x-y-z indices into a linear index
+    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw-1, y_ind_forw-1, z_ind_forw-1) + 1
+    linear_index_back = sub2ind([Nx, Ny, Nz], x_ind_back - 1, Ny - y_ind_back, z_ind_back - 1) + 1
+
+    # assign these values to the bowl
+    bowl_sm = matlab_assign(bowl_sm, linear_index_forw - 1, 1)
+    bowl_sm = matlab_assign(bowl_sm, linear_index_back - 1, 1)
+
+    # set existing bowl values to a distance of zero in the pixel map (this
+    # avoids problems with overlapping pixels)
+    pixel_map[bowl_sm == 1] = 0
+
+    # =========================================================================
+    # DIMENSION 3
+    # =========================================================================
+
+    # find the grid point that corresponds to the outside of the bowl in the
+    # third dimension in both directions (the pixel map is first re-ordered to
+    # [X, Y, Z] -> [Z, X, Y])
+    pixel_map_temp = np.transpose(pixel_map, (2, 0, 1))
+    value_forw, index_forw = pixel_map_temp.min(axis=0), pixel_map_temp.argmin(axis=0)
+    value_back, index_back = np.flip(pixel_map_temp, axis=0).min(axis=0), np.flip(pixel_map_temp, axis=0).argmin(axis=0)
+    del pixel_map_temp
+
+    # extract the linear index in the y-z plane of the values that lie on the
+    # bowl surface
+    xy_ind_forw = matlab_find(value_forw < THRESHOLD)
+    xy_ind_back = matlab_find(value_back < THRESHOLD)
+
+    # use these subscripts to extract the z-index of the grid points that lie
+    # on the bowl surface
+    z_ind_forw = index_forw.flatten(order='F')[xy_ind_forw - 1] + 1
+    z_ind_back = index_back.flatten(order='F')[xy_ind_back - 1] + 1
+
+    # convert the linear index to equivalent subscript values
+    x_ind_forw, y_ind_forw = ind2sub([Nx, Ny], xy_ind_forw)
+    x_ind_back, y_ind_back = ind2sub([Nx, Ny], xy_ind_back)
+
+    # combine x-y-z indices into a linear index
+    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw - 1, y_ind_forw - 1, z_ind_forw - 1) + 1
+    linear_index_back = sub2ind([Nx, Ny, Nz], x_ind_back - 1, y_ind_back - 1, Nz - z_ind_back) + 1
+
+    # assign these values to the bowl
+    bowl_sm = matlab_assign(bowl_sm, linear_index_forw - 1, 1)
+    bowl_sm = matlab_assign(bowl_sm, linear_index_back - 1, 1)
+
+    # =========================================================================
+    # RESTRICT SPHERE TO BOWL
+    # =========================================================================
+
+    # remove grid points within the sphere that do not form part of the bowl
+    if not np.isinf(radius):
+
+        # form vector from the geometric bowl centre to the back of the bowl
+        v1 = bowl_pos_sm - c
+
+        # calculate length of vector
+        l1 = np.sqrt(sum((bowl_pos_sm - c)**2))
+
+        # loop through the non-zero elements in the bowl matrix
+        bowl_ind = matlab_find(bowl_sm == 1)[:, 0]
+        for bowl_ind_i in bowl_ind:
+
+            # extract the indices of the current point
+            x_ind, y_ind, z_ind = ind2sub([Nx, Ny, Nz], bowl_ind_i)
+            p = np.array([x_ind, y_ind, z_ind])
+
+            # form vector from the geometric bowl centre to the current point
+            # on the bowl
+            v2 = p - c
+
+            # calculate length of vector
+            l2 = np.sqrt(sum((p - c)**2))
+
+            # find the angle between the two vectors using the dot product,
+            # normalised using the vector lengths
+            theta = np.arccos(sum( v1 * v2 / (l1 * l2) ))
+
+    #         # alternative calculation normalised using radius of curvature
+    #         theta2 = acos(sum( v1 .* v2 ./ radius**2 ))
+
+            # if the angle is greater than the half angle of the bowl, remove
+            # it from the bowl
+            if theta > half_arc_angle:
+                bowl_sm = matlab_assign(bowl_sm, bowl_ind_i - 1, 0)
+
+    else:
+
+        # form a distance map from the centre of the disc
+        pixelMapPoint = makePixelMapPoint(grid_size_sm, bowl_pos_sm)
+
+        # set all points in the disc greater than the diameter to zero
+        bowl_sm[pixelMapPoint > (diameter / 2)] = 0
+
+    # =========================================================================
+    # REMOVE OVERLAPPED POINTS
+    # =========================================================================
+
+    if remove_overlap:
+
+        # define the shapes that capture the overlapped points, along with the
+        # corresponding mask of which point to delete
+        overlap_shapes = []
+        overlap_delete = []
+        
+        shape               = np.zeros((3, 3, 3))
+        shape[0, 0, :]      = 1
+        shape[1, 1, :]      = 1
+        shape[2, 2, :]      = 1
+        shape[0, 1, 1]      = 1
+        shape[1, 2, 1]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[0, 1, 1]      = 1
+        delete[0, 2, 1]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0, 0, :]      = 1
+        shape[1, 1, :]      = 1
+        shape[2, 2, :]      = 1
+        shape[0, 1, 1]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[0, 1, 1]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0:2, 0, :]    = 1
+        shape[2, 1, :]      = 1
+        shape[1, 1, 1]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[1, 1, 1]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0, 0, :]      = 1
+        shape[1, 1, :]      = 1
+        shape[2, 2, :]      = 1
+        shape[0, 1, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[0, 1, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0:2, 1, :]    = 1
+        shape[2, 2, :]      = 1
+        shape[2, 1, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[2, 1, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0, :, 2]      = 1
+        shape[1, :, 1]      = 1
+        shape[1, :, 0]      = 1
+        shape[2, 1, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[2, 1, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0, 2, :]      = 1
+        shape[1, 0:2, :]      = 1
+        shape[2, 0, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[2, 0, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[:, :, 1]      = 1
+        shape[0, 0, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[0, 0, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[0, :, 0]      = 1
+        shape[1, :, 1]      = 1
+        shape[1, :, 2]      = 1
+        shape[1, 1, 0]      = 1
+        overlap_shapes.append(shape)
+
+        delete               = np.zeros((3, 3, 3))
+        delete[1, 1, 0]      = 1
+        overlap_delete.append(delete)
+
+        shape               = np.zeros((3, 3, 3))
+        shape[1:3, 2, 0]    = 1
+        shape[0, 2, 1:3]    = 1
+        shape[0, 1, 2]      = 1
+        shape[1, 1, 1]      = 1
+        shape[2, 1, 0]      = 1
+        shape[1:3, 0, 1]    = 1
+        shape[1, 0, 2]      = 1
+        overlap_shapes.append(shape)
+
+
+        delete               = np.zeros((3, 3, 3))
+        delete[1, 0, 1]      = 1
+        overlap_delete.append(delete)
+
+        # set loop flag
+        points_remaining = True
+
+        # initialise deleted point counter
+        deleted_points = 0
+
+        # set list of possible permutations
+        perm_list = [
+            [0, 1, 2],
+            [0, 2, 1],
+            [1, 2, 0],
+            [1, 0, 2],
+            [2, 0, 1],
+            [2, 1, 0]
+        ]
+
+        while points_remaining:
+
+            # get linear index of non-zero bowl elements
+            index_mat = matlab_find(bowl_sm > 0)[:, 0]
+
+            # set Boolean delete variable
+            delete_point = False
+
+            # loop through all points on the bowl, and find the all the points with
+            # more than 8 neighbours
+            index = 0
+            for index, index_mat_i in enumerate(index_mat):
+
+                # extract subscripts for current point
+                cx, cy, cz = ind2sub([Nx, Ny, Nz], index_mat_i)
+
+                # ignore edge points
+                if (cx > 1) and (cx < Nx) and (cy > 1) and (cy < Ny) and (cz > 1) and (cz < Nz):
+
+                    # extract local region around current point
+                    region = bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1]  # FARID might not work
+
+                    # if there's more than 8 neighbours, check the point for
+                    # deletion
+                    if (region.sum() - 1) > 8:
+
+                        # loop through the different shapes
+                        for shape_index in range(len(overlap_shapes)):
+
+                            # check every permutation of the shape, and apply the
+                            # deletion mask if the pattern matches
+
+                            # loop through possible shape permutations
+                            for ind1 in range(len(perm_list)):
+
+                                # get shape and delete mask
+                                overlap_s = overlap_shapes[shape_index]
+                                overlap_d = overlap_delete[shape_index]
+
+                                # permute
+                                overlap_s = np.transpose(overlap_s, perm_list[ind1])
+                                overlap_d = np.transpose(overlap_d, perm_list[ind1])
+
+                                # loop through possible shape reflections
+                                for ind2 in range(1, 8):
+
+                                    # flipfunc the shape
+                                    if ind2 == 2:
+                                        overlap_s = np.flip(overlap_s, axis=0)
+                                        overlap_d = np.flip(overlap_d, axis=0)
+                                    elif ind2 == 3:
+                                        overlap_s = np.flip(overlap_s, axis=1)
+                                        overlap_d = np.flip(overlap_d, axis=1)
+                                    elif ind2 == 4:
+                                        overlap_s = np.flip(overlap_s, axis=2)
+                                        overlap_d = np.flip(overlap_d, axis=2)
+                                    elif ind2 == 5:
+                                        overlap_s = np.flip(np.flip(overlap_s, axis=0), axis=1)
+                                        overlap_d = np.flip(np.flip(overlap_d, axis=0), axis=1)
+                                    elif ind2 == 6:
+                                        overlap_s = np.flip(np.flip(overlap_s, axis=0), axis=2)
+                                        overlap_d = np.flip(np.flip(overlap_d, axis=0), axis=2)
+                                    elif ind2 == 7:
+                                        overlap_s = np.flip(np.flip(overlap_s, axis=1), axis=2)
+                                        overlap_d = np.flip(np.flip(overlap_d, axis=1), axis=2)
+
+                                    # rotate the shape 4 x 90 degrees
+                                    for ind3 in range(4):
+
+                                        # check if the shape matches
+                                        if np.all(overlap_s == region):
+                                            delete_point = True
+
+                                        # break from loop if a match is found
+                                        if delete_point:
+                                            break
+
+                                        # rotate shape
+                                        overlap_s = np.rot90(overlap_s)
+                                        overlap_d = np.rot90(overlap_d)
+
+                                    # break from loop if a match is found
+                                    if delete_point:
+                                        break
+
+                                # break from loop if a match is found
+                                if delete_point:
+                                    break
+
+                            # remove point from bowl if required, and update
+                            # counter
+                            if delete_point:
+                                bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1] = bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1] * np.bitwise_not(overlap_d).astype(float)  # Farid won't work probably
+                                deleted_points = deleted_points + 1
+                                break
+
+                # break from loop if a match is found
+                if delete_point:
+                    break
+
+            # break from while loop if the outer for loop has completed
+            # without deleting a point
+            if index == (len(index_mat) - 1):
+                points_remaining = False
+
+        # display status
+        if deleted_points:
+            print('{deleted_points} overlapped points removed from bowl')
+
+    # =========================================================================
+    # PLACE BOWL WITHIN LARGER GRID
+    # =========================================================================
+
+    # preallocate storage variable
+    if binary:
+        bowl = np.zeros(grid_size, dtype=bool)
+    else:
+        bowl = np.zeros(grid_size)
+
+    # calculate position of bounding box within larger grid
+    x1 = bowl_pos[0] - bx
+    x2 = x1 + Nx
+    y1 = bowl_pos[1] - by
+    y2 = y1 + Ny
+    z1 = bowl_pos[2] - bz
+    z2 = z1 + Nz
+
+    # truncate bounding box if it falls outside the grid
+    if x1 < 0:
+        bowl_sm = bowl_sm[abs(x1):, :, :]
+        x1 = 0
+    if y1 < 0:
+        bowl_sm = bowl_sm[:, abs(y1):, :]
+        y1 = 0
+    if z1 < 0:
+        bowl_sm = bowl_sm[:, :, abs(z1):]
+        z1 = 0
+    if x2 >= grid_size[0]:
+        to_delete = x2 - grid_size[0]
+        bowl_sm = bowl_sm[:-to_delete, :, :]
+        x2 = grid_size[0]
+    if y2 >= grid_size[1]:
+        to_delete = y2 - grid_size[1]
+        bowl_sm = bowl_sm[:, :-to_delete, :]
+        y2 = grid_size[1]
+    if z2 >= grid_size[2]:
+        to_delete = z2 - grid_size[2]
+        bowl_sm = bowl_sm[:, :, :-to_delete]
+        z2 = grid_size[2]
+
+    # place bowl into grid
+    bowl[x1:x2, y1:y2, z1:z2] = bowl_sm
+
+    return bowl
