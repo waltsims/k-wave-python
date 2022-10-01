@@ -4,7 +4,9 @@ from typing import Tuple, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-from kwave.utils.matrixutils import matlab_find, matlab_assign
+from kwave.utils.tictoc import TicToc
+
+from kwave.utils.matrixutils import matlab_find, matlab_assign, max_nd
 from scipy import optimize
 import warnings
 
@@ -39,6 +41,15 @@ def get_spaced_points(start, stop, n=100, spacing='linear'):
         return np.geomspace(start, stop, num=n)
     else:
         raise ValueError(f"spacing {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
+
+
+def pull_matlab(prop, expected_val=None):
+    from scipy.io import loadmat
+
+    temp_mat = loadmat('/data/code/Work/black_box_testing/temp.mat')
+    if expected_val is not None:
+        return np.allclose(expected_val, temp_mat[prop])
+    return temp_mat[prop]
 
 
 def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
@@ -1347,9 +1358,9 @@ def makePixelMapPlane(grid_size, normal, point):
         Nz = np.round(grid_size[2])
 
         # create coordinate meshes
-        px, py, pz             = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1))
-        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0],  np.ones(Ny) * point[1],  np.ones(Nz) * point[2])
-        nx, ny, nz             = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2])
+        px, py, pz             = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1), indexing='ij')
+        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0],  np.ones(Ny) * point[1],  np.ones(Nz) * point[2], indexing='ij')
+        nx, ny, nz             = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2], indexing='ij')
 
         # calculate distance according to Eq. (6) at
         # http://mathworld.wolfram.com/Point-PlaneDistance.html
@@ -1910,3 +1921,99 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     bowl[x1:x2, y1:y2, z1:z2] = bowl_sm
 
     return bowl
+
+
+def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
+    # =========================================================================
+    # DEFINE LITERALS
+    # =========================================================================
+
+    # =========================================================================
+    # INPUT CHECKING
+    # =========================================================================
+
+    # check inputs
+    if bowl_pos.shape[-1] != 3:
+        raise ValueError('bowl_pos should contain 3 columns, with [bx, by, bz] in each row.')
+
+    if len(radius) != 1 and len(radius) != bowl_pos.shape[0]:
+        raise ValueError('The number of rows in bowl_pos and radius does not match.')
+
+    if len(diameter) != 1 and len(diameter) != bowl_pos.shape[0]:
+        raise ValueError('The number of rows in bowl_pos and diameter does not match.')
+
+    # force integer grid size values
+    grid_size = np.round(grid_size).astype(int)
+    bowl_pos  = np.round(bowl_pos).astype(int)
+    focus_pos = np.round(focus_pos).astype(int)
+    diameter  = np.round(diameter)
+    radius    = np.round(radius)
+
+    # =========================================================================
+    # CREATE BOWLS
+    # =========================================================================
+
+    # preallocate output matrices
+    if binary:
+        bowls = np.zeros(grid_size, dtype=bool)
+    else:
+        bowls = np.zeros(grid_size)
+
+    bowls_labelled = np.zeros(grid_size)
+
+    # loop for calling makeBowl
+    for bowl_index in range(bowl_pos.shape[0]):
+
+        # update command line status
+        if bowl_index == 1:
+            TicToc.tic()
+        else:
+            TicToc.toc(reset=True)
+        print(f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
+
+        # get parameters for current bowl
+        if bowl_pos.shape[0] > 1:
+            bowl_pos_k = bowl_pos[bowl_index]
+        else:
+            bowl_pos_k = bowl_pos
+
+        if len(radius) > 1:
+            radius_k = radius[bowl_index]
+        else:
+            radius_k = radius
+
+        if len(diameter) > 1:
+            diameter_k = diameter[bowl_index]
+        else:
+            diameter_k = diameter
+
+        if focus_pos.shape[0] > 1:
+            focus_pos_k = focus_pos[bowl_index]
+        else:
+            focus_pos_k = focus_pos
+
+        # create new bowl
+        new_bowl = makeBowl(
+            grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k,
+            remove_overlap=remove_overlap, binary=binary
+        )
+
+        # add bowl to bowl matrix
+        bowls = bowls + new_bowl
+
+        # add new bowl to labelling matrix
+        bowls_labelled[new_bowl == 1] = bowl_index
+
+    TicToc.toc()
+
+    # check if any of the bowls are overlapping
+    max_nd_val, _ = max_nd(bowls)
+    if  max_nd_val > 1:
+
+        # display warning
+        print(f'WARNING: {max_nd_val - 1} bowls are overlapping')
+
+        # force the output to be binary
+        bowls[bowls != 0] = 1
+
+    return bowls, bowls_labelled
