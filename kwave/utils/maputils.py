@@ -1248,7 +1248,7 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
             # if the angle is greater than the half angle of the arc, remove
             # it from the arc
             if theta > half_arc_angle:
-                arc[x_ind - 1, y_ind - 1] = 0   # FARID NOTE: Possibly won't work due to indexing differences
+                arc = matlab_assign(arc, arc_ind_i - 1, 0)
     else:
 
         # calculate arc direction angle, then rotate by 90 degrees
@@ -1384,11 +1384,11 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     # number of grid points to expand the bounding box compared to
     # sqrt(2)*diameter
     BOUNDING_BOX_EXP        = 2
-    
+
     # =========================================================================
     # INPUT CHECKING
     # =========================================================================
-    
+
     # force integer input values
     grid_size = np.round(grid_size).astype(int)
     bowl_pos  = np.round(bowl_pos).astype(int)
@@ -1639,7 +1639,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         # corresponding mask of which point to delete
         overlap_shapes = []
         overlap_delete = []
-        
+
         shape               = np.zeros((3, 3, 3))
         shape[0, 0, :]      = 1
         shape[1, 1, :]      = 1
@@ -2017,3 +2017,75 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
         bowls[bowls != 0] = 1
 
     return bowls, bowls_labelled
+
+
+def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+    # check inputs
+    if arc_pos.shape[-1] != 2:
+        raise ValueError('arc_pos should contain 2 columns, with [ax, ay] in each row.')
+
+    if len(radius) != 1 and len(radius) != arc_pos.shape[0]:
+        raise ValueError('The number of rows in arc_pos and radius does not match.')
+
+    if len(diameter) != 1 and len(diameter) != arc_pos.shape[0]:
+        raise ValueError('The number of rows in arc_pos and diameter does not match.')
+
+    # force integer grid size values
+    grid_size = grid_size.round().astype(int)
+    arc_pos = arc_pos.round().astype(int)
+    diameter = diameter.round()
+    focus_pos = focus_pos.round().astype(int)
+    radius = radius.round()
+
+    # =========================================================================
+    # CREATE ARCS
+    # =========================================================================
+
+    # create empty matrix
+    arcs = np.zeros(grid_size)
+    arcs_labelled = np.zeros(grid_size)
+
+    # loop for calling makeArc
+    for k in range(arc_pos.shape[0]):
+
+        # get parameters for current arc
+        if arc_pos.shape[0] > 1:
+            arc_pos_k = arc_pos[k]
+        else:
+            arc_pos_k = arc_pos
+
+        if len(radius) > 1:
+            radius_k = radius[k]
+        else:
+            radius_k = radius
+
+        if len(diameter) > 1:
+            diameter_k = diameter[k]
+        else:
+            diameter_k = diameter
+
+        if focus_pos.shape[0] > 1:
+            focus_pos_k = focus_pos[k]
+        else:
+            focus_pos_k = focus_pos
+
+        # create new arc
+        new_arc = makeArc(grid_size, arc_pos_k, radius_k, diameter_k, focus_pos_k)
+
+        # add arc to arc matrix
+        arcs = arcs + new_arc
+
+        # add new arc to labelling matrix
+        arcs_labelled[new_arc == 1] = k
+
+    # check if any of the arcs are overlapping
+    max_nd_val, _ = max_nd(arcs)
+    if max_nd_val > 1:
+
+        # display warning
+        print(f'WARNING: {max_nd_val - 1} arcs are overlapping')
+
+        # force the output to be binary
+        arcs[arcs != 0] = 1
+
+    return arcs, arcs_labelled
