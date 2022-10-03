@@ -3,6 +3,21 @@ import numpy as np
 from pathlib import Path
 
 
+def compare_h5_attributes(local_h5_path, ref_path):
+    local_h5 = h5py.File(local_h5_path, 'r')
+    ref_h5 = h5py.File(ref_path, 'r')
+    for key in local_h5.attrs.keys():
+        assert key in ref_h5.attrs.keys()
+        assert np.isclose(local_h5.attrs[key], ref_h5.attrs[key])
+
+def compare_h5_values(local_h5_path, ref_path):
+    local_h5 = h5py.File(local_h5_path, 'r')
+    ref_h5 = h5py.File(ref_path, 'r')
+    assert ref_h5.keys() == local_h5.keys()
+    for key in ref_h5.keys():
+        assert np.isclose(local_h5[key], ref_h5[key]).all()
+
+
 def test_write_matrix(tmp_path_factory):
     idx = 0
     for dim in range(1, 3):
@@ -10,14 +25,8 @@ def test_write_matrix(tmp_path_factory):
             tmp_path = tmp_path_factory.mktemp("matrix") / f"{idx}.h5"
             matrix = np.single(10.0 * np.ones([1, dim]))
             write_matrix(tmp_path, matrix=matrix, matrix_name='test')
-            local_h5 = h5py.File(tmp_path, 'r')
             ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeMatrix/{idx}.h5")
-            ref_h5 = h5py.File(ref_path, 'r')
-            # TODO: this introduces dependency on h5diff
-            cmd = f'h5diff -c -d 0.00000001 {tmp_path} {ref_path}'
-            print(cmd)
-            res = os.system(cmd)
-            assert res == 0
+            compare_h5_values(tmp_path, ref_path)
             idx = idx + 1
     pass
 
@@ -35,11 +44,8 @@ def test_write_flags(tmp_path_factory):
         write_flags(tmp_path)
         ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeFlags/{idx}.h5")
 
-        # TODO: this introduces dependency on h5diff
-        cmd = f'h5diff -c -d 0.00000001 {tmp_path} {ref_path}'
-        print(cmd)
-        res = os.system(cmd)
-        assert res == 0, f"File index {idx} failed"
+        compare_h5_values(tmp_path, ref_path)
+
         idx = idx + 1
     pass
 
@@ -51,13 +57,8 @@ def test_write_attributes(tmp_path_factory):
     matrix = np.single(10.0 * np.ones([1, 1]))
     ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeAttributes/{idx}.h5")
     write_matrix(tmp_path, matrix, matrix_name)
-    write_attributes(tmp_path)  
-    local_h5 = h5py.File(tmp_path, 'r')
-    ref_h5 = h5py.File(ref_path, 'r')
-    for key in local_h5.attrs.keys():
-        assert key in ref_h5.attrs.keys()
-        assert np.isclose(local_h5.attrs[key], ref_h5.attrs[key])
-
+    write_attributes(tmp_path)
+    compare_h5_attributes(tmp_path, ref_path)
     idx = idx + 1
     pass
 
@@ -73,10 +74,7 @@ def test_writeGrid(tmp_path_factory):
         ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeGrid/{idx}.h5")
 
         # TODO: this introduces dependency on h5diff
-        cmd = f'h5diff -c -d 0.00000001 {tmp_path} {ref_path}'
-        print(cmd)
-        res = os.system(cmd)
-        assert res == 0, f"File index {idx} failed"
+        compare_h5_values(tmp_path, ref_path)
         idx = idx + 1
     pass
 
