@@ -13,7 +13,6 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.skip(reason="Test not yet passing.")
 def test_makeCircle():
     collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCircle')
     num_collected_values = len(os.listdir(collected_values_folder))
