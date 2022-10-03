@@ -16,6 +16,6 @@ for idx=1:length(all_params)
     bowl = makeBowl(params{:});
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeBowl/' idx_padded '.mat'];
+    filename = ['collectedValues/makeBowl/' idx_padded '.mat'];
     save(filename, 'params', 'bowl');
 end

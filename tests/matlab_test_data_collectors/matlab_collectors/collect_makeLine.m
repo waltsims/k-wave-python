@@ -34,6 +34,6 @@ for idx=1:length(all_params)
     line = makeLine(params{:});
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeLine/' idx_padded '.mat'];
+    filename = ['collectedValues/makeLine/' idx_padded '.mat'];
     save(filename, 'params', 'line');
 end

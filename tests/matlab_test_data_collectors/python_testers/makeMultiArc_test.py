@@ -3,12 +3,13 @@ from kwave.utils.maputils import makeMultiArc
 from scipy.io import loadmat
 import numpy as np
 import os
-import pytest
+from pathlib import Path
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+
 def test_makeMultiArc():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues/makeMultiArc'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeMultiArc')
+
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

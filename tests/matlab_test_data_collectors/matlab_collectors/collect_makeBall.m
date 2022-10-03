@@ -13,6 +13,6 @@ for idx=1:length(all_params)
     ball = makeBall(params{:});
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeBall/' idx_padded '.mat'];
+    filename = ['collectedValues/makeBall/' idx_padded '.mat'];
     save(filename, 'params', 'ball');
 end

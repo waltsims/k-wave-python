@@ -25,6 +25,6 @@ for idx=1:length(all_params)
     arc = makeArc(params{:});
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeArc/' idx_padded '.mat'];
+    filename = ['collectedValues/makeArc/' idx_padded '.mat'];
     save(filename, 'params', 'arc');
 end

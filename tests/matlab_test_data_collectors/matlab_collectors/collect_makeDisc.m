@@ -14,6 +14,6 @@ for idx=1:length(all_params)
     disc = makeDisc(params{:});
     
     idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues_makeDisc/' idx_padded '.mat'];
+    filename = ['collectedValues/makeDisc/' idx_padded '.mat'];
     save(filename, 'params', 'disc');
 end

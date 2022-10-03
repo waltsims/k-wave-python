@@ -8,6 +8,7 @@ import pytest
 
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_makeDisc():
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCircle')
     collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_makeDisc'
     num_collected_values = len(os.listdir(collected_values_folder))
 

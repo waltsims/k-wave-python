@@ -7,7 +7,7 @@ resolution = [128, 128];
 
 idx = 0;
 idx_padded = sprintf('%06d', idx);
-filename = ['collectedValues_scanConversion/' idx_padded '.mat'];
+filename = ['collectedValues/scanConversion/' idx_padded '.mat'];
 
 b_mode = scanConversion(scan_lines, steering_angles, image_size, c0, dt, resolution);
 save(filename, 'scan_lines', 'steering_angles', 'image_size', 'c0', 'dt', 'resolution', 'b_mode');
