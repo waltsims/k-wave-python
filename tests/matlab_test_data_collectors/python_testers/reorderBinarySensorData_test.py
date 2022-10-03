@@ -2,12 +2,11 @@ from kwave.utils import reorder_binary_sensor_data
 from scipy.io import loadmat
 import numpy as np
 import os
-import pytest
+from pathlib import Path
 
 
-@pytest.mark.skip(reason="Reference files to not always exist.")
 def test_binary_sensor_data():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_reorderBinarySensorData'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/reorderBinarySensorData')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

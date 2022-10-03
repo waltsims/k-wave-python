@@ -15,7 +15,7 @@ for i=1:length(list_of_seconds)
  
                 
     idx_padded = sprintf('%06d', idx);
-    filename = ['collectedValues_scaleTime/' idx_padded '.mat'];
+    filename = ['collectedValues/scaleTime/' idx_padded '.mat'];
     save(filename, 'seconds', 'time');
 
     idx = idx + 1;

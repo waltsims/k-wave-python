@@ -69,16 +69,16 @@ for dim = dims
                 end
                 for N = sizes
                     if idx == 2049
-                        disp(idx);
+%                         disp(idx);
                     end
 
                     [win, cg] = getWin(N', type_, input_args{:});
-                    disp(size(win));
+%                     disp(size(win));
 
                     idx_padded = sprintf('%06d', idx);
-                    filename = ['collectedValues/' idx_padded '.mat'];
+                    filename = ['collectedValues/getWin/' idx_padded '.mat'];
                     type_ = char(type_);
-%                     save(filename, 'N', 'type_', 'input_args', 'win', 'cg');
+                    save(filename, 'N', 'type_', 'input_args', 'win', 'cg');
 
                     idx = idx + 1;
 

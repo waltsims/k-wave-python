@@ -3,12 +3,11 @@ from kwave.utils.conversionutils import scale_SI
 from scipy.io import loadmat
 import numpy as np
 import os
-import pytest
+from pathlib import Path
 
 
-@pytest.mark.skip(reason="Reference files to not always exist.")
 def test_scale_si():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_scaleSI'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/scaleSI')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

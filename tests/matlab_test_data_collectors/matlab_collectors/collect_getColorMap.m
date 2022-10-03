@@ -1,5 +1,5 @@
 list_num_colors = [12, 36, 256];
-output_folder = 'collectedValues_getColorMap';
+output_folder = 'collectedValues/getColorMap';
 idx = 0;
 
 

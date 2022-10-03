@@ -3,7 +3,44 @@ name: pytest
 on: [push]
 
 jobs:
-  build:
+  collect_references:
+    name: collect_references
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: k-Wave-python
+      - name: checkout reference k-Wave repo
+        uses: actions/checkout@v3
+        with:
+          repository: waltsims/k-Wave
+          path: k-Wave
+          ref: v1.3.0
+      - name: setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
+      - name: run reference generation
+        uses: matlab-actions/run-command@v1
+        with:
+          command: |
+            addpath('k-Wave-python','k-Wave');
+            cd k-Wave-python/tests/matlab_test_data_collectors;
+            run_all_collectors;
+      - name: compress artifact
+        uses: a7ul/tar-action@v1.1.0
+        with:
+          command: c
+          cwd: ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
+          files: |
+            ./collectedValues
+          outPath: collectedValues.tar.gz
+      - name: upload reference values artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: collectedValues
+          path: collectedValues.tar.gz
+  test:
+    needs: collect_references
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
@@ -11,6 +48,20 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
+      - name: Download collectedValues
+        uses: actions/download-artifact@v3
+        with:
+          name: collectedValues
+          path: tests/matlab_test_data_collectors/python_testers/
+      - name: unpack collectedValues
+        uses: a7ul/tar-action@v1.1.0
+        with:
+          command: x
+          cwd: ./tests/matlab_test_data_collectors/python_testers/
+          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+      - name: where are the files?
+        run: |
+          ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:

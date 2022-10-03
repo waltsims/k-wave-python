@@ -17,7 +17,7 @@ for i=1:length(list_of_x)
  
                 
     idx_padded = sprintf('%06d', idx);
-    filename = ['collectedValues_scaleSI/' idx_padded '.mat'];
+    filename = ['collectedValues/scaleSI/' idx_padded '.mat'];
     save(filename, 'x', 'x_sc', 'scale', 'prefix', 'prefix_fullname');
 
     idx = idx + 1;

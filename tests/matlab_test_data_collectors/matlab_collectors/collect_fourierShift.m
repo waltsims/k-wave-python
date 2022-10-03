@@ -8,7 +8,7 @@ data_dims = { ...
     [5, 10, 5, 4] ...  # 4D
 };
 shifts = [0, 0.12, 0.29, 0.5, 0.52, 0.85, 1.0];
-output_folder = 'collectedValues_fourierShift';
+output_folder = 'collectedValues/fourierShift';
 idx = 0;
 
 for data_dim_idx=1:size(dims, 2)

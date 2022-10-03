@@ -1,15 +1,15 @@
-import pytest
-
 from kwave.kgrid import kWaveGrid
 from kwave.utils import reorder_sensor_data, dotdict
 from scipy.io import loadmat
 import numpy as np
+from pathlib import Path
 import os
+import pytest
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Failing in GitHub Workflow.")
 def test_reorderSensorData():
-    collected_values_folder = '/data/code/Work/black_box_testing/collectedValues_reorderSensorData'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/reorderSensorData')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

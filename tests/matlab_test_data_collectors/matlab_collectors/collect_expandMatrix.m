@@ -42,7 +42,7 @@ for dim = dims
                 disp(size(expanded_matrix))
                 
                 idx_padded = sprintf('%06d', idx);
-                filename = ['collectedValues_expandMatrix/' idx_padded '.mat'];
+                filename = ['collectedValues/expandMatrix/' idx_padded '.mat'];
                 save(filename, 'matrix', 'input_args', 'expanded_matrix');
                 
                 idx = idx + 1;
