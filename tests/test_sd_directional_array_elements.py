@@ -22,7 +22,7 @@ from kwave.kmedium import kWaveMedium
 import pytest
 
 
-@pytest.skip("Failing since commit eed75b3f553a9baeeba4ca27d36e444e919e9159")
+@pytest.mark.skip("Failing since commit eed75b3f553a9baeeba4ca27d36e444e919e9159")
 def test_sd_directional_array_elements():
     # pathname for the input and output files
     pathname = gettempdir()
