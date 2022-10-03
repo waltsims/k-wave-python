@@ -1,6 +1,7 @@
 import os
 import platform
 import socket
+import warnings
 from datetime import datetime
 
 import cv2
@@ -193,7 +194,44 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         assign_str_attr(f[f'/{matrix_name}'].attrs, h5_literals.DATA_TYPE_ATT_NAME, data_type_c)
 
 
-def write_attributes(filename, file_description=None):
+def write_attributes_typed(filename, file_description=None):
+    # get literals
+    h5_literals = get_h5_literals()
+
+    # get computer infor
+    comp_info = dotdict({
+        'date': datetime.now().strftime("%d-%b-%Y"),
+        'computer_name': socket.gethostname(),
+        'operating_system_type': platform.system(),
+        'operating_system': platform.system() + " " + platform.release() + " " + platform.version(),
+        'user_name': os.environ.get('USERNAME'),
+        'matlab_version': 'N/A',
+        'kwave_version': '1.3',
+        'kwave_path': 'N/A',
+    })
+
+    # set file description if not provided by user
+    if file_description is None:
+        file_description = f'Input data created by {comp_info.user_name} running MATLAB ' \
+                           f'{comp_info.matlab_version} on {comp_info.operating_system_type}'
+
+    # set additional file attributes
+    with h5py.File(filename, "a") as f:
+        f[h5_literals.FILE_MAJOR_VER_ATT_NAME] = h5_literals.HDF_FILE_MAJOR_VERSION
+        f[h5_literals.FILE_MINOR_VER_ATT_NAME] = h5_literals.HDF_FILE_MINOR_VERSION
+        f[h5_literals.CREATED_BY_ATT_NAME] = f'k-Wave 1.3'
+        f[h5_literals.FILE_DESCR_ATT_NAME] = file_description
+        f[h5_literals.FILE_TYPE_ATT_NAME] = h5_literals.HDF_INPUT_FILE
+        f[h5_literals.FILE_CREATION_DATE_ATT_NAME] = get_date_string()
+
+
+def write_attributes(filename, file_description=None, legacy=False):
+
+    if not legacy:
+        write_attributes_typed(filename, file_description)
+        return
+
+    warnings.warn("Attributes will soon be typed when saved and not saved ", DeprecationWarning)
     # get literals
     h5_literals = get_h5_literals()
 
