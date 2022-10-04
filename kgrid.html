@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,7 +52,59 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">kWaveGrid</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kWaveGrid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.kgrid.kWaveGrid"><code class="docutils literal notranslate"><span class="pre">kWaveGrid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.highest_prime_factors"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.highest_prime_factors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.k_dtt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.k_dtt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.kx_vec_dtt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.kx_vec_dtt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.ky_vec_dtt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.ky_vec_dtt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.kz_vec_dtt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.kz_vec_dtt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.makeDTTDim"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.makeDTTDim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.makeDim"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.makeDim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.makeTime"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.makeTime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.setNUGrid"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.setNUGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.setTime"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.setTime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.N"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.N</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Nt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Nt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Nx"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Nx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Ny"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Ny</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Nz"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Nz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dim"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dudn"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dudn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dudn_sg"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dudn_sg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dx"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dy"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.dz"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.dz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.k"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.k</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.k_max"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.k_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.k_max_all"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.k_max_all</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.k_vec"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.k_vec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.kx"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.kx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.ky"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.ky</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.kz"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.kz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.n_vec"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.n_vec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.n_vec_sg"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.n_vec_sg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.nonuniform"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.nonuniform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.size"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.spacing"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.spacing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.t_array"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.t_array</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.total_grid_points"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.total_grid_points</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.x"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.x_vec"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.x_vec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.xn"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.xn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.y"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.y_size"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.y_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.y_vec"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.y_vec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.yn"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.yn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.z"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.z</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.z_size"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.z_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.z_vec"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.z_vec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kgrid.kWaveGrid.zn"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.zn</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="kmedium.html">kMedium</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>

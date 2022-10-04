@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -60,7 +61,39 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulation Options</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulation Options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.options.SimulationOptions"><code class="docutils literal notranslate"><span class="pre">SimulationOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.init"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.cartesian_interp"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.cartesian_interp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.create_log"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.create_log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.data_cast"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.data_cast</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.data_recast"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.data_recast</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.hdf_compression_level"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.hdf_compression_level</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.multi_axial_PML_ratio"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.multi_axial_PML_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_auto"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_auto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_inside"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_inside</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_search_range"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_search_range</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_x_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_x_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_x_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_x_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_y_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_y_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_y_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_y_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_z_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_z_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.pml_z_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_z_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.radial_symmetry"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.radial_symmetry</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.save_to_disk"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.save_to_disk</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.save_to_disk_exit"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.save_to_disk_exit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.scale_source_terms"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.scale_source_terms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_c0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_c0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_p0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_p0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_rho0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_rho0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.stream_to_disk"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.stream_to_disk</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.use_finite_difference"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_finite_difference</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.use_kspace"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_kspace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.options.SimulationOptions.use_sg"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_sg</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="array.html">Array</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
 </ul>

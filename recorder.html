@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -62,7 +63,34 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="simopt.html">Simulation Options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="array.html">Array</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Recorder</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Recorder</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.recorder.Recorder"><code class="docutils literal notranslate"><span class="pre">Recorder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.get_allowed_flags"><code class="docutils literal notranslate"><span class="pre">Recorder.get_allowed_flags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.is_set"><code class="docutils literal notranslate"><span class="pre">Recorder.is_set()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.set_flags_from_list"><code class="docutils literal notranslate"><span class="pre">Recorder.set_flags_from_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.set_index_variables"><code class="docutils literal notranslate"><span class="pre">Recorder.set_index_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.I"><code class="docutils literal notranslate"><span class="pre">Recorder.I</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.I_avg"><code class="docutils literal notranslate"><span class="pre">Recorder.I_avg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p"><code class="docutils literal notranslate"><span class="pre">Recorder.p</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_final"><code class="docutils literal notranslate"><span class="pre">Recorder.p_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_max"><code class="docutils literal notranslate"><span class="pre">Recorder.p_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_max_all"><code class="docutils literal notranslate"><span class="pre">Recorder.p_max_all</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_min"><code class="docutils literal notranslate"><span class="pre">Recorder.p_min</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_min_all"><code class="docutils literal notranslate"><span class="pre">Recorder.p_min_all</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.p_rms"><code class="docutils literal notranslate"><span class="pre">Recorder.p_rms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u"><code class="docutils literal notranslate"><span class="pre">Recorder.u</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_final"><code class="docutils literal notranslate"><span class="pre">Recorder.u_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_max"><code class="docutils literal notranslate"><span class="pre">Recorder.u_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_max_all"><code class="docutils literal notranslate"><span class="pre">Recorder.u_max_all</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_min"><code class="docutils literal notranslate"><span class="pre">Recorder.u_min</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_min_all"><code class="docutils literal notranslate"><span class="pre">Recorder.u_min_all</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_non_staggered"><code class="docutils literal notranslate"><span class="pre">Recorder.u_non_staggered</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_rms"><code class="docutils literal notranslate"><span class="pre">Recorder.u_rms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.recorder.Recorder.u_split_field"><code class="docutils literal notranslate"><span class="pre">Recorder.u_split_field</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>

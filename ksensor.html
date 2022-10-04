@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -53,7 +54,30 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kmedium.html">kMedium</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">kSensor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kSensor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.ksensor.kSensor"><code class="docutils literal notranslate"><span class="pre">kSensor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.expand_grid"><code class="docutils literal notranslate"><span class="pre">kSensor.expand_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.directivity"><code class="docutils literal notranslate"><span class="pre">kSensor.directivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.frequency_response"><code class="docutils literal notranslate"><span class="pre">kSensor.frequency_response</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.mask"><code class="docutils literal notranslate"><span class="pre">kSensor.mask</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.record"><code class="docutils literal notranslate"><span class="pre">kSensor.record</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.record_start_index"><code class="docutils literal notranslate"><span class="pre">kSensor.record_start_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensor.time_reversal_boundary_data"><code class="docutils literal notranslate"><span class="pre">kSensor.time_reversal_boundary_data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.set_default_size"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.set_default_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.set_unique_angles"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.set_unique_angles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.set_wavenumbers"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.set_wavenumbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.angle"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.angle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.pattern"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.pattern</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.size"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.unique_angles"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.unique_angles</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.ksensor.kSensorDirectivity.wavenumbers"><code class="docutils literal notranslate"><span class="pre">kSensorDirectivity.wavenumbers</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ksimulation.html">kWaveSimulation</a></li>

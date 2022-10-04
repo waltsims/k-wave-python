@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -52,7 +53,34 @@
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">kMedium</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kMedium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.kmedium.kWaveMedium"><code class="docutils literal notranslate"><span class="pre">kWaveMedium</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.check_fields"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.check_fields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.ensure_defined"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.ensure_defined()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.is_defined"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.is_defined()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.is_nonlinear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.is_nonlinear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.set_absorbing"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.set_absorbing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.BonA"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.BonA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.absorbing"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.absorbing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_filter"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_mode"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_power"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_power</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_sign"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_sign</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.density"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.density</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.stokes"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.stokes</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
