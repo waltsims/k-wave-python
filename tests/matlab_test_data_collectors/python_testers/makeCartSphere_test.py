@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeDisc
+from kwave.utils.maputils import make_cart_sphere
 
 from scipy.io import loadmat
 import numpy as np
@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 
-def test_makeDisc():
+def test_makeCartSphere():
     collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCartSphere')
     num_collected_values = len(os.listdir(collected_values_folder))
 
@@ -15,12 +15,11 @@ def test_makeDisc():
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
-        Nx, Ny, cx, cy, radius, plot_disc = recorded_data['params'][0]
-        Nx, Ny, cx, cy, radius, plot_disc = int(Nx), int(Ny), int(cx), int(cy), int(radius), bool(plot_disc)
-        expected_disc = recorded_data['disc']
+        radius, num_points, center = recorded_data['params'][0]
+        expected_value = recorded_data['sphere']
 
-        disc = makeDisc(Nx, Ny, cx, cy, radius, plot_disc)
+        sphere = make_cart_sphere(radius, num_points, center)
 
-        assert np.allclose(expected_disc, disc)
+        assert np.allclose(expected_value, sphere)
 
     print('makeDisc(..) works as expected!')

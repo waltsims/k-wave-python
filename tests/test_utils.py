@@ -1,13 +1,16 @@
+from kwave.utils.checkutils import num_dim
+from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, make_cart_sphere
+from kwave.utils.conversionutils import db2neper, neper2db
+from kwave.utils.kutils import toneBurst, add_noise, gradient_spect
+from kwave.utils.interputils import get_bli
+from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
+from kwave.utils.matrixutils import gradient_FD, resize
+from kwave.utils.ioutils import loadImage
+import numpy as np
+from utils import *
 import pytest
 from phantominator import shepp_logan
-from kwave import kgrid
-# noinspection PyUnresolvedReferences
-from kwave.ksource import kSource
-from kwave.ksensor import kSensor
-from kwave.kmedium import kWaveMedium
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 
-from kwave.utils import *
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,
                          0.02355139, 0.02753738, 0.02966112, 0.02907933, 0.02502059,
                          0.01690274, 0.00445909, -0.01214073, -0.03219275, -0.05440197,
@@ -57,13 +60,6 @@ def test_hounsfield2soundspeed():
     return
 
 
-def signal_to_noise(signal, noisy_signal):
-    p_sig = np.sqrt(np.mean(signal ** 2))
-    p_noise = np.sqrt(np.mean((noisy_signal - signal) ** 2))
-    snr = 20 * np.log10(p_sig / p_noise)
-    return snr
-
-
 def test_add_noise():
     output = add_noise(input_signal, 5)
     p_sig = np.sqrt(np.mean(input_signal ** 2))
@@ -72,16 +68,6 @@ def test_add_noise():
     assert (abs(5 - snr) < 2), \
         "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
     return
-
-
-def test_add_noise_peak():
-    # test add noise with peak flag set
-    signal_to_noise_ratio = 40  # [dB]
-    sensor_data = add_noise(input_signal, signal_to_noise_ratio, 'peak')
-    snr = signal_to_noise(input_signal, sensor_data)
-    assert np.isclose(snr, 40., atol=10), \
-        "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
-    pass
 
 
 def test_tone_burst_gaussian():
@@ -2801,7 +2787,8 @@ def test_gradient_spect_2D():
                     -0.654508497187479, -0.572061402817691, -0.475528258147581, -0.367286029574072, -0.250000000000002,
                     -0.126558140723503, -2.97228021785130e-16, 0.126558140723502, 0.250000000000002, 0.367286029574070,
                     0.475528258147580, 0.572061402817691, 0.654508497187478, 0.720839420167349, 0.769420884293821,
-                    0.799056652687463, 0.809016994374954, 0.799056652687465, 0.769420884293821, 0.720839420167348,
+
+                  0.799056652687463, 0.809016994374954, 0.799056652687465, 0.769420884293821, 0.720839420167348,
                     0.654508497187480, 0.572061402817689, 0.475528258147581, 0.367286029574072, 0.250000000000002,
                     0.126558140723503, 3.96304029046841e-16],
                    [-0.110615871041237, -0.218508012224411, -0.321019760960103, -0.415626937777454, -0.500000000000001,
@@ -3168,129 +3155,10 @@ def test_resize_2D_nearest_smaller():
     assert np.all(p1.T == [0., 1.])
 
 
-def test_grid2cart_1D():
-    test_grid = kgrid.kWaveGrid([5], [0.1])
-    test_selection = np.zeros([5, 1])
-    test_selection[1] = 1
-    [cart_data, order_index] = grid2cart(test_grid, test_selection)
-    assert np.isclose(cart_data, [-0.1]).all()
-    assert np.isclose(order_index, [[1]]).all()
-    pass
+def test_make_cart_circle():
+    # test it runs
+    make_cart_circle(5, 40)
 
-
-def test_grid2cart_2D():
-    test_grid = kgrid.kWaveGrid([5, 5], [0.1, 0.1])
-    test_selection = np.zeros([5, 5])
-    test_selection[1, 1] = 1
-    test_selection[2, 1] = 1
-    [cart_data, order_index] = grid2cart(test_grid, test_selection)
-    assert np.isclose(cart_data, [[-0.1, 0.], [-0.1, -0.1]]).all()
-    assert np.isclose(order_index, [[1, 1], [2, 1]]).all()
-    pass
-
-
-def test_grid2cart_3D():
-    test_grid = kgrid.kWaveGrid([5, 5, 5], [0.1, 0.1, 0.1])
-    test_selection = np.zeros([5, 5, 5])
-    test_selection[1, 1, 1] = 1
-    test_selection[2, 1, 1] = 1
-    test_selection[3, 3, 1] = 1
-    [cart_data, order_index] = grid2cart(test_grid, test_selection)
-    assert np.isclose(cart_data, [[-0.1, 0., 0.1], [-0.1, -0.1, 0.1], [-0.1, -0.1, -0.1]]).all()
-    assert np.isclose(order_index, [[1, 1, 1], [2, 1, 1], [3, 3, 1]]).all()
-    pass
-
-
-def test_interpftn():
-    x = np.zeros([5, 5])
-    y = interpftn(x, [10, 10])
-    assert y.shape == (10, 10)
-    assert (y == 0.).all()
-
-    # Test window option.
-    x = np.zeros([5, 5])
-    y = interpftn(x, [10, 10], win='boxcar')
-    assert y.shape == (10, 10)
-    assert (y == 0.).all()
-
-    # Test non-homogeneous x
-    x = np.zeros([5, 5])
-    x[0, :] = 1
-    y = interpftn(x, [10, 10])
-    y_prime = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-               [0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958,
-                0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [-0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958,
-                -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000,
-                0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000, 0.200000000000000],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [-0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958,
-                -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958, -0.247213595499958],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958,
-                0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958, 0.647213595499958]]
-    assert y.shape == (10, 10)
-    assert np.isclose(y, y_prime).all()
-
-    # test 1D x case
-    x = np.zeros((5, 1))
-    x[:2] = 1
-    y = interpftn(x, (10,))
-    assert np.isclose(y.squeeze(), np.array(
-        [1, 1.29442719099992, 1, 0.400000000000000, -4.44089209850063e-17, -0.0472135954999580, -4.44089209850063e-17,
-         -0.0472135954999579, 0, 0.400000000000000])).all()
-    # TODO: test 3D x
-    pass
-
-
-def test_interp_cart_data():
-    # assign the grid size and create the computational grid
-    PML_size = 20  # size of the PML in grid points
-    Nx = 256 - 2 * PML_size  # number of grid points in the x direction
-    Ny = 256 - 2 * PML_size  # number of grid points in the y direction
-    x = 10e-3  # total grid size [m]
-    y = 10e-3  # total grid size [m]
-    dx = x / Nx  # grid point spacing in the x direction [m]
-    dy = y / Ny  # grid point spacing in the y direction [m]
-
-    sim_kgrid = kWaveGrid([Nx, Ny], [dx, dy])
-
-    # define the properties of the propagation medium
-    medium = kWaveMedium(sound_speed=1500)
-    # define a centered Cartesian circular sensor
-    sensor_radius = 4.5e-3              # [m]
-    sensor_angle = 3 * np.pi / 2        # [rad]
-    sensor_pos = [0, 0]                 # [m]
-    num_sensor_points = 70
-    cart_sensor_mask = makeCartCircle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
-
-    # create the time array
-    sim_kgrid.makeTime(medium.sound_speed)
-
-    # mock the sim
-    sensor_data = np.repeat(np.linspace(start=0, stop=1000, num=1091)[np.newaxis, :], 70, axis=0)
-
-    # create a second computation grid for the reconstruction to avoid the
-    # inverse crime
-    Nx = 300  # number of grid points in the x direction
-    Ny = 300  # number of grid points in the y direction
-    dx = x / Nx  # grid point spacing in the x direction [m]
-    dy = y / Ny  # grid point spacing in the y direction [m]
-    kgrid_recon = kWaveGrid([Nx, Ny], [dx, dy])
-    sensor_radius_grid_points = round(sensor_radius / kgrid_recon.dx)
-
-    binary_sensor_mask = makeCircle(kgrid_recon.Nx, kgrid_recon.Ny, kgrid_recon.Nx / 2 + 1, kgrid_recon.Ny / 2 + 1,
-                                    sensor_radius_grid_points, sensor_angle)
-
-    time_reversal_boundary_data = interpCartData(kgrid_recon, sensor_data, cart_sensor_mask, binary_sensor_mask)
-
-    assert time_reversal_boundary_data.shape == (574, 1091)
-    assert (time_reversal_boundary_data[0, :] == time_reversal_boundary_data[:, :]).all()
-
-    time_reversal_boundary_data = interpCartData(kgrid_recon, sensor_data, cart_sensor_mask, binary_sensor_mask, interp='linear')
-    assert time_reversal_boundary_data.shape == (574, 1091)
-    assert (time_reversal_boundary_data[0, :] == time_reversal_boundary_data[:, :]).all()
-    pass
+def test_make_cart_sphere():
+    # test it runs
+    make_cart_sphere(5, 40, plot_sphere=True)

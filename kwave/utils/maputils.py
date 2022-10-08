@@ -7,6 +7,7 @@ import numpy as np
 from kwave.utils.tictoc import TicToc
 
 from kwave.utils.matrixutils import matlab_find, matlab_assign, max_nd
+from kwave.utils.conversionutils import scale_SI
 from scipy import optimize
 import warnings
 
@@ -98,7 +99,7 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
 
         actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) * \
                                                           a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (
-                                                                      y_trial - 1))
+                                                                  y_trial - 1))
 
         absorption_error = np.sqrt(np.sum((desired_absorption - actual_absorption) ** 2))
 
@@ -438,6 +439,102 @@ def makeBall(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
         raise NotImplementedError
         # voxelPlot(double(ball))
     return ball
+
+
+def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False):
+    """
+       make_cart_sphere creates a set of points in cartesian coordinates defining a sphere.
+
+    Args:
+        radius:
+        num_points:
+        center_pos:
+        plot_sphere:
+
+    Returns:
+
+    """
+    cx, cy, cz = center_pos
+
+    # generate angle functions using the Golden Section Spiral method
+    inc = np.pi * (3 - np.sqrt(5))
+    off = 2 / num_points
+    k = np.arange(0, num_points)
+    y = k * off - 1 + (off / 2)
+    r = np.sqrt(1 - (y ** 2))
+    phi = k * inc
+
+    # create the sphere
+    sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
+
+    # offset if needed
+    sphere[0, :] = sphere[0, :] + cx
+    sphere[1, :] = sphere[1, :] + cy
+    sphere[2, :] = sphere[2, :] + cz
+
+    # plot results
+    if plot_sphere:
+        # select suitable axis scaling factor
+        [x_sc, scale, prefix, _] = scale_SI(np.max(sphere))
+
+        # create the figure
+        plt.figure
+        plt.style.use('seaborn-poster')
+        ax = plt.axes(projection='3d')
+        ax.plot3D(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, '.')
+        ax.set_xlabel(f"[{prefix} m]")
+        ax.set_ylabel(f"[{prefix} m]")
+        ax.set_zlabel(f"[{prefix} m]")
+        ax.axis('auto')
+        ax.grid()
+        plt.show()
+
+
+def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi, plot_circle=False):
+    """
+    make_cart_circle creates a set of points in cartesian coordinates defining a circle or arc.
+
+    Args:
+        radius:
+        num_points:
+        center_pos:
+        arc_angle:          Arc angle in radians.
+        plot_circle:
+
+    Returns:
+        2 x num_points array of cartesian coordinates
+
+    """
+
+    # check for arc_angle input
+    if arc_angle == 2 * np.pi:
+        full_circle = True
+
+    cx = center_pos[0]
+    cy = center_pos[1]
+
+    # create angles
+    angles = np.arange(0, num_points) * arc_angle / num_points + np.pi / 2
+
+    # create cartesian grid
+    circle = np.concatenate([radius * np.cos(angles[np.newaxis, :]), radius * np.sin(-angles[np.newaxis])])
+
+    # offset if needed
+    circle[0, :] = circle[0, :] + cx
+    circle[1, :] = circle[1, :] + cy
+
+    # plot results
+    if plot_circle:
+        # select suitable axis scaling factor
+        [_, scale, prefix, _] = scale_SI(np.max(abs(circle)))
+
+        # create the figure
+        plt.figure()
+        plt.plot(circle[1, :] * scale, circle[0, :] * scale, 'b.')
+        plt.xlabel([f"y-position [{prefix} m]"])
+        plt.ylabel([f"x-position [{prefix} m]"])
+        plt.axis('equal')
+        plt.show()
 
 
 def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
@@ -804,7 +901,7 @@ def makeLine(
         raise ValueError('startpoint should be a two-element vector.')
 
     if np.any(startpoint < 1) or startpoint[0] > Nx or startpoint[1] > Ny:
-       ValueError('The starting point must lie within the grid, between [1 1] and [Nx Ny].')
+        ValueError('The starting point must lie within the grid, between [1 1] and [Nx Ny].')
 
     # =========================================================================
     # LINE BETWEEN TWO POINTS OR ANGLED LINE?
@@ -839,12 +936,12 @@ def makeLine(
         xx = np.array([a[0], b[0]], dtype=int)
         yy = np.array([a[1], b[1]], dtype=int)
         if np.any(a < 0) or np.any(b < 0) or np.any(xx > Nx - 1) or np.any(yy > Ny - 1):
-           raise ValueError('Both the start and end points must lie within the grid.')
+            raise ValueError('Both the start and end points must lie within the grid.')
 
     if linetype == 'angled':
 
         # angle must lie between -np.pi and np.pi
-        angle = angle %  (2 * np.pi)
+        angle = angle % (2 * np.pi)
         if angle > np.pi:
             angle = angle - (2 * np.pi)
         elif angle < -np.pi:
@@ -860,8 +957,8 @@ def makeLine(
         line = np.zeros((Nx, Ny))
 
         # find the equation of the line
-        m = (b[1] - a[1]) / (b[0] - a[0])    # gradient of the line
-        c = a[1] - m * a[0]                  # where the line crosses the y axis
+        m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
+        c = a[1] - m * a[0]  # where the line crosses the y axis
 
         if abs(m) < 1:
 
@@ -877,14 +974,13 @@ def makeLine(
             line[x, y] = 1
 
             while x < x_end:
-
                 # next points to try are
-                poss_x = [x,      x,     x+1,   x+1,   x+1]
-                poss_y = [y-1,    y+1,   y-1,   y,     y+1]
+                poss_x = [x, x, x + 1, x + 1, x + 1]
+                poss_y = [y - 1, y + 1, y - 1, y, y + 1]
 
                 # find the point closest to the line
                 true_y = m * poss_x + c
-                diff = (poss_y - true_y)**2
+                diff = (poss_y - true_y) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -910,14 +1006,13 @@ def makeLine(
             line[x, y] = 1
 
             while y < y_end:
-
                 # next points to try are
-                poss_y = [y,   y,   y+1,   y+1, y+1]
-                poss_x = [x-1, x+1, x-1,   x,   x+1]
+                poss_y = [y, y, y + 1, y + 1, y + 1]
+                poss_x = [x - 1, x + 1, x - 1, x, x + 1]
 
                 # find the point closest to the line
                 true_x = (poss_y - c) / m
-                diff = (poss_x - true_x)**2
+                diff = (poss_x - true_x) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -927,7 +1022,7 @@ def makeLine(
                 # add the point to the line
                 line[x, y] = 1
 
-        else: # m = +-Inf
+        else:  # m = +-Inf
 
             # start at the end with the smallest value of y
             if a[1] < b[1]:
@@ -943,7 +1038,6 @@ def makeLine(
             line[x, y] = 1
 
             while y < y_end:
-
                 # next point
                 y = y + 1
 
@@ -983,23 +1077,23 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif (angle < np.pi) and (angle > np.pi/2):
+        elif (angle < np.pi) and (angle > np.pi / 2):
 
             # define the equation of the line
-            m = -np.tan(angle - np.pi/2)   # gradient of the line
-            c = y - m * x            # where the line crosses the y axis
+            m = -np.tan(angle - np.pi / 2)  # gradient of the line
+            c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
 
                 # next points to try are
-                poss_x = np.array([x-1, x-1, x  ])
-                poss_y = np.array([y,   y+1, y+1])
+                poss_x = np.array([x - 1, x - 1, x])
+                poss_y = np.array([y, y + 1, y + 1])
 
                 # find the point closest to the line
                 true_y = m * poss_x + c
-                diff = (poss_y - true_y)**2
+                diff = (poss_y - true_y) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -1014,9 +1108,9 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif angle == np.pi/2:
+        elif angle == np.pi / 2:
 
             while line_length < linelength:
 
@@ -1031,23 +1125,23 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif (angle < np.pi/2) and (angle > 0):
+        elif (angle < np.pi / 2) and (angle > 0):
 
             # define the equation of the line
-            m = np.tan(np.pi/2 - angle)    # gradient of the line
-            c = y - m * x            # where the line crosses the y axis
+            m = np.tan(np.pi / 2 - angle)  # gradient of the line
+            c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
 
                 # next points to try are
-                poss_x = np.array([x-1, x-1, x ])
-                poss_y = np.array([y,   y-1, y-1])
+                poss_x = np.array([x - 1, x - 1, x])
+                poss_y = np.array([y, y - 1, y - 1])
 
                 # find the point closest to the line
                 true_y = m * poss_x + c
-                diff = (poss_y - true_y)**2
+                diff = (poss_y - true_y) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -1062,9 +1156,9 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif angle==0:
+        elif angle == 0:
 
             while line_length < linelength:
 
@@ -1079,23 +1173,23 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif (angle < 0) and (angle > -np.pi/2):
+        elif (angle < 0) and (angle > -np.pi / 2):
 
             # define the equation of the line
-            m = -np.tan(np.pi/2 + angle)   # gradient of the line
-            c = y - m * x            # where the line crosses the y axis
+            m = -np.tan(np.pi / 2 + angle)  # gradient of the line
+            c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
 
                 # next points to try are
-                poss_x = np.array([x+1, x+1, x ])
-                poss_y = np.array([y,   y-1, y-1])
+                poss_x = np.array([x + 1, x + 1, x])
+                poss_y = np.array([y, y - 1, y - 1])
 
                 # find the point closest to the line
                 true_y = m * poss_x + c
-                diff = (poss_y - true_y)**2
+                diff = (poss_y - true_y) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -1110,9 +1204,9 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif angle == -np.pi/2:
+        elif angle == -np.pi / 2:
 
             while line_length < linelength:
 
@@ -1127,23 +1221,23 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
-        elif (angle < -np.pi/2) and (angle > -np.pi):
+        elif (angle < -np.pi / 2) and (angle > -np.pi):
 
             # define the equation of the line
-            m = np.tan(-angle - np.pi/2)     # gradient of the line
-            c = y - m * x              # where the line crosses the y axis
+            m = np.tan(-angle - np.pi / 2)  # gradient of the line
+            c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
 
                 # next points to try are
-                poss_x = np.array([x+1, x+1,  x ])
-                poss_y = np.array([y,   y+1, y+1])
+                poss_x = np.array([x + 1, x + 1, x])
+                poss_y = np.array([y, y + 1, y + 1])
 
                 # find the point closest to the line
                 true_y = m * poss_x + c
-                diff = (poss_y - true_y)**2
+                diff = (poss_y - true_y) ** 2
                 index = matlab_find(diff == min(diff))[0]
 
                 # the next point
@@ -1158,7 +1252,7 @@ def makeLine(
                 line[x - 1, y - 1] = 1
 
                 # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)
+                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
     return line
 
@@ -1166,8 +1260,8 @@ def makeLine(
 def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
     # force integer input values
     grid_size = grid_size.round().astype(int)
-    arc_pos   = arc_pos.round().astype(int)
-    diameter  = int(round(diameter))
+    arc_pos = arc_pos.round().astype(int)
+    diameter = int(round(diameter))
     focus_pos = focus_pos.round().astype(int)
 
     try:
@@ -1211,7 +1305,7 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
         half_arc_angle = np.arcsin(diameter / 2 / radius)
 
         # find centre of circle on which the arc lies
-        distance_cf = np.sqrt( (ax - fx)**2 + (ay - fy)**2 )
+        distance_cf = np.sqrt((ax - fx) ** 2 + (ay - fy) ** 2)
         cx = round(radius / distance_cf * (fx - ax) + ax)
         cy = round(radius / distance_cf * (fy - ay) + ay)
         c = np.array([cx, cy])
@@ -1223,7 +1317,7 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
         v1 = arc_pos - c
 
         # calculate length of vector
-        l1 = np.sqrt(sum((arc_pos - c)**2))
+        l1 = np.sqrt(sum((arc_pos - c) ** 2))
 
         # extract all points that form part of the arc
         arc_ind = matlab_find(arc, mode='eq', val=1)
@@ -1239,11 +1333,11 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
             v2 = p - c
 
             # calculate length of vector
-            l2 = np.sqrt(sum((p - c)**2))
+            l2 = np.sqrt(sum((p - c) ** 2))
 
             # find the angle between the two vectors using the dot product,
             # normalised using the vector lengths
-            theta = np.arccos(sum( v1 * v2 / (l1 * l2) ))
+            theta = np.arccos(sum(v1 * v2 / (l1 * l2)))
 
             # if the angle is greater than the half angle of the arc, remove
             # it from the arc
@@ -1252,12 +1346,12 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
     else:
 
         # calculate arc direction angle, then rotate by 90 degrees
-        ang = np.arctan( (fx - ax) / (fy - ay) ) + np.pi/2
+        ang = np.arctan((fx - ax) / (fy - ay)) + np.pi / 2
 
         # draw lines to create arc with infinite radius
         arc = np.logical_or(
-            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1)//2),
-            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1)//2)
+            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
+            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
         )
     return arc
 
@@ -1270,6 +1364,7 @@ def ind2sub(array_shape, ind):
     indices = np.unravel_index(ind - 1, array_shape, order='F')
     indices = (np.squeeze(index) + 1 for index in indices)
     return indices
+
 
 def sub2ind(array_shape, x, y, z) -> np.ndarray:
     results = []
@@ -1299,8 +1394,8 @@ def makePixelMapPoint(grid_size, centre_pos) -> np.ndarray:
 
         # combine index matrices
         pixel_map = np.zeros((Nx, Ny))
-        pixel_map += (nx**2)[:, None]
-        pixel_map += (ny**2)[None, :]
+        pixel_map += (nx ** 2)[:, None]
+        pixel_map += (ny ** 2)[None, :]
         pixel_map = np.sqrt(pixel_map)
 
     elif num_dim == 3:
@@ -1316,9 +1411,9 @@ def makePixelMapPoint(grid_size, centre_pos) -> np.ndarray:
 
         # combine index matrices
         pixel_map = np.zeros((Nx, Ny, Nz))
-        pixel_map += (nx**2)[:, None, None]
-        pixel_map += (ny**2)[None, :, None]
-        pixel_map += (nz**2)[None, None, :]
+        pixel_map += (nx ** 2)[:, None, None]
+        pixel_map += (ny ** 2)[None, :, None]
+        pixel_map += (nz ** 2)[None, None, :]
         pixel_map = np.sqrt(pixel_map)
 
     else:
@@ -1342,13 +1437,13 @@ def makePixelMapPlane(grid_size, normal, point):
         Ny = round(grid_size[1])
 
         # create coordinate meshes
-        [px, py]         = np.meshgrid(Nx, Ny)
-        [pointx, pointy] = np.meshgrid(np.ones((1, Nx)) * point[0],  np.ones(1, Ny) * point[1])
-        [nx, ny]         = np.meshgrid(np.ones((1, Nx)) * normal[0], np.ones(1, Ny) * normal[2])
+        [px, py] = np.meshgrid(Nx, Ny)
+        [pointx, pointy] = np.meshgrid(np.ones((1, Nx)) * point[0], np.ones(1, Ny) * point[1])
+        [nx, ny] = np.meshgrid(np.ones((1, Nx)) * normal[0], np.ones(1, Ny) * normal[2])
 
         # calculate distance according to Eq. (6) at
         # http://mathworld.wolfram.com/Point-PlaneDistance.html
-        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny) / np.sqrt(sum(normal**2))
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny) / np.sqrt(sum(normal ** 2))
 
     elif num_dim == 3:
 
@@ -1358,13 +1453,15 @@ def makePixelMapPlane(grid_size, normal, point):
         Nz = np.round(grid_size[2])
 
         # create coordinate meshes
-        px, py, pz             = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1), indexing='ij')
-        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0],  np.ones(Ny) * point[1],  np.ones(Nz) * point[2], indexing='ij')
-        nx, ny, nz             = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2], indexing='ij')
+        px, py, pz = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1), indexing='ij')
+        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0], np.ones(Ny) * point[1], np.ones(Nz) * point[2],
+                                             indexing='ij')
+        nx, ny, nz = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2],
+                                 indexing='ij')
 
         # calculate distance according to Eq. (6) at
         # http://mathworld.wolfram.com/Point-PlaneDistance.html
-        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny + (pz - pointz) * nz) / np.sqrt(sum(normal**2))
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny + (pz - pointz) * nz) / np.sqrt(sum(normal ** 2))
 
     else:
         # throw error
@@ -1379,11 +1476,11 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     # =========================================================================
 
     # threshold used to find the closest point to the radius
-    THRESHOLD               = 0.5
+    THRESHOLD = 0.5
 
     # number of grid points to expand the bounding box compared to
     # sqrt(2)*diameter
-    BOUNDING_BOX_EXP        = 2
+    BOUNDING_BOX_EXP = 2
 
     # =========================================================================
     # INPUT CHECKING
@@ -1391,10 +1488,10 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
 
     # force integer input values
     grid_size = np.round(grid_size).astype(int)
-    bowl_pos  = np.round(bowl_pos).astype(int)
+    bowl_pos = np.round(bowl_pos).astype(int)
     focus_pos = np.round(focus_pos).astype(int)
-    diameter  = np.round(diameter)
-    radius    = np.round(radius)
+    diameter = np.round(diameter)
+    radius = np.round(radius)
 
     # check the input ranges
     if np.any(grid_size < 1):
@@ -1405,7 +1502,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         raise ValueError('The radius must be positive.')
     if diameter <= 0:
         raise ValueError('The diameter must be positive.')
-    if diameter > (2*radius):
+    if diameter > (2 * radius):
         raise ValueError('The diameter of the bowl must be less than twice the radius of curvature.')
     if diameter % 2 == 0:
         raise ValueError('The diameter must be an odd number of grid points.')
@@ -1423,9 +1520,9 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     grid_size_sm = np.array([Nx, Ny, Nz])
 
     # set the bowl position to be the centre of the bounding box
-    bx = np.ceil(Nx/2).astype(int)
-    by = np.ceil(Ny/2).astype(int)
-    bz = np.ceil(Nz/2).astype(int)
+    bx = np.ceil(Nx / 2).astype(int)
+    by = np.ceil(Ny / 2).astype(int)
+    bz = np.ceil(Nz / 2).astype(int)
     bowl_pos_sm = np.array([bx, by, bz])
 
     # set the focus position to be in the direction specified by the user
@@ -1450,7 +1547,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         half_arc_angle = np.arcsin(diameter / (2 * radius))
 
         # find centre of sphere on which the bowl lies
-        distance_cf = np.sqrt( (bx - fx)**2 + (by - fy)**2 + (bz - fz)**2 )
+        distance_cf = np.sqrt((bx - fx) ** 2 + (by - fy) ** 2 + (bz - fz) ** 2)
         cx = round(radius / distance_cf * (fx - bx) + bx)
         cy = round(radius / distance_cf * (fy - by) + by)
         cz = round(radius / distance_cf * (fz - bz) + bz)
@@ -1498,8 +1595,8 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     y_ind_back, z_ind_back = ind2sub([Ny, Nz], yz_ind_back)
 
     # combine x-y-z indices into a linear index
-    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw-1, y_ind_forw-1, z_ind_forw-1) + 1
-    linear_index_back = sub2ind([Nx, Ny, Nz], Nx - x_ind_back, y_ind_back-1, z_ind_back-1) + 1
+    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw - 1, y_ind_forw - 1, z_ind_forw - 1) + 1
+    linear_index_back = sub2ind([Nx, Ny, Nz], Nx - x_ind_back, y_ind_back - 1, z_ind_back - 1) + 1
 
     # assign these values to the bowl
     bowl_sm = matlab_assign(bowl_sm, linear_index_forw - 1, 1)
@@ -1536,7 +1633,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     z_ind_back, x_ind_back = ind2sub([Nz, Nx], zx_ind_back)
 
     # combine x-y-z indices into a linear index
-    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw-1, y_ind_forw-1, z_ind_forw-1) + 1
+    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw - 1, y_ind_forw - 1, z_ind_forw - 1) + 1
     linear_index_back = sub2ind([Nx, Ny, Nz], x_ind_back - 1, Ny - y_ind_back, z_ind_back - 1) + 1
 
     # assign these values to the bowl
@@ -1592,7 +1689,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         v1 = bowl_pos_sm - c
 
         # calculate length of vector
-        l1 = np.sqrt(sum((bowl_pos_sm - c)**2))
+        l1 = np.sqrt(sum((bowl_pos_sm - c) ** 2))
 
         # loop through the non-zero elements in the bowl matrix
         bowl_ind = matlab_find(bowl_sm == 1)[:, 0]
@@ -1607,14 +1704,14 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
             v2 = p - c
 
             # calculate length of vector
-            l2 = np.sqrt(sum((p - c)**2))
+            l2 = np.sqrt(sum((p - c) ** 2))
 
             # find the angle between the two vectors using the dot product,
             # normalised using the vector lengths
-            theta = np.arccos(sum( v1 * v2 / (l1 * l2) ))
+            theta = np.arccos(sum(v1 * v2 / (l1 * l2)))
 
-    #         # alternative calculation normalised using radius of curvature
-    #         theta2 = acos(sum( v1 .* v2 ./ radius**2 ))
+            #         # alternative calculation normalised using radius of curvature
+            #         theta2 = acos(sum( v1 .* v2 ./ radius**2 ))
 
             # if the angle is greater than the half angle of the bowl, remove
             # it from the bowl
@@ -1640,115 +1737,114 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         overlap_shapes = []
         overlap_delete = []
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, 0, :]      = 1
-        shape[1, 1, :]      = 1
-        shape[2, 2, :]      = 1
-        shape[0, 1, 1]      = 1
-        shape[1, 2, 1]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, 0, :] = 1
+        shape[1, 1, :] = 1
+        shape[2, 2, :] = 1
+        shape[0, 1, 1] = 1
+        shape[1, 2, 1] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[0, 1, 1]      = 1
-        delete[0, 2, 1]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[0, 1, 1] = 1
+        delete[0, 2, 1] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, 0, :]      = 1
-        shape[1, 1, :]      = 1
-        shape[2, 2, :]      = 1
-        shape[0, 1, 1]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, 0, :] = 1
+        shape[1, 1, :] = 1
+        shape[2, 2, :] = 1
+        shape[0, 1, 1] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[0, 1, 1]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[0, 1, 1] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0:2, 0, :]    = 1
-        shape[2, 1, :]      = 1
-        shape[1, 1, 1]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0:2, 0, :] = 1
+        shape[2, 1, :] = 1
+        shape[1, 1, 1] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[1, 1, 1]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[1, 1, 1] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, 0, :]      = 1
-        shape[1, 1, :]      = 1
-        shape[2, 2, :]      = 1
-        shape[0, 1, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, 0, :] = 1
+        shape[1, 1, :] = 1
+        shape[2, 2, :] = 1
+        shape[0, 1, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[0, 1, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[0, 1, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0:2, 1, :]    = 1
-        shape[2, 2, :]      = 1
-        shape[2, 1, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0:2, 1, :] = 1
+        shape[2, 2, :] = 1
+        shape[2, 1, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[2, 1, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[2, 1, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, :, 2]      = 1
-        shape[1, :, 1]      = 1
-        shape[1, :, 0]      = 1
-        shape[2, 1, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, :, 2] = 1
+        shape[1, :, 1] = 1
+        shape[1, :, 0] = 1
+        shape[2, 1, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[2, 1, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[2, 1, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, 2, :]      = 1
-        shape[1, 0:2, :]      = 1
-        shape[2, 0, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, 2, :] = 1
+        shape[1, 0:2, :] = 1
+        shape[2, 0, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[2, 0, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[2, 0, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[:, :, 1]      = 1
-        shape[0, 0, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[:, :, 1] = 1
+        shape[0, 0, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[0, 0, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[0, 0, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[0, :, 0]      = 1
-        shape[1, :, 1]      = 1
-        shape[1, :, 2]      = 1
-        shape[1, 1, 0]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[0, :, 0] = 1
+        shape[1, :, 1] = 1
+        shape[1, :, 2] = 1
+        shape[1, 1, 0] = 1
         overlap_shapes.append(shape)
 
-        delete               = np.zeros((3, 3, 3))
-        delete[1, 1, 0]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[1, 1, 0] = 1
         overlap_delete.append(delete)
 
-        shape               = np.zeros((3, 3, 3))
-        shape[1:3, 2, 0]    = 1
-        shape[0, 2, 1:3]    = 1
-        shape[0, 1, 2]      = 1
-        shape[1, 1, 1]      = 1
-        shape[2, 1, 0]      = 1
-        shape[1:3, 0, 1]    = 1
-        shape[1, 0, 2]      = 1
+        shape = np.zeros((3, 3, 3))
+        shape[1:3, 2, 0] = 1
+        shape[0, 2, 1:3] = 1
+        shape[0, 1, 2] = 1
+        shape[1, 1, 1] = 1
+        shape[2, 1, 0] = 1
+        shape[1:3, 0, 1] = 1
+        shape[1, 0, 2] = 1
         overlap_shapes.append(shape)
 
-
-        delete               = np.zeros((3, 3, 3))
-        delete[1, 0, 1]      = 1
+        delete = np.zeros((3, 3, 3))
+        delete[1, 0, 1] = 1
         overlap_delete.append(delete)
 
         # set loop flag
@@ -1787,7 +1883,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
                 if (cx > 1) and (cx < Nx) and (cy > 1) and (cy < Ny) and (cz > 1) and (cz < Nz):
 
                     # extract local region around current point
-                    region = bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1]  # FARID might not work
+                    region = bowl_sm[cx - 1:cx + 1, cy - 1:cy + 1, cz - 1:cz + 1]  # FARID might not work
 
                     # if there's more than 8 neighbours, check the point for
                     # deletion
@@ -1859,7 +1955,10 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
                             # remove point from bowl if required, and update
                             # counter
                             if delete_point:
-                                bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1] = bowl_sm[cx-1:cx+1, cy-1:cy+1, cz-1:cz+1] * np.bitwise_not(overlap_d).astype(float)  # Farid won't work probably
+                                bowl_sm[cx - 1:cx + 1, cy - 1:cy + 1, cz - 1:cz + 1] = bowl_sm[cx - 1:cx + 1,
+                                                                                       cy - 1:cy + 1,
+                                                                                       cz - 1:cz + 1] * np.bitwise_not(
+                                    overlap_d).astype(float)  # Farid won't work probably
                                 deleted_points = deleted_points + 1
                                 break
 
@@ -1944,10 +2043,10 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
 
     # force integer grid size values
     grid_size = np.round(grid_size).astype(int)
-    bowl_pos  = np.round(bowl_pos).astype(int)
+    bowl_pos = np.round(bowl_pos).astype(int)
     focus_pos = np.round(focus_pos).astype(int)
-    diameter  = np.round(diameter)
-    radius    = np.round(radius)
+    diameter = np.round(diameter)
+    radius = np.round(radius)
 
     # =========================================================================
     # CREATE BOWLS
@@ -2008,8 +2107,7 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
 
     # check if any of the bowls are overlapping
     max_nd_val, _ = max_nd(bowls)
-    if  max_nd_val > 1:
-
+    if max_nd_val > 1:
         # display warning
         print(f'WARNING: {max_nd_val - 1} bowls are overlapping')
 
@@ -2081,7 +2179,6 @@ def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, f
     # check if any of the arcs are overlapping
     max_nd_val, _ = max_nd(arcs)
     if max_nd_val > 1:
-
         # display warning
         print(f'WARNING: {max_nd_val - 1} arcs are overlapping')
 
