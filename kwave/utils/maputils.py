@@ -2089,3 +2089,85 @@ def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, f
         arcs[arcs != 0] = 1
 
     return arcs, arcs_labelled
+
+
+def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
+
+    # enforce a centered sphere
+    cx = floor(Nx / 2) + 1
+    cy = floor(Ny / 2) + 1
+    cz = floor(Nz / 2) + 1
+
+    # preallocate the storage variable
+    if binary:
+        sphere = np.zeros((Nx, Ny, Nz), dtype=bool)
+    else:
+        sphere = np.zeros((Nx, Ny, Nz))
+
+    # create a guide circle from which the individal radii can be extracted
+    guide_circle = makeCircle(Ny, Nx, cy, cx, radius)
+
+    # step through the guide circle points and create partially filled discs
+    centerpoints = np.arange(cx - radius, cx + 1)
+    reflection_offset = np.arange(len(centerpoints), 1, -1)
+    for centerpoint_index in range(len(centerpoints)):
+
+        # extract the current row from the guide circle
+        row_data = guide_circle[:, centerpoints[centerpoint_index] - 1]
+
+        # add an index to the grid points in the current row
+        row_index = row_data * np.arange(1, len(row_data) + 1)
+
+        # calculate the radius
+        swept_radius = (row_index.max() - row_index[row_index != 0].min()) / 2
+
+        # create a circle to add to the sphere
+        circle = makeCircle(Ny, Nz, cy, cz, swept_radius)
+
+        # make an empty fill matrix
+        if binary:
+            circle_fill = np.zeros((Ny, Nz), dtype=bool)
+        else:
+            circle_fill = np.zeros((Ny, Nz))
+
+        # fill in the circle line by line
+        fill_centerpoints = np.arange(cz - swept_radius, cz + swept_radius + 1).astype(int)
+        for fill_centerpoints_i in fill_centerpoints:
+
+            # extract the first row
+            row_data = circle[:, fill_centerpoints_i - 1]
+
+            # add an index to the grid points in the current row
+            row_index = row_data * np.arange(1, len(row_data) + 1)
+
+            # calculate the diameter
+            start_index = row_index[row_index != 0].min()
+            stop_index = row_index.max()
+
+            # count how many points on the line
+            num_points = sum(row_data)
+
+            # fill in the line
+            if start_index != stop_index and (stop_index - start_index) >= num_points:
+                circle_fill[(start_index + num_points // 2) - 1:stop_index - (num_points // 2), fill_centerpoints_i - 1] = 1
+
+        # remove points from the filled circle that existed in the previous
+        # layer
+        if centerpoint_index == 0:
+            sphere[centerpoints[centerpoint_index] - 1, :, :] = circle + circle_fill
+            prev_circle = circle + circle_fill
+        else:
+            prev_circle_alt = circle + circle_fill
+            circle_fill = circle_fill - prev_circle
+            circle_fill[circle_fill < 0] = 0
+            sphere[centerpoints[centerpoint_index] - 1, :, :] = circle + circle_fill
+            prev_circle = prev_circle_alt
+
+        # create the other half of the sphere at the same time
+        if centerpoint_index != len(centerpoints) - 1:
+            sphere[cx + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :, :]
+
+    # plot results
+    if plot_sphere:
+        raise NotImplementedError
+    return sphere
