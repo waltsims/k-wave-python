@@ -22,4 +22,4 @@ def test_makeCartSphere():
 
         assert np.allclose(expected_value, sphere)
 
-    print('makeDisc(..) works as expected!')
+    print('makeCartSphere(..) works as expected!')

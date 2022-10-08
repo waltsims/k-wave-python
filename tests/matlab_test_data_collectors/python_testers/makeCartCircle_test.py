@@ -23,4 +23,4 @@ def test_makeCartCircle():
 
         assert np.allclose(expected_value, circle)
 
-    print('makeDisc(..) works as expected!')
+    print('makeCartCircle(..) works as expected!')

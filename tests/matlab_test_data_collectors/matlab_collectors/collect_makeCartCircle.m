@@ -7,7 +7,7 @@ all_params = {
     };  
 
 for idx=1:length(all_params)
-        cirlce = makeCartCircle(all_params{idx}{1}, all_params{idx}{2}, all_params{idx}{3});
+        circle = makeCartCircle(all_params{idx}{1}, all_params{idx}{2}, all_params{idx}{3});
         params = all_params{idx};
         idx_padded = sprintf('%06d', idx - 1);
         filename = [rel_path idx_padded '.mat'];
