@@ -2171,3 +2171,122 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
     if plot_sphere:
         raise NotImplementedError
     return sphere
+
+
+def makeSphericalSection(radius, height, width=None, plot_section=False, binary=False):
+    use_spherical_sections = True
+
+    # force inputs to be integers
+    radius = int(radius)
+    height = int(height)
+
+    use_width = (width is not None)
+    if use_width:
+        width = int(width)
+        if width % 2 == 0:
+            raise ValueError('Input width must be an odd number.')
+
+    # calculate minimum grid dimensions to fit entire sphere
+    Nx = 2*radius + 1
+
+    # create sphere
+    ss = makeSphere(Nx, Nx, Nx, radius, False, binary)
+
+    # truncate to given height
+    if use_spherical_sections:
+        ss = ss[:height, :, :]
+    else:
+        ss = np.transpose(ss[:, :height, :], [1, 2, 0])
+
+    # flatten transducer and store the maximum and indices
+    mx = np.squeeze(np.max(ss, axis=0))
+
+    # calculate the total length/width of the transducer
+    length = mx[(len(mx) + 1) // 2].sum()
+
+    # truncate transducer grid based on length (removes empty rows and columns)
+    offset = int((Nx - length)/2)
+    ss = ss[:, offset:-offset, offset:-offset]
+
+    # also truncate to given width if defined by user
+    if use_width:
+
+        # check the value is appropriate
+        if width > length:
+            raise ValueError('Input for width must be less than or equal to transducer length.')
+
+        # calculate offset
+        offset = int((length - width)/2)
+
+        # truncate transducer grid
+        ss = ss[:, offset:-offset, :]
+
+    # compute average distance between each grid point and its contiguous
+
+    # calculate x-index of each grid point in the spherical section, create
+    # mask and remove singleton dimensions
+    mx, mx_ind = np.max(ss, axis=0), ss.argmax(axis=0) + 1
+    mask = np.squeeze(mx != 0)
+    mx_ind = np.squeeze(mx_ind) * mask
+
+    # double check there there is only one value of spherical section in
+    # each matrix column
+    if mx.sum() != ss.sum():
+        raise ValueError('mean neighbour distance cannot be calculated uniquely due to overlapping points in the x-direction')
+
+    # calculate average distance to grid point neighbours in the flat case
+    x_dist = np.tile([1, 0, 1], [3, 1])
+    y_dist = x_dist.T
+    flat_dist = np.sqrt(x_dist**2 + y_dist**2)
+    flat_dist = np.mean(flat_dist)
+
+    # compute distance map
+    dist_map = np.zeros(mx_ind.shape)
+    sz = mx_ind.shape
+    for m in range(sz[0]):
+        for n in range(sz[1]):
+
+            # clear map
+            local_heights = np.zeros((3, 3))
+
+            # extract the height (x-distance) of the 8 neighbouring grid
+            # points
+            if m == 0 and n == 0:
+                local_heights[1:3, 1:3] = mx_ind[m:m + 2, n:n + 2]
+            elif m == (sz[0] - 1) and n == (sz[1] - 1):
+                local_heights[0:2, 0:2] = mx_ind[m - 1:m+1, n - 1:n+1]
+            elif m == 0 and n == (sz[1] - 1):
+                local_heights[1:3, 0:2] = mx_ind[m:m + 2, n - 1:n + 1]
+            elif m == (sz[0] - 1) and n == 0:
+                local_heights[0:2, 1:3] = mx_ind[m - 1:m+1, n:n + 2]
+            elif m == 0:
+                local_heights[1:3, :] = mx_ind[m:m + 2, n - 1:n + 2]
+            elif m == (sz[0] - 1):
+                local_heights[0:2, :] = mx_ind[m - 1:m+1, n - 1:n + 2]
+            elif n == 0:
+                local_heights[:, 1:3] = mx_ind[m - 1:m + 2, n:n + 2]
+            elif n == (sz[1] - 1):
+                local_heights[:, 0:2] = mx_ind[m - 1:m + 2, n - 1:n + 1]
+            else:
+                local_heights = mx_ind[m - 1:m + 2, n - 1:n + 2]
+
+            # compute average variation from center
+            local_heights_var = abs(local_heights - local_heights[1, 1])
+
+            # threshold no neighbours
+            local_heights_var[local_heights == 0] = 0
+
+            # calculate total distance from centre
+            dist = np.sqrt(x_dist**2 + y_dist**2 + local_heights_var**2)
+
+            # average and store as a ratio
+            dist_map[m, n] = 1 + (np.mean(dist) - flat_dist) / flat_dist
+
+    # threshold out the non-transducer grid points
+    dist_map[mask != 1] = 0
+
+    # plot if required
+    if plot_section:
+        raise NotImplementedError
+
+    return ss, dist_map
