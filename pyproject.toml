@@ -1,3 +1,61 @@
 [build-system]
-requires = ["setuptools>=42"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "k-Wave-python"
+dynamic = ["version"]
+description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = "~=3.9"
+authors = [
+    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
+    { name = "Walter Simson", email = "walter.simson@tum.de"}
+]
+maintainers = [
+    { name = "Walter Simson", email = "walter.simson@tum.de" },
+    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" }
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "h5py==3.6.0",
+    "scipy==1.7.3",
+    "opencv-python==4.4.0.46",
+    "deepdiff==5.2.3",
+    "matplotlib==3.3.4",
+    "numpy~=1.21.6",
+    "UFF.py @ git+https://github.com/waltsims/uff.py@a672319b5cfbe3a676837e47c5958a3fdea12fa7"
+]
+
+[project.urls]
+Homepage = "http://www.k-wave.org/"
+Documentation = "https://waltersimson.com/k-wave-python/"
+Repository = "https://github.com/waltsims/k-wave-python"
+Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
+
+[project.optional-dependencies]
+test = ["phantominator"]
+example = ["gdown==4.4.0"]
+docs = ["sphinx_rtd_theme",
+        "sphinx-toolbox"]
+
+[tool.hatch.version]
+path = "kwave/__init__.py"
+
+[tool.hatch.build]
+artifacts = ["!/kwave/bin"]
+
+[tool.hatch.metadata]
+# can be removed as soon as uff is published and no longer a direct reference
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages=["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+
+[tools.pytest.ini_options]
+testpaths = ["tests"]
