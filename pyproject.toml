@@ -25,10 +25,10 @@ classifiers = [
 dependencies = [
     "h5py==3.6.0",
     "scipy==1.7.3",
-    "opencv-python==4.4.0.46",
+    "opencv-python==4.6.0.66",
     "deepdiff==5.2.3",
-    "matplotlib==3.3.4",
-    "numpy~=1.21.6",
+    "matplotlib==3.6.1",
+    "numpy~=1.22.2",
     "UFF.py @ git+https://github.com/waltsims/uff.py@a672319b5cfbe3a676837e47c5958a3fdea12fa7"
 ]
 
@@ -39,7 +39,7 @@ Repository = "https://github.com/waltsims/k-wave-python"
 Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
-test = ["phantominator"]
+test = ["pytest", "phantominator"]
 example = ["gdown==4.4.0"]
 docs = ["sphinx_rtd_theme",
         "sphinx-toolbox"]
