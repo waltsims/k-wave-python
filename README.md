@@ -11,7 +11,7 @@ With this project, we hope to increase accessibility and reproducablitiy of [k-W
 The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/)
 
 ## Installation
-
+To install the most recent build of k-Wave-python from PyPI, run:
 ```bash
 pip install k-wave-python
 ```
@@ -27,7 +27,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-pip install -r ./requirements/example.txt
+pip install --editable '.[example]' 
 python3 examples/bmode_reconstruction_example.py
 ```
 
