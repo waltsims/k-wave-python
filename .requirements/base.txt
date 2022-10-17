@@ -40,7 +40,7 @@ pyparsing==3.0.9
     #   packaging
 python-dateutil==2.8.2
     # via matplotlib
-scipy==1.7.3
+scipy==1.9.2
     # via k-Wave-python (pyproject.toml)
 six==1.16.0
     # via python-dateutil
