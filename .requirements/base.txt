@@ -28,7 +28,7 @@ numpy==1.22.4
     #   scipy
 opencv-python==4.6.0.66
     # via k-Wave-python (pyproject.toml)
-ordered-set==4.0.2
+ordered-set==4.1.0
     # via deepdiff
 packaging==21.3
     # via matplotlib
