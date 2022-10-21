@@ -98,24 +98,17 @@
 <p>Currently, this package serves as an interface to the cpp binaries of k-Wave.
 For this reason, the k-Wave binaries are packaged with the code in this repository.
 The k-Wave binaries can currently be found on the <a class="reference external" href="http://www.k-wave.org/download.php">k-Wave download page</a>.</p>
-<p>In order to correctly set up your development environment for this repository, clone the repository from github, and install the project dependencies..</p>
+<p>In order to correctly set up your development environment for this repository, clone the repository from github, and install the project dependencies.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/waltsims/k-wave-python
 <span class="nb">cd</span> k-wave-python
-pip install -r requirements.txt
+pip install -e .
 </pre></div>
 </div>
 <p>Next, download all k-Wave binaries from the <a class="reference external" href="http://www.k-wave.org/download.php">k-Wave download page</a>.</p>
-<p>Lastly, place the contents of the linux-binaries, and windows-executables directories in the project directory structure under <code class="docutils literal notranslate"><span class="pre">kwave/bin/linux/</span></code> and <code class="docutils literal notranslate"><span class="pre">kwave/bin/windows</span></code> respectively.
-Now your development environment has been set up, and you can run and build the <code class="docutils literal notranslate"><span class="pre">k-Wave-python</span></code> codebase.
-You can now build the package via:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m build
-</pre></div>
-</div>
-<p>Or install the package locally via:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 setup.py install
-</pre></div>
-</div>
-<p>If you have any issues or questions, please join the <a class="reference external" href="https://t.me/+ILL4yGgcX0A2Y2Y6">k-Wave-python Development Telegram group</a> to discuss. We look forward to interacting with you.</p>
+<p>Lastly, place the contents of the linux-binaries, and windows-executables directories in the project directory structure under <code class="docutils literal notranslate"><span class="pre">kwave/bin/linux/</span></code>, <code class="docutils literal notranslate"><span class="pre">kwave/bin/darwin</span></code> and <code class="docutils literal notranslate"><span class="pre">kwave/bin/windows</span></code> respectively.
+You will have to create the directory structure yourself.</p>
+<p>With this, you are ready to develop k-Wave-python.
+If you have any issues or questions, please post them on the <a class="reference external" href="https://github.com/waltsims/k-wave-python/discussions">k-Wave-python discussions page</a> to discuss. We look forward to interacting with you.</p>
 </section>
 
 
