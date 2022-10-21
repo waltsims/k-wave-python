@@ -388,8 +388,6 @@ def interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask
     # Check dimensionality of data passed
     if kgrid.dim not in [2, 3]:
         raise ValueError('Data must be two- or three-dimensional.')
-    if kgrid.dim == 3:
-        raise Warning('This method is untested for 3D case.')
 
     from kwave.utils.kutils import grid2cart
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
