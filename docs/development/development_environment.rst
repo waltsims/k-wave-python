@@ -11,22 +11,12 @@ In order to correctly set up your development environment for this repository, c
 
     git clone https://github.com/waltsims/k-wave-python
     cd k-wave-python
-    pip install -r requirements.txt
+    pip install -e .
 
 Next, download all k-Wave binaries from the `k-Wave download page <http://www.k-wave.org/download.php>`_.
 
-Lastly, place the contents of the linux-binaries, and windows-executables directories in the project directory structure under ``kwave/bin/linux/`` and ``kwave/bin/windows`` respectively.
-Now your development environment has been set up, and you can run and build the ``k-Wave-python`` codebase.
-You can now build the package via:
+Lastly, place the contents of the linux-binaries, and windows-executables directories in the project directory structure under ``kwave/bin/linux/``, ``kwave/bin/darwin`` and ``kwave/bin/windows`` respectively.
+You will have to create the directory structure yourself.
 
-.. code-block:: bash
-
-    python3 -m build
-
-Or install the package locally via:
-
-.. code-block:: bash
-
-    python3 setup.py install
-
-If you have any issues or questions, please join the `k-Wave-python Development Telegram group <https://t.me/+ILL4yGgcX0A2Y2Y6>`_ to discuss. We look forward to interacting with you.
+With this, you are ready to develop k-Wave-python
+If you have any issues or questions, please post them on the `GitHub discussions page <https://github.com/waltsims/k-wave-python/discussions>`_ to discuss. We look forward to interacting with you.
