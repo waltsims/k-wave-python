@@ -3159,6 +3159,7 @@ def test_make_cart_circle():
     # test it runs
     make_cart_circle(5, 40)
 
+
 def test_make_cart_sphere():
     # test it runs
-    make_cart_sphere(5, 40, plot_sphere=True)
+    make_cart_sphere(5, 40)

@@ -1,5 +1,6 @@
 from typing import Tuple
-
+from skimage.transform import resize as si_resize
+from scipy.interpolate import interpn
 import numpy as np
 import warnings
 
@@ -95,102 +96,6 @@ def matlab_assign(matrix: np.ndarray, indices, values):
     matrix[indices] = values
     return matrix.reshape(original_shape, order='F')
 
-# def _resize1D():
-#     # extract the original number of pixels from the size of the matrix
-#     [Nx_input, Ny_input] = size(mat);
-#
-#     # extract the desired number of pixels
-#     if Ny_input == 1
-#         Nx_output = varargin{2}(1);
-#         Ny_output = 1;
-#     else
-#         Nx_output = 1;
-#         Ny_output = varargin{2}(1);
-#     end
-#
-#     # update command line status
-#     disp(['  input grid size: ' num2str(Nx_input) ' by ' num2str(Ny_input) ' elements']);
-#     disp(['  output grid size: ' num2str(Nx_output) ' by ' num2str(Ny_output) ' elements']);
-#
-#     # check the size is different to the input size
-#     if Nx_input ~= Nx_output || Ny_input ~= Ny_output
-#
-#     # resize the input matrix to the desired number of pixels
-#     if Ny_input == 1
-#         mat_rs = interp1((0:1/(Nx_input - 1):1)', mat, (0:1/(Nx_output - 1):1)', interp_mode);
-#         else
-#         mat_rs = interp1((0:1/(Ny_input - 1):1), mat, (0:1/(Ny_output - 1):1), interp_mode);
-#         end
-#
-#     else
-#         mat_rs = mat;
-#     end
-#     pass
-
-def _resize2D(mat,new_size, interp_mode='linear'):
-    """
-    2D specification of resize method
-
-    Args:
-        mat:
-        new_size:
-        interp_mode:
-
-    Returns:
-        mat_rs:
-    """
-
-    # extract the original number of pixels from the size of the matrix
-    Nx_input, Ny_input = mat.shape
-
-    # extract the desired number of pixels
-    Nx_output, Ny_output = new_size
-
-    # update command line status
-    print(f'  input grid size: {Nx_input} by {Ny_input} elements')
-    print(f'  output grid size: {Nx_output} by {Ny_output} elements')
-
-    # check the size is different to the input size
-    if Nx_input != Nx_output or Ny_input != Ny_output:
-
-        # resize the input matrix to the desired number of pixels
-        inp_y = np.arange(0, 1 + 1e-8, 1 / (Ny_input - 1))
-        inp_x = np.arange(0, 1 + 1e-8, 1 / (Nx_input - 1))
-
-        out_y = np.arange(0, 1 + 1e-8, 1 / (Ny_output - 1))
-        out_x = np.arange(0, 1 + 1e-8, 1 / (Nx_output - 1))
-
-        mat_rs = interpolate2D([inp_x, inp_y], mat, [out_x, out_y], method=interp_mode, copy_nans=False)
-        print(mat_rs.shape)
-
-        # mat_rs = interp2(0:1/(Ny_input - 1):1, (0:1/(Nx_input - 1):1)', mat, 0:1/(Ny_output - 1):1, (0:1/(Nx_output - 1):1)', interp_mode);
-    else:
-        mat_rs = mat
-    return mat_rs
-
-# def _resize3D(mat, resolution, interp_mode='linear'):
-#     # extract the original number of pixels from the size of the matrix
-#     [Nx_input, Ny_input, Nz_input] = mat.shape
-#
-#     # extract the desired number of pixels
-#     Nx_output, Ny_output, Nz_output = resolution
-#
-#     # update command line status
-#     print(f'  input grid size: {Nx_input} by {Ny_input} by {Nz_input} elements')
-#     print(f'  output grid size: {Nx_output} by {Ny_output} by {Nz_output} elements')
-#
-#     # create normalised plaid grids of current discretisation
-#     [x_mat, y_mat, z_mat] = ndgrid((0:Nx_input-1)/(Nx_input-1), (0:Ny_input-1)/(Ny_input-1), (0:Nz_input-1)/(Nz_input-1));
-#
-#     # create plaid grids of desired discretisation
-#     [x_mat_interp, y_mat_interp, z_mat_interp] = ndgrid((0:Nx_output-1)/(Nx_output-1), (0:Ny_output-1)/(Ny_output-1), (0:Nz_output-1)/(Nz_output-1));
-#
-#     # compute interpolation; for a matrix indexed as [M, N, P], the
-#     # axis variables must be given in the order N, M, P
-#     mat_rs = interp3(y_mat, x_mat, z_mat, mat, y_mat_interp, x_mat_interp, z_mat_interp, interp_mode);
-#     pass
-
-
 def resize(mat, new_size, interp_mode='linear'):
     """
     resize: resamples a "matrix" of spatial samples to a desired "resolution" or spatial sampling frequency via interpolation
@@ -204,8 +109,6 @@ def resize(mat, new_size, interp_mode='linear'):
         res_mat:            "resized" matrix
 
     """
-    # TODO: wrap scikit image resize
-    #  https://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
     # start the timer
     TicToc.tic()
 
@@ -216,18 +119,33 @@ def resize(mat, new_size, interp_mode='linear'):
     assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
 
-    if num_dim2(mat) == 1:
-        raise NotImplementedError
-    elif num_dim2(mat) == 2:
-        mat_rs = _resize2D(mat, new_size, interp_mode)
-    elif num_dim2(mat) == 3:
-        raise NotImplementedError
-    else:
-        raise ValueError('Input matrix must be 1, 2 or 3 dimensional.')
+    mat = mat.squeeze()
+    mat_shape = mat.shape
 
+    axis = []
+    for dim in range(len(mat.shape)):
+        dim_size = mat.shape[dim]
+        axis.append(np.linspace(0, 1, dim_size))
+
+    new_axis = []
+    for dim in range(len(new_size)):
+        dim_size = new_size[dim]
+        new_axis.append(np.linspace(0, 1, dim_size))
+
+    points = tuple(p for p in axis)
+    xi = np.meshgrid(*new_axis)
+    xi = np.array([x.flatten() for x in xi]).T
+    new_points = xi
+    mat_rs = np.squeeze(interpn(points, mat, new_points, method=interp_mode))
+    # TODO: fix this hack.
+    if dim + 1 == 3:
+        mat_rs = mat_rs.reshape([new_size[1], new_size[0], new_size[2]])
+        mat_rs = np.transpose(mat_rs, (1, 0, 2))
+    else:
+        mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
     print(f'  completed in {scale_time(TicToc.toc())}')
-    assert mat_rs.shape == tuple(new_size)
+    assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
 

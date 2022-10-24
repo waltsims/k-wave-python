@@ -34,17 +34,20 @@ for idx=1:length(all_params)
         sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
 
 
-        % create a binary sensor mask of an equivalent continuous sphere
-        sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
+
         
         % define the properties of the propagation medium
         medium_sound_speed = params{1};	% [m/s]
         if dim == 2
             kgrid = kWaveGrid(Nx, dx, Ny, dy);
+            % create a binary sensor mask of an equivalent continuous sphere
+            sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
             p0_binary = ball_magnitude * makeCircle(Nx, Ny, ball_x_pos, ball_y_pos, ball_radius);
             binary_sensor_mask = makeDisc(kgrid.Nx, kgrid.Ny, 0, 0, sensor_radius_grid_points);
         else
             kgrid = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
+            % create a binary sensor mask of an equivalent continuous sphere
+            sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
             p0_binary = ball_magnitude * makeBall(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius);
             binary_sensor_mask = makeSphere(kgrid.Nx, kgrid.Ny, kgrid.Nz, sensor_radius_grid_points);
         end
