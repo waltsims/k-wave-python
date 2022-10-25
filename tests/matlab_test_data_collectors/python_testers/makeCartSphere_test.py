@@ -16,6 +16,7 @@ def test_makeCartSphere():
         recorded_data = loadmat(filepath)
 
         radius, num_points, center = recorded_data['params'][0]
+        center = center[0]
         expected_value = recorded_data['sphere']
 
         sphere = make_cart_sphere(radius, num_points, center)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def test_makeDisc():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCartSphere')
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeDisc')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):

@@ -489,6 +489,7 @@ def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False
         ax.grid()
         plt.show()
 
+    return sphere.squeeze()
 
 def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi, plot_circle=False):
     """
@@ -509,12 +510,16 @@ def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi,
     # check for arc_angle input
     if arc_angle == 2 * np.pi:
         full_circle = True
+    else:
+        full_circle = False
 
     cx = center_pos[0]
     cy = center_pos[1]
 
+    n_steps = num_points if full_circle else num_points - 1
+
     # create angles
-    angles = np.arange(0, num_points) * arc_angle / num_points + np.pi / 2
+    angles = np.arange(0, num_points) * arc_angle / n_steps + np.pi / 2
 
     # create cartesian grid
     circle = np.concatenate([radius * np.cos(angles[np.newaxis, :]), radius * np.sin(-angles[np.newaxis])])
@@ -535,6 +540,8 @@ def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi,
         plt.ylabel([f"x-position [{prefix} m]"])
         plt.axis('equal')
         plt.show()
+
+    return np.squeeze(circle)
 
 
 def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
@@ -698,51 +705,6 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
         plt.ylabel('x-position [grid points]')
         plt.xlabel('y-position [grid points]')
         plt.show()
-
-    return circle
-
-
-def makeCartCircle(radius, num_points, center_pos=None, arc_angle=(2 * np.pi), plot_circle=False):
-    """
-        Create a 2D Cartesian circle or arc.
-
-             MakeCartCircle creates a 2 x num_points array of the Cartesian
-             coordinates of points evenly distributed over a circle or arc (if
-             arc_angle is given).
-    Args:
-
-    Returns:
-
-    """
-    full_circle = (arc_angle == 2 * np.pi)
-
-    if center_pos is None:
-        cx = cy = 0
-    else:
-        cx, cy = center_pos
-
-    # ensure there is only a total of num_points including the endpoints when
-    # arc_angle is not equal to 2*pi
-    if not full_circle:
-        num_points = num_points - 1
-
-    # create angles
-    angles = np.arange(0, num_points + 1) * arc_angle / num_points + np.pi / 2
-
-    # discard repeated final point if arc_angle is equal to 2*pi
-    if full_circle:
-        angles = angles[0:- 1]
-
-    # create cartesian grid
-    # circle = flipud([radius*cos(angles); radius*sin(-angles)]);        # B.0.3
-    circle = np.vstack([radius * np.cos(angles), radius * np.sin(-angles)])  # B.0.4
-
-    # offset if needed
-    circle[0, :] = circle[0, :] + cx
-    circle[1, :] = circle[1, :] + cy
-
-    if plot_circle:
-        raise NotImplementedError
 
     return circle
 

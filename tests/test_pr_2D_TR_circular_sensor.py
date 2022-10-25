@@ -61,7 +61,7 @@ def test_pr_2D_TR_circular_sensor():
     sensor_angle = 3 * np.pi / 2        # [rad]
     sensor_pos = [0, 0]                 # [m]
     num_sensor_points = 70
-    cart_sensor_mask = makeCartCircle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
+    cart_sensor_mask = make_cart_circle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
 
     # assign to sensor structure
     sensor_mask = cart_sensor_mask

@@ -1,7 +1,8 @@
+clear all;
+
 directory = pwd + "/matlab_collectors";
 files = getListOfFiles(directory);
 % remove this file.
-
 
 for idx=1:length(files)
         % ensure collected value directory has been created

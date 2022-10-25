@@ -52,7 +52,7 @@ def test_ivp_loading_external_image():
     # define a centered circular sensor
     sensor_radius = 4e-3   # [m]
     num_sensor_points = 50
-    sensor_mask = makeCartCircle(sensor_radius, num_sensor_points)
+    sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
 
     # run the first simulation
