@@ -1,13 +1,14 @@
-from kwave.utils.interputils import interpCartData
-from kwave.kgrid import kWaveGrid
-
 from scipy.io import loadmat
+from pathlib import Path
 import numpy as np
 import os
 
+from kwave.utils.interputils import interpCartData
+from kwave.kgrid import kWaveGrid
+
 
 def test_interpcartdata():
-    collected_values_folder = os.path.join(os.path.curdir, 'collectedValues/interpCartData')
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/interpCartData')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
