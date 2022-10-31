@@ -10,7 +10,7 @@ cycler==0.11.0
     # via matplotlib
 deepdiff==5.2.3
     # via k-Wave-python (pyproject.toml)
-fonttools==4.37.4
+fonttools==4.38.0
     # via matplotlib
 h5py==3.6.0
     # via k-Wave-python (pyproject.toml)
