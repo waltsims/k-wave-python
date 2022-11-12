@@ -48,9 +48,10 @@ If you're enjoying k-Wave-python and want to contribute, development instruction
 
 ## Related Projects
 
-1. [`j-wave`](https://github.com/ucl-bug/jwave): Differentiable acoustic simulations in JAX 
-2. [`ADSeismic.jl`](https://github.com/kailaix/ADSeismic.jl): a finite difference acoustic simulator with support for AD and JIT compilation in Julia.
-3. [`stride`](https://github.com/trustimaging/stride): a general optimisation framework for medical ultrasound tomography. 
+1. [`k-Wave`](https://github.com/ucl-bug/k-wave): A MATLAB toolbox for the time-domain simulation of acoustic wave fields. 
+2. [`j-wave`](https://github.com/ucl-bug/jwave): Differentiable acoustic simulations in JAX.
+3. [`ADSeismic.jl`](https://github.com/kailaix/ADSeismic.jl): a finite difference acoustic simulator with support for AD and JIT compilation in Julia.
+4. [`stride`](https://github.com/trustimaging/stride): a general optimisation framework for medical ultrasound tomography. 
 
 ## Contact
 e-mail [walter.simson@tum.de](mailto:walter.simson@tum.de).
