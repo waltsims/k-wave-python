@@ -32,7 +32,7 @@ ordered-set==4.0.2
     # via deepdiff
 packaging==21.3
     # via matplotlib
-pillow==9.2.0
+pillow==9.3.0
     # via matplotlib
 pyparsing==3.0.9
     # via

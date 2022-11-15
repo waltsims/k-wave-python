@@ -92,7 +92,7 @@ packaging==21.3
     # via
     #   matplotlib
     #   sphinx
-pillow==9.2.0
+pillow==9.3.0
     # via matplotlib
 platformdirs==2.5.2
     # via apeye
