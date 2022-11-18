@@ -1,17 +1,4 @@
 
-% line = makeLine(20, 20, [1, 1], [19, 19]);
-% 
-% line = makeLine(20, 20, [1, 1], [5, 5]);
-% line = makeLine(10, 20, [4, 15], [10, 1]);
-
-% line = makeLine(20, 20, [15, 15], 0.75 * pi, 5);
-% 
-% line = makeLine(20, 20, [15, 15], 0.75 * pi, -5);
-% line = makeLine(20, 10, [15, 10], 0.1 * pi, 5);
-% 
-% figure;
-% imagesc(line);
-
 all_params = { ...
     {20, 20, [1, 1], [19, 19]}, ...
     {20, 20, [1, 1], [5, 5]}, ...
