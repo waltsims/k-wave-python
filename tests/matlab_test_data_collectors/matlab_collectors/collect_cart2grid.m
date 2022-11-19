@@ -27,7 +27,7 @@ for dim = dims
             kgrid.dx = list_d(1);
 
             x_bounds = [-kgrid.Nx/2  * kgrid.dx + kgrid.dx/2, kgrid.Nx/2  * kgrid.dx - kgrid.dx/2];
-            points_x = rand_vector_in_range(x_bounds(1), x_bounds(2), num_points);
+            points_x = utils.rand_vector_in_range(x_bounds(1), x_bounds(2), num_points);
 
             if dim == 2 || dim == 3
                 kgrid.Ny = kgrid_dims(2);
@@ -38,14 +38,14 @@ for dim = dims
                     y_bounds = [-kgrid.Ny/2  * kgrid.dy + kgrid.dy/2, kgrid.Ny/2  * kgrid.dy - kgrid.dy/2];
                 end
                 
-                points_y = rand_vector_in_range(y_bounds(1), y_bounds(2), num_points);
+                points_y = utils.rand_vector_in_range(y_bounds(1), y_bounds(2), num_points);
             end
 
             if dim == 3
                 kgrid.Nz = kgrid_dims(3);
                 kgrid.dz = list_d(3);
                 z_bounds = [-kgrid.Nz/2  * kgrid.dz + kgrid.dz/2, kgrid.Nz/2  * kgrid.dz - kgrid.dz/2];
-                points_z = rand_vector_in_range(z_bounds(1), z_bounds(2), num_points);
+                points_z = utils.rand_vector_in_range(z_bounds(1), z_bounds(2), num_points);
             end
 
             if dim == 1
