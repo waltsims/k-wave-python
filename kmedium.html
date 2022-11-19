@@ -53,7 +53,34 @@
 <p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">kMedium</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kMedium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#kwave.kmedium.kWaveMedium"><code class="docutils literal notranslate"><span class="pre">kWaveMedium</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.check_fields"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.check_fields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.ensure_defined"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.ensure_defined()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.is_defined"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.is_defined()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.is_nonlinear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.is_nonlinear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.set_absorbing"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.set_absorbing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.BonA"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.BonA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.absorbing"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.absorbing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_coeff_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_coeff_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_filter"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_mode"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_power"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_power</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.alpha_sign"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.alpha_sign</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.density"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.density</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_compression"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_ref_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.sound_speed_shear"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.sound_speed_shear</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kwave.kmedium.kWaveMedium.stokes"><code class="docutils literal notranslate"><span class="pre">kWaveMedium.stokes</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
@@ -83,8 +110,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>kMedium</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">kMedium</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/kmedium.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -94,8 +121,195 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="kmedium">
-<h1>kMedium<a class="headerlink" href="#kmedium" title="Permalink to this heading"></a></h1>
+  <section id="module-kwave.kmedium">
+<span id="kmedium"></span><h1>kMedium<a class="headerlink" href="#module-kwave.kmedium" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.kmedium.</span></span><span class="sig-name descname"><span class="pre">kWaveMedium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sound_speed:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed_ref:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_coeff:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_power:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_mode:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_filter:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_sign:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BonA:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">array&gt;</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absorbing:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stokes:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.check_fields">
+<span class="sig-name descname"><span class="pre">check_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.check_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.check_fields" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Check whether the given properties are valid</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kgrid_shape</strong> – Shape of the kWaveGrid</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.ensure_defined">
+<span class="sig-name descname"><span class="pre">ensure_defined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.ensure_defined"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.ensure_defined" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Assert that the field(s) are defined (not None)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*fields</strong> – String list of the fields</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.is_defined">
+<span class="sig-name descname"><span class="pre">is_defined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.is_defined"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.is_defined" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Check if the field(s) are defined or None</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*fields</strong> – String list of the fields</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Boolean list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.is_nonlinear">
+<span class="sig-name descname"><span class="pre">is_nonlinear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.is_nonlinear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.is_nonlinear" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Check if the medium is nonlinear</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether the fluid simulation is nonlinear</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.set_absorbing">
+<span class="sig-name descname"><span class="pre">set_absorbing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_absorbing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_stokes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/kwave/kmedium.html#kWaveMedium.set_absorbing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kmedium.kWaveMedium.set_absorbing" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Change medium’s absorbing and stokes properties</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>is_absorbing</strong> – Is the medium absorbing</p></li>
+<li><p><strong>is_stokes</strong> – Is the medium stokes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.BonA">
+<span class="sig-name descname"><span class="pre">BonA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.BonA" title="Permalink to this definition"></a></dt>
+<dd><p>parameter of nonlinearity</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.absorbing">
+<span class="sig-name descname"><span class="pre">absorbing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.absorbing" title="Permalink to this definition"></a></dt>
+<dd><p>is the medium absorbing?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_coeff">
+<span class="sig-name descname"><span class="pre">alpha_coeff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_coeff" title="Permalink to this definition"></a></dt>
+<dd><p>power law absorption coefficient [dB/(MHz^y cm)]</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_coeff_compression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha_coeff_compression</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_coeff_compression" title="Permalink to this definition"></a></dt>
+<dd><p>Compression alpha coefficient (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_coeff_shear">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha_coeff_shear</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_coeff_shear" title="Permalink to this definition"></a></dt>
+<dd><p>Shear alpha coefficient (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_filter">
+<span class="sig-name descname"><span class="pre">alpha_filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_filter" title="Permalink to this definition"></a></dt>
+<dd><p>frequency domain filter applied to the absorption and dispersion terms in the equation of state</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_mode">
+<span class="sig-name descname"><span class="pre">alpha_mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_mode" title="Permalink to this definition"></a></dt>
+<dd><p>optional input to force either the absorption or dispersion terms in the equation of state to be excluded; valid inputs are ‘no_absorption’ or ‘no_dispersion’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_power">
+<span class="sig-name descname"><span class="pre">alpha_power</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_power" title="Permalink to this definition"></a></dt>
+<dd><p>power law absorption exponent</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.alpha_sign">
+<span class="sig-name descname"><span class="pre">alpha_sign</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.alpha_sign" title="Permalink to this definition"></a></dt>
+<dd><p>two element array used to control the sign of absorption and dispersion terms in the equation of state</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.density">
+<span class="sig-name descname"><span class="pre">density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.density" title="Permalink to this definition"></a></dt>
+<dd><p>density distribution within the acoustic medium [kg/m^3]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed">
+<span class="sig-name descname"><span class="pre">sound_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed" title="Permalink to this definition"></a></dt>
+<dd><p>sound speed distribution within the acoustic medium [m/s] | required to be defined</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_compression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sound_speed_compression</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_compression" title="Permalink to this definition"></a></dt>
+<dd><p>Compression sound speed (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_ref">
+<span class="sig-name descname"><span class="pre">sound_speed_ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_ref" title="Permalink to this definition"></a></dt>
+<dd><p>reference sound speed used within the k-space operator (phase correction term) [m/s]</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_ref_compression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sound_speed_ref_compression</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_compression" title="Permalink to this definition"></a></dt>
+<dd><p>Compression sound speed reference (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_ref_shear">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sound_speed_ref_shear</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_ref_shear" title="Permalink to this definition"></a></dt>
+<dd><p>Shear sound speed reference (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.sound_speed_shear">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sound_speed_shear</span></span><a class="headerlink" href="#kwave.kmedium.kWaveMedium.sound_speed_shear" title="Permalink to this definition"></a></dt>
+<dd><p>Shear sound speed (used in elastic simulations | not supported currently!)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kmedium.kWaveMedium.stokes">
+<span class="sig-name descname"><span class="pre">stokes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.kmedium.kWaveMedium.stokes" title="Permalink to this definition"></a></dt>
+<dd><p>is the medium absorbing stokes?</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
