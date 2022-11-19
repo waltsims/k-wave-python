@@ -6,6 +6,7 @@ test_local.sh
 tests/reference_outputs
 /.coverage
 /docs/_build/
+Pipfile.lock
 build/
 kwave/bin/windows
 kwave/bin/linux

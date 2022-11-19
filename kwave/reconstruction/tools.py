@@ -2,6 +2,25 @@ import numpy as np
 from uff import Position
 
 
+def log_compression(signal, cf, normalize=False):
+    """
+    Log compress an input signal.
+
+    Args:
+        signal: signal to be log compressed
+        cf: compression factor
+        normalize (bool): when true, signal is normalized before compression
+
+   Returns: signal: log-compressed signal
+    """
+    if normalize:
+        ms = max(signal)
+        signal = ms * (np.log10(1 + cf * signal / ms) / np.log10(1 + cf))
+    else:
+        signal = np.log10(1 + cf * signal) / np.log10(1 + cf)
+    return signal
+
+
 def apodize(distance, aperture, window):
     """
     Function that assigns different apodization to a set of pixels and elements

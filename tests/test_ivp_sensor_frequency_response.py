@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import makeDisc, makeCartCircle
+from kwave.utils.maputils import makeDisc, make_cart_circle
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -61,7 +61,7 @@ def test_ivp_sensor_frequency_response():
     # define a centered circular sensor
     sensor_radius = 4e-3   # [m]
     num_sensor_points = 50
-    sensor_mask = makeCartCircle(sensor_radius, num_sensor_points)
+    sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
 
     # run the simulation

@@ -71,7 +71,7 @@ def test_ivp_comparison_modelling_functions():
     # define a centered circular sensor pushed right to the edge of the grid
     sensor_radius = 6.3e-3   # [m]
     num_sensor_points = 50
-    sensor_mask = makeCartCircle(sensor_radius, num_sensor_points)
+    sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
 
     # convert the cartesian sensor mask to a binary sensor mask

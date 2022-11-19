@@ -252,7 +252,7 @@ def test_cpp_io_in_parts():
         write_flags(input_file_full_path)
 
         # set additional file attributes
-        write_attributes(input_file_full_path)
+        write_attributes(input_file_full_path, legacy=True)
 
         TicToc.toc()
 

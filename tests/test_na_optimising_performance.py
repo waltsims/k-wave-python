@@ -53,7 +53,7 @@ def test_na_optimising_performance():
     # define a centered Cartesian circular sensor
     sensor_radius = 4.5e-3     # [m]
     num_sensor_points = 100
-    sensor_mask = makeCartCircle(sensor_radius, num_sensor_points)
+    sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
 
     # create the time array

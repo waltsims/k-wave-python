@@ -1,7 +1,11 @@
 import math
 from math import floor
+from typing import Optional, Tuple
 
 import numpy as np
+from scipy.interpolate import interp1d
+
+from kwave.utils.tictoc import TicToc
 
 
 def scale_time(seconds):
@@ -21,7 +25,7 @@ def scale_time(seconds):
     # calculate hours, minutes, and seconds
     hours = floor(seconds / (60 * 60))
     seconds = seconds - hours * 60 * 60
-    minutes = floor( seconds / 60 )
+    minutes = floor(seconds / 60)
     seconds = seconds - minutes * 60
 
     # write out as a string, to keep the output manageable, only the largest
@@ -33,11 +37,19 @@ def scale_time(seconds):
     elif days > 0:
         time = f'{days} days, {hours} hours, and {minutes} min'
     elif hours > 0:
-        time = f'{hours} hours {minutes} min seconds s'
+        seconds = np.round(seconds, 4)
+        if np.abs(seconds - int(seconds)) < 1e-4:
+            seconds = int(seconds)
+        time = f'{hours}hours {minutes}min {seconds}s'
     elif minutes > 0:
-        time = f'{minutes} min {seconds} s'
+        seconds = np.round(seconds, 4)
+        if np.abs(seconds - int(seconds)) < 1e-4:
+            seconds = int(seconds)
+        time = f'{minutes}min {seconds}s'
     else:
-        time = f'{seconds} s'
+        precision = 10  # manually tuned number
+        seconds = round(seconds, precision)
+        time = f'{seconds}s'
     return time
 
 
@@ -79,8 +91,8 @@ def scale_SI(x):
             4: ('p', 'pico', 1e12),
             5: ('f', 'femto', 1e15),
             6: ('a', 'atto', 1e18),
-            7: ('a', 'zepto', 1e21),
-            8: ('a', 'yocto', 1e24),
+            7: ('z', 'zepto', 1e21),
+            8: ('y', 'yocto', 1e24),
         }
         prefix, prefix_fullname, scale = units[sym_index]
 
@@ -116,14 +128,114 @@ def scale_SI(x):
         scale = 1
 
     # form scaling into a string
-    x_sc = x_sc.round(4)
+    round_decimals = 6  # TODO this needs to be tuned
+    x_sc = x_sc.round(round_decimals)
+    if (x_sc - int(x_sc)) < (0.1 ** round_decimals):
+        # avoid values like X.0, instead have only X
+        x_sc = int(x_sc)
     x_sc = f'-{x_sc}{prefix}' if negative else f'{x_sc}{prefix}'
     return x_sc, scale, prefix, prefix_fullname
 
 
 def db2neper(alpha, y=1):
+    """
+    DB2NEPER Convert decibels to nepers.
+
+    DESCRIPTION:
+    db2neper converts an attenuation coefficient in units of
+    dB / (MHz ^ y cm) to units of Nepers / ((rad / s) ^ y m).
+
+    USAGE:
+    alpha = db2neper(alpha)
+    alpha = db2neper(alpha, y)
+
+    INPUTS:
+    alpha - attenuation in dB / (MHz ^ y cm)
+
+    OPTIONAL INPUTS:
+    y - power law exponent(default=1)
+
+    OUTPUTS:
+    alpha - attenuation in Nepers / ((rad / s) ^ y m)
+
+    ABOUT:
+    author - Bradley Treeby
+    date - 27 th March 2009
+    last update - 4 th June 2017
+
+    This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
+    Copyright(C) 2009 - 2017 Bradley Treeby
+
+    See also neper2db
+
+    This file is part of k - Wave.k - Wave is free software: you can
+    redistribute it and / or modify it under the terms of the GNU Lesser
+    General Public License as published by the Free Software Foundation,
+    either version 3 of the License, or (at your option) any later version.
+
+    k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
+    more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
+
+    set default y value if not given by user
+    """
+
     # calculate conversion
-    alpha = 100 * alpha * ((1e-6 / (2*math.pi))**y) / (20 * math.log10(math.exp(1)))
+    alpha = 100 * alpha * (1e-6 / (2 * math.pi)) ** y / (20 * np.log10(np.exp(1)))
+    return alpha
+
+
+def neper2db(alpha, y=1):
+    """
+    NEPER2DB Convert nepers to decibels.
+
+    DESCRIPTION:
+    % neper2db converts an attenuation coefficient in units of
+    % Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
+    %
+    % USAGE:
+    % alpha = neper2db(alpha)
+    % alpha = neper2db(alpha, y)
+    %
+    % INPUTS:
+    % alpha - attenuation in Nepers / ((rad / s) ^ y m)
+    %
+    % OPTIONAL INPUTS:
+    % y - power law exponent(default=1)
+    %
+    % OUTPUTS:
+    % alpha - attenuation in dB / (MHz ^ y cm)
+    %
+    % ABOUT:
+    % author - Bradley Treeby
+    % date - 3 rd December 2009
+    % last update - 7 th June 2017
+    %
+    % This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
+    % Copyright(C) 2009 - 2017 Bradley Treeby
+    %
+    % See also db2neper
+
+    % This file is part of k - Wave.k - Wave is free software: you can
+    % redistribute it and / or modify it under the terms of the GNU Lesser
+    % General Public License as published by the Free Software Foundation,
+    % either version 3 of the License, or (at your option) any later version.
+    %
+    % k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
+    % WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    % FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
+        % more details.
+    %
+    % You should have received a copy of the GNU Lesser General Public License
+    % along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
+    """
+
+    # calculate conversion
+    alpha = 20 * math.log10(math.exp(1)) * alpha * (2 * math.pi * 1e6) ** y / 100
     return alpha
 
 
@@ -138,3 +250,112 @@ def cast_to_type(data, matlab_type: str):
         'uint16': np.uint16,
     }
     return data.astype(type_map[matlab_type])
+
+
+def scan_conversion(
+    scan_lines: np.ndarray,
+    steering_angles,
+    image_size: Tuple[float, float],
+    c0,
+    dt,
+    resolution: Optional[Tuple[int, int]]
+) -> np.ndarray:
+
+    if resolution is None:
+        resolution = (256, 256)  # in pixels
+
+    x_resolution, y_resolution = resolution
+
+    # assign the inputs
+    x, y = image_size
+
+    # start the timer
+    TicToc.tic()
+
+    # update command line status
+    print('Computing ultrasound scan conversion...')
+
+    # extract a_line parameters
+    Nt = scan_lines.shape[1]
+
+    # calculate radius variable based on the sound speed in the medium and the
+    # round trip distance
+    r = c0 * np.arange(1, Nt + 1) * dt / 2     # [m]
+
+    # create regular Cartesian grid to remap to
+    pos_vec_y_new = np.linspace(0, 1, y_resolution) * y - y / 2
+    pos_vec_x_new = np.linspace(0, 1, x_resolution) * x
+    [pos_mat_x_new, pos_mat_y_new] = np.array(np.meshgrid(pos_vec_x_new, pos_vec_y_new, indexing='ij'))
+
+    # convert new points to polar coordinates
+    [th_cart, r_cart] = cart2pol(pos_mat_x_new, pos_mat_y_new)
+
+    # TODO: move this import statement at the top of the file
+    # Not possible now due to cyclic dependencies
+    from kwave.utils.interputils import interpolate2D_with_queries
+
+    # below part has some modifications
+    # we flatten the _cart matrices and build queries
+    # then we get values at the query locations
+    # and reshape the values to the desired size
+    # These three steps can be accomplished in one step in Matlab
+    # However, we don't want to add custom logic to the `interpolate2D_with_queries` method.
+
+    # Modifications -start
+    queries = np.array([r_cart.flatten(), th_cart.flatten()]).T
+
+    b_mode = interpolate2D_with_queries(
+        [r, 2 * np.pi * steering_angles / 360],
+        scan_lines.T,
+        queries,
+        method='linear',
+        copy_nans=False
+    )
+    image_size_points = (len(pos_vec_x_new), len(pos_vec_y_new))
+    b_mode = b_mode.reshape(image_size_points)
+    # Modifications -end
+
+    b_mode[np.isnan(b_mode)] = 0
+
+    # update command line status
+    print(f'  completed in {scale_time(TicToc.toc())}')
+
+    return b_mode
+
+
+def cart2pol(x, y):
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return phi, rho
+
+
+def revolve2D(mat2D):
+    # start timer
+    TicToc.tic()
+
+    # update command line status
+    print('Revolving 2D matrix to form a 3D matrix...')
+
+    # get size of matrix
+    m, n = mat2D.shape
+
+    # create the reference axis for the 2D image
+    r_axis_one_sided = np.arange(0, n)
+    r_axis_two_sided = np.arange(-(n-1), n)
+
+    # compute the distance from every pixel in the z-y cross-section of the 3D
+    # matrix to the rotation axis
+    z, y = np.meshgrid(r_axis_two_sided, r_axis_two_sided)
+    r = np.sqrt(y**2 + z**2)
+
+    # create empty image matrix
+    mat3D = np.zeros((m, 2 * n - 1, 2 * n - 1))
+
+    # loop through each cross section and create 3D matrix
+    for x_index in range(m):
+        interp = interp1d(x=r_axis_one_sided, y=mat2D[x_index, :], kind='linear', bounds_error=False, fill_value=0)
+        mat3D[x_index, :, :] = interp(r)
+
+    # update command line status
+    print(f'  completed in {scale_time(TicToc.toc())}s')
+    return mat3D

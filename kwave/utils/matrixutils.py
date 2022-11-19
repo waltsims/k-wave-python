@@ -1,6 +1,9 @@
+from typing import Tuple
+from skimage.transform import resize as si_resize
+from scipy.interpolate import interpn
 import numpy as np
+import warnings
 
-from .kutils import get_win
 from .tictoc import TicToc
 from .conversionutils import scale_time
 from .checkutils import num_dim2, is_number
@@ -33,6 +36,7 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
         expanded matrix
     """
     opts = {}
+    matrix = np.squeeze(matrix)
 
     if edge_val is None:
         opts['mode'] = 'edge'
@@ -53,12 +57,12 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
         if n_coeff == 2:
             opts['pad_width'] = exp_coeff
         if n_coeff == 4:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[2]), (exp_coeff[1], exp_coeff[3])]
+            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:
         if n_coeff == 3:
             opts['pad_width'] = np.tile(np.expand_dims(exp_coeff, axis=-1), [1, 2])
         if n_coeff == 6:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[3]), (exp_coeff[1], exp_coeff[4]), (exp_coeff[2], exp_coeff[5])]
+            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3]), (exp_coeff[4], exp_coeff[5])]
 
     return np.pad(matrix, **opts)
 
@@ -86,8 +90,25 @@ def unflatten_matlab_mask(arr, mask, diff=None):
     else:
         return np.unravel_index(mask.ravel(order='F') + diff, arr.shape, order='F')
 
+def matlab_assign(matrix: np.ndarray, indices, values):
+    original_shape = matrix.shape
+    matrix = matrix.flatten(order='F')
+    matrix[indices] = values
+    return matrix.reshape(original_shape, order='F')
 
-def resize(mat, resolution, interp_mode='linear'):
+def resize(mat, new_size, interp_mode='linear'):
+    """
+    resize: resamples a "matrix" of spatial samples to a desired "resolution" or spatial sampling frequency via interpolation
+
+    Args:
+        mat:                matrix to be "resized" i.e. resampled
+        new_size:         desired output resolution
+        interp_mode:        interpolation method
+
+    Returns:
+        res_mat:            "resized" matrix
+
+    """
     # start the timer
     TicToc.tic()
 
@@ -95,96 +116,36 @@ def resize(mat, resolution, interp_mode='linear'):
     print('Resizing matrix...')
 
     # check inputs
-    assert num_dim2(mat) == len(resolution), \
+    assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
 
-    if num_dim2(mat) == 1:
-        raise NotImplementedError
-        # % extract the original number of pixels from the size of the matrix
-        # [Nx_input, Ny_input] = size(mat);
-        #
-        # % extract the desired number of pixels
-        # if Ny_input == 1
-        #     Nx_output = varargin{2}(1);
-        #     Ny_output = 1;
-        # else
-        #     Nx_output = 1;
-        #     Ny_output = varargin{2}(1);
-        # end
-        #
-        # % update command line status
-        # disp(['  input grid size: ' num2str(Nx_input) ' by ' num2str(Ny_input) ' elements']);
-        # disp(['  output grid size: ' num2str(Nx_output) ' by ' num2str(Ny_output) ' elements']);
-        #
-        # % check the size is different to the input size
-        # if Nx_input ~= Nx_output || Ny_input ~= Ny_output
-        #
-        # % resize the input matrix to the desired number of pixels
-        # if Ny_input == 1
-        #     mat_rs = interp1((0:1/(Nx_input - 1):1)', mat, (0:1/(Nx_output - 1):1)', interp_mode);
-        #     else
-        #     mat_rs = interp1((0:1/(Ny_input - 1):1), mat, (0:1/(Ny_output - 1):1), interp_mode);
-        #     end
-        #
-        # else
-        #     mat_rs = mat;
-        # end
-    elif num_dim2(mat) == 2:
-        # extract the original number of pixels from the size of the matrix
-        Nx_input, Ny_input = mat.shape
+    mat = mat.squeeze()
+    mat_shape = mat.shape
 
-        # extract the desired number of pixels
-        Nx_output, Ny_output = resolution
+    axis = []
+    for dim in range(len(mat.shape)):
+        dim_size = mat.shape[dim]
+        axis.append(np.linspace(0, 1, dim_size))
 
-        # update command line status
-        print(f'  input grid size: {Nx_input} by {Ny_input} elements')
-        print(f'  output grid size: {Nx_output} by {Ny_output} elements')
+    new_axis = []
+    for dim in range(len(new_size)):
+        dim_size = new_size[dim]
+        new_axis.append(np.linspace(0, 1, dim_size))
 
-        # check the size is different to the input size
-        if Nx_input != Nx_output or Ny_input != Ny_output:
-
-            # resize the input matrix to the desired number of pixels
-            inp_y = np.arange(0, 1 + 1e-8, 1 / (Ny_input - 1))
-            inp_x = np.arange(0, 1 + 1e-8, 1 / (Nx_input - 1))
-
-            out_y = np.arange(0, 1 + 1e-8, 1 / (Ny_output - 1))
-            out_x = np.arange(0, 1 + 1e-8, 1 / (Nx_output - 1))
-
-            mat_rs = interpolate2D([inp_y, inp_x], mat, [out_y, out_x], copy_nans=False)
-            print(mat_rs.shape)
-
-            # mat_rs = interp2(0:1/(Ny_input - 1):1, (0:1/(Nx_input - 1):1)', mat, 0:1/(Ny_output - 1):1, (0:1/(Nx_output - 1):1)', interp_mode);
-        else:
-            mat_rs = mat
-
-    elif num_dim2(mat) == 3:
-        raise NotImplementedError
-        # % extract the original number of pixels from the size of the matrix
-        # [Nx_input, Ny_input, Nz_input] = size(mat);
-        #
-        # % extract the desired number of pixels
-        # Nx_output = varargin{2}(1);
-        # Ny_output = varargin{2}(2);
-        # Nz_output = varargin{2}(3);
-        #
-        # % update command line status
-        # disp(['  input grid size: ' num2str(Nx_input) ' by ' num2str(Ny_input) ' by ' num2str(Nz_input) ' elements']);
-        # disp(['  output grid size: ' num2str(Nx_output) ' by ' num2str(Ny_output) ' by ' num2str(Nz_output) ' elements']);
-        #
-        # % create normalised plaid grids of current discretisation
-        # [x_mat, y_mat, z_mat] = ndgrid((0:Nx_input-1)/(Nx_input-1), (0:Ny_input-1)/(Ny_input-1), (0:Nz_input-1)/(Nz_input-1));
-        #
-        # % create plaid grids of desired discretisation
-        # [x_mat_interp, y_mat_interp, z_mat_interp] = ndgrid((0:Nx_output-1)/(Nx_output-1), (0:Ny_output-1)/(Ny_output-1), (0:Nz_output-1)/(Nz_output-1));
-        #
-        # % compute interpolation; for a matrix indexed as [M, N, P], the
-        # % axis variables must be given in the order N, M, P
-        # mat_rs = interp3(y_mat, x_mat, z_mat, mat, y_mat_interp, x_mat_interp, z_mat_interp, interp_mode);
+    points = tuple(p for p in axis)
+    xi = np.meshgrid(*new_axis)
+    xi = np.array([x.flatten() for x in xi]).T
+    new_points = xi
+    mat_rs = np.squeeze(interpn(points, mat, new_points, method=interp_mode))
+    # TODO: fix this hack.
+    if dim + 1 == 3:
+        mat_rs = mat_rs.reshape([new_size[1], new_size[0], new_size[2]])
+        mat_rs = np.transpose(mat_rs, (1, 0, 2))
     else:
-        raise ValueError('Input matrix must be 1, 2 or 3 dimensional.')
-
+        mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
     print(f'  completed in {scale_time(TicToc.toc())}')
+    assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
 
@@ -214,7 +175,9 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    win, _ = get_win(grid_size, window_type, 'Rotation', DEF_USE_ROTATION, 'Symmetric', window_symmetry)
+    from .kutils import get_win
+    win, _ = get_win(grid_size, type_=window_type,
+                     rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
 
     # rotate window if input mat is (1, N)
@@ -228,3 +191,67 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
     if restore_max:
         mat_sm = (np.abs(mat).max() / np.abs(mat_sm).max()) * mat_sm
     return mat_sm
+
+
+def gradient_FD(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
+    """
+    A wrapper of the numpy gradient method for use in the k-wave library.
+
+    gradient_FD calculates the gradient of an n-dimensional input matrix
+    using the finite-difference method. For one-dimensional inputs, the
+    gradient is always computed along the non-singleton dimension. For
+    higher dimensional inputs, the gradient for singleton dimensions is
+    returned as 0. For elements in the centre of the grid, the gradient
+    is computed using centered finite-differences. For elements on the
+    edge of the grid, the gradient is computed using forward or backward
+    finite-differences. The order of accuracy of the finite-difference
+    approximation is controlled by accuracy_order (default = 2). The
+    calculations are done using sparse multiplication, so the input
+    matrix is always cast to double precision.
+
+    Args:
+        f:
+        dx:                 array of values for the grid point spacing in each
+                            dimension. If a value for dim is given, dn is the
+                            spacing in dimension dim.
+        dim:                optional input to specify a single dimension over which to compute the gradient for
+                            n-dimension input functions
+        deriv_order:        order of the derivative to compute, e.g., use 1 to
+                            compute df/dx, 2 to compute df^2/dx^2, etc.
+                            (default = 1)
+        accuracy_order:     order of accuracy for the finite difference
+                            coefficients. Because centered differences are
+                            used, this must be set to an integer multiple of
+                            2 (default = 2)
+
+    Returns:
+        fx, fy, ...         gradient
+
+    """
+    if deriv_order:
+        warnings.warn("deriv_order is no longer a supported argument.", DeprecationWarning)
+    if accuracy_order:
+        warnings.warn("accuracy_order is no longer a supported argument.", DeprecationWarning)
+
+    if dim is not None and dx is not None:
+        return np.gradient(f, dx, axis=dim)
+    elif dim is not None:
+        return np.gradient(f, axis=dim)
+    elif dx is not None:
+        return np.gradient(f, dx)
+    else:
+        return np.gradient(f)
+
+
+def min_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
+    min_val, linear_index = np.min(matrix), matrix.argmin()
+    numpy_index = np.unravel_index(linear_index, matrix.shape)
+    matlab_index = tuple(idx + 1 for idx in numpy_index)
+    return min_val, matlab_index
+
+
+def max_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
+    max_val, linear_index = np.max(matrix), matrix.argmax()
+    numpy_index = np.unravel_index(linear_index, matrix.shape)
+    matlab_index = tuple(idx + 1 for idx in numpy_index)
+    return max_val, matlab_index

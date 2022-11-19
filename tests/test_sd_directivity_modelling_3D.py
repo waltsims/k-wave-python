@@ -54,7 +54,7 @@ def test_sd_directivity_modelling_3D():
     # centre of the detector face
     radius = 20    # [grid points]
     points = 11
-    circle = makeCartCircle(radius * dx, points, [0, 0], np.pi)
+    circle = make_cart_circle(radius * dx, points, [0, 0], np.pi)
     circle = np.vstack([circle, np.zeros((1, points))])
 
     # find the binary sensor mask most closely corresponding to the cartesian

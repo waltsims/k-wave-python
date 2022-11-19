@@ -108,6 +108,7 @@ class NotATransducer(kSensor):
             steering_angle:
         """
         super().__init__()
+        assert isinstance(transducer, kWaveTransducerSimple)
         self.transducer = transducer
         # time index to start recording if transducer is used as a sensor
         self.record_start_index = 1
@@ -180,6 +181,7 @@ class NotATransducer(kSensor):
 
         # create an empty transducer mask (the grid points within
         # element 'n' are all given the value 'n')
+        assert transducer.stored_grid_size is not None
         self.indexed_mask = np.zeros(transducer.stored_grid_size, dtype=mask_type)
 
         # create a second empty mask used for the elevation beamforming
@@ -560,7 +562,7 @@ class NotATransducer(kSensor):
             # if the number of active elements is greater than 1,
             # create apodization using getWin, otherwise, assign 1
             if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), self.transmit_apodization)
+                apodization, _ = get_win(int(self.number_active_elements), type_=self.transmit_apodization)
             else:
                 apodization = 1
         apodization = np.array(apodization)
