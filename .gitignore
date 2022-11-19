@@ -7,9 +7,11 @@ tests/reference_outputs
 /.coverage
 /docs/_build/
 Pipfile.lock
+build/
 kwave/bin/windows
 kwave/bin/linux
 /k_Wave_python.egg-info/
 *.mat
-/build/
+examples/__pycache__/
+src/
 *.h5

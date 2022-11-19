@@ -11,7 +11,7 @@ With this project, we hope to increase accessibility and reproducablitiy of [k-W
 The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/)
 
 ## Installation
-
+To install the most recent build of k-Wave-python from PyPI, run:
 ```bash
 pip install k-wave-python
 ```
@@ -27,7 +27,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-pip install -r ./requirements/example.txt
+pip install --editable '.[example]' 
 python3 examples/bmode_reconstruction_example.py
 ```
 
@@ -45,7 +45,13 @@ To test the reconstruction on a machine without a GPU, set `RUN_SIMULATION` [on 
 ## Development
 
 If you're enjoying k-Wave-python and want to contribute, development instructions can be found [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
-If you would like to get involved, open an issue letting us know, or message us on the [k-Wave-python Telegram chat](https://t.me/+ILL4yGgcX0A2Y2Y6) 
+
+## Related Projects
+
+1. [`k-Wave`](https://github.com/ucl-bug/k-wave): A MATLAB toolbox for the time-domain simulation of acoustic wave fields. 
+2. [`j-wave`](https://github.com/ucl-bug/jwave): Differentiable acoustic simulations in JAX.
+3. [`ADSeismic.jl`](https://github.com/kailaix/ADSeismic.jl): a finite difference acoustic simulator with support for AD and JIT compilation in Julia.
+4. [`stride`](https://github.com/trustimaging/stride): a general optimisation framework for medical ultrasound tomography. 
 
 ## Contact
 e-mail [walter.simson@tum.de](mailto:walter.simson@tum.de).

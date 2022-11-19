@@ -95,7 +95,7 @@ def kspaceFirstOrderC():
                 binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
 
             # check the binary exists and is in the correct place before doing anything else
-            if not os.path.exists(f'{binary_path}{binary_name}'):
+            if not os.path.exists(f'{os.path.join(binary_path,binary_name)}'):
                 warn(f'''
                     The binary file {binary_name} could not be found in {binary_path}. 
                     To use the C++ code, the C++ binaries for your operating system must be downloaded 
