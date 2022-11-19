@@ -100,7 +100,6 @@
 
 <span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">kwave.enums</span> <span class="kn">import</span> <span class="n">DiscreteCosine</span><span class="p">,</span> <span class="n">DiscreteSine</span>
-<span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">largest_prime_factor</span>
 
 <span class="c1"># default CFL number</span>
 <span class="n">CFL_DEFAULT</span> <span class="o">=</span> <span class="mf">0.3</span>
@@ -131,6 +130,7 @@
         <span class="n">N</span><span class="p">,</span> <span class="n">spacing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span>  <span class="c1"># if inputs are lists</span>
         <span class="k">assert</span> <span class="n">N</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">spacing</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># ensure no multidimensional lists</span>
         <span class="k">assert</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">spacing</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># ensure valid dimensionality</span>
+        <span class="k">assert</span> <span class="n">N</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">spacing</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="s2">&quot;Size list N and spacing list do not have the same size.&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>              <span class="c1">#: grid size in each dimension [grid points]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span> <span class="o">=</span> <span class="n">spacing</span>              <span class="c1">#: grid point spacing in each direction [m]</span>
@@ -515,6 +515,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Vector of three elements</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># import statement place here in order to avoid circular dependencies</span>
+        <span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">largest_prime_factor</span>
         <span class="k">if</span> <span class="n">axisymmetric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">axisymmetric</span> <span class="o">==</span> <span class="s1">&#39;WSWA&#39;</span><span class="p">:</span>
                 <span class="n">prime_facs</span> <span class="o">=</span> <span class="p">[</span><span class="n">largest_prime_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nx</span><span class="p">),</span>

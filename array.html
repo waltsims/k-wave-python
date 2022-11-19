@@ -62,19 +62,7 @@
 <p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="simopt.html">Simulation Options</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Array</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#kwave.data.Array"><code class="docutils literal notranslate"><span class="pre">Array</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.append"><code class="docutils literal notranslate"><span class="pre">Array.append()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.assign_dim"><code class="docutils literal notranslate"><span class="pre">Array.assign_dim()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.numpy"><code class="docutils literal notranslate"><span class="pre">Array.numpy()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.data"><code class="docutils literal notranslate"><span class="pre">Array.data</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.x"><code class="docutils literal notranslate"><span class="pre">Array.x</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.y"><code class="docutils literal notranslate"><span class="pre">Array.y</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kwave.data.Array.z"><code class="docutils literal notranslate"><span class="pre">Array.z</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Array</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -106,66 +94,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-kwave.data">
-<span id="array"></span><h1>Array<a class="headerlink" href="#module-kwave.data" title="Permalink to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="kwave.data.Array">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.data.</span></span><span class="sig-name descname"><span class="pre">Array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>This class is very similar to Numpy.ndarray but there are differences:</dt><dd><ul class="simple">
-<li><p>It can have 3 elements at max</p></li>
-<li><p>Its elements can be anything</p></li>
-<li><dl class="simple">
-<dt>The elements do not have to be same type,</dt><dd><p>e.g. this is valid: Array([&lt;scalar&gt;, &lt;List&gt;, &lt;Tuple of Tuples&gt;])</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.append" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.assign_dim">
-<span class="sig-name descname"><span class="pre">assign_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.assign_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.assign_dim" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.numpy">
-<span class="sig-name descname"><span class="pre">numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.numpy" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kwave.data.Array.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#kwave.data.Array.data" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.x">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.data.Array.x" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.y">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.data.Array.y" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.z">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.data.Array.z" title="Permalink to this definition"></a></dt>
-<dd><p>3rd dimension element. 0 if not defined</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>return</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="array">
+<h1>Array<a class="headerlink" href="#array" title="Permalink to this heading"></a></h1>
 </section>
 
 
