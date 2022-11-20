@@ -351,7 +351,7 @@ def get_win(N: Union[int, List[int]],
 
     """
 
-    def cosineSeries(n, N, coeffs):
+    def cosine_series(n, N, coeffs):
         """
             Sub-function to calculate a summed filter cosine series.
         Args:
@@ -415,15 +415,15 @@ def get_win(N: Union[int, List[int]],
         elif type_ == 'Bartlett-Hanning':
             win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Blackman':
-            win = cosineSeries(n, N, [(1 - param) / 2, 0.5, param / 2])
+            win = cosine_series(n, N, [(1 - param) / 2, 0.5, param / 2])
         elif type_ == 'Blackman-Harris':
-            win = cosineSeries(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
+            win = cosine_series(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
         elif type_ == 'Blackman-Nuttall':
-            win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
+            win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Cosine':
             win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
         elif type_ == 'Flattop':
-            win = cosineSeries(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
+            win = cosine_series(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
             ylim = [-0.2, 1]
         elif type_ == 'Gaussian':
             win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
@@ -449,7 +449,7 @@ def get_win(N: Union[int, List[int]],
             win = 2 * np.pi * n / (N - 1) - np.pi
             win = sinc(win + 1e-12).T
         elif type_ == 'Nuttall':
-            win = cosineSeries(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
+            win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Rectangular':
             win = np.ones(N)
         elif type_ == 'Triangular':
@@ -583,11 +583,11 @@ def get_win(N: Union[int, List[int]],
     return win, cg
 
 
-def toneBurst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
-              signal_offset=0):
+def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
+               signal_offset=0):
     """
         Create an enveloped single frequency tone burst.
-        toneBurst creates an enveloped single frequency tone burst for use in
+        tone_burst creates an enveloped single frequency tone burst for use in
         ultrasound simulations. If an array is given for the optional input
         'SignalOffset', a matrix of tone bursts is created where each row
         corresponds to a tone burst for each value of the 'SignalOffset'. If
@@ -765,7 +765,7 @@ def freq2wavenumber(N, k_max, filter_cutoff, c, k_dim):
 
 def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     """
-     getAlphaFilter uses get_win to create a Tukey window via rotation to
+     get_alpha_filter uses get_win to create a Tukey window via rotation to
      pass to the medium.alpha_filter input field of the first order
      simulation functions (kspaceFirstOrder1D, kspaceFirstOrder2D, and
      kspaceFirstOrder3D). This parameter is used to regularise time

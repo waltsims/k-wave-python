@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeSphericalSection
+from kwave.utils.maputils import make_spherical_section
 
 from scipy.io import loadmat
 import numpy as np
@@ -27,9 +27,9 @@ def test_makeSphericalSection():
         expected_spherical_section = recorded_data['spherical_section']
         expected_distance_map = recorded_data['distance_map']
 
-        spherical_section, distance_map = makeSphericalSection(radius, height, width, plot_section, binary)
+        spherical_section, distance_map = make_spherical_section(radius, height, width, plot_section, binary)
 
         assert np.allclose(expected_spherical_section, spherical_section)
         assert np.allclose(expected_distance_map, distance_map)
 
-    print('makeSphericalSection(..) works as expected!')
+    print('make_spherical_section(..) works as expected!')

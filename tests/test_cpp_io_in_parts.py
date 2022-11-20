@@ -95,7 +95,7 @@ def test_cpp_io_in_parts():
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
         # create the scattering ball and density matrix
-        ball       = makeBall(float(Nx), float(Ny), float(Nz), float(ball_x), float(ball_y), float(ball_z), float(ball_radius), False, True)
+        ball       = make_ball(float(Nx), float(Ny), float(Nz), float(ball_x), float(ball_y), float(ball_z), float(ball_radius), False, True)
         ball       = np.array(ball)
         rho0       = rho0_background * np.ones((Nx, Ny, Nz), dtype=np.float32)
         rho0[ball] = rho0_ball
@@ -110,15 +110,15 @@ def test_cpp_io_in_parts():
         kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
 
         # interpolate onto staggered grid in x direction and save
-        rho0_sg = interpolate3D([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x + kgrid.dx / 2, kgrid.y, kgrid.z])
+        rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x + kgrid.dx / 2, kgrid.y, kgrid.z])
         write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgx')
 
         # interpolate onto staggered grid in y direction and save
-        rho0_sg = interpolate3D([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y + kgrid.dy / 2, kgrid.z])
+        rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y + kgrid.dy / 2, kgrid.z])
         write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgy')
 
         # interpolate onto staggered grid in z direction and save
-        rho0_sg = interpolate3D([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y, kgrid.z + kgrid.dz / 2])
+        rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y, kgrid.z + kgrid.dz / 2])
         write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgz')
 
         # clear variable to free memory

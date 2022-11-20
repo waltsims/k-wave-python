@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeSphere
+from kwave.utils.maputils import make_sphere
 
 from scipy.io import loadmat
 import numpy as np
@@ -20,8 +20,8 @@ def test_makeSphere():
         Nx, Ny, Nz, radius, plot_sphere, binary = int(Nx), int(Ny), int(Nz), int(radius), bool(plot_sphere), bool(binary)
         expected_sphere = recorded_data['sphere']
 
-        sphere = makeSphere(Nx, Ny, Nz, radius, plot_sphere, binary)
+        sphere = make_sphere(Nx, Ny, Nz, radius, plot_sphere, binary)
 
         assert np.allclose(expected_sphere, sphere)
 
-    print('makeSphere(..) works as expected!')
+    print('make_sphere(..) works as expected!')

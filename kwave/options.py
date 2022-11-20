@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 from kwave.utils import get_h5_literals
+from kwave.utils import get_optimal_pml_size
 
 
 @dataclass
@@ -298,9 +299,9 @@ class SimulationOptions(object):
             else:
                 # get optimal pml size
                 if axisymmetric:
-                    pml_size_temp = getOptimalPMLSize(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+                    pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
                 else:
-                    pml_size_temp = getOptimalPMLSize(kgrid, options.pml_search_range)
+                    pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range)
 
                 # assign to individual variables
                 if kgrid.dim == 1:

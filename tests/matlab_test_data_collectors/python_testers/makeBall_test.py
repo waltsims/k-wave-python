@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeBall
+from kwave.utils.maputils import make_ball
 
 from scipy.io import loadmat
 import numpy as np
@@ -22,8 +22,8 @@ def test_makeBall():
 
         expected_ball = recorded_data['ball']
 
-        ball = makeBall(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball, binary)
+        ball = make_ball(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball, binary)
 
         assert np.allclose(expected_ball, ball)
 
-    print('makeBall(..) works as expected!')
+    print('make_ball(..) works as expected!')

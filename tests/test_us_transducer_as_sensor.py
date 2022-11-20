@@ -13,8 +13,8 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import toneBurst
-from kwave.utils.maputils import makeBall
+from kwave.utils.kutils import tone_burst
+from kwave.utils.maputils import make_ball
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -80,15 +80,15 @@ def test_us_transducer_as_sensor():
 
     # create source mask
     source = kSource()
-    source.p_mask = makeBall(Nx, Ny, Nz, round(25e-3/dx), Ny/2, Nz/2, 3) + makeBall(Nx, Ny, Nz, round(8e-3/dx), Ny/4, Nz/2, 3)
+    source.p_mask = make_ball(Nx, Ny, Nz, round(25e-3 / dx), Ny / 2, Nz / 2, 3) + make_ball(Nx, Ny, Nz, round(8e-3 / dx), Ny / 4, Nz / 2, 3)
 
     # define properties of the input signal
     source_strength = 1e6          # [Pa]
     tone_burst_freq = 0.5e6        # [Hz]
     tone_burst_cycles = 5
 
-    # create the input signal using toneBurst
-    source.p = source_strength * toneBurst(1/kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    # create the input signal using tone_burst
+    source.p = source_strength * tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # =========================================================================
     # DEFINE THE ULTRASOUND TRANSDUCER

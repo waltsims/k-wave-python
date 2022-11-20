@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.maputils import makeBall
+from kwave.utils.maputils import make_ball
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -45,20 +45,20 @@ def test_ivp_3D_simulation():
     medium.sound_speed[0:Nx//2, :, :] = 1800
     medium.density[:, Ny//4-1:, :]    = 1200
 
-    # create initial pressure distribution using makeBall
+    # create initial pressure distribution using make_ball
     ball_magnitude = 10    # [Pa]
     ball_x_pos = 38        # [grid points]
     ball_y_pos = 32        # [grid points]
     ball_z_pos = 32        # [grid points]
     ball_radius = 5        # [grid points]
-    ball_1 = ball_magnitude * makeBall(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius)
+    ball_1 = ball_magnitude * make_ball(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius)
 
     ball_magnitude = 10    # [Pa]
     ball_x_pos = 20        # [grid points]
     ball_y_pos = 20        # [grid points]
     ball_z_pos = 20        # [grid points]
     ball_radius = 3        # [grid points]
-    ball_2 = ball_magnitude * makeBall(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius)
+    ball_2 = ball_magnitude * make_ball(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius)
 
     source = kSource()
     source.p0 = ball_1 + ball_2

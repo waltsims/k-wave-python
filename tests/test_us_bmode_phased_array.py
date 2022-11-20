@@ -80,8 +80,8 @@ def test_us_bmode_phased_array():
     tone_burst_freq = 1e6 / sc  # [Hz]
     tone_burst_cycles = 4
 
-    # create the input signal using toneBurst
-    input_signal = toneBurst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)
@@ -158,8 +158,8 @@ def test_us_bmode_phased_array():
     radius = 8e-3  # [m]
     x_pos = 32e-3  # [m]
     y_pos = dy * (Ny / 2)  # [m]
-    scattering_region1 = makeBall(Nx, Ny, Nz, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps),
-                                  Nz / 2, round(radius / dx + rounding_eps))
+    scattering_region1 = make_ball(Nx, Ny, Nz, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps),
+                                   Nz / 2, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]

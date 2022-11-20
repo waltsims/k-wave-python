@@ -264,41 +264,41 @@ def write_attributes(filename, file_description=None, legacy=False):
 
 def write_flags(filename):
     """
-    %     writeFlags reads the input HDF5 file and derives and writes the
-    %     required source and medium flags based on the datasets present in the
-    %     file. For example, if the file contains a data set named 'BonA', the
-    %     nonlinear_flag will be written as true. Conditional flags are also
-    %     written. The source mode flags are written when appropriate if they
-    %     are not already present in the file. The default source mode is
-    %     'additive'.
-    %
-    %     List of flags that are always written
-    %         ux_source_flag
-    %         uy_source_flag
-    %         uz_source_flag
-    %         sxx_source_flag
-    %         sxy_source_flag
-    %         sxz_source_flag
-    %         syy_source_flag
-    %         syz_source_flag
-    %         szz_source_flag
-    %         p_source_flag
-    %         p0_source_flag
-    %         transducer_source_flag
-    %         nonuniform_grid_flag
-    %         nonlinear_flag
-    %         absorbing_flag
-    %         axisymmetric_flag
-    %         elastic_flag
-    %         sensor_mask_type
-    %
-    %     List of conditional flags
-    %         u_source_mode
-    %         u_source_many
-    %         p_source_mode
-    %         p_source_many
-    %         s_source_mode
-    %         s_source_many
+     writeFlags reads the input HDF5 file and derives and writes the
+     required source and medium flags based on the datasets present in the
+     file. For example, if the file contains a data set named 'BonA', the
+     nonlinear_flag will be written as true. Conditional flags are also
+     written. The source mode flags are written when appropriate if they
+     are not already present in the file. The default source mode is
+     'additive'.
+
+     List of flags that are always written
+         ux_source_flag
+         uy_source_flag
+         uz_source_flag
+         sxx_source_flag
+         sxy_source_flag
+         sxz_source_flag
+         syy_source_flag
+         syz_source_flag
+         szz_source_flag
+         p_source_flag
+         p0_source_flag
+         transducer_source_flag
+         nonuniform_grid_flag
+         nonlinear_flag
+         absorbing_flag
+         axisymmetric_flag
+         elastic_flag
+         sensor_mask_type
+
+     List of conditional flags
+         u_source_mode
+         u_source_many
+         p_source_mode
+         p_source_many
+         s_source_mode
+         s_source_many
     Args:
         filename:
 
@@ -411,29 +411,29 @@ def write_grid(filename, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c
     """
 
 
-    %
-    % DESCRIPTION:
-    %     writeGrid creates and writes the wavenumber grids and PML variables
-    %     required by the k-Wave C++ code to the HDF5 file specified by the
-    %     user.
-    %
-    %     List of parameters that are written:
-    %         Nx
-    %         Ny
-    %         Nz
-    %         Nt
-    %         dt
-    %         dx
-    %         dy
-    %         dz
-    %         c_ref
-    %         pml_x_alpha
-    %         pml_y_alpha
-    %         pml_z_alpha
-    %         pml_x_size
-    %         pml_y_size
-    %         pml_z_size
-    %
+
+     DESCRIPTION:
+         writeGrid creates and writes the wavenumber grids and PML variables
+         required by the k-Wave C++ code to the HDF5 file specified by the
+         user.
+
+         List of parameters that are written:
+             Nx
+             Ny
+             Nz
+             Nt
+             dt
+             dx
+             dy
+             dz
+             c_ref
+             pml_x_alpha
+             pml_y_alpha
+             pml_z_alpha
+             pml_x_size
+             pml_y_size
+             pml_z_size
+
     Returns:
 
     """
@@ -497,7 +497,7 @@ def assign_str_attr(attrs, attr_name, attr_val):
     attrs.create(attr_name, attr_val, None, dtype=f'<S{len(attr_val)}')
 
 
-def loadImage(path, is_gray):
+def load_image(path, is_gray):
     if is_gray:
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     else:

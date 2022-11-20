@@ -158,29 +158,6 @@ def db2neper(alpha, y=1):
     OUTPUTS:
     alpha - attenuation in Nepers / ((rad / s) ^ y m)
 
-    ABOUT:
-    author - Bradley Treeby
-    date - 27 th March 2009
-    last update - 4 th June 2017
-
-    This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
-    Copyright(C) 2009 - 2017 Bradley Treeby
-
-    See also neper2db
-
-    This file is part of k - Wave.k - Wave is free software: you can
-    redistribute it and / or modify it under the terms of the GNU Lesser
-    General Public License as published by the Free Software Foundation,
-    either version 3 of the License, or (at your option) any later version.
-
-    k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
-    more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
-
     set default y value if not given by user
     """
 
@@ -194,44 +171,22 @@ def neper2db(alpha, y=1):
     NEPER2DB Convert nepers to decibels.
 
     DESCRIPTION:
-    % neper2db converts an attenuation coefficient in units of
-    % Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
-    %
-    % USAGE:
-    % alpha = neper2db(alpha)
-    % alpha = neper2db(alpha, y)
-    %
-    % INPUTS:
-    % alpha - attenuation in Nepers / ((rad / s) ^ y m)
-    %
-    % OPTIONAL INPUTS:
-    % y - power law exponent(default=1)
-    %
-    % OUTPUTS:
-    % alpha - attenuation in dB / (MHz ^ y cm)
-    %
-    % ABOUT:
-    % author - Bradley Treeby
-    % date - 3 rd December 2009
-    % last update - 7 th June 2017
-    %
-    % This function is part of the k - Wave Toolbox(http: // www.k - wave.org)
-    % Copyright(C) 2009 - 2017 Bradley Treeby
-    %
-    % See also db2neper
+     neper2db converts an attenuation coefficient in units of
+     Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
-    % This file is part of k - Wave.k - Wave is free software: you can
-    % redistribute it and / or modify it under the terms of the GNU Lesser
-    % General Public License as published by the Free Software Foundation,
-    % either version 3 of the License, or (at your option) any later version.
-    %
-    % k - Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-    % WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    % FOR A PARTICULAR PURPOSE.See the GNU Lesser General Public License for
-        % more details.
-    %
-    % You should have received a copy of the GNU Lesser General Public License
-    % along with k - Wave.If not, see < http:// www.gnu.org / licenses / >.
+     USAGE:
+     alpha = neper2db(alpha)
+     alpha = neper2db(alpha, y)
+
+     INPUTS:
+     alpha - attenuation in Nepers / ((rad / s) ^ y m)
+
+     OPTIONAL INPUTS:
+     y - power law exponent(default=1)
+
+     OUTPUTS:
+     alpha - attenuation in dB / (MHz ^ y cm)
+
     """
 
     # calculate conversion
@@ -292,7 +247,7 @@ def scan_conversion(
 
     # TODO: move this import statement at the top of the file
     # Not possible now due to cyclic dependencies
-    from kwave.utils.interputils import interpolate2D_with_queries
+    from kwave.utils.interputils import interpolate2d_with_queries
 
     # below part has some modifications
     # we flatten the _cart matrices and build queries
@@ -304,7 +259,7 @@ def scan_conversion(
     # Modifications -start
     queries = np.array([r_cart.flatten(), th_cart.flatten()]).T
 
-    b_mode = interpolate2D_with_queries(
+    b_mode = interpolate2d_with_queries(
         [r, 2 * np.pi * steering_angles / 360],
         scan_lines.T,
         queries,

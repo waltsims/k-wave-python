@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeMultiArc
+from kwave.utils.maputils import make_multi_arc
 
 from scipy.io import loadmat
 import numpy as np
@@ -21,8 +21,8 @@ def test_makeMultiArc():
         grid_size, radius, diameter, focus_pos = grid_size[0], radius[0], diameter[0], focus_pos
         expected_multi_arc = recorded_data['multi_arc']
 
-        multi_arc, _ = makeMultiArc(grid_size, arc_pos, radius, diameter, focus_pos)
+        multi_arc, _ = make_multi_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_multi_arc, multi_arc)
 
-    print('makeMultiArc(..) works as expected!')
+    print('make_multi_arc(..) works as expected!')

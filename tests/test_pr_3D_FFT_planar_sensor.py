@@ -45,10 +45,10 @@ def test_pr_3D_FFT_planar_sensor():
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
-    # create initial pressure distribution using makeBall
+    # create initial pressure distribution using make_ball
     ball_magnitude = 10         # [Pa]
     ball_radius = 3 * scale     # [grid points]
-    p0 = ball_magnitude * makeBall(Nx, Ny, Nz, Nx/2, Ny/2, Nz/2, ball_radius)
+    p0 = ball_magnitude * make_ball(Nx, Ny, Nz, Nx / 2, Ny / 2, Nz / 2, ball_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
     source = kSource()

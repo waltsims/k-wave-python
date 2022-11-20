@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.filterutils import filterTimeSeries
+from kwave.utils.filterutils import filter_time_series
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -61,7 +61,7 @@ def test_tvsp_3D_simulation():
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
-    source.p = filterTimeSeries(kgrid, medium, source.p)
+    source.p = filter_time_series(kgrid, medium, source.p)
 
     # define a series of Cartesian points to collect the data
     y = np.arange(-20, 21, 2) * dy            # [m]

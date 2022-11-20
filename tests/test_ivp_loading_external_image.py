@@ -32,7 +32,7 @@ def test_ivp_loading_external_image():
     # load the initial pressure distribution from an image and scale the
     # magnitude
     p0_magnitude = 3
-    p0 = p0_magnitude * loadImage('tests/EXAMPLE_source_one.png', True)
+    p0 = p0_magnitude * load_image('tests/EXAMPLE_source_one.png', True)
 
     # create the computational grid
     Nx = 128           # number of grid points in the x (row) direction

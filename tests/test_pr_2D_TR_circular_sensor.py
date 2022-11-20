@@ -31,7 +31,7 @@ def test_pr_2D_TR_circular_sensor():
 
     # load the initial pressure distribution from an image and scale
     p0_magnitude = 2
-    p0 = p0_magnitude * loadImage('tests/EXAMPLE_source_two.bmp', is_gray=True)
+    p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
 
     # assign the grid size and create the computational grid
     PML_size = 20              # size of the PML in grid points

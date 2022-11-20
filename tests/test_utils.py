@@ -1,11 +1,11 @@
 from kwave.utils.checkutils import num_dim
 from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, make_cart_sphere
 from kwave.utils.conversionutils import db2neper, neper2db
-from kwave.utils.kutils import toneBurst, add_noise, gradient_spect
+from kwave.utils.kutils import tone_burst, add_noise, gradient_spect
 from kwave.utils.interputils import get_bli
 from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
-from kwave.utils.matrixutils import gradient_FD, resize
-from kwave.utils.ioutils import loadImage
+from kwave.utils.matrixutils import gradient_fd, resize
+from kwave.utils.ioutils import load_image
 import numpy as np
 from utils import *
 import pytest
@@ -73,7 +73,7 @@ def test_add_noise():
 def test_tone_burst_gaussian():
     # Test simple case
     expected_input_signal = input_signal
-    test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5)
+    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5)
     assert (abs(test_input_signal - expected_input_signal) < 1e-6).all()
 
 
@@ -102,13 +102,13 @@ def test_tone_burst_rectangular():
                                       -0.8044142, -0.93662527, -0.99682203, -0.98037612, -0.88855201,
                                       -0.7284098, -0.51226232, -0.25672853])
     # Test envelope selection options [Gaussian, Rectangular, RingUpDown, Not an option]
-    test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5, 'Rectangular')
+    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, 'Rectangular')
     assert (abs(test_input_signal - expected_input_signal) < 1e-6).all()
 
 
 def test_tone_error():
     try:
-        test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5, envelope='BobTheBuilder')
+        test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, envelope='BobTheBuilder')
     except ValueError as e:
         if str(e) == 'Unknown envelope BobTheBuilder.':
             pass
@@ -144,18 +144,18 @@ def test_ring_up_down():
                        0.0259352417883178, -0.0122098235923999, -0.0368366147187818, -0.0484457797059703,
                        -0.0491983787127497, -0.0423204785736672, -0.0314249515836928, -0.0198560606331043,
                        -0.0101530991131800, -0.00370708071980281, -0.000652592846675473, 0]
-    test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5, envelope=[3, 2])
+    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, envelope=[3, 2])
     assert np.isclose(test_input_signal, expected_signal).all()
 
 
 def test_signal_length():
-    test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5, signal_length=500)
+    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, signal_length=500)
     assert len(np.squeeze(test_input_signal)) == 500
 
 
 def test_signal_offset():
     offset = 100
-    test_input_signal = toneBurst(1.129333333333333e+07, 5e5, 5, signal_offset=offset, signal_length=500)
+    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, signal_offset=offset, signal_length=500)
     assert len(np.squeeze(test_input_signal)) == 500
     assert (np.squeeze(test_input_signal)[:offset] == 0.).all()
 
@@ -170,14 +170,14 @@ def test_spect():
     a = np.array([0, 1.111111111, 2.222222222, 3.3333333333, 4.444444444]) * 1e6
     b = [0.0000, 0.1850, 0.3610, 0.2905, 0.0841]
     c = [3.1416, 1.9199, -0.8727, 2.6180, -0.1745]
-    a_t, b_t, c_t = spect(toneBurst(10e6, 2.5e6, 2), 10e6)
+    a_t, b_t, c_t = spect(tone_burst(10e6, 2.5e6, 2), 10e6)
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 0.0001).all()
 
 
 def test_extract_amp_phase():
-    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10 ** 6)
     a, b, c = 0.6547, -1.8035, 2.5926e06
     assert (abs(a_t - a) < 0.01).all()
@@ -186,7 +186,7 @@ def test_extract_amp_phase():
 
 
 def test_apply_filter_lowpass():
-    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
     expected_signal = [0.00000000e+00, 2.76028757e-24, -3.59205956e-24,
                        1.46416820e-23, 3.53059551e-22, 1.00057133e-21,
@@ -196,7 +196,7 @@ def test_apply_filter_lowpass():
 
 
 def test_apply_filter_highpass():
-    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
     expected_signal = [0.00000000e+00, 1.40844920e-10, 1.82974394e-09,
                        7.00097845e-09, 9.76890695e-09, -4.62418007e-09,
@@ -206,7 +206,7 @@ def test_apply_filter_highpass():
 
 
 def test_apply_filter_bandpass():
-    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
@@ -222,7 +222,7 @@ def test_fit_power_law_params():
 
 
 def test_get_bli():
-    test_signal = toneBurst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     bli, x_fine = get_bli(test_signal)
 
     assert x_fine[-1] == 8
@@ -242,36 +242,36 @@ def test_power_kramers_kronig():
 
 def test_gradient_FD():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
-    grad = gradient_FD(f)
+    grad = gradient_fd(f)
     assert (abs(np.array(grad) - np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5])) < 0.001).all()
 
 
 def test_gradient_spacing():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     dx = 2
-    grad = gradient_FD(f, dx)
+    grad = gradient_fd(f, dx)
     assert (abs(np.array(grad) - np.array([0.5, 0.75, 1.25, 1.75, 2.25, 2.5])) < 0.001).all()
 
 
 def test_gradient_spacing_ndim():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     x = np.arange(f.size)
-    grad = gradient_FD(f, x)
+    grad = gradient_fd(f, x)
     assert (abs(grad - np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.])) < 0.001).all()
 
 
 def test_gradeint_spacing_uneven():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     x = np.array([0., 1., 1.5, 3.5, 4., 6.], dtype=float)
-    grad = gradient_FD(f, x)
+    grad = gradient_fd(f, x)
     assert (abs(grad - np.array([1., 3., 3.5, 6.7, 6.9, 2.5])) < 0.001).all()
 
 
 def test_gradient_FD_2D():
     f = np.array([[1, 2, 6], [3, 4, 5]], dtype=float)
-    grad = gradient_FD(f)
+    grad = gradient_fd(f)
 
-    assert len(grad) == 2, "gradient_FD did not return two gradient matrices."
+    assert len(grad) == 2, "gradient_fd did not return two gradient matrices."
     assert (abs(np.array(grad) - [np.array([[2., 2., -1.], [2., 2., -1.]]),
                                   np.array([[1., 2.5, 4.], [1., 1., 1.]])]) < 0.001).all()
 
@@ -282,9 +282,9 @@ def test_gradient_FD_2D():
 #     f = np.array([[1, 2, 6], [3, 4, 5]], dtype=float)
 #     dx = 2
 #     y = [1., 1.5, 3.5]
-#     grad = gradient_FD(f, dx, y)
+#     grad = gradient_fd(f, dx, y)
 #
-#     assert len(grad) == 2, "gradient_FD did not return two gradient matrices."
+#     assert len(grad) == 2, "gradient_fd did not return two gradient matrices."
 #     assert (abs(np.array(grad) - np.array([np.array([[1., 1., -0.5],
 #                                                      [1., 1., -0.5]]), np.array([[2., 2., 2.],
 #                                                                                  [2., 1.7, 0.5]])])) < 0.001).all()

@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from kwave.utils.maputils import makeCircle, makeLine
+from kwave.utils.maputils import make_circle, make_line
 
 from kwave.utils.interputils import cart2grid
 
@@ -27,11 +27,11 @@ def test_makeLine():
         if len(params) == 4:
             Nx, Ny, startpoint, endpoint = params
             Nx, Ny, startpoint, endpoint = int(Nx), int(Ny), startpoint[0], endpoint[0]
-            line = makeLine(Nx, Ny, startpoint, endpoint)
+            line = make_line(Nx, Ny, startpoint, endpoint)
         else:
             Nx, Ny, startpoint, angle, length = params
             Nx, Ny, startpoint, angle, length = int(Nx), int(Ny), startpoint[0], float(angle), int(length)
-            line = makeLine(Nx, Ny, startpoint, endpoint=None, angle=angle, length=length)
+            line = make_line(Nx, Ny, startpoint, endpoint=None, angle=angle, length=length)
 
         expected_line = recorded_data['line']
 
@@ -40,4 +40,4 @@ def test_makeLine():
 
         assert np.allclose(expected_line, line)
 
-    print('makeLine(..) works as expected!')
+    print('make_line(..) works as expected!')

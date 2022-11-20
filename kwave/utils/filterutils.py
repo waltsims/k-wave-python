@@ -500,8 +500,8 @@ def gaussian_filter(signal, Fs, frequency, bandwidth):
     return signal
 
 
-def filterTimeSeries(kgrid, medium, signal, ppw=3, rppw=0, stop_band_atten=60, transition_width=0.1, zerophase=False,
-                     plot_spectrums=False, plot_signals=False):
+def filter_time_series(kgrid, medium, signal, ppw=3, rppw=0, stop_band_atten=60, transition_width=0.1, zerophase=False,
+                       plot_spectrums=False, plot_signals=False):
     """
         Filter signal using the Kaiser windowing method
         filterTimeSeries filters an input time domain signal using a low pass
@@ -759,6 +759,6 @@ def smooth(A, restore_max=False, window_type="Blackman"):
 
     # restore magnitude if required
     if restore_max:
-        A_sm = (max(abs(A[:])) / max(abs(A_sm[:]))) * A_sm
+        A_sm = (np.max(abs(A)) / np.max(abs(A_sm))) * A_sm
 
     return A_sm

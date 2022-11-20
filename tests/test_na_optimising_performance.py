@@ -44,7 +44,7 @@ def test_na_optimising_performance():
     # load the initial pressure distribution from an image and scale
     source = kSource()
     p0_magnitude = 2           # [Pa]
-    source.p0 = p0_magnitude * loadImage('tests/EXAMPLE_source_two.bmp', is_gray=True)
+    source.p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
     source.p0 = resize(source.p0, (Nx, Ny))
 
     # define the properties of the propagation medium
