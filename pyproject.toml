@@ -41,7 +41,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest", "phantominator"]
-example = ["gdown==4.4.0"]
+example = ["gdown==4.5.3"]
 docs = ["sphinx_rtd_theme",
         "sphinx-toolbox"]
 
