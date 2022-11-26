@@ -95,6 +95,7 @@
 <span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">get_h5_literals</span>
+<span class="kn">from</span> <span class="nn">kwave.utils</span> <span class="kn">import</span> <span class="n">get_optimal_pml_size</span>
 
 
 <div class="viewcode-block" id="SimulationOptions"><a class="viewcode-back" href="../../simopt.html#kwave.options.SimulationOptions">[docs]</a><span class="nd">@dataclass</span>
@@ -392,9 +393,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># get optimal pml size</span>
                 <span class="k">if</span> <span class="n">axisymmetric</span><span class="p">:</span>
-                    <span class="n">pml_size_temp</span> <span class="o">=</span> <span class="n">getOptimalPMLSize</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_search_range</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="n">pml_size_temp</span> <span class="o">=</span> <span class="n">get_optimal_pml_size</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_search_range</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">pml_size_temp</span> <span class="o">=</span> <span class="n">getOptimalPMLSize</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_search_range</span><span class="p">)</span>
+                    <span class="n">pml_size_temp</span> <span class="o">=</span> <span class="n">get_optimal_pml_size</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">pml_search_range</span><span class="p">)</span>
 
                 <span class="c1"># assign to individual variables</span>
                 <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
