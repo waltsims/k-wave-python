@@ -8,12 +8,12 @@ import scipy
 
 from kwave.utils.tictoc import TicToc
 
-from kwave.utils.matrixutils import matlab_find, matlab_assign, max_nd
-from kwave.utils.conversionutils import scale_SI
+from kwave.utils.matrix import matlab_find, matlab_assign, max_nd
+from kwave.utils.conversion import scale_SI
 from scipy import optimize
 import warnings
 
-from kwave.utils.conversionutils import db2neper, neper2db
+from kwave.utils.conversion import db2neper, neper2db
 
 
 def get_spaced_points(start, stop, n=100, spacing='linear'):

@@ -1,4 +1,4 @@
-from kwave.utils.matrixutils import expand_matrix
+from kwave.utils.matrix import expand_matrix
 
 from kwave.utils import min_nd
 

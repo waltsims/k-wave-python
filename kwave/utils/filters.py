@@ -7,8 +7,8 @@ from scipy.fftpack import fft, ifft, ifftshift, fftshift, fftn, ifftn
 import math
 from math import pi
 
-from kwave.utils.conversionutils import scale_SI
-from kwave.utils.checkutils import num_dim, num_dim2
+from kwave.utils.conversion import scale_SI
+from kwave.utils.checks import num_dim, num_dim2
 
 
 # Compute the next highest power of 2 of a 32–bit number `n`

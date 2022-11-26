@@ -3,7 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 
-from kwave.utils.filterutils import gaussian_filter
+from kwave.utils.filters import gaussian_filter
 
 
 def test_gaussianFilter():

@@ -1,5 +1,5 @@
 import numpy as np
-from kwave.utils.filterutils import gaussian, gaussian_filter, create_cw_signals, fwhm, envelope_detection, sharpness, \
+from kwave.utils.filters import gaussian, gaussian_filter, create_cw_signals, fwhm, envelope_detection, sharpness, \
     smooth
 from kwave.utils.kutils import get_win
 from math import pi

@@ -1,4 +1,4 @@
-from kwave.utils.maputils import make_multi_bowl
+from kwave.utils.mapgen import make_multi_bowl
 
 from scipy.io import loadmat
 import numpy as np

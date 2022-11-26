@@ -5,8 +5,8 @@ import numpy as np
 import warnings
 
 from .tictoc import TicToc
-from .conversionutils import scale_time
-from .checkutils import num_dim2, is_number
+from .conversion import scale_time
+from .checks import num_dim2, is_number
 from .interputils import interpolate2d
 
 

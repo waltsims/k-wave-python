@@ -12,7 +12,7 @@ import os
 from tempfile import gettempdir
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import make_disc, make_circle
+from kwave.utils.mapgen import make_disc, make_circle
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref

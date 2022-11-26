@@ -1,3 +1,4 @@
+import platform
 from typing import List
 
 import numpy as np
@@ -76,3 +77,7 @@ def is_number(value):
     if value.dtype in [np.float32, np.float64]:
         return True
     return np.issubdtype(np.array(value), np.number)
+
+
+def is_unix():
+    return platform.system() in ['Linux', 'Darwin']

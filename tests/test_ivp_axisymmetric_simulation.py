@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.utils.maputils import make_disc
+from kwave.utils.mapgen import make_disc
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref

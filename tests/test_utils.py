@@ -1,10 +1,10 @@
-from kwave.utils.checkutils import num_dim
-from kwave.utils.maputils import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, make_cart_sphere
-from kwave.utils.conversionutils import db2neper, neper2db
+from kwave.utils.checks import num_dim
+from kwave.utils.mapgen import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, make_cart_sphere
+from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.kutils import tone_burst, add_noise, gradient_spect
 from kwave.utils.interputils import get_bli
-from kwave.utils.filterutils import extract_amp_phase, spect, apply_filter
-from kwave.utils.matrixutils import gradient_fd, resize
+from kwave.utils.filters import extract_amp_phase, spect, apply_filter
+from kwave.utils.matrix import gradient_fd, resize
 from kwave.utils.ioutils import load_image
 import numpy as np
 from utils import *

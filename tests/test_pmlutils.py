@@ -1,4 +1,4 @@
-from kwave.utils.pmlutils import get_optimal_pml_size
+from kwave.utils.pml import get_optimal_pml_size
 from kwave.kgrid import kWaveGrid
 
 

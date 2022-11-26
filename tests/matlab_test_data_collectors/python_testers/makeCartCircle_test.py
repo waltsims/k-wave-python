@@ -1,4 +1,4 @@
-from kwave.utils.maputils import make_cart_circle
+from kwave.utils.mapgen import make_cart_circle
 
 from scipy.io import loadmat
 import numpy as np

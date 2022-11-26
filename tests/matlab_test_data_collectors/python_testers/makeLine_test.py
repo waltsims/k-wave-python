@@ -1,10 +1,10 @@
 from unittest.mock import Mock
 
-from kwave.utils.maputils import make_circle, make_line
+from kwave.utils.mapgen import make_circle, make_line
 
 from kwave.utils.interputils import cart2grid
 
-from kwave.utils.conversionutils import scale_time
+from kwave.utils.conversion import scale_time
 
 from scipy.io import loadmat
 import numpy as np

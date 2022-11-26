@@ -3,10 +3,8 @@ from tempfile import gettempdir
 from warnings import warn
 
 from kwave.ktransducer import *
-from kwave.utils import dotdict, get_date_string
+from kwave.utils import dotdict, get_date_string, is_unix
 import functools
-
-from kwave.utils import is_unix
 
 
 def kspaceFirstOrderG(func):

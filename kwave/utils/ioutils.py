@@ -8,7 +8,7 @@ import cv2
 import h5py
 import numpy as np
 
-from .conversionutils import cast_to_type
+from .conversion import cast_to_type
 from kwave.utils import dotdict
 
 

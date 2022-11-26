@@ -5,8 +5,8 @@ from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
 from kwave.utils.tictoc import TicToc
-from kwave.utils.checkutils import num_dim
-from kwave.utils.conversionutils import scale_time
+from kwave.utils.checks import num_dim
+from kwave.utils.conversion import scale_time
 
 
 def sortrows(arr: np.ndarray, index: int):

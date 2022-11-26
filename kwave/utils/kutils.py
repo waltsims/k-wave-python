@@ -2,10 +2,10 @@ from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
 from numpy import ndarray, array
-from kwave.utils.matrixutils import unflatten_matlab_mask, matlab_mask
+from kwave.utils.matrix import unflatten_matlab_mask, matlab_mask
 
-from kwave.utils.checkutils import num_dim
-from kwave.utils.conversionutils import scale_SI
+from kwave.utils.checks import num_dim
+from kwave.utils.conversion import scale_SI
 
 from kwave.kgrid import kWaveGrid
 import numpy as np
@@ -14,8 +14,8 @@ import scipy
 from numpy.fft import ifftshift, fft, ifft, fftshift
 
 from .math import sinc
-from .maputils import ndgrid
-from .conversionutils import db2neper
+from .mapgen import ndgrid
+from .conversion import db2neper
 
 import math
 
@@ -677,7 +677,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
         # create the envelope
         if envelope == 'Gaussian':
-            from kwave.utils.filterutils import gaussian
+            from kwave.utils.filters import gaussian
             x_lim = 3
             window_x = np.arange(-x_lim, x_lim + 1e-8, 2 * x_lim / (len(tone_burst) - 1))
             window = gaussian(window_x, 1, 0, 1)
