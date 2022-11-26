@@ -14,7 +14,7 @@ def sortrows(arr: np.ndarray, index: int):
     return arr[arr[:, index].argsort(),]
 
 
-def interpolate3D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray]) -> np.ndarray:
+def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray]) -> np.ndarray:
     """
         Interpolates input grid values at the given locations
         Added by Farid
@@ -60,7 +60,7 @@ def interpolate3D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
-def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray],
+def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray],
                   method='linear', copy_nans=True) -> np.ndarray:
     """
         Interpolates input grid values at the given locations
@@ -108,7 +108,7 @@ def interpolate2D(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
-def interpolate2D_with_queries(
+def interpolate2d_with_queries(
         grid_points: List[np.ndarray],
         grid_values: np.ndarray,
         queries: np.ndarray,
@@ -335,9 +335,9 @@ def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
     return bli, x_fine
 
 
-def interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp='nearest'):
+def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp='nearest'):
     """
-     interpCartData takes a matrix of time-series data recorded over a set
+     interp_cart_data takes a matrix of time-series data recorded over a set
      of Cartesian sensor points given by cart_sensor_mask and computes the
      equivalent time-series at each sensor position on the binary sensor
      mask binary_sensor_mask using interpolation. The properties of
@@ -345,8 +345,8 @@ def interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask
      Two and three dimensional data are supported.
 
      Usage:
-         binary_sensor_data = interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
-         binary_sensor_data = interpCartData(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)
+         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)
 
      Args:
          kgrid:                k-Wave grid object returned by kWaveGrid

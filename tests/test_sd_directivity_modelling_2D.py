@@ -70,7 +70,7 @@ def test_sd_directivity_modelling_2D():
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
-    source.p = filterTimeSeries(kgrid, medium, source.p)
+    source.p = filter_time_series(kgrid, medium, source.p)
 
     # pre-allocate array for storing the output time series
     single_element_data = np.zeros((Nt, points))

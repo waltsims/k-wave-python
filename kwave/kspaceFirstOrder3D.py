@@ -265,9 +265,9 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
     if k_sim.rho0.ndim == 3 and options.use_sg:
         # rho0 is heterogeneous and staggered grids are used
         grid_points = [k_sim.kgrid.x, k_sim.kgrid.y, k_sim.kgrid.z]
-        k_sim.rho0_sgx = interpolate3D(grid_points, k_sim.rho0, [k_sim.kgrid.x + k_sim.kgrid.dx / 2, k_sim.kgrid.y, k_sim.kgrid.z])
-        k_sim.rho0_sgy = interpolate3D(grid_points, k_sim.rho0, [k_sim.kgrid.x, k_sim.kgrid.y + k_sim.kgrid.dy / 2, k_sim.kgrid.z])
-        k_sim.rho0_sgz = interpolate3D(grid_points, k_sim.rho0, [k_sim.kgrid.x, k_sim.kgrid.y, k_sim.kgrid.z + k_sim.kgrid.dz / 2])
+        k_sim.rho0_sgx = interpolate3d(grid_points, k_sim.rho0, [k_sim.kgrid.x + k_sim.kgrid.dx / 2, k_sim.kgrid.y, k_sim.kgrid.z])
+        k_sim.rho0_sgy = interpolate3d(grid_points, k_sim.rho0, [k_sim.kgrid.x, k_sim.kgrid.y + k_sim.kgrid.dy / 2, k_sim.kgrid.z])
+        k_sim.rho0_sgz = interpolate3d(grid_points, k_sim.rho0, [k_sim.kgrid.x, k_sim.kgrid.y, k_sim.kgrid.z + k_sim.kgrid.dz / 2])
     else:
         # rho0 is homogeneous or staggered grids are not used
         k_sim.rho0_sgx = k_sim.rho0

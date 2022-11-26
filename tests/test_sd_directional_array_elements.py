@@ -13,8 +13,8 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.filterutils import filterTimeSeries
-from kwave.utils.maputils import makeCircle
+from kwave.utils.filterutils import filter_time_series
+from kwave.utils.maputils import make_circle
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -52,7 +52,7 @@ def test_sd_directional_array_elements():
 
     # define a semicircular sensor centred on the grid
     semicircle_radius = 65  # [grid points]
-    arc = makeCircle(Nx, Ny, Nx//2 - 1, Ny//2 - 1, semicircle_radius, np.pi)
+    arc = make_circle(Nx, Ny, Nx // 2 - 1, Ny // 2 - 1, semicircle_radius, np.pi)
 
     # find total number and indices of the grid points constituting the semicircle
     arc_indices = matlab_find(arc, val=1, mode='eq')
@@ -90,7 +90,7 @@ def test_sd_directional_array_elements():
     source_freq = 1e6   # [Hz]
     source_mag = 0.5    # [Pa]
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
-    source.p = filterTimeSeries(kgrid, medium, source.p)
+    source.p = filter_time_series(kgrid, medium, source.p)
 
     # run the simulation with the PML switched off on the sides, so that the
     # source continues up to the edge of the domain (and from there infinitely,

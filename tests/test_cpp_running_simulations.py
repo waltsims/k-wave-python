@@ -65,7 +65,7 @@ def test_cpp_running_simulations():
     ball_x      = Nx/2 + 40    # [grid points]
     ball_y      = Ny/2         # [grid points]
     ball_z      = Nz/2         # [grid points]
-    ball        = makeBall(Nx, Ny, Nz, ball_x, ball_y, ball_z, ball_radius)
+    ball        = make_ball(Nx, Ny, Nz, ball_x, ball_y, ball_z, ball_radius)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(
@@ -95,7 +95,7 @@ def test_cpp_running_simulations():
     source.p        = source_strength * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
-    source.p = filterTimeSeries(kgrid, medium, source.p)
+    source.p = filter_time_series(kgrid, medium, source.p)
     source.p = np.array(source.p)
 
     # define a sensor mask through the central plane

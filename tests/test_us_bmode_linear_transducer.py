@@ -11,8 +11,8 @@ import setup_test
 import os
 from tempfile import gettempdir
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import toneBurst
-from kwave.utils.maputils import makeBall
+from kwave.utils.kutils import tone_burst
+from kwave.utils.maputils import make_ball
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -88,8 +88,8 @@ def test_us_bmode_linear_transducer():
     tone_burst_freq = 1.5e6        # [Hz]
     tone_burst_cycles = 4
 
-    # create the input signal using toneBurst
-    input_signal = toneBurst(1/kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)
@@ -169,7 +169,7 @@ def test_us_bmode_linear_transducer():
     radius = 6e-3       # [m]
     x_pos = 27.5e-3     # [m]
     y_pos = 20.5e-3     # [m]
-    scattering_region1 = makeBall(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
+    scattering_region1 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -179,7 +179,7 @@ def test_us_bmode_linear_transducer():
     radius = 5e-3       # [m]
     x_pos = 30.5e-3     # [m]
     y_pos = 37e-3       # [m]
-    scattering_region2 = makeBall(Nx_tot, Ny_tot, Nz_tot, round(x_pos/dx + rounding_eps), round(y_pos/dx + rounding_eps), Nz_tot/2, round(radius/dx + rounding_eps))
+    scattering_region2 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region2 == 1] = scattering_c0[scattering_region2 == 1]
@@ -189,7 +189,7 @@ def test_us_bmode_linear_transducer():
     radius = 4.5e-3     # [m]
     x_pos = 15.5e-3     # [m]
     y_pos = 30.5e-3     # [m]
-    scattering_region3 = makeBall(Nx_tot, Ny_tot, Nz_tot, round(x_pos/dx + rounding_eps), round(y_pos/dx + rounding_eps), Nz_tot/2, round(radius/dx + rounding_eps))
+    scattering_region3 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region3 == 1] = scattering_c0[scattering_region3 == 1]

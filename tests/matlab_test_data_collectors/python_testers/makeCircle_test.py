@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from kwave.utils.maputils import makeCircle
+from kwave.utils.maputils import make_circle
 
 from kwave.utils.interputils import cart2grid
 
@@ -30,8 +30,8 @@ def test_makeCircle():
         arc_angle = float(recorded_data['arc_angle'])
         expected_circle = recorded_data['circle']
 
-        circle = makeCircle(Nx, Ny, cx, cy, radius, arc_angle)
+        circle = make_circle(Nx, Ny, cx, cy, radius, arc_angle)
 
         assert np.allclose(expected_circle, circle)
 
-    print('makeCircle(..) works as expected!')
+    print('make_circle(..) works as expected!')

@@ -52,18 +52,18 @@ def test_ivp_comparison_modelling_functions():
     t_end = 6e-6
     kgrid.makeTime(medium.sound_speed, 0.3, t_end)
 
-    # create initial pressure distribution using makeDisc
+    # create initial pressure distribution using make_disc
     disc_magnitude = 5 # [Pa]
     disc_x_pos = 50    # [grid points]
     disc_y_pos = 50    # [grid points]
     disc_radius = 8    # [grid points]
-    disc_1 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     disc_magnitude = 3 # [Pa]
     disc_x_pos = 80    # [grid points]
     disc_y_pos = 60    # [grid points]
     disc_radius = 5    # [grid points]
-    disc_2 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     source = kSource()
     source.p0 = disc_1 + disc_2

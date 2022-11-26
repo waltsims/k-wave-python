@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.filterutils import filterTimeSeries
+from kwave.utils.filterutils import filter_time_series
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -57,7 +57,7 @@ def test_tvsp_doppler_effect():
     source_pressure = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
-    source_pressure = filterTimeSeries(kgrid, medium, source_pressure)
+    source_pressure = filter_time_series(kgrid, medium, source_pressure)
 
     # define a line of source points
     source = kSource()

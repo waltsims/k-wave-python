@@ -13,8 +13,8 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import makeDisc
-from kwave.utils.matrixutils import smooth
+from kwave.utils.maputils import make_disc
+from kwave.utils.filterutils import smooth
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -40,17 +40,17 @@ def test_pr_2D_TR_line_sensor():
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
-    # create initial pressure distribution using makeDisc
+    # create initial pressure distribution using make_disc
     disc_magnitude = 5         # [Pa]
     disc_x_pos = 60            # [grid points]
     disc_y_pos = 140           # [grid points]
     disc_radius = 5            # [grid points]
-    disc_2 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     disc_x_pos = 30            # [grid points]
     disc_y_pos = 110           # [grid points]
     disc_radius = 8            # [grid points]
-    disc_1 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
     p0 = smooth(disc_1 + disc_2, True)

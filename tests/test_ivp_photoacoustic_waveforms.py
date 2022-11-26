@@ -14,7 +14,7 @@ from tempfile import gettempdir
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.maputils import makeBall, makeDisc
+from kwave.utils.maputils import make_ball, make_disc
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -81,7 +81,7 @@ def test_ivp_photoacoustic_waveforms():
 
     # create initial pressure distribution
     source = kSource()
-    source.p0 = makeDisc(Nx, Nx, Nx/2, Nx/2, source_radius)
+    source.p0 = make_disc(Nx, Nx, Nx / 2, Nx / 2, source_radius)
 
     # define a single sensor point
     sensor_mask = np.zeros((Nx, Nx))
@@ -115,7 +115,7 @@ def test_ivp_photoacoustic_waveforms():
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
     # create initial pressure distribution
-    source.p0 = makeBall(Nx, Nx, Nx, Nx/2, Nx/2, Nx/2, source_radius)
+    source.p0 = make_ball(Nx, Nx, Nx, Nx / 2, Nx / 2, Nx / 2, source_radius)
 
     # define a single sensor point
     sensor.mask = np.zeros((Nx, Nx, Nx))

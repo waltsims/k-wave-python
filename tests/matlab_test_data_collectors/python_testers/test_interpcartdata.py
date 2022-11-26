@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import os
 
-from kwave.utils.interputils import interpCartData
+from kwave.utils.interputils import interp_cart_data
 from kwave.kgrid import kWaveGrid
 
 
@@ -37,7 +37,7 @@ def test_interpcartdata():
         sensor_mask = recorded_data['sensor_mask']
         binary_sensor_mask = recorded_data['binary_sensor_mask']
 
-        trbd_py = interpCartData(kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask )
+        trbd_py = interp_cart_data(kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask)
 
         assert np.allclose(trbd, trbd_py)
 

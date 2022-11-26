@@ -12,7 +12,7 @@ import os
 from tempfile import gettempdir
 from kwave.kgrid import kWaveGrid
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import toneBurst
+from kwave.utils.kutils import tone_burst
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -81,8 +81,8 @@ def test_us_defining_transducer():
     tone_burst_freq = 0.5e6         # [Hz]
     tone_burst_cycles = 5
 
-    # create the input signal using toneBurst
-    input_signal = toneBurst(1/kgrid.dt, tone_burst_freq, tone_burst_cycles);
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles);
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)

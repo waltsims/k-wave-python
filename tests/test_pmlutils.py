@@ -1,4 +1,4 @@
-from kwave.utils.pmlutils import getOptimalPMLSize
+from kwave.utils.pmlutils import get_optimal_pml_size
 from kwave.kgrid import kWaveGrid
 
 
@@ -17,7 +17,7 @@ def test_get_optimal_pml_size_1D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert 32 == getOptimalPMLSize(kgrid)
+    assert 32 == get_optimal_pml_size(kgrid)
     pass
 
 
@@ -36,7 +36,7 @@ def test_get_optimal_pml_size_2D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert (32 == getOptimalPMLSize(kgrid)).all()
+    assert (32 == get_optimal_pml_size(kgrid)).all()
     pass
 
 
@@ -55,4 +55,4 @@ def test_get_optimal_pml_size_3D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert (32 == getOptimalPMLSize(kgrid)).all()
+    assert (32 == get_optimal_pml_size(kgrid)).all()

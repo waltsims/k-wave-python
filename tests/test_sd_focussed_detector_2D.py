@@ -12,7 +12,7 @@ import os
 from tempfile import gettempdir
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import makeDisc, makeCircle
+from kwave.utils.maputils import make_disc, make_circle
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -43,7 +43,7 @@ def test_sd_focussed_detector_2D():
     # define a sensor as part of a circle centred on the grid
     sensor_radius = 65  # [grid points]
     arc_angle = np.pi  # [rad]
-    sensor_mask = makeCircle(Nx, Ny, Nx / 2, Ny / 2, sensor_radius, arc_angle)
+    sensor_mask = make_circle(Nx, Ny, Nx / 2, Ny / 2, sensor_radius, arc_angle)
     sensor = kSensor(sensor_mask)
 
     # define the array of temporal points
@@ -52,7 +52,7 @@ def test_sd_focussed_detector_2D():
 
     # place a disc-shaped source near the focus of the detector
     source = kSource()
-    source.p0 = 2 * makeDisc(Nx, Ny, Nx / 2, Ny / 2, 4)
+    source.p0 = 2 * make_disc(Nx, Ny, Nx / 2, Ny / 2, 4)
 
     # run the first simulation
     input_filename = f'example_input.h5'

@@ -66,9 +66,9 @@ def get_pml(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, axisymmetr
     # pml_right = pml_alpha*(c/dx)* ( ((x + 0.5) - 1) ./ (pml_size - 1) ).^2;
 
 
-def getOptimalPMLSize(grid_size, pml_range=None, axisymmetric=None):
+def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     """
-     getOptimalPMLSize finds the size of the perfectly matched layer (PML)
+     get_optimal_pml_size finds the size of the perfectly matched layer (PML)
      that gives an overall grid size with the smallest prime factors when
      using the first-order simulation functions in k-Wave with the
      optional input 'PMLInside', false. Choosing grid sizes with small

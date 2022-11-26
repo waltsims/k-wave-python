@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import makeDisc, make_cart_circle
+from kwave.utils.maputils import make_disc, make_cart_circle
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -44,18 +44,18 @@ def test_ivp_heterogeneous_medium():
     medium.sound_speed[0:Nx//2, :] = 1800         # [m/s]
     medium.density[:, Ny//4-1:Ny] = 1200          # [kg/m^3]
 
-    # create initial pressure distribution using makeDisc
+    # create initial pressure distribution using make_disc
     disc_magnitude = 5 # [Pa]
     disc_x_pos = 50    # [grid points]
     disc_y_pos = 50    # [grid points]
     disc_radius = 8    # [grid points]
-    disc_1 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     disc_magnitude = 3 # [Pa]
     disc_x_pos = 80    # [grid points]
     disc_y_pos = 60    # [grid points]
     disc_radius = 5    # [grid points]
-    disc_2 = disc_magnitude * makeDisc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     source = kSource()
     source.p0 = disc_1 + disc_2

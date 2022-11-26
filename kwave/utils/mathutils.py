@@ -57,10 +57,8 @@ def fourier_shift(
         # subtract 1 in order to keep function interface compatible with matlab
         shift_dim -= 1
 
-    try:
-        N = data.shape[shift_dim]
-    except IndexError:
-        print('aaa')
+    N = data.shape[shift_dim]
+
     if N % 2 == 0:
         # grid dimension has an even number of points
         k_vec = (2 * np.pi) * ( np.arange(-N // 2, N // 2) / N)

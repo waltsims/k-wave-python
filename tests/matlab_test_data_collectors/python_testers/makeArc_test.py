@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeArc
+from kwave.utils.maputils import make_arc
 
 from scipy.io import loadmat
 import numpy as np
@@ -23,8 +23,8 @@ def test_makeArc():
             radius = float(radius)
         expected_arc = recorded_data['arc']
 
-        arc = makeArc(grid_size, arc_pos, radius, diameter, focus_pos)
+        arc = make_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_arc, arc)
 
-    print('makeArc(..) works as expected!')
+    print('make_arc(..) works as expected!')

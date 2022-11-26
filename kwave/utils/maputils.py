@@ -44,15 +44,6 @@ def get_spaced_points(start, stop, n=100, spacing='linear'):
         raise ValueError(f"spacing {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
 
 
-def pull_matlab(prop, expected_val=None):
-    from scipy.io import loadmat
-
-    temp_mat = loadmat('/data/code/Work/black_box_testing/temp.mat')
-    if expected_val is not None:
-        return np.allclose(expected_val, temp_mat[prop])
-    return temp_mat[prop]
-
-
 def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
     """
 
@@ -70,7 +61,7 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
     The returned values should be used to define the medium.alpha_coeff
     and medium.alpha_power within the simulation functions. The
     absorption behaviour over the frequency range f_min:f_max will then
-    follow the power law defined by a0 and y.Add testing for getOptimalPMLSize()
+    follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()
 
     Args:
         a0:
@@ -97,7 +88,7 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
         """Second-order absorption error"""
         a0_np_trial, y_trial = trial_vals
 
-        actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) * \
+        actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) *
                                                           a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (
                                                                   y_trial - 1))
 
@@ -369,16 +360,16 @@ def water_non_linearity(temp):
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
-    BonA = np.polyval(p, temp);
+    BonA = np.polyval(p, temp)
     return BonA
 
 
-def makeBall(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
+def make_ball(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
     """
     MAKEBALL Create a binary map of a filled ball within a 3D grid.
 
     DESCRIPTION:
-         makeBall creates a binary map of a filled ball within a
+         make_ball creates a binary map of a filled ball within a
          three-dimensional grid (the ball position is denoted by 1's in the
          matrix with 0's elsewhere). A single grid point is taken as the ball
          centre thus the total diameter of the ball will always be an odd
@@ -423,7 +414,7 @@ def makeBall(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
     ball = np.zeros((Nx, Ny, Nz)).astype(np.bool if binary else np.float32)
 
     # define np.pixel map
-    r = makePixelMap(Nx, Ny, Nz, 'Shift', [0, 0, 0])
+    r = make_pixel_map(Nx, Ny, Nz, 'Shift', [0, 0, 0])
 
     # create ball
     ball[r <= radius] = MAGNITUDE
@@ -478,7 +469,7 @@ def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False
         [x_sc, scale, prefix, _] = scale_SI(np.max(sphere))
 
         # create the figure
-        plt.figure
+        plt.figure()
         plt.style.use('seaborn-poster')
         ax = plt.axes(projection='3d')
         ax.plot3D(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, '.')
@@ -490,6 +481,7 @@ def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False
         plt.show()
 
     return sphere.squeeze()
+
 
 def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi, plot_circle=False):
     """
@@ -544,11 +536,11 @@ def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi,
     return np.squeeze(circle)
 
 
-def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
+def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     """
         Create a binary map of a filled disc within a 2D grid.
 
-             makeDisc creates a binary map of a filled disc within a
+             make_disc creates a binary map of a filled disc within a
              two-dimensional grid (the disc position is denoted by 1's in the
              matrix with 0's elsewhere). A single grid point is taken as the disc
              centre thus the total diameter of the disc will always be an odd
@@ -590,7 +582,7 @@ def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
     disc = np.zeros((Nx, Ny))
 
     # define np.pixel map
-    r = makePixelMap(Nx, Ny, None, 'Shift', [0, 0])
+    r = make_pixel_map(Nx, Ny, None, 'Shift', [0, 0])
 
     # create disc
     disc[r <= radius] = MAGNITUDE
@@ -606,11 +598,11 @@ def makeDisc(Nx, Ny, cx, cy, radius, plot_disc=False):
     return disc
 
 
-def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
+def make_circle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
     """
         Create a binary map of a circle within a 2D grid.
 
-             makeCircle creates a binary map of a circle or arc (using the
+             make_circle creates a binary map of a circle or arc (using the
              midpoint circle algorithm) within a two-dimensional grid (the circle
              position is denoted by 1's in the matrix with 0's elsewhere). A
              single grid point is taken as the circle centre thus the total
@@ -625,7 +617,7 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
         cx:
         cy:
         radius:
-        plot_disc:
+        plot_circle:
 
     Returns:
 
@@ -709,12 +701,12 @@ def makeCircle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
     return circle
 
 
-def makePixelMap(Nx, Ny, Nz=None, *args):
+def make_pixel_map(Nx, Ny, Nz=None, *args):
     """
-    MAKEPIXELMAP Create matrix of grid point distances from the centre point.
+    make_pixel_map Create matrix of grid point distances from the centre point.
 
      DESCRIPTION:
-         makePixelMap generates a matrix populated with values of how far each
+         make_pixel_map generates a matrix populated with values of how far each
          pixel in a grid is from the centre (given in pixel coordinates). Both
          single and double pixel centres can be used by setting the optional
          input parameter 'OriginSize'. For grids where the dimension size and
@@ -780,8 +772,8 @@ def makePixelMap(Nx, Ny, Nz=None, *args):
 
     if map_dimension == 2:
         # create the maps for each dimension
-        nx = createPixelDim(Nx, origin_size, shift[0])
-        ny = createPixelDim(Ny, origin_size, shift[1])
+        nx = create_pixel_dim(Nx, origin_size, shift[0])
+        ny = create_pixel_dim(Ny, origin_size, shift[1])
 
         # create plaid grids
         r_x, r_y = np.meshgrid(nx, ny, indexing='ij')
@@ -790,9 +782,9 @@ def makePixelMap(Nx, Ny, Nz=None, *args):
         r = np.sqrt(r_x ** 2 + r_y ** 2)
     if map_dimension == 3:
         # create the maps for each dimension
-        nx = createPixelDim(Nx, origin_size, shift[0])
-        ny = createPixelDim(Ny, origin_size, shift[1])
-        nz = createPixelDim(Nz, origin_size, shift[2])
+        nx = create_pixel_dim(Nx, origin_size, shift[0])
+        ny = create_pixel_dim(Ny, origin_size, shift[1])
+        nz = create_pixel_dim(Nz, origin_size, shift[2])
 
         # create plaid grids
         r_x, r_y, r_z = np.meshgrid(nx, ny, nz, indexing='ij')
@@ -802,7 +794,7 @@ def makePixelMap(Nx, Ny, Nz=None, *args):
     return r
 
 
-def createPixelDim(Nx, origin_size, shift):
+def create_pixel_dim(Nx, origin_size, shift):
     # Nested function to create the pixel radius variable
 
     # grid dimension has an even number of points
@@ -843,7 +835,7 @@ def createPixelDim(Nx, origin_size, shift):
     return nx
 
 
-def makeLine(
+def make_line(
         Nx: int,
         Ny: int,
         startpoint: Tuple[int, int],
@@ -1219,7 +1211,7 @@ def makeLine(
     return line
 
 
-def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
     # force integer input values
     grid_size = grid_size.round().astype(int)
     arc_pos = arc_pos.round().astype(int)
@@ -1273,7 +1265,7 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
         c = np.array([cx, cy])
 
         # create circle
-        arc = makeCircle(Nx, Ny, cx, cy, radius)
+        arc = make_circle(Nx, Ny, cx, cy, radius)
 
         # form vector from the geometric arc centre to the arc midpoint
         v1 = arc_pos - c
@@ -1312,8 +1304,8 @@ def makeArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_
 
         # draw lines to create arc with infinite radius
         arc = np.logical_or(
-            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
-            makeLine(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
+            make_line(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
+            make_line(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
         )
     return arc
 
@@ -1337,7 +1329,7 @@ def sub2ind(array_shape, x, y, z) -> np.ndarray:
     return np.array(results)
 
 
-def makePixelMapPoint(grid_size, centre_pos) -> np.ndarray:
+def make_pixel_map_point(grid_size, centre_pos) -> np.ndarray:
     # check for number of dimensions
     num_dim = len(grid_size)
 
@@ -1385,7 +1377,7 @@ def makePixelMapPoint(grid_size, centre_pos) -> np.ndarray:
     return pixel_map
 
 
-def makePixelMapPlane(grid_size, normal, point):
+def make_pixel_map_plane(grid_size, normal, point):
     # error checking
     if np.all(normal == 0):
         raise ValueError('Normal vector should not be zero.')
@@ -1432,7 +1424,7 @@ def makePixelMapPlane(grid_size, normal, point):
     return pixel_map
 
 
-def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
+def make_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
     # =========================================================================
     # DEFINE LITERALS
     # =========================================================================
@@ -1516,7 +1508,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
         c = np.array([cx, cy, cz])
 
         # generate matrix with distance from the centre
-        pixel_map = makePixelMapPoint(grid_size_sm, c)
+        pixel_map = make_pixel_map_point(grid_size_sm, c)
 
         # set search radius to bowl radius
         search_radius = radius
@@ -1524,7 +1516,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     else:
 
         # generate matrix with distance from the centre
-        pixel_map = makePixelMapPlane(grid_size_sm, bowl_pos_sm - focus_pos_sm, bowl_pos_sm)
+        pixel_map = make_pixel_map_plane(grid_size_sm, bowl_pos_sm - focus_pos_sm, bowl_pos_sm)
 
         # set search radius to 0 (the disc is flat)
         search_radius = 0
@@ -1683,7 +1675,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     else:
 
         # form a distance map from the centre of the disc
-        pixelMapPoint = makePixelMapPoint(grid_size_sm, bowl_pos_sm)
+        pixelMapPoint = make_pixel_map_point(grid_size_sm, bowl_pos_sm)
 
         # set all points in the disc greater than the diameter to zero
         bowl_sm[pixelMapPoint > (diameter / 2)] = 0
@@ -1984,7 +1976,7 @@ def makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, rem
     return bowl
 
 
-def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
+def make_multi_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
     # =========================================================================
     # DEFINE LITERALS
     # =========================================================================
@@ -2022,7 +2014,7 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
 
     bowls_labelled = np.zeros(grid_size)
 
-    # loop for calling makeBowl
+    # loop for calling make_bowl
     for bowl_index in range(bowl_pos.shape[0]):
 
         # update command line status
@@ -2054,7 +2046,7 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
             focus_pos_k = focus_pos
 
         # create new bowl
-        new_bowl = makeBowl(
+        new_bowl = make_bowl(
             grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k,
             remove_overlap=remove_overlap, binary=binary
         )
@@ -2079,7 +2071,7 @@ def makeMultiBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False
     return bowls, bowls_labelled
 
 
-def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
     # check inputs
     if arc_pos.shape[-1] != 2:
         raise ValueError('arc_pos should contain 2 columns, with [ax, ay] in each row.')
@@ -2105,7 +2097,7 @@ def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, f
     arcs = np.zeros(grid_size)
     arcs_labelled = np.zeros(grid_size)
 
-    # loop for calling makeArc
+    # loop for calling make_arc
     for k in range(arc_pos.shape[0]):
 
         # get parameters for current arc
@@ -2130,7 +2122,7 @@ def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, f
             focus_pos_k = focus_pos
 
         # create new arc
-        new_arc = makeArc(grid_size, arc_pos_k, radius_k, diameter_k, focus_pos_k)
+        new_arc = make_arc(grid_size, arc_pos_k, radius_k, diameter_k, focus_pos_k)
 
         # add arc to arc matrix
         arcs = arcs + new_arc
@@ -2150,8 +2142,7 @@ def makeMultiArc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, f
     return arcs, arcs_labelled
 
 
-def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
-
+def make_sphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
     # enforce a centered sphere
     cx = floor(Nx / 2) + 1
     cy = floor(Ny / 2) + 1
@@ -2164,7 +2155,7 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
         sphere = np.zeros((Nx, Ny, Nz))
 
     # create a guide circle from which the individal radii can be extracted
-    guide_circle = makeCircle(Ny, Nx, cy, cx, radius)
+    guide_circle = make_circle(Ny, Nx, cy, cx, radius)
 
     # step through the guide circle points and create partially filled discs
     centerpoints = np.arange(cx - radius, cx + 1)
@@ -2181,7 +2172,7 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
         swept_radius = (row_index.max() - row_index[row_index != 0].min()) / 2
 
         # create a circle to add to the sphere
-        circle = makeCircle(Ny, Nz, cy, cz, swept_radius)
+        circle = make_circle(Ny, Nz, cy, cz, swept_radius)
 
         # make an empty fill matrix
         if binary:
@@ -2208,7 +2199,8 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
 
             # fill in the line
             if start_index != stop_index and (stop_index - start_index) >= num_points:
-                circle_fill[(start_index + num_points // 2) - 1:stop_index - (num_points // 2), fill_centerpoints_i - 1] = 1
+                circle_fill[(start_index + num_points // 2) - 1:stop_index - (num_points // 2),
+                fill_centerpoints_i - 1] = 1
 
         # remove points from the filled circle that existed in the previous
         # layer
@@ -2224,7 +2216,8 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[cx + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :, :]
+            sphere[cx + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
+                                                                          :]
 
     # plot results
     if plot_sphere:
@@ -2232,7 +2225,7 @@ def makeSphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
     return sphere
 
 
-def makeSphericalSection(radius, height, width=None, plot_section=False, binary=False):
+def make_spherical_section(radius, height, width=None, plot_section=False, binary=False):
     use_spherical_sections = True
 
     # force inputs to be integers
@@ -2246,10 +2239,10 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
             raise ValueError('Input width must be an odd number.')
 
     # calculate minimum grid dimensions to fit entire sphere
-    Nx = 2*radius + 1
+    Nx = 2 * radius + 1
 
     # create sphere
-    ss = makeSphere(Nx, Nx, Nx, radius, False, binary)
+    ss = make_sphere(Nx, Nx, Nx, radius, False, binary)
 
     # truncate to given height
     if use_spherical_sections:
@@ -2264,7 +2257,7 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
     length = mx[(len(mx) + 1) // 2].sum()
 
     # truncate transducer grid based on length (removes empty rows and columns)
-    offset = int((Nx - length)/2)
+    offset = int((Nx - length) / 2)
     ss = ss[:, offset:-offset, offset:-offset]
 
     # also truncate to given width if defined by user
@@ -2275,7 +2268,7 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
             raise ValueError('Input for width must be less than or equal to transducer length.')
 
         # calculate offset
-        offset = int((length - width)/2)
+        offset = int((length - width) / 2)
 
         # truncate transducer grid
         ss = ss[:, offset:-offset, :]
@@ -2291,12 +2284,13 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
     # double check there there is only one value of spherical section in
     # each matrix column
     if mx.sum() != ss.sum():
-        raise ValueError('mean neighbour distance cannot be calculated uniquely due to overlapping points in the x-direction')
+        raise ValueError(
+            'mean neighbour distance cannot be calculated uniquely due to overlapping points in the x-direction')
 
     # calculate average distance to grid point neighbours in the flat case
     x_dist = np.tile([1, 0, 1], [3, 1])
     y_dist = x_dist.T
-    flat_dist = np.sqrt(x_dist**2 + y_dist**2)
+    flat_dist = np.sqrt(x_dist ** 2 + y_dist ** 2)
     flat_dist = np.mean(flat_dist)
 
     # compute distance map
@@ -2313,15 +2307,15 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
             if m == 0 and n == 0:
                 local_heights[1:3, 1:3] = mx_ind[m:m + 2, n:n + 2]
             elif m == (sz[0] - 1) and n == (sz[1] - 1):
-                local_heights[0:2, 0:2] = mx_ind[m - 1:m+1, n - 1:n+1]
+                local_heights[0:2, 0:2] = mx_ind[m - 1:m + 1, n - 1:n + 1]
             elif m == 0 and n == (sz[1] - 1):
                 local_heights[1:3, 0:2] = mx_ind[m:m + 2, n - 1:n + 1]
             elif m == (sz[0] - 1) and n == 0:
-                local_heights[0:2, 1:3] = mx_ind[m - 1:m+1, n:n + 2]
+                local_heights[0:2, 1:3] = mx_ind[m - 1:m + 1, n:n + 2]
             elif m == 0:
                 local_heights[1:3, :] = mx_ind[m:m + 2, n - 1:n + 2]
             elif m == (sz[0] - 1):
-                local_heights[0:2, :] = mx_ind[m - 1:m+1, n - 1:n + 2]
+                local_heights[0:2, :] = mx_ind[m - 1:m + 1, n - 1:n + 2]
             elif n == 0:
                 local_heights[:, 1:3] = mx_ind[m - 1:m + 2, n:n + 2]
             elif n == (sz[1] - 1):
@@ -2336,7 +2330,7 @@ def makeSphericalSection(radius, height, width=None, plot_section=False, binary=
             local_heights_var[local_heights == 0] = 0
 
             # calculate total distance from centre
-            dist = np.sqrt(x_dist**2 + y_dist**2 + local_heights_var**2)
+            dist = np.sqrt(x_dist ** 2 + y_dist ** 2 + local_heights_var ** 2)
 
             # average and store as a ratio
             dist_map[m, n] = 1 + (np.mean(dist) - flat_dist) / flat_dist

@@ -7,7 +7,7 @@ import warnings
 from .tictoc import TicToc
 from .conversionutils import scale_time
 from .checkutils import num_dim2, is_number
-from .interputils import interpolate2D
+from .interputils import interpolate2d
 
 
 def expand_matrix(matrix, exp_coeff, edge_val=None):
@@ -193,11 +193,11 @@ def smooth(mat, restore_max=False, window_type='Blackman'):
     return mat_sm
 
 
-def gradient_FD(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
+def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
     """
     A wrapper of the numpy gradient method for use in the k-wave library.
 
-    gradient_FD calculates the gradient of an n-dimensional input matrix
+    gradient_fd calculates the gradient of an n-dimensional input matrix
     using the finite-difference method. For one-dimensional inputs, the
     gradient is always computed along the non-singleton dimension. For
     higher dimensional inputs, the gradient for singleton dimensions is

@@ -1,4 +1,4 @@
-from kwave.utils.kutils import check_stability, primefactors, toneBurst, get_alpha_filter, focus
+from kwave.utils.kutils import check_stability, primefactors, tone_burst, get_alpha_filter, focus
 from kwave import kWaveMedium, kWaveGrid
 from kwave.ksource import kSource
 from kwave.ktransducer import *
@@ -191,8 +191,8 @@ def test_focus():
     tone_burst_freq = 1.5e6  # [Hz]
     tone_burst_cycles = 4
 
-    # create the input signal using toneBurst
-    input_signal = toneBurst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)
@@ -283,8 +283,8 @@ def test_focus():
     tone_burst_freq = 1.5e6  # [Hz]
     tone_burst_cycles = 4
 
-    # create the input signal using toneBurst
-    input_signal = toneBurst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
     # scale the source magnitude by the source_strength divided by the
     # impedance (the source is assigned to the particle velocity)

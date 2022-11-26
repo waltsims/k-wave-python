@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeBowl
+from kwave.utils.maputils import make_bowl
 
 from scipy.io import loadmat
 import numpy as np
@@ -30,8 +30,8 @@ def test_makeBowl():
         remove_overlap = bool(params[8])
         expected_bowl = recorded_data['bowl']
 
-        bowl = makeBowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=binary, remove_overlap=remove_overlap)
+        bowl = make_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=binary, remove_overlap=remove_overlap)
 
         assert np.allclose(expected_bowl, bowl)
 
-    print('makeBowl(..) works as expected!')
+    print('make_bowl(..) works as expected!')

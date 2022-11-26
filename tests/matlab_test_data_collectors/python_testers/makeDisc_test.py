@@ -1,4 +1,4 @@
-from kwave.utils.maputils import makeDisc
+from kwave.utils.maputils import make_disc
 
 from scipy.io import loadmat
 import numpy as np
@@ -19,8 +19,8 @@ def test_makeDisc():
         Nx, Ny, cx, cy, radius, plot_disc = int(Nx), int(Ny), int(cx), int(cy), int(radius), bool(plot_disc)
         expected_disc = recorded_data['disc']
 
-        disc = makeDisc(Nx, Ny, cx, cy, radius, plot_disc)
+        disc = make_disc(Nx, Ny, cx, cy, radius, plot_disc)
 
         assert np.allclose(expected_disc, disc)
 
-    print('makeDisc(..) works as expected!')
+    print('make_disc(..) works as expected!')

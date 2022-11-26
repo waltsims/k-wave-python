@@ -13,7 +13,7 @@ from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.utils.maputils import makeDisc
+from kwave.utils.maputils import make_disc
 from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
@@ -47,7 +47,7 @@ def test_ivp_axisymmetric_simulation():
     # generated on a 2D grid that is doubled in size in the radial (y)
     # direction, and then trimmed so that only half the disc is retained
     source = kSource()
-    source.p0 = 10 * makeDisc(Nx, 2 * Ny, Nx//4 + 8, Ny + 1, 5)
+    source.p0 = 10 * make_disc(Nx, 2 * Ny, Nx // 4 + 8, Ny + 1, 5)
     source.p0 = source.p0[:, Ny:]
 
     # define a Cartesian sensor mask with points in the shape of a circle
