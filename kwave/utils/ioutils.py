@@ -8,7 +8,6 @@ import cv2
 import h5py
 import numpy as np
 
-from .misc import get_date_string
 from .conversionutils import cast_to_type
 from kwave.utils import dotdict
 
@@ -510,3 +509,7 @@ def load_image(path, is_gray):
     img = img.max() - img
     img = img * (1 / img.max())
     return img
+
+
+def get_date_string():
+    return datetime.now().strftime("%d-%b-%Y-%H-%M-%S")

@@ -1,16 +1,9 @@
-import os
 from operator import itemgetter
 from tempfile import gettempdir
 from warnings import warn
 
-import numpy as np
-from numpy.fft import ifftshift
-from scipy.io import savemat
-
-from kwave.kgrid import *
 from kwave.ktransducer import *
-from kwave.utils import dotdict
-import math
+from kwave.utils import dotdict, get_date_string
 import functools
 
 from kwave.utils import is_unix

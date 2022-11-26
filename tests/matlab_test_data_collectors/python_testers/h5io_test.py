@@ -10,6 +10,7 @@ def compare_h5_attributes(local_h5_path, ref_path):
         assert key in ref_h5.attrs.keys()
         assert np.isclose(local_h5.attrs[key], ref_h5.attrs[key])
 
+
 def compare_h5_values(local_h5_path, ref_path):
     local_h5 = h5py.File(local_h5_path, 'r')
     ref_h5 = h5py.File(ref_path, 'r')
@@ -62,7 +63,8 @@ def test_write_attributes(tmp_path_factory):
     idx = idx + 1
     pass
 
-def test_writeGrid(tmp_path_factory):
+
+def test_write_grid(tmp_path_factory):
     idx = 0
     for dim in range(1, 3):
         tmp_path = tmp_path_factory.mktemp("flags") / f"{idx}.h5"
@@ -77,6 +79,3 @@ def test_writeGrid(tmp_path_factory):
         compare_h5_values(tmp_path, ref_path)
         idx = idx + 1
     pass
-
-
-

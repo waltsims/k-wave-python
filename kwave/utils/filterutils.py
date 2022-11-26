@@ -1,6 +1,6 @@
 import numpy as np
 from kwave.utils.kutils import get_win
-from kwave.utils.misc import find_closest, sinc
+from .math import find_closest, sinc
 import scipy
 from scipy.signal import lfilter
 from scipy.fftpack import fft, ifft, ifftshift, fftshift, fftn, ifftn
@@ -462,6 +462,11 @@ def gaussian(x, magnitude=None, mean=0, variance=1):
 
     return gauss_distr
     # return magnitude * norm.pdf(x, loc=mean, scale=variance)
+    """ # Former impl. form Farid
+        if magnitude is None:
+        magnitude = np.sqrt(2 * np.pi * variance)
+    return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
+    """
 
 
 def gaussian_filter(signal, Fs, frequency, bandwidth):

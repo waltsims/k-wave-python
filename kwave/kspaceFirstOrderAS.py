@@ -6,6 +6,7 @@ from kwave.kspaceFirstOrder import *
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.utils import *
 from kwave.enums import DiscreteCosine
+from kwave.utils import sinc
 
 
 @kspaceFirstOrderC()

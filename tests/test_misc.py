@@ -1,4 +1,4 @@
-from kwave.utils.misc import round_even, round_odd, find_closest, focused_bowl_oneil
+from kwave.utils import round_even, round_odd, find_closest, focused_bowl_oneil
 
 import numpy as np
 

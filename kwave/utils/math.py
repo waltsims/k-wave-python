@@ -84,3 +84,60 @@ def fourier_shift(
     part_1_times_2 = part_1 * part_2
     result = ifft(part_1_times_2, axis=shift_dim).real
     return result
+
+
+def round_even(x):
+    """
+    Rounds to the nearest even integer.
+
+    Args:
+        x (float): inpput value
+
+    Returns:
+        (int): nearest odd integer.
+    """
+    return 2 * round(x / 2)
+
+
+def round_odd(x):
+    """
+    Rounds to the nearest odd integer.
+
+    Args:
+        x (float): input value
+
+    Returns:
+        (int): nearest odd integer.
+
+    """
+    return 2 * round((x + 1) / 2) - 1
+
+
+def find_closest(A, a):
+    """
+    find_closest returns the value and index of the item in A that is
+    closest to the value a. For vectors, value and index correspond to
+    the closest element in A. For matrices, value and index are row
+    vectors corresponding to the closest element from each column. For
+    N-D arrays, the function finds the closest value along the first
+    matrix dimension (singleton dimensions are removed before the
+    search). If there is more than one element with the closest value,
+    the index of the first one is returned.
+
+    Args:
+        A: matrix to search
+        a: value to find
+
+    Returns:
+        val
+        idx
+    """
+
+    assert isinstance(A, np.ndarray), "A must be an np.array"
+
+    idx = np.unravel_index(np.argmin(abs(A - a)), A.shape)
+    return A[idx], idx
+
+
+def sinc(x):
+    return np.sinc(x / np.pi)

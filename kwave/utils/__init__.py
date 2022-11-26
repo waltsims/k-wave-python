@@ -9,8 +9,7 @@ from kwave.utils.ioutils import *
 from kwave.utils.kutils import *
 from kwave.utils.maputils import *
 from kwave.utils.matrixutils import *
-from kwave.utils.misc import *
 from kwave.utils.pmlutils import *
 from kwave.utils.tictoc import *
-from kwave.utils.mathutils import *
+from kwave.utils.math import *
 from kwave.utils.osutils import *

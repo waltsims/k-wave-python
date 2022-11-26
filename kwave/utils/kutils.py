@@ -13,7 +13,8 @@ import warnings
 import scipy
 from numpy.fft import ifftshift, fft, ifft, fftshift
 
-from .misc import sinc, ndgrid, gaussian
+from .math import sinc
+from .maputils import ndgrid
 from .conversionutils import db2neper
 
 import math
@@ -676,6 +677,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
         # create the envelope
         if envelope == 'Gaussian':
+            from kwave.utils.filterutils import gaussian
             x_lim = 3
             window_x = np.arange(-x_lim, x_lim + 1e-8, 2 * x_lim / (len(tone_burst) - 1))
             window = gaussian(window_x, 1, 0, 1)
