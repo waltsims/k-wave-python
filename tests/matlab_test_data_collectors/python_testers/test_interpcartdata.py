@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import os
 
-from kwave.utils.interputils import interp_cart_data
+from kwave.utils.interp import interp_cart_data
 from kwave.kgrid import kWaveGrid
 
 

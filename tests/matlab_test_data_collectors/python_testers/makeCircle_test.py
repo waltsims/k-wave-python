@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from kwave.utils.mapgen import make_circle
 
-from kwave.utils.interputils import cart2grid
+from kwave.utils.interp import cart2grid
 
 from kwave.utils.conversion import scale_time
 

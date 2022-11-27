@@ -247,7 +247,7 @@ def scan_conversion(
 
     # TODO: move this import statement at the top of the file
     # Not possible now due to cyclic dependencies
-    from kwave.utils.interputils import interpolate2d_with_queries
+    from kwave.utils.interp import interpolate2d_with_queries
 
     # below part has some modifications
     # we flatten the _cart matrices and build queries

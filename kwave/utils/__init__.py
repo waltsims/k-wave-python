@@ -4,8 +4,8 @@ from kwave.utils.colormap import *
 from kwave.utils.conversion import *
 from kwave.utils.data import *
 from kwave.utils.filters import *
-from kwave.utils.interputils import *
-from kwave.utils.ioutils import *
+from kwave.utils.interp import *
+from kwave.utils.io import *
 from kwave.utils.kutils import *
 from kwave.utils.mapgen import *
 from kwave.utils.matrix import *

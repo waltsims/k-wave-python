@@ -1,4 +1,4 @@
-from kwave.utils.ioutils import *
+from kwave.utils.io import *
 import numpy as np
 from pathlib import Path
 
