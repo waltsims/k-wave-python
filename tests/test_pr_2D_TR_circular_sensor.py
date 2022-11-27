@@ -17,7 +17,7 @@ from kwave.ktransducer import *
 from kwave.utils import *
 from tests.diff_utils import compare_against_ref
 from kwave.kmedium import kWaveMedium
-from kwave.utils import dotdict
+from kwave.utils import smooth
 import os
 
 

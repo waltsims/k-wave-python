@@ -9,7 +9,7 @@ from kwave.ktransducer import NotATransducer
 from kwave.options import SimulationOptions
 from kwave.recorder import Recorder
 from kwave.utils import *
-from kwave.utils import dotdict, get_date_string
+from kwave.utils import dotdict, get_date_string, smooth
 
 
 @dataclass

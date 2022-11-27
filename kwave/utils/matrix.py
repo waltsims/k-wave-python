@@ -1,13 +1,11 @@
 from typing import Tuple
-from skimage.transform import resize as si_resize
 from scipy.interpolate import interpn
 import numpy as np
 import warnings
 
 from .tictoc import TicToc
 from .conversion import scale_time
-from .checks import num_dim2, is_number
-from .interputils import interpolate2d
+from .checks import num_dim2
 
 
 def expand_matrix(matrix, exp_coeff, edge_val=None):
@@ -147,50 +145,6 @@ def resize(mat, new_size, interp_mode='linear'):
     print(f'  completed in {scale_time(TicToc.toc())}')
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
-
-
-def smooth(mat, restore_max=False, window_type='Blackman'):
-    """
-        Smooth a matrix
-    Returns:
-
-    """
-    DEF_USE_ROTATION = True
-
-    assert is_number(mat) and np.all(~np.isinf(mat))
-    assert isinstance(restore_max, bool)
-    assert isinstance(window_type, str)
-
-    # get the grid size
-    grid_size = mat.shape
-
-    # remove singleton dimensions
-    if num_dim2(mat) != len(grid_size):
-        grid_size = np.squeeze(grid_size)
-
-    # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
-    # even grid sizes to ensure the DC component of the window has a value of
-    # unity
-    window_symmetry = (np.array(grid_size) % 2).astype(bool)
-
-    # get the window, taking the absolute value to discard machine precision
-    # negative values
-    from .kutils import get_win
-    win, _ = get_win(grid_size, type_=window_type,
-                     rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
-    win = np.abs(win)
-
-    # rotate window if input mat is (1, N)
-    if mat.shape[0] == 1:  # is row?
-        win = win.T
-
-    # apply the filter
-    mat_sm = np.real(np.fft.ifftn(np.fft.fftn(mat) * np.fft.ifftshift(win)))
-
-    # restore magnitude if required
-    if restore_max:
-        mat_sm = (np.abs(mat).max() / np.abs(mat_sm).max()) * mat_sm
-    return mat_sm
 
 
 def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):

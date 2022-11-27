@@ -8,14 +8,10 @@
 """
 # noinspection PyUnresolvedReferences
 import setup_test
-import os
 from tempfile import gettempdir
 
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.mapgen import make_disc
-from kwave.utils.filters import smooth
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
 from kwave.kmedium import kWaveMedium

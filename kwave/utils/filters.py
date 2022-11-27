@@ -1,5 +1,6 @@
 import numpy as np
 from kwave.utils.kutils import get_win
+from . import is_number, num_dim2
 from .math import find_closest, sinc
 import scipy
 from scipy.signal import lfilter
@@ -720,7 +721,7 @@ def apply_filter(signal, Fs, cutoff_f, filter_type, zero_phase=False, transition
     return filtered_signal[np.newaxis]
 
 
-def smooth(A, restore_max=False, window_type="Blackman"):
+def smooth(a, restore_max=False, window_type='Blackman'):
     """
     Smooth a matrix.
 
@@ -730,40 +731,46 @@ def smooth(A, restore_max=False, window_type="Blackman"):
     Blackman window is used.
 
     Args:
-        A: spatial distribution to smooth
+        a: spatial distribution to smooth
         restore_max:  Boolean controlling whether the maximum value is restored after smoothing(default=false).
         window_type:  shape of the smoothing window; any valid inputs to get_win are supported(default='Blackman').
 
     OUTPUTS:
     A_sm - smoothed
-   """
+    """
+    DEF_USE_ROTATION = True
+
+    assert is_number(a) and np.all(~np.isinf(a))
+    assert isinstance(restore_max, bool)
+    assert isinstance(window_type, str)
+
     # get the grid size
-    grid_size = A.shape
+    grid_size = a.shape
 
     # remove singleton dimensions
-    if num_dim(A) is not len(grid_size):
-        A = A.squeeze()
-        grid_size = A.shape
+    if num_dim2(a) != len(grid_size):
+        grid_size = np.squeeze(grid_size)
 
     # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
     # even grid sizes to ensure the DC component of the window has a value of
     # unity
-    window_symmetry = [bool(n % 2) for n in grid_size]
+    window_symmetry = (np.array(grid_size) % 2).astype(bool)
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    win_tmp, _ = get_win(grid_size, window_type, rotation=True, symmetric=window_symmetry)
-    win = abs(win_tmp)
+    from .kutils import get_win
+    win, _ = get_win(grid_size, type_=window_type,
+                     rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
+    win = np.abs(win)
 
-    # rotate window if input A is (1, N)
-    if win.shape[0] == 1:
-        win = win.transpose()
+    # rotate window if input mat is (1, N)
+    if a.shape[0] == 1:  # is row?
+        win = win.T
 
     # apply the filter
-    A_sm = np.real(ifftn(fftn(A) * ifftshift(win)))
+    a_sm = np.real(np.fft.ifftn(np.fft.fftn(a) * np.fft.ifftshift(win)))
 
     # restore magnitude if required
     if restore_max:
-        A_sm = (np.max(abs(A)) / np.max(abs(A_sm))) * A_sm
-
-    return A_sm
+        a_sm = (np.abs(a).max() / np.abs(a_sm).max()) * a_sm
+    return a_sm
