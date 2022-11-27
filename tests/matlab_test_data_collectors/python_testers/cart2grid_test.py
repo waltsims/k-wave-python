@@ -2,15 +2,11 @@ from unittest.mock import Mock
 
 from kwave.utils.interputils import cart2grid
 
-from kwave.utils.conversionutils import scale_time
-
 from scipy.io import loadmat
 import numpy as np
 import os
-import pytest
 
 
-@pytest.mark.skip(reason="Missing cart2grid collector")
 def test_cart2grid():
     collected_values_folder = os.path.join(os.path.curdir, 'collectedValues/cart2grid')
     num_collected_values = len(os.listdir(collected_values_folder))
@@ -47,8 +43,8 @@ def test_cart2grid():
 
         grid_data, order_index, reorder_index = cart2grid(kgrid, cart_data, axisymmetric=is_axisymmetric)
 
-        assert np.allclose(expected_grid_data, grid_data)
-        assert np.allclose(expected_order_index, order_index)
-        assert np.allclose(expected_reorder_index, reorder_index)
+        assert np.allclose(expected_grid_data, grid_data), f"Failed on example {i}"
+        assert np.allclose(expected_order_index, order_index), f"Failed on example {i}"
+        assert np.allclose(expected_reorder_index, reorder_index), f"Failed on example {i}"
 
     print('cart2grid(..) works as expected!')
