@@ -1,3 +1,4 @@
+import math
 from typing import Optional
 
 import numpy as np
@@ -24,23 +25,6 @@ def rwh_primes(n):
         if sieve[i]:
             sieve[2*i*(i+1)::2*i+1] = bytearray((n//2-2*i*(i+1))//(2*i+1)+1)
     return [2, *compress(range(3, n, 2), sieve[1:])]
-
-
-def check_divisible(number: float, divider: float) -> bool:
-    """
-        Checks whether number is divisible by divider without any remainder
-        Why do we need such a function? -> Because due to floating point precision we
-        experience rounding errors while using standard modulo operator with floating point numbers
-    Args:
-        number: Number that's supposed to be divided
-        divider: Divider that should devide the number
-
-    Returns:
-
-    """
-    result = number / divider
-    after_decimal = result % 1
-    return after_decimal == 0
 
 
 def fourier_shift(
@@ -141,3 +125,23 @@ def find_closest(A, a):
 
 def sinc(x):
     return np.sinc(x / np.pi)
+
+
+def primefactors(n):
+    # even number divisible
+    factors = []
+    while n % 2 == 0:
+        factors.append(2),
+        n = n / 2
+
+    # n became odd
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+
+        while (n % i == 0):
+            factors.append(i)
+            n = n / i
+
+    if n > 2:
+        factors.append(n)
+
+    return factors

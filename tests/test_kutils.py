@@ -1,9 +1,10 @@
-from kwave.utils.kutils import check_stability, primefactors, tone_burst, get_alpha_filter, focus
-from kwave import kWaveMedium, kWaveGrid
+from kwave import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ktransducer import *
 
 import numpy as np
+
+from kwave.utils import primefactors
 
 
 def test_check_stability():
