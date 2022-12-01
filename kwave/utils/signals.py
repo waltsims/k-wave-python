@@ -578,7 +578,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     indexes = [round((kgrid.N[idx] - filter_size[idx]) / 2) for idx in range(len(filter_size))]
 
     if dim == 1:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0]] = filter_sec
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0]] = np.squeeze(filter_sec)
     elif dim == 2:
         alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1]] = filter_sec
     elif dim == 3:
