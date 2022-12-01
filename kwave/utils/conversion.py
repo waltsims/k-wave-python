@@ -3,8 +3,10 @@ from math import floor
 from typing import Optional, Tuple
 
 import numpy as np
+from numpy import ndarray
 from scipy.interpolate import interp1d
 
+from kwave import kWaveGrid
 from kwave.utils.tictoc import TicToc
 
 
@@ -314,3 +316,40 @@ def revolve2D(mat2D):
     # update command line status
     print(f'  completed in {scale_time(TicToc.toc())}s')
     return mat3D
+
+
+def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):
+    """
+    Returns the Cartesian coordinates of the non-zero points of a binary grid.
+
+    DESCRIPTION:
+        grid2cart returns the set of Cartesian coordinates corresponding to
+        the non-zero elements in the binary matrix grid_data, in the
+        coordinate framework defined in kgrid.
+
+    USAGE:
+        [cart_data, order_index] = grid2cart(kgrid, grid_data)
+
+    args:
+        input_kgrid:       k-Wave grid object returned by kWaveGrid
+        grid_selection:    binary grid with the same dimensions as the k-Wave grid kgrid
+
+    Returns:
+        cart_data:    1 x N, 2 x N, or 3 x N (for 1, 2, and 3
+                      dimensions) array of Cartesian sensor points
+        order_index:  returns a list of indices of the returned card_data coordinates.
+    """
+    grid_data = np.array((grid_selection != 0), dtype=bool)
+    cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
+
+    if input_kgrid.dim > 0:
+        cart_data[0, :] = input_kgrid.x[grid_data]
+    if input_kgrid.dim > 1:
+        cart_data[1, :] = input_kgrid.y[grid_data]
+    if input_kgrid.dim > 2:
+        cart_data[2, :] = input_kgrid.z[grid_data]
+    if 0 <= input_kgrid.dim > 3:
+        raise ValueError("kGrid with unsupported size passed.")
+
+    order_index = np.argwhere(grid_data.squeeze() != 0)
+    return cart_data.squeeze(), order_index

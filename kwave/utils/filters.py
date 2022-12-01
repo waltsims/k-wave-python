@@ -1,15 +1,16 @@
-import numpy as np
-from kwave.utils.kutils import get_win
-from . import is_number, num_dim2
-from .math import find_closest, sinc
-import scipy
-from scipy.signal import lfilter
-from scipy.fftpack import fft, ifft, ifftshift, fftshift, fftn, ifftn
 import math
 from math import pi
 
-from kwave.utils.conversion import scale_SI
+import numpy as np
+import scipy
+from scipy.fftpack import fft, ifft, ifftshift, fftshift
+from scipy.signal import lfilter
+
 from kwave.utils.checks import num_dim, num_dim2
+from kwave.utils.conversion import scale_SI
+from kwave.utils.signals import get_win
+from . import is_number
+from .math import find_closest, sinc
 
 
 # Compute the next highest power of 2 of a 32–bit number `n`
@@ -227,7 +228,7 @@ def extract_amp_phase(data, Fs, source_freq, dim='auto', fft_padding=3, window='
         amp = func_as[:, :, :, f_index]
         phase = func_ps[:, :, :, f_index]
     else:
-        raise ValueError('dim must be 0, 1, 2, or 3');
+        raise ValueError('dim must be 0, 1, 2, or 3')
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
 
@@ -758,7 +759,7 @@ def smooth(a, restore_max=False, window_type='Blackman'):
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    from .kutils import get_win
+    from .signals import get_win
     win, _ = get_win(grid_size, type_=window_type,
                      rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)

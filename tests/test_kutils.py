@@ -1,5 +1,6 @@
 from kwave import kWaveMedium
 from kwave.ktransducer import *
+from kwave.reconstruction.beamform import focus
 from kwave.utils import primefactors
 
 

@@ -1,11 +1,12 @@
-from typing import Tuple
-from scipy.interpolate import interpn
-import numpy as np
 import warnings
+from typing import Tuple
 
-from .tictoc import TicToc
-from .conversion import scale_time
+import numpy as np
+from scipy.interpolate import interpn
+
 from .checks import num_dim2
+from .conversion import scale_time
+from .tictoc import TicToc
 
 
 def expand_matrix(matrix, exp_coeff, edge_val=None):
@@ -209,3 +210,9 @@ def max_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
     numpy_index = np.unravel_index(linear_index, matrix.shape)
     matlab_index = tuple(idx + 1 for idx in numpy_index)
     return max_val, matlab_index
+
+
+def broadcast_axis(data, ndims, axis):
+    newshape = [1] * ndims
+    newshape[axis] = -1
+    return data.reshape(*newshape)

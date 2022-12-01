@@ -4,9 +4,9 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from kwave.utils.tictoc import TicToc
-from kwave.utils.checks import num_dim
+
 from kwave.utils.conversion import scale_time
+from kwave.utils.tictoc import TicToc
 
 
 def sortrows(arr: np.ndarray, index: int):
@@ -389,7 +389,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     if kgrid.dim not in [2, 3]:
         raise ValueError('Data must be two- or three-dimensional.')
 
-    from kwave.utils.kutils import grid2cart
+    from kwave.utils import grid2cart
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
 
     # nearest neighbour interpolation of the data points

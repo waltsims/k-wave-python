@@ -1,19 +1,17 @@
 from math import floor
 from typing import Union, List, Optional
-from numpy import ndarray
-from kwave.utils.matrix import unflatten_matlab_mask, matlab_mask
 
-from kwave.utils.checks import num_dim
-from kwave.utils.conversion import scale_SI
-
-from kwave.kgrid import kWaveGrid
 import numpy as np
-import warnings
 import scipy
 from numpy.fft import ifftshift, fft, ifft
 
-from .math import sinc
+from kwave.kgrid import kWaveGrid
+from kwave.utils.checks import num_dim
+from kwave.utils.conversion import scale_SI
+from kwave.utils.matrix import unflatten_matlab_mask, matlab_mask
 from .mapgen import ndgrid
+from .math import sinc
+from .matrix import broadcast_axis
 
 
 def add_noise(signal, snr, mode="rms"):
@@ -49,43 +47,6 @@ def add_noise(signal, snr, mode="rms"):
     signal = signal + noise
 
     return signal
-
-
-def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):
-    """
-    Returns the Cartesian coordinates of the non-zero points of a binary grid.
-
-    DESCRIPTION:
-        grid2cart returns the set of Cartesian coordinates corresponding to
-        the non-zero elements in the binary matrix grid_data, in the
-        coordinate framework defined in kgrid.
-
-    USAGE:
-        [cart_data, order_index] = grid2cart(kgrid, grid_data)
-
-    args:
-        input_kgrid:       k-Wave grid object returned by kWaveGrid
-        grid_selection:    binary grid with the same dimensions as the k-Wave grid kgrid
-
-    Returns:
-        cart_data:    1 x N, 2 x N, or 3 x N (for 1, 2, and 3
-                      dimensions) array of Cartesian sensor points
-        order_index:  returns a list of indices of the returned card_data coordinates.
-    """
-    grid_data = np.array((grid_selection != 0), dtype=bool)
-    cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
-
-    if input_kgrid.dim > 0:
-        cart_data[0, :] = input_kgrid.x[grid_data]
-    if input_kgrid.dim > 1:
-        cart_data[1, :] = input_kgrid.y[grid_data]
-    if input_kgrid.dim > 2:
-        cart_data[2, :] = input_kgrid.z[grid_data]
-    if 0 <= input_kgrid.dim > 3:
-        raise ValueError("kGrid with unsupported size passed.")
-
-    order_index = np.argwhere(grid_data.squeeze() != 0)
-    return cart_data.squeeze(), order_index
 
 
 def get_win(N: Union[int, List[int]],
@@ -617,7 +578,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     indexes = [round((kgrid.N[idx] - filter_size[idx]) / 2) for idx in range(len(filter_size))]
 
     if dim == 1:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0]]
+        alpha_filter[indexes[0]: indexes[0] + filter_size[0]] = filter_sec
     elif dim == 2:
         alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1]] = filter_sec
     elif dim == 3:
@@ -629,68 +590,6 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     print(f'  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
 
     return alpha_filter
-
-
-def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
-    """
-        focus Create input signal based on source mask and focus position.
-        focus takes a single input signal and a source mask and creates an
-        input signal matrix (with one input signal for each source point).
-        The appropriate time delays required to focus the signals at a given
-        position in Cartesian space are automatically added based on the user
-        inputs for focus_position and sound_speed.
-
-    Args:
-         kgrid:             k-Wave grid object returned by kWaveGrid
-         input_signal:      single time series input
-         source_mask:       matrix specifying the positions of the time
-                            varying source distribution (i.e., source.p_mask
-                            or source.u_mask)
-         focus_position:    position of the focus in Cartesian coordinates
-         sound_speed:       scalar sound speed
-
-    Returns:
-         input_signal_mat:  matrix of time series following the source points
-    """
-
-    assert kgrid.t_array != 'auto', "kgrid.t_array must be defined."
-    if isinstance(sound_speed, int):
-        sound_speed = float(sound_speed)
-
-    assert isinstance(sound_speed, float), "sound_speed must be a scalar."
-
-    positions = [kgrid.x.flatten(), kgrid.y.flatten(), kgrid.z.flatten()]
-
-    # filter_positions
-    positions = [position for position in positions if (position != np.nan).any()]
-    assert len(positions) == kgrid.dim
-    positions = np.array(positions)
-
-    if isinstance(focus_position, list):
-        focus_position = np.array(focus_position)
-    assert isinstance(focus_position, np.ndarray)
-
-    dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
-
-    # distance to delays
-    delay = int(np.round(dist / (kgrid.dt * sound_speed)))
-    max_delay = np.max(delay)
-    rel_delay = -(delay - max_delay)
-
-    signal_mat = np.zeros((rel_delay.size, input_signal.size + max_delay))
-
-    # for src_idx, delay in enumerate(rel_delay):
-    #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
-    # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
-
-    warnings.warn("This method is not fully migrated, might be depricated and is untested.", PendingDeprecationWarning)
-    return signal_mat
-
-
-def broadcast_axis(data, ndims, axis):
-    newshape = [1] * ndims
-    newshape[axis] = -1
-    return data.reshape(*newshape)
 
 
 def get_wave_number(Nx, dx, dim):
@@ -757,6 +656,7 @@ def gradient_spect(f, dn, dim=None, deriv_order=1):
             # get the wave number
             kx = get_wave_number(sz[dim], dn[dim], dim)
             # calculate derivative and assign output
+            # TODO: replace this with numpy broadcasting
             kx = broadcast_axis(kx, num_dim(f), dim)
             grads.append(np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim)))
 

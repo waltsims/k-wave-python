@@ -1,10 +1,13 @@
+import warnings
+
 import numpy as np
-from scipy.signal import hilbert
-from scipy.interpolate import interp1d
-from uff import UFF, ChannelData
 from matplotlib import pyplot as plt
-import kwave.reconstruction.tools as tools
+from scipy.interpolate import interp1d
+from scipy.signal import hilbert
+from uff import ChannelData
 from uff.position import Position
+
+import kwave.reconstruction.tools as tools
 from kwave.reconstruction.shifted_transform import ShiftedTransform
 
 
@@ -117,3 +120,59 @@ def beamform(channel_data: ChannelData):
     plt.title(channel_data.description)
     plt.colorbar()
     plt.show()
+
+
+def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
+    """
+        focus Create input signal based on source mask and focus position.
+        focus takes a single input signal and a source mask and creates an
+        input signal matrix (with one input signal for each source point).
+        The appropriate time delays required to focus the signals at a given
+        position in Cartesian space are automatically added based on the user
+        inputs for focus_position and sound_speed.
+
+    Args:
+         kgrid:             k-Wave grid object returned by kWaveGrid
+         input_signal:      single time series input
+         source_mask:       matrix specifying the positions of the time
+                            varying source distribution (i.e., source.p_mask
+                            or source.u_mask)
+         focus_position:    position of the focus in Cartesian coordinates
+         sound_speed:       scalar sound speed
+
+    Returns:
+         input_signal_mat:  matrix of time series following the source points
+    """
+
+    assert kgrid.t_array != 'auto', "kgrid.t_array must be defined."
+    if isinstance(sound_speed, int):
+        sound_speed = float(sound_speed)
+
+    assert isinstance(sound_speed, float), "sound_speed must be a scalar."
+
+    positions = [kgrid.x.flatten(), kgrid.y.flatten(), kgrid.z.flatten()]
+
+    # filter_positions
+    positions = [position for position in positions if (position != np.nan).any()]
+    assert len(positions) == kgrid.dim
+    positions = np.array(positions)
+
+    if isinstance(focus_position, list):
+        focus_position = np.array(focus_position)
+    assert isinstance(focus_position, np.ndarray)
+
+    dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
+
+    # distance to delays
+    delay = int(np.round(dist / (kgrid.dt * sound_speed)))
+    max_delay = np.max(delay)
+    rel_delay = -(delay - max_delay)
+
+    signal_mat = np.zeros((rel_delay.size, input_signal.size + max_delay))
+
+    # for src_idx, delay in enumerate(rel_delay):
+    #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
+    # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
+
+    warnings.warn("This method is not fully migrated, might be depricated and is untested.", PendingDeprecationWarning)
+    return signal_mat
