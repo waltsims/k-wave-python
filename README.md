@@ -17,7 +17,7 @@ Currently, we are looking for beta testers on Windows.
 
 
 ## Getting started
-![](docs/images/example_bmode.png)
+![](_static/example_bmode.png)
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
 
