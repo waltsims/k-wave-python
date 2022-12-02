@@ -6,8 +6,8 @@ build-backend = "hatchling.build"
 name = "k-Wave-python"
 dynamic = ["version"]
 description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
-readme = "README.md"
-license = {file = "LICENSE"}
+readme = "docs/README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
