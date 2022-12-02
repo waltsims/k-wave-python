@@ -34,6 +34,7 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
     Returns:
         expanded matrix
     """
+
     opts = {}
     matrix = np.squeeze(matrix)
 
@@ -108,6 +109,7 @@ def resize(mat, new_size, interp_mode='linear'):
         res_mat:            "resized" matrix
 
     """
+
     # start the timer
     TicToc.tic()
 
@@ -183,6 +185,7 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
         fx, fy, ...         gradient
 
     """
+
     if deriv_order:
         warnings.warn("deriv_order is no longer a supported argument.", DeprecationWarning)
     if accuracy_order:
