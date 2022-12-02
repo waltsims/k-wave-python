@@ -4,9 +4,9 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from kwave.utils.tictoc import TicToc
-from kwave.utils.checkutils import num_dim
+
 from kwave.utils.conversionutils import scale_time
+from kwave.utils.tictoc import TicToc
 
 
 def sortrows(arr: np.ndarray, index: int):
@@ -213,27 +213,27 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
         if not axisymmetric:
             data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
         else:
-            data_y = data_y + 1
+            data_y = data_y
 
         # check if the points all lie within the grid
-        if data_x.max() > kgrid.Nx or data_y.max() > kgrid.Ny or data_x.min() < 1 or data_y.min() < 1:
+        if data_x.max() >= kgrid.Nx or data_y.max() >= kgrid.Ny or data_x.min() < 0 or data_y.min() < 0:
             raise AssertionError('Cartesian points must lie within the grid defined by kgrid.')
 
         # create empty grid
-        grid_data = np.zeros((kgrid.Nx, kgrid.Ny))
-
-        # create index variable
-        point_index = np.arange(1, data_x.size + 1, dtype=int)
+        grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny))
 
         # map values
         for data_index in range(data_x.size):
-            grid_data[data_x[data_index], data_y[data_index]] = point_index[data_index]
+            try:
+                grid_data[data_x[data_index], data_y[data_index]] = int(data_index)
+            except:
+                print("nice try")
 
         # extract reordering index
         reorder_index = grid_data.flatten(order='F')[
-            grid_data.flatten(order='F') != 0
+            grid_data.flatten(order='F') != -1
             ]
-        reorder_index = reorder_index[:, None]  # [N] => [N, 1]
+        reorder_index = reorder_index[:, None] + 1  # [N] => [N, 1]
 
     elif kgrid.dim == 3:
 
@@ -254,12 +254,12 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
         data_z = data_z + np.floor(kgrid.Nz // 2).astype(int)
 
         # check if the points all lie within the grid
-        assert 1 <= data_x.min() and 1 <= data_y.min() and 1 <= data_z.min() and \
-               data_x.max() <= kgrid.Nx and data_y.max() <= kgrid.Ny and data_z.max() <= kgrid.Nz, \
+        assert 0 <= data_x.min() and 0 <= data_y.min() and 0 <= data_z.min() and \
+               data_x.max() < kgrid.Nx and data_y.max() < kgrid.Ny and data_z.max() < kgrid.Nz, \
             "Cartesian points must lie within the grid defined by kgrid."
 
         # create empty grid
-        grid_data = np.zeros((kgrid.Nx, kgrid.Ny, kgrid.Nz), dtype=int)
+        grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny, kgrid.Nz), dtype=int)
 
         # create index variable
         point_index = np.arange(1, data_x.size + 1)
@@ -270,7 +270,7 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
 
         # extract reordering index
         reorder_index = grid_data.flatten(order='F')[
-            grid_data.flatten(order='F') != 0
+            grid_data.flatten(order='F') != -1
             ]
         reorder_index = reorder_index[:, None, None]  # [N] => [N, 1, 1]
     else:
@@ -286,14 +286,18 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
     order_index = order_index[:, None]  # [N] => [N, 1]
 
     # reset binary grid values
-    grid_data[grid_data != 0] = 1
+    if kgrid.dim == 1:
+        grid_data[grid_data != 0] = 1
+    else:
+        grid_data[grid_data != -1] = 1
+        grid_data[grid_data == -1] = 0
 
     # check if any Cartesian points have been mapped to the same grid point,
     # thereby reducing the total number of points
     num_discarded_points = cart_data.shape[1] - np.sum(grid_data)
     if num_discarded_points != 0:
         print(f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
-    return grid_data, order_index, reorder_index
+    return grid_data.astype(np.int), order_index, reorder_index
 
 
 def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
