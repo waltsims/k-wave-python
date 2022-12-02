@@ -773,7 +773,7 @@ class kWaveSimulation(object):
                             sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
         
                             # reorder p0 based on the order_index
-                            sensor.time_reversal_boundary_data = sortrows(sensor.time_reversal_boundary_data, new_col_pos);
+                            sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
         
                             # remove the reordering data
                             sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
@@ -1090,7 +1090,8 @@ class kWaveSimulation(object):
         # check input options for data streaming *****
         if opt.stream_to_disk:
             if not self.use_sensor or self.time_rev:
-                raise ValueError('The optional input ''StreamToDisk'' is currently only compatible with forward simulations using a non-zero sensor mask.');
+                raise ValueError(
+                    'The optional input ''StreamToDisk'' is currently only compatible with forward simulations using a non-zero sensor mask.')
             elif self.sensor.record is not None and self.sensor.record.ismember(self.record.flags[1:]).any():
                 raise ValueError('The optional input ''StreamToDisk'' is currently only compatible with sensor.record = {''p''} (the default).')
 
@@ -1255,12 +1256,12 @@ class kWaveSimulation(object):
         # smooth the sound speed distribution if required
         if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
             print('  smoothing sound speed distribution...')
-            ev('medium.sound_speed = smooth(medium.sound_speed);')
+            self.medium.sound_speed = smooth(self.medium.sound_speed)
 
         # smooth the ambient density distribution if required
         if opt.smooth_rho0 and num_dim2(self.medium.density) == k_dim and self.medium.density.size > 1:
             print('smoothing density distribution...')
-            ev('medium.density = smooth(medium.density);')
+            self.medium.density = smooth(self.medium.density)
 
     def create_sensor_variables(self) -> None:
         """

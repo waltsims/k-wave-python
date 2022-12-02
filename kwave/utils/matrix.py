@@ -2,7 +2,7 @@ import warnings
 from typing import Tuple
 
 import numpy as np
-from scipy.interpolate import interpn
+from scipy.interpolate import interpn, interp1d
 
 from .checks import num_dim2
 from .conversion import scale_time
@@ -216,3 +216,35 @@ def broadcast_axis(data, ndims, axis):
     newshape = [1] * ndims
     newshape[axis] = -1
     return data.reshape(*newshape)
+
+
+def revolve2d(mat2D):
+    # start timer
+    TicToc.tic()
+
+    # update command line status
+    print('Revolving 2D matrix to form a 3D matrix...')
+
+    # get size of matrix
+    m, n = mat2D.shape
+
+    # create the reference axis for the 2D image
+    r_axis_one_sided = np.arange(0, n)
+    r_axis_two_sided = np.arange(-(n - 1), n)
+
+    # compute the distance from every pixel in the z-y cross-section of the 3D
+    # matrix to the rotation axis
+    z, y = np.meshgrid(r_axis_two_sided, r_axis_two_sided)
+    r = np.sqrt(y ** 2 + z ** 2)
+
+    # create empty image matrix
+    mat3D = np.zeros((m, 2 * n - 1, 2 * n - 1))
+
+    # loop through each cross section and create 3D matrix
+    for x_index in range(m):
+        interp = interp1d(x=r_axis_one_sided, y=mat2D[x_index, :], kind='linear', bounds_error=False, fill_value=0)
+        mat3D[x_index, :, :] = interp(r)
+
+    # update command line status
+    print(f'  completed in {scale_time(TicToc.toc())}s')
+    return mat3D

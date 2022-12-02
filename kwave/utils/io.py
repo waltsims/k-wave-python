@@ -9,7 +9,7 @@ import h5py
 import numpy as np
 
 from .conversion import cast_to_type
-from kwave.utils import dotdict
+from .dotdictionary import dotdict
 
 
 def get_h5_literals():

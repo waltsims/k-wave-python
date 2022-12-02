@@ -5,12 +5,12 @@ from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
 
-from kwave.utils.conversion import scale_time
-from kwave.utils.tictoc import TicToc
+from .conversion import scale_time
+from .tictoc import TicToc
 
 
-def sortrows(arr: np.ndarray, index: int):
-    assert arr.ndim == 2, "'sortrows' currently supports only 2-dimensional matrices"
+def sort_rows(arr: np.ndarray, index: int):
+    assert arr.ndim == 2, "'sort_rows' currently supports only 2-dimensional matrices"
     return arr[arr[:, index].argsort(),]
 
 
@@ -281,7 +281,7 @@ def cart2grid(kgrid, cart_data, axisymmetric=False):
     order_index = np.ones((reorder_index.size, 2), dtype=int)
     order_index[:, 0] = np.squeeze(reorder_index)
     order_index[:, 1] = np.arange(1, reorder_index.size + 1)
-    order_index = sortrows(order_index, 0)
+    order_index = sort_rows(order_index, 0)
     order_index = order_index[:, 1]
     order_index = order_index[:, None]  # [N] => [N, 1]
 
@@ -412,7 +412,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             new_col_pos = -1
 
             # reorder the data set based on distance information
-            cart_sensor_data_ro = sortrows(cart_sensor_data_ro, new_col_pos)
+            cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
 
             # linearly interpolate between the two closest points
             perc = cart_sensor_data_ro[2, new_col_pos] / (
@@ -433,7 +433,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
         #         cart_sensor_data_ro[:, new_col_pos] = dist
         #
         #         # reorder the data set based on distance information
-        #         cart_sensor_data_ro = sortrows(cart_sensor_data_ro, new_col_pos)
+        #         cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
         #
         #         # linearly interpolate between the two closest points
         #         perc = cart_sensor_data_ro[1, new_col_pos] / (cart_sensor_data_ro[0, new_col_pos] + cart_sensor_data_ro[1, new_col_pos] )

@@ -1,19 +1,16 @@
 import math
+import warnings
 from math import floor
 from typing import Tuple, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-
-from kwave.utils.tictoc import TicToc
-
-from kwave.utils.matrix import matlab_find, matlab_assign, max_nd
-from kwave.utils.conversion import scale_SI
 from scipy import optimize
-import warnings
 
-from kwave.utils.conversion import db2neper, neper2db
+from .conversion import scale_SI, db2neper, neper2db
+from .matrix import matlab_find, matlab_assign, max_nd
+from .tictoc import TicToc
 
 
 def get_spaced_points(start, stop, n=100, spacing='linear'):

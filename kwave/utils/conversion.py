@@ -1,13 +1,10 @@
 import math
 from math import floor
-from typing import Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-from scipy.interpolate import interp1d
 
 from kwave import kWaveGrid
-from kwave.utils.tictoc import TicToc
 
 
 def scale_time(seconds):
@@ -209,113 +206,10 @@ def cast_to_type(data, matlab_type: str):
     return data.astype(type_map[matlab_type])
 
 
-def scan_conversion(
-    scan_lines: np.ndarray,
-    steering_angles,
-    image_size: Tuple[float, float],
-    c0,
-    dt,
-    resolution: Optional[Tuple[int, int]]
-) -> np.ndarray:
-
-    if resolution is None:
-        resolution = (256, 256)  # in pixels
-
-    x_resolution, y_resolution = resolution
-
-    # assign the inputs
-    x, y = image_size
-
-    # start the timer
-    TicToc.tic()
-
-    # update command line status
-    print('Computing ultrasound scan conversion...')
-
-    # extract a_line parameters
-    Nt = scan_lines.shape[1]
-
-    # calculate radius variable based on the sound speed in the medium and the
-    # round trip distance
-    r = c0 * np.arange(1, Nt + 1) * dt / 2     # [m]
-
-    # create regular Cartesian grid to remap to
-    pos_vec_y_new = np.linspace(0, 1, y_resolution) * y - y / 2
-    pos_vec_x_new = np.linspace(0, 1, x_resolution) * x
-    [pos_mat_x_new, pos_mat_y_new] = np.array(np.meshgrid(pos_vec_x_new, pos_vec_y_new, indexing='ij'))
-
-    # convert new points to polar coordinates
-    [th_cart, r_cart] = cart2pol(pos_mat_x_new, pos_mat_y_new)
-
-    # TODO: move this import statement at the top of the file
-    # Not possible now due to cyclic dependencies
-    from kwave.utils.interp import interpolate2d_with_queries
-
-    # below part has some modifications
-    # we flatten the _cart matrices and build queries
-    # then we get values at the query locations
-    # and reshape the values to the desired size
-    # These three steps can be accomplished in one step in Matlab
-    # However, we don't want to add custom logic to the `interpolate2D_with_queries` method.
-
-    # Modifications -start
-    queries = np.array([r_cart.flatten(), th_cart.flatten()]).T
-
-    b_mode = interpolate2d_with_queries(
-        [r, 2 * np.pi * steering_angles / 360],
-        scan_lines.T,
-        queries,
-        method='linear',
-        copy_nans=False
-    )
-    image_size_points = (len(pos_vec_x_new), len(pos_vec_y_new))
-    b_mode = b_mode.reshape(image_size_points)
-    # Modifications -end
-
-    b_mode[np.isnan(b_mode)] = 0
-
-    # update command line status
-    print(f'  completed in {scale_time(TicToc.toc())}')
-
-    return b_mode
-
-
 def cart2pol(x, y):
     rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
     return phi, rho
-
-
-def revolve2D(mat2D):
-    # start timer
-    TicToc.tic()
-
-    # update command line status
-    print('Revolving 2D matrix to form a 3D matrix...')
-
-    # get size of matrix
-    m, n = mat2D.shape
-
-    # create the reference axis for the 2D image
-    r_axis_one_sided = np.arange(0, n)
-    r_axis_two_sided = np.arange(-(n-1), n)
-
-    # compute the distance from every pixel in the z-y cross-section of the 3D
-    # matrix to the rotation axis
-    z, y = np.meshgrid(r_axis_two_sided, r_axis_two_sided)
-    r = np.sqrt(y**2 + z**2)
-
-    # create empty image matrix
-    mat3D = np.zeros((m, 2 * n - 1, 2 * n - 1))
-
-    # loop through each cross section and create 3D matrix
-    for x_index in range(m):
-        interp = interp1d(x=r_axis_one_sided, y=mat2D[x_index, :], kind='linear', bounds_error=False, fill_value=0)
-        mat3D[x_index, :, :] = interp(r)
-
-    # update command line status
-    print(f'  completed in {scale_time(TicToc.toc())}s')
-    return mat3D
 
 
 def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):

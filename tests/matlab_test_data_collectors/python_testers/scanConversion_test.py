@@ -1,9 +1,10 @@
-from kwave.utils import scan_conversion
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.reconstruction.beamform import scan_conversion
 
 
 def test_scanConversion():

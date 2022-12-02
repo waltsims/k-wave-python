@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, pi
 from typing import Union, List, Optional
 
 import numpy as np
@@ -6,12 +6,11 @@ import scipy
 from numpy.fft import ifftshift, fft, ifft
 
 from kwave.kgrid import kWaveGrid
-from kwave.utils.checks import num_dim
-from kwave.utils.conversion import scale_SI
-from kwave.utils.matrix import unflatten_matlab_mask, matlab_mask
+from .checks import num_dim
+from .conversion import scale_SI
 from .mapgen import ndgrid
 from .math import sinc
-from .matrix import broadcast_axis
+from .matrix import unflatten_matlab_mask, matlab_mask, broadcast_axis
 
 
 def add_noise(signal, snr, mode="rms"):
@@ -370,12 +369,11 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         sample_freq: sampling frequency [Hz]
         signal_freq: frequency of the tone burst signal [Hz]
         num_cycles: number of sinusoidal oscillations
-        envelope:
         OPTIONAL INPUTS:
             Optional 'string', value pairs that may be used to modify the default
             computational settings.
 
-            'Envelope'      - Envelope used to taper the tone burst. Valid inputs
+            envelope:      - Envelope used to taper the tone burst. Valid inputs
                               are:
 
                                   'Gaussian' (the default)
@@ -386,12 +384,12 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
                               with a cosine taper of the specified length at the
                               beginning and end.
 
-            'Plot'          - Boolean controlling whether the created tone
+            plot:             Boolean controlling whether the created tone
                               burst is plotted.
-            'SignalLength'  - Signal length in number of samples, if longer
+            signal_length:    Signal length in number of samples, if longer
                               than the tone burst length, the signal is
                               appended with zeros.
-            'SignalOffset'  - Signal offset before the tone burst starts in
+            signal_offset:    Signal offset before the tone burst starts in
                               number of samples.
 
     Returns: created tone burst
@@ -710,3 +708,74 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     # to adjacent sensor points.
     reordered_sensor_data = sensor_data[indices_new]
     return reordered_sensor_data
+
+
+def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
+    """
+   create_cw_signals generates a series of continuous wave (CW) signals
+   based on the 1D or 2D input matrices amp and phase, where each signal
+   is given by:
+
+       amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));
+
+   To avoid startup transients, a cosine tapered up-ramp is applied to
+   the beginning of the signal. By default, the length of this ramp is
+   four periods of the wave. The up-ramp can be turned off by setting
+   the ramp_length to 0.
+
+    Example:
+
+        # define sampling parameters
+        f = 5e6
+        T = 1/f
+        Fs = 100e6
+        dt = 1/Fs
+        t_array = np.arange(0, 10*T, dt)
+
+        # define amplitude and phase
+        amp = get_win(9, 'Gaussian')
+        phase = np.arange(0, 2*pi, 9).T
+
+        # create signals and plot
+        cw_signal = create_cw_signals(t_array, f, amp, phase)
+
+    Args:
+        t_array:
+        freq:
+        amp:
+        phase:
+        ramp_length:
+
+    Returns:
+        cw_signals:
+
+    """
+    if len(phase) == 1:
+        phase = phase * np.ones(amp.shape)
+
+    N1, N2 = amp.T.shape
+
+    cw_signals = np.zeros([N1, N2, len(t_array)])
+
+    for idx1 in range(N1 - 1):
+        for idx2 in range(N2 - 1):
+            cw_signals[idx1, idx2, :] = amp[idx1, idx2] * np.sin(2 * pi * freq * t_array + phase[idx1, idx2])
+
+    if ramp_length != 0:
+        # get period and time-step
+        period = 1 / freq
+        dt = t_array[1] - t_array[0]
+
+        # create ramp x-axis between 0 and pi
+        ramp_length_points = int(np.round(ramp_length * period / dt))
+        ramp_axis = np.arange(0, pi, pi / (ramp_length_points))
+
+        # create ramp using a shifted cosine
+        ramp = (-np.cos(ramp_axis) + 1) * 0.5
+        ramp = np.reshape(ramp, (1, 1, -1))
+
+        # apply ramp to all signals simultaneously
+
+        cw_signals[:, :, :ramp_length_points] *= ramp
+
+    return np.squeeze(cw_signals)

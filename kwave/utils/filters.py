@@ -1,16 +1,14 @@
 import math
-from math import pi
 
 import numpy as np
 import scipy
 from scipy.fftpack import fft, ifft, ifftshift, fftshift
 from scipy.signal import lfilter
 
-from kwave.utils.checks import num_dim, num_dim2
-from kwave.utils.conversion import scale_SI
-from kwave.utils.signals import get_win
-from . import is_number
+from .checks import num_dim, num_dim2, is_number
+from .conversion import scale_SI
 from .math import find_closest, sinc
+from .signals import get_win
 
 
 # Compute the next highest power of 2 of a 32–bit number `n`
@@ -231,94 +229,6 @@ def extract_amp_phase(data, Fs, source_freq, dim='auto', fft_padding=3, window='
         raise ValueError('dim must be 0, 1, 2, or 3')
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
-
-
-def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
-    """
-   create_cw_signals generates a series of continuous wave (CW) signals
-   based on the 1D or 2D input matrices amp and phase, where each signal
-   is given by:
-
-       amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));
-
-   To avoid startup transients, a cosine tapered up-ramp is applied to
-   the beginning of the signal. By default, the length of this ramp is
-   four periods of the wave. The up-ramp can be turned off by setting
-   the ramp_length to 0.
-
-    Example:
-
-        # define sampling parameters
-        f = 5e6
-        T = 1/f
-        Fs = 100e6
-        dt = 1/Fs
-        t_array = np.arange(0, 10*T, dt)
-
-        # define amplitude and phase
-        amp = get_win(9, 'Gaussian')
-        phase = np.arange(0, 2*pi, 9).T
-
-        # create signals and plot
-        cw_signal = create_cw_signals(t_array, f, amp, phase)
-
-    Args:
-        t_array:
-        freq:
-        amp:
-        phase:
-        ramp_length:
-
-    Returns:
-        cw_signals:
-
-    """
-    if len(phase) == 1:
-        phase = phase * np.ones(amp.shape)
-
-    N1, N2 = amp.T.shape
-
-    cw_signals = np.zeros([N1, N2, len(t_array)])
-
-    for idx1 in range(N1 - 1):
-        for idx2 in range(N2 - 1):
-            cw_signals[idx1, idx2, :] = amp[idx1, idx2] * np.sin(2 * pi * freq * t_array + phase[idx1, idx2])
-
-    if ramp_length != 0:
-        # get period and time-step
-        period = 1 / freq
-        dt = t_array[1] - t_array[0]
-
-        # create ramp x-axis between 0 and pi
-        ramp_length_points = int(np.round(ramp_length * period / dt))
-        ramp_axis = np.arange(0, pi, pi / (ramp_length_points))
-
-        # create ramp using a shifted cosine
-        ramp = (-np.cos(ramp_axis) + 1) * 0.5
-        ramp = np.reshape(ramp, (1, 1, -1))
-
-        # apply ramp to all signals simultaneously
-
-        cw_signals[:, :, :ramp_length_points] *= ramp
-
-    return np.squeeze(cw_signals)
-
-
-def envelope_detection(signal):
-    """
-    envelopeDetection applies the Hilbert transform to extract the
-    envelope from an input vector x. If x is a matrix, the envelope along
-    the last axis.
-
-    Args:
-        signal:
-
-    Returns:
-        signal_envelope:
-
-    """
-
-    return np.abs(scipy.signal.hilbert(signal))
 
 
 def brenner_sharpness(im):
