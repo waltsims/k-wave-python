@@ -13,6 +13,19 @@ from .signals import get_win
 
 # Compute the next highest power of 2 of a 32–bit number `n`
 def next_pow2(n):
+    """
+    Calculate the next power of 2 that is greater than or equal to `n`.
+
+    This function takes a positive integer `n` and returns the smallest power of 2 that is greater
+    than or equal to `n`.
+
+    Args:
+        n: The number to find the next power of 2 for.
+
+    Returns:
+        The smallest power of 2 that is greater than or equal to `n`.
+    """
+
     # decrement `n` (to handle cases when `n` itself is a power of 2)
     n = n - 1
 
@@ -28,10 +41,18 @@ def next_pow2(n):
 
 
 def single_sided_correction(func_fft, fft_len, dim):
-    """
-     correct the single - sided magnitude by multiplying the symmetric points by
-     2(the DC and Nyquist components are unique and are not multiplied by 2
-     and the Nyquist component only exists for even numbered FFT lengths)
+    """Correct the single-sided magnitude by multiplying the symmetric points by 2.
+
+    The DC and Nyquist components are unique and are not multiplied by 2.
+    The Nyquist component only exists for even numbered FFT lengths.
+
+    Args:
+        func_fft: The FFT of the function to be corrected.
+        fft_len: The length of the FFT.
+        dim: The number of dimensions of `func_fft`.
+
+    Returns:
+        The corrected FFT of the function.
     """
     if fft_len % 2:
 
@@ -61,7 +82,6 @@ def single_sided_correction(func_fft, fft_len, dim):
 
 def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window='Rectangular'):
     """
-
     Args:
         func:          signal to analyse
         Fs:            sampling frequency [Hz]
@@ -81,6 +101,9 @@ def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window
         f:             frequency array
         func_as:       single-sided amplitude spectrum
         func_ps:       single-sided phase spectrum
+
+    Raises:
+        ValueError: if input signal is scalar or has more than 4 dimensions.
 
     """
 
@@ -161,26 +184,24 @@ def spect(func, Fs, dim='auto', fft_len=0, power_two=False, unwrap=False, window
 
 
 def extract_amp_phase(data, Fs, source_freq, dim='auto', fft_padding=3, window='Hanning'):
-    """
-         extract_amp_phase extracts the amplitude and phase information at a
-         specified frequency from a vector or matrix of time series data. By
-         default the time dimension is set to the highest non-singleton
-         dimension. The amplitude and phase are extracted from the frequency
-         spectrum, which is calculated using a windowed and zero padded FFT.
-         The values are extracted at the frequency closest to source_freq.
+    """Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
+
+    The amplitude and phase are extracted from the frequency spectrum, which is calculated using a windowed and zero
+    padded FFT. The values are extracted at the frequency closest to source_freq. By default, the time dimension is set
+    to the highest non-singleton dimension.
 
     Args:
-
-     data:               matrix of time signals [s]
-     Fs:                 sampling frequency [Hz]
-     source_freq:        frequency at which the amplitude and phase should be
-                         extracted [Hz]
-     dim:
-     fft_padding:
-     window:
+        data: matrix of time signals [s]
+        Fs: sampling frequency [Hz]
+        source_freq: frequency at which the amplitude and phase should be extracted [Hz]
+        dim: the time dimension of the input data. If 'auto', the highest non-singleton dimension is used.
+        fft_padding: the amount of zero padding to apply to the FFT.
+        window: the windowing function to use for the FFT.
 
     Returns:
-
+        amp: the extracted amplitude values
+        phase: the extracted phase values
+        f: the frequencies of the FFT spectrum
     """
 
     # check for the dim input

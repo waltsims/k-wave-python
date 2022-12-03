@@ -1,5 +1,6 @@
 import math
 from math import floor
+from typing import Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -136,28 +137,16 @@ def scale_SI(x):
     return x_sc, scale, prefix, prefix_fullname
 
 
-def db2neper(alpha, y=1):
+def db2neper(alpha: float, y: int = 1) -> float:
     """
-    DB2NEPER Convert decibels to nepers.
+    Convert decibels to nepers.
 
-    DESCRIPTION:
-    db2neper converts an attenuation coefficient in units of
-    dB / (MHz ^ y cm) to units of Nepers / ((rad / s) ^ y m).
+    Args:
+        alpha: Attenuation in dB / (MHz ^ y cm).
+        y: Power law exponent (default=1).
 
-    USAGE:
-    alpha = db2neper(alpha)
-    alpha = db2neper(alpha, y)
-
-    INPUTS:
-    alpha - attenuation in dB / (MHz ^ y cm)
-
-    OPTIONAL INPUTS:
-    y - power law exponent(default=1)
-
-    OUTPUTS:
-    alpha - attenuation in Nepers / ((rad / s) ^ y m)
-
-    set default y value if not given by user
+    Returns:
+        Attenuation in Nepers / ((rad / s) ^ y m).
     """
 
     # calculate conversion
@@ -165,27 +154,16 @@ def db2neper(alpha, y=1):
     return alpha
 
 
-def neper2db(alpha, y=1):
+def neper2db(alpha: float, y: int = 1) -> float:
     """
-    NEPER2DB Convert nepers to decibels.
+    Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
-    DESCRIPTION:
-     neper2db converts an attenuation coefficient in units of
-     Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
+    Args:
+        alpha: Attenuation in Nepers / ((rad / s) ^ y m)
+        y: Power law exponent (default=1)
 
-     USAGE:
-     alpha = neper2db(alpha)
-     alpha = neper2db(alpha, y)
-
-     INPUTS:
-     alpha - attenuation in Nepers / ((rad / s) ^ y m)
-
-     OPTIONAL INPUTS:
-     y - power law exponent(default=1)
-
-     OUTPUTS:
-     alpha - attenuation in dB / (MHz ^ y cm)
-
+    Returns:
+        Attenuation in dB / (MHz ^ y cm)
     """
 
     # calculate conversion
@@ -207,31 +185,34 @@ def cast_to_type(data, matlab_type: str):
 
 
 def cart2pol(x, y):
-    rho = np.sqrt(x**2 + y**2)
+    """
+    Convert from cartesian to polar coordinates.
+
+    Args:
+    x: The x-coordinate of the point.
+    y: The y-coordinate of the point.
+
+    Returns:
+    A tuple containing the polar coordinates of the point.
+    """
+    rho = np.sqrt(x ** 2 + y ** 2)
     phi = np.arctan2(y, x)
     return phi, rho
 
 
-def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray):
+def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray, ndarray]:
     """
     Returns the Cartesian coordinates of the non-zero points of a binary grid.
 
-    DESCRIPTION:
-        grid2cart returns the set of Cartesian coordinates corresponding to
-        the non-zero elements in the binary matrix grid_data, in the
-        coordinate framework defined in kgrid.
-
-    USAGE:
-        [cart_data, order_index] = grid2cart(kgrid, grid_data)
-
-    args:
-        input_kgrid:       k-Wave grid object returned by kWaveGrid
-        grid_selection:    binary grid with the same dimensions as the k-Wave grid kgrid
+    Args:
+        input_kgrid: k-Wave grid object returned by kWaveGrid
+        grid_selection: binary grid with the same dimensions as the k-Wave grid kgrid
 
     Returns:
-        cart_data:    1 x N, 2 x N, or 3 x N (for 1, 2, and 3
-                      dimensions) array of Cartesian sensor points
-        order_index:  returns a list of indices of the returned card_data coordinates.
+        cart_data: 1 x N, 2 x N, or 3 x N (for 1, 2, and 3 dimensions) array of Cartesian sensor points
+        order_index: returns a list of indices of the returned cart_data coordinates.
+    Raises:
+        ValueError: when input_kgrid.dim is not in [1, 2, 3]
     """
     grid_data = np.array((grid_selection != 0), dtype=bool)
     cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))

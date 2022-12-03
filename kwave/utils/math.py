@@ -1,9 +1,8 @@
 import math
-from typing import Optional
+from itertools import compress
+from typing import Optional, Tuple, Union
 
 import numpy as np
-from itertools import compress
-
 from numpy.fft import ifftshift, fft, ifft
 
 
@@ -20,10 +19,10 @@ def largest_prime_factor(n):
 def rwh_primes(n):
     # https://stackoverflow.com/questions/2068372/fastest-way-to-list-all-primes-below-n-in-python/3035188#3035188
     """ Returns a list of primes < n for n > 2 """
-    sieve = bytearray([True]) * (n//2+1)
-    for i in range(1, int(n**0.5)//2+1):
+    sieve = bytearray([True]) * (n // 2 + 1)
+    for i in range(1, int(n ** 0.5) // 2 + 1):
         if sieve[i]:
-            sieve[2*i*(i+1)::2*i+1] = bytearray((n//2-2*i*(i+1))//(2*i+1)+1)
+            sieve[2 * i * (i + 1)::2 * i + 1] = bytearray((n // 2 - 2 * i * (i + 1)) // (2 * i + 1) + 1)
     return [2, *compress(range(3, n, 2), sieve[1:])]
 
 
@@ -45,10 +44,10 @@ def fourier_shift(
 
     if N % 2 == 0:
         # grid dimension has an even number of points
-        k_vec = (2 * np.pi) * ( np.arange(-N // 2, N // 2) / N)
+        k_vec = (2 * np.pi) * (np.arange(-N // 2, N // 2) / N)
     else:
         # grid dimension has an odd number of points
-        k_vec = (2 * np.pi) * ( np.arange(-(N -1) // 2, N // 2 + 1) / N)
+        k_vec = (2 * np.pi) * (np.arange(-(N - 1) // 2, N // 2 + 1) / N)
 
     # force middle value to be zero in case 1/N is a recurring number and the
     # series doesn't give exactly zero
@@ -97,24 +96,22 @@ def round_odd(x):
     return 2 * round((x + 1) / 2) - 1
 
 
-def find_closest(A, a):
+def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int], Tuple[int, ...]]:
     """
-    find_closest returns the value and index of the item in A that is
-    closest to the value a. For vectors, value and index correspond to
-    the closest element in A. For matrices, value and index are row
-    vectors corresponding to the closest element from each column. For
-    N-D arrays, the function finds the closest value along the first
-    matrix dimension (singleton dimensions are removed before the
-    search). If there is more than one element with the closest value,
-    the index of the first one is returned.
+    Returns the value and index of the item in A that is closest to the value a.
+
+    This function finds the value and index of the item in the input array A that is closest to the given value a.
+    For vectors, the value and index correspond to the closest element in A. For matrices, value and index are row
+    vectors corresponding to the closest element from each column. For N-D arrays, the function finds the closest
+    value along the first matrix dimension (singleton dimensions are removed before the search). If there is more
+    than one element with the closest value, the index of the first one is returned.
 
     Args:
-        A: matrix to search
-        a: value to find
+        A (np.ndarray): The array to search.
+        a (Union[float, int]): The value to find.
 
     Returns:
-        val
-        idx
+        Tuple[Union[float, int], Tuple[int, ...]]: A tuple containing the closest value and its index in the input array.
     """
 
     assert isinstance(A, np.ndarray), "A must be an np.array"

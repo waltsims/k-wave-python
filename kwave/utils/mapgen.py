@@ -537,26 +537,24 @@ def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi,
 
 def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     """
-        Create a binary map of a filled disc within a 2D grid.
+    Create a binary map of a filled disc within a 2D grid.
 
-             make_disc creates a binary map of a filled disc within a
-             two-dimensional grid (the disc position is denoted by 1's in the
-             matrix with 0's elsewhere). A single grid point is taken as the disc
-             centre thus the total diameter of the disc will always be an odd
-             number of grid points. As the returned disc has a constant radius, if
-             used within a k-Wave grid where dx ~= dy, the disc will appear oval
-             shaped. If part of the disc overlaps the grid edge, the rest of the
-             disc will wrap to the grid edge on the opposite side.
+    This function creates a binary map of a filled disc within a two-dimensional grid. The disc position is denoted by 1's
+    in the matrix with 0's elsewhere. A single grid point is taken as the disc centre, so the total diameter of the disc
+    will always be an odd number of grid points. If used within a k-Wave grid where dx != dy, the disc will appear oval
+    shaped. If part of the disc overlaps the grid edge, the rest of the disc will wrap to the grid edge on the opposite
+    side.
+
     Args:
-        Nx:
-        Ny:
-        cx:
-        cy:
-        radius:
-        plot_disc:
+        Nx (int): The number of grid points along the x-axis.
+        Ny (int): The number of grid points along the y-axis.
+        cx (int): The x-coordinate of the disc centre.
+        cy (int): The y-coordinate of the disc centre.
+        radius (int): The radius of the disc.
+        plot_disc (bool): If set to True, the disc will be plotted using Matplotlib.
 
     Returns:
-
+        np.ndarray: A binary map of the disc in the 2D grid.
     """
     # define literals
     MAGNITUDE = 1
@@ -597,29 +595,28 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     return disc
 
 
-def make_circle(Nx, Ny, cx, cy, radius, arc_angle=None, plot_circle=False):
+def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Optional[float] = None,
+                plot_circle: bool = False) -> np.ndarray:
     """
-        Create a binary map of a circle within a 2D grid.
+    Create a binary map of a circle within a 2D grid.
 
-             make_circle creates a binary map of a circle or arc (using the
-             midpoint circle algorithm) within a two-dimensional grid (the circle
-             position is denoted by 1's in the matrix with 0's elsewhere). A
-             single grid point is taken as the circle centre thus the total
-             diameter will always be an odd number of grid points.
+    This function creates a binary map of a circle (or arc) using the midpoint circle algorithm within a two-dimensional grid.
+    The circle position is denoted by 1's in the matrix with 0's elsewhere. A single grid point is taken as the circle
+    centre, so the total diameter will always be an odd number of grid points. The centre of the circle and the radius
+    are not constrained by the grid dimensions, so it is possible to create sections of circles or a blank image if none
+    of the circle intersects the grid.
 
-             Note: The centre of the circle and the radius are not constrained by
-             the grid dimensions, so it is possible to create sections of circles,
-             or a blank image if none of the circle intersects the grid.
     Args:
-        Nx:
-        Ny:
-        cx:
-        cy:
-        radius:
-        plot_circle:
+        Nx (int): The number of grid points along the x-axis.
+        Ny (int): The number of grid points along the y-axis.
+        cx (int): The x-coordinate of the circle centre.
+        cy (int): The y-coordinate of the circle centre.
+        radius (int): The radius of the circle.
+        arc_angle (Optional[float], optional): The angle of the circular arc in degrees. If set to None, a full circle will be created.
+        plot_circle (bool, optional): If set to True, the circle will be plotted using Matplotlib.
 
     Returns:
-
+        np.ndarray: A binary map of the circle in the 2D grid.
     """
     # define literals
     MAGNITUDE = 1

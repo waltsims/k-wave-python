@@ -11,7 +11,7 @@ from .tictoc import TicToc
 
 def sort_rows(arr: np.ndarray, index: int):
     assert arr.ndim == 2, "'sort_rows' currently supports only 2-dimensional matrices"
-    return arr[arr[:, index].argsort(),]
+    return arr[arr[:, index].argsort()]
 
 
 def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray]) -> np.ndarray:

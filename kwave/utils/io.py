@@ -3,6 +3,7 @@ import platform
 import socket
 import warnings
 from datetime import datetime
+from typing import Optional
 
 import cv2
 import h5py
@@ -224,8 +225,24 @@ def write_attributes_typed(filename, file_description=None):
         f[h5_literals.FILE_CREATION_DATE_ATT_NAME] = get_date_string()
 
 
-def write_attributes(filename, file_description=None, legacy=False):
+def write_attributes(filename: str, file_description: Optional[str] = None, legacy: bool = False) -> None:
+    """
+    Write attributes to a HDF5 file.
 
+    This function writes attributes to a HDF5 file using a deprecated legacy method if legacy is set to True, or a new
+    typed method if legacy is set to False. The function warns if legacy is set to True and deprecates it. If
+    file_description is not provided, a default file description will be used.
+
+    Args:
+        filename (str): The name of the HDF5 file.
+        file_description (Optional[str], optional): The description of the file. If not provided, a default description
+            will be used.
+        legacy (bool, optional): If set to True, the function will use the deprecated legacy method to write attributes.
+            If set to False, the function will use the new typed method. Defaults to False.
+
+    Raises:
+        DeprecationWarning: If legacy is set to True, a DeprecationWarning will be raised.
+    """
     if not legacy:
         write_attributes_typed(filename, file_description)
         return
@@ -253,13 +270,18 @@ def write_attributes(filename, file_description=None, legacy=False):
 
     # set additional file attributes
     with h5py.File(filename, "a") as f:
-        assign_str_attr(f.attrs, h5_literals.FILE_MAJOR_VER_ATT_NAME, h5_literals.HDF_FILE_MAJOR_VERSION)
-        assign_str_attr(f.attrs, h5_literals.FILE_MINOR_VER_ATT_NAME, h5_literals.HDF_FILE_MINOR_VERSION)
-        assign_str_attr(f.attrs, h5_literals.CREATED_BY_ATT_NAME, f'k-Wave N/A')
-        assign_str_attr(f.attrs, h5_literals.FILE_DESCR_ATT_NAME, file_description)
-        assign_str_attr(f.attrs, h5_literals.FILE_TYPE_ATT_NAME, h5_literals.HDF_INPUT_FILE)
-        assign_str_attr(f.attrs, h5_literals.FILE_CREATION_DATE_ATT_NAME, get_date_string())
-
+        # create a dictionary of attributes
+        attributes = {
+            h5_literals.FILE_MAJOR_VER_ATT_NAME: h5_literals.HDF_FILE_MAJOR_VERSION,
+            h5_literals.FILE_MINOR_VER_ATT_NAME: h5_literals.HDF_FILE_MINOR_VERSION,
+            h5_literals.CREATED_BY_ATT_NAME: f'k-Wave N/A',
+            h5_literals.FILE_DESCR_ATT_NAME: file_description,
+            h5_literals.FILE_TYPE_ATT_NAME: h5_literals.HDF_INPUT_FILE,
+            h5_literals.FILE_CREATION_DATE_ATT_NAME: get_date_string(),
+        }
+        # loop through the attributes dictionary and assign each attribute to the file
+        for key, value in attributes.items():
+            assign_str_attr(f.attrs, key, value)
 
 def write_flags(filename):
     """

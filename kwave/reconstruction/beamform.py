@@ -9,9 +9,9 @@ from scipy.signal import hilbert
 from uff import ChannelData
 from uff.position import Position
 
-import kwave.reconstruction.tools as tools
-from kwave.reconstruction.shifted_transform import ShiftedTransform
-from kwave.utils import TicToc, cart2pol, scale_time
+from .shifted_transform import ShiftedTransform
+from .tools import make_time_vector, get_t0, get_origin_array, apodize
+from ..utils import TicToc, cart2pol, scale_time
 
 
 def beamform(channel_data: ChannelData):
@@ -52,7 +52,7 @@ def beamform(channel_data: ChannelData):
         transmit_wave = event.transmit_setup.transmit_waves[0]
 
         # make time vector
-        time_vector = tools.make_time_vector(num_samples=number_samples, sampling_freq=sampling_freq,
+        time_vector = make_time_vector(num_samples=number_samples, sampling_freq=sampling_freq,
                                        time_offset=event.receive_setup.time_offset)
 
         # todo: make indexing 0 min and not 1 min
@@ -63,15 +63,15 @@ def beamform(channel_data: ChannelData):
         expanding_aperture = pixel_positions[:, 2] / f_number
 
         # time zero delays for spherical waves
-        origin = tools.get_origin_array(channel_data, transmit_wave)
-        t0_point = tools.get_t0(transmit_wave)
+        origin = get_origin_array(channel_data, transmit_wave)
+        t0_point = get_t0(transmit_wave)
 
         # print(origin, t0_point)
 
         transmit_distance = np.sign(pixel_positions[:, 2] - origin[2]) * \
                             np.sqrt(np.sum((pixel_positions - origin) ** 2, axis=1)) + \
                             np.abs(1.2 * t0_point[0])
-                            # np.sqrt(np.sum((origin - t0_point) ** 2))
+        # np.sqrt(np.sum((origin - t0_point) ** 2))
 
         probe = channel_data.probes[probe - 1]
         # todo: why are element positions saved as transforms and not positions?
@@ -93,7 +93,7 @@ def beamform(channel_data: ChannelData):
 
             pixel_element_lateral_distance = abs(pixel_positions[:, 0] - element_location[0])
             # print(pixel_element_lateral_distance)
-            receive_apodization = tools.apodize(pixel_element_lateral_distance, expanding_aperture, apodization_window)
+            receive_apodization = apodize(pixel_element_lateral_distance, expanding_aperture, apodization_window)
 
             # receive distance
             receive_distance = np.sqrt(np.sum((pixel_positions - np.array(element_location)) ** 2, axis=1))

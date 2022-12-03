@@ -15,6 +15,7 @@ from .matrix import unflatten_matlab_mask, matlab_mask, broadcast_axis
 
 def add_noise(signal, snr, mode="rms"):
     """
+    Add Gaussian noise to a signal.
 
     Args:
         signal (np.array):      input signal

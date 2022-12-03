@@ -1,22 +1,28 @@
 import numpy as np
 
 
-def get_pml(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, axisymmetric=False):
+def get_pml(Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: float,
+            staggered: bool, dimension: int, axisymmetric: bool = False) -> np.ndarray:
     """
-        getPML returns a 1D perfectly matched layer variable based on the given size and absorption coefficient.
+    Returns a 1D perfectly matched layer variable based on the given size and absorption coefficient.
+
+    This function calculates a 1D perfectly matched layer (PML) variable based on the specified size and absorption coefficient.
+    It uses the given parameters to create an absorption profile, which is then exponentiated and reshaped in the desired direction.
+    If the axisymmetric argument is set to True, the axial side of the radial PML will not be added.
+
     Args:
-        Nx:
-        dx:
-        dt:
-        c:
-        pml_size:
-        pml_alpha:
-        staggered:
-        dimension:
-        axisymmetric:
+        Nx (int): The number of grid points in the x direction.
+        dx (float): The spacing between grid points in the x direction.
+        dt (float): The time step size.
+        c (float): The wave speed in the medium.
+        pml_size (int): The size of the PML layer in grid points.
+        pml_alpha (float): The absorption coefficient of the PML layer.
+        staggered (bool): Whether to use a staggered grid for calculating the varying components of the PML.
+        dimension (int): The dimension of the PML (1, 2, or 3).
+        axisymmetric (bool, optional): Whether to use axisymmetry when calculating the PML. Defaults to False.
 
     Returns:
-
+        A 1D numpy array representing the PML variable.
     """
     # define x-axis
     Nx = int(Nx)
@@ -25,27 +31,18 @@ def get_pml(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, axisymmetr
 
     # create absorption profile
     if staggered:
-
-        # calculate the varying components of the pml using a staggered grid
-        pml_left  = pml_alpha * (c / dx) * (( ((x + 0.5) - pml_size - 1) / (0 - pml_size) ) ** 4)
-        pml_right = pml_alpha * (c / dx) * (( (x + 0.5) / pml_size ) ** 4)
-
+        pml_left = pml_alpha * (c / dx) * ((((x + 0.5) - pml_size - 1) / (0 - pml_size)) ** 4)
+        pml_right = pml_alpha * (c / dx) * (((x + 0.5) / pml_size) ** 4)
     else:
+        pml_left = pml_alpha * (c / dx) * (((x - pml_size - 1) / (0 - pml_size)) ** 4)
+        pml_right = pml_alpha * (c / dx) * ((x / pml_size) ** 4)
 
-        # calculate the varying components of the pml using a regular grid
-        pml_left  = pml_alpha * (c / dx) * (( (x - pml_size - 1) / (0 - pml_size) ) ** 4)
-        pml_right = pml_alpha * (c / dx) * (( x / pml_size ) ** 4)
-
-    # exponentiation
-    pml_left  = np.exp(-pml_left * dt / 2)
+    # exponentiate and add the components of the pml to the total function
+    pml_left = np.exp(-pml_left * dt / 2)
     pml_right = np.exp(-pml_right * dt / 2)
-
-    # add the components of the pml to the total function, not adding the axial
-    # side of the radial PML if axisymmetric
     pml = np.ones((1, Nx))
     if not axisymmetric:
         pml[:, :pml_size] = pml_left
-
     pml[:, Nx - pml_size:] = pml_right
 
     # reshape the pml vector to be in the desired direction
@@ -54,7 +51,6 @@ def get_pml(Nx, dx, dt, c, pml_size, pml_alpha, staggered, dimension, axisymmetr
     elif dimension == 3:
         pml = np.reshape(pml, (1, 1, Nx))
     return pml
-
     # ------------
     # Other forms:
     # ------------

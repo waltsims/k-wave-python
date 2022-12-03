@@ -14,4 +14,12 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None):
 
 
 def intmax(dtype: str):
+    """
+    Returns the maximum value for the given integer type.
+
+    :param dtype: The integer type.
+    :type dtype: str
+    :return: The maximum value for the given integer type.
+    :rtype: int
+    """
     return np.iinfo(getattr(np, dtype)).max

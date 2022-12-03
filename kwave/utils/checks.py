@@ -9,30 +9,76 @@ from .math import sinc, primefactors
 
 
 def enforce_fields(dictionary, *fields):
-    # from kwave
+    """
+    Ensures that the given dictionary contains the specified fields.
+
+    Args:
+        dictionary: A dictionary to check.
+        *fields: The fields that must be present in the dictionary.
+
+    Raises:
+        AssertionError: If any of the specified fields are not in the dictionary.
+    """
     for f in fields:
         assert f in dictionary.keys(), [f'The field {f} must be defined in the given dictionary']
 
 
 def enforce_fields_obj(obj, *fields):
-    # from kwave
+    """
+    Enforces that certain fields are not None in the given object.
+
+    Args:
+    obj: Object to check the fields of.
+    *fields: List of field names to check.
+
+    Raises:
+    AssertionError: If any of the given fields are None in the given object.
+    """
     for f in fields:
         assert getattr(obj, f) is not None, f'The field {f} must be not None in the given object'
 
 
 def check_field_names(dictionary, *fields):
-    # from kwave
+    """
+    This method checks if the keys of the given dictionary are valid fields.
+
+    Args:
+    dictionary: A dictionary where the keys will be checked for validity.
+    *fields: A list of valid field names.
+
+    Returns:
+    None
+
+    Raises:
+    AssertionError: If any of the keys in the dictionary are not in the list of valid fields.
+    """
     for k in dictionary.keys():
         assert k in fields, f'The field {k} is not a valid field for the given dictionary'
 
 
 def num_dim(x):
-    # get the size collapsing any singleton dimensions
+    """
+    Returns the number of dimensions in x, after collapsing any singleton dimensions.
+
+    Args:
+    x (np.ndarray): The input array.
+
+    Returns:
+    int: The number of dimensions in x.
+    """
     return len(x.squeeze().shape)
 
 
 def num_dim2(x: np.ndarray):
-    # get the size collapsing any singleton dimensions
+    """
+    Get the number of dimensions of an array after collapsing singleton dimensions.
+
+    Args:
+        x (np.ndarray): The input array.
+
+    Returns:
+        int: The number of dimensions of the array after collapsing singleton dimensions.
+    """
     sz = np.squeeze(x).shape
 
     if len(sz) > 2:
@@ -43,35 +89,44 @@ def num_dim2(x: np.ndarray):
 
 def check_str_eq(value, target: str):
     """
-        String equality check only if the value is string. Helps to avoid FutureWarnings when value is not a string.
-        Added by @Farid
+    This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.
+
     Args:
-        value:
-        target:
+        value: The value to check.
+        target: The target string to compare with.
 
     Returns:
-
+        bool: True if the value is a string and is equal to the target, False otherwise.
     """
     return isinstance(value, str) and value == target
 
 
-def check_str_in(value, target: List[str]):
+def check_str_in(value, target: List[str]) -> bool:
     """
-        Check if value is in the given list only if the value is string.
-        Helps to avoid FutureWarnings when value is not a string.
-        Added by @Farid
+    Check if value is in the given list only if the value is string.
+    Helps to avoid FutureWarnings when value is not a string.
+    Added by @Farid
+
     Args:
-        value:
-        target:
+        value: The value to check for inclusion in `target`
+        target: A list of strings to check for the presence of `value`
 
     Returns:
-
+        True if `value` is a string and is present in `target`, otherwise False
     """
-    # added by Farid
     return isinstance(value, str) and value in target
 
 
 def is_number(value):
+    """
+    Check if the given value is a numeric type.
+
+    Args:
+        value: The value to check.
+
+    Returns:
+        bool: True if the value is numeric, False otherwise.
+    """
     if value is None:
         return False
     if isinstance(value, (int, float)):
@@ -84,6 +139,16 @@ def is_number(value):
 
 
 def is_unix():
+    """
+    Check whether the current platform is a Unix-like system.
+
+    Args:
+        None
+
+    Returns:
+        bool: True if the current platform is a Unix-like system, False otherwise.
+
+    """
     return platform.system() in ['Linux', 'Darwin']
 
 
@@ -213,47 +278,38 @@ def check_stability(kgrid, medium):
     return dt_stability_limit
 
 
-def check_factors(min_number, max_number):
+def check_factors(min_number: int, max_number: int) -> None:
     """
-        Return the maximum prime factor for a range of numbers.
+    Return the maximum prime factor for a range of numbers.
 
-        checkFactors loops through the given range of numbers and finds the
-        numbers with the smallest maximum prime factors. This allows suitable
-        grid sizes to be selected to maximise the speed of the FFT (this is
-        fastest for FFT lengths with small prime factors). The output is
-        printed to the command line, and a plot of the factors is generated.
+    checkFactors loops through the given range of numbers and finds the
+    numbers with the smallest maximum prime factors. This allows suitable
+    grid sizes to be selected to maximise the speed of the FFT (this is
+    fastest for FFT lengths with small prime factors). The output is
+    printed to the command line.
 
     Args:
         min_number: integer specifying the lower bound of values to test
         max_number: integer specifying the upper bound of values to test
 
     Returns:
-
+        None
     """
 
-    # extract factors
-    facs = np.zeros(1, max_number - min_number)
-    fac_max = facs
-    for index in range(min_number, max_number):
-        facs[index - min_number + 1] = len(primefactors(index))
-        fac_max[index - min_number + 1] = max(primefactors(index))
+    # compute the factors and maximum prime factors for each number in the range
+    factors = {}
+    for n in range(min_number, max_number):
+        factors[n] = {
+            'factors': primefactors(n),
+            'max_prime_factor': max(primefactors(n))
+        }
 
-    # compute best factors in range
-    print('Numbers with a maximum prime factor of 2')
-    ind = min_number + np.argwhere(fac_max == 2)
-    print(ind)
-    print('Numbers with a maximum prime factor of 3')
-    ind = min_number + np.argwhere(fac_max == 3)
-    print(ind)
-    print('Numbers with a maximum prime factor of 5')
-    ind = min_number + np.argwhere(fac_max == 5)
-    print(ind)
-    print('Numbers with a maximum prime factor of 7')
-    ind = min_number + np.argwhere(fac_max == 7)
-    print(ind)
-    print('Numbers to avoid (prime numbers)')
-    nums = np.arange(min_number, max_number)
-    print(nums[fac_max == nums])
+    # print the numbers that match each maximum prime factor
+    for factor in [2, 3, 5, 7]:
+        print(f'Numbers with a maximum prime factor of {factor}:')
+        for n in range(min_number, max_number):
+            if factors[n]['max_prime_factor'] == factor:
+                print(n)
 
 
 def check_divisible(number: float, divider: float) -> bool:
@@ -266,8 +322,9 @@ def check_divisible(number: float, divider: float) -> bool:
         divider: Divider that should devide the number
 
     Returns:
-
+        bool: True if number is divisible by divider, False otherwise
     """
     result = number / divider
     after_decimal = result % 1
     return after_decimal == 0
+

@@ -209,13 +209,41 @@ def min_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
 
 
 def max_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
+    """
+    Returns the maximum value in a n-dimensional array and its index.
+
+    Args:
+        matrix (np.ndarray): n-dimensional array of values.
+
+    Returns:
+        A tuple containing the maximum value in the array, and a tuple containing the index of the
+        maximum value. The index is given in the MATLAB convention, where indexing starts at 1.
+
+    """
+    # Get the maximum value and its linear index
     max_val, linear_index = np.max(matrix), matrix.argmax()
+
+    # Convert the linear index to a tuple of indices in the original matrix
     numpy_index = np.unravel_index(linear_index, matrix.shape)
+
+    # Convert the tuple of indices to 1-based indices (as used in Matlab)
     matlab_index = tuple(idx + 1 for idx in numpy_index)
+
+    # Return the maximum value and the 1-based index
     return max_val, matlab_index
 
 
-def broadcast_axis(data, ndims, axis):
+def broadcast_axis(data: np.ndarray, ndims: int, axis: int) -> np.ndarray:
+    """Broadcast the given axis of the data to the specified number of dimensions.
+
+    Args:
+        data (np.ndarray): The data to broadcast.
+        ndims (int): The number of dimensions to broadcast the axis to.
+        axis (int): The axis to broadcast.
+
+    Returns:
+        The broadcasted data.
+    """
     newshape = [1] * ndims
     newshape[axis] = -1
     return data.reshape(*newshape)
