@@ -1,11 +1,11 @@
-from unittest.mock import Mock
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+from unittest.mock import Mock
 
-from kwave.utils import unmask_sensor_data
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.signals import unmask_sensor_data
 
 
 def test_unmask_sensor_data():

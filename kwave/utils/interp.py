@@ -5,7 +5,7 @@ from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
 
-from .conversion import scale_time
+from .conversion import scale_time, grid2cart
 from .tictoc import TicToc
 
 
@@ -389,7 +389,6 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     if kgrid.dim not in [2, 3]:
         raise ValueError('Data must be two- or three-dimensional.')
 
-    from kwave.utils import grid2cart
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
 
     # nearest neighbour interpolation of the data points

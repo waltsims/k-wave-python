@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+
 import numpy as np
-from kwave.utils import get_h5_literals
-from kwave.utils import get_optimal_pml_size
+
+from kwave.utils.io import get_h5_literals
+from kwave.utils.pml import get_optimal_pml_size
 
 
 @dataclass

@@ -1,11 +1,12 @@
 import math
-import numpy as np
 from warnings import warn
+
+import numpy as np
 
 from kwave import kWaveGrid
 from kwave.ksource import kSource
-from kwave.utils import matlab_mask
-from kwave.utils import dotdict
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.matrix import matlab_mask
 
 
 def scale_source_terms_func(

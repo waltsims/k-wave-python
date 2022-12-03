@@ -8,8 +8,15 @@ from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
 from kwave.options import SimulationOptions
 from kwave.recorder import Recorder
-from kwave.utils import *
-from kwave.utils import dotdict, get_date_string, smooth, check_stability
+from kwave.utils.checks import num_dim2, check_stability
+from kwave.utils.colormap import get_color_map
+from kwave.utils.conversion import cast_to_type
+from kwave.utils.data import get_smallest_possible_type
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import smooth
+from kwave.utils.interp import cart2grid
+from kwave.utils.io import get_date_string
+from kwave.utils.matrix import matlab_find, matlab_mask
 
 
 @dataclass

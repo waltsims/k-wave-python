@@ -1,6 +1,11 @@
+import numpy as np
+
 from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor
-from kwave.utils import *
+from kwave.utils.checks import is_number
+from kwave.utils.data import get_smallest_possible_type
+from kwave.utils.matrix import unflatten_matlab_mask, matlab_find, matlab_mask, expand_matrix
+from kwave.utils.signals import get_win
 
 
 # force value to be a positive integer
@@ -519,7 +524,7 @@ class NotATransducer(kSensor):
     @property
     def transmit_apodization_mask(self):
         """
-            % convert the transmit apodization into the form of a element mask,
+            % convert the transmit wave apodization into the form of a element mask,
             % where the apodization values are placed at the grid points
             % belonging to the active transducer elements. These values are
             % then extracted in the correct order within

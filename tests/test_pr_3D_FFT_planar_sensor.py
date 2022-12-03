@@ -6,16 +6,18 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
+import os
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *
-from kwave.utils import smooth
+from kwave.utils.filters import smooth
+from kwave.utils.mapgen import make_ball
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
 
 
 def test_pr_3D_FFT_planar_sensor():

@@ -4,7 +4,7 @@ from warnings import warn
 import numpy as np
 
 from kwave.kgrid import kWaveGrid
-from kwave.utils import num_dim2, matlab_find
+from kwave.utils.checks import num_dim2
 
 
 @dataclass
@@ -128,11 +128,11 @@ class kSource(object):
             else:
 
                 # check the source labels are monotonic, and start from 1
-                if eng.eval('(sum(p_unique(2:end) - p_unique(1:end-1)) != (numel(p_unique) - 1)) || (~any(p_unique == 1))'):
-                    raise ValueError('If using a labelled source.p_mask, the source labels must be monotonically increasing and start from 1.')
-
+                if (sum(p_unique[1:] - p_unique[:-1]) != len(p_unique) - 1) or (not any(p_unique == 1)):
+                    raise ValueError(
+                        'If using a labelled source.p_mask, the source labels must be monotonically increasing and start from 1.')
                 # make sure the correct number of input signals are given
-                if eng.eval('size(source.p, 1) != (numel(p_unique) - 1)'):
+                if np.size(self.p, 1) != (np.size(p_unique) - 1):
                     raise ValueError('The number of time series in source.p must match the number of labelled source elements in source.p_mask.')
 
         # check for time varying velocity source input and set source flag

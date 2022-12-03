@@ -1,6 +1,8 @@
-from kwave.utils import round_even, round_odd, find_closest, focused_bowl_oneil
 
 import numpy as np
+
+from kwave.utils.mapgen import focused_bowl_oneil
+from kwave.utils.math import round_odd, round_even, find_closest
 
 
 def test_round_odd_down():

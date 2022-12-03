@@ -1,8 +1,8 @@
-from kwave.utils.pml import get_optimal_pml_size
 from kwave.kgrid import kWaveGrid
+from kwave.utils.pml import get_optimal_pml_size
 
 
-def test_get_optimal_pml_size_1D():
+def test_get_optimal_pml_size_1d():
     # size of the computational grid
     nx = 64  # number of grid points in the x (row) direction
     x = 1e-3  # size of the domain in the x direction [m]

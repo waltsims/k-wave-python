@@ -1,7 +1,10 @@
 from kwave import kWaveMedium
 from kwave.ktransducer import *
 from kwave.reconstruction.beamform import focus
-from kwave.utils import primefactors
+from kwave.utils.checks import check_stability
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.math import primefactors
+from kwave.utils.signals import get_alpha_filter, tone_burst
 
 
 def test_check_stability():

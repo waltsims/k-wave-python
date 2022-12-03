@@ -1,5 +1,7 @@
 import numpy as np
 
+from kwave.utils.math import largest_prime_factor
+
 
 def get_pml(Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: float,
             staggered: bool, dimension: int, axisymmetric: bool = False) -> np.ndarray:
@@ -127,7 +129,6 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
 
     # extract the largest prime factor for each dimension for each pml size
     facs = np.zeros((grid_dim, len(pml_size)))
-    from kwave.utils import largest_prime_factor
     for dim in range(0, grid_dim):
         for index in range(0, len(pml_size)):
             if isinstance(axisymmetric, str) and dim == 2:

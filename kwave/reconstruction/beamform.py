@@ -11,7 +11,8 @@ from uff.position import Position
 
 from .shifted_transform import ShiftedTransform
 from .tools import make_time_vector, get_t0, get_origin_array, apodize
-from ..utils import TicToc, cart2pol, scale_time
+from ..utils.conversion import scale_time, cart2pol
+from ..utils.tictoc import TicToc
 
 
 def beamform(channel_data: ChannelData):

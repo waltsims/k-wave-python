@@ -1,4 +1,4 @@
-from kwave.utils import water_sound_speed, water_non_linearity, water_density, water_absorption
+from kwave.utils.mapgen import water_sound_speed, water_non_linearity, water_density, water_absorption
 
 
 def test_water_absorption():

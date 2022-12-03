@@ -1,6 +1,7 @@
-from kwave import kWaveGrid, kWaveMedium
-from kwave.utils import scale_SI
 import numpy as np
+
+from kwave import kWaveGrid, kWaveMedium
+from kwave.utils.conversion import scale_SI
 
 
 def display_simulation_params(kgrid: kWaveGrid, medium: kWaveMedium, elastic_code: bool):

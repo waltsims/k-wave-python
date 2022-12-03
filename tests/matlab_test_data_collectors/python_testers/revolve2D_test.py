@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-from kwave.utils import revolve2d
+from kwave.utils.matrix import revolve2d
 
 
 def test_revolve2D():

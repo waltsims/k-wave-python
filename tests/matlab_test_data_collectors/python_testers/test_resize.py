@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-from kwave.utils import resize
+from kwave.utils.matrix import resize
 
 
 def test_resize():
