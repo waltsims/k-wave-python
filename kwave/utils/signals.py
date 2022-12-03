@@ -7,10 +7,11 @@ from numpy.fft import ifftshift, fft, ifft
 
 from kwave.kgrid import kWaveGrid
 from .checks import num_dim
-from .conversion import scale_SI
+from .conversion import scale_SI, freq2wavenumber
 from .mapgen import ndgrid
 from .math import sinc
-from .matrix import unflatten_matlab_mask, matlab_mask, broadcast_axis
+from .matlab import matlab_mask, unflatten_matlab_mask
+from .matrix import broadcast_axis
 
 
 def add_noise(signal, snr, mode="rms"):
@@ -133,7 +134,7 @@ def get_win(N: Union[int, List[int]],
         """
         series = coeffs[0]
         for index in range(1, len(coeffs)):
-            series = series + (-1) ** (index) * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
+            series = series + (-1) ** index * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
         return series.T
 
     # Check if N is either `int` or `list of ints`
@@ -505,31 +506,6 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
 def calc_max_freq(max_spat_freq, c):
     filter_cutoff_freq = max_spat_freq * c / (2 * np.pi)
     return filter_cutoff_freq
-
-
-def freq2wavenumber(N, k_max, filter_cutoff, c, k_dim):
-    """
-    Args:
-        N:
-        k_max:
-        filter_cutoff:
-        c:
-        k_dim:
-
-    Returns:
-
-    """
-    k_cutoff = 2 * np.pi * filter_cutoff / c
-
-    # set the alpha_filter size
-    filter_size = round(N * k_cutoff / k_dim[-1])
-
-    # check the alpha_filter size
-    if filter_size > N:
-        # set the alpha_filter size to be the same as the grid size
-        filter_size = N
-        filter_cutoff = k_max * c / (2 * np.pi)
-    return filter_size, filter_cutoff
 
 
 def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):

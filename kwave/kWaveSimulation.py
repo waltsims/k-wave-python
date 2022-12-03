@@ -16,7 +16,7 @@ from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import smooth
 from kwave.utils.interp import cart2grid
 from kwave.utils.io import get_date_string
-from kwave.utils.matrix import matlab_find, matlab_mask
+from kwave.utils.matlab import matlab_find, matlab_mask
 
 
 @dataclass

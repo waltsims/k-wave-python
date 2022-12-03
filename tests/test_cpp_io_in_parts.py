@@ -16,7 +16,7 @@ from kwave.utils.conversion import cast_to_type
 from kwave.utils.interp import interpolate3d
 from kwave.utils.io import get_h5_literals, write_matrix, write_attributes, write_flags, write_grid
 from kwave.utils.mapgen import make_ball
-from kwave.utils.matrix import matlab_find
+from kwave.utils.matlab import matlab_find
 from kwave.utils.tictoc import TicToc
 from tests.diff_utils import compare_against_ref
 

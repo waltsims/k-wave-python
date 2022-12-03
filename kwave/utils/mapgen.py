@@ -9,7 +9,8 @@ import scipy
 from scipy import optimize
 
 from .conversion import scale_SI, db2neper, neper2db
-from .matrix import matlab_find, matlab_assign, max_nd
+from .matlab import matlab_assign, matlab_find
+from .matrix import max_nd
 from .tictoc import TicToc
 
 

@@ -19,6 +19,7 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.ktransducer import *
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_circle
+from kwave.utils.matlab import matlab_find, matlab_mask, unflatten_matlab_mask
 from tests.diff_utils import compare_against_ref
 
 

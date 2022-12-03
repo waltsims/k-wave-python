@@ -1,6 +1,6 @@
 import math
 from math import floor
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 from numpy import ndarray
@@ -228,3 +228,30 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
 
     order_index = np.argwhere(grid_data.squeeze() != 0)
     return cart_data.squeeze(), order_index
+
+
+def freq2wavenumber(N: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
+    int, float]:
+    """Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.
+
+    Args:
+        N: The size of the grid.
+        k_max: The maximum wavenumber.
+        filter_cutoff: The frequency to convert to a wavenumber cutoff.
+        c: The speed of sound.
+        k_dim: The dimensions of the wavenumber grid.
+
+    Returns:
+        A tuple containing the calculated filter size and wavenumber cutoff.
+    """
+    k_cutoff = 2 * np.pi * filter_cutoff / c
+
+    # set the alpha_filter size
+    filter_size = round(N * k_cutoff / k_dim[-1])
+
+    # check the alpha_filter size
+    if filter_size > N:
+        # set the alpha_filter size to be the same as the grid size
+        filter_size = N
+        filter_cutoff = k_max * c / (2 * np.pi)
+    return filter_size, filter_cutoff

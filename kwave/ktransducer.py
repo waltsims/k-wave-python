@@ -4,7 +4,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_number
 from kwave.utils.data import get_smallest_possible_type
-from kwave.utils.matrix import unflatten_matlab_mask, matlab_find, matlab_mask, expand_matrix
+from kwave.utils.matlab import matlab_find, matlab_mask, unflatten_matlab_mask
+from kwave.utils.matrix import expand_matrix
 from kwave.utils.signals import get_win
 
 

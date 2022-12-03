@@ -19,6 +19,7 @@ from kwave.ktransducer import *
 from kwave.utils.filters import filter_time_series
 from kwave.utils.interp import cart2grid
 from kwave.utils.mapgen import make_cart_circle
+from kwave.utils.matlab import matlab_find, unflatten_matlab_mask
 from tests.diff_utils import compare_against_ref
 
 
