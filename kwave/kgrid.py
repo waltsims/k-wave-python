@@ -230,7 +230,7 @@ class kWaveGrid(object):
             Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
         """
         if self.dim < 2:
-            return np.nan
+            return 0
         return self.size[1] * self.ky * self.dy / (2 * math.pi)
 
     @property
@@ -239,7 +239,7 @@ class kWaveGrid(object):
             Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
         """
         if self.dim < 3:
-            return np.nan
+            return 0
         return self.size[2] * self.kz * self.dz / (2 * math.pi)
 
     @property
