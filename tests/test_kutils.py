@@ -1,9 +1,8 @@
-from kwave.utils.kutils import check_stability, primefactors, tone_burst, get_alpha_filter, focus
-from kwave import kWaveMedium, kWaveGrid
+import numpy as np
+
+from kwave import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ktransducer import *
-
-import numpy as np
 
 
 def test_check_stability():
@@ -47,7 +46,7 @@ def test_prime_factors():
     assert ((np.array(expected_res) - np.array(primefactors(144))) == 0).all()
 
 
-def test_get_alpha_filters_2D():
+def test_get_alpha_filters_2d():
     # =========================================================================
     # SETTINGS
     # =========================================================================

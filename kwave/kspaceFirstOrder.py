@@ -1,18 +1,10 @@
-import os
+import functools
 from operator import itemgetter
 from tempfile import gettempdir
 from warnings import warn
 
-import numpy as np
-from numpy.fft import ifftshift
-from scipy.io import savemat
-
-from kwave.kgrid import *
 from kwave.ktransducer import *
 from kwave.utils import dotdict
-import math
-import functools
-
 from kwave.utils import is_unix
 
 
@@ -272,14 +264,14 @@ def kspaceFirstOrderC():
 
             # append the save to disk parameter
             # farid | modified behaviour here!
-            # Originally, kspaceFO-nD GPU and CPU version would ALWAYS add 'SaveToDisk' option to kwargs
+            # Originally, kspaceFO-nD GPU and CPU version would ALWAYS add 'save_to_disk ' option to kwargs
             # And kspaceFO-nD would not add this option
-            # In our case all examples use CPU version. So some usages already pass 'SaveToDisk' as kwarg
-            # For them, we don't override 'SaveToDisk' options
+            # In our case all examples use CPU version. So some usages already pass 'save_to_disk ' as kwarg
+            # For them, we don't override 'save_to_disk ' options
             # (originally it would have and it was required to be changed using DataPath & DataName options)
-            if 'SaveToDisk' not in kwargs:
-                kwargs['SaveToDisk'] = input_filename
-                kwargs['SaveToDiskExit'] = True
+            # if 'save_to_disk ' not in kwargs:
+            #     kwargs['save_to_disk'] = input_filename
+            #     kwargs['save_to_disk_exit'] = True
             res = func(kgrid=kgrid, medium=medium, source=source, sensor=sensor, **args, **kwargs)
             return res
         return wrapper

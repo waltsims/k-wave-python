@@ -1,8 +1,9 @@
+import numpy as np
+
 from kwave import kWaveGrid, kWaveMedium, SimulationOptions, NotATransducer
 from kwave.data import Array
-from kwave.utils import matlab_find, expand_matrix, get_smallest_possible_type
 from kwave.utils import dotdict
-import numpy as np
+from kwave.utils import matlab_find, expand_matrix, get_smallest_possible_type
 
 
 def expand_grid_matrices(
@@ -59,6 +60,8 @@ def expand_grid_matrices(
 
 def expand_kgrid(kgrid, is_axisymmetric, pml_size):
     Nt_temp, dt_temp = kgrid.Nt, kgrid.dt
+
+    pml_size = pml_size.squeeze()
 
     if kgrid.dim == 1:
         new_size            = kgrid.N + 2 * pml_size

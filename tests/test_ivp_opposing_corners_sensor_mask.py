@@ -6,18 +6,15 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import make_disc
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
 
 
 def test_ivp_opposing_corners_sensor_mask():
@@ -76,11 +73,14 @@ def test_ivp_opposing_corners_sensor_mask():
     sensor = kSensor(sensor_mask)
 
     # input arguments
-    input_filename  = f'example_input.h5'
-    input_file_full_path = os.path.join(pathname, input_filename)
+    input_filename = f'example_ivp_corn'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     input_args = {
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
 
     # run the simulation

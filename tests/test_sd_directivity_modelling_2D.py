@@ -6,19 +6,16 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
+from copy import deepcopy
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils import *
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-from copy import deepcopy
 
 
 def test_sd_directivity_modelling_2D():
@@ -85,14 +82,19 @@ def test_sd_directivity_modelling_2D():
         source.p_mask[unflatten_matlab_mask(source.p_mask, source_positions[source_loop] - 1)] = 1
 
         # run the simulation
-        input_filename  = f'example_input_{source_loop + 1}.h5'
-        input_file_full_path = os.path.join(pathname, input_filename)
+
+        input_filename = f'example_input_{source_loop + 1}'
+        pathname = gettempdir()
+        input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
         input_args = {
-            'SaveToDisk': input_file_full_path,
-            'SaveToDiskExit': True
+            'save_to_disk': True,
+            'data_name': input_filename,
+            'data_path': gettempdir(),
+            'save_to_disk_exit': True
         }
 
-        # run the simulation
+
+            # run the simulation
         kspaceFirstOrder2DC(**{
             'medium': medium,
             'kgrid': kgrid,

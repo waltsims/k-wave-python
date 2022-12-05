@@ -6,19 +6,16 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
+from copy import deepcopy
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import make_disc, make_cart_circle
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-from copy import deepcopy
 
 
 def test_ivp_homogeneous_medium():
@@ -62,9 +59,14 @@ def test_ivp_homogeneous_medium():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
+    input_filename = f'example_ivp_homo'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     input_args = {
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -74,5 +76,5 @@ def test_ivp_homogeneous_medium():
         **input_args
     })
 
-    assert compare_against_ref(f'out_ivp_homogeneous_medium', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_ivp_homogeneous_medium', input_file_full_path), \
         'Files do not match!'

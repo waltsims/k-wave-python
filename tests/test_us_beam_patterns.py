@@ -6,17 +6,14 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+from tempfile import gettempdir
+
 # noinspection PyUnresolvedReferences
 import setup_test
-import os
-from tempfile import gettempdir
-from kwave.kgrid import *
+from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import tone_burst
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
 
 
 def test_us_beam_patterns():
@@ -157,18 +154,23 @@ def test_us_beam_patterns():
     # =========================================================================
 
     # set the input settings
+    input_filename = f'example_beam_pat'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     input_args = {
-        'PMLInside': False,
-        'PMLSize': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
-        'DataCast': DATA_CAST,
-        'DataRecast': True,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+        'data_cast': DATA_CAST,
+        'data_recast': True,
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
 
     # stream the data to disk in blocks of 100 if storing the complete time history
     if not USE_STATISTICS:
-        input_args['StreamToDisk'] = 100
+        input_args['stream_to_disk'] = 100
 
     # run the simulation
     kspaceFirstOrder3DC(**{
@@ -178,5 +180,5 @@ def test_us_beam_patterns():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_us_beam_patterns', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_us_beam_patterns', input_file_full_path), \
         'Files do not match!'

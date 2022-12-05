@@ -6,20 +6,17 @@
     downloaded from http://www.k-wave.org/download.php and placed in the
     binaries folder of the toolbox.
 """
+from tempfile import gettempdir
+
 # noinspection PyUnresolvedReferences
 import setup_test
-import os
-import h5py
-import numpy as np
-from tempfile import gettempdir
-from kwave.ksource import kSource
-from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
+from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
 from kwave.utils import *
-from tests.diff_utils import compare_against_ref
 from kwave.utils import dotdict
-from kwave.kmedium import kWaveMedium
+from tests.diff_utils import compare_against_ref
 
 
 def test_cpp_running_simulations():
@@ -32,14 +29,14 @@ def test_cpp_running_simulations():
     example_number = 1
 
     # input and output filenames (these must have the .h5 extension)
-    input_filename  = 'example_input.h5'
+    input_filename = 'example'
     output_filename = 'example_output.h5'
 
     # pathname for the input and output files
     pathname = gettempdir()
 
     # remove input file if it already exists
-    input_file_full_path = os.path.join(pathname, input_filename)
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     output_file_full_path = os.path.join(pathname, output_filename)
     if example_number == 1 and os.path.exists(input_file_full_path):
         os.remove(input_file_full_path)
@@ -105,7 +102,7 @@ def test_cpp_running_simulations():
 
     # set the input arguments
     input_args = {
-        'PMLSize': pml_size
+        'pml_size': pml_size
     }
 
     if example_number == 1:
@@ -116,7 +113,11 @@ def test_cpp_running_simulations():
             'source': source,
             'sensor': sensor,
             **input_args,
-            'SaveToDisk': input_file_full_path
+            'save_to_disk': True,
+            'save_to_disk_exit': True,
+            'data_name': input_filename,
+            'data_path': gettempdir()
+            # 'data_path': input_file_full_path
         })
 
         # display the required syntax to run the C++ simulation

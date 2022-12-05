@@ -6,19 +6,15 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import make_disc
-from kwave.utils.filterutils import smooth
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
 
 
 def test_pr_2D_TR_line_sensor():
@@ -69,12 +65,17 @@ def test_pr_2D_TR_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
+    input_filename = f'example_tr_dir'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     input_args = {
-        'PMLInside': False,
-        'PMLSize': PML_size,
-        'Smooth': False,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'pml_size': PML_size,
+        'smooth': False,
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
 
     # run the simulation
@@ -85,4 +86,4 @@ def test_pr_2D_TR_line_sensor():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_pr_2D_TR_line_sensor', input_args['SaveToDisk']), 'Files do not match!'
+    assert compare_against_ref(f'out_pr_2D_TR_line_sensor', input_file_full_path), 'Files do not match!'

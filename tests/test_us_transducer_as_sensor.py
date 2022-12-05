@@ -6,19 +6,15 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.utils.kutils import tone_burst
-from kwave.utils.maputils import make_ball
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
 
 
 def test_us_transducer_as_sensor():
@@ -131,11 +127,17 @@ def test_us_transducer_as_sensor():
     # transducer.properties
 
     # set the input settings
+    input_filename = f'example_tran_as_sen'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
     input_args = {
-        'PMLInside': False,
-        'PMLSize': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-        'DataCast': DATA_CAST,
-        'SaveToDisk': input_file_full_path
+        'pml_inside': False,
+        'pml_size': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
+        'data_cast': DATA_CAST,
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
 
     # run the simulation
