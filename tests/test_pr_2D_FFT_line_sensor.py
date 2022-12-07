@@ -70,6 +70,7 @@ def test_pr_2D_FFT_line_sensor():
     input_args = {
         'pml_inside': False,
         'pml_size': PML_size,
+        'smooth_p0': False,
         'save_to_disk': True,
         'data_name': input_filename,
         'data_path': gettempdir(),

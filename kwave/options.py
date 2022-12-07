@@ -57,7 +57,6 @@ class SimulationOptions(object):
     save_to_disk: bool = False
     save_to_disk_exit: bool = True
     scale_source_terms: bool = True
-    smooth: bool = False
     smooth_c0: bool = False
     smooth_rho0: bool = False
     smooth_p0: bool = True
@@ -214,7 +213,6 @@ class SimulationOptions(object):
                 * save_to_dis
 Exit: Exit the simulation after saving the HDF5 file
                 * ScaleSourceTerms: Apply the source scaling term to time varying sources
-                * Smooth: Boolean controlling whether source.p0, medium.sound_speed, and medium.density are smoothed using smooth before computation. 'Smooth' can either be given as a single Boolean value or as a 3 element array to control the smoothing of source.p0, medium.sound_speed, and medium.density, independently (default = [true, false, false]).
                 * UseFD:
                 * UsekSpace: use the k-space correction
                 * UseSG: Use a staggered grid
@@ -319,14 +317,6 @@ Exit: Exit the simulation after saving the HDF5 file
 
             elif options.save_to_disk or options.save_to_disk_exit:
                 assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
-
-            elif options.smooth:
-                val = np.atleast_1d(val)
-                assert len(val) <= 3 and np.array(
-                    val).dtype == bool, "Optional input ''Smooth'' must be a 1, 2 or 3 element Boolean array."
-                options.smooth_p0 = val[0]
-                options.smooth_c0 = val[len(val) // 2]
-                options.smooth_rho0 = val[-1]
 
             else:
                 # raise NotImplementedError(f"Unknown optional input: {key}.")

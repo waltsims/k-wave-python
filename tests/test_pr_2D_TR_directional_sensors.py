@@ -6,7 +6,6 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -75,7 +74,7 @@ def test_pr_2D_TR_directional_sensors():
     input_args = {
         'pml_inside': False,
         'pml_size': PML_size,
-        'smooth': False,
+        'smooth_p0': False,
         'save_to_disk': True,
         'data_name': input_filename,
         'data_path': gettempdir(),
