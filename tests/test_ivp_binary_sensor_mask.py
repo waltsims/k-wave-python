@@ -6,30 +6,20 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
+from copy import deepcopy
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.maputils import make_disc, make_circle
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-from copy import deepcopy
-import pytest
 
 
-@pytest.mark.skip("Failing since commit eed75b3f553a9baeeba4ca27d36e444e919e9159")
 def test_ivp_binary_sensor_mask():
-    # pathname for the input and output files
     pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
 
     # create the computational grid
     Nx = 128           # number of grid points in the x (row) direction
