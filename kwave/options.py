@@ -46,8 +46,6 @@ class SimulationOptions(object):
         pml_z_size: PML Size for z-axis
         """
 
-    # FLAGS WHICH CAN BE CONTROLLED WITH OPTIONAL INPUTS (THESE CAN BE MODIFIED)
-    # flags which control the behaviour of the simulations
     axisymmetric: bool = False
     elastic_code: bool = False
     cart_interp: str = 'linear'
@@ -67,9 +65,6 @@ class SimulationOptions(object):
     use_finite_difference: bool = False
     stream_to_disk: bool = False
     data_recast: Optional[bool] = False
-
-    # VARIABLES THAT CAN BE CHANGED USING OPTIONAL INPUTS (THESE CAN BE MODIFIED)
-    # general settings
     cartesian_interp: str = 'linear'
     hdf_compression_level: Optional[int] = None
     data_cast: str = 'off'
@@ -80,7 +75,6 @@ class SimulationOptions(object):
     data_name: Optional[str] = None
     input_filename: Optional[str] = None
     output_filename: Optional[str] = None
-
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
@@ -99,7 +93,7 @@ class SimulationOptions(object):
 
         assert self.data_cast in ['off', 'double', 'single'], \
             "Invalid input for ''DataCast''."
-        # replace double with off
+
         if self.data_cast == 'double':
             self.data_cast = 'off'
 
@@ -119,6 +113,7 @@ class SimulationOptions(object):
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
             "Optional input ''MultiAxialPMLRatio'' must be a single positive value."
+
         assert isinstance(self.use_sg, bool), "Optional input ''use_sg'' must be Boolean."
 
         assert isinstance(self.save_to_disk_exit, bool), "Optional input ''save_to_disk_exit'' must be Boolean."
@@ -133,16 +128,13 @@ class SimulationOptions(object):
         assert isinstance(self.save_to_disk_exit,
                           (bool, str)), "Optional input ''save_to_disk'' must be Boolean or a String."
         # automatically assign the PML size to give small prime factors
-        if self.pml_auto:
-            if self.pml_inside:
-                raise NotImplementedError(
-                    "''PMLSize'' set to ''auto'' is only supported with ''PMLInside'' set to false.")
+        if self.pml_auto and self.pml_inside:
+            raise NotImplementedError(
+                "''PMLSize'' set to ''auto'' is only supported with ''PMLInside'' set to false.")
 
         if self.pml_size is not None:
             # TODO(walter): remove auto option in exchange for pml_auto=True
-            if isinstance(self.pml_size, str):
-                raise ValueError(f"Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
-            if isinstance(self.pml_size, float):
+            if not isinstance(self.pml_size, (list, np.ndarray)):
                 raise ValueError(f"Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
             if isinstance(self.pml_size, int):
                 self.pml_size = np.array([self.pml_size])
@@ -155,13 +147,13 @@ class SimulationOptions(object):
         # check for a user defined name for the input and output files
         if self.data_name:
             name_prefix = self.data_name
-            input_filename = f'{name_prefix}_input.h5'
-            output_filename = f'{name_prefix}_output.h5'
         else:
             # set the filename inputs to store data in the default temp directory
             date_string = get_date_string()
-            input_filename = 'kwave_input_data' + date_string + '.h5'
-            output_filename = 'kwave_output_data' + date_string + '.h5'
+            name_prefix = date_string + "kwave"
+
+        input_filename = f'{name_prefix}_input.h5'
+        output_filename = f'{name_prefix}_output.h5'
 
         assert self.use_fd is None or (np.issubdtype(self.use_fd, np.number) and self.use_fd in [2, 4]), \
             "Optional input ''UseFD'' can only be set to 2, 4."
