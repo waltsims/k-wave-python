@@ -6,7 +6,6 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -101,10 +100,16 @@ def test_ivp_comparison_modelling_functions():
     # kspaceSecondOrder(kgrid, medium, source, sensor, 'ExpandGrid', false, save_args{:})
 
     # run the simulation using the first order code
+    input_filename = f'example_comparison_modeling'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+
     input_args = {
-        'PMLInside': False,
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'save_to_disk': True,
+        'data_name': input_filename,
+        'data_path': gettempdir(),
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,

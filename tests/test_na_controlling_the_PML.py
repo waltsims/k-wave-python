@@ -6,7 +6,6 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -106,7 +105,7 @@ def test_na_controlling_the_pml():
 
     # Example 3
     input_args = {
-        'pml_alpha': 2,
+        'pml_size': 2,
         'save_to_disk': True,
         'data_name': input_filename,
         'data_path': gettempdir(),
