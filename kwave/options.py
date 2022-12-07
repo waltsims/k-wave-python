@@ -21,8 +21,6 @@ class SimulationOptions(object):
         save_to_disk: save the input data to a HDF5 file
         save_to_disk_exit: exit the simulation after saving the HDF5 file
         scale_source_terms: apply the source scaling term to time varying sources
-        # TODO(Walter): work out directional smoothing logic
-        smooth: Boolean controlling whether source.p0, medium.sound_speed, and medium.density are smoothed using smooth before computation. 'Smooth' can either be given as a single Boolean value or as a 3 element array to control the smoothing of source.p0, medium.sound_speed, and medium.density, independently (default = [true, false, false]).
         smooth_c0: smooth the sound speed distribution
         smooth_rho0: smooth the density distribution
         smooth_p0: smooth the initial pressure distribution
@@ -52,7 +50,7 @@ class SimulationOptions(object):
     # flags which control the behaviour of the simulations
     axisymmetric: bool = False
     cart_interp: str = 'linear'
-    pml_inside: Optional[bool] = None
+    pml_inside: bool = True
     pml_alpha: float = 2.0
     save_to_disk: bool = False
     save_to_disk_exit: bool = True
@@ -118,7 +116,7 @@ class SimulationOptions(object):
         assert np.isscalar(self.stream_to_disk) or isinstance(self.stream_to_disk, bool), \
             "Optional input ''StreamToDisk'' must be a single scalar or Boolean value."
 
-        # assert isinstance(self.pml_inside, bool), "Optional input ''PMLInside'' must be Boolean."
+        assert isinstance(self.pml_inside, bool), "Optional input ''PMLInside'' must be Boolean."
 
         # load the HDF5 literals (for the default compression level)
         h5_literals = get_h5_literals()

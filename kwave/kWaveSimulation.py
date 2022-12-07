@@ -1208,7 +1208,7 @@ class kWaveSimulation(object):
 
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
-        if opt.pml_inside is not None:
+        if opt.pml_inside is False:
             expand_results = expand_grid_matrices(
                 self.kgrid, self.medium, self.source, self.sensor, self.options,
                 dotdict({
