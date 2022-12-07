@@ -134,10 +134,10 @@ class SimulationOptions(object):
 
         if self.pml_size is not None:
             # TODO(walter): remove auto option in exchange for pml_auto=True
-            if not isinstance(self.pml_size, (list, np.ndarray)):
-                raise ValueError(f"Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
             if isinstance(self.pml_size, int):
                 self.pml_size = np.array([self.pml_size])
+            if not isinstance(self.pml_size, (list, np.ndarray)):
+                raise ValueError(f"Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
 
         # Check if each member variable is None, and set it to self.pml_alpha if it is
         self.pml_x_alpha = self.pml_alpha if self.pml_x_alpha is None else self.pml_x_alpha
