@@ -49,6 +49,7 @@ class SimulationOptions(object):
     # FLAGS WHICH CAN BE CONTROLLED WITH OPTIONAL INPUTS (THESE CAN BE MODIFIED)
     # flags which control the behaviour of the simulations
     axisymmetric: bool = False
+    elastic_code: bool = False
     cart_interp: str = 'linear'
     pml_inside: bool = True
     pml_alpha: float = 2.0
@@ -83,7 +84,7 @@ class SimulationOptions(object):
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
-    pml_size: Optional[int] = None
+    pml_size: Optional[list[int]] = None
     pml_x_size: Optional[int] = None
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
@@ -96,20 +97,11 @@ class SimulationOptions(object):
 
         assert isinstance(self.data_cast, str), "Optional input ''DataCast'' must be a string."
 
-        assert self.data_cast in ['off', 'double', 'single', 'gpuArray-single', 'gpuArray-double'], \
+        assert self.data_cast in ['off', 'double', 'single'], \
             "Invalid input for ''DataCast''."
         # replace double with off
         if self.data_cast == 'double':
             self.data_cast = 'off'
-
-        # replace PCT options with gpuArray
-        if self.data_cast == 'gpuArray-single':
-            self.data_cast = 'gpuArray'
-            self.data_cast_prepend = 'single'
-        elif self.data_cast == 'gpuArray-double':
-            self.data_cast = 'gpuArray'
-        if self.data_cast == 'gpuArray':
-            raise NotImplementedError("gpuArray is not supported in Python-version")
 
         assert isinstance(self.data_recast, bool), "Optional input ''DataRecast'' must be Boolean."
 
@@ -188,7 +180,7 @@ class SimulationOptions(object):
             elastic_code: Flag that indicates whether elastic simulation is used
             **kwargs: Dictionary that holds following optional simulation properties:
 
-                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest' and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = 'linear').
+                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest', duplicated data points are discarded and sensor_data will be returned with fewer points than specified by sensor.mask (default = 'linear').
                 * create_log: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).
                 * data_cast: String input of the data type that variables are cast to before computation. For example, setting to 'single' will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision. This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting 'data_cast' to 'gpuArray-single' (default = 'off').
                 * data_recast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the 'data_cast' option.
@@ -202,10 +194,11 @@ class SimulationOptions(object):
                 * stream_to_disk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of time steps that are taken before the data is saved to disk (default = 200).
                 * save_to_disk: String containing a filename (including pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
                 * save_to_disk_exit: Exit the simulation after saving the HDF5 file
-                * ScaleSourceTerms: Apply the source scaling term to time varying sources
-                * UseFD: Use finite difference gradients instead of spectral (in 1D)
-                * UsekSpace: use the k-space correction
-                * UseSG: Use a staggered grid
+                * scale_source_terms: Apply the source scaling term to time varying sources
+                * use_fd: Use finite difference gradients instead of spectral (in 1D)
+                * use_k_space: use the k-space correction
+                * use_sg: Use a staggered grid
+
 
         Returns:
             SimulationOptions instance
