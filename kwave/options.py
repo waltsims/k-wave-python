@@ -84,7 +84,7 @@ class SimulationOptions(object):
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
-    pml_size: Optional[list[int]] = None
+    pml_size: Optional[List[int]] = None
     pml_x_size: Optional[int] = None
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
