@@ -231,8 +231,6 @@ Exit: Exit the simulation after saving the HDF5 file
         # general
         STREAM_TO_DISK_STEPS_DEF = 200  # number of steps before streaming to disk
 
-        # filenames
-
         options = SimulationOptions(**kwargs)
 
         if options.pml_size is not None or not isinstance(options.pml_size, bool):
@@ -291,20 +289,6 @@ Exit: Exit the simulation after saving the HDF5 file
                     options.pml_y_alpha = val[len(val) // 2]
                     options.pml_z_alpha = val[-1]
 
-                # assign input based on number of dimensions, rounding to
-                # the nearest integer
-                val = np.atleast_1d(np.squeeze(val))
-                if kgrid.dim == 1:
-                    options.pml_x_size = float(np.round(val))
-                elif kgrid.dim == 2:
-                    options.pml_x_size = float(np.round(val[0]))
-                    options.pml_y_size = float(np.round(val[-1]))
-                elif kgrid.dim == 3:
-                    options.pml_x_size = float(np.round(val[0]))
-                    options.pml_y_size = float(np.round(val[len(val) // 2]))
-                    options.pml_z_size = float(np.round(val[-1]))
-
-            # TODO: figure this logic out
             elif options.save_to_disk_exit:
                 assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
 
