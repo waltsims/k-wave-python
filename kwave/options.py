@@ -118,8 +118,6 @@ class SimulationOptions(object):
         assert np.isscalar(self.stream_to_disk) or isinstance(self.stream_to_disk, bool), \
             "Optional input ''StreamToDisk'' must be a single scalar or Boolean value."
 
-
-        # TODO: figure this logic out
         # assert isinstance(self.pml_inside, bool), "Optional input ''PMLInside'' must be Boolean."
 
         # load the HDF5 literals (for the default compression level)
@@ -164,12 +162,6 @@ class SimulationOptions(object):
         self.pml_y_alpha = self.pml_alpha if self.pml_y_alpha is None else self.pml_y_alpha
         self.pml_z_alpha = self.pml_alpha if self.pml_z_alpha is None else self.pml_z_alpha
 
-        # unimplimented_params = ['display_mask', 'log_scale', 'mesh_plot', 'plot_freq',
-        #              'plot_layout', 'plot_scale', 'plot_sim', 'plot_pml']
-        # for param in unimplimented_params:
-        # raise NotImplementedError(f'Plotting is not supported! Parameter {key} is related to plotting.')
-        # check for a user defined location for the input and output files
-
         # check for a user defined name for the input and output files
         if self.data_name:
             name_prefix = self.data_name
@@ -180,6 +172,9 @@ class SimulationOptions(object):
             date_string = get_date_string()
             input_filename = 'kwave_input_data' + date_string + '.h5'
             output_filename = 'kwave_output_data' + date_string + '.h5'
+
+        assert self.use_fd is None or (np.issubdtype(self.use_fd, np.number) and self.use_fd in [2, 4]), \
+            "Optional input ''UseFD'' can only be set to 2, 4."
 
         # add pathname to input and output filenames
         self.input_filename = os.path.join(self.data_path, input_filename)
@@ -195,47 +190,35 @@ class SimulationOptions(object):
             elastic_code: Flag that indicates whether elastic simulation is used
             **kwargs: Dictionary that holds following optional simulation properties:
 
-                * CartInterp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest' and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = 'linear').
-                * CreateLog: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).
-                * DataCast: String input of the data type that variables are cast to before computation. For example, setting to 'single' will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision.  This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting 'DataCast' to 'gpuArray-single' (default = 'off').
-                * DataRecast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the 'DataCast' option.
-                * HDFCompressionLevel: Compression level used for writing the input HDF5 file when using 'save_to_dis
-' or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.
-                * MultiAxialPMLRatio: MPML settings
-                * PMLAlpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
-                * PMLInside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by PMLSize before running the simulation (default = true).
-                * PMLRange: Search range used when automatically determining PML size. Tuple of two elements
-                * PMLSize: Size of the perfectly matched layer in grid  points. By default, the PML is added evenly to all sides of the grid, however, both PMLSize and PMLAlpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate PMLAlpha to zero rather than forcing the PML to be of zero size (default = 10).
-                * RadialSymmetry: Radial symmetry used in axisymmetric code
-                * StreamToDisk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of times steps that are taken before the data is saved to disk (default = 200).
-                * save_to_dis
-: String containing a filename (including  pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
-                * save_to_dis
-Exit: Exit the simulation after saving the HDF5 file
+                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest' and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = 'linear').
+                * create_log: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).
+                * data_cast: String input of the data type that variables are cast to before computation. For example, setting to 'single' will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision. This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting 'data_cast' to 'gpuArray-single' (default = 'off').
+                * data_recast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the 'data_cast' option.
+                * hdf_compression_level: Compression level used for writing the input HDF5 file when using 'save_to_disk' or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.
+                * multi_axial_pml_ratio: MPML settings
+                * pml_alpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
+                * pml_inside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by pml_size before running the simulation (default = true).
+                * pml_range: Search range used when automatically determining PML size. Tuple of two elements
+                * pml_size: Size of the perfectly matched layer in grid points. By default, the PML is added evenly to all sides of the grid, however, both pml_size and pml_alpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate pml_alpha to zero rather than forcing the PML to be of zero size (default = 10).
+                * radial_symmetry: Radial symmetry used in axisymmetric code
+                * stream_to_disk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of time steps that are taken before the data is saved to disk (default = 200).
+                * save_to_disk: String containing a filename (including pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
+                * save_to_disk_exit: Exit the simulation after saving the HDF5 file
                 * ScaleSourceTerms: Apply the source scaling term to time varying sources
-                * UseFD:
+                * UseFD: Use finite difference gradients instead of spectral (in 1D)
                 * UsekSpace: use the k-space correction
                 * UseSG: Use a staggered grid
 
         Returns:
             SimulationOptions instance
         """
-        # =========================================================================
-        # FIXED LITERALS USED IN THE CODE (THESE CAN BE MODIFIED)
-        # =========================================================================
 
-        # Literals used to set default parameters end with _DEF. These are cleared
-        # at the end of kspaceFirstOrder_inputChecking. Literals used at other
-        # places in the code are not cleared.
-
-        # general
         STREAM_TO_DISK_STEPS_DEF = 200  # number of steps before streaming to disk
 
         options = SimulationOptions(**kwargs)
 
         if options.pml_size is not None or not isinstance(options.pml_size, bool):
             options.pml_size = np.atleast_1d(options.pml_size)
-            # TODO: pml_size option must always be an np.array OR ensure
             if len(options.pml_size) > kgrid.dim:
                 if kgrid.dim > 1:
                     raise ValueError(
@@ -254,7 +237,6 @@ Exit: Exit the simulation after saving the HDF5 file
             options.pml_y_size = options.pml_x_size
             options.plot_scale = [-1, 1]
         elif kgrid.dim == 3:
-            # TODO: take into acount multi dimensional pml size case
             if len(options.pml_size) == kgrid.dim:
                 options.pml_x_size, options.pml_y_size, options.pml_z_size = options.pml_size.ravel()
             else:
@@ -302,13 +284,6 @@ Exit: Exit the simulation after saving the HDF5 file
             elif options.save_to_disk or options.save_to_disk_exit:
                 assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
 
-            else:
-                # raise NotImplementedError(f"Unknown optional input: {key}.")
-                pass
-
-            assert options.use_fd is None or (np.issubdtype(options.use_fd, np.number) and options.use_fd in [2, 4]), \
-                "Optional input ''UseFD'' can only be set to 2, 4."
-
             if options.use_fd:
                 # input only supported in 1D fluid code
                 assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''UseFD'' only supported in 1D."
@@ -318,14 +293,14 @@ Exit: Exit the simulation after saving the HDF5 file
 
                 # assign to individual variables
                 if kgrid.dim == 1:
-                    options.pml_x_size = float(pml_size_temp[0])
+                    options.pml_x_size = int(pml_size_temp[0])
                 elif kgrid.dim == 2:
-                    options.pml_x_size = float(pml_size_temp[1])
-                    options.pml_y_size = float(pml_size_temp[2])
+                    options.pml_x_size = int(pml_size_temp[1])
+                    options.pml_y_size = int(pml_size_temp[2])
                 elif kgrid.dim == 3:
-                    options.pml_x_size = float(pml_size_temp[0])
-                    options.pml_y_size = float(pml_size_temp[1])
-                    options.pml_z_size = float(pml_size_temp[2])
+                    options.pml_x_size = int(pml_size_temp[0])
+                    options.pml_y_size = int(pml_size_temp[1])
+                    options.pml_z_size = int(pml_size_temp[2])
 
                 # cleanup unused variables
                 del pml_size_temp

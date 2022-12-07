@@ -19,8 +19,7 @@ def kspaceFirstOrderASC(**kwargs):
         options, and all display options are ignored (only command line
         outputs are given). See the k-Wave user manual for more information.
 
-        The function works by appending the optional input 'save_to_dis
-' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrderAS to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The

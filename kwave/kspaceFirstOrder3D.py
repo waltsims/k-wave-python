@@ -17,8 +17,7 @@ def kspaceFirstOrder3DG(**kwargs):
         line outputs are given). See the k-Wave user manual for more
         information.
 
-        The function works by appending the optional input 'save_to_dis
-' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrder3D to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The
@@ -59,8 +58,7 @@ def kspaceFirstOrder3DC(**kwargs):
         ignored (only command line outputs are given). See the k-Wave user
         manual for more information.
 
-        The function works by appending the optional input 'save_to_dis
-' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrder3D to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The
@@ -406,9 +404,6 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
         # exit matlab computation if required
         if options.save_to_disk_exit:
             return
-
-        # input_filename = k_sim.options.save_to_disk
-        # output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
 
         executor = Executor(device='gpu')
         sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,

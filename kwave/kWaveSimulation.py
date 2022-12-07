@@ -22,7 +22,6 @@ class kWaveSimulation(object):
                  sensor,
                  **kwargs
                  ):
-        self.record_u_split_field = None
         self.kgrid = kgrid
         self.medium = medium
         self.source = source
@@ -1209,7 +1208,7 @@ class kWaveSimulation(object):
 
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
-        if opt.pml_inside is not None or opt.pml_inside is not (False or None):
+        if opt.pml_inside is not None:
             expand_results = expand_grid_matrices(
                 self.kgrid, self.medium, self.source, self.sensor, self.options,
                 dotdict({
@@ -1334,16 +1333,14 @@ class kWaveSimulation(object):
                     'time_rev': self.time_rev,
                     'blank_sensor': self.blank_sensor,
                     'record_u_split_field': self.record_u_split_field,
-                    # 'source_u_labelled': self.source.u_labelled,
                     'axisymmetric': self.axisymmetric,
                     'reorder_data': self.reorder_data,
-                    # 'transducer_receive_elevation_focus': self.sensor.receive_elevation_focus,
                 }),
                 dotdict({
-                    # 'sensor_x': self.sensor.x,
-                    # 'sensor_mask_index': self.sensor.mask_index,
+                    'sensor_x': self.sensor.x,
+                    'sensor_mask_index': self.sensor.mask_index,
                     'record': self.record,
-                    # 'sensor_data_buffer_size': self.sensor.data_buffer_size,
+                    'sensor_data_buffer_size': self.sensor.data_buffer_size,
                 })
             )
             self.binary_sensor_mask                 = result.binary_sensor_mask

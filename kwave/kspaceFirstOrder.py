@@ -253,16 +253,6 @@ def kspaceFirstOrderC():
             if sensor.record_start_index is not None:
                 options_string = options_string + ' -s ' + str(sensor.record_start_index)
 
-            # append the save to disk parameter
-            # farid | modified behaviour here!
-            # Originally, kspaceFO-nD GPU and CPU version would ALWAYS add 'save_to_disk ' option to kwargs
-            # And kspaceFO-nD would not add this option
-            # In our case all examples use CPU version. So some usages already pass 'save_to_disk ' as kwarg
-            # For them, we don't override 'save_to_disk ' options
-            # (originally it would have and it was required to be changed using DataPath & DataName options)
-            # if 'save_to_disk ' not in kwargs:
-            #     kwargs['save_to_disk'] = input_filename
-            #     kwargs['save_to_disk_exit'] = True
             res = func(kgrid=kgrid, medium=medium, source=source, sensor=sensor, **args, **kwargs)
             return res
         return wrapper
