@@ -1,22 +1,20 @@
+import math
+import warnings
 from copy import deepcopy
 from math import floor
 from typing import Union, List, Optional
-from numpy import ndarray, array
-from kwave.utils.matrixutils import unflatten_matlab_mask, matlab_mask
 
-from kwave.utils.checkutils import num_dim
-from kwave.utils.conversionutils import scale_SI
+import numpy as np
+import scipy
+from numpy import ndarray
+from numpy.fft import ifftshift, fft, ifft
 
 from kwave.kgrid import kWaveGrid
-import numpy as np
-import warnings
-import scipy
-from numpy.fft import ifftshift, fft, ifft, fftshift
-
-from .misc import sinc, ndgrid, gaussian
+from kwave.utils.checkutils import num_dim
+from kwave.utils.conversionutils import scale_SI
+from kwave.utils.matrixutils import unflatten_matlab_mask, matlab_mask
 from .conversionutils import db2neper
-
-import math
+from .misc import sinc, ndgrid, gaussian
 
 
 def primefactors(n):
@@ -975,6 +973,20 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
 
 
 def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    """
+    Reorders the sensor data based on the coordinates of the sensor points.
+
+    Args:
+        kgrid (object): The k-Wave grid object.
+        sensor (object): The k-Wave sensor object.
+        sensor_data (np.ndarray): The sensor data to be reordered.
+
+    Returns:
+        np.ndarray: The reordered sensor data.
+
+    Raises:
+        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
+    """
     # check simulation is 2D
     if kgrid.dim != 2:
         raise ValueError('The simulation must be 2D.')
@@ -994,8 +1006,7 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     angle[angle < 0] = 2 * np.pi + angle[angle < 0]
 
     # sort the sensor points in order of increasing angle
-    indices_new = np.argsort(angle)
-    # [angle_sorted, indices_new] = sort(angle, 'ascend'); %#ok<ASGLU>
+    indices_new = np.argsort(angle, kind='stable')
 
     # reorder the measure time series so that adjacent time series correspond
     # to adjacent sensor points.
