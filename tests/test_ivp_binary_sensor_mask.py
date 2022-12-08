@@ -6,7 +6,6 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -38,20 +37,20 @@ def test_ivp_binary_sensor_mask():
     disc_radius = 8    # [grid points]
     disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
-    disc_magnitude = 3 # [Pa]
-    disc_x_pos = 80    # [grid points]
-    disc_y_pos = 60    # [grid points]
-    disc_radius = 5    # [grid points]
+    disc_magnitude = 3  # [Pa]
+    disc_x_pos = 80  # [grid points]
+    disc_y_pos = 60  # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
 
     source = kSource()
     source.p0 = disc_1 + disc_2
 
     # define a binary sensor mask
-    sensor_x_pos = Nx//2 - 1                # [grid points]
-    sensor_y_pos = Ny//2 - 1            # [grid points]
-    sensor_radius = Nx//2 - 22          # [grid points]
-    sensor_arc_angle = 3 * np.pi / 2    # [radians]
+    sensor_x_pos = Nx // 2  # [grid points]
+    sensor_y_pos = Ny // 2  # [grid points]
+    sensor_radius = Nx // 2 - 22  # [grid points]
+    sensor_arc_angle = 3 * np.pi / 2  # [radians]
     sensor_mask = make_circle(Nx, Ny, sensor_x_pos, sensor_y_pos, sensor_radius, sensor_arc_angle)
     sensor = kSensor(sensor_mask)
 

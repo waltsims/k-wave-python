@@ -6,7 +6,6 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -39,7 +38,7 @@ def test_sd_focussed_detector_2d():
     # define a sensor as part of a circle centred on the grid
     sensor_radius = 65  # [grid points]
     arc_angle = np.pi  # [rad]
-    sensor_mask = make_circle(Nx, Ny, Nx / 2, Ny / 2, sensor_radius, arc_angle)
+    sensor_mask = make_circle(Nx, Ny, Nx // 2 + 1, Ny // 2 + 1, sensor_radius, arc_angle)
     sensor = kSensor(sensor_mask)
 
     # define the array of temporal points

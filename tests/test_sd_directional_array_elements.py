@@ -45,7 +45,7 @@ def test_sd_directional_array_elements():
 
     # define a semicircular sensor centred on the grid
     semicircle_radius = 65  # [grid points]
-    arc = make_circle(Nx, Ny, Nx // 2 - 1, Ny // 2 - 1, semicircle_radius, np.pi)
+    arc = make_circle(Nx, Ny, Nx // 2, Ny // 2, semicircle_radius, np.pi)
 
     # find total number and indices of the grid points constituting the semicircle
     arc_indices = matlab_find(arc, val=1, mode='eq')
