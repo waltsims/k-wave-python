@@ -9,6 +9,7 @@ import pytest
 import requests
 
 
+@pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Running in GitHub Workflow.")
 def test_readme():
     # Check if there is internet connectivity
     try:
