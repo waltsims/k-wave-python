@@ -659,6 +659,20 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
 
 
 def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    """
+    Reorders the sensor data based on the coordinates of the sensor points.
+
+    Args:
+        kgrid (object): The k-Wave grid object.
+        sensor (object): The k-Wave sensor object.
+        sensor_data (np.ndarray): The sensor data to be reordered.
+
+    Returns:
+        np.ndarray: The reordered sensor data.
+
+    Raises:
+        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
+    """
     # check simulation is 2D
     if kgrid.dim != 2:
         raise ValueError('The simulation must be 2D.')
@@ -678,8 +692,7 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     angle[angle < 0] = 2 * np.pi + angle[angle < 0]
 
     # sort the sensor points in order of increasing angle
-    indices_new = np.argsort(angle)
-    # [angle_sorted, indices_new] = sort(angle, 'ascend'); %#ok<ASGLU>
+    indices_new = np.argsort(angle, kind='stable')
 
     # reorder the measure time series so that adjacent time series correspond
     # to adjacent sensor points.
