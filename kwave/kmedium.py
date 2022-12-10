@@ -3,8 +3,7 @@ from typing import List
 from warnings import warn
 
 import numpy as np
-import kwave.utils.misc as util
-import kwave.utils.checkutils
+import kwave.utils.checks
 
 
 @dataclass

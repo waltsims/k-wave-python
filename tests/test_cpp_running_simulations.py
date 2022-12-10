@@ -6,20 +6,23 @@
     downloaded from http://www.k-wave.org/download.php and placed in the
     binaries folder of the toolbox.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
 import os
+from tempfile import gettempdir
+
 import h5py
 import numpy as np
-from tempfile import gettempdir
-from kwave.ksource import kSource
+
+# noinspection PyUnresolvedReferences
+import setup_test
 from kwave.kgrid import kWaveGrid
-from kwave.ksensor import kSensor
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
-from kwave.utils import *
-from tests.diff_utils import compare_against_ref
-from kwave.utils import dotdict
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import filter_time_series
+from kwave.utils.mapgen import make_ball
+from tests.diff_utils import compare_against_ref
 
 
 def test_cpp_running_simulations():

@@ -1,4 +1,4 @@
-from kwave.utils.maputils import make_spherical_section
+from kwave.utils.mapgen import make_spherical_section
 
 from scipy.io import loadmat
 import numpy as np

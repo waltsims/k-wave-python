@@ -1,8 +1,9 @@
 import math
+
 import numpy as np
 
 from kwave import kWaveGrid, kWaveMedium
-from kwave.utils import db2neper
+from kwave.utils.conversion import db2neper
 
 
 def create_absorption_variables(kgrid: kWaveGrid, medium: kWaveMedium, equation_of_state):

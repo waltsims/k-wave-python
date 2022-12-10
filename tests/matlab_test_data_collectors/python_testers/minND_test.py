@@ -1,9 +1,10 @@
-from kwave.utils import min_nd
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.matrix import min_nd
 
 
 def test_minND():

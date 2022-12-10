@@ -1,4 +1,4 @@
-from kwave.utils.maputils import make_ball
+from kwave.utils.mapgen import make_ball
 
 from scipy.io import loadmat
 import numpy as np

@@ -8,8 +8,15 @@ from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
 from kwave.options import SimulationOptions
 from kwave.recorder import Recorder
-from kwave.utils import *
-from kwave.utils import dotdict
+from kwave.utils.checks import num_dim2, check_stability
+from kwave.utils.colormap import get_color_map
+from kwave.utils.conversion import cast_to_type
+from kwave.utils.data import get_smallest_possible_type
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import smooth
+from kwave.utils.interp import cart2grid
+from kwave.utils.io import get_date_string
+from kwave.utils.matlab import matlab_find, matlab_mask
 
 
 @dataclass
@@ -773,7 +780,7 @@ class kWaveSimulation(object):
                             sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
         
                             # reorder p0 based on the order_index
-                            sensor.time_reversal_boundary_data = sortrows(sensor.time_reversal_boundary_data, new_col_pos);
+                            sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
         
                             # remove the reordering data
                             sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
@@ -1090,7 +1097,8 @@ class kWaveSimulation(object):
         # check input options for data streaming *****
         if opt.stream_to_disk:
             if not self.use_sensor or self.time_rev:
-                raise ValueError('The optional input ''StreamToDisk'' is currently only compatible with forward simulations using a non-zero sensor mask.');
+                raise ValueError(
+                    'The optional input ''StreamToDisk'' is currently only compatible with forward simulations using a non-zero sensor mask.')
             elif self.sensor.record is not None and self.sensor.record.ismember(self.record.flags[1:]).any():
                 raise ValueError('The optional input ''StreamToDisk'' is currently only compatible with sensor.record = {''p''} (the default).')
 
@@ -1255,12 +1263,12 @@ class kWaveSimulation(object):
         # smooth the sound speed distribution if required
         if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
             print('  smoothing sound speed distribution...')
-            ev('medium.sound_speed = smooth(medium.sound_speed);')
+            self.medium.sound_speed = smooth(self.medium.sound_speed)
 
         # smooth the ambient density distribution if required
         if opt.smooth_rho0 and num_dim2(self.medium.density) == k_dim and self.medium.density.size > 1:
             print('smoothing density distribution...')
-            ev('medium.density = smooth(medium.density);')
+            self.medium.density = smooth(self.medium.density)
 
     def create_sensor_variables(self) -> None:
         """

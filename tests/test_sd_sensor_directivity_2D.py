@@ -6,20 +6,18 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
+from copy import deepcopy
+from tempfile import gettempdir
+
 # noinspection PyUnresolvedReferences
 import setup_test
-import os
-import numpy as np
-from tempfile import gettempdir
-from kwave.kgrid import *
+from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensorDirectivity
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-from copy import deepcopy
 
 
 def test_sd_sensor_directivity_2D():

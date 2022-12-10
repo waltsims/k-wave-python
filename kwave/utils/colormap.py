@@ -1,19 +1,21 @@
+from typing import Optional
+
 import numpy as np
 
 
-def get_color_map(num_colors=None):
+def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
     """
-      DESCRIPTION:
-          getColorMap returns the default color map used for display and
-          visualisation across the k-Wave Toolbox. Zero values are displayed as
-          white, positive values are displayed as yellow through red to black,
-          and negative values are displayed as light to dark blue-greys. If no
-          value for num_colors is provided, cm will have 256 colors.
+    Returns the default color map used for display and visualisation across
+    the k-Wave Toolbox. Zero values are displayed as white, positive values
+    are displayed as yellow through red to black, and negative values are
+    displayed as light to dark blue-greys. If no value for `num_colors` is
+    provided, `cm` will have 256 colors.
+
     Args:
-        num_colors: number of colors in the color map (default is 256)
+        num_colors: The number of colors in the color map (default is 256).
 
     Returns:
-        cm: three column color map matrix which can be applied using colormap
+        A three-column color map matrix which can be applied using colormap.
     """
     if num_colors is None:
         neg_pad = 48
@@ -29,20 +31,17 @@ def get_color_map(num_colors=None):
     return np.vstack([neg, pos])
 
 
-def hot(m):
+def hot(m: int) -> np.ndarray:
     """
-    %HOT    Red-yellow-white color map inspired by black body radiation
-    %   HOT(M) returns an M-by-3 matrix containing a "hot" colormap.
-    %   HOT, by itself, is the same length as the current figure's
-    %   colormap. If no figure exists, MATLAB uses the length of the
-    %   default colormap.
+    Generate a hot colormap of length m.
+    The colormap consists of a progression from black to red, yellow, and white.
+
     Args:
-        m:
-
+        m: The length of the colormap.
     Returns:
-
+        An m-by-3 array containing the hot colormap.
     """
-    n = int(np.fix(3/8 * m))
+    n = int(np.fix(3 / 8 * m))
 
     r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m-n)])
     g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m-2*n)])
@@ -51,11 +50,30 @@ def hot(m):
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
-def bone(m):
+def bone(m: int) -> np.ndarray:
+    """
+    Returns an m-by-3 matrix containing a "bone" colormap.
+
+    Args:
+        m: The number of rows in the colormap.
+
+    Returns:
+        An m-by-3 matrix containing the colormap.
+    """
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
-def gray(m):
-    g = np.arange(m) / max(m-1, 1)
+def gray(m: int) -> np.ndarray:
+    """
+    Returns an M-by-3 matrix containing a grayscale colormap.
+
+    Args:
+        m: The length of the colormap.
+
+    Returns:
+        An M-by-3 matrix containing the grayscale colormap.
+    """
+
+    g = np.arange(m) / max(m - 1, 1)
     g = g[:, None]
     return np.hstack([g, g, g])

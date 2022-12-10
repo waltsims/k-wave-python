@@ -6,19 +6,20 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
 import setup_test
-
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.ktransducer import *
-from kwave.utils import *
+from kwave.utils.filters import smooth
+from kwave.utils.io import load_image
+from kwave.utils.mapgen import make_cart_circle
+from kwave.utils.matrix import resize
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-from kwave.utils import dotdict
-import os
 
 
 def test_pr_2D_TR_circular_sensor():

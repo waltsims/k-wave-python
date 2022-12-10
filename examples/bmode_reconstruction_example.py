@@ -1,3 +1,4 @@
+import os
 from tempfile import gettempdir
 
 import scipy.io
@@ -8,6 +9,8 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.signals import tone_burst
 
 if __name__ == '__main__':
     # pathname for the input and output files

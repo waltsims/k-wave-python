@@ -1,9 +1,10 @@
-import scipy
-import uff
-import numpy as np
-from kwave import NotATransducer
-from uff.linear_array import LinearArray
 import time
+
+import numpy as np
+import uff
+from uff.linear_array import LinearArray
+
+from kwave import NotATransducer
 
 
 def build_channel_data(sensor_data: np.ndarray,

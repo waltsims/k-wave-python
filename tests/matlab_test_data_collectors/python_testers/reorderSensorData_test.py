@@ -5,10 +5,11 @@ import numpy as np
 from scipy.io import loadmat
 
 from kwave.kgrid import kWaveGrid
-from kwave.utils import reorder_sensor_data, dotdict
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.signals import reorder_sensor_data
 
 
-def test_reorderSensorData():
+def test_reorder_sensor_data():
     collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/reorderSensorData')
     num_collected_values = len(os.listdir(collected_values_folder))
 
