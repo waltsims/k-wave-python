@@ -1,13 +1,13 @@
+from tempfile import gettempdir
+
 import scipy.io
 
 from example_utils import download_from_gdrive_if_does_not_exist
-from kwave.reconstruction.beamform import beamform
-from kwave.reconstruction.converter import build_channel_data
-from tempfile import gettempdir
+from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *
-from kwave.kmedium import kWaveMedium
-
+from kwave.reconstruction.beamform import beamform
+from kwave.reconstruction.converter import build_channel_data
 
 if __name__ == '__main__':
     # pathname for the input and output files
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = True
+    RUN_SIMULATION = False
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID

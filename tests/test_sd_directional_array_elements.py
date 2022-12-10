@@ -6,23 +6,17 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
-import os
 from tempfile import gettempdir
 
+# noinspection PyUnresolvedReferences
+import setup_test
+from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.filterutils import filter_time_series
-from kwave.utils.maputils import make_circle
-from kwave.utils import dotdict
 from kwave.ktransducer import *
 from tests.diff_utils import compare_against_ref
-from kwave.kmedium import kWaveMedium
-import pytest
 
 
-@pytest.mark.skip("Failing since commit eed75b3f553a9baeeba4ca27d36e444e919e9159")
 def test_sd_directional_array_elements():
     # pathname for the input and output files
     pathname = gettempdir()
@@ -32,18 +26,17 @@ def test_sd_directional_array_elements():
     # =========================================================================
 
     # create the computational grid
-    Nx = 180            # number of grid points in the x (row) direction
-    Ny = 180            # number of grid points in the y (column) direction
-    dx = 0.1e-3         # grid point spacing in the x direction [m]
-    dy = 0.1e-3         # grid point spacing in the y direction [m]
+    Nx = 180  # number of grid points in the x (row) direction
+    Ny = 180  # number of grid points in the y (column) direction
+    dx = 0.1e-3  # grid point spacing in the x direction [m]
+    dy = 0.1e-3  # grid point spacing in the y direction [m]
     kgrid = kWaveGrid([Nx, Ny], [dx, dy])
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
-
     # define the array of time points [s]
-    t_end = 12e-6       # [s]
+    t_end = 12e-6  # [s]
     kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
     # =========================================================================
@@ -52,14 +45,15 @@ def test_sd_directional_array_elements():
 
     # define a semicircular sensor centred on the grid
     semicircle_radius = 65  # [grid points]
-    arc = make_circle(Nx, Ny, Nx // 2 - 1, Ny // 2 - 1, semicircle_radius, np.pi)
+    arc = make_circle(Nx, Ny, Nx // 2, Ny // 2, semicircle_radius, np.pi)
 
     # find total number and indices of the grid points constituting the semicircle
     arc_indices = matlab_find(arc, val=1, mode='eq')
     Nv = len(arc_indices)
 
     # calculate angles between grid points in the arc and the centre of the grid
-    arc_angles = np.arctan((matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1)))  # -1 compatibility
+    arc_angles = np.arctan(
+        (matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1)))  # -1 compatibility
 
     # sort the angles into ascending order, and adjust the indices accordingly
     sorted_index = arc_angles.ravel().argsort()
@@ -87,8 +81,8 @@ def test_sd_directional_array_elements():
     source.p_mask[139, :] = 1
 
     # define a time varying sinusoidal source
-    source_freq = 1e6   # [Hz]
-    source_mag = 0.5    # [Pa]
+    source_freq = 1e6  # [Hz]
+    source_mag = 0.5  # [Pa]
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
     source.p = filter_time_series(kgrid, medium, source.p)
 
@@ -96,7 +90,7 @@ def test_sd_directional_array_elements():
     # source continues up to the edge of the domain (and from there infinitely,
     # because of the periodic assumption implicit in pseudospectral methods)
     # input arguments
-    input_filename  = f'example_input.h5'
+    input_filename = f'example_input.h5'
     input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'PMLAlpha': np.array([2, 0]),
