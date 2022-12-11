@@ -1,4 +1,4 @@
-from kwave.utils.maputils import make_multi_arc
+from kwave.utils.mapgen import make_multi_arc
 
 from scipy.io import loadmat
 import numpy as np

@@ -1,11 +1,13 @@
 import functools
+import os
 from operator import itemgetter
 from tempfile import gettempdir
 from warnings import warn
 
 from kwave.ktransducer import *
-from kwave.utils import dotdict
-from kwave.utils import is_unix
+from kwave.utils.checks import is_unix
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.io import get_date_string
 
 
 def kspaceFirstOrderG(func):

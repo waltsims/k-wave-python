@@ -4,15 +4,21 @@
     This example demonstrates how to save the HDF5 input files required by
     the C++ code in parts. It builds on the Running C++ Simulations Example.
 """
-# noinspection PyUnresolvedReferences
-import setup_test
+import os
 from tempfile import gettempdir
+
 import numpy as np
 
+# noinspection PyUnresolvedReferences
+import setup_test
 from kwave.kgrid import kWaveGrid
-from kwave.utils import *
+from kwave.utils.conversion import cast_to_type
+from kwave.utils.interp import interpolate3d
+from kwave.utils.io import get_h5_literals, write_matrix, write_attributes, write_flags, write_grid
+from kwave.utils.mapgen import make_ball
+from kwave.utils.matlab import matlab_find
+from kwave.utils.tictoc import TicToc
 from tests.diff_utils import compare_against_ref
-import os
 
 
 def test_cpp_io_in_parts():

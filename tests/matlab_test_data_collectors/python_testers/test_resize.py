@@ -1,9 +1,10 @@
 import os
-from scipy.io import loadmat
 from pathlib import Path
-import numpy as np
 
-from kwave.utils import resize
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.matrix import resize
 
 
 def test_resize():
@@ -25,4 +26,4 @@ def test_resize():
 
         assert np.allclose(expected_mat, resized_mat), f"Results do not match for {i + 1} dimensional case."
 
-    print('revolve2D(..) works as expected!')
+    print('revolve2d(..) works as expected!')

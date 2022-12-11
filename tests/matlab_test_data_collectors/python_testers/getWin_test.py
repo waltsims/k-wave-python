@@ -1,9 +1,10 @@
-from kwave.utils import get_win
-
-from scipy.io import loadmat
-import numpy as np
-from pathlib import Path
 import os
+from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.filters import get_win
 
 
 def test_get_win():

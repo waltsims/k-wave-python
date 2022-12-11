@@ -6,6 +6,7 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
 from copy import deepcopy
 from tempfile import gettempdir
 
@@ -15,6 +16,10 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import *
+from kwave.utils.filters import *
+from kwave.utils.interp import cart2grid
+from kwave.utils.mapgen import make_cart_circle
+from kwave.utils.matlab import matlab_find, unflatten_matlab_mask
 from tests.diff_utils import compare_against_ref
 
 

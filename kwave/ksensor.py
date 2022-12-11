@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+
 import numpy as np
 
-from kwave.utils import expand_matrix
+from kwave.utils.matrix import expand_matrix
 
 
 class kSensor(object):

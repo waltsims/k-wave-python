@@ -3,7 +3,7 @@ from numpy.fft import ifftshift
 
 from kwave import SimulationOptions, kWaveGrid
 from kwave.data import Array
-from kwave.utils import dotdict
+from kwave.utils.dotdictionary import dotdict
 
 
 # Note from Farid: This function/file is very suspicios. I'm pretty sure that the implementation is not correct.

@@ -6,10 +6,9 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
 from copy import deepcopy
 from tempfile import gettempdir
-
-import pytest
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -17,11 +16,11 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.ktransducer import *
+from kwave.utils.mapgen import make_disc, make_circle
 from tests.diff_utils import compare_against_ref
 
 
-@pytest.mark.skip("Failing since commit eed75b3f553a9baeeba4ca27d36e444e919e9159")
-def test_sd_focussed_detector_2D():
+def test_sd_focussed_detector_2d():
     # pathname for the input and output files
     pathname = gettempdir()
 
@@ -42,7 +41,7 @@ def test_sd_focussed_detector_2D():
     # define a sensor as part of a circle centred on the grid
     sensor_radius = 65  # [grid points]
     arc_angle = np.pi  # [rad]
-    sensor_mask = make_circle(Nx, Ny, Nx / 2, Ny / 2, sensor_radius, arc_angle)
+    sensor_mask = make_circle(Nx, Ny, Nx // 2 + 1, Ny // 2 + 1, sensor_radius, arc_angle)
     sensor = kSensor(sensor_mask)
 
     # define the array of temporal points

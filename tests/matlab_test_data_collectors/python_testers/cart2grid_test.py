@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import numpy as np
 from scipy.io import loadmat
 
-from kwave.utils.interputils import cart2grid
+from kwave.utils.interp import cart2grid
 
 
 def test_cart2grid():

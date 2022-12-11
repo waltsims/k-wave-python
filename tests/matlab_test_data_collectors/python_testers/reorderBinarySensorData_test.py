@@ -1,8 +1,10 @@
-from kwave.utils import reorder_binary_sensor_data
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.signals import reorder_binary_sensor_data
 
 
 def test_binary_sensor_data():

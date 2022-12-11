@@ -6,6 +6,7 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
 from copy import deepcopy
 from tempfile import gettempdir
 

@@ -6,7 +6,9 @@ from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.kspaceFirstOrder import *
-from kwave.utils import *
+from kwave.utils.interp import interpolate2d
+from kwave.utils.pml import get_pml
+from kwave.utils.tictoc import TicToc
 
 
 @kspaceFirstOrderG

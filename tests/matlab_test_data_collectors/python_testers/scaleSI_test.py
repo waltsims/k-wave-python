@@ -1,4 +1,4 @@
-from kwave.utils.conversionutils import scale_SI
+from kwave.utils.conversion import scale_SI
 
 from scipy.io import loadmat
 import numpy as np

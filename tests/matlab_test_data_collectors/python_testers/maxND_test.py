@@ -1,10 +1,10 @@
-from kwave.utils import max_nd
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
-import pytest
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.matrix import max_nd
 
 
 def test_maxND():

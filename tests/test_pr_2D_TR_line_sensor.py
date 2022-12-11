@@ -6,6 +6,7 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import os
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
@@ -14,6 +15,8 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.ktransducer import *
+from kwave.utils.filters import smooth
+from kwave.utils.mapgen import make_disc
 from tests.diff_utils import compare_against_ref
 
 

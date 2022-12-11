@@ -1,10 +1,10 @@
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
 
-from kwave.utils import revolve2D
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.matrix import revolve2d
 
 
 def test_revolve2D():
@@ -22,8 +22,8 @@ def test_revolve2D():
 
         expected_mat3D = recorded_data['mat3D']
 
-        mat3D = revolve2D(mat2D)
+        mat3D = revolve2d(mat2D)
 
         assert np.allclose(expected_mat3D, mat3D)
 
-    print('revolve2D(..) works as expected!')
+    print('revolve2d(..) works as expected!')

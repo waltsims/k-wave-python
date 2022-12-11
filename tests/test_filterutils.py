@@ -1,8 +1,12 @@
-import numpy as np
-from kwave.utils.filterutils import gaussian, gaussian_filter, create_cw_signals, fwhm, envelope_detection, sharpness, \
-    smooth
-from kwave.utils.kutils import get_win
 from math import pi
+
+import numpy as np
+
+from kwave.reconstruction.beamform import envelope_detection
+from kwave.utils.filters import gaussian, fwhm, sharpness, \
+    smooth
+from kwave.utils.signals import create_cw_signals
+from kwave.utils.signals import get_win
 
 
 def test_gaussian():
