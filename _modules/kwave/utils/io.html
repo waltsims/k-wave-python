@@ -1,0 +1,833 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>kwave.utils.io - k-wave-python documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html">Development Environment</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.options.html">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.utils.html">kwave.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.mapgen.html">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for kwave.utils.io</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">cast_to_type</span>
+<span class="kn">from</span> <span class="nn">.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
+
+
+<div class="viewcode-block" id="get_h5_literals"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.get_h5_literals">[docs]</a><span class="k">def</span> <span class="nf">get_h5_literals</span><span class="p">():</span>
+    <span class="n">literals</span> <span class="o">=</span> <span class="n">dotdict</span><span class="p">({</span>
+        <span class="c1"># data type</span>
+        <span class="s1">&#39;DATA_TYPE_ATT_NAME&#39;</span><span class="p">:</span>                   <span class="s1">&#39;data_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MATRIX_DATA_TYPE_MATLAB&#39;</span><span class="p">:</span>              <span class="s1">&#39;single&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MATRIX_DATA_TYPE_C&#39;</span><span class="p">:</span>                   <span class="s1">&#39;float&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;INTEGER_DATA_TYPE_MATLAB&#39;</span><span class="p">:</span>             <span class="s1">&#39;uint64&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;INTEGER_DATA_TYPE_C&#39;</span><span class="p">:</span>                  <span class="s1">&#39;long&#39;</span><span class="p">,</span>
+
+        <span class="c1"># real / complex</span>
+        <span class="s1">&#39;DOMAIN_TYPE_ATT_NAME&#39;</span><span class="p">:</span>                 <span class="s1">&#39;domain_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DOMAIN_TYPE_REAL&#39;</span><span class="p">:</span>                     <span class="s1">&#39;real&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DOMAIN_TYPE_COMPLEX&#39;</span><span class="p">:</span>                  <span class="s1">&#39;complex&#39;</span><span class="p">,</span>
+
+        <span class="c1"># file descriptors</span>
+        <span class="s1">&#39;FILE_MAJOR_VER_ATT_NAME&#39;</span><span class="p">:</span>              <span class="s1">&#39;major_version&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FILE_MINOR_VER_ATT_NAME&#39;</span><span class="p">:</span>              <span class="s1">&#39;minor_version&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FILE_DESCR_ATT_NAME&#39;</span><span class="p">:</span>                  <span class="s1">&#39;file_description&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FILE_CREATION_DATE_ATT_NAME&#39;</span><span class="p">:</span>          <span class="s1">&#39;creation_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CREATED_BY_ATT_NAME&#39;</span><span class="p">:</span>                  <span class="s1">&#39;created_by&#39;</span><span class="p">,</span>
+
+        <span class="c1"># file type</span>
+        <span class="s1">&#39;FILE_TYPE_ATT_NAME&#39;</span><span class="p">:</span>                   <span class="s1">&#39;file_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HDF_INPUT_FILE&#39;</span><span class="p">:</span>                       <span class="s1">&#39;input&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HDF_OUTPUT_FILE&#39;</span><span class="p">:</span>                      <span class="s1">&#39;output&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HDF_CHECKPOINT_FILE&#39;</span><span class="p">:</span>                  <span class="s1">&#39;checkpoint&#39;</span><span class="p">,</span>
+
+        <span class="c1"># file version information</span>
+        <span class="s1">&#39;HDF_FILE_MAJOR_VERSION&#39;</span><span class="p">:</span>               <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HDF_FILE_MINOR_VERSION&#39;</span><span class="p">:</span>               <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+
+        <span class="c1"># compression level</span>
+        <span class="s1">&#39;HDF_COMPRESSION_LEVEL&#39;</span><span class="p">:</span>                <span class="mi">0</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">literals</span></div>
+
+
+<div class="viewcode-block" id="write_matrix"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.write_matrix">[docs]</a><span class="k">def</span> <span class="nf">write_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">matrix_name</span><span class="p">,</span> <span class="n">compression_level</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># get literals</span>
+    <span class="n">h5_literals</span> <span class="o">=</span> <span class="n">get_h5_literals</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">compression_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">compression_level</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_COMPRESSION_LEVEL</span>
+
+    <span class="c1"># dims = num_dim(matrix)</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># C &lt;=&gt; Fortran ordering</span>
+    <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>  <span class="c1"># C &lt;=&gt; Fortran ordering</span>
+
+    <span class="c1"># get the size of the input matrix</span>
+    <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">elif</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">Nx</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+
+    <span class="c1"># check size of matrix and set chunk size and compression level</span>
+    <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># set chunk size to Nx * Ny</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># set chunk size to Nx</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">dims</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># check that the matrix size is greater than 1 MB</span>
+        <span class="n">one_mb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">one_mb</span><span class="p">:</span>
+            <span class="c1"># set chunk size to 1 MB</span>
+            <span class="k">if</span> <span class="n">Nx</span> <span class="o">&gt;</span> <span class="n">Ny</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">one_mb</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">Ny</span> <span class="o">&gt;</span> <span class="n">Nz</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">one_mb</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">one_mb</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># set no compression</span>
+            <span class="n">compression_level</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># set chunk size to grid size</span>
+            <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">Nx</span> <span class="o">&gt;</span> <span class="n">Ny</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">Ny</span> <span class="o">&gt;</span> <span class="n">Nz</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Nz</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># throw error for unknown matrix size</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input matrix must have 1, 2 or 3 dimensions.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># check the format of the matrix is either single precision (float in C++)</span>
+    <span class="c1"># or uint64 (unsigned long in C++)</span>
+    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+        <span class="c1"># set data type flags</span>
+        <span class="n">data_type_matlab</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">MATRIX_DATA_TYPE_MATLAB</span>
+        <span class="n">data_type_c</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">MATRIX_DATA_TYPE_C</span>
+    <span class="k">elif</span> <span class="n">matrix</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>
+
+        <span class="c1"># set data type flags</span>
+        <span class="n">data_type_matlab</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">INTEGER_DATA_TYPE_MATLAB</span>
+        <span class="n">data_type_c</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">INTEGER_DATA_TYPE_C</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># throw error for unknown data type</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input matrix must be of type &#39;&#39;single&#39;&#39; or &#39;&#39;uint64&#39;&#39;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># check if the input matrix is real or complex, if complex, rearrange the</span>
+    <span class="c1"># data in the C++ format</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+
+        <span class="c1"># set file tag</span>
+        <span class="n">domain_type</span> <span class="o">=</span> <span class="s1">&#39;real&#39;</span>  <span class="c1"># DOMAIN_TYPE_REAL</span>
+
+    <span class="k">elif</span> <span class="n">dims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+        <span class="c1"># set file tag</span>
+        <span class="n">domain_type</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">DOMAIN_TYPE_COMPLEX</span>
+
+        <span class="c1"># rearrange the data so the real and imaginary parts are stored in the</span>
+        <span class="c1"># same matrix</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">))</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">))</span>
+
+        <span class="c1"># update the size of Nx</span>
+        <span class="n">Nx</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Nx</span>
+
+    <span class="k">elif</span> <span class="n">dims</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="c1"># set file tag</span>
+        <span class="n">domain_type</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">DOMAIN_TYPE_COMPLEX</span>
+
+        <span class="c1"># rearrange the data so the real and imaginary parts are stored in the</span>
+        <span class="c1"># same matrix</span>
+        <span class="n">nelems</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nelems</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nelems</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+        <span class="c1"># update the matrix size</span>
+        <span class="n">Nx</span> <span class="o">=</span> <span class="n">Nx</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Nx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+        <span class="n">Ny</span> <span class="o">=</span> <span class="n">Ny</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ny</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+        <span class="n">Nz</span> <span class="o">=</span> <span class="n">Nz</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Nz</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+
+        <span class="c1"># double store in x-direction if a complex scalar</span>
+        <span class="k">if</span> <span class="n">Nx</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">Ny</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">Nz</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">Nx</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Nx</span>
+
+        <span class="c1"># put in correct dimension</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Currently there is no support for saving 2D complex matrices.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># allocate a holder for the new matrix within the file</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">data_type_matlab</span><span class="p">,</span>
+        <span class="s1">&#39;chunks&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">compression_level</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># use compression</span>
+        <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;compression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compression_level</span>
+
+    <span class="c1"># write the matrix into the file</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">matrix_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+        <span class="c1"># set attributes for the matrix (used by k-Wave++)</span>
+        <span class="n">assign_str_attr</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">matrix_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">DOMAIN_TYPE_ATT_NAME</span><span class="p">,</span> <span class="n">domain_type</span><span class="p">)</span>
+        <span class="n">assign_str_attr</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">matrix_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">DATA_TYPE_ATT_NAME</span><span class="p">,</span> <span class="n">data_type_c</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_attributes_typed"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.write_attributes_typed">[docs]</a><span class="k">def</span> <span class="nf">write_attributes_typed</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># get literals</span>
+    <span class="n">h5_literals</span> <span class="o">=</span> <span class="n">get_h5_literals</span><span class="p">()</span>
+
+    <span class="c1"># get computer infor</span>
+    <span class="n">comp_info</span> <span class="o">=</span> <span class="n">dotdict</span><span class="p">({</span>
+        <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y&quot;</span><span class="p">),</span>
+        <span class="s1">&#39;computer_name&#39;</span><span class="p">:</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
+        <span class="s1">&#39;operating_system_type&#39;</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">(),</span>
+        <span class="s1">&#39;operating_system&#39;</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">platform</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">platform</span><span class="o">.</span><span class="n">version</span><span class="p">(),</span>
+        <span class="s1">&#39;user_name&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;USERNAME&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;matlab_version&#39;</span><span class="p">:</span> <span class="s1">&#39;N/A&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;kwave_version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;kwave_path&#39;</span><span class="p">:</span> <span class="s1">&#39;N/A&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+
+    <span class="c1"># set file description if not provided by user</span>
+    <span class="k">if</span> <span class="n">file_description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_description</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Input data created by </span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">user_name</span><span class="si">}</span><span class="s1"> running MATLAB &#39;</span> \
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">matlab_version</span><span class="si">}</span><span class="s1"> on </span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">operating_system_type</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># set additional file attributes</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_MAJOR_VER_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_FILE_MAJOR_VERSION</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_MINOR_VER_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_FILE_MINOR_VERSION</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">CREATED_BY_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;k-Wave 1.3&#39;</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_DESCR_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_description</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_TYPE_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_INPUT_FILE</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_CREATION_DATE_ATT_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_date_string</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="write_attributes"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.write_attributes">[docs]</a><span class="k">def</span> <span class="nf">write_attributes</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">legacy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write attributes to a HDF5 file.</span>
+
+<span class="sd">    This function writes attributes to a HDF5 file using a deprecated legacy method if legacy is set to True, or a new</span>
+<span class="sd">    typed method if legacy is set to False. The function warns if legacy is set to True and deprecates it. If</span>
+<span class="sd">    file_description is not provided, a default file description will be used.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (str): The name of the HDF5 file.</span>
+<span class="sd">        file_description (Optional[str], optional): The description of the file. If not provided, a default description</span>
+<span class="sd">            will be used.</span>
+<span class="sd">        legacy (bool, optional): If set to True, the function will use the deprecated legacy method to write attributes.</span>
+<span class="sd">            If set to False, the function will use the new typed method. Defaults to False.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        DeprecationWarning: If legacy is set to True, a DeprecationWarning will be raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">legacy</span><span class="p">:</span>
+        <span class="n">write_attributes_typed</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_description</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Attributes will soon be typed when saved and not saved &quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+    <span class="c1"># get literals</span>
+    <span class="n">h5_literals</span> <span class="o">=</span> <span class="n">get_h5_literals</span><span class="p">()</span>
+
+    <span class="c1"># get computer infor</span>
+    <span class="n">comp_info</span> <span class="o">=</span> <span class="n">dotdict</span><span class="p">({</span>
+        <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y&quot;</span><span class="p">),</span>
+        <span class="s1">&#39;computer_name&#39;</span><span class="p">:</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
+        <span class="s1">&#39;operating_system_type&#39;</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">(),</span>
+        <span class="s1">&#39;operating_system&#39;</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">platform</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">platform</span><span class="o">.</span><span class="n">version</span><span class="p">(),</span>
+        <span class="s1">&#39;user_name&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;USERNAME&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;matlab_version&#39;</span><span class="p">:</span> <span class="s1">&#39;N/A&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;kwave_version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;kwave_path&#39;</span><span class="p">:</span> <span class="s1">&#39;N/A&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+
+    <span class="c1"># set file description if not provided by user</span>
+    <span class="k">if</span> <span class="n">file_description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_description</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Input data created by </span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">user_name</span><span class="si">}</span><span class="s1"> running MATLAB &#39;</span> \
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">matlab_version</span><span class="si">}</span><span class="s1"> on </span><span class="si">{</span><span class="n">comp_info</span><span class="o">.</span><span class="n">operating_system_type</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># set additional file attributes</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># create a dictionary of attributes</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_MAJOR_VER_ATT_NAME</span><span class="p">:</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_FILE_MAJOR_VERSION</span><span class="p">,</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_MINOR_VER_ATT_NAME</span><span class="p">:</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_FILE_MINOR_VERSION</span><span class="p">,</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">CREATED_BY_ATT_NAME</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;k-Wave N/A&#39;</span><span class="p">,</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_DESCR_ATT_NAME</span><span class="p">:</span> <span class="n">file_description</span><span class="p">,</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_TYPE_ATT_NAME</span><span class="p">:</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">HDF_INPUT_FILE</span><span class="p">,</span>
+            <span class="n">h5_literals</span><span class="o">.</span><span class="n">FILE_CREATION_DATE_ATT_NAME</span><span class="p">:</span> <span class="n">get_date_string</span><span class="p">(),</span>
+        <span class="p">}</span>
+        <span class="c1"># loop through the attributes dictionary and assign each attribute to the file</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">assign_str_attr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="write_flags"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.write_flags">[docs]</a><span class="k">def</span> <span class="nf">write_flags</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     writeFlags reads the input HDF5 file and derives and writes the</span>
+<span class="sd">     required source and medium flags based on the datasets present in the</span>
+<span class="sd">     file. For example, if the file contains a data set named &#39;BonA&#39;, the</span>
+<span class="sd">     nonlinear_flag will be written as true. Conditional flags are also</span>
+<span class="sd">     written. The source mode flags are written when appropriate if they</span>
+<span class="sd">     are not already present in the file. The default source mode is</span>
+<span class="sd">     &#39;additive&#39;.</span>
+
+<span class="sd">     List of flags that are always written</span>
+<span class="sd">         ux_source_flag</span>
+<span class="sd">         uy_source_flag</span>
+<span class="sd">         uz_source_flag</span>
+<span class="sd">         sxx_source_flag</span>
+<span class="sd">         sxy_source_flag</span>
+<span class="sd">         sxz_source_flag</span>
+<span class="sd">         syy_source_flag</span>
+<span class="sd">         syz_source_flag</span>
+<span class="sd">         szz_source_flag</span>
+<span class="sd">         p_source_flag</span>
+<span class="sd">         p0_source_flag</span>
+<span class="sd">         transducer_source_flag</span>
+<span class="sd">         nonuniform_grid_flag</span>
+<span class="sd">         nonlinear_flag</span>
+<span class="sd">         absorbing_flag</span>
+<span class="sd">         axisymmetric_flag</span>
+<span class="sd">         elastic_flag</span>
+<span class="sd">         sensor_mask_type</span>
+
+<span class="sd">     List of conditional flags</span>
+<span class="sd">         u_source_mode</span>
+<span class="sd">         u_source_many</span>
+<span class="sd">         p_source_mode</span>
+<span class="sd">         p_source_many</span>
+<span class="sd">         s_source_mode</span>
+<span class="sd">         s_source_many</span>
+<span class="sd">    Args:</span>
+<span class="sd">        filename:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h5_literals</span> <span class="o">=</span> <span class="n">get_h5_literals</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="n">v_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;ux_source&#39;</span><span class="p">,</span> <span class="s1">&#39;u_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;uy_source&#39;</span><span class="p">,</span> <span class="s1">&#39;u_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;uz_source&#39;</span><span class="p">,</span> <span class="s1">&#39;u_source_many&#39;</span><span class="p">),</span>
+
+            <span class="p">(</span><span class="s1">&#39;sxx_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;syy_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;szz_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;sxy_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;sxz_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;syz_source&#39;</span><span class="p">,</span> <span class="s1">&#39;s_source_many&#39;</span><span class="p">),</span>
+
+            <span class="p">(</span><span class="s1">&#39;p_source&#39;</span><span class="p">,</span> <span class="s1">&#39;p_source_many&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">variable_list</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">many_flag_key</span> <span class="ow">in</span> <span class="n">v_list</span><span class="p">:</span>
+            <span class="n">inp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_input&#39;</span>
+            <span class="n">flag_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_flag&#39;</span>
+            <span class="k">if</span> <span class="n">inp_name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="n">variable_list</span><span class="p">[</span><span class="n">flag_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="n">inp_name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="n">variable_list</span><span class="p">[</span><span class="n">many_flag_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="n">inp_name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">variable_list</span><span class="p">[</span><span class="n">flag_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># --------------------</span>
+        <span class="c1"># u source</span>
+        <span class="c1"># --------------------</span>
+
+        <span class="c1"># write u_source mode if not already in file (1 is Additive, 0 is Dirichlet)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">variable_list</span><span class="p">[</span><span class="n">flag</span><span class="p">]</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ux_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;uy_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;uz_source_flag&#39;</span><span class="p">])</span> \
+                <span class="ow">and</span> <span class="s1">&#39;u_source_mode&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;u_source_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># --------------------</span>
+        <span class="c1"># s source</span>
+        <span class="c1"># --------------------</span>
+
+        <span class="c1"># write s_source mode if not already in file (1 is Additive, 0 is Dirichlet)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">variable_list</span><span class="p">[</span><span class="n">flag</span><span class="p">]</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sxx_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;syy_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;szz_source_flag&#39;</span><span class="p">,</span>
+                                                <span class="s1">&#39;sxy_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;sxz_source_flag&#39;</span><span class="p">,</span> <span class="s1">&#39;syz_source_flag&#39;</span><span class="p">])</span> \
+                <span class="ow">and</span> <span class="s1">&#39;s_source_mode&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;s_source_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># --------------------</span>
+        <span class="c1"># p source</span>
+        <span class="c1"># --------------------</span>
+
+        <span class="c1"># write p_source mode if not already in file (1 is Additive, 0 is Dirichlet)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">variable_list</span><span class="p">[</span><span class="n">flag</span><span class="p">]</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;p_source_flag&#39;</span><span class="p">])</span> \
+                <span class="ow">and</span> <span class="s1">&#39;p_source_mode&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;p_source_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># check for p0_source_input and set p0_source_flag</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;p0_source_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;p0_source_input&#39;</span> <span class="ow">in</span> <span class="n">names</span>
+
+        <span class="c1"># --------------------</span>
+        <span class="c1"># additional flags</span>
+        <span class="c1"># --------------------</span>
+        <span class="c1"># check for transducer_source_input and set transducer_source_flag</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;transducer_source_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;transducer_source_input&#39;</span> <span class="ow">in</span> <span class="n">names</span>
+
+        <span class="c1"># check for BonA and set nonlinear flag</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;nonlinear_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;BonA&#39;</span> <span class="ow">in</span> <span class="n">names</span>
+
+        <span class="c1"># check for alpha_coeff and set absorbing flag</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;absorbing_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;alpha_coeff&#39;</span> <span class="ow">in</span> <span class="n">names</span>
+
+        <span class="c1"># check for lambda and set elastic flag</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;elastic_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lambda&#39;</span> <span class="ow">in</span> <span class="n">names</span>
+
+        <span class="c1"># set axisymmetric grid flag to false</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;axisymmetric_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># set nonuniform grid flag to false</span>
+        <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;nonuniform_grid_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># check for sensor_mask_index and sensor_mask_corners</span>
+        <span class="k">if</span> <span class="s1">&#39;sensor_mask_index&#39;</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;sensor_mask_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="s1">&#39;sensor_mask_corners&#39;</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">variable_list</span><span class="p">[</span><span class="s1">&#39;sensor_mask_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Either sensor_mask_index or sensor_mask_corners must be defined in the input file&#39;</span><span class="p">)</span>
+
+    <span class="c1"># --------------------</span>
+    <span class="c1"># write flags to file</span>
+    <span class="c1"># --------------------</span>
+
+    <span class="c1"># change all the index variables to be in 64-bit unsigned integers (long in C++) and write to file</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variable_list</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># cast matrix to 64-bit unsigned integer</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="n">write_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="write_grid"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.write_grid">[docs]</a><span class="k">def</span> <span class="nf">write_grid</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">pml_alpha</span><span class="p">,</span> <span class="n">Nt</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="sd">     DESCRIPTION:</span>
+<span class="sd">         writeGrid creates and writes the wavenumber grids and PML variables</span>
+<span class="sd">         required by the k-Wave C++ code to the HDF5 file specified by the</span>
+<span class="sd">         user.</span>
+
+<span class="sd">         List of parameters that are written:</span>
+<span class="sd">             Nx</span>
+<span class="sd">             Ny</span>
+<span class="sd">             Nz</span>
+<span class="sd">             Nt</span>
+<span class="sd">             dt</span>
+<span class="sd">             dx</span>
+<span class="sd">             dy</span>
+<span class="sd">             dz</span>
+<span class="sd">             c_ref</span>
+<span class="sd">             pml_x_alpha</span>
+<span class="sd">             pml_y_alpha</span>
+<span class="sd">             pml_z_alpha</span>
+<span class="sd">             pml_x_size</span>
+<span class="sd">             pml_y_size</span>
+<span class="sd">             pml_z_size</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h5_literals</span> <span class="o">=</span> <span class="n">get_h5_literals</span><span class="p">()</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># STORE FLOATS</span>
+    <span class="c1"># =========================================================================</span>
+    <span class="n">variable_list</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;dt&#39;</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span>
+        <span class="s1">&#39;dx&#39;</span><span class="p">:</span> <span class="n">grid_spacing</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;dy&#39;</span><span class="p">:</span> <span class="n">grid_spacing</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;dz&#39;</span><span class="p">:</span> <span class="n">grid_spacing</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;pml_x_alpha&#39;</span><span class="p">:</span> <span class="n">pml_alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;pml_y_alpha&#39;</span><span class="p">:</span> <span class="n">pml_alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;pml_z_alpha&#39;</span><span class="p">:</span> <span class="n">pml_alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;c_ref&#39;</span><span class="p">:</span> <span class="n">c_ref</span>
+    <span class="p">}</span>
+
+    <span class="c1"># change float variables to be in single precision (float in C++), then add to HDF5 file</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variable_list</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># cast matrix to single precision</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">cast_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">MATRIX_DATA_TYPE_MATLAB</span><span class="p">)</span>
+        <span class="n">write_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">value</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># STORE INTEGERS</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="c1"># integer variables</span>
+    <span class="n">variable_list</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Nx&#39;</span><span class="p">:</span> <span class="n">grid_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;Ny&#39;</span><span class="p">:</span> <span class="n">grid_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;Nz&#39;</span><span class="p">:</span> <span class="n">grid_size</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;Nt&#39;</span><span class="p">:</span> <span class="n">Nt</span><span class="p">,</span>
+        <span class="s1">&#39;pml_x_size&#39;</span><span class="p">:</span> <span class="n">pml_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;pml_y_size&#39;</span><span class="p">:</span> <span class="n">pml_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;pml_z_size&#39;</span><span class="p">:</span> <span class="n">pml_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">}</span>
+
+    <span class="c1"># change all the index variables to be in 64-bit unsigned integers (long in C++)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variable_list</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># cast matrix to 64-bit unsigned integer</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">cast_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">h5_literals</span><span class="o">.</span><span class="n">INTEGER_DATA_TYPE_MATLAB</span><span class="p">)</span>
+        <span class="n">write_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="assign_str_attr"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.assign_str_attr">[docs]</a><span class="k">def</span> <span class="nf">assign_str_attr</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assigns HDF5 attribute with value as a fixed-length string</span>
+<span class="sd">    Args:</span>
+<span class="sd">        attrs:</span>
+<span class="sd">        attr_name:</span>
+<span class="sd">        attr_val:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_val</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;&lt;S</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">attr_val</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_image"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.load_image">[docs]</a><span class="k">def</span> <span class="nf">load_image</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_gray</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_gray</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_GRAYSCALE</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_COLOR</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="c1"># im = squeeze(double(im(:, :, 1)) + double(im(:, :, 2)) + double(im(:, :, 3)));</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># scale pixel values from 0 -&gt; 1</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">img</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">img</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="get_date_string"><a class="viewcode-back" href="../../../kwave.utils.io.html#kwave.utils.io.get_date_string">[docs]</a><span class="k">def</span> <span class="nf">get_date_string</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y-%H-%M-%S&quot;</span><span class="p">)</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    </body>
+</html>

@@ -1,967 +1,2018 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; k-Wave-python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sphinx-toolbox-code.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
-</head>
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> k-Wave-python
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 --><title>Index - k-wave-python documentation</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="get_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/bmode.html">B-mode Reconstruction</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Base Modules</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="kgrid.html">kWaveGrid</a></li>
-<li class="toctree-l1"><a class="reference internal" href="kmedium.html">kMedium</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ksensor.html">kSensor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ksource.html">kSource</a></li>
-<li class="toctree-l1"><a class="reference internal" href="kspace_fo.html">kSpace First Order</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ksimulation.html">kWaveSimulation</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Helper Modules</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="simopt.html">Simulation Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="array.html">Array</a></li>
-<li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.options.html">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.utils.html">kwave.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.mapgen.html">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
 
-        </div>
+</div>
+</div>
+
       </div>
-    </nav>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a> | <a href="#X"><strong>X</strong></a> | <a href="#Y"><strong>Y</strong></a> | <a href="#Z"><strong>Z</strong></a></div>
+</section>
+<section id="_" class="genindex-section">
+  <h2>_</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.data.html#kwave.data.Array.__init__">__init__() (kwave.data.Array method)</a>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">k-Wave-python</a>
-      </nav>
+        <ul>
+          <li><a href="kwave.executor.html#kwave.executor.Executor.__init__">(kwave.executor.Executor method)</a>
+</li>
+          <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.__init__">(kwave.kgrid.kWaveGrid method)</a>
+</li>
+          <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.__init__">(kwave.kmedium.kWaveMedium method)</a>
+</li>
+          <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.__init__">(kwave.ksensor.kSensor method)</a>
+</li>
+          <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.__init__">(kwave.ksensor.kSensorDirectivity method)</a>
+</li>
+          <li><a href="kwave.ksource.html#kwave.ksource.kSource.__init__">(kwave.ksource.kSource method)</a>
+</li>
+          <li><a href="kwave.ktransducer.html#kwave.ktransducer.kWaveTransducerSimple.__init__">(kwave.ktransducer.kWaveTransducerSimple method)</a>
+</li>
+          <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.__init__">(kwave.ktransducer.NotATransducer method)</a>
+</li>
+          <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.__init__">(kwave.kWaveSimulation.kWaveSimulation method)</a>
+</li>
+          <li><a href="kwave.options.html#kwave.options.SimulationOptions.__init__">(kwave.options.SimulationOptions method)</a>
+</li>
+          <li><a href="kwave.recorder.html#kwave.recorder.Recorder.__init__">(kwave.recorder.Recorder method)</a>
+</li>
+          <li><a href="kwave.utils.dotdictionary.html#kwave.utils.dotdictionary.dotdict.__init__">(kwave.utils.dotdictionary.dotdict method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Index</li>
-      <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/waltsims/k-wave-python/blob/master/docs/genindex" class="fa fa-github"> Edit on GitHub</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_eta">absorb_eta (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_nabla1">absorb_nabla1 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_nabla2">absorb_nabla2 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_tau">absorb_tau (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.absorbing">absorbing (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.active_elements_mask">active_elements_mask (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.add_noise">add_noise() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.all_elements_mask">all_elements_mask (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff">alpha_coeff (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff_compression">alpha_coeff_compression (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff_shear">alpha_coeff_shear (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_filter">alpha_filter (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_mode">alpha_mode (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_power">alpha_power (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.alpha_sign">alpha_sign (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.angle">angle (kwave.ksensor.kSensorDirectivity attribute)</a>
+</li>
+        <li><a href="kwave.reconstruction.tools.html#kwave.reconstruction.tools.apodize">apodize() (in module kwave.reconstruction.tools)</a>
+</li>
+        <li><a href="kwave.data.html#kwave.data.Array.append">append() (kwave.data.Array method)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.appended_zeros">appended_zeros (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.apply_alpha_filter">apply_alpha_filter() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.apply_filter">apply_filter() (in module kwave.utils.filters)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_pressure_source_correction">apply_pressure_source_correction() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_source_correction">apply_source_correction() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_velocity_source_corrections">apply_velocity_source_corrections() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
+</li>
+        <li><a href="kwave.data.html#kwave.data.Array">Array (class in kwave.data)</a>
+</li>
+        <li><a href="kwave.data.html#kwave.data.Array.assign_dim">assign_dim() (kwave.data.Array method)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">assign_pseudonyms() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.assign_str_attr">assign_str_attr() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.axisymmetric">axisymmetric (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h1 id="index">Index</h1>
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.beamform">beamform() (in module kwave.reconstruction.beamform)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.beamforming_delays">beamforming_delays (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.beamforming_delays_offset">beamforming_delays_offset (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.binary_sensor_mask">binary_sensor_mask (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.blank_sensor">blank_sensor (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.BonA">BonA (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.utils.colormap.html#kwave.utils.colormap.bone">bone() (in module kwave.utils.colormap)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.brenner_sharpness">brenner_sharpness() (in module kwave.utils.filters)</a>
+</li>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.broadcast_axis">broadcast_axis() (in module kwave.utils.matrix)</a>
+</li>
+        <li><a href="kwave.reconstruction.converter.html#kwave.reconstruction.converter.build_channel_data">build_channel_data() (in module kwave.reconstruction.converter)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
- | <a href="#B"><strong>B</strong></a>
- | <a href="#C"><strong>C</strong></a>
- | <a href="#D"><strong>D</strong></a>
- | <a href="#E"><strong>E</strong></a>
- | <a href="#F"><strong>F</strong></a>
- | <a href="#G"><strong>G</strong></a>
- | <a href="#H"><strong>H</strong></a>
- | <a href="#I"><strong>I</strong></a>
- | <a href="#K"><strong>K</strong></a>
- | <a href="#L"><strong>L</strong></a>
- | <a href="#M"><strong>M</strong></a>
- | <a href="#N"><strong>N</strong></a>
- | <a href="#P"><strong>P</strong></a>
- | <a href="#R"><strong>R</strong></a>
- | <a href="#S"><strong>S</strong></a>
- | <a href="#T"><strong>T</strong></a>
- | <a href="#U"><strong>U</strong></a>
- | <a href="#V"><strong>V</strong></a>
- | <a href="#W"><strong>W</strong></a>
- | <a href="#X"><strong>X</strong></a>
- | <a href="#Y"><strong>Y</strong></a>
- | <a href="#Z"><strong>Z</strong></a>
- 
-</div>
-<h2 id="A">A</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_eta">absorb_eta (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.c0">c0 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_nabla1">absorb_nabla1 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.calc_max_freq">calc_max_freq() (in module kwave.utils.signals)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_nabla2">absorb_nabla2 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.calculate_all_vars_size">calculate_all_vars_size() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.absorb_tau">absorb_tau (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.calculate_expand_size">calculate_expand_size() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.absorbing">absorbing (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.cart2grid">cart2grid() (in module kwave.utils.interp)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff">alpha_coeff (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.cart2pol">cart2pol() (in module kwave.utils.conversion)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff_compression">alpha_coeff_compression (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.cartesian_interp">cartesian_interp (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_coeff_shear">alpha_coeff_shear (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.cast_to_type">cast_to_type() (in module kwave.utils.conversion)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_filter">alpha_filter (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim">check_calling_func_name_and_dim() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_mode">alpha_mode (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.check_conditions">check_conditions() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_power">alpha_power (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_divisible">check_divisible() (in module kwave.utils.checks)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.alpha_sign">alpha_sign (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_factors">check_factors() (in module kwave.utils.checks)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.angle">angle (kwave.ksensor.kSensorDirectivity attribute)</a>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_field_names">check_field_names() (in module kwave.utils.checks)</a>
 </li>
-      <li><a href="array.html#kwave.data.Array.append">append() (kwave.data.Array method)</a>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.check_fields">check_fields() (kwave.kmedium.kWaveMedium method)</a>
 </li>
-      <li><a href="array.html#kwave.data.Array">Array (class in kwave.data)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_input_combinations">check_input_combinations() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-      <li><a href="array.html#kwave.data.Array.assign_dim">assign_dim() (kwave.data.Array method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_kgrid_time">check_kgrid_time() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">assign_pseudonyms() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_medium">check_medium() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.axisymmetric">axisymmetric (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_sensor">check_sensor() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_source">check_source() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_stability">check_stability() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_str_eq">check_str_eq() (in module kwave.utils.checks)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.check_str_in">check_str_in() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.COLOR_MAP">COLOR_MAP (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.combine_sensor_data">combine_sensor_data() (kwave.ktransducer.NotATransducer method)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.compute_absorbing_coeff">compute_absorbing_coeff() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.compute_directivity">compute_directivity (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.compute_dispersive_coeff">compute_dispersive_coeff() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.compute_triangulation_points">compute_triangulation_points() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.create_absorbing_medium_variables">create_absorbing_medium_variables() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.create_absorption_variables">create_absorption_variables() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_absorption_vars">create_absorption_vars() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.create_cw_signals">create_cw_signals() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.create_log">create_log (kwave.options.SimulationOptions attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.create_normalized_wavenumber_vectors">create_normalized_wavenumber_vectors() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.create_pixel_dim">create_pixel_dim() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">create_pml_indices() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.create_sensor_variables">create_sensor_variables() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
 
-<h2 id="B">B</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.binary_sensor_mask">binary_sensor_mask (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <ul>
+          <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_sensor_variables">(kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.blank_sensor">blank_sensor (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        </ul></li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.create_shift_operators">create_shift_operators() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.BonA">BonA (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.create_stokes_medium_variables">create_stokes_medium_variables() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.create_storage_variables">create_storage_variables() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.create_transducer_buffer">create_transducer_buffer() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.cuboid_corners">cuboid_corners (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="C">C</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.c0">c0 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.data.html#kwave.data.Array.data">data (kwave.data.Array attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.cartesian_interp">cartesian_interp (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.data_cast">data_cast (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim">check_calling_func_name_and_dim() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.data_recast">data_recast (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.check_fields">check_fields() (kwave.kmedium.kWaveMedium method)</a>
+        <li><a href="kwave.kWaveSimulation_helper.data_cast.html#kwave.kWaveSimulation_helper.data_cast.dataCast">dataCast() (in module kwave.kWaveSimulation_helper.data_cast)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_input_combinations">check_input_combinations() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.db2neper">db2neper() (in module kwave.utils.conversion)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_kgrid_time">check_kgrid_time() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.delay_mask">delay_mask (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_medium">check_medium() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.delay_mask">delay_mask() (kwave.ktransducer.NotATransducer method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_sensor">check_sensor() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.density">density (kwave.kmedium.kWaveMedium attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_source">check_source() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dim">dim (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.COLOR_MAP">COLOR_MAP (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.directivity">directivity (kwave.ksensor.kSensor attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.compute_directivity">compute_directivity (kwave.kWaveSimulation.kWaveSimulation property)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteCosine">DiscreteCosine (class in kwave.enums)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_absorption_vars">create_absorption_vars() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteSine">DiscreteSine (class in kwave.enums)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.create_log">create_log (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#kwave.kWaveSimulation_helper.display_simulation_params.display_simulation_params">display_simulation_params() (in module kwave.kWaveSimulation_helper.display_simulation_params)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">create_pml_indices() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.utils.dotdictionary.html#kwave.utils.dotdictionary.dotdict">dotdict (class in kwave.utils.dotdictionary)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_sensor_variables">create_sensor_variables() (kwave.kWaveSimulation.kWaveSimulation method)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.cuboid_corners">cuboid_corners (kwave.kWaveSimulation.kWaveSimulation property)</a>
-</li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dt">dt (kwave.kgrid.kWaveGrid attribute)</a>
 
-<h2 id="D">D</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="array.html#kwave.data.Array.data">data (kwave.data.Array attribute)</a>
+        <ul>
+          <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.dt">(kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.data_cast">data_cast (kwave.options.SimulationOptions attribute)</a>
+        </ul></li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dudn">dudn (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.data_recast">data_recast (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dudn_sg">dudn_sg (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.delay_mask">delay_mask (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dx">dx (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.density">density (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dy">dy (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dim">dim (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.dz">dz (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.directivity">directivity (kwave.ksensor.kSensor attribute)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dt">dt (kwave.kgrid.kWaveGrid attribute)</a>
+    </ul></td>
+  </tr></table>
+</section>
 
-      <ul>
-        <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.dt">(kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.elastic_code">elastic_code (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      </ul></li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dudn">dudn (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.elastic_time_rev">elastic_time_rev (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dudn_sg">dudn_sg (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.kWaveTransducerSimple.element_pitch">element_pitch (kwave.ktransducer.kWaveTransducerSimple property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dx">dx (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.elevation_beamforming_delays">elevation_beamforming_delays (kwave.ktransducer.NotATransducer property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dy">dy (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.elevation_beamforming_mask">elevation_beamforming_mask (kwave.ktransducer.NotATransducer property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.dz">dz (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.enforce_fields">enforce_fields() (in module kwave.utils.checks)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.enforce_fields_obj">enforce_fields_obj() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.enforce_filename_standards">enforce_filename_standards() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.ensure_defined">ensure_defined() (kwave.kmedium.kWaveMedium method)</a>
+</li>
+        <li><a href="kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.envelope_detection">envelope_detection() (in module kwave.reconstruction.beamform)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.equation_of_state">equation_of_state (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.ESTIMATE_SIM_TIME_STEPS">ESTIMATE_SIM_TIME_STEPS (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.executor.html#kwave.executor.Executor">Executor (class in kwave.executor)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_cuboid_corner_list">expand_cuboid_corner_list() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_directivity_angle">expand_directivity_angle() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.expand_grid">expand_grid() (kwave.ksensor.kSensor method)</a>
 
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.elastic_code">elastic_code (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <ul>
+          <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.expand_grid">(kwave.ktransducer.NotATransducer method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.elastic_time_rev">elastic_time_rev (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        </ul></li>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_grid_matrices">expand_grid_matrices() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.ensure_defined">ensure_defined() (kwave.kmedium.kWaveMedium method)</a>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_kgrid">expand_kgrid() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.equation_of_state">equation_of_state (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.expand_matrix">expand_matrix() (in module kwave.utils.matrix)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.ESTIMATE_SIM_TIME_STEPS">ESTIMATE_SIM_TIME_STEPS (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_medium">expand_medium() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.expand_grid">expand_grid() (kwave.ksensor.kSensor method)</a>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_pressure_sources">expand_pressure_sources() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_sensor">expand_sensor() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_source">expand_source() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_stress_sources">expand_stress_sources() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_velocity_sources">expand_velocity_sources() (in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.extract_amp_phase">extract_amp_phase() (in module kwave.utils.filters)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="F">F</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksource.html#kwave.ksource.kSource.flag_ux">flag_ux (kwave.ksource.kSource property)</a>
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.filter_time_series">filter_time_series() (in module kwave.utils.filters)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.flag_uy">flag_uy (kwave.ksource.kSource property)</a>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.find_closest">find_closest() (in module kwave.utils.math)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksource.html#kwave.ksource.kSource.flag_uz">flag_uz (kwave.ksource.kSource property)</a>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.fit_power_law_params">fit_power_law_params() (in module kwave.utils.mapgen)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.frequency_response">frequency_response (kwave.ksensor.kSensor attribute)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.flag_ux">flag_ux (kwave.ksource.kSource property)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.flag_uy">flag_uy (kwave.ksource.kSource property)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.flag_uz">flag_uz (kwave.ksource.kSource property)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.focus">focus() (in module kwave.reconstruction.beamform)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.focused_bowl_oneil">focused_bowl_oneil() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.fourier_shift">fourier_shift() (in module kwave.utils.math)</a>
+</li>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.freq2wavenumber">freq2wavenumber() (in module kwave.utils.conversion)</a>
+</li>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.frequency_response">frequency_response (kwave.ksensor.kSensor attribute)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.fwhm">fwhm() (in module kwave.utils.filters)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="G">G</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="recorder.html#kwave.recorder.Recorder.get_allowed_flags">get_allowed_flags() (kwave.recorder.Recorder static method)</a>
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.gaussian">gaussian() (in module kwave.utils.filters)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.gaussian_filter">gaussian_filter() (in module kwave.utils.filters)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.get_absorbtion">get_absorbtion() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.get_allowed_flags">get_allowed_flags() (kwave.recorder.Recorder static method)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.get_alpha_filter">get_alpha_filter() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.get_bli">get_bli() (in module kwave.utils.interp)</a>
+</li>
+        <li><a href="kwave.utils.colormap.html#kwave.utils.colormap.get_color_map">get_color_map() (in module kwave.utils.colormap)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.get_date_string">get_date_string() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#kwave.kWaveSimulation_helper.create_absorption_variables.get_dispersion">get_dispersion() (in module kwave.kWaveSimulation_helper.create_absorption_variables)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.get_h5_literals">get_h5_literals() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_kspace_elastic_sound_speed_ref">get_kspace_elastic_sound_speed_ref() (in module kwave.kWaveSimulation_helper.set_sound_speed_ref)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#kwave.kWaveSimulation_helper.display_simulation_params.get_min_sound_speed">get_min_sound_speed() (in module kwave.kWaveSimulation_helper.display_simulation_params)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.get_num_of_sensor_points">get_num_of_sensor_points() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.get_num_recorded_time_points">get_num_recorded_time_points() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
+</li>
+        <li><a href="kwave.utils.pml.html#kwave.utils.pml.get_optimal_pml_size">get_optimal_pml_size() (in module kwave.utils.pml)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_ordinary_sound_speed_ref">get_ordinary_sound_speed_ref() (in module kwave.kWaveSimulation_helper.set_sound_speed_ref)</a>
+</li>
+        <li><a href="kwave.reconstruction.tools.html#kwave.reconstruction.tools.get_origin_array">get_origin_array() (in module kwave.reconstruction.tools)</a>
+</li>
+        <li><a href="kwave.utils.pml.html#kwave.utils.pml.get_pml">get_pml() (in module kwave.utils.pml)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_pstd_elastic_sound_speed_ref">get_pstd_elastic_sound_speed_ref() (in module kwave.kWaveSimulation_helper.set_sound_speed_ref)</a>
+</li>
+        <li><a href="kwave.utils.data.html#kwave.utils.data.get_smallest_possible_type">get_smallest_possible_type() (in module kwave.utils.data)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.get_spaced_points">get_spaced_points() (in module kwave.utils.mapgen)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.reconstruction.tools.html#kwave.reconstruction.tools.get_t0">get_t0() (in module kwave.reconstruction.tools)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.get_transmit_apodization">get_transmit_apodization() (kwave.ktransducer.NotATransducer method)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.get_wave_number">get_wave_number() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.get_win">get_win() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_axisymmetric_variables">grab_axisymmetric_variables() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_elastic_code_variables">grab_elastic_code_variables() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_float_variables">grab_float_variables() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_integer_variables">grab_integer_variables() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_medium_props">grab_medium_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_nonuniform_grid_props">grab_nonuniform_grid_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_pml_size">grab_pml_size() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_pressure_source_props">grab_pressure_source_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_sensor_props">grab_sensor_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_source_props">grab_source_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_stress_source_props">grab_stress_source_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_time_varying_source_props">grab_time_varying_source_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.grab_velocity_source_props">grab_velocity_source_props() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
+</li>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.gradient_fd">gradient_fd() (in module kwave.utils.matrix)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.gradient_spect">gradient_spect() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.utils.colormap.html#kwave.utils.colormap.gray">gray() (in module kwave.utils.colormap)</a>
+</li>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.grid2cart">grid2cart() (in module kwave.utils.conversion)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.grid_size">grid_size (kwave.ktransducer.NotATransducer property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="H">H</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.hdf_compression_level">hdf_compression_level (kwave.options.SimulationOptions attribute)</a>
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.hdf_compression_level">hdf_compression_level (kwave.options.SimulationOptions attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.HIGHEST_PRIME_FACTOR_WARNING">HIGHEST_PRIME_FACTOR_WARNING (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.HIGHEST_PRIME_FACTOR_WARNING">HIGHEST_PRIME_FACTOR_WARNING (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.highest_prime_factors">highest_prime_factors() (kwave.kgrid.kWaveGrid method)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.highest_prime_factors">highest_prime_factors() (kwave.kgrid.kWaveGrid method)</a>
 </li>
-  </ul></td>
-</tr></table>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.colormap.html#kwave.utils.colormap.hot">hot() (in module kwave.utils.colormap)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.hounsfield2density">hounsfield2density() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.hounsfield2soundspeed">hounsfield2soundspeed() (in module kwave.utils.mapgen)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="I">I</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="recorder.html#kwave.recorder.Recorder.I">I (kwave.recorder.Recorder attribute)</a>
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.I">I (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.I_avg">I_avg (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.I_avg">I_avg (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.init">init() (kwave.options.SimulationOptions static method)</a>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.ind2sub">ind2sub() (in module kwave.utils.mapgen)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.input_checking">input_checking() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.indexed_active_elements_mask">indexed_active_elements_mask (kwave.ktransducer.NotATransducer property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.is_defined">is_defined() (kwave.kmedium.kWaveMedium method)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.indexed_elements_mask">indexed_elements_mask (kwave.ktransducer.NotATransducer property)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.is_nonlinear">is_nonlinear() (kwave.kmedium.kWaveMedium method)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.init">init() (kwave.options.SimulationOptions static method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.is_p0_empty">is_p0_empty() (kwave.ksource.kSource method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.input_checking">input_checking() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.is_set">is_set() (kwave.recorder.Recorder method)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.input_signal">input_signal (kwave.ktransducer.NotATransducer property)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.interp_cart_data">interp_cart_data() (in module kwave.utils.interp)</a>
+</li>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.interpftn">interpftn() (in module kwave.utils.interp)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.interpolate2d">interpolate2d() (in module kwave.utils.interp)</a>
+</li>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.interpolate2d_with_queries">interpolate2d_with_queries() (in module kwave.utils.interp)</a>
+</li>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.interpolate3d">interpolate3d() (in module kwave.utils.interp)</a>
+</li>
+        <li><a href="kwave.utils.data.html#kwave.utils.data.intmax">intmax() (in module kwave.utils.data)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.is_defined">is_defined() (kwave.kmedium.kWaveMedium method)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.is_nonlinear">is_nonlinear() (kwave.kmedium.kWaveMedium method)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.is_number">is_number() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.is_p0_empty">is_p0_empty() (kwave.ksource.kSource method)</a>
+</li>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.is_set">is_set() (kwave.recorder.Recorder method)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.is_unix">is_unix() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.isfield">isfield() (kwave.ktransducer.NotATransducer static method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="K">K</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.k">k (kwave.kgrid.kWaveGrid attribute)</a>
+<section id="K" class="genindex-section">
+  <h2>K</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.k">k (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.k_dtt">k_dtt() (kwave.kgrid.kWaveGrid method)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.k_dtt">k_dtt() (kwave.kgrid.kWaveGrid method)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.k_max">k_max (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.k_max">k_max (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.k_max_all">k_max_all (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.k_max_all">k_max_all (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.k_vec">k_vec (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.k_vec">k_vec (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.kelvin_voigt_model">kelvin_voigt_model (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.kelvin_voigt_model">kelvin_voigt_model (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor">kSensor (class in kwave.ksensor)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor">kSensor (class in kwave.ksensor)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity">kSensorDirectivity (class in kwave.ksensor)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity">kSensorDirectivity (class in kwave.ksensor)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource">kSource (class in kwave.ksource)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource">kSource (class in kwave.ksource)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.KSPACE_CFL">KSPACE_CFL (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.KSPACE_CFL">KSPACE_CFL (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.kspace_elastic_code">kspace_elastic_code (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.kspace_elastic_code">kspace_elastic_code (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">kspaceFirstOrder2D() (in module kwave.kspaceFirstOrder2D)</a>
+        <li><a href="kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">kspaceFirstOrder2D() (in module kwave.kspaceFirstOrder2D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">kspaceFirstOrder2DC() (in module kwave.kspaceFirstOrder2D)</a>
+        <li><a href="kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">kspaceFirstOrder2DC() (in module kwave.kspaceFirstOrder2D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG">kspaceFirstOrder2DG() (in module kwave.kspaceFirstOrder2D)</a>
+        <li><a href="kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG">kspaceFirstOrder2DG() (in module kwave.kspaceFirstOrder2D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3D">kspaceFirstOrder3D() (in module kwave.kspaceFirstOrder3D)</a>
+        <li><a href="kwave.kspaceFirstOrder3D.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3D">kspaceFirstOrder3D() (in module kwave.kspaceFirstOrder3D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3DC">kspaceFirstOrder3DC() (in module kwave.kspaceFirstOrder3D)</a>
+        <li><a href="kwave.kspaceFirstOrder3D.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3DC">kspaceFirstOrder3DC() (in module kwave.kspaceFirstOrder3D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3DG">kspaceFirstOrder3DG() (in module kwave.kspaceFirstOrder3D)</a>
+        <li><a href="kwave.kspaceFirstOrder3D.html#kwave.kspaceFirstOrder3D.kspaceFirstOrder3DG">kspaceFirstOrder3DG() (in module kwave.kspaceFirstOrder3D)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">kspaceFirstOrderAS() (in module kwave.kspaceFirstOrderAS)</a>
+        <li><a href="kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">kspaceFirstOrderAS() (in module kwave.kspaceFirstOrderAS)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">kspaceFirstOrderASC() (in module kwave.kspaceFirstOrderAS)</a>
+        <li><a href="kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">kspaceFirstOrderASC() (in module kwave.kspaceFirstOrderAS)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder.kspaceFirstOrderC">kspaceFirstOrderC() (in module kwave.kspaceFirstOrder)</a>
+        <li><a href="kwave.kspaceFirstOrder.html#kwave.kspaceFirstOrder.kspaceFirstOrderC">kspaceFirstOrderC() (in module kwave.kspaceFirstOrder)</a>
 </li>
-      <li><a href="kspace_fo.html#kwave.kspaceFirstOrder.kspaceFirstOrderG">kspaceFirstOrderG() (in module kwave.kspaceFirstOrder)</a>
+        <li><a href="kwave.kspaceFirstOrder.html#kwave.kspaceFirstOrder.kspaceFirstOrderG">kspaceFirstOrderG() (in module kwave.kspaceFirstOrder)</a>
 </li>
-      <li>
+        <li>
+    kwave
+
+        <ul>
+          <li><a href="kwave.html#module-kwave">module</a>
+</li>
+        </ul></li>
+        <li>
     kwave.data
 
-      <ul>
-        <li><a href="array.html#module-kwave.data">module</a>
+        <ul>
+          <li><a href="kwave.data.html#module-kwave.data">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
+    kwave.enums
+
+        <ul>
+          <li><a href="kwave.enums.html#module-kwave.enums">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.executor
+
+        <ul>
+          <li><a href="kwave.executor.html#module-kwave.executor">module</a>
+</li>
+        </ul></li>
+        <li>
     kwave.kgrid
 
-      <ul>
-        <li><a href="kgrid.html#module-kwave.kgrid">module</a>
+        <ul>
+          <li><a href="kwave.kgrid.html#module-kwave.kgrid">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.kmedium
 
-      <ul>
-        <li><a href="kmedium.html#module-kwave.kmedium">module</a>
+        <ul>
+          <li><a href="kwave.kmedium.html#module-kwave.kmedium">module</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
+        </ul></li>
+        <li>
     kwave.ksensor
 
-      <ul>
-        <li><a href="ksensor.html#module-kwave.ksensor">module</a>
+        <ul>
+          <li><a href="kwave.ksensor.html#module-kwave.ksensor">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.ksource
 
-      <ul>
-        <li><a href="ksource.html#module-kwave.ksource">module</a>
+        <ul>
+          <li><a href="kwave.ksource.html#module-kwave.ksource">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.kspaceFirstOrder
 
-      <ul>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder">module</a>
+        <ul>
+          <li><a href="kwave.kspaceFirstOrder.html#module-kwave.kspaceFirstOrder">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.kspaceFirstOrder2D
 
-      <ul>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder2D">module</a>
+        <ul>
+          <li><a href="kwave.kspaceFirstOrder2D.html#module-kwave.kspaceFirstOrder2D">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.kspaceFirstOrder3D
 
-      <ul>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder3D">module</a>
+        <ul>
+          <li><a href="kwave.kspaceFirstOrder3D.html#module-kwave.kspaceFirstOrder3D">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
     kwave.kspaceFirstOrderAS
 
-      <ul>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrderAS">module</a>
+        <ul>
+          <li><a href="kwave.kspaceFirstOrderAS.html#module-kwave.kspaceFirstOrderAS">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
+    kwave.ktransducer
+
+        <ul>
+          <li><a href="kwave.ktransducer.html#module-kwave.ktransducer">module</a>
+</li>
+        </ul></li>
+        <li>
     kwave.kWaveSimulation
 
-      <ul>
-        <li><a href="ksimulation.html#module-kwave.kWaveSimulation">module</a>
+        <ul>
+          <li><a href="kwave.kWaveSimulation.html#module-kwave.kWaveSimulation">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.html#module-kwave.kWaveSimulation_helper">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.create_absorption_variables
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#module-kwave.kWaveSimulation_helper.create_absorption_variables">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.create_storage_variables
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#module-kwave.kWaveSimulation_helper.create_storage_variables">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.data_cast
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.data_cast.html#module-kwave.kWaveSimulation_helper.data_cast">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.display_simulation_params
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#module-kwave.kWaveSimulation_helper.display_simulation_params">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.expand_grid_matrices
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#module-kwave.kWaveSimulation_helper.expand_grid_matrices">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    kwave.kWaveSimulation_helper.retract_transducer_grid_size
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html#module-kwave.kWaveSimulation_helper.retract_transducer_grid_size">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.save_to_disk_func
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#module-kwave.kWaveSimulation_helper.save_to_disk_func">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.scale_source_terms_func
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#module-kwave.kWaveSimulation_helper.scale_source_terms_func">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.kWaveSimulation_helper.set_sound_speed_ref
+
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#module-kwave.kWaveSimulation_helper.set_sound_speed_ref">module</a>
+</li>
+        </ul></li>
+        <li>
     kwave.options
 
-      <ul>
-        <li><a href="simopt.html#module-kwave.options">module</a>
+        <ul>
+          <li><a href="kwave.options.html#module-kwave.options">module</a>
 </li>
-      </ul></li>
-      <li>
+        </ul></li>
+        <li>
+    kwave.reconstruction
+
+        <ul>
+          <li><a href="kwave.reconstruction.html#module-kwave.reconstruction">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.reconstruction.beamform
+
+        <ul>
+          <li><a href="kwave.reconstruction.beamform.html#module-kwave.reconstruction.beamform">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.reconstruction.converter
+
+        <ul>
+          <li><a href="kwave.reconstruction.converter.html#module-kwave.reconstruction.converter">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.reconstruction.shifted_transform
+
+        <ul>
+          <li><a href="kwave.reconstruction.shifted_transform.html#module-kwave.reconstruction.shifted_transform">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.reconstruction.tools
+
+        <ul>
+          <li><a href="kwave.reconstruction.tools.html#module-kwave.reconstruction.tools">module</a>
+</li>
+        </ul></li>
+        <li>
     kwave.recorder
 
-      <ul>
-        <li><a href="recorder.html#module-kwave.recorder">module</a>
+        <ul>
+          <li><a href="kwave.recorder.html#module-kwave.recorder">module</a>
 </li>
-      </ul></li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid">kWaveGrid (class in kwave.kgrid)</a>
-</li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium">kWaveMedium (class in kwave.kmedium)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation">kWaveSimulation (class in kwave.kWaveSimulation)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.kx">kx (kwave.kgrid.kWaveGrid property)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.kx_vec_dtt">kx_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.ky">ky (kwave.kgrid.kWaveGrid property)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.ky_vec_dtt">ky_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.kz">kz (kwave.kgrid.kWaveGrid property)</a>
-</li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.kz_vec_dtt">kz_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
-</li>
-  </ul></td>
-</tr></table>
+        </ul></li>
+        <li>
+    kwave.utils
 
-<h2 id="L">L</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.LOG_NAME">LOG_NAME (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <ul>
+          <li><a href="kwave.utils.html#module-kwave.utils">module</a>
 </li>
-  </ul></td>
-</tr></table>
+        </ul></li>
+        <li>
+    kwave.utils.checks
 
-<h2 id="M">M</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.makeDim">makeDim() (kwave.kgrid.kWaveGrid static method)</a>
+        <ul>
+          <li><a href="kwave.utils.checks.html#module-kwave.utils.checks">module</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.makeDTTDim">makeDTTDim() (kwave.kgrid.kWaveGrid static method)</a>
+        </ul></li>
+        <li>
+    kwave.utils.colormap
+
+        <ul>
+          <li><a href="kwave.utils.colormap.html#module-kwave.utils.colormap">module</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.makeTime">makeTime() (kwave.kgrid.kWaveGrid method)</a>
+        </ul></li>
+        <li>
+    kwave.utils.conversion
+
+        <ul>
+          <li><a href="kwave.utils.conversion.html#module-kwave.utils.conversion">module</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.mask">mask (kwave.ksensor.kSensor property)</a>
+        </ul></li>
+        <li>
+    kwave.utils.data
+
+        <ul>
+          <li><a href="kwave.utils.data.html#module-kwave.utils.data">module</a>
 </li>
-      <li>
+        </ul></li>
+        <li>
+    kwave.utils.dotdictionary
+
+        <ul>
+          <li><a href="kwave.utils.dotdictionary.html#module-kwave.utils.dotdictionary">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.filters
+
+        <ul>
+          <li><a href="kwave.utils.filters.html#module-kwave.utils.filters">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.interp
+
+        <ul>
+          <li><a href="kwave.utils.interp.html#module-kwave.utils.interp">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.io
+
+        <ul>
+          <li><a href="kwave.utils.io.html#module-kwave.utils.io">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.mapgen
+
+        <ul>
+          <li><a href="kwave.utils.mapgen.html#module-kwave.utils.mapgen">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.math
+
+        <ul>
+          <li><a href="kwave.utils.math.html#module-kwave.utils.math">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.matrix
+
+        <ul>
+          <li><a href="kwave.utils.matrix.html#module-kwave.utils.matrix">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.pml
+
+        <ul>
+          <li><a href="kwave.utils.pml.html#module-kwave.utils.pml">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.signals
+
+        <ul>
+          <li><a href="kwave.utils.signals.html#module-kwave.utils.signals">module</a>
+</li>
+        </ul></li>
+        <li>
+    kwave.utils.tictoc
+
+        <ul>
+          <li><a href="kwave.utils.tictoc.html#module-kwave.utils.tictoc">module</a>
+</li>
+        </ul></li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid">kWaveGrid (class in kwave.kgrid)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium">kWaveMedium (class in kwave.kmedium)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation">kWaveSimulation (class in kwave.kWaveSimulation)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.kWaveTransducerSimple">kWaveTransducerSimple (class in kwave.ktransducer)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.kx">kx (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.kx_vec_dtt">kx_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.ky">ky (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.ky_vec_dtt">ky_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.kz">kz (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.kz_vec_dtt">kz_vec_dtt() (kwave.kgrid.kWaveGrid method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.largest_prime_factor">largest_prime_factor() (in module kwave.utils.math)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.load_image">load_image() (in module kwave.utils.io)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.reconstruction.tools.html#kwave.reconstruction.tools.log_compression">log_compression() (in module kwave.reconstruction.tools)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.LOG_NAME">LOG_NAME (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.utils.dotdictionary.html#kwave.utils.dotdictionary.dotdict.lookup">lookup() (kwave.utils.dotdictionary.dotdict method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_arc">make_arc() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_ball">make_ball() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_bowl">make_bowl() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_circle">make_cart_circle() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_sphere">make_cart_sphere() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_circle">make_circle() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_disc">make_disc() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_line">make_line() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_arc">make_multi_arc() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_bowl">make_multi_bowl() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map">make_pixel_map() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_plane">make_pixel_map_plane() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_point">make_pixel_map_point() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.make_pos_int">make_pos_int() (in module kwave.ktransducer)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_sphere">make_sphere() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.make_spherical_section">make_spherical_section() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.reconstruction.tools.html#kwave.reconstruction.tools.make_time_vector">make_time_vector() (in module kwave.reconstruction.tools)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.makeDim">makeDim() (kwave.kgrid.kWaveGrid static method)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.makeDTTDim">makeDTTDim() (kwave.kgrid.kWaveGrid static method)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.makeTime">makeTime() (kwave.kgrid.kWaveGrid method)</a>
+</li>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.mask">mask (kwave.ksensor.kSensor property)</a>
+
+        <ul>
+          <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.mask">(kwave.ktransducer.NotATransducer property)</a>
+</li>
+        </ul></li>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.max_nd">max_nd() (in module kwave.utils.matrix)</a>
+</li>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.min_nd">min_nd() (in module kwave.utils.matrix)</a>
+</li>
+        <li>
     module
 
-      <ul>
-        <li><a href="array.html#module-kwave.data">kwave.data</a>
+        <ul>
+          <li><a href="kwave.html#module-kwave">kwave</a>
 </li>
-        <li><a href="kgrid.html#module-kwave.kgrid">kwave.kgrid</a>
+          <li><a href="kwave.data.html#module-kwave.data">kwave.data</a>
 </li>
-        <li><a href="kmedium.html#module-kwave.kmedium">kwave.kmedium</a>
+          <li><a href="kwave.enums.html#module-kwave.enums">kwave.enums</a>
 </li>
-        <li><a href="ksensor.html#module-kwave.ksensor">kwave.ksensor</a>
+          <li><a href="kwave.executor.html#module-kwave.executor">kwave.executor</a>
 </li>
-        <li><a href="ksource.html#module-kwave.ksource">kwave.ksource</a>
+          <li><a href="kwave.kgrid.html#module-kwave.kgrid">kwave.kgrid</a>
 </li>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder">kwave.kspaceFirstOrder</a>
+          <li><a href="kwave.kmedium.html#module-kwave.kmedium">kwave.kmedium</a>
 </li>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder2D">kwave.kspaceFirstOrder2D</a>
+          <li><a href="kwave.ksensor.html#module-kwave.ksensor">kwave.ksensor</a>
 </li>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrder3D">kwave.kspaceFirstOrder3D</a>
+          <li><a href="kwave.ksource.html#module-kwave.ksource">kwave.ksource</a>
 </li>
-        <li><a href="kspace_fo.html#module-kwave.kspaceFirstOrderAS">kwave.kspaceFirstOrderAS</a>
+          <li><a href="kwave.kspaceFirstOrder.html#module-kwave.kspaceFirstOrder">kwave.kspaceFirstOrder</a>
 </li>
-        <li><a href="ksimulation.html#module-kwave.kWaveSimulation">kwave.kWaveSimulation</a>
+          <li><a href="kwave.kspaceFirstOrder2D.html#module-kwave.kspaceFirstOrder2D">kwave.kspaceFirstOrder2D</a>
 </li>
-        <li><a href="simopt.html#module-kwave.options">kwave.options</a>
+          <li><a href="kwave.kspaceFirstOrder3D.html#module-kwave.kspaceFirstOrder3D">kwave.kspaceFirstOrder3D</a>
 </li>
-        <li><a href="recorder.html#module-kwave.recorder">kwave.recorder</a>
+          <li><a href="kwave.kspaceFirstOrderAS.html#module-kwave.kspaceFirstOrderAS">kwave.kspaceFirstOrderAS</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.multi_axial_PML_ratio">multi_axial_PML_ratio (kwave.options.SimulationOptions attribute)</a>
+          <li><a href="kwave.ktransducer.html#module-kwave.ktransducer">kwave.ktransducer</a>
 </li>
-  </ul></td>
-</tr></table>
+          <li><a href="kwave.kWaveSimulation.html#module-kwave.kWaveSimulation">kwave.kWaveSimulation</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.html#module-kwave.kWaveSimulation_helper">kwave.kWaveSimulation_helper</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.create_absorption_variables.html#module-kwave.kWaveSimulation_helper.create_absorption_variables">kwave.kWaveSimulation_helper.create_absorption_variables</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#module-kwave.kWaveSimulation_helper.create_storage_variables">kwave.kWaveSimulation_helper.create_storage_variables</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.data_cast.html#module-kwave.kWaveSimulation_helper.data_cast">kwave.kWaveSimulation_helper.data_cast</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#module-kwave.kWaveSimulation_helper.display_simulation_params">kwave.kWaveSimulation_helper.display_simulation_params</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#module-kwave.kWaveSimulation_helper.expand_grid_matrices">kwave.kWaveSimulation_helper.expand_grid_matrices</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html#module-kwave.kWaveSimulation_helper.retract_transducer_grid_size">kwave.kWaveSimulation_helper.retract_transducer_grid_size</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#module-kwave.kWaveSimulation_helper.save_to_disk_func">kwave.kWaveSimulation_helper.save_to_disk_func</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#module-kwave.kWaveSimulation_helper.scale_source_terms_func">kwave.kWaveSimulation_helper.scale_source_terms_func</a>
+</li>
+          <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#module-kwave.kWaveSimulation_helper.set_sound_speed_ref">kwave.kWaveSimulation_helper.set_sound_speed_ref</a>
+</li>
+          <li><a href="kwave.options.html#module-kwave.options">kwave.options</a>
+</li>
+          <li><a href="kwave.reconstruction.html#module-kwave.reconstruction">kwave.reconstruction</a>
+</li>
+          <li><a href="kwave.reconstruction.beamform.html#module-kwave.reconstruction.beamform">kwave.reconstruction.beamform</a>
+</li>
+          <li><a href="kwave.reconstruction.converter.html#module-kwave.reconstruction.converter">kwave.reconstruction.converter</a>
+</li>
+          <li><a href="kwave.reconstruction.shifted_transform.html#module-kwave.reconstruction.shifted_transform">kwave.reconstruction.shifted_transform</a>
+</li>
+          <li><a href="kwave.reconstruction.tools.html#module-kwave.reconstruction.tools">kwave.reconstruction.tools</a>
+</li>
+          <li><a href="kwave.recorder.html#module-kwave.recorder">kwave.recorder</a>
+</li>
+          <li><a href="kwave.utils.html#module-kwave.utils">kwave.utils</a>
+</li>
+          <li><a href="kwave.utils.checks.html#module-kwave.utils.checks">kwave.utils.checks</a>
+</li>
+          <li><a href="kwave.utils.colormap.html#module-kwave.utils.colormap">kwave.utils.colormap</a>
+</li>
+          <li><a href="kwave.utils.conversion.html#module-kwave.utils.conversion">kwave.utils.conversion</a>
+</li>
+          <li><a href="kwave.utils.data.html#module-kwave.utils.data">kwave.utils.data</a>
+</li>
+          <li><a href="kwave.utils.dotdictionary.html#module-kwave.utils.dotdictionary">kwave.utils.dotdictionary</a>
+</li>
+          <li><a href="kwave.utils.filters.html#module-kwave.utils.filters">kwave.utils.filters</a>
+</li>
+          <li><a href="kwave.utils.interp.html#module-kwave.utils.interp">kwave.utils.interp</a>
+</li>
+          <li><a href="kwave.utils.io.html#module-kwave.utils.io">kwave.utils.io</a>
+</li>
+          <li><a href="kwave.utils.mapgen.html#module-kwave.utils.mapgen">kwave.utils.mapgen</a>
+</li>
+          <li><a href="kwave.utils.math.html#module-kwave.utils.math">kwave.utils.math</a>
+</li>
+          <li><a href="kwave.utils.matrix.html#module-kwave.utils.matrix">kwave.utils.matrix</a>
+</li>
+          <li><a href="kwave.utils.pml.html#module-kwave.utils.pml">kwave.utils.pml</a>
+</li>
+          <li><a href="kwave.utils.signals.html#module-kwave.utils.signals">kwave.utils.signals</a>
+</li>
+          <li><a href="kwave.utils.tictoc.html#module-kwave.utils.tictoc">kwave.utils.tictoc</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.multi_axial_PML_ratio">multi_axial_PML_ratio (kwave.options.SimulationOptions attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="N">N</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.N">N (kwave.kgrid.kWaveGrid attribute)</a>
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.N">N (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.n_vec">n_vec (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.n_vec">n_vec (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.n_vec_sg">n_vec_sg (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.n_vec_sg">n_vec_sg (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.nonuniform">nonuniform (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.ndgrid">ndgrid() (in module kwave.utils.mapgen)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.nonuniform_grid">nonuniform_grid (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.neper2db">neper2db() (in module kwave.utils.conversion)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.Nt">Nt (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.next_pow2">next_pow2() (in module kwave.utils.filters)</a>
 </li>
-      <li><a href="array.html#kwave.data.Array.numpy">numpy() (kwave.data.Array method)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.nonuniform">nonuniform (kwave.kgrid.kWaveGrid attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.Nx">Nx (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.nonuniform_grid">nonuniform_grid (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.Ny">Ny (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.norm_var">norm_var() (in module kwave.utils.filters)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.Nz">Nz (kwave.kgrid.kWaveGrid property)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer">NotATransducer (class in kwave.ktransducer)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.Nt">Nt (kwave.kgrid.kWaveGrid attribute)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.num_dim">num_dim() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.utils.checks.html#kwave.utils.checks.num_dim2">num_dim2() (in module kwave.utils.checks)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.number_active_elements">number_active_elements (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.data.html#kwave.data.Array.numpy">numpy() (kwave.data.Array method)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.Nx">Nx (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.Ny">Ny (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.Nz">Nz (kwave.kgrid.kWaveGrid property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="P">P</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksource.html#kwave.ksource.kSource.p">p (kwave.ksource.kSource attribute)</a>
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.p">p (kwave.ksource.kSource attribute)</a>
 
-      <ul>
-        <li><a href="recorder.html#kwave.recorder.Recorder.p">(kwave.recorder.Recorder attribute)</a>
+        <ul>
+          <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p">(kwave.recorder.Recorder attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="ksource.html#kwave.ksource.kSource.p0">p0 (kwave.ksource.kSource property)</a>
+        </ul></li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.p0">p0 (kwave.ksource.kSource property)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_final">p_final (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_final">p_final (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.p_frequency_ref">p_frequency_ref (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.p_frequency_ref">p_frequency_ref (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.p_mask">p_mask (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.p_mask">p_mask (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_max">p_max (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_max">p_max (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_max_all">p_max_all (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_max_all">p_max_all (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_min">p_min (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_min">p_min (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_min_all">p_min_all (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_min_all">p_min_all (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.p_mode">p_mode (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.p_mode">p_mode (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.p_rms">p_rms (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.p_rms">p_rms (kwave.recorder.Recorder attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.p_source_pos_index">p_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.p_source_pos_index">p_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.pattern">pattern (kwave.ksensor.kSensorDirectivity attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.pattern">pattern (kwave.ksensor.kSensorDirectivity attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_auto">pml_auto (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_auto">pml_auto (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_inside">pml_inside (kwave.options.SimulationOptions attribute)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_inside">pml_inside (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_search_range">pml_search_range (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_search_range">pml_search_range (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_x_alpha">pml_x_alpha (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_x_alpha">pml_x_alpha (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_x_size">pml_x_size (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_x_size">pml_x_size (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_y_alpha">pml_y_alpha (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_y_alpha">pml_y_alpha (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_y_size">pml_y_size (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_y_size">pml_y_size (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_z_alpha">pml_z_alpha (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_z_alpha">pml_z_alpha (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.pml_z_size">pml_z_size (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.pml_z_size">pml_z_size (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.print_start_status">print_start_status() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.power_law_kramers_kronig">power_law_kramers_kronig() (in module kwave.utils.mapgen)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.PSTD_CFL">PSTD_CFL (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.primefactors">primefactors() (in module kwave.utils.math)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#kwave.kWaveSimulation_helper.display_simulation_params.print_grid_size">print_grid_size() (in module kwave.kWaveSimulation_helper.display_simulation_params)</a>
 
-<h2 id="R">R</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.radial_symmetry">radial_symmetry (kwave.options.SimulationOptions attribute)</a>
+        <ul>
+          <li><a href="kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.print_grid_size">(in module kwave.kWaveSimulation_helper.expand_grid_matrices)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.record">record (kwave.ksensor.kSensor attribute)</a>
+        </ul></li>
+        <li><a href="kwave.kWaveSimulation_helper.display_simulation_params.html#kwave.kWaveSimulation_helper.display_simulation_params.print_max_supported_freq">print_max_supported_freq() (in module kwave.kWaveSimulation_helper.display_simulation_params)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.record_start_index">record_start_index (kwave.ksensor.kSensor property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.print_start_status">print_start_status() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="recorder.html#kwave.recorder.Recorder">Recorder (class in kwave.recorder)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.PSTD_CFL">PSTD_CFL (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.reorder_data">reorder_data (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.rho0">rho0 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
-</li>
-  </ul></td>
-</tr></table>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="S">S</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksource.html#kwave.ksource.kSource.s_mask">s_mask (kwave.ksource.kSource attribute)</a>
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.radial_symmetry">radial_symmetry (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.s_mode">s_mode (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.record">record (kwave.ksensor.kSensor attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.s_source_pos_index">s_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.record_start_index">record_start_index (kwave.ksensor.kSensor property)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.save_to_disk">save_to_disk (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder">Recorder (class in kwave.recorder)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.save_to_disk_exit">save_to_disk_exit (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.remove_z_dimension">remove_z_dimension() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.scale_source_terms">scale_source_terms (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.reorder_binary_sensor_data">reorder_binary_sensor_data() (in module kwave.utils.signals)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.scale_source_terms">scale_source_terms() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.reorder_data">reorder_data (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.select_precision">select_precision() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.reorder_sensor_data">reorder_sensor_data() (in module kwave.utils.signals)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.set_absorbing">set_absorbing() (kwave.kmedium.kWaveMedium method)</a>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.resize">resize() (in module kwave.utils.matrix)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.set_default_size">set_default_size() (kwave.ksensor.kSensorDirectivity method)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.retract_grid">retract_grid() (kwave.ktransducer.NotATransducer method)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.set_flags_from_list">set_flags_from_list() (kwave.recorder.Recorder method)</a>
+        <li><a href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html#kwave.kWaveSimulation_helper.retract_transducer_grid_size.retract_transducer_grid_size">retract_transducer_grid_size() (in module kwave.kWaveSimulation_helper.retract_transducer_grid_size)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.set_index_data_type">set_index_data_type() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.utils.matrix.html#kwave.utils.matrix.revolve2d">revolve2d() (in module kwave.utils.matrix)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.set_index_variables">set_index_variables() (kwave.recorder.Recorder method)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.rho0">rho0 (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.set_unique_angles">set_unique_angles() (kwave.ksensor.kSensorDirectivity method)</a>
+        <li><a href="kwave.reconstruction.shifted_transform.html#kwave.reconstruction.shifted_transform.ShiftedTransform.rotation">rotation (kwave.reconstruction.shifted_transform.ShiftedTransform attribute)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.set_wavenumbers">set_wavenumbers() (kwave.ksensor.kSensorDirectivity method)</a>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.round_even">round_even() (in module kwave.utils.math)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.setNUGrid">setNUGrid() (kwave.kgrid.kWaveGrid method)</a>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.round_odd">round_odd() (in module kwave.utils.math)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.setTime">setTime() (kwave.kgrid.kWaveGrid method)</a>
+        <li><a href="kwave.executor.html#kwave.executor.Executor.run_simulation">run_simulation() (kwave.executor.Executor method)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions">SimulationOptions (class in kwave.options)</a>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.rwh_primes">rwh_primes() (in module kwave.utils.math)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.size">size (kwave.kgrid.kWaveGrid property)</a>
+    </ul></td>
+  </tr></table>
+</section>
 
-      <ul>
-        <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.size">(kwave.ksensor.kSensorDirectivity attribute)</a>
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.s_mask">s_mask (kwave.ksource.kSource attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.smooth_and_enlarge">smooth_and_enlarge() (kwave.kWaveSimulation.kWaveSimulation method)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.s_mode">s_mode (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.smooth_c0">smooth_c0 (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.s_source_pos_index">s_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.smooth_p0">smooth_p0 (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.save_file">save_file() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.smooth_rho0">smooth_rho0 (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.save_h5_file">save_h5_file() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed">sound_speed (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.save_mat_file">save_mat_file() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_compression">sound_speed_compression (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.save_to_disk">save_to_disk (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref">sound_speed_ref (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.save_to_disk_exit">save_to_disk_exit (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref_compression">sound_speed_ref_compression (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.save_to_disk_func">save_to_disk_func() (in module kwave.kWaveSimulation_helper.save_to_disk_func)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref_shear">sound_speed_ref_shear (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source">scale_pressure_source() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_shear">sound_speed_shear (kwave.kmedium.kWaveMedium property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_dirichlet">scale_pressure_source_dirichlet() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p">source_p (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_nonuniform_grid">scale_pressure_source_nonuniform_grid() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p0">source_p0 (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_uniform_grid">scale_pressure_source_uniform_grid() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p0_elastic">source_p0_elastic (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.scale_SI">scale_SI() (in module kwave.utils.conversion)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p_labelled">source_p_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.scale_source_terms">scale_source_terms (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_P_MODE_DEF">SOURCE_P_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.scale_source_terms">scale_source_terms() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_s_labelled">source_s_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_source_terms_func">scale_source_terms_func() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_S_MODE_DEF">SOURCE_S_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_stress_source">scale_stress_source() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxx">source_sxx (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_stress_sources">scale_stress_sources() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxy">source_sxy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.utils.conversion.html#kwave.utils.conversion.scale_time">scale_time() (in module kwave.utils.conversion)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxz">source_sxz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_transducer_source">scale_transducer_source() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_syy">source_syy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source">scale_velocity_source() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_syz">source_syz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source_nonuniform">scale_velocity_source_nonuniform() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_szz">source_szz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source_x">scale_velocity_source_x() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_u_labelled">source_u_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_sources">scale_velocity_sources() (in module kwave.kWaveSimulation_helper.scale_source_terms_func)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_U_MODE_DEF">SOURCE_U_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.scan_conversion">scan_conversion() (in module kwave.reconstruction.beamform)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_ux">source_ux (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.select_precision">select_precision() (kwave.kWaveSimulation.kWaveSimulation static method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_uy">source_uy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.set_absorbing">set_absorbing() (kwave.kmedium.kWaveMedium method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_uz">source_uz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.set_default_size">set_default_size() (kwave.ksensor.kSensorDirectivity method)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.spacing">spacing (kwave.kgrid.kWaveGrid attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.create_storage_variables.html#kwave.kWaveSimulation_helper.create_storage_variables.set_flags">set_flags() (in module kwave.kWaveSimulation_helper.create_storage_variables)</a>
 </li>
-      <li><a href="kmedium.html#kwave.kmedium.kWaveMedium.stokes">stokes (kwave.kmedium.kWaveMedium attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.set_flags_from_list">set_flags_from_list() (kwave.recorder.Recorder method)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.stream_to_disk">stream_to_disk (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.set_index_data_type">set_index_data_type() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.STREAM_TO_DISK_FILENAME">STREAM_TO_DISK_FILENAME (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.set_index_variables">set_index_variables() (kwave.recorder.Recorder method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.sxx">sxx (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref">set_sound_speed_ref() (in module kwave.kWaveSimulation_helper.set_sound_speed_ref)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.sxy">sxy (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.set_unique_angles">set_unique_angles() (kwave.ksensor.kSensorDirectivity method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.sxz">sxz (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.set_wavenumbers">set_wavenumbers() (kwave.ksensor.kSensorDirectivity method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.syy">syy (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.setNUGrid">setNUGrid() (kwave.kgrid.kWaveGrid method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.syz">syz (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.setTime">setTime() (kwave.kgrid.kWaveGrid method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.szz">szz (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.sharpness">sharpness() (in module kwave.utils.filters)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.reconstruction.shifted_transform.html#kwave.reconstruction.shifted_transform.ShiftedTransform">ShiftedTransform (class in kwave.reconstruction.shifted_transform)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions">SimulationOptions (class in kwave.options)</a>
+</li>
+        <li><a href="kwave.utils.math.html#kwave.utils.math.sinc">sinc() (in module kwave.utils.math)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.single_sided_correction">single_sided_correction() (in module kwave.utils.filters)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.size">size (kwave.kgrid.kWaveGrid property)</a>
 
-<h2 id="T">T</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.t_array">t_array (kwave.kgrid.kWaveGrid property)</a>
+        <ul>
+          <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.size">(kwave.ksensor.kSensorDirectivity attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.time_rev">time_rev (kwave.kWaveSimulation.kWaveSimulation property)</a>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.smooth">smooth() (in module kwave.utils.filters)</a>
 </li>
-      <li><a href="ksensor.html#kwave.ksensor.kSensor.time_reversal_boundary_data">time_reversal_boundary_data (kwave.ksensor.kSensor attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.smooth_and_enlarge">smooth_and_enlarge() (kwave.kWaveSimulation.kWaveSimulation method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.total_grid_points">total_grid_points (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.smooth_c0">smooth_c0 (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_receive_elevation_focus">transducer_receive_elevation_focus (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.smooth_p0">smooth_p0 (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_sensor">transducer_sensor (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.smooth_rho0">smooth_rho0 (kwave.options.SimulationOptions attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_source">transducer_source (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+        <li><a href="kwave.utils.interp.html#kwave.utils.interp.sort_rows">sort_rows() (in module kwave.utils.interp)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed">sound_speed (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_compression">sound_speed_compression (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref">sound_speed_ref (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref_compression">sound_speed_ref_compression (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_ref_shear">sound_speed_ref_shear (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.sound_speed_shear">sound_speed_shear (kwave.kmedium.kWaveMedium property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p">source_p (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p0">source_p0 (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p0_elastic">source_p0_elastic (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_p_labelled">source_p_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_P_MODE_DEF">SOURCE_P_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_s_labelled">source_s_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_S_MODE_DEF">SOURCE_S_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxx">source_sxx (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxy">source_sxy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_sxz">source_sxz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_syy">source_syy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_syz">source_syz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_szz">source_szz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_u_labelled">source_u_labelled (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.SOURCE_U_MODE_DEF">SOURCE_U_MODE_DEF (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_ux">source_ux (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_uy">source_uy (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.source_uz">source_uz (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.spacing">spacing (kwave.kgrid.kWaveGrid attribute)</a>
+</li>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.spect">spect() (in module kwave.utils.filters)</a>
+</li>
+        <li><a href="kwave.utils.tictoc.html#kwave.utils.tictoc.TicToc.start_time">start_time (kwave.utils.tictoc.TicToc attribute)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.steering_angle">steering_angle (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.steering_angle_max">steering_angle_max (kwave.ktransducer.NotATransducer property)</a>
+</li>
+        <li><a href="kwave.kmedium.html#kwave.kmedium.kWaveMedium.stokes">stokes (kwave.kmedium.kWaveMedium attribute)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.stream_to_disk">stream_to_disk (kwave.options.SimulationOptions attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.STREAM_TO_DISK_FILENAME">STREAM_TO_DISK_FILENAME (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.sub2ind">sub2ind() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.sxx">sxx (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.sxy">sxy (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.sxz">sxz (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.syy">syy (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.syz">syz (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.szz">szz (kwave.ksource.kSource attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
-<h2 id="U">U</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u">u (kwave.recorder.Recorder attribute)</a>
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.t_array">t_array (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_final">u_final (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.utils.filters.html#kwave.utils.filters.tenenbaum_sharpness">tenenbaum_sharpness() (in module kwave.utils.filters)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.u_frequency_ref">u_frequency_ref (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.utils.tictoc.html#kwave.utils.tictoc.TicToc.tic">tic() (kwave.utils.tictoc.TicToc static method)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.u_mask">u_mask (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.utils.tictoc.html#kwave.utils.tictoc.TicToc">TicToc (class in kwave.utils.tictoc)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_max">u_max (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.time_rev">time_rev (kwave.kWaveSimulation.kWaveSimulation property)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_max_all">u_max_all (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensor.time_reversal_boundary_data">time_reversal_boundary_data (kwave.ksensor.kSensor attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_min">u_min (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.utils.tictoc.html#kwave.utils.tictoc.TicToc.toc">toc() (kwave.utils.tictoc.TicToc static method)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_min_all">u_min_all (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.tone_burst">tone_burst() (in module kwave.utils.signals)</a>
 </li>
-      <li><a href="ksource.html#kwave.ksource.kSource.u_mode">u_mode (kwave.ksource.kSource attribute)</a>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.total_grid_points">total_grid_points (kwave.kgrid.kWaveGrid property)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_non_staggered">u_non_staggered (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_receive_elevation_focus">transducer_receive_elevation_focus (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_rms">u_rms (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_sensor">transducer_sensor (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.u_source_pos_index">u_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.transducer_source">transducer_source (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
 </li>
-      <li><a href="recorder.html#kwave.recorder.Recorder.u_split_field">u_split_field (kwave.recorder.Recorder attribute)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.kWaveTransducerSimple.transducer_width">transducer_width (kwave.ktransducer.kWaveTransducerSimple property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.unique_angles">unique_angles (kwave.ksensor.kSensorDirectivity attribute)</a>
+        <li><a href="kwave.reconstruction.shifted_transform.html#kwave.reconstruction.shifted_transform.ShiftedTransform.translation">translation (kwave.reconstruction.shifted_transform.ShiftedTransform attribute)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.use_finite_difference">use_finite_difference (kwave.options.SimulationOptions attribute)</a>
+        <li><a href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer.transmit_apodization_mask">transmit_apodization_mask (kwave.ktransducer.NotATransducer property)</a>
 </li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.use_kspace">use_kspace (kwave.options.SimulationOptions attribute)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_sensor">use_sensor (kwave.kWaveSimulation.kWaveSimulation property)</a>
-</li>
-      <li><a href="simopt.html#kwave.options.SimulationOptions.use_sg">use_sg (kwave.options.SimulationOptions attribute)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_p">use_w_source_correction_p (kwave.kWaveSimulation.kWaveSimulation property)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_u">use_w_source_correction_u (kwave.kWaveSimulation.kWaveSimulation property)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_axisymmetric">userarg_axisymmetric (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_cuboid_corners">userarg_cuboid_corners (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
-</li>
-      <li><a href="ksimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_time_rev">userarg_time_rev (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
-</li>
-      <li><a href="ksource.html#kwave.ksource.kSource.ux">ux (kwave.ksource.kSource attribute)</a>
-</li>
-      <li><a href="ksource.html#kwave.ksource.kSource.uy">uy (kwave.ksource.kSource attribute)</a>
-</li>
-      <li><a href="ksource.html#kwave.ksource.kSource.uz">uz (kwave.ksource.kSource attribute)</a>
-</li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteCosine.TYPE_1">TYPE_1 (kwave.enums.DiscreteCosine attribute)</a>
 
-<h2 id="V">V</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksource.html#kwave.ksource.kSource.validate">validate() (kwave.ksource.kSource method)</a>
+        <ul>
+          <li><a href="kwave.enums.html#kwave.enums.DiscreteSine.TYPE_1">(kwave.enums.DiscreteSine attribute)</a>
 </li>
-  </ul></td>
-</tr></table>
+        </ul></li>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteCosine.TYPE_2">TYPE_2 (kwave.enums.DiscreteCosine attribute)</a>
 
-<h2 id="W">W</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ksensor.html#kwave.ksensor.kSensorDirectivity.wavenumbers">wavenumbers (kwave.ksensor.kSensorDirectivity attribute)</a>
+        <ul>
+          <li><a href="kwave.enums.html#kwave.enums.DiscreteSine.TYPE_2">(kwave.enums.DiscreteSine attribute)</a>
 </li>
-  </ul></td>
-</tr></table>
+        </ul></li>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteCosine.TYPE_3">TYPE_3 (kwave.enums.DiscreteCosine attribute)</a>
 
-<h2 id="X">X</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="array.html#kwave.data.Array.x">x (kwave.data.Array property)</a>
-
-      <ul>
-        <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.x">(kwave.kgrid.kWaveGrid property)</a>
+        <ul>
+          <li><a href="kwave.enums.html#kwave.enums.DiscreteSine.TYPE_3">(kwave.enums.DiscreteSine attribute)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.x_vec">x_vec (kwave.kgrid.kWaveGrid property)</a>
+        </ul></li>
+        <li><a href="kwave.enums.html#kwave.enums.DiscreteCosine.TYPE_4">TYPE_4 (kwave.enums.DiscreteCosine attribute)</a>
+
+        <ul>
+          <li><a href="kwave.enums.html#kwave.enums.DiscreteSine.TYPE_4">(kwave.enums.DiscreteSine attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.xn">xn (kwave.kgrid.kWaveGrid property)</a>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u">u (kwave.recorder.Recorder attribute)</a>
 </li>
-  </ul></td>
-</tr></table>
-
-<h2 id="Y">Y</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="array.html#kwave.data.Array.y">y (kwave.data.Array property)</a>
-
-      <ul>
-        <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.y">(kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_final">u_final (kwave.recorder.Recorder attribute)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.y_size">y_size (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.u_frequency_ref">u_frequency_ref (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.y_vec">y_vec (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.u_mask">u_mask (kwave.ksource.kSource attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.yn">yn (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_max">u_max (kwave.recorder.Recorder attribute)</a>
 </li>
-  </ul></td>
-</tr></table>
-
-<h2 id="Z">Z</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="array.html#kwave.data.Array.z">z (kwave.data.Array property)</a>
-
-      <ul>
-        <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.z">(kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_max_all">u_max_all (kwave.recorder.Recorder attribute)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.z_size">z_size (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_min">u_min (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.z_vec">z_vec (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_min_all">u_min_all (kwave.recorder.Recorder attribute)</a>
 </li>
-      <li><a href="kgrid.html#kwave.kgrid.kWaveGrid.zn">zn (kwave.kgrid.kWaveGrid property)</a>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.u_mode">u_mode (kwave.ksource.kSource attribute)</a>
 </li>
-  </ul></td>
-</tr></table>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_non_staggered">u_non_staggered (kwave.recorder.Recorder attribute)</a>
+</li>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_rms">u_rms (kwave.recorder.Recorder attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.u_source_pos_index">u_source_pos_index (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.recorder.html#kwave.recorder.Recorder.u_split_field">u_split_field (kwave.recorder.Recorder attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.unique_angles">unique_angles (kwave.ksensor.kSensorDirectivity attribute)</a>
+</li>
+        <li><a href="kwave.utils.signals.html#kwave.utils.signals.unmask_sensor_data">unmask_sensor_data() (in module kwave.utils.signals)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.use_finite_difference">use_finite_difference (kwave.options.SimulationOptions attribute)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.use_kspace">use_kspace (kwave.options.SimulationOptions attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_sensor">use_sensor (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.options.html#kwave.options.SimulationOptions.use_sg">use_sg (kwave.options.SimulationOptions attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_p">use_w_source_correction_p (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_u">use_w_source_correction_u (kwave.kWaveSimulation.kWaveSimulation property)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_axisymmetric">userarg_axisymmetric (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_cuboid_corners">userarg_cuboid_corners (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.userarg_time_rev">userarg_time_rev (kwave.kWaveSimulation.kWaveSimulation attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.ux">ux (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.uy">uy (kwave.ksource.kSource attribute)</a>
+</li>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.uz">uz (kwave.ksource.kSource attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="V" class="genindex-section">
+  <h2>V</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.ksource.html#kwave.ksource.kSource.validate">validate() (kwave.ksource.kSource method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="W" class="genindex-section">
+  <h2>W</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.water_absorption">water_absorption() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.water_density">water_density() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.water_non_linearity">water_non_linearity() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.utils.mapgen.html#kwave.utils.mapgen.water_sound_speed">water_sound_speed() (in module kwave.utils.mapgen)</a>
+</li>
+        <li><a href="kwave.ksensor.html#kwave.ksensor.kSensorDirectivity.wavenumbers">wavenumbers (kwave.ksensor.kSensorDirectivity attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.write_attributes">write_attributes() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.write_attributes_typed">write_attributes_typed() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.write_flags">write_flags() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.write_grid">write_grid() (in module kwave.utils.io)</a>
+</li>
+        <li><a href="kwave.utils.io.html#kwave.utils.io.write_matrix">write_matrix() (in module kwave.utils.io)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="X" class="genindex-section">
+  <h2>X</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.data.html#kwave.data.Array.x">x (kwave.data.Array property)</a>
+
+        <ul>
+          <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.x">(kwave.kgrid.kWaveGrid property)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.x_vec">x_vec (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.xn">xn (kwave.kgrid.kWaveGrid property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="Y" class="genindex-section">
+  <h2>Y</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.data.html#kwave.data.Array.y">y (kwave.data.Array property)</a>
+
+        <ul>
+          <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.y">(kwave.kgrid.kWaveGrid property)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.y_size">y_size (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.y_vec">y_vec (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.yn">yn (kwave.kgrid.kWaveGrid property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="Z" class="genindex-section">
+  <h2>Z</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.data.html#kwave.data.Array.z">z (kwave.data.Array property)</a>
+
+        <ul>
+          <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.z">(kwave.kgrid.kWaveGrid property)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.z_size">z_size (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.z_vec">z_vec (kwave.kgrid.kWaveGrid property)</a>
+</li>
+        <li><a href="kwave.kgrid.html#kwave.kgrid.kWaveGrid.zn">zn (kwave.kgrid.kWaveGrid property)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
 
 
-
-           </div>
-          </div>
-          <footer>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2021, Walter Simson, Farid Yagubbayli.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
       </div>
-    </section>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    </body>
 </html>

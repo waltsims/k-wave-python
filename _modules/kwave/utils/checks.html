@@ -1,0 +1,626 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>kwave.utils.checks - k-wave-python documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html">Development Environment</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.options.html">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.utils.html">kwave.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.mapgen.html">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for kwave.utils.checks</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">db2neper</span>
+<span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="n">sinc</span><span class="p">,</span> <span class="n">primefactors</span>
+
+
+<div class="viewcode-block" id="enforce_fields"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.enforce_fields">[docs]</a><span class="k">def</span> <span class="nf">enforce_fields</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ensures that the given dictionary contains the specified fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dictionary: A dictionary to check.</span>
+<span class="sd">        *fields: The fields that must be present in the dictionary.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: If any of the specified fields are not in the dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be defined in the given dictionary&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="enforce_fields_obj"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.enforce_fields_obj">[docs]</a><span class="k">def</span> <span class="nf">enforce_fields_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enforces that certain fields are not None in the given object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    obj: Object to check the fields of.</span>
+<span class="sd">    *fields: List of field names to check.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">    AssertionError: If any of the given fields are None in the given object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be not None in the given object&#39;</span></div>
+
+
+<div class="viewcode-block" id="check_field_names"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_field_names">[docs]</a><span class="k">def</span> <span class="nf">check_field_names</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method checks if the keys of the given dictionary are valid fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    dictionary: A dictionary where the keys will be checked for validity.</span>
+<span class="sd">    *fields: A list of valid field names.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    None</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">    AssertionError: If any of the keys in the dictionary are not in the list of valid fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> is not a valid field for the given dictionary&#39;</span></div>
+
+
+<div class="viewcode-block" id="num_dim"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.num_dim">[docs]</a><span class="k">def</span> <span class="nf">num_dim</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the number of dimensions in x, after collapsing any singleton dimensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    x (np.ndarray): The input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    int: The number of dimensions in x.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="num_dim2"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.num_dim2">[docs]</a><span class="k">def</span> <span class="nf">num_dim2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the number of dimensions of an array after collapsing singleton dimensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): The input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The number of dimensions of the array after collapsing singleton dimensions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_str_eq"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_eq">[docs]</a><span class="k">def</span> <span class="nf">check_str_eq</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The value to check.</span>
+<span class="sd">        target: The target string to compare with.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the value is a string and is equal to the target, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">==</span> <span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="check_str_in"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_in">[docs]</a><span class="k">def</span> <span class="nf">check_str_in</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if value is in the given list only if the value is string.</span>
+<span class="sd">    Helps to avoid FutureWarnings when value is not a string.</span>
+<span class="sd">    Added by @Farid</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The value to check for inclusion in `target`</span>
+<span class="sd">        target: A list of strings to check for the presence of `value`</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if `value` is a string and is present in `target`, otherwise False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="is_number"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_number">[docs]</a><span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if the given value is a numeric type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The value to check.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the value is numeric, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_unix"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_unix">[docs]</a><span class="k">def</span> <span class="nf">is_unix</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check whether the current platform is a Unix-like system.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the current platform is a Unix-like system, False otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Linux&#39;</span><span class="p">,</span> <span class="s1">&#39;Darwin&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="check_stability"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_stability">[docs]</a><span class="k">def</span> <span class="nf">check_stability</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          checkStability calculates the maximum time step for which the k-space</span>
+<span class="sd">          propagation models kspaceFirstOrder1D, kspaceFirstOrder2D and</span>
+<span class="sd">          kspaceFirstOrder3D are stable. These models are unconditionally</span>
+<span class="sd">          stable when the reference sound speed is equal to or greater than the</span>
+<span class="sd">          maximum sound speed in the medium and there is no absorption.</span>
+<span class="sd">          However, when the reference sound speed is less than the maximum</span>
+<span class="sd">          sound speed the model is only stable for sufficiently small time</span>
+<span class="sd">          steps. The criterion is more stringent (the time step is smaller) in</span>
+<span class="sd">          the absorbing case.</span>
+
+<span class="sd">          The time steps given are accurate when the medium properties are</span>
+<span class="sd">          homogeneous. For a heterogeneous media they give a useful, but not</span>
+<span class="sd">          exact, estimate.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        kgrid: k-Wave grid object return by kWaveGrid</span>
+<span class="sd">        medium: structure containing the medium properties</span>
+
+<span class="sd">    Returns: the maximum time step for which the models are stable.</span>
+<span class="sd">            This is set to Inf when the model is unconditionally stable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># why? : this function was migrated from Matlab.</span>
+    <span class="c1"># Matlab would treat the &#39;medium&#39; as a &quot;pass by value&quot; argument.</span>
+    <span class="c1"># In python argument is passed by reference and changes in this function will cause original data to be changed.</span>
+    <span class="c1"># Instead of making significant changes to the function, we make a deep copy of the argument</span>
+    <span class="n">medium</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
+
+    <span class="c1"># define literals</span>
+    <span class="n">FIXED_POINT_ACCURACY</span> <span class="o">=</span> <span class="mf">1e-12</span>
+
+    <span class="c1"># find the maximum wavenumber</span>
+    <span class="n">kmax</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="c1"># calculate the reference sound speed for the fluid code, using the</span>
+    <span class="c1"># maximum by default which ensures the model is unconditionally stable</span>
+    <span class="n">reductions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+        <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+        <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ss_ref</span> <span class="o">=</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed_ref</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">ss_ref</span><span class="p">):</span>
+            <span class="n">c_ref</span> <span class="o">=</span> <span class="n">ss_ref</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">c_ref</span> <span class="o">=</span> <span class="n">reductions</span><span class="p">[</span><span class="n">ss_ref</span><span class="p">](</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unknown input for medium.sound_speed_ref.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c_ref</span> <span class="o">=</span> <span class="n">reductions</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">](</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
+
+    <span class="c1"># calculate the timesteps required for stability</span>
+    <span class="k">if</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+
+        <span class="c1"># =====================================================================</span>
+        <span class="c1"># NON-ABSORBING CASE</span>
+        <span class="c1"># =====================================================================</span>
+
+        <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c_ref</span> <span class="o">&gt;=</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+            <span class="c1"># set the timestep to Inf when the model is unconditionally stable</span>
+            <span class="n">dt_stability_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># set the timestep required for stability when c_ref~=max(medium.sound_speed(:))</span>
+            <span class="n">dt_stability_limit</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">c_ref</span> <span class="o">*</span> <span class="n">kmax</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">c_ref</span> <span class="o">/</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="c1"># =====================================================================</span>
+        <span class="c1"># ABSORBING CASE</span>
+        <span class="c1"># =====================================================================</span>
+
+        <span class="c1"># convert the absorption coefficient to nepers.(rad/s)^-y.m^-1</span>
+        <span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="o">=</span> <span class="n">db2neper</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span><span class="p">,</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span><span class="p">)</span>
+
+        <span class="c1"># calculate the absorption constant</span>
+        <span class="k">if</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">==</span> <span class="s1">&#39;no_absorption&#39;</span><span class="p">:</span>
+            <span class="n">absorb_tau</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span> <span class="o">**</span> <span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">absorb_tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># calculate the dispersion constant</span>
+        <span class="k">if</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">==</span> <span class="s1">&#39;no_dispersion&#39;</span><span class="p">:</span>
+            <span class="n">absorb_eta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_coeff</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span> <span class="o">**</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">absorb_eta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># estimate the timestep required for stability in the absorbing case by</span>
+        <span class="c1"># assuming the k-space correction factor, kappa = 1 (note that</span>
+        <span class="c1"># absorb_tau and absorb_eta are negative quantities)</span>
+        <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
+
+        <span class="n">temp1</span> <span class="o">=</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">absorb_tau</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">**</span> <span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">temp2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">absorb_eta</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">**</span> <span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dt_estimate</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">temp1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">temp2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">temp2</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># use a fixed point iteration to find the correct timestep, assuming</span>
+        <span class="c1"># now that kappa = kappa(dt), using the previous estimate as a starting</span>
+        <span class="c1"># point</span>
+
+        <span class="c1"># first define the function to iterate</span>
+        <span class="k">def</span> <span class="nf">kappa</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sinc</span><span class="p">(</span><span class="n">c_ref</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">temp3</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">absorb_tau</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">*</span> <span class="n">kappa</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">**</span> <span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">func_to_solve</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">temp3</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">temp3</span><span class="p">(</span><span class="n">dt</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">temp2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="n">temp2</span> <span class="o">*</span> <span class="n">kmax</span> <span class="o">*</span> <span class="n">kappa</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">*</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># run the fixed point iteration</span>
+        <span class="n">dt_stability_limit</span> <span class="o">=</span> <span class="n">dt_estimate</span>
+        <span class="n">dt_old</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dt_stability_limit</span> <span class="o">-</span> <span class="n">dt_old</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">FIXED_POINT_ACCURACY</span><span class="p">:</span>
+            <span class="n">dt_old</span> <span class="o">=</span> <span class="n">dt_stability_limit</span>
+            <span class="n">dt_stability_limit</span> <span class="o">=</span> <span class="n">func_to_solve</span><span class="p">(</span><span class="n">dt_stability_limit</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dt_stability_limit</span></div>
+
+
+<div class="viewcode-block" id="check_factors"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_factors">[docs]</a><span class="k">def</span> <span class="nf">check_factors</span><span class="p">(</span><span class="n">min_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the maximum prime factor for a range of numbers.</span>
+
+<span class="sd">    checkFactors loops through the given range of numbers and finds the</span>
+<span class="sd">    numbers with the smallest maximum prime factors. This allows suitable</span>
+<span class="sd">    grid sizes to be selected to maximise the speed of the FFT (this is</span>
+<span class="sd">    fastest for FFT lengths with small prime factors). The output is</span>
+<span class="sd">    printed to the command line.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        min_number: integer specifying the lower bound of values to test</span>
+<span class="sd">        max_number: integer specifying the upper bound of values to test</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># compute the factors and maximum prime factors for each number in the range</span>
+    <span class="n">factors</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_number</span><span class="p">,</span> <span class="n">max_number</span><span class="p">):</span>
+        <span class="n">factors</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;factors&#39;</span><span class="p">:</span> <span class="n">primefactors</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+            <span class="s1">&#39;max_prime_factor&#39;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">primefactors</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+        <span class="p">}</span>
+
+    <span class="c1"># print the numbers that match each maximum prime factor</span>
+    <span class="k">for</span> <span class="n">factor</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Numbers with a maximum prime factor of </span><span class="si">{</span><span class="n">factor</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_number</span><span class="p">,</span> <span class="n">max_number</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">factors</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s1">&#39;max_prime_factor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">factor</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_divisible"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_divisible">[docs]</a><span class="k">def</span> <span class="nf">check_divisible</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">divider</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether number is divisible by divider without any remainder</span>
+<span class="sd">        Why do we need such a function? -&gt; Because due to floating point precision we</span>
+<span class="sd">        experience rounding errors while using standard modulo operator with floating point numbers</span>
+<span class="sd">    Args:</span>
+<span class="sd">        number: Number that&#39;s supposed to be divided</span>
+<span class="sd">        divider: Divider that should devide the number</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if number is divisible by divider, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">number</span> <span class="o">/</span> <span class="n">divider</span>
+    <span class="n">after_decimal</span> <span class="o">=</span> <span class="n">result</span> <span class="o">%</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">after_decimal</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    </body>
+</html>

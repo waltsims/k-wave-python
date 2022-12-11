@@ -1,0 +1,591 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.recorder module" href="kwave.recorder.html" /><link rel="prev" title="kwave.ktransducer module" href="kwave.ktransducer.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>kwave.options module - k-wave-python documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.utils.html">kwave.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.mapgen.html">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/waltsims/k-wave-python/edit/master/docs/kwave.options.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-kwave.options">
+<span id="kwave-options-module"></span><h1>kwave.options module<a class="headerlink" href="#module-kwave.options" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.options.</span></span><span class="sig-name descname"><span class="pre">SimulationOptions</span></span><a class="reference internal" href="_modules/kwave/options.html#SimulationOptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.options.SimulationOptions" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SimulationOptions()</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kwave.options.SimulationOptions.__init__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.cartesian_interp">
+<span class="sig-name descname"><span class="pre">cartesian_interp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'linear'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.cartesian_interp" title="Permalink to this definition">#</a></dt>
+<dd><p>interpolation mode for Cartesian sensor mask</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.create_log">
+<span class="sig-name descname"><span class="pre">create_log</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.create_log" title="Permalink to this definition">#</a></dt>
+<dd><p>create a log using diary</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_cast">
+<span class="sig-name descname"><span class="pre">data_cast</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'off'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_cast" title="Permalink to this definition">#</a></dt>
+<dd><p>data cast</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_recast">
+<span class="sig-name descname"><span class="pre">data_recast</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_recast" title="Permalink to this definition">#</a></dt>
+<dd><p>recast the sensor data back to double precision</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.hdf_compression_level">
+<span class="sig-name descname"><span class="pre">hdf_compression_level</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.hdf_compression_level" title="Permalink to this definition">#</a></dt>
+<dd><p>zip compression level for HDF5 input files</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.init">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elastic_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/options.html#SimulationOptions.init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.options.SimulationOptions.init" title="Permalink to this definition">#</a></dt>
+<dd><blockquote>
+<div><p>Initialize the Simulation Options</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kgrid</strong> – kWaveGrid instance</p></li>
+<li><p><strong>elastic_code</strong> (<em>bool</em>) – Flag that indicates whether elastic simulation is used</p></li>
+<li><p><strong>axisymmetric</strong> (<em>bool</em>) – Flag that indicates whether axisymmetric simulation is used</p></li>
+<li><p><strong>**kwargs</strong> – <p>Dictionary that holds following optional simulation properties:</p>
+<ul>
+<li><p>CartInterp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to ‘nearest’ and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = ‘linear’).</p></li>
+<li><p>CreateLog: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).</p></li>
+<li><p>DataCast: String input of the data type that variables are cast to before computation. For example, setting to ‘single’ will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision.  This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting ‘DataCast’ to ‘gpuArray-single’ (default = ‘off’).</p></li>
+<li><p>DataRecast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the ‘DataCast’ option.</p></li>
+<li><p>HDFCompressionLevel: Compression level used for writing the input HDF5 file when using ‘SaveToDisk’ or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.</p></li>
+<li><p>MultiAxialPMLRatio: MPML settings</p></li>
+<li><p>PMLAlpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).</p></li>
+<li><p>PMLInside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by PMLSize before running the simulation (default = true).</p></li>
+<li><p>PMLRange: Search range used when automatically determining PML size. Tuple of two elements</p></li>
+<li><p>PMLSize: Size of the perfectly matched layer in grid  points. By default, the PML is added evenly to all sides of the grid, however, both PMLSize and PMLAlpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate PMLAlpha to zero rather than forcing the PML to be of zero size (default = 10).</p></li>
+<li><p>RadialSymmetry: Radial symmetry used in axisymmetric code</p></li>
+<li><p>StreamToDisk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of times steps that are taken before the data is saved to disk (default = 200).</p></li>
+<li><p>SaveToDisk: String containing a filename (including  pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.</p></li>
+<li><p>SaveToDiskExit: Exit the simulation after saving the HDF5 file</p></li>
+<li><p>ScaleSourceTerms: Apply the source scaling term to time varying sources</p></li>
+<li><p>Smooth: Boolean controlling whether source.p0, medium.sound_speed, and medium.density are smoothed using smooth before computation. ‘Smooth’ can either be given as a single Boolean value or as a 3 element array to control the smoothing of source.p0, medium.sound_speed, and medium.density, independently (default = [true, false, false]).</p></li>
+<li><p>UseFD: Use finite difference gradients instead of spectral (in 1D)</p></li>
+<li><p>UsekSpace: use the k-space correction</p></li>
+<li><p>UseSG: Use a staggered grid</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SimulationOptions instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.multi_axial_PML_ratio">
+<span class="sig-name descname"><span class="pre">multi_axial_PML_ratio</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.multi_axial_PML_ratio" title="Permalink to this definition">#</a></dt>
+<dd><p>MPML settings</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_auto">
+<span class="sig-name descname"><span class="pre">pml_auto</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_auto" title="Permalink to this definition">#</a></dt>
+<dd><p>automatically choose the PML size to give small prime factors</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_inside">
+<span class="sig-name descname"><span class="pre">pml_inside</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_inside" title="Permalink to this definition">#</a></dt>
+<dd><p>put the PML inside the grid defined by the user</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_search_range">
+<span class="sig-name descname"><span class="pre">pml_search_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[10,</span> <span class="pre">40]</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_search_range" title="Permalink to this definition">#</a></dt>
+<dd><p>search range used when automatically determining PML size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_alpha">
+<span class="sig-name descname"><span class="pre">pml_x_alpha</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_alpha" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_size">
+<span class="sig-name descname"><span class="pre">pml_x_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_size" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_alpha">
+<span class="sig-name descname"><span class="pre">pml_y_alpha</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_alpha" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_size">
+<span class="sig-name descname"><span class="pre">pml_y_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_size" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_alpha">
+<span class="sig-name descname"><span class="pre">pml_z_alpha</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_alpha" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Alpha</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_size">
+<span class="sig-name descname"><span class="pre">pml_z_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_size" title="Permalink to this definition">#</a></dt>
+<dd><p>PML Size</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.radial_symmetry">
+<span class="sig-name descname"><span class="pre">radial_symmetry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'WSWA-FFT'</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.radial_symmetry" title="Permalink to this definition">#</a></dt>
+<dd><p>radial symmetry used in axisymmetric code</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.save_to_disk">
+<span class="sig-name descname"><span class="pre">save_to_disk</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.save_to_disk" title="Permalink to this definition">#</a></dt>
+<dd><p>save the input data to a HDF5 file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.save_to_disk_exit">
+<span class="sig-name descname"><span class="pre">save_to_disk_exit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.save_to_disk_exit" title="Permalink to this definition">#</a></dt>
+<dd><p>exit the simulation after saving the HDF5 file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.scale_source_terms">
+<span class="sig-name descname"><span class="pre">scale_source_terms</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.scale_source_terms" title="Permalink to this definition">#</a></dt>
+<dd><p>apply the source scaling term to time varying sources</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_c0">
+<span class="sig-name descname"><span class="pre">smooth_c0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_c0" title="Permalink to this definition">#</a></dt>
+<dd><p>smooth the sound speed distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_p0">
+<span class="sig-name descname"><span class="pre">smooth_p0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_p0" title="Permalink to this definition">#</a></dt>
+<dd><p>smooth the initial pressure distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.smooth_rho0">
+<span class="sig-name descname"><span class="pre">smooth_rho0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.smooth_rho0" title="Permalink to this definition">#</a></dt>
+<dd><p>smooth the density distribution</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.stream_to_disk">
+<span class="sig-name descname"><span class="pre">stream_to_disk</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.stream_to_disk" title="Permalink to this definition">#</a></dt>
+<dd><p>buffer the sensor data to disk (in 3D)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_finite_difference">
+<span class="sig-name descname"><span class="pre">use_finite_difference</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_finite_difference" title="Permalink to this definition">#</a></dt>
+<dd><p>use finite difference gradients instead of spectral (in 1D)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_kspace">
+<span class="sig-name descname"><span class="pre">use_kspace</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_kspace" title="Permalink to this definition">#</a></dt>
+<dd><p>use the k-space correction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_sg">
+<span class="sig-name descname"><span class="pre">use_sg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_sg" title="Permalink to this definition">#</a></dt>
+<dd><p>use a staggered grid</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="kwave.recorder.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">kwave.recorder module</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="kwave.ktransducer.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">kwave.ktransducer module</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kwave.options module</a><ul>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions"><code class="docutils literal notranslate"><span class="pre">SimulationOptions</span></code></a><ul>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.__init__"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.cartesian_interp"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.cartesian_interp</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.create_log"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.create_log</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.data_cast"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.data_cast</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.data_recast"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.data_recast</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.hdf_compression_level"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.hdf_compression_level</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.init"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.init()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.multi_axial_PML_ratio"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.multi_axial_PML_ratio</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_auto"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_auto</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_inside"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_inside</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_search_range"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_search_range</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_x_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_x_alpha</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_x_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_x_size</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_y_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_y_alpha</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_y_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_y_size</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_z_alpha"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_z_alpha</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.pml_z_size"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.pml_z_size</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.radial_symmetry"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.radial_symmetry</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.save_to_disk"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.save_to_disk</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.save_to_disk_exit"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.save_to_disk_exit</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.scale_source_terms"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.scale_source_terms</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_c0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_c0</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_p0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_p0</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.smooth_rho0"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.smooth_rho0</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.stream_to_disk"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.stream_to_disk</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.use_finite_difference"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_finite_difference</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.use_kspace"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_kspace</span></code></a></li>
+<li><a class="reference internal" href="#kwave.options.SimulationOptions.use_sg"><code class="docutils literal notranslate"><span class="pre">SimulationOptions.use_sg</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    </body>
+</html>

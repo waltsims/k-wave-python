@@ -1,0 +1,685 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>kwave.kWaveSimulation_helper.scale_source_terms_func - k-wave-python documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html">Development Environment</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.options.html">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.utils.html">kwave.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.mapgen.html">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for kwave.kWaveSimulation_helper.scale_source_terms_func</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.ksource</span> <span class="kn">import</span> <span class="n">kSource</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.matlab</span> <span class="kn">import</span> <span class="n">matlab_mask</span>
+
+
+<div class="viewcode-block" id="scale_source_terms_func"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_source_terms_func">[docs]</a><span class="k">def</span> <span class="nf">scale_source_terms_func</span><span class="p">(</span>
+        <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
+        <span class="n">p_source_pos_index</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span>
+        <span class="n">transducer_input_signal</span><span class="p">,</span>
+        <span class="n">flags</span><span class="p">:</span> <span class="n">dotdict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subscript for the first-order k-Wave simulation functions to scale source terms to the correct units.</span>
+<span class="sd">    Args:</span>
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span>  <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span>
+
+    <span class="c1"># get the dimension size</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_conditions</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_uy</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_uz</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">transducer_source</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># PRESSURE SOURCES</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="n">apply_pressure_source_correction</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">source_p</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">use_w_source_correction_p</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+    <span class="n">scale_pressure_source</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">source_p</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">)</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># STRESS SOURCES</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="n">scale_stress_sources</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># VELOCITY SOURCES</span>
+    <span class="c1"># =========================================================================</span>
+
+    <span class="n">apply_velocity_source_corrections</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">use_w_source_correction_u</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_ux</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_uy</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_uz</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+    <span class="n">scale_velocity_sources</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">)</span>
+
+    <span class="c1"># =========================================================================</span>
+    <span class="c1"># TRANSDUCER SOURCE</span>
+    <span class="c1"># =========================================================================</span>
+    <span class="n">transducer_input_signal</span> <span class="o">=</span> <span class="n">scale_transducer_source</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">transducer_source</span><span class="p">,</span> <span class="n">transducer_input_signal</span><span class="p">,</span>
+                                                      <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transducer_input_signal</span></div>
+
+
+<div class="viewcode-block" id="check_conditions"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.check_conditions">[docs]</a><span class="k">def</span> <span class="nf">check_conditions</span><span class="p">(</span><span class="n">is_nonuniform_grid</span><span class="p">,</span> <span class="n">is_source_uy</span><span class="p">,</span> <span class="n">is_source_uz</span><span class="p">,</span> <span class="n">is_transducer_source</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        check for non-uniform grid and give error for source terms that haven&#39;t yet been implemented</span>
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_nonuniform_grid</span> <span class="ow">and</span> <span class="p">(</span><span class="n">is_source_uy</span> <span class="ow">or</span> <span class="n">is_source_uz</span> <span class="ow">or</span> <span class="n">is_transducer_source</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;WARNING: source scaling not implemented for non-uniform grids with given source condition&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="apply_pressure_source_correction"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_pressure_source_correction">[docs]</a><span class="k">def</span> <span class="nf">apply_pressure_source_correction</span><span class="p">(</span><span class="n">is_source_p</span><span class="p">,</span> <span class="n">use_w_source_correction_p</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        apply k-space source correction expressed as a function of w</span>
+<span class="sd">    Args:</span>
+<span class="sd">        is_source_p:</span>
+<span class="sd">        use_w_source_correction_p:</span>
+<span class="sd">        source:</span>
+<span class="sd">        dt:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_source_p</span> <span class="ow">and</span> <span class="n">use_w_source_correction_p</span><span class="p">:</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">apply_source_correction</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">p_frequency_ref</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scale_pressure_source"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source">[docs]</a><span class="k">def</span> <span class="nf">scale_pressure_source</span><span class="p">(</span><span class="n">is_source_p</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">,</span> <span class="n">is_nonuniform_grid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        scale the input pressure by 1/c0^2 (to convert to units of density), then</span>
+<span class="sd">        by 1/N (to split the input across the split density field). If the</span>
+<span class="sd">        pressure is injected as a mass source, also scale the pressure by</span>
+<span class="sd">        2*dt*c0/dx to account for the time step and convert to units of [kg/(m^3 s)]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        is_source_p:</span>
+<span class="sd">        source:</span>
+<span class="sd">        kgrid:</span>
+<span class="sd">        N:</span>
+<span class="sd">        c0:</span>
+<span class="sd">        dx:</span>
+<span class="sd">        dt:</span>
+<span class="sd">        p_source_pos_index:</span>
+<span class="sd">        is_nonuniform_grid:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_source_p</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">p_mode</span> <span class="o">==</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">:</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">scale_pressure_source_dirichlet</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_nonuniform_grid</span><span class="p">:</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">scale_pressure_source_nonuniform_grid</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">scale_pressure_source_uniform_grid</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scale_pressure_source_dirichlet"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_dirichlet">[docs]</a><span class="k">def</span> <span class="nf">scale_pressure_source_dirichlet</span><span class="p">(</span><span class="n">source_p</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter based on the homogeneous</span>
+        <span class="c1"># sound speed</span>
+        <span class="n">source_p</span> <span class="o">=</span> <span class="n">source_p</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="p">(</span><span class="n">c0</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter seperately for each source</span>
+        <span class="c1"># position based on the sound speed at that position</span>
+        <span class="k">for</span> <span class="n">p_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_p</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="p">(</span><span class="n">c0</span><span class="p">[</span><span class="n">p_source_pos_index</span><span class="p">[</span><span class="n">p_index</span><span class="p">]]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">source_p</span></div>
+
+
+<div class="viewcode-block" id="scale_pressure_source_nonuniform_grid"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_nonuniform_grid">[docs]</a><span class="k">def</span> <span class="nf">scale_pressure_source_nonuniform_grid</span><span class="p">(</span><span class="n">source_p</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">xn</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">yn</span>
+    <span class="n">zn</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">zn</span>
+    <span class="n">x_size</span><span class="p">,</span> <span class="n">y_size</span><span class="p">,</span> <span class="n">z_size</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># create empty matrix</span>
+    <span class="n">grid_point_sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># compute averaged grid point seperation map, the interior</span>
+    <span class="c1"># points are calculated using the average distance to all</span>
+    <span class="c1"># connected grid points (the edge values are not calculated</span>
+    <span class="c1"># assuming there are no source points in the PML)</span>
+    <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">grid_point_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">grid_point_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">+</span> \
+                                     <span class="n">y_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">grid_point_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">+</span> \
+                                           <span class="n">y_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">+</span> \
+                                           <span class="n">z_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">zn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">6</span>
+
+    <span class="c1"># compute and apply scale parameter</span>
+    <span class="k">for</span> <span class="n">p_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_p</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+            <span class="c1"># compute the scale parameter based on the homogeneous sound speed</span>
+            <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">grid_point_sep</span><span class="p">[</span><span class="n">p_source_pos_index</span><span class="p">[</span><span class="n">p_index</span><span class="p">]]))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># compute the scale parameter based on the sound speed at that position</span>
+            <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">c0</span><span class="p">[</span><span class="n">p_source_pos_index</span><span class="p">[</span><span class="n">p_index</span><span class="p">]]</span> <span class="o">*</span> <span class="n">grid_point_sep</span><span class="p">[</span><span class="n">p_source_pos_index</span><span class="p">[</span><span class="n">p_index</span><span class="p">]]))</span>
+    <span class="k">return</span> <span class="n">source_p</span></div>
+
+
+<div class="viewcode-block" id="scale_pressure_source_uniform_grid"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_pressure_source_uniform_grid">[docs]</a><span class="k">def</span> <span class="nf">scale_pressure_source_uniform_grid</span><span class="p">(</span><span class="n">source_p</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter based on the homogeneous</span>
+        <span class="c1"># sound speed</span>
+        <span class="n">source_p</span> <span class="o">=</span> <span class="n">source_p</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">dx</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter seperately for each source</span>
+        <span class="c1"># position based on the sound speed at that position</span>
+        <span class="k">for</span> <span class="n">p_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_p</span><span class="p">[</span><span class="n">p_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">matlab_mask</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span> <span class="n">p_source_pos_index</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span><span class="n">p_index</span><span class="p">])</span> <span class="o">*</span> <span class="n">dx</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">source_p</span></div>
+
+
+<div class="viewcode-block" id="scale_stress_sources"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_stress_sources">[docs]</a><span class="k">def</span> <span class="nf">scale_stress_sources</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        scale the stress source by 1/N to divide amoungst the split field</span>
+<span class="sd">        components, and if source.s_mode is not set to &#39;dirichlet&#39;, also scale by</span>
+<span class="sd">        2*dt*c0/dx to account for the time step and convert to units of</span>
+<span class="sd">        [kg/(m^3 s)] (note dx is used in all dimensions)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        source:</span>
+<span class="sd">        c0:</span>
+<span class="sd">        flags:</span>
+<span class="sd">        dt:</span>
+<span class="sd">        dx:</span>
+<span class="sd">        N:</span>
+<span class="sd">        s_source_pos_index:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">sxx</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_sxx</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_p0</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">sxx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">syy</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_syy</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_p0</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">syy</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">szz</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_szz</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_p0</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">szz</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">sxy</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_sxy</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">sxy</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">sxz</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_sxz</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">sxz</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">syz</span> <span class="o">=</span> <span class="n">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">source_syz</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">syz</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scale_stress_source"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_stress_source">[docs]</a><span class="k">def</span> <span class="nf">scale_stress_source</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">is_source_exists</span><span class="p">,</span> <span class="n">is_p0_exists</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">s_source_pos_index</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_source_exists</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">s_mode</span> <span class="o">==</span> <span class="s1">&#39;dirichlet&#39;</span> <span class="ow">or</span> <span class="n">is_p0_exists</span><span class="p">:</span>
+            <span class="n">source_val</span> <span class="o">=</span> <span class="n">source_val</span> <span class="o">/</span> <span class="n">N</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+                <span class="c1"># compute the scale parameter based on the homogeneous sound</span>
+                <span class="c1"># speed</span>
+                <span class="n">source_val</span> <span class="o">=</span> <span class="n">source_val</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">dx</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># compute the scale parameter seperately for each source</span>
+                <span class="c1"># position based on the sound speed at that position</span>
+                <span class="k">for</span> <span class="n">s_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_val</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">source_val</span><span class="p">[</span><span class="n">s_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_val</span><span class="p">[</span><span class="n">s_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">c0</span><span class="p">[</span><span class="n">s_source_pos_index</span><span class="p">[</span><span class="n">s_index</span><span class="p">]]</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">dx</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">source_val</span></div>
+
+
+<div class="viewcode-block" id="apply_velocity_source_corrections"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_velocity_source_corrections">[docs]</a><span class="k">def</span> <span class="nf">apply_velocity_source_corrections</span><span class="p">(</span>
+        <span class="n">use_w_source_correction_u</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">is_ux_exists</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">is_uy_exists</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">is_uz_exists</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        apply k-space source correction expressed as a function of w</span>
+<span class="sd">    Args:</span>
+<span class="sd">        use_w_source_correction_u:</span>
+<span class="sd">        is_ux_exists:</span>
+<span class="sd">        is_uy_exists:</span>
+<span class="sd">        is_uz_exists:</span>
+<span class="sd">        source:</span>
+<span class="sd">        dt:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_w_source_correction_u</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">is_ux_exists</span><span class="p">:</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">ux</span> <span class="o">=</span> <span class="n">apply_source_correction</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">ux</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_frequency_ref</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_uy_exists</span><span class="p">:</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">uy</span> <span class="o">=</span> <span class="n">apply_source_correction</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">uy</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_frequency_ref</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_uz_exists</span><span class="p">:</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">uz</span> <span class="o">=</span> <span class="n">apply_source_correction</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">uz</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_frequency_ref</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="apply_source_correction"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.apply_source_correction">[docs]</a><span class="k">def</span> <span class="nf">apply_source_correction</span><span class="p">(</span><span class="n">source_val</span><span class="p">,</span> <span class="n">frequency_ref</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">source_val</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">frequency_ref</span> <span class="o">*</span> <span class="n">dt</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scale_velocity_sources"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_sources">[docs]</a><span class="k">def</span> <span class="nf">scale_velocity_sources</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">):</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">ux</span> <span class="o">=</span> <span class="n">scale_velocity_source_x</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">source_ux</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_mode</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">ux</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">uy</span> <span class="o">=</span> <span class="n">scale_velocity_source</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">source_uy</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_mode</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">uy</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">uz</span> <span class="o">=</span> <span class="n">scale_velocity_source</span><span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">source_uz</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">u_mode</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">uz</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="scale_velocity_source_x"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source_x">[docs]</a><span class="k">def</span> <span class="nf">scale_velocity_source_x</span><span class="p">(</span><span class="n">is_source_ux</span><span class="p">,</span> <span class="n">source_u_mode</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">is_nonuniform_grid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if source.u_mode is not set to &#39;dirichlet&#39;, scale the x-direction</span>
+<span class="sd">        velocity source terms by 2*dt*c0/dx to account for the time step and</span>
+<span class="sd">        convert to units of [m/s^2]</span>
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_source_ux</span> <span class="ow">or</span> <span class="n">source_u_mode</span> <span class="o">==</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">is_nonuniform_grid</span><span class="p">:</span>
+        <span class="n">source_val</span> <span class="o">=</span> <span class="n">scale_velocity_source_nonuniform</span><span class="p">(</span><span class="n">is_source_ux</span><span class="p">,</span> <span class="n">source_u_mode</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span>
+                                                      <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">source_val</span> <span class="o">=</span> <span class="n">scale_velocity_source</span><span class="p">(</span><span class="n">is_source_ux</span><span class="p">,</span> <span class="n">source_u_mode</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">source_val</span></div>
+
+
+<div class="viewcode-block" id="scale_velocity_source"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source">[docs]</a><span class="k">def</span> <span class="nf">scale_velocity_source</span><span class="p">(</span><span class="n">is_source</span><span class="p">,</span> <span class="n">source_u_mode</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">,</span> <span class="n">d_direction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if source.u_mode is not set to &#39;dirichlet&#39;, scale the d_direction</span>
+<span class="sd">        velocity source terms by 2*dt*c0/dz to account for the time step and</span>
+<span class="sd">        convert to units of [m/s^2]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        is_source:</span>
+<span class="sd">        source_u_mode:</span>
+<span class="sd">        source_val:</span>
+<span class="sd">        c0:</span>
+<span class="sd">        dt:</span>
+<span class="sd">        u_source_pos_index:</span>
+<span class="sd">        d_direction:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_source</span> <span class="ow">or</span> <span class="n">source_u_mode</span> <span class="o">==</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">source_val</span>
+
+    <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter based on the homogeneous sound speed</span>
+        <span class="n">source_val</span> <span class="o">=</span> <span class="n">source_val</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">d_direction</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># compute the scale parameter seperately for each source position</span>
+        <span class="c1"># based on the sound speed at that position</span>
+        <span class="k">for</span> <span class="n">u_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_val</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c0</span><span class="p">(</span><span class="n">u_source_pos_index</span><span class="p">[</span><span class="n">u_index</span><span class="p">])</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">d_direction</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">source_val</span></div>
+
+
+<div class="viewcode-block" id="scale_velocity_source_nonuniform"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_velocity_source_nonuniform">[docs]</a><span class="k">def</span> <span class="nf">scale_velocity_source_nonuniform</span><span class="p">(</span><span class="n">is_source</span><span class="p">,</span> <span class="n">source_u_mode</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">source_val</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if source.u_mode is not set to &#39;dirichlet&#39;, scale the d_direction</span>
+<span class="sd">        velocity source terms by 2*dt*c0/dz to account for the time step and</span>
+<span class="sd">        convert to units of [m/s^2]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        is_source:</span>
+<span class="sd">        source_u_mode:</span>
+<span class="sd">        kgrid:</span>
+<span class="sd">        source_val:</span>
+<span class="sd">        c0:</span>
+<span class="sd">        dt:</span>
+<span class="sd">        u_source_pos_index:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_source</span> <span class="ow">or</span> <span class="n">source_u_mode</span> <span class="o">==</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">source_val</span>
+
+    <span class="c1"># create empty matrix</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">xn</span>
+    <span class="n">x_size</span> <span class="o">=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">grid_point_sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># compute averaged grid point seperation map, the interior</span>
+    <span class="c1"># points are calculated using the average distance to all</span>
+    <span class="c1"># connected grid points (the edge values are not calculated</span>
+    <span class="c1"># assuming there are no source points in the PML)</span>
+    <span class="n">grid_point_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="c1"># compute and apply scale parameter</span>
+    <span class="k">for</span> <span class="n">u_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">source_val</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># compute the scale parameter based on the homogeneous sound speed</span>
+            <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">grid_point_sep</span><span class="p">[</span><span class="n">u_source_pos_index</span><span class="p">[</span><span class="n">u_index</span><span class="p">]]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># compute the scale parameter based on the sound speed at that position</span>
+            <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">source_val</span><span class="p">[</span><span class="n">u_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c0</span><span class="p">[</span><span class="n">u_source_pos_index</span><span class="p">[</span><span class="n">u_index</span><span class="p">]]</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="n">grid_point_sep</span><span class="p">[</span><span class="n">u_source_pos_index</span><span class="p">[</span><span class="n">u_index</span><span class="p">]]))</span>
+    <span class="k">return</span> <span class="n">source_val</span></div>
+
+
+<div class="viewcode-block" id="scale_transducer_source"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.scale_source_terms_func.html#kwave.kWaveSimulation_helper.scale_source_terms_func.scale_transducer_source">[docs]</a><span class="k">def</span> <span class="nf">scale_transducer_source</span><span class="p">(</span><span class="n">is_transducer_source</span><span class="p">,</span> <span class="n">transducer_input_signal</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">u_source_pos_index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        scale the transducer source term by 2*dt*c0/dx to account for the time</span>
+<span class="sd">        step and convert to units of [m/s^2]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        is_transducer_source:</span>
+<span class="sd">        transducer_input_signal:</span>
+<span class="sd">        c0:</span>
+<span class="sd">        dt:</span>
+<span class="sd">        dx:</span>
+<span class="sd">        u_source_pos_index:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_transducer_source</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">transducer_input_signal</span> <span class="o">=</span> <span class="n">transducer_input_signal</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># compute the scale parameter based on the average sound speed at the</span>
+            <span class="c1"># transducer positions (only one input signal is used to drive the transducer)</span>
+            <span class="n">transducer_input_signal</span> <span class="o">=</span> <span class="n">transducer_input_signal</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c0</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span><span class="n">u_source_pos_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transducer_input_signal</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    </body>
+</html>

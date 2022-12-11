@@ -1,0 +1,952 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.utils.math module" href="kwave.utils.math.html" /><link rel="prev" title="kwave.utils.io module" href="kwave.utils.io.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>kwave.utils.mapgen module - k-wave-python documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-toolbox-code.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">k-wave-python  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">k-wave-python  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_started/contrib.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">kwave</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="kwave.data.html">kwave.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.enums.html">kwave.enums module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.executor.html">kwave.executor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kWaveSimulation.html">kwave.kWaveSimulation module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kgrid.html">kwave.kgrid module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kmedium.html">kwave.kmedium module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksensor.html">kwave.ksensor module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ksource.html">kwave.ksource module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder.html">kwave.kspaceFirstOrder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.ktransducer.html">kwave.ktransducer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.options.html">kwave.options module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwave.recorder.html">kwave.recorder module</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="kwave.utils.html">kwave.utils package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.checks.html">kwave.utils.checks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.colormap.html">kwave.utils.colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.conversion.html">kwave.utils.conversion module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.data.html">kwave.utils.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.dotdictionary.html">kwave.utils.dotdictionary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.filters.html">kwave.utils.filters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.interp.html">kwave.utils.interp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.io.html">kwave.utils.io module</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">kwave.utils.mapgen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.math.html">kwave.utils.math module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.matrix.html">kwave.utils.matrix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.pml.html">kwave.utils.pml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.signals.html">kwave.utils.signals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.utils.tictoc.html">kwave.utils.tictoc module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.kWaveSimulation_helper.html">kwave.kWaveSimulation_helper package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.data_cast.html">kwave.kWaveSimulation_helper.data_cast module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.kWaveSimulation_helper.set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="kwave.reconstruction.html">kwave.reconstruction package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.beamform.html">kwave.reconstruction.beamform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.converter.html">kwave.reconstruction.converter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.shifted_transform.html">kwave.reconstruction.shifted_transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwave.reconstruction.tools.html">kwave.reconstruction.tools module</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/waltsims/k-wave-python/edit/master/docs/kwave.utils.mapgen.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-kwave.utils.mapgen">
+<span id="kwave-utils-mapgen-module"></span><h1>kwave.utils.mapgen module<a class="headerlink" href="#module-kwave.utils.mapgen" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.create_pixel_dim">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">create_pixel_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#create_pixel_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.create_pixel_dim" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.fit_power_law_params">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">fit_power_law_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#fit_power_law_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.fit_power_law_params" title="Permalink to this definition">#</a></dt>
+<dd><p>fit_power_law_params calculates the absorption parameters that should
+be defined in the simulation functions given the desired power law
+absorption behaviour defined by a0 and y. This takes into account the
+actual absorption behaviour exhibited by the fractional Laplacian
+wave equation.</p>
+<p>This fitting is required when using large absorption values or high
+frequencies, as the fractional Laplacian wave equation solved in
+kspaceFirstOrderND and kspaceSecondOrder no longer encapsulates
+absorption of the form a = a0*f^y.</p>
+<p>The returned values should be used to define the medium.alpha_coeff
+and medium.alpha_power within the simulation functions. The
+absorption behaviour over the frequency range f_min:f_max will then
+follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a0</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>c0</strong> – </p></li>
+<li><p><strong>f_min</strong> – </p></li>
+<li><p><strong>f_max</strong> – </p></li>
+<li><p><strong>plot_fit</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>y_fit:</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a0_fit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.focused_bowl_oneil">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">focused_bowl_oneil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lateral_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#focused_bowl_oneil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.focused_bowl_oneil" title="Permalink to this definition">#</a></dt>
+<dd><p>focused_bowl_oneil calculates O’Neil’s solution (O’Neil, H. Theory of
+focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949) for
+the axial and lateral pressure amplitude generated by a focused bowl
+transducer when uniformly driven by a continuous wave sinusoid at a
+given frequency and normal surface velocity.</p>
+<p>The solution is evaluated at the positions along the beam axis given
+by axial_position (where 0 corresponds to the transducer surface),
+and lateral positions through the geometric focus given by
+lateral_position (where 0 corresponds to the beam axis). To return
+only the axial or lateral pressure, set the either axial_position or
+lateral_position to [].</p>
+<p>Note, O’Neil’s formulae are derived under the assumptions of the
+Rayleigh integral, which are valid when the transducer diameter is
+large compared to both the transducer height and the acoustic
+wavelength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – </p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – </p></li>
+<li><p><strong>velocity</strong> (<em>float</em>) – </p></li>
+<li><p><strong>frequency</strong> (<em>float</em>) – </p></li>
+<li><p><strong>sound_speed</strong> (<em>float</em>) – </p></li>
+<li><p><strong>density</strong> (<em>float</em>) – </p></li>
+<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>[&lt;class ‘float’&gt;, &lt;class ‘float’&gt;]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p># define transducer parameters
+radius = 140e-3  # [m]
+diameter = 120e-3  # [m]
+velocity = 100e-3  # [m / s]
+frequency = 1e6  # [Hz]
+sound_speed = 1500  # [m / s]
+density = 1000  # [kg / m ^ 3]</p>
+<p># define position vectors
+axial_position = np.arange(0, 250e-3 + 1e-4, 1e-4)  # [m]
+lateral_position = np.arange(-15e-3, 15e-3 + 1e-4, 1e-4)  # [m]</p>
+<p># evaluate pressure
+[p_axial, p_lateral] = focused_bowl_oneil(radius, diameter,</p>
+<blockquote>
+<div><p>velocity, frequency, sound_speed, density,
+axial_position, lateral_position)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pressure amplitude at the axial_position [Pa]
+p_lateral:         pressure amplitude at the lateral_position [Pa]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>p_axial</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – </p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – </p></li>
+<li><p><strong>velocity</strong> (<em>float</em>) – </p></li>
+<li><p><strong>frequency</strong> (<em>float</em>) – </p></li>
+<li><p><strong>sound_speed</strong> (<em>float</em>) – </p></li>
+<li><p><strong>density</strong> (<em>float</em>) – </p></li>
+<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.get_spaced_points">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">get_spaced_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#get_spaced_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.get_spaced_points" title="Permalink to this definition">#</a></dt>
+<dd><p>getSpacedPoints generates a row vector of either logarithmically or
+linearly spaced points between X1 and X2. When spacing is set to
+‘linear’, the function is identical to the inbuilt np.linspace
+function. When spacing is set to ‘log’, the function is similar to
+the inbuilt np.logspace function, except that X1 and X2 define the start
+and end numbers, not decades. For logarithmically spaced points, X1
+must be &gt; 0. If N &lt; 2, X2 is returned.
+:param start:
+:param stop:
+:param n:
+:param spacing:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>points</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.hounsfield2density">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">hounsfield2density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fitting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#hounsfield2density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.hounsfield2density" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert Hounsfield units in CT data to density values [kg / m ^ 3]
+based on the experimental data given by Schneider et al.
+The conversion is made using a np.piece-wise linear fit to the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ct_data</strong> – </p></li>
+<li><p><strong>plot_fitting</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>density in kg / m ^ 3</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>density_map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.hounsfield2soundspeed">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">hounsfield2soundspeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#hounsfield2soundspeed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.hounsfield2soundspeed" title="Permalink to this definition">#</a></dt>
+<dd><p>Calclulates the soundspeed of a medium given a CT of the medium.
+For soft-tissue, the approximate sound speed can also be returned
+using the empirical relationship given by Mast.</p>
+<p>Mast, T. D., “Empirical relationships between acoustic parameters
+in human soft tissues,” Acoust. Res. Lett. Online, 1(2), pp. 37-42
+(2000).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ct_data</strong> – </p>
+</dd>
+</dl>
+<p>Returns: sound_speed:       matrix of sound speed values of size of ct data</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.ind2sub">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">ind2sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#ind2sub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.ind2sub" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_arc">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_arc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_arc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_arc" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_ball">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ball</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_ball" title="Permalink to this definition">#</a></dt>
+<dd><p>MAKEBALL Create a binary map of a filled ball within a 3D grid.</p>
+<dl class="simple">
+<dt>DESCRIPTION:</dt><dd><p>make_ball creates a binary map of a filled ball within a
+three-dimensional grid (the ball position is denoted by 1’s in the
+matrix with 0’s elsewhere). A single grid point is taken as the ball
+centre thus the total diameter of the ball will always be an odd
+number of grid points.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> – size of the 3D grid in x-dimension [grid points]</p></li>
+<li><p><strong>Ny</strong> – size of the 3D grid in y-dimension [grid points]</p></li>
+<li><p><strong>Nz</strong> – size of the 3D grid in z-dimension [grid points]</p></li>
+<li><p><strong>cx</strong> – centre of the ball in x-dimension [grid points]</p></li>
+<li><p><strong>cy</strong> – centre of the ball in y-dimension [grid points]</p></li>
+<li><p><strong>cz</strong> – centre of the ball in z-dimension [grid points]</p></li>
+<li><p><strong>radius</strong> – ball radius [grid points]</p></li>
+<li><p><strong>plot_ball</strong> – Boolean controlling whether the ball is plotted using voxelPlot (default = false)</p></li>
+<li><p><strong>binary</strong> – Boolean controlling whether the ball map is returned as a double precision matrix (false)
+or a logical matrix (true) (default = false)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3D binary map of a filled ball</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_bowl">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_bowl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bowl_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_bowl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_bowl" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_circle">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.283185307179586</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_circle" title="Permalink to this definition">#</a></dt>
+<dd><p>make_cart_circle creates a set of points in cartesian coordinates defining a circle or arc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> – </p></li>
+<li><p><strong>num_points</strong> – </p></li>
+<li><p><strong>center_pos</strong> – </p></li>
+<li><p><strong>arc_angle</strong> – Arc angle in radians.</p></li>
+<li><p><strong>plot_circle</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2 x num_points array of cartesian coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_sphere">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_sphere" title="Permalink to this definition">#</a></dt>
+<dd><blockquote>
+<div><p>make_cart_sphere creates a set of points in cartesian coordinates defining a sphere.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> – </p></li>
+<li><p><strong>num_points</strong> – </p></li>
+<li><p><strong>center_pos</strong> – </p></li>
+<li><p><strong>plot_sphere</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_circle">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_circle" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a binary map of a circle within a 2D grid.</p>
+<p>This function creates a binary map of a circle (or arc) using the midpoint circle algorithm within a two-dimensional grid.
+The circle position is denoted by 1’s in the matrix with 0’s elsewhere. A single grid point is taken as the circle
+centre, so the total diameter will always be an odd number of grid points. The centre of the circle and the radius
+are not constrained by the grid dimensions, so it is possible to create sections of circles or a blank image if none
+of the circle intersects the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points along the x-axis.</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points along the y-axis.</p></li>
+<li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the circle centre.</p></li>
+<li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the circle centre.</p></li>
+<li><p><strong>radius</strong> (<em>int</em>) – The radius of the circle.</p></li>
+<li><p><strong>arc_angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
+<li><p><strong>plot_circle</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the circle will be plotted using Matplotlib.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A binary map of the circle in the 2D grid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_disc">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_disc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_disc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_disc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_disc" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a binary map of a filled disc within a 2D grid.</p>
+<p>This function creates a binary map of a filled disc within a two-dimensional grid. The disc position is denoted by 1’s
+in the matrix with 0’s elsewhere. A single grid point is taken as the disc centre, so the total diameter of the disc
+will always be an odd number of grid points. If used within a k-Wave grid where dx != dy, the disc will appear oval
+shaped. If part of the disc overlaps the grid edge, the rest of the disc will wrap to the grid edge on the opposite
+side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points along the x-axis.</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points along the y-axis.</p></li>
+<li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the disc centre.</p></li>
+<li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the disc centre.</p></li>
+<li><p><strong>radius</strong> (<em>int</em>) – The radius of the disc.</p></li>
+<li><p><strong>plot_disc</strong> (<em>bool</em>) – If set to True, the disc will be plotted using Matplotlib.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A binary map of the disc in the 2D grid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_line">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_line" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – </p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – </p></li>
+<li><p><strong>startpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>endpoint</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>length</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_multi_arc">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_multi_arc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_multi_arc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_multi_arc" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_multi_bowl">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_multi_bowl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bowl_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_multi_bowl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_multi_bowl" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map" title="Permalink to this definition">#</a></dt>
+<dd><p>make_pixel_map Create matrix of grid point distances from the centre point.</p>
+<blockquote>
+<div><dl>
+<dt>DESCRIPTION:</dt><dd><p>make_pixel_map generates a matrix populated with values of how far each
+pixel in a grid is from the centre (given in pixel coordinates). Both
+single and double pixel centres can be used by setting the optional
+input parameter ‘OriginSize’. For grids where the dimension size and
+centre pixel size are not both odd or even, the optional input
+parameter ‘Shift’ can be used to control the location of the
+centerpoint.</p>
+<p>examples for a 2D pixel map:</p>
+<p>Single pixel origin size for odd and even (with ‘Shift’ = [1 1] and
+[0 0], respectively) grid sizes:</p>
+<p>x x x       x x x x         x x x x
+x 0 x       x x x x         x 0 x x
+x x x       x x 0 x         x x x x</p>
+<blockquote>
+<div><p>x x x x         x x x x</p>
+</div></blockquote>
+<p>Double pixel origin size for even and odd (with ‘Shift’ = [1 1] and
+[0 0], respectively) grid sizes:</p>
+<p>x x x x      x x x x x        x x x x x
+x 0 0 x      x x x x x        x 0 0 x x
+x 0 0 x      x x 0 0 x        x 0 0 x x
+x x x x      x x 0 0 x        x x x x x</p>
+<blockquote>
+<div><p>x x x x x        x x x x x</p>
+</div></blockquote>
+<p>By default a single pixel centre is used which is shifted towards
+the final row and column.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – </p>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map_plane">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map_plane" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map_point">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map_point" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_sphere">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_sphere" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_spherical_section">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_spherical_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_spherical_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_spherical_section" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.ndgrid">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">ndgrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#ndgrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.ndgrid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.power_law_kramers_kronig">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">power_law_kramers_kronig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#power_law_kramers_kronig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.power_law_kramers_kronig" title="Permalink to this definition">#</a></dt>
+<dd><blockquote>
+<div><p>POWERLAWKRAMERSKRONIG Calculate dispersion for power law absorption.</p>
+<dl class="simple">
+<dt>DESCRIPTION:</dt><dd><p>powerLawKramersKronig computes the variation in sound speed for an
+attenuating medium using the Kramers-Kronig for power law
+attenuation where att = a0*w^y. The power law parameters must be in
+Nepers / m, with the frequency in rad/s. The variation is given
+about the sound speed c0 at a reference frequency w0.</p>
+</dd>
+<dt>USAGE:</dt><dd><p>c_kk = power_law_kramers_kronig(w, w0, c0, a0, y)</p>
+</dd>
+</dl>
+<p>INPUTS:</p>
+<p>OUTPUTS:</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> – input frequency array [rad/s]</p></li>
+<li><p><strong>w0</strong> – reference frequency [rad/s]</p></li>
+<li><p><strong>c0</strong> – sound speed at w0 [m/s]</p></li>
+<li><p><strong>a0</strong> – power law coefficient [Nepers/((rad/s)^y m)]</p></li>
+<li><p><strong>y</strong> – power law exponent, where 0 &lt; y &lt; 3</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>c_kk           variation of sound speed with w [m/s]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.sub2ind">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">sub2ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#sub2ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.sub2ind" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.water_absorption">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_absorption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_absorption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_absorption" title="Permalink to this definition">#</a></dt>
+<dd><p>water_absorption Calculate ultrasound absorption in distilled water.</p>
+<p>DESCRIPTION:
+waterAbsorption calculates the ultrasonic absorption in distilled
+water at a given temperature and frequency using a 7 th order
+polynomial fitted to the data given by np.pinkerton(1949).</p>
+<p>USAGE:
+abs = waterAbsorption(f, T)</p>
+<p>INPUTS:
+f - f frequency value [MHz]
+T - water temperature value [degC]</p>
+<p>OUTPUTS:
+abs - absorption[dB / cm]</p>
+<p>REFERENCES:
+[1] np.pinkerton(1949) “The Absorption of Ultrasonic Waves in Liquids
+and its Relation to Molecular Constitution, ” Proceedings of the
+Physical Society.Section B, 2, 129 - 141</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.water_density">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_density" title="Permalink to this definition">#</a></dt>
+<dd><p>WATERDENSITY Calculate density of air - saturated water with temperature.</p>
+<p>DESCRIPTION:
+waterDensity calculates the density of air - saturated water at a given % temperature using the 4 th order polynomial given by Jones(1992).</p>
+<p>USAGE:
+density = waterDensity(T)</p>
+<p>INPUTS:
+T - water temperature in the range 5 to 40[degC]</p>
+<p>OUTPUTS:
+density - density of water[kg / m ^ 3]</p>
+<p>ABOUT:
+author - Bradley E.Treeby
+date - 22 nd February 2018
+last update - 4 th April 2019</p>
+<p>REFERENCES:
+[1] F.E.Jones and G.L.Harris(1992) “ITS-90 Density of Water
+Formulation for Volumetric Standards Calibration, ” J. Res. Natl.
+Inst.Stand.Technol., 97(3), 335 - 340.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.water_non_linearity">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_non_linearity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_non_linearity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_non_linearity" title="Permalink to this definition">#</a></dt>
+<dd><p>WATERNONLINEARITY Calculate B/A of water with temperature.</p>
+<dl class="simple">
+<dt>DESCRIPTION:</dt><dd><p>waterNonlinearity calculates the parameter of nonlinearity B/A at a
+given temperature using a fourth-order polynomial fitted to the data
+given by Beyer (1960).</p>
+</dd>
+<dt>USAGE:</dt><dd><p>BonA = waterNonlinearity(T)</p>
+</dd>
+<dt>INPUTS:</dt><dd><p>T             - water temperature in the range 0 to 100 [degC]</p>
+</dd>
+<dt>OUTPUTS:</dt><dd><p>BonA          - parameter of nonlinearity</p>
+</dd>
+<dt>ABOUT:</dt><dd><p>author        - Bradley E. Treeby
+date          - 22nd February 2018
+last update   - 4th April 2019</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] R. T Beyer (1960) “Parameter of nonlinearity in fluids,” J.
+Acoust. Soc. Am., 32(6), 719-721.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.water_sound_speed">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_sound_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_sound_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_sound_speed" title="Permalink to this definition">#</a></dt>
+<dd><p>WATERSOUNDSPEED Calculate the sound speed in distilled water with temperature.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>DESCRIPTION:</dt><dd><p>waterSoundSpeed calculates the sound speed in distilled water at a
+a given temperature using the 5th order polynomial given by Marczak
+(1997).</p>
+</dd>
+<dt>USAGE:</dt><dd><p>c = waterSoundSpeed(T)</p>
+</dd>
+<dt>INPUTS:</dt><dd><p>T             - water temperature in the range 0 to 95 [degC]</p>
+</dd>
+<dt>OUTPUTS:</dt><dd><p>c             - sound speed [m/s]</p>
+</dd>
+<dt>REFERENCES:</dt><dd><p>[1] Marczak (1997) “Water as a standard in the measurements of speed
+of sound in liquids,” J. Acoust. Soc. Am., 102, 2776-2779.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="kwave.utils.math.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">kwave.utils.math module</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="kwave.utils.io.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">kwave.utils.io module</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Walter Simson, Farid Yagubbayli
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kwave.utils.mapgen module</a><ul>
+<li><a class="reference internal" href="#kwave.utils.mapgen.create_pixel_dim"><code class="docutils literal notranslate"><span class="pre">create_pixel_dim()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.fit_power_law_params"><code class="docutils literal notranslate"><span class="pre">fit_power_law_params()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.focused_bowl_oneil"><code class="docutils literal notranslate"><span class="pre">focused_bowl_oneil()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.get_spaced_points"><code class="docutils literal notranslate"><span class="pre">get_spaced_points()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.hounsfield2density"><code class="docutils literal notranslate"><span class="pre">hounsfield2density()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.hounsfield2soundspeed"><code class="docutils literal notranslate"><span class="pre">hounsfield2soundspeed()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.ind2sub"><code class="docutils literal notranslate"><span class="pre">ind2sub()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_arc"><code class="docutils literal notranslate"><span class="pre">make_arc()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_ball"><code class="docutils literal notranslate"><span class="pre">make_ball()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_bowl"><code class="docutils literal notranslate"><span class="pre">make_bowl()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_cart_circle"><code class="docutils literal notranslate"><span class="pre">make_cart_circle()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_cart_sphere"><code class="docutils literal notranslate"><span class="pre">make_cart_sphere()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_circle"><code class="docutils literal notranslate"><span class="pre">make_circle()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_disc"><code class="docutils literal notranslate"><span class="pre">make_disc()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_line"><code class="docutils literal notranslate"><span class="pre">make_line()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_multi_arc"><code class="docutils literal notranslate"><span class="pre">make_multi_arc()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_multi_bowl"><code class="docutils literal notranslate"><span class="pre">make_multi_bowl()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_pixel_map"><code class="docutils literal notranslate"><span class="pre">make_pixel_map()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_pixel_map_plane"><code class="docutils literal notranslate"><span class="pre">make_pixel_map_plane()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_pixel_map_point"><code class="docutils literal notranslate"><span class="pre">make_pixel_map_point()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_sphere"><code class="docutils literal notranslate"><span class="pre">make_sphere()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_spherical_section"><code class="docutils literal notranslate"><span class="pre">make_spherical_section()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.ndgrid"><code class="docutils literal notranslate"><span class="pre">ndgrid()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.power_law_kramers_kronig"><code class="docutils literal notranslate"><span class="pre">power_law_kramers_kronig()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.sub2ind"><code class="docutils literal notranslate"><span class="pre">sub2ind()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.water_absorption"><code class="docutils literal notranslate"><span class="pre">water_absorption()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.water_density"><code class="docutils literal notranslate"><span class="pre">water_density()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.water_non_linearity"><code class="docutils literal notranslate"><span class="pre">water_non_linearity()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.water_sound_speed"><code class="docutils literal notranslate"><span class="pre">water_sound_speed()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    </body>
+</html>
