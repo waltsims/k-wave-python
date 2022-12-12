@@ -26,7 +26,7 @@ dependencies = [
     "h5py==3.6.0",
     "scipy==1.7.3",
     "opencv-python==4.6.0.66",
-    "deepdiff==5.2.3",
+    "deepdiff==6.2.2",
     "matplotlib==3.6.1",
     "numpy~=1.22.2",
     "scikit-image==0.19.3",
