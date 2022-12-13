@@ -29,6 +29,7 @@ class kWaveSimulation(object):
                  sensor,
                  **kwargs
                  ):
+        self.precision = None
         self.kgrid = kgrid
         self.medium = medium
         self.source = source

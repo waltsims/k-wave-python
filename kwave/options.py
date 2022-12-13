@@ -30,7 +30,7 @@ class SimulationOptions(object):
         pml_auto: automatically choose the PML size to give small prime factors
         create_log: create a log using diary
         use_finite_difference: use finite difference gradients instead of spectral (in 1D)
-        stream_to_disk: buffer the sensor data to disk (in 3D)
+        stream_to_disk:  String containing a filename (including pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
         data_recast: recast the sensor data back to double precision
         cartesian_interp: interpolation mode for Cartesian sensor mask
         hdf_compression_level: zip compression level for HDF5 input files
@@ -87,8 +87,6 @@ class SimulationOptions(object):
         assert self.cartesian_interp in ['linear', 'nearest'], \
             "Optional input ''CartInterp'' must be set to ''linear'' or ''nearest''."
 
-        assert isinstance(self.create_log, bool), "Optional input ''CreateLog'' must be Boolean."
-
         assert isinstance(self.data_cast, str), "Optional input ''DataCast'' must be a string."
 
         assert self.data_cast in ['off', 'double', 'single'], \
@@ -96,13 +94,6 @@ class SimulationOptions(object):
 
         if self.data_cast == 'double':
             self.data_cast = 'off'
-
-        assert isinstance(self.data_recast, bool), "Optional input ''DataRecast'' must be Boolean."
-
-        assert np.isscalar(self.stream_to_disk) or isinstance(self.stream_to_disk, bool), \
-            "Optional input ''StreamToDisk'' must be a single scalar or Boolean value."
-
-        assert isinstance(self.pml_inside, bool), "Optional input ''PMLInside'' must be Boolean."
 
         # load the HDF5 literals (for the default compression level)
         h5_literals = get_h5_literals()
@@ -114,19 +105,24 @@ class SimulationOptions(object):
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
             "Optional input ''MultiAxialPMLRatio'' must be a single positive value."
 
-        assert isinstance(self.use_sg, bool), "Optional input ''use_sg'' must be Boolean."
+        assert np.isscalar(self.stream_to_disk) or isinstance(self.stream_to_disk, bool), \
+            "Optional input ''StreamToDisk'' must be a single scalar or Boolean value."
 
-        assert isinstance(self.save_to_disk_exit, bool), "Optional input ''save_to_disk_exit'' must be Boolean."
+        boolean_inputs = {"use_sg": self.use_sg,
+                          "data_recast": self.data_recast,
+                          "save_to_disk_exit": self.save_to_disk_exit,
+                          "use_kspace": self.use_kspace,
+                          "save_to_disk": self.save_to_disk,
+                          "pml_inside": self.pml_inside,
+                          "create_log": self.create_log,
+                          "scale_source_terms": self.scale_source_terms}
 
-        assert isinstance(self.use_kspace, bool), "Optional input ''UsekSpace'' must be Boolean."
-
-        assert isinstance(self.scale_source_terms, bool), "Optional input ''ScaleSourceTerms'' must be Boolean."
+        for key, val in boolean_inputs.items():
+            assert isinstance(val, bool), f"Optional input ''{key}'' must be Boolean."
 
         assert self.radial_symmetry in ['WSWA', 'WSWS', 'WSWA-FFT', 'WSWS-FFT'], \
             "Optional input ''RadialSymmetry'' must be set to ''WSWA'', ''WSWS'', ''WSWA-FFT'', ''WSWS-FFT''."
 
-        assert isinstance(self.save_to_disk_exit,
-                          (bool, str)), "Optional input ''save_to_disk'' must be Boolean or a String."
         # automatically assign the PML size to give small prime factors
         if self.pml_auto and self.pml_inside:
             raise NotImplementedError(
@@ -145,6 +141,7 @@ class SimulationOptions(object):
         self.pml_z_alpha = self.pml_alpha if self.pml_z_alpha is None else self.pml_z_alpha
 
         # check for a user defined name for the input and output files
+        # TODO(walter): could this be the default value?
         if self.data_name:
             name_prefix = self.data_name
         else:
