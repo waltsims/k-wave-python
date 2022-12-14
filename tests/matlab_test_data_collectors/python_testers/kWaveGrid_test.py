@@ -41,15 +41,37 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
         match key:
             case "kx_vec":
                 mapped_key = 'k_vec.x'
+            case "ky_vec":
+                mapped_key = 'k_vec.y'
+            case "kz_vec":
+                mapped_key = 'k_vec.z'
+            case "kx_max":
+                mapped_key = 'k_max.x'
+            case "ky_max":
+                mapped_key = 'k_max.y'
+            case "kz_max":
+                mapped_key = 'k_max.z'
+            case "x_size":
+                mapped_key = 'size'
+            case "xn_vec":
+                mapped_key = 'n_vec.x'
+            case "yn_vec":
+                mapped_key = 'n_vec.y'
+            case "zn_vec":
+                mapped_key = 'n_vec.z'
             case _:
                 mapped_key = key
 
         actual_value = recursive_getattr(kgrid_object, mapped_key, None)
         actual_value = np.squeeze(actual_value)
 
-        if (actual_value is None) and (expected_value is not None):
+        if mapped_key in ['k_vec.y', 'k_vec.z', 'k_max.y', 'k_max.z',
+                          'y_vec', 'z_vec', 'ky', 'kz', 'yn_vec', 'zn_vec'] \
+                and (np.isnan(actual_value)) and (expected_value == 0):
+            are_equal = True
+        elif (actual_value is None) and (expected_value is not None):
             are_equal = False
-        elif np.size(expected_value) >= 2:
+        elif np.size(actual_value) >= 2 or np.size(expected_value) >= 2:
             are_equal = np.allclose(actual_value, expected_value)
         else:
             are_equal = (actual_value == expected_value)
