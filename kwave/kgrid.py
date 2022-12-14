@@ -7,15 +7,17 @@ import sys
 from kwave.data import Array
 from kwave.enums import DiscreteCosine, DiscreteSine
 
-# default CFL number
-CFL_DEFAULT = 0.3
 
-# machine precision
-MACHINE_PRECISION = 100 * sys.float_info.epsilon
 
 
 @dataclass
 class kWaveGrid(object):
+    # default CFL number
+    CFL_DEFAULT = 0.3
+
+    # machine precision
+    MACHINE_PRECISION = 100 * sys.float_info.epsilon
+
     """
         kWaveGrid is the grid class used across the k-Wave Toolbox. An object
         of the kWaveGrid class contains the grid coordinates and wavenumber
@@ -117,7 +119,7 @@ class kWaveGrid(object):
             assert t_array[0] == 0, 't_array must begin at zero.'
 
             # check the time array is evenly spaced
-            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < MACHINE_PRECISION, \
+            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.MACHINE_PRECISION, \
                 't_array must be evenly spaced.'
 
             # check the time steps are increasing

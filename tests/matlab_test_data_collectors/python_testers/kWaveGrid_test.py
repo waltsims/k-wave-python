@@ -1,3 +1,5 @@
+import functools
+
 import numpy as np
 
 from kwave.enums import DiscreteCosine
@@ -8,7 +10,7 @@ from scipy.io import loadmat
 class TestRecordReader(object):
 
     def __init__(self, record_filename):
-        recorded_data = loadmat(record_filename)
+        recorded_data = loadmat(record_filename, simplify_cells=True)
         self._records = recorded_data
         self._total_steps = recorded_data['total_steps']
         self._step = 0
@@ -26,13 +28,54 @@ class TestRecordReader(object):
             raise ValueError("Exceeded total recorded steps. Perhaps something is wrong with logic?")
 
 
+def recursive_getattr(obj, attr, *args):
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
+
+
+def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
+    are_totally_equal = True
+    for key, expected_value in expected_kgrid_dict.items():
+
+        match key:
+            case "kx_vec":
+                mapped_key = 'k_vec.x'
+            case _:
+                mapped_key = key
+
+        actual_value = recursive_getattr(kgrid_object, mapped_key, None)
+        actual_value = np.squeeze(actual_value)
+
+        if (actual_value is None) and (expected_value is not None):
+            are_equal = False
+        elif np.size(expected_value) >= 2:
+            are_equal = np.allclose(actual_value, expected_value)
+        else:
+            are_equal = (actual_value == expected_value)
+
+        if not are_equal:
+            print('Following property does not match:')
+            print(f'\tkey: {key}, mapped_key: {mapped_key}')
+            print(f'\t\texpected: {expected_value}')
+            print(f'\t\tactual: {actual_value}')
+            are_totally_equal = False
+
+    return are_totally_equal
+
+
 if __name__ == '__main__':
-    recorder = TestRecordReader('/data/code/Work/black_box_testing/x.mat')
-    print(recorder.expected_value_of('dx', squeeze=True))
+    recorder = TestRecordReader('/Users/farid/workspace/black_box_testing/collectedValues/kWaveGrid.mat')
+    # print(recorder.expected_value_of('dx', squeeze=True))
 
     Nx = 10
     dx = 0.1
     kgrid = kWaveGrid(Nx, dx)
+
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    exit(0)
+
+
 
     assert recorder.expected_value_of('Nx', squeeze=True) == kgrid.Nx
     assert recorder.expected_value_of('dx', squeeze=True) == kgrid.dx

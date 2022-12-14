@@ -6,42 +6,53 @@ Nx = 10;
 dx = 0.1;
 kgrid = kWaveGrid(Nx, dx);
 
-recorder = utils.TestRecorder([output_file]);
-recorder.recordExpectedValue('Nx', kgrid.Nx);
-recorder.recordExpectedValue('dx', kgrid.dx);
-recorder.recordExpectedValue('kx_vec', kgrid.kx_vec);
-recorder.recordExpectedValue('k', kgrid.k);
-recorder.recordExpectedValue('kx_max', kgrid.kx_max);
-recorder.recordExpectedValue('k_max', kgrid.k_max);
-recorder.recordExpectedValue('x', kgrid.x);
-recorder.recordExpectedValue('y', kgrid.y);
-recorder.recordExpectedValue('z', kgrid.z);
-recorder.recordExpectedValue('kx', kgrid.kx);
-recorder.recordExpectedValue('x_vec', kgrid.x_vec);
-recorder.recordExpectedValue('y_vec', kgrid.y_vec);
-recorder.recordExpectedValue('z_vec', kgrid.z_vec);
-recorder.recordExpectedValue('x_size', kgrid.x_size);
-recorder.recordExpectedValue('y_size', kgrid.y_size);
-recorder.recordExpectedValue('z_size', kgrid.z_size);
-recorder.recordExpectedValue('t_array', kgrid.t_array);
-recorder.recordExpectedValue('total_grid_points', kgrid.total_grid_points);
-
+recorder = TestRecorder(output_file);
+recorder.recordObject('kgrid', kgrid);
 recorder.increment();
+% recorder.recordExpectedValue('Nx', kgrid.Nx);
+% recorder.recordExpectedValue('dx', kgrid.dx);
+% recorder.recordExpectedValue('kx_vec', kgrid.kx_vec);
+% recorder.recordExpectedValue('k', kgrid.k);
+% recorder.recordExpectedValue('kx_max', kgrid.kx_max);
+% recorder.recordExpectedValue('k_max', kgrid.k_max);
+% recorder.recordExpectedValue('x', kgrid.x);
+% recorder.recordExpectedValue('y', kgrid.y);
+% recorder.recordExpectedValue('z', kgrid.z);
+% recorder.recordExpectedValue('kx', kgrid.kx);
+% recorder.recordExpectedValue('x_vec', kgrid.x_vec);
+% recorder.recordExpectedValue('y_vec', kgrid.y_vec);
+% recorder.recordExpectedValue('z_vec', kgrid.z_vec);
+% recorder.recordExpectedValue('x_size', kgrid.x_size);
+% recorder.recordExpectedValue('y_size', kgrid.y_size);
+% recorder.recordExpectedValue('z_size', kgrid.z_size);
+% recorder.recordExpectedValue('t_array', kgrid.t_array);
+% recorder.recordExpectedValue('total_grid_points', kgrid.total_grid_points);
+
 
 kgrid.setTime(52, 0.0001);
-recorder.recordExpectedValue('Nt', kgrid.Nt);
-recorder.recordExpectedValue('dt', kgrid.dt);
-recorder.recordExpectedValue('t_array', kgrid.t_array);
-
+recorder.recordObject('kgrid', kgrid);
 recorder.increment();
+% recorder.recordExpectedValue('Nt', kgrid.Nt);
+% recorder.recordExpectedValue('dt', kgrid.dt);
+% recorder.recordExpectedValue('t_array', kgrid.t_array);
+
+% recorder.increment();
 [t_array, dt] = kgrid.makeTime(1596);
-recorder.recordExpectedValue('returned_t_array', t_array);
-recorder.recordExpectedValue('returned_dt', dt);
-recorder.recordExpectedValue('Nt', kgrid.Nt);
-recorder.recordExpectedValue('dt', kgrid.dt);
-recorder.recordExpectedValue('t_array', kgrid.t_array);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_t_array', t_array);
+recorder.recordVariable('returned_dt', dt);
 recorder.increment();
+
+% recorder.recordExpectedValue('Nt', kgrid.Nt);
+% recorder.recordExpectedValue('dt', kgrid.dt);
+% recorder.recordExpectedValue('t_array', kgrid.t_array);
+
+recorder.saveRecordsToDisk();
+
+return
+
+
+%%%%% UNTIL HERE
 [k, M] = kgrid.k_dtt(1);
 recorder.recordExpectedValue('returned_k', k);
 recorder.recordExpectedValue('returned_M', M);
