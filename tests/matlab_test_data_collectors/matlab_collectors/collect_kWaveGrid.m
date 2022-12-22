@@ -2,6 +2,7 @@ output_file = 'collectedValues/kWaveGrid.mat';
 test_step_idx = 0;
 test_var_expectations = {};
 
+
 Nx = 10;
 dx = 0.1;
 Ny = 14;
@@ -61,10 +62,24 @@ for dim = 1:3
         recorder.increment();
     end
 
-    highest_prime_factors = kgrid.highest_prime_factors('WSWA');
+    highest_prime_factors = kgrid.highest_prime_factors();
     recorder.recordObject('kgrid', kgrid);
     recorder.recordVariable('returned_highest_prime_factors', highest_prime_factors);
     recorder.increment();
+
+    axisymmetric_options = {'WSWA', 'WSWS'};
+    for ii = 1:numel(axisymmetric_options)
+        axisymmetric = axisymmetric_options{ii};
+
+        if strcmp(axisymmetric, 'WSWS') && dim == 1
+            continue
+        end
+
+        highest_prime_factors = kgrid.highest_prime_factors(axisymmetric);
+        recorder.recordObject('kgrid', kgrid);
+        recorder.recordVariable('returned_highest_prime_factors', highest_prime_factors);
+        recorder.increment();
+    end
 
     inp_xn_vec = rand(3, 2);
     inp_dxudxn = rand(4, 7);
