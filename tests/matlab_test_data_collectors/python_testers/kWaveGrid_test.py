@@ -40,75 +40,39 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
     are_totally_equal = True
     for key, expected_value in expected_kgrid_dict.items():
 
-        ignore_if_nan = False
-        match key:
-            case "kx_vec":
-                mapped_key = 'k_vec.x'
-            case "ky_vec":
-                mapped_key = 'k_vec.y'
-                ignore_if_nan = True
-            case "kz_vec":
-                mapped_key = 'k_vec.z'
-                ignore_if_nan = True
-            case "kx_max":
-                mapped_key = 'k_max.x'
-            case "ky_max":
-                mapped_key = 'k_max.y'
-                ignore_if_nan = True
-            case "kz_max":
-                mapped_key = 'k_max.z'
-                ignore_if_nan = True
-            case "k_max":
-                mapped_key = "k_max_all"
-            case "x_size":
-                mapped_key = 'size.x'
-            case "xn_vec":
-                mapped_key = 'n_vec.x'
-            case "yn_vec":
-                mapped_key = 'n_vec.y'
-                ignore_if_nan = True
-            case "zn_vec":
-                mapped_key = 'n_vec.z'
-                ignore_if_nan = True
-            case "xn_vec_sgx":
-                mapped_key = 'n_vec_sg.x'
-            case "xn_vec_sgy":
-                mapped_key = 'n_vec_sg.y'
-                ignore_if_nan = True
-            case "xn_vec_sgz":
-                mapped_key = 'n_vec_sg.z'
-                ignore_if_nan = True
-            case "dxudxn":
-                mapped_key = 'dudn.x'
-            case "dyudyn":
-                mapped_key = 'dudn.y'
-                ignore_if_nan = True
-            case "dzudzn":
-                mapped_key = 'dudn.z'
-                ignore_if_nan = True
+        matlab_to_python_mapping = {
+            "kx_vec": "k_vec.x",
+            "ky_vec": "k_vec.y",
+            "kz_vec": "k_vec.z",
+            "kx_max": "k_max.x",
+            "ky_max": "k_max.y",
+            "kz_max": "k_max.z",
+            "k_max": "k_max_all",
+            "x_size": "size.x",
+            "xn_vec": "n_vec.x",
+            "yn_vec": "n_vec.y",
+            "zn_vec": "n_vec.z",
+            "xn_vec_sgx": "n_vec_sg.x",
+            "xn_vec_sgy": "n_vec_sg.y",
+            "xn_vec_sgz": "n_vec_sg.z",
+            "dxudxn": "dudn.x",
+            "dyudyn": "dudn.y",
+            "dzudzn": "dudn.z",
+            "dxudxn_sgx": "dudn_sg.x",
+            "dyudyn_sgy": "dudn_sg.y",
+            "dzudzn_sgz": "dudn_sg.z",
+            "yn_vec_sgy": "n_vec_sg.y",
+            "zn_vec_sgz": "n_vec_sg.z"
+        }
 
-            case "dxudxn_sgx":
-                mapped_key = 'dudn_sg.x'
-            case "dyudyn_sgy":
-                mapped_key = 'dudn_sg.y'
-                ignore_if_nan = True
-            case "dzudzn_sgz":
-                mapped_key = 'dudn_sg.z'
-                ignore_if_nan = True
-
-            case "yn_vec_sgy":
-                mapped_key = 'n_vec_sg.y'
-                ignore_if_nan = True
-            case "zn_vec_sgz":
-                mapped_key = 'n_vec_sg.z'
-                ignore_if_nan = True
-
-            case 'y_vec' | 'z_vec' | 'ky' | 'kz' | 'yn' | 'zn':
-                mapped_key = key
-                ignore_if_nan = True
-
-            case _:
-                mapped_key = key
+        mapped_key = matlab_to_python_mapping.get(key, key)
+        if mapped_key in ["k_vec.y", "k_vec.z", "k_max.y", "k_max.z", "n_vec.y", "n_vec.z",
+                          "n_vec_sg.y", "n_vec_sg.z", "dudn.y", "dudn.z", "dudn.z", 
+                          "dudn_sg.y", "dudn_sg.z", "n_vec_sg.y", "n_vec_sg.z", 
+                          'y_vec', 'z_vec' , 'ky' , 'kz', 'yn', 'zn']:
+            ignore_if_nan = True
+        else:
+            ignore_if_nan = False
 
         actual_value = recursive_getattr(kgrid_object, mapped_key, None)
         actual_value = np.squeeze(actual_value)
@@ -130,11 +94,12 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
             print(f'\t\tactual: {actual_value}')
             are_totally_equal = False
 
-    return are_totally_equal
+    assert are_totally_equal
 
 
 def test_get_color_map():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
+    # test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
+    test_record_path = os.path.join('/Users/farid/workspace/black_box_testing', 'collectedValues/kWaveGrid.mat')
     reader = TestRecordReader(test_record_path)
 
     Nx = 10
