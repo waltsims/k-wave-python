@@ -98,8 +98,7 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
 
 
 def test_get_color_map():
-    # test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
-    test_record_path = os.path.join('/Users/farid/workspace/black_box_testing', 'collectedValues/kWaveGrid.mat')
+    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
     reader = TestRecordReader(test_record_path)
 
     Nx = 10
