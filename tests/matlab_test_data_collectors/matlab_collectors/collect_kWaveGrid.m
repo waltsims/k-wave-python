@@ -21,29 +21,32 @@ recorder.recordVariable('returned_t_array', t_array);
 recorder.recordVariable('returned_dt', dt);
 recorder.increment();
 
-[k, M] = kgrid.k_dtt(1);
-recorder.recordObject('kgrid', kgrid);
-recorder.recordVariable('returned_k', k);
-recorder.recordVariable('returned_M', M);
-recorder.increment();
 
-[kx_vec_dtt, M] = kgrid.kx_vec_dtt(1);
-recorder.recordObject('kgrid', kgrid);
-recorder.recordVariable('returned_kx_vec_dtt', kx_vec_dtt);
-recorder.recordVariable('returned_M', M);
-recorder.increment();
+for ii = 1:8
+    [k, M] = kgrid.k_dtt(ii);
+    recorder.recordObject('kgrid', kgrid);
+    recorder.recordVariable('returned_k', k);
+    recorder.recordVariable('returned_M', M);
+    recorder.increment();
 
-[ky_vec_dtt, M] = kgrid.ky_vec_dtt(1);
-recorder.recordObject('kgrid', kgrid);
-recorder.recordVariable('returned_ky_vec_dtt', ky_vec_dtt);
-recorder.recordVariable('returned_M', M);
-recorder.increment();
+    [kx_vec_dtt, M] = kgrid.kx_vec_dtt(ii);
+    recorder.recordObject('kgrid', kgrid);
+    recorder.recordVariable('returned_kx_vec_dtt', kx_vec_dtt);
+    recorder.recordVariable('returned_M', M);
+    recorder.increment();
 
-[kz_vec_dtt, M] = kgrid.kz_vec_dtt(1);
-recorder.recordObject('kgrid', kgrid);
-recorder.recordVariable('returned_kz_vec_dtt', kz_vec_dtt);
-recorder.recordVariable('returned_M', M);
-recorder.increment();
+    [ky_vec_dtt, M] = kgrid.ky_vec_dtt(ii);
+    recorder.recordObject('kgrid', kgrid);
+    recorder.recordVariable('returned_ky_vec_dtt', ky_vec_dtt);
+    recorder.recordVariable('returned_M', M);
+    recorder.increment();
+
+    [kz_vec_dtt, M] = kgrid.kz_vec_dtt(ii);
+    recorder.recordObject('kgrid', kgrid);
+    recorder.recordVariable('returned_kz_vec_dtt', kz_vec_dtt);
+    recorder.recordVariable('returned_M', M);
+    recorder.increment();
+end
 
 highest_prime_factors = kgrid.highest_prime_factors('WSWA');
 recorder.recordObject('kgrid', kgrid);

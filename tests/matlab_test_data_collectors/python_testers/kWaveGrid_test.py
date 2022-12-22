@@ -2,7 +2,7 @@ import functools
 
 import numpy as np
 
-from kwave.enums import DiscreteCosine
+from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.kgrid import kWaveGrid
 from scipy.io import loadmat
 
@@ -136,30 +136,32 @@ if __name__ == '__main__':
     assert np.allclose(recorder.expected_value_of('returned_dt'), dt)
     recorder.increment()
 
-    k, M = kgrid.k_dtt(DiscreteCosine.TYPE_1)
-    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
-    assert np.allclose(recorder.expected_value_of('returned_k'), k)
-    assert np.allclose(recorder.expected_value_of('returned_M'), M)
-    recorder.increment()
+    for dtt_type in [*list(DiscreteCosine), *list(DiscreteSine)]:
+        print(dtt_type)
+        k, M = kgrid.k_dtt(dtt_type)
+        check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+        assert np.allclose(recorder.expected_value_of('returned_k'), k)
+        assert np.allclose(recorder.expected_value_of('returned_M'), M)
+        recorder.increment()
 
-    kx_vec_dtt, M = kgrid.kx_vec_dtt(DiscreteCosine.TYPE_1)
-    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
-    assert np.allclose(recorder.expected_value_of('returned_kx_vec_dtt'), kx_vec_dtt)
-    assert np.allclose(recorder.expected_value_of('returned_M'), M)
-    recorder.increment()
+        kx_vec_dtt, M = kgrid.kx_vec_dtt(dtt_type)
+        check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+        assert np.allclose(recorder.expected_value_of('returned_kx_vec_dtt'), kx_vec_dtt)
+        assert np.allclose(recorder.expected_value_of('returned_M'), M)
+        recorder.increment()
 
 
-    ky_vec_dtt, M = kgrid.ky_vec_dtt(DiscreteCosine.TYPE_1)
-    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
-    assert np.allclose(recorder.expected_value_of('returned_ky_vec_dtt'), ky_vec_dtt)
-    assert np.allclose(recorder.expected_value_of('returned_M'), M)
-    recorder.increment()
+        ky_vec_dtt, M = kgrid.ky_vec_dtt(dtt_type)
+        check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+        assert np.allclose(recorder.expected_value_of('returned_ky_vec_dtt'), ky_vec_dtt)
+        assert np.allclose(recorder.expected_value_of('returned_M'), M)
+        recorder.increment()
 
-    kz_vec_dtt, M = kgrid.kz_vec_dtt(DiscreteCosine.TYPE_1)
-    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
-    assert np.allclose(recorder.expected_value_of('returned_kz_vec_dtt'), kz_vec_dtt)
-    assert np.allclose(recorder.expected_value_of('returned_M'), M)
-    recorder.increment()
+        kz_vec_dtt, M = kgrid.kz_vec_dtt(dtt_type)
+        check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+        assert np.allclose(recorder.expected_value_of('returned_kz_vec_dtt'), kz_vec_dtt)
+        assert np.allclose(recorder.expected_value_of('returned_M'), M)
+        recorder.increment()
 
     highest_prime_factors = kgrid.highest_prime_factors('WSWA')
     check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
