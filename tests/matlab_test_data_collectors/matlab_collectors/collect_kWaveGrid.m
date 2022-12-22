@@ -9,7 +9,7 @@ Ny = 14;
 dy = 0.05;
 Nz = 9;
 dz = 0.13;
-recorder = TestRecorder(output_file);
+recorder = utils.TestRecorder(output_file);
 
 for dim = 1:3
     disp(dim)

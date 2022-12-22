@@ -10,9 +10,15 @@ classdef TestRecorder < handle
            obj.record_filename = record_filename;
        end
        
-       function obj = recordExpectedValue(obj, name, value)
-           key = ['step_' num2str(obj.step) '___' name];
-           obj.records(key) = value;
+       function obj = recordObject(obj, obj_name, obj_to_record)
+           warning('off', 'MATLAB:structOnObject')
+           key = ['step_' num2str(obj.step) '___' obj_name];
+           obj.records(key) = struct(obj_to_record);
+       end
+
+       function obj = recordVariable(obj, var_name, var_value)
+           key = ['step_' num2str(obj.step) '___' var_name];
+           obj.records(key) = var_value;
        end
        
        function obj = increment(obj)
