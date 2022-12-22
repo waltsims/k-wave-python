@@ -51,6 +51,8 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
                 mapped_key = 'k_max.y'
             case "kz_max":
                 mapped_key = 'k_max.z'
+            case "k_max":
+                mapped_key = "k_max_all"
             case "x_size":
                 mapped_key = 'size'
             case "xn_vec":
@@ -59,6 +61,31 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
                 mapped_key = 'n_vec.y'
             case "zn_vec":
                 mapped_key = 'n_vec.z'
+            case "xn_vec_sgx":
+                mapped_key = 'n_vec_sg.x'
+            case "xn_vec_sgy":
+                mapped_key = 'n_vec_sg.y'
+            case "xn_vec_sgz":
+                mapped_key = 'n_vec_sg.z'
+            case "dxudxn":
+                mapped_key = 'dudn.x'
+            case "dyudyn":
+                mapped_key = 'dudn.y'
+            case "dzudzn":
+                mapped_key = 'dudn.z'
+
+            case "yn_vec_sgy":
+                mapped_key = 'n_vec_sg.y'
+            case "zn_vec_sgz":
+                mapped_key = 'n_vec_sg.z'
+
+            case "dxudxn_sgx":
+                mapped_key = 'dudn_sg.x'
+            case "dyudyn_sgy":
+                mapped_key = 'dudn_sg.y'
+            case "dzudzn_sgz":
+                mapped_key = 'dudn_sg.z'
+
             case _:
                 mapped_key = key
 
@@ -66,7 +93,9 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
         actual_value = np.squeeze(actual_value)
 
         if mapped_key in ['k_vec.y', 'k_vec.z', 'k_max.y', 'k_max.z',
-                          'y_vec', 'z_vec', 'ky', 'kz', 'yn_vec', 'zn_vec'] \
+                          'y_vec', 'z_vec', 'ky', 'kz', 'n_vec.y', 'n_vec.z',
+                          'n_vec_sg.y', 'n_vec_sg.z', 'dudn.y', 'dudn.z', 'dudn_sg.y', 'dudn_sg.z',
+                          'yn', 'zn'] \
                 and (np.isnan(actual_value)) and (expected_value == 0):
             are_equal = True
         elif (actual_value is None) and (expected_value is not None):
@@ -76,7 +105,7 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
         else:
             are_equal = (actual_value == expected_value)
 
-        if not are_equal:
+        if (not are_equal):
             print('Following property does not match:')
             print(f'\tkey: {key}, mapped_key: {mapped_key}')
             print(f'\t\texpected: {expected_value}')
@@ -95,92 +124,51 @@ if __name__ == '__main__':
     kgrid = kWaveGrid(Nx, dx)
 
     check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
-    exit(0)
-
-
-
-    assert recorder.expected_value_of('Nx', squeeze=True) == kgrid.Nx
-    assert recorder.expected_value_of('dx', squeeze=True) == kgrid.dx
-    assert np.allclose(recorder.expected_value_of('kx_vec'), kgrid.k_vec.x)
-    assert np.allclose(recorder.expected_value_of('k'), kgrid.k)
-    assert recorder.expected_value_of('kx_max', squeeze=True) == kgrid.k_max.x
-
-    # recorder.recordExpectedValue('k_max', kgrid.k_max)
-    # assert np.allclose(recorder.expected_value_of('k_max'), kgrid.k_max)
-
-    assert np.allclose(recorder.expected_value_of('x'), kgrid.x)
-    assert np.allclose(recorder.expected_value_of('y'), kgrid.y)
-    assert np.allclose(recorder.expected_value_of('z'), kgrid.z)
-
-    assert np.allclose(recorder.expected_value_of('x_size'), kgrid.size[0])
-    # assert np.allclose(recorder.expected_value_of('y_size'), kgrid.size.y)
-    # assert np.allclose(recorder.expected_value_of('z_size'), kgrid.size.z)
-
-    assert str(recorder.expected_value_of('t_array')[0]) == kgrid.t_array
-    assert recorder.expected_value_of('total_grid_points', squeeze=True) == kgrid.total_grid_points
-
     recorder.increment()
 
     kgrid.setTime(52, 0.0001)
-    assert recorder.expected_value_of('Nt', squeeze=True) == kgrid.Nt
-    assert recorder.expected_value_of('dt', squeeze=True) == kgrid.dt
-    assert np.allclose(recorder.expected_value_of('t_array'), kgrid.t_array)
-
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
     recorder.increment()
-    # t_array, dt = kgrid.makeTime(1596)
-    kgrid.makeTime(1596)
-    # assert np.allclose(recorder.expected_value_of('returned_t_array'), t_array)
-    # assert np.allclose(recorder.expected_value_of('returned_dt'), dt)
-    assert np.allclose(recorder.expected_value_of('Nt'), kgrid.Nt)
-    assert np.allclose(recorder.expected_value_of('dt'), kgrid.dt)
-    assert np.allclose(recorder.expected_value_of('t_array'), kgrid.t_array)
 
+    t_array, dt = kgrid.makeTime(1596)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_t_array'), t_array)
+    assert np.allclose(recorder.expected_value_of('returned_dt'), dt)
     recorder.increment()
+
     k, M = kgrid.k_dtt(DiscreteCosine.TYPE_1)
-    # assert np.allclose(recorder.expected_value_of('returned_k'), k)
-    # assert np.allclose(recorder.expected_value_of('returned_M'), M)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_k'), k)
+    assert np.allclose(recorder.expected_value_of('returned_M'), M)
+    recorder.increment()
 
-    # recorder.increment()
-    # [kx_vec_dtt, M] = kgrid.kx_vec_dtt(1)
-    # recorder.recordExpectedValue('returned_kx_vec_dtt', kx_vec_dtt)
-    # recorder.recordExpectedValue('returned_M', M)
-    #
-    # recorder.increment()
-    # [ky_vec_dtt, M] = kgrid.ky_vec_dtt(1)
-    # recorder.recordExpectedValue('returned_ky_vec_dtt', ky_vec_dtt)
-    # recorder.recordExpectedValue('returned_M', M)
-    #
-    # recorder.increment()
-    # [kz_vec_dtt, M] = kgrid.kz_vec_dtt(1)
-    # recorder.recordExpectedValue('returned_kz_vec_dtt', kz_vec_dtt)
-    # recorder.recordExpectedValue('returned_M', M)
-    #
-    # recorder.increment()
-    # highest_prime_factors = kgrid.highest_prime_factors('WSWA')
-    # recorder.recordExpectedValue('returned_highest_prime_factors', highest_prime_factors)
-    #
-    # recorder.increment()
-    # recorder.recordExpectedValue('xn', kgrid.xn)
-    # recorder.recordExpectedValue('xn_vec', kgrid.xn_vec)
-    # recorder.recordExpectedValue('yn', kgrid.yn)
-    # recorder.recordExpectedValue('yn_vec', kgrid.yn_vec)
-    # recorder.recordExpectedValue('zn', kgrid.zn)
-    # recorder.recordExpectedValue('zn_vec', kgrid.zn_vec)
-    #
-    # recorder.increment()
-    # inp_xn_vec = rand(3, 2)
-    # inp_dxudxn = rand(4, 7)
-    # inp_xn_vec_sgx = rand(7, 5)
-    # inp_dxudxn_sgx = rand(3, 4)
-    # kgrid.setNUGrid(1, inp_xn_vec, inp_dxudxn, inp_xn_vec_sgx, inp_dxudxn_sgx)
-    #
-    # recorder.recordExpectedValue('inp_xn_vec', inp_xn_vec)
-    # recorder.recordExpectedValue('inp_dxudxn', inp_dxudxn)
-    # recorder.recordExpectedValue('inp_xn_vec_sgx', inp_xn_vec_sgx)
-    # recorder.recordExpectedValue('inp_dxudxn_sgx', inp_dxudxn_sgx)
-    #
-    # recorder.recordExpectedValue('xn_vec', kgrid.xn_vec)
-    # recorder.recordExpectedValue('dxudxn', kgrid.dxudxn)
-    # recorder.recordExpectedValue('xn_vec_sgx', kgrid.xn_vec_sgx)
-    # recorder.recordExpectedValue('dxudxn_sgx', kgrid.dxudxn_sgx)
-    # recorder.recordExpectedValue('nonuniform', kgrid.nonuniform)
+    kx_vec_dtt, M = kgrid.kx_vec_dtt(DiscreteCosine.TYPE_1)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_kx_vec_dtt'), kx_vec_dtt)
+    assert np.allclose(recorder.expected_value_of('returned_M'), M)
+    recorder.increment()
+
+
+    ky_vec_dtt, M = kgrid.ky_vec_dtt(DiscreteCosine.TYPE_1)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_ky_vec_dtt'), ky_vec_dtt)
+    assert np.allclose(recorder.expected_value_of('returned_M'), M)
+    recorder.increment()
+
+    kz_vec_dtt, M = kgrid.kz_vec_dtt(DiscreteCosine.TYPE_1)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_kz_vec_dtt'), kz_vec_dtt)
+    assert np.allclose(recorder.expected_value_of('returned_M'), M)
+    recorder.increment()
+
+    highest_prime_factors = kgrid.highest_prime_factors('WSWA')
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))
+    assert np.allclose(recorder.expected_value_of('returned_highest_prime_factors'), highest_prime_factors)
+    recorder.increment()
+
+    inp_xn_vec = recorder.expected_value_of('inp_xn_vec')
+    inp_dxudxn = recorder.expected_value_of('inp_dxudxn')
+    inp_xn_vec_sgx = recorder.expected_value_of('inp_xn_vec_sgx')
+    inp_dxudxn_sgx = recorder.expected_value_of('inp_dxudxn_sgx')
+    kgrid.setNUGrid(1, inp_xn_vec, inp_dxudxn, inp_xn_vec_sgx, inp_dxudxn_sgx)
+    check_kgrid_equality(kgrid, recorder.expected_value_of('kgrid'))

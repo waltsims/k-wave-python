@@ -47,60 +47,45 @@ recorder.increment();
 % recorder.recordExpectedValue('dt', kgrid.dt);
 % recorder.recordExpectedValue('t_array', kgrid.t_array);
 
-recorder.saveRecordsToDisk();
-
-return
-
 
 %%%%% UNTIL HERE
 [k, M] = kgrid.k_dtt(1);
-recorder.recordExpectedValue('returned_k', k);
-recorder.recordExpectedValue('returned_M', M);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_k', k);
+recorder.recordVariable('returned_M', M);
 recorder.increment();
+
 [kx_vec_dtt, M] = kgrid.kx_vec_dtt(1);
-recorder.recordExpectedValue('returned_kx_vec_dtt', kx_vec_dtt);
-recorder.recordExpectedValue('returned_M', M);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_kx_vec_dtt', kx_vec_dtt);
+recorder.recordVariable('returned_M', M);
 recorder.increment();
+
 [ky_vec_dtt, M] = kgrid.ky_vec_dtt(1);
-recorder.recordExpectedValue('returned_ky_vec_dtt', ky_vec_dtt);
-recorder.recordExpectedValue('returned_M', M);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_ky_vec_dtt', ky_vec_dtt);
+recorder.recordVariable('returned_M', M);
 recorder.increment();
+
 [kz_vec_dtt, M] = kgrid.kz_vec_dtt(1);
-recorder.recordExpectedValue('returned_kz_vec_dtt', kz_vec_dtt);
-recorder.recordExpectedValue('returned_M', M);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_kz_vec_dtt', kz_vec_dtt);
+recorder.recordVariable('returned_M', M);
 recorder.increment();
+
 highest_prime_factors = kgrid.highest_prime_factors('WSWA');
-recorder.recordExpectedValue('returned_highest_prime_factors', highest_prime_factors);
-
+recorder.recordObject('kgrid', kgrid);
+recorder.recordVariable('returned_highest_prime_factors', highest_prime_factors);
 recorder.increment();
-recorder.recordExpectedValue('xn', kgrid.xn);
-recorder.recordExpectedValue('xn_vec', kgrid.xn_vec);
-recorder.recordExpectedValue('yn', kgrid.yn);
-recorder.recordExpectedValue('yn_vec', kgrid.yn_vec);
-recorder.recordExpectedValue('zn', kgrid.zn);
-recorder.recordExpectedValue('zn_vec', kgrid.zn_vec);
 
-recorder.increment();
 inp_xn_vec = rand(3, 2);
 inp_dxudxn = rand(4, 7);
 inp_xn_vec_sgx = rand(7, 5);
 inp_dxudxn_sgx = rand(3, 4);
+recorder.recordVariable('inp_xn_vec', inp_xn_vec);
+recorder.recordVariable('inp_dxudxn', inp_dxudxn);
+recorder.recordVariable('inp_xn_vec_sgx', inp_xn_vec_sgx);
+recorder.recordVariable('inp_dxudxn_sgx', inp_dxudxn_sgx);
 kgrid.setNUGrid(1, inp_xn_vec, inp_dxudxn, inp_xn_vec_sgx, inp_dxudxn_sgx);
-
-recorder.recordExpectedValue('inp_xn_vec', inp_xn_vec);
-recorder.recordExpectedValue('inp_dxudxn', inp_dxudxn);
-recorder.recordExpectedValue('inp_xn_vec_sgx', inp_xn_vec_sgx);
-recorder.recordExpectedValue('inp_dxudxn_sgx', inp_dxudxn_sgx);
-
-
-recorder.recordExpectedValue('xn_vec', kgrid.xn_vec);
-recorder.recordExpectedValue('dxudxn', kgrid.dxudxn);
-recorder.recordExpectedValue('xn_vec_sgx', kgrid.xn_vec_sgx);
-recorder.recordExpectedValue('dxudxn_sgx', kgrid.dxudxn_sgx);
-recorder.recordExpectedValue('nonuniform', kgrid.nonuniform);
-
+recorder.recordObject('kgrid', kgrid);
 recorder.saveRecordsToDisk();
