@@ -482,6 +482,8 @@ class kWaveGrid(object):
         if (int(t_end / self.dt) != math.ceil(t_end / self.dt)) and (t_end % self.dt == 0):
             self.Nt = self.Nt + 1
 
+        return self.t_array, self.dt
+
     ##################################################
     ####
     #### FUNCTIONS BELOW WERE NOT TESTED FOR CORRECTNESS!
@@ -541,7 +543,7 @@ class kWaveGrid(object):
         """
 
         # compute the implied period of the input function
-        if dtt_type == 1:
+        if dtt_type == DiscreteCosine.TYPE_1:
             M = 2 * (Nx - 1)
         elif dtt_type == 5:
             M = 2 * (Nx + 1)
@@ -552,7 +554,7 @@ class kWaveGrid(object):
         if dtt_type == DiscreteCosine.TYPE_1:
             # whole-wavenumber DTT
             # WSWS / DCT-I
-            n = np.arange(0, M // 2).T
+            n = np.arange(0, M // 2 + 1).T
             kx_vec = 2 * math.pi * n / (M * dx)
         elif dtt_type == DiscreteCosine.TYPE_2:
             # whole-wavenumber DTT
@@ -567,7 +569,7 @@ class kWaveGrid(object):
         elif dtt_type == DiscreteSine.TYPE_2:
             # whole-wavenumber DTT
             # HAHA / DST-II
-            n = np.arange(1, M // 2).T
+            n = np.arange(1, M // 2 + 1).T
             kx_vec = 2 * math.pi * n / (M * dx)
         elif dtt_type in [DiscreteCosine.TYPE_3, DiscreteCosine.TYPE_4,
                           DiscreteSine.TYPE_3,   DiscreteSine.TYPE_4]:
@@ -606,24 +608,24 @@ class kWaveGrid(object):
 
         # force non-uniform grid spacing to be column vectors, and the
         # gradients to be in the correct direction for use with bsxfun
-        n_vec            = np.reshape(n_vec,    (-1, 1))
-        n_vec_sg         = np.reshape(n_vec_sg, (-1, 1))
+        n_vec            = np.reshape(n_vec,    (-1, 1), order='F')
+        n_vec_sg         = np.reshape(n_vec_sg, (-1, 1), order='F')
 
         if dim == 1:
-            dudn         = np.reshape(dudn,     (-1, 1))
-            dudn_sg      = np.reshape(dudn_sg,  (-1, 1))
+            dudn         = np.reshape(dudn,     (-1, 1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (-1, 1), order='F')
         elif dim == 2:
-            dudn         = np.reshape(dudn,     (1, -1))
-            dudn_sg      = np.reshape(dudn_sg,  (1, -1))
+            dudn         = np.reshape(dudn,     (1, -1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (1, -1), order='F')
         elif dim == 3:
-            dudn         = np.reshape(dudn,     (1, 1, -1))
-            dudn_sg      = np.reshape(dudn_sg,  (1, 1, -1))
+            dudn         = np.reshape(dudn,     (1, 1, -1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (1, 1, -1), order='F')
 
         self.n_vec.assign_dim(self.dim, n_vec)
         self.n_vec_sg.assign_dim(self.dim, n_vec_sg)
 
         self.dudn.assign_dim(self.dim, dudn)
-        self.dudn_sg.assign_dim(self.dudn_sg, dudn_sg)
+        self.dudn_sg.assign_dim(self.dim, dudn_sg)
 
         # set non-uniform flag
         self.nonuniform = True
