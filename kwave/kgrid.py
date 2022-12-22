@@ -545,7 +545,7 @@ class kWaveGrid(object):
         # compute the implied period of the input function
         if dtt_type == DiscreteCosine.TYPE_1:
             M = 2 * (Nx - 1)
-        elif dtt_type == 5:
+        elif dtt_type == DiscreteSine.TYPE_1:
             M = 2 * (Nx + 1)
         else:
             M = 2 * Nx
