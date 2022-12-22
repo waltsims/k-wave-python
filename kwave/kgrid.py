@@ -269,10 +269,13 @@ class kWaveGrid(object):
         """
         if self.dim < 2:
             return np.nan
+
+        n_vec_y = np.array(self.n_vec.y).T
+
         if self.dim == 2:
-            return np.tile(self.n_vec.y.T, (self.Nx, 1)) if self.nonuniform else 0
+            return np.tile(n_vec_y, (self.Nx, 1)) if self.nonuniform else 0
         else:
-            return np.tile(self.n_vec.y.T, (self.Nx, 1, self.Nz)) if self.nonuniform else 0
+            return np.tile(n_vec_y, (self.Nx, 1, self.Nz)) if self.nonuniform else 0
 
     @property
     def zn(self):
@@ -283,14 +286,15 @@ class kWaveGrid(object):
         """
         if self.dim < 3:
             return np.nan
-        return np.tile(np.transpose(self.n_vec.z, (1, 2, 0)), (self.Nx, self.Ny, 1)) if self.nonuniform else 0
+        n_vec_z = np.atleast_1d(np.squeeze(self.n_vec.z))[None, None, :]
+        return np.tile(n_vec_z, (self.Nx, self.Ny, 1)) if self.nonuniform else 0
 
     @property
     def size(self):
         """
             Size of grid in the all directions [m]
         """
-        return self.N * self.spacing
+        return Array(self.N * self.spacing)
 
     @property
     def total_grid_points(self) -> np.ndarray:
@@ -655,7 +659,7 @@ class kWaveGrid(object):
         dtt_type = np.array(dtt_type)
         assert (dtt_type.size in [1, self.dim]), f'dtt_type must be a scalar, or {self.dim}D vector'
         if self.dim == 1:
-            k, M = self.kx_vec_dtt(dtt_type)
+            k, M = self.kx_vec_dtt(dtt_type[0])
             return k, M
         elif self.dim == 2:
             # assign the grid parameters for the x and y spatial directions
@@ -664,9 +668,9 @@ class kWaveGrid(object):
 
             # define the wavenumber based on the wavenumber components
             k = np.zeros((self.Nx, self.Ny))
-            assert len(kx_vec_dtt.shape) == 3
-            k = np.reshape(kx_vec_dtt, (-1, 1, 1)) ** 2 + k
-            k = np.reshape(ky_vec_dtt, (1, -1, 1)) ** 2 + k
+            # assert len(kx_vec_dtt.shape) == 3
+            k += np.reshape(kx_vec_dtt, (-1, 1)) ** 2
+            k += np.reshape(ky_vec_dtt, (1, -1)) ** 2
             k = np.sqrt(k)
 
             # define product of implied period
