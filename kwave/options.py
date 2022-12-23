@@ -100,13 +100,13 @@ class SimulationOptions(object):
         self.hdf_compression_level = h5_literals.HDF_COMPRESSION_LEVEL
         # check value is an integer between 0 and 9
         assert isinstance(self.hdf_compression_level, int) and 0 <= self.hdf_compression_level <= 9, \
-            "Optional input ''HDFCompressionLevel'' must be an integer between 0 and 9."
+            "Optional input ''hdf_compression_level'' must be an integer between 0 and 9."
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
-            "Optional input ''MultiAxialPMLRatio'' must be a single positive value."
+            "Optional input ''multi_axial_PML_ratio'' must be a single positive value."
 
         assert np.isscalar(self.stream_to_disk) or isinstance(self.stream_to_disk, bool), \
-            "Optional input ''StreamToDisk'' must be a single scalar or Boolean value."
+            "Optional input ''stream_to_disk'' must be a single scalar or Boolean value."
 
         boolean_inputs = {"use_sg": self.use_sg,
                           "data_recast": self.data_recast,
@@ -126,7 +126,7 @@ class SimulationOptions(object):
         # automatically assign the PML size to give small prime factors
         if self.pml_auto and self.pml_inside:
             raise NotImplementedError(
-                "''PMLSize'' set to ''auto'' is only supported with ''PMLInside'' set to false.")
+                "''pml_size'' set to ''auto'' is only supported with ''pml_inside'' set to false.")
 
         if self.pml_size is not None:
             # TODO(walter): remove auto option in exchange for pml_auto=True
@@ -202,9 +202,9 @@ class SimulationOptions(object):
             if len(options.pml_size) > kgrid.dim:
                 if kgrid.dim > 1:
                     raise ValueError(
-                        f"Optional input ''PMLSize'' must be a 1 or {kgrid.dim} element numerical array.")
+                        f"Optional input ''pml_size'' must be a 1 or {kgrid.dim} element numerical array.")
                 else:
-                    raise ValueError(f"Optional input ''PMLSize'' must be a single numerical value.")
+                    raise ValueError(f"Optional input ''pml_size'' must be a single numerical value.")
 
         if kgrid.dim == 1:
             options.pml_x_alpha = 2
@@ -236,7 +236,7 @@ class SimulationOptions(object):
                 if val.size > kgrid.dim:
                     if kgrid.dim > 1:
                         raise ValueError(
-                            f"Optional input ''PMLAlpha'' must be a 1 or {kgrid.dim} element numerical array.")
+                            f"Optional input ''pml_alpha'' must be a 1 or {kgrid.dim} element numerical array.")
                     else:
                         raise ValueError(f"Optional input ''PMLAlpha'' must be a single numerical value.")
 
@@ -266,7 +266,7 @@ class SimulationOptions(object):
 
             if options.use_fd:
                 # input only supported in 1D fluid code
-                assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''UseFD'' only supported in 1D."
+                assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''use_fd'' only supported in 1D."
             # get optimal pml size
             if options.axisymmetric or options.pml_auto:
                 pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
