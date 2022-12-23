@@ -85,7 +85,7 @@ class SimulationOptions(object):
 
     def __post_init__(self):
         assert self.cartesian_interp in ['linear', 'nearest'], \
-            "Optional input ''CartInterp'' must be set to ''linear'' or ''nearest''."
+            "Optional input ''cartesian_interp'' must be set to ''linear'' or ''nearest''."
 
         assert isinstance(self.data_cast, str), "Optional input ''DataCast'' must be a string."
 
