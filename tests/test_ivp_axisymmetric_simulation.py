@@ -20,12 +20,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_axisymmetric_simulation():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
 
     # create the computational grid
     Nx = 128            # number of grid points in the axial (x) direction
@@ -60,11 +54,13 @@ def test_ivp_axisymmetric_simulation():
     sensor.mask[:, sensor.mask[1, :] < 0] = np.nan
 
     # set the input settings
-    input_filename  = f'example_input.h5'
+    input_filename = f'example_ivp_axisymmetric_input.h5'
+    pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
     }
 
     # run the simulation

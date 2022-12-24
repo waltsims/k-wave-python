@@ -26,7 +26,7 @@ def create_storage_variables(
         return flags
 
     num_sensor_points = get_num_of_sensor_points(flags.blank_sensor, flags.binary_sensor_mask, kgrid.k,
-                                                    values.sensor_mask_index, values.sensor_x)
+                                                 values.sensor_mask_index, values.sensor_x)
 
     num_recorded_time_points, stream_data_index = \
         get_num_recorded_time_points(kgrid.dim, kgrid.Nt, opt.stream_to_disk, sensor.record_start_index)
@@ -39,7 +39,8 @@ def create_storage_variables(
     pml_size = Array(pml_size[:kgrid.dim])
     all_vars_size = calculate_all_vars_size(kgrid, opt.pml_inside, pml_size)
 
-    sensor_data = create_sensor_variables(values.record, kgrid, num_sensor_points, num_recorded_time_points, all_vars_size)
+    sensor_data = create_sensor_variables(values.record, kgrid, num_sensor_points, num_recorded_time_points,
+                                          all_vars_size)
 
     create_transducer_buffer(values.transducer_sensor, values.transducer_receive_elevation_focus, sensor,
                              num_sensor_points, num_recorded_time_points, values.sensor_data_buffer_size,
@@ -66,11 +67,24 @@ def set_flags(flags, sensor_x, sensor_mask, is_cartesian_interp):
         # conversion from a Cartesian to binary mask
         num_discarded_points = len(sensor_x) - sensor_mask.sum()
         if num_discarded_points != 0:
-            print(f'  WARNING: {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
-
+            print(
+                f'  WARNING: {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
 
 
 def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, sensor_mask_index, sensor_x):
+    """
+    Returns the number of sensor points for a given set of sensor parameters.
+
+    Args:
+        is_blank_sensor (bool): Whether the sensor is blank or not.
+        is_binary_sensor_mask (bool): Whether the sensor mask is binary or not.
+        kgrid_k (ndarray): An array of k-values for the k-Wave grid.
+        sensor_mask_index (list): List of sensor mask indices.
+        sensor_x (list): List of sensor x-coordinates.
+
+    Returns:
+        int: The number of sensor points.
+    """
     if is_blank_sensor:
         num_sensor_points = kgrid_k.size
     elif is_binary_sensor_mask:
@@ -121,11 +135,11 @@ def create_shift_operators(record: dotdict, record_old: dotdict, kgrid: kWaveGri
                 record.x_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.x * kgrid.dx / 2))
             elif kgrid.dim == 2:
                 record.x_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.x * kgrid.dx / 2))
-                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2) ).T
+                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2)).T
             elif kgrid.dim == 3:
                 record.x_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.x * kgrid.dx / 2))
-                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2) ).T
-                record.z_shift_neg = np.transpose(ifftshift( np.exp(-1j*kgrid.k_vec.z*kgrid.dz/2) ), [1, 2, 0])
+                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2)).T
+                record.z_shift_neg = np.transpose(ifftshift(np.exp(-1j * kgrid.k_vec.z * kgrid.dz / 2)), [1, 2, 0])
         else:
             if kgrid.dim == 1:
                 record.x_shift_neg = 1
@@ -145,20 +159,20 @@ def create_normalized_wavenumber_vectors(record: dotdict, kgrid: kWaveGrid, is_r
         return
 
     # x-dimension
-    record.kx_norm               = kgrid.kx / kgrid.k
+    record.kx_norm = kgrid.kx / kgrid.k
     record.kx_norm[kgrid.k == 0] = 0
-    record.kx_norm               = ifftshift(record.kx_norm)
+    record.kx_norm = ifftshift(record.kx_norm)
 
     # y-dimension
-    record.ky_norm               = kgrid.ky / kgrid.k
+    record.ky_norm = kgrid.ky / kgrid.k
     record.ky_norm[kgrid.k == 0] = 0
-    record.ky_norm               = ifftshift(record.ky_norm)
+    record.ky_norm = ifftshift(record.ky_norm)
 
     # z-dimension
     if kgrid.dim == 3:
-        record.kz_norm               = kgrid.kz / kgrid.k
+        record.kz_norm = kgrid.kz / kgrid.k
         record.kz_norm[kgrid.k == 0] = 0
-        record.kz_norm               = ifftshift(record.kz_norm)
+        record.kz_norm = ifftshift(record.kz_norm)
 
 
 def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_recorded_time_points, all_vars_size):

@@ -22,24 +22,17 @@ from kwave.utils.matrix import resize
 from tests.diff_utils import compare_against_ref
 
 
-def test_pr_2D_TR_circular_sensor():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
+def test_pr_2d_tr_circular_sensor():
     # load the initial pressure distribution from an image and scale
     p0_magnitude = 2
     p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
 
     # assign the grid size and create the computational grid
-    PML_size = 20              # size of the PML in grid points
-    Nx = 256 - 2 * PML_size    # number of grid points in the x direction
-    Ny = 256 - 2 * PML_size    # number of grid points in the y direction
-    x = 10e-3                  # total grid size [m]
-    y = 10e-3                  # total grid size [m]
+    PML_size = 20  # size of the PML in grid points
+    Nx = 256 - 2 * PML_size  # number of grid points in the x direction
+    Ny = 256 - 2 * PML_size  # number of grid points in the y direction
+    x = 10e-3  # total grid size [m]
+    y = 10e-3  # total grid size [m]
     dx = x / Nx                # grid point spacing in the x direction [m]
     dy = y / Ny                # grid point spacing in the y direction [m]
     kgrid = kWaveGrid([Nx, Ny], [dx, dy])
@@ -72,11 +65,16 @@ def test_pr_2D_TR_circular_sensor():
     kgrid.makeTime(medium.sound_speed)
 
     # set the input settings
+    input_filename = f'example_tr_circ_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'Smooth': False,
-        'PMLInside': False,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'smooth_p0': False,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
 
     # run the simulation
@@ -87,4 +85,4 @@ def test_pr_2D_TR_circular_sensor():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_pr_2D_TR_circular_sensor', input_args['SaveToDisk']), 'Files do not match!'
+    assert compare_against_ref(f'out_pr_2D_TR_circular_sensor', input_file_full_path), 'Files do not match!'

@@ -28,8 +28,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_us_bmode_linear_transducer():
-    # pathname for the input and output files
-    pathname = gettempdir()
 
     # simulation settings
     DATA_CAST = 'single'
@@ -220,15 +218,18 @@ def test_us_bmode_linear_transducer():
             medium.density = density_map[:, medium_position:medium_position + Ny, :]
 
             # set the input settings
-            input_filename  = f'example_input_{scan_line_index}.h5'
+            input_filename = f'example_lin_tran_input.h5'
+            pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)
-            # set the input settings
             input_args = {
-                'PMLInside': False,
-                'PMLSize': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'DataCast': DATA_CAST,
-                'DataRecast': True,
-                'SaveToDisk': input_file_full_path
+                'pml_inside': False,
+                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+                'data_cast': DATA_CAST,
+                'data_recast': True,
+                'save_to_disk': True,
+                'input_filename': input_filename,
+                'data_path': pathname,
+                'save_to_disk_exit': True
             }
 
             # run the simulation

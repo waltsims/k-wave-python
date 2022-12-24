@@ -35,7 +35,7 @@ def test_cpp_running_simulations():
     example_number = 1
 
     # input and output filenames (these must have the .h5 extension)
-    input_filename  = 'example_input.h5'
+    input_filename = 'example_input.h5'
     output_filename = 'example_output.h5'
 
     # pathname for the input and output files
@@ -108,7 +108,7 @@ def test_cpp_running_simulations():
 
     # set the input arguments
     input_args = {
-        'PMLSize': pml_size
+        'pml_size': pml_size
     }
 
     if example_number == 1:
@@ -119,7 +119,11 @@ def test_cpp_running_simulations():
             'source': source,
             'sensor': sensor,
             **input_args,
-            'SaveToDisk': input_file_full_path
+            'save_to_disk': True,
+            'save_to_disk_exit': True,
+            'input_filename': input_filename,
+            'data_path': pathname
+            # 'data_path': input_file_full_path
         })
 
         # display the required syntax to run the C++ simulation

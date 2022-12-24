@@ -25,7 +25,7 @@ def kspaceFirstOrderASC(**kwargs):
         options, and all display options are ignored (only command line
         outputs are given). See the k-Wave user manual for more information.
 
-        The function works by appending the optional input 'SaveToDisk' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrderAS to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The
@@ -62,7 +62,7 @@ def kspaceFirstOrderASC(**kwargs):
     """
     # generate the input file and save to disk
     kspaceFirstOrderAS(**kwargs)
-    return kwargs['SaveToDisk']
+    return kwargs['save_to_disk']
 
 
 def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
@@ -175,16 +175,16 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
     pml_x_size, pml_y_size = options.pml_x_size, options.pml_y_size
     c_ref = k_sim.c_ref
 
-    k_sim.pml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False,                 1, False)
+    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1, False)
     k_sim.pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True and options.use_sg, 1, False)
-    k_sim.pml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False,                 2, True)
+    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 2, True)
     k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, True and options.use_sg, 2, True)
 
     # define the k-space, derivative, and shift operators
     # for the x (axial) direction, the operators are the same as normal
     kx_vec = k_sim.kgrid.k_vec.x
-    k_sim.ddx_k_shift_pos = ifftshift( 1j * kx_vec * np.exp( 1j * kx_vec * dx/2) ).T
-    k_sim.ddx_k_shift_neg = ifftshift( 1j * kx_vec * np.exp(-1j * kx_vec * dx/2) ).T
+    k_sim.ddx_k_shift_pos = ifftshift(1j * kx_vec * np.exp(1j * kx_vec * dx / 2)).T
+    k_sim.ddx_k_shift_neg = ifftshift(1j * kx_vec * np.exp(-1j * kx_vec * dx / 2)).T
 
     # for the y (radial) direction
     # when using DTTs:
@@ -206,15 +206,16 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
             # symmetries in WSWS
             kgrid_exp = kWaveGrid([Nx, Ny * 2 - 2], [dx, dy])
         # define operators, rotating y-direction for use with bsxfun
-        k_sim.ddy_k       = ifftshift( 1j * options.k_vec.y ).T
-        k_sim.y_shift_pos = ifftshift( np.exp( 1j * kgrid_exp.k_vec.y * kgrid_exp.dy/2) ).T
-        k_sim.y_shift_neg = ifftshift( np.exp(-1j * kgrid_exp.k_vec.y * kgrid_exp.dy/2) ).T
+        k_sim.ddy_k = ifftshift(1j * kgrid.k_vec.y).T
+        k_sim.y_shift_pos = ifftshift(np.exp(1j * kgrid_exp.k_vec.y * kgrid_exp.dy / 2)).T
+        k_sim.y_shift_neg = ifftshift(np.exp(-1j * kgrid_exp.k_vec.y * kgrid_exp.dy / 2)).T
 
         # define the k-space operator
         if options.use_kspace:
             k_sim.kappa = ifftshift(sinc(c_ref * kgrid_exp.k * dt / 2))
-            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or ((k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
-                k_sim.source_kappa = ifftshift(np.cos (c_ref * kgrid_exp.k * dt / 2))
+            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or (
+                    (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
+                k_sim.source_kappa = ifftshift(np.cos(c_ref * kgrid_exp.k * dt / 2))
         else:
             k_sim.kappa = 1
             k_sim.source_kappa = 1
@@ -225,23 +226,26 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
 
             # define the derivative operators
             k_sim.ddy_k_wswa = -ky_vec.T
-            k_sim.ddy_k_hahs =  ky_vec.T
+            k_sim.ddy_k_hahs = ky_vec.T
         elif options.radial_symmetry == 'WSWS':
             # get the wavenumbers and implied length for the DTTs
             ky_vec, M = k_sim.kgrid.ky_vec_dtt(DiscreteCosine.TYPE_1)
 
             # define the derivative operators
             k_sim.ddy_k_wsws = -ky_vec[1:].T
-            k_sim.ddy_k_haha =  ky_vec[1:].T
+            k_sim.ddy_k_haha = ky_vec[1:].T
 
         # define the k-space operator
         if options.use_kspace:
             # define scalar wavenumber
-            k_dtt = np.sqrt(np.tile(ifftshift(k_sim.kgrid.k_vec.x)**2, [1, k_sim.kgrid.Ny]) + np.tile((ky_vec.T)**2, [k_sim.kgrid.Nx, 1]))
+            k_dtt = np.sqrt(np.tile(ifftshift(k_sim.kgrid.k_vec.x) ** 2, [1, k_sim.kgrid.Ny]) + np.tile((ky_vec.T) ** 2,
+                                                                                                        [k_sim.kgrid.Nx,
+                                                                                                         1]))
 
             # define k-space operators
             k_sim.kappa = sinc(c_ref * k_dtt * k_sim.kgrid.dt / 2)
-            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or ((k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
+            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or (
+                    (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
                 k_sim.source_kappa = np.cos(c_ref * k_dtt * k_sim.kgrid.dt / 2)
 
             # cleanup unused variables
@@ -252,8 +256,8 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
             k_sim.source_kappa = 1
 
     # define staggered and non-staggered grid axial distance
-    k_sim.y_vec    = (k_sim.kgrid.y_vec - k_sim.kgrid.y_vec[0]).T
-    k_sim.y_vec_sg = (k_sim.kgrid.y_vec - k_sim.kgrid.y_vec[0] + k_sim.kgrid.dy/2).T
+    k_sim.y_vec = (k_sim.kgrid.y_vec - k_sim.kgrid.y_vec[0]).T
+    k_sim.y_vec_sg = (k_sim.kgrid.y_vec - k_sim.kgrid.y_vec[0] + k_sim.kgrid.dy / 2).T
 
     # option to run simulations without the spatial staggered grid is not
     # supported for the axisymmetric code

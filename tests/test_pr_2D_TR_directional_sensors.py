@@ -23,12 +23,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_pr_2D_TR_directional_sensors():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
 
     # create the computational grid
     PML_size = 20              # size of the PML in grid points
@@ -72,12 +66,17 @@ def test_pr_2D_TR_directional_sensors():
     kgrid.makeTime(medium.sound_speed)
 
     # set the input arguements
+    input_filename = f'example_tr_dir_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLInside': False,
-        'PMLSize': PML_size,
-        'Smooth': False,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'pml_size': PML_size,
+        'smooth_p0': False,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
 
     # run the simulation for omnidirectional detector elements
@@ -88,7 +87,7 @@ def test_pr_2D_TR_directional_sensors():
         'sensor': deepcopy(sensor),
         **input_args
     })
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_args['SaveToDisk']), 'Files do not match!'
+    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
 
     # define the directionality of the sensor elements
     directivity = kSensorDirectivity()
@@ -111,4 +110,4 @@ def test_pr_2D_TR_directional_sensors():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_args['SaveToDisk']), 'Files do not match!'
+    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'

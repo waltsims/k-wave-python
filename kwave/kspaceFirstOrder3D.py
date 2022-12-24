@@ -1,5 +1,3 @@
-import tempfile
-
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
@@ -21,7 +19,7 @@ def kspaceFirstOrder3DG(**kwargs):
         line outputs are given). See the k-Wave user manual for more
         information.
 
-        The function works by appending the optional input 'SaveToDisk' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrder3D to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The
@@ -62,7 +60,7 @@ def kspaceFirstOrder3DC(**kwargs):
         ignored (only command line outputs are given). See the k-Wave user
         manual for more information.
 
-        The function works by appending the optional input 'SaveToDisk' to
+        The function works by appending the optional input 'save_to_disk' to
         the user inputs and then calling kspaceFirstOrder3D to save the input
         files to disk. The contents of sensor.record (if set) are parsed as
         input flags, and the C++ code is run using the system command. The
@@ -261,6 +259,8 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
     # =========================================================================
     options = k_sim.options
 
+    # TODO(walter): this could all be moved inside of ksim
+
     # interpolate the values of the density at the staggered grid locations
     # where sgx = (x + dx/2, y, z), sgy = (x, y + dy/2, z), sgz = (x, y, z + dz/2)
     k_sim.rho0 = np.atleast_1d(k_sim.rho0)
@@ -407,9 +407,7 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
         if options.save_to_disk_exit:
             return
 
-        input_filename = k_sim.options.save_to_disk
-        output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
-
         executor = Executor(device='gpu')
-        sensor_data = executor.run_simulation(input_filename, output_filename, options='--p_raw')
+        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
+                                              options='--p_raw')
         return k_sim.sensor.combine_sensor_data(sensor_data)

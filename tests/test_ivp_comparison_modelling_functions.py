@@ -22,18 +22,11 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_comparison_modelling_functions():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
     example_number = 1
     # 1: non-absorbing medium, no absorbing boundary layer
     # 2: non-absorbing medium, using PML and ExpandGrid
     # 3: absorbing medium, no absorbing boundary layer
     # 4: absorbing medium, using PML and ExpandGrid
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
 
     # create the computational grid
     Nx = 128           # number of grid points in the x (row) direction
@@ -79,12 +72,15 @@ def test_ivp_comparison_modelling_functions():
 
     # run the simulation using the first order code
     # run the first simulation
-    input_filename  = f'example_input.h5'
+    input_filename = f'example_ivp_comp_input.h5'
+    pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLAlpha': 0,
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'pml_alpha': 0,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -101,10 +97,16 @@ def test_ivp_comparison_modelling_functions():
     # kspaceSecondOrder(kgrid, medium, source, sensor, 'ExpandGrid', false, save_args{:})
 
     # run the simulation using the first order code
+    input_filename = f'example_comparison_modeling_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
+
     input_args = {
-        'PMLInside': False,
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,

@@ -67,12 +67,17 @@ def test_pr_2D_FFT_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
+    input_filename = f'example_fft_line_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLInside': False,
-        'PMLSize': PML_size,
-        'Smooth': False,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'pml_size': PML_size,
+        'smooth_p0': False,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
 
     # run the simulation
@@ -83,4 +88,4 @@ def test_pr_2D_FFT_line_sensor():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_pr_2D_FFT_line_sensor', input_args['SaveToDisk']), 'Files do not match!'
+    assert compare_against_ref(f'out_pr_2D_FFT_line_sensor', input_file_full_path), 'Files do not match!'

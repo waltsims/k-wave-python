@@ -165,12 +165,12 @@ if __name__ == '__main__':
             input_file_full_path = os.path.join(pathname, input_filename)
             # set the input settings
             input_args = {
-                'PMLInside': False,
-                'PMLSize': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'DataCast': DATA_CAST,
-                'DataRecast': True,
-                'SaveToDisk': input_file_full_path,
-                'SaveToDiskExit': False,
+                'pml_inside': False,
+                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+                'data_cast': DATA_CAST,
+                'data_recast': True,
+                'save_to_disk': input_file_full_path,
+                'save_to_disk_exit': False,
             }
 
             # run the simulation

@@ -63,6 +63,8 @@ def expand_grid_matrices(
 def expand_kgrid(kgrid, is_axisymmetric, pml_size):
     Nt_temp, dt_temp = kgrid.Nt, kgrid.dt
 
+    pml_size = pml_size.squeeze()
+
     if kgrid.dim == 1:
         new_size            = kgrid.N + 2 * pml_size
     elif kgrid.dim == 2:

@@ -22,13 +22,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_sd_directional_array_elements():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
     # create the computational grid
     Nx = 180  # number of grid points in the x (row) direction
     Ny = 180  # number of grid points in the y (column) direction
@@ -94,12 +87,14 @@ def test_sd_directional_array_elements():
     # source continues up to the edge of the domain (and from there infinitely,
     # because of the periodic assumption implicit in pseudospectral methods)
     # input arguments
-    input_filename = f'example_input.h5'
+    input_filename = f'example_sd_direct_input.h5'
+    pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLAlpha': np.array([2, 0]),
-        'SaveToDisk': input_file_full_path,
-        'SaveToDiskExit': True
+        'pml_alpha': np.array([2, 0]),
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'save_to_disk_exit': True
     }
 
     # run the simulation

@@ -20,9 +20,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_us_beam_patterns():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
     # simulation settings
     DATA_CAST = 'single'       # set to 'single' or 'gpuArray-single' to speed up computations
     MASK_PLANE = 'xy'          # set to 'xy' or 'xz' to generate the beam pattern in different planes
@@ -157,18 +154,23 @@ def test_us_beam_patterns():
     # =========================================================================
 
     # set the input settings
+    input_filename = f'example_beam_pat_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLInside': False,
-        'PMLSize': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
-        'DataCast': DATA_CAST,
-        'DataRecast': True,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+        'data_cast': DATA_CAST,
+        'data_recast': True,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
 
     # stream the data to disk in blocks of 100 if storing the complete time history
     if not USE_STATISTICS:
-        input_args['StreamToDisk'] = 100
+        input_args['stream_to_disk'] = 100
 
     # run the simulation
     kspaceFirstOrder3DC(**{
@@ -178,5 +180,5 @@ def test_us_beam_patterns():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_us_beam_patterns', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_us_beam_patterns', input_file_full_path), \
         'Files do not match!'

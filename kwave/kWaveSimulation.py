@@ -29,6 +29,7 @@ class kWaveSimulation(object):
                  sensor,
                  **kwargs
                  ):
+        self.precision = None
         self.kgrid = kgrid
         self.medium = medium
         self.source = source
@@ -467,9 +468,10 @@ class kWaveSimulation(object):
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
         # run subscript to check optional inputs
-        self.options = SimulationOptions.init(self.kgrid, self.elastic_code, self.axisymmetric, **self.kwargs)
+        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, **self.kwargs)
         opt = self.options
 
+        # TODO(Walter): clean this up with getters in simulation options pml size
         pml_x_size, pml_y_size, pml_z_size = opt.pml_x_size, opt.pml_y_size, opt.pml_z_size
         pml_size = Array([pml_x_size, pml_y_size, pml_z_size])
 
@@ -714,7 +716,7 @@ class kWaveSimulation(object):
                                     raise ValueError('sensor.mask cuboid corners must be within the grid.')
 
                         # create a binary mask for display from the list of corners
-                        # TODO FARID mask should be init in sensor not here
+                        # TODO FARID mask should be option_factory in sensor not here
                         self.sensor.mask = np.zeros_like(self.kgrid.k, dtype=bool)
                         for cuboid_index in range(self.record.cuboid_corners_list.shape[1]):
                             if self.kgrid.dim == 1:
@@ -1082,6 +1084,7 @@ class kWaveSimulation(object):
         if not user_medium_density_input and (self.source_ux or self.source_uy or self.source_uz or self.record.u or self.record.u_max or self.record.u_rms):
             raise ValueError('medium.density must be explicitly defined if velocity inputs or outputs are used, even in homogeneous media.')
 
+        # TODO(walter): move to check medium
         # enforce density input if nonlinear equations are being used
         if not user_medium_density_input and self.medium.is_nonlinear():
             raise ValueError('medium.density must be explicitly defined if medium.BonA is specified.')
@@ -1214,7 +1217,7 @@ class kWaveSimulation(object):
 
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
-        if not opt.pml_inside:
+        if opt.pml_inside is False:
             expand_results = expand_grid_matrices(
                 self.kgrid, self.medium, self.source, self.sensor, self.options,
                 dotdict({
@@ -1330,7 +1333,8 @@ class kWaveSimulation(object):
                 self.sensor_mask_index = []
 
         # run subscript to create storage variables if not saving to disk
-        if self.use_sensor and not isinstance(self.options.save_to_disk, str):
+        # TODO (Walter): this case is very broken but save to disk is currently always true!
+        if self.use_sensor and not self.options.save_to_disk:
             result = create_storage_variables(
                 self.kgrid, self.sensor, self.options,
                 dotdict({
@@ -1338,16 +1342,14 @@ class kWaveSimulation(object):
                     'time_rev': self.time_rev,
                     'blank_sensor': self.blank_sensor,
                     'record_u_split_field': self.record_u_split_field,
-                    'source_u_labelled': self.source_u_labelled,
                     'axisymmetric': self.axisymmetric,
                     'reorder_data': self.reorder_data,
-                    'transducer_receive_elevation_focus': self.transducer_receive_elevation_focus,
                 }),
                 dotdict({
-                    'sensor_x': self.sensor_x,
-                    'sensor_mask_index': self.sensor_mask_index,
+                    'sensor_x': self.sensor.x,
+                    'sensor_mask_index': self.sensor.mask_index,
                     'record': self.record,
-                    'sensor_data_buffer_size': self.sensor_data_buffer_size,
+                    'sensor_data_buffer_size': self.sensor.data_buffer_size,
                 })
             )
             self.binary_sensor_mask                 = result.binary_sensor_mask
@@ -1362,7 +1364,7 @@ class kWaveSimulation(object):
         Returns:
             None
         """
-        if not self.elastic_code and not isinstance(self.options.save_to_disk, str):
+        if not self.elastic_code and not self.options.save_to_disk:
             self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(self.kgrid, self.medium, self.equation_of_state)
 
     def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:

@@ -20,10 +20,7 @@ from kwave.utils.mapgen import make_disc, make_cart_circle
 from tests.diff_utils import compare_against_ref
 
 
-def test_na_controlling_the_PML():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
+def test_na_controlling_the_pml():
     # modify this parameter to run the different examples
     example_number = 1
     # 1: PML with no absorption
@@ -68,10 +65,15 @@ def test_na_controlling_the_PML():
     sensor = kSensor(sensor_mask)
 
     # Example 1
+    input_filename = f'example_ivp_cont_pml_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLAlpha': 0,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_alpha': 0,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -80,14 +82,16 @@ def test_na_controlling_the_PML():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_1', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_na_controlling_the_PML/input_1', input_file_full_path), \
         'Files do not match!'
 
     # Example 2
     input_args = {
-        'PMLAlpha': 1e6,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_alpha': 1e6,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -96,14 +100,16 @@ def test_na_controlling_the_PML():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_2', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_na_controlling_the_PML/input_2', input_file_full_path), \
         'Files do not match!'
 
     # Example 3
     input_args = {
-        'PMLSize': 2,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_size': 2,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -112,14 +118,16 @@ def test_na_controlling_the_PML():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_3', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_na_controlling_the_PML/input_3', input_file_full_path), \
         'Files do not match!'
 
     # Example 4
     input_args = {
-        'PMLInside': False,
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'pml_inside': False,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -128,5 +136,5 @@ def test_na_controlling_the_PML():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_4', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_na_controlling_the_PML/input_4', input_file_full_path), \
         'Files do not match!'

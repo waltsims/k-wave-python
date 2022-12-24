@@ -88,10 +88,15 @@ def test_ivp_photoacoustic_waveforms():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
+    input_filename = f'example_ivp_pa_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'DataCast': 'single',
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'data_cast': 'single',
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -100,7 +105,7 @@ def test_ivp_photoacoustic_waveforms():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_1', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
         'Files do not match!'
 
     # =========================================================================
@@ -122,9 +127,11 @@ def test_ivp_photoacoustic_waveforms():
 
     # run the simulation
     input_args = {
-        'DataCast': 'single',
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'data_cast': 'single',
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder3DC(**{
         'medium': medium,
@@ -133,5 +140,5 @@ def test_ivp_photoacoustic_waveforms():
         'sensor': sensor,
         **input_args
     })
-    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_2', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \
         'Files do not match!'

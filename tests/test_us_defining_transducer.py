@@ -142,11 +142,17 @@ def test_us_defining_transducer():
     sensor = kSensor(sensor_mask)
 
     # set the input settings
+    input_filename = f'example_def_tran_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'PMLInside': False,
-        'PMLSize': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-        'DataCast': DATA_CAST,
-        'SaveToDisk': input_file_full_path
+        'pml_inside': False,
+        'pml_size': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
+        'data_cast': DATA_CAST,
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
 
     # run the simulation

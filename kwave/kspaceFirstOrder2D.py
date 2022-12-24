@@ -22,7 +22,7 @@ def kspaceFirstOrder2DG(**kwargs):
     all input options, and all display options are ignored (only command
     line outputs are given). See the k-Wave user manual for more
     information.
-    The function works by appending the optional input 'SaveToDisk' to
+    The function works by appending the optional input 'save_to_disk' to
     the user inputs and then calling kspaceFirstOrder2D to save the input
     files to disk. The contents of sensor.record (if set) are parsed as
     input flags, and the C++ code is run using the system command. The
@@ -56,7 +56,7 @@ def kspaceFirstOrder2DC(**kwargs):
     kspaceFirstOrder3DC. Note, the C++ code does not support all input
     options, and all display options are ignored (only command line
     outputs are given). See the k-Wave user manual for more information.
-    The function works by appending the optional input 'SaveToDisk' to
+    The function works by appending the optional input 'save_to_disk' to
     the user inputs and then calling kspaceFirstOrder2D to save the input
     files to disk. The contents of sensor.record (if set) are parsed as
     input flags, and the C++ code is run using the system command. The
@@ -92,7 +92,7 @@ def kspaceFirstOrder2DC(**kwargs):
     """
     # generate the input file and save to disk
     kspaceFirstOrder2D(**kwargs)
-    return kwargs['SaveToDisk']
+    return kwargs['save_to_disk']
 
 
 def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):

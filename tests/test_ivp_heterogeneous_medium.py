@@ -21,13 +21,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_heterogeneous_medium():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
     # create the computational grid
     Nx = 128           # number of grid points in the x (row) direction
     Ny = 128           # number of grid points in the y (column) direction
@@ -67,9 +60,14 @@ def test_ivp_heterogeneous_medium():
 
     # run the simulation with optional inputs for plotting the simulation
     # layout in addition to removing the PML from the display
+    input_filename = f'example_ivp_hetero_input.h5'
+    pathname = gettempdir()
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
-        'SaveToDisk': os.path.join(pathname, f'example_input.h5'),
-        'SaveToDiskExit': True
+        'save_to_disk': True,
+        'input_filename': input_filename,
+        'data_path': pathname,
+        'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
         'medium': medium,
@@ -79,5 +77,5 @@ def test_ivp_heterogeneous_medium():
         **input_args
     })
 
-    assert compare_against_ref(f'out_ivp_heterogeneous_medium', input_args['SaveToDisk']), \
+    assert compare_against_ref(f'out_ivp_heterogeneous_medium', input_file_full_path), \
         'Files do not match!'
