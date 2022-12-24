@@ -22,13 +22,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_loading_external_image():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
     # load the initial pressure distribution from an image and scale the
     # magnitude
     p0_magnitude = 3
@@ -56,13 +49,13 @@ def test_ivp_loading_external_image():
     sensor = kSensor(sensor_mask)
 
     # run the first simulation
-    input_filename = f'example_ivp_ext_img'
+    input_filename = f'example_ivp_ext_img_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
 

@@ -35,14 +35,14 @@ def test_cpp_running_simulations():
     example_number = 1
 
     # input and output filenames (these must have the .h5 extension)
-    input_filename = 'example'
+    input_filename = 'example_input.h5'
     output_filename = 'example_output.h5'
 
     # pathname for the input and output files
     pathname = gettempdir()
 
     # remove input file if it already exists
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     output_file_full_path = os.path.join(pathname, output_filename)
     if example_number == 1 and os.path.exists(input_file_full_path):
         os.remove(input_file_full_path)
@@ -121,8 +121,8 @@ def test_cpp_running_simulations():
             **input_args,
             'save_to_disk': True,
             'save_to_disk_exit': True,
-            'data_name': input_filename,
-            'data_path': gettempdir()
+            'input_filename': input_filename,
+            'data_path': pathname
             # 'data_path': input_file_full_path
         })
 

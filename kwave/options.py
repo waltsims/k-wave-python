@@ -71,10 +71,9 @@ class SimulationOptions(object):
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = 'WSWA-FFT'
     multi_axial_PML_ratio: float = 0.1
-    data_path: str = gettempdir()
-    data_name: Optional[str] = None
-    input_filename: Optional[str] = None
-    output_filename: Optional[str] = None
+    data_path: Optional[str] = field(default_factory=lambda: gettempdir())
+    output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}kwave_input.h5")
+    input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}kwave_output.h5")
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
@@ -140,24 +139,13 @@ class SimulationOptions(object):
         self.pml_y_alpha = self.pml_alpha if self.pml_y_alpha is None else self.pml_y_alpha
         self.pml_z_alpha = self.pml_alpha if self.pml_z_alpha is None else self.pml_z_alpha
 
-        # check for a user defined name for the input and output files
-        # TODO(walter): could this be the default value?
-        if self.data_name:
-            name_prefix = self.data_name
-        else:
-            # set the filename inputs to store data in the default temp directory
-            date_string = get_date_string()
-            name_prefix = date_string + "kwave"
-
-        input_filename = f'{name_prefix}_input.h5'
-        output_filename = f'{name_prefix}_output.h5'
+        # add pathname to input and output filenames
+        self.input_filename = os.path.join(self.data_path, self.input_filename)
+        self.output_filename = os.path.join(self.data_path, self.output_filename)
 
         assert self.use_fd is None or (np.issubdtype(self.use_fd, np.number) and self.use_fd in [2, 4]), \
             "Optional input ''UseFD'' can only be set to 2, 4."
 
-        # add pathname to input and output filenames
-        self.input_filename = os.path.join(self.data_path, input_filename)
-        self.output_filename = os.path.join(self.data_path, output_filename)
 
     @staticmethod
     def option_factory(kgrid, elastic_code: bool, axisymmetric: bool, **kwargs):

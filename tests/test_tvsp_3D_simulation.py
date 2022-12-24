@@ -10,29 +10,25 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kSensor
 from kwave.utils.filters import filter_time_series
 from tests.diff_utils import compare_against_ref
 
 
 def test_tvsp_3D_simulation():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
     # create the computational grid
-    Nx = 64            # number of grid points in the x direction
-    Ny = 64            # number of grid points in the y direction
-    Nz = 64            # number of grid points in the z direction
-    dx = 0.1e-3        # grid point spacing in the x direction [m]
+    Nx = 64  # number of grid points in the x direction
+    Ny = 64  # number of grid points in the y direction
+    Nz = 64  # number of grid points in the z direction
+    dx = 0.1e-3  # grid point spacing in the x direction [m]
     dy = 0.1e-3        # grid point spacing in the y direction [m]
     dz = 0.1e-3        # grid point spacing in the z direction [m]
     kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
@@ -71,16 +67,16 @@ def test_tvsp_3D_simulation():
 
     # define the field parameters to record
     sensor.record = ['p', 'p_final']
-    input_filename = f'example_tvsp_3d'
+    input_filename = f'example_tvsp_3d_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     # input arguments
     input_args = {
         'data_cast': 'single',
         'cart_interp': 'nearest',
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
 

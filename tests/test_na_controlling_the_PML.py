@@ -21,9 +21,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_na_controlling_the_pml():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
     # modify this parameter to run the different examples
     example_number = 1
     # 1: PML with no absorption
@@ -68,14 +65,14 @@ def test_na_controlling_the_pml():
     sensor = kSensor(sensor_mask)
 
     # Example 1
-    input_filename = f'example_ivp_cont_pml'
+    input_filename = f'example_ivp_cont_pml_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'pml_alpha': 0,
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
@@ -92,8 +89,8 @@ def test_na_controlling_the_pml():
     input_args = {
         'pml_alpha': 1e6,
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
@@ -110,8 +107,8 @@ def test_na_controlling_the_pml():
     input_args = {
         'pml_size': 2,
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
@@ -128,8 +125,8 @@ def test_na_controlling_the_pml():
     input_args = {
         'pml_inside': False,
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{

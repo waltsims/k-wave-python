@@ -131,16 +131,16 @@ def test_us_transducer_as_sensor():
     # transducer.properties
 
     # set the input settings
-    input_filename = f'example_tran_as_sen'
+    input_filename = f'example_tran_as_sen_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'pml_inside': False,
         'pml_size': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
         'data_cast': DATA_CAST,
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
 

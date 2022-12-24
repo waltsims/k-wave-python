@@ -12,10 +12,11 @@ from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kSensor
 from kwave.utils.interp import cart2grid
 from kwave.utils.io import load_image
 from kwave.utils.mapgen import make_cart_circle
@@ -24,15 +25,8 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_na_optimising_performance():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
     # change scale to 2 to increase the computational time
     scale = 1
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
 
     # assign the grid size and create the computational grid
     Nx = 256 * scale           # number of grid points in the x direction
@@ -64,13 +58,13 @@ def test_na_optimising_performance():
     # run the simulation
 
     # 1: default input options
-    input_filename = f'example_opt_perf'
+    input_filename = f'example_opt_perf_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{
@@ -86,8 +80,8 @@ def test_na_optimising_performance():
     # 2: nearest neighbour Cartesian interpolation and plotting switched off
     input_args = {
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     # convert Cartesian sensor mask to binary mask
@@ -107,8 +101,8 @@ def test_na_optimising_performance():
     input_args = {
         'data_cast': 'single',
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
     kspaceFirstOrder2DC(**{

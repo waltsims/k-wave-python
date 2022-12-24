@@ -20,8 +20,6 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_3D_simulation():
-    # pathname for the input and output files
-    pathname = gettempdir()
 
     # =========================================================================
     # SIMULATION
@@ -70,15 +68,15 @@ def test_ivp_3D_simulation():
     sensor = kSensor(sensor_mask)
 
     # input arguments
-    input_filename = f'example_ivp_3D'
+    input_filename = f'example_ivp_3D_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'data_cast': 'single',
         'cart_interp': 'nearest',
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
 

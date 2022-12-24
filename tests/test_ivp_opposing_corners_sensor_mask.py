@@ -9,29 +9,25 @@
 import os
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kSensor
 from kwave.utils.mapgen import make_disc
 from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_opposing_corners_sensor_mask():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
     # create the computational grid
-    Nx = 128            # number of grid points in the x (row) direction
-    Ny = 128            # number of grid points in the y (column) direction
-    dx = 0.1e-3         # grid point spacing in the x direction [m]
-    dy = 0.1e-3         # grid point spacing in the y direction [m]
+    Nx = 128  # number of grid points in the x (row) direction
+    Ny = 128  # number of grid points in the y (column) direction
+    dx = 0.1e-3  # grid point spacing in the x direction [m]
+    dy = 0.1e-3  # grid point spacing in the y direction [m]
     kgrid = kWaveGrid([Nx, Ny], [dx, dy])
 
     # define the properties of the propagation medium
@@ -75,13 +71,13 @@ def test_ivp_opposing_corners_sensor_mask():
     sensor = kSensor(sensor_mask)
 
     # input arguments
-    input_filename = f'example_ivp_corn'
+    input_filename = f'example_ivp_corn_input.h5'
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')
+    input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
         'save_to_disk': True,
-        'data_name': input_filename,
-        'data_path': gettempdir(),
+        'input_filename': input_filename,
+        'data_path': pathname,
         'save_to_disk_exit': True
     }
 

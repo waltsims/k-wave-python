@@ -10,11 +10,14 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.mapgen import make_ball
 from kwave.utils.signals import tone_burst
@@ -29,16 +32,9 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_us_bmode_phased_array():
-    # pathname for the input and output files
-    pathname = gettempdir()
-
     # simulation settings
     DATA_CAST = 'single'
     RUN_SIMULATION = True
-
-    # =========================================================================
-    # DEFINE THE K-WAVE GRID
-    # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
     PML_X_SIZE = 15  # [grid points]
@@ -199,17 +195,17 @@ def test_us_bmode_phased_array():
             not_transducer.steering_angle = steering_angles[angle_index - 1]
 
             # set the input settings
-            input_filename = f'example_input_{angle_index}'
+            input_filename = f'example_input_{angle_index}_input.h5'
             pathname = gettempdir()
-            input_file_full_path = os.path.join(pathname, input_filename + '_input.h5')            # set the input settings
+            input_file_full_path = os.path.join(pathname, input_filename)  # set the input settings
             input_args = {
                 'pml_inside': False,
                 'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
                 'data_cast': DATA_CAST,
                 'data_recast': True,
                 'save_to_disk': True,
-                'data_name': input_filename,
-                'data_path': gettempdir(),
+                'input_filename': input_filename,
+                'data_path': pathname,
                 'save_to_disk_exit': True
             }
 
