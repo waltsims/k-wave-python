@@ -86,10 +86,10 @@ class SimulationOptions(object):
         assert self.cartesian_interp in ['linear', 'nearest'], \
             "Optional input ''cartesian_interp'' must be set to ''linear'' or ''nearest''."
 
-        assert isinstance(self.data_cast, str), "Optional input ''DataCast'' must be a string."
+        assert isinstance(self.data_cast, str), "Optional input ''data_cast'' must be a string."
 
         assert self.data_cast in ['off', 'double', 'single'], \
-            "Invalid input for ''DataCast''."
+            "Invalid input for ''data_cast''."
 
         if self.data_cast == 'double':
             self.data_cast = 'off'
@@ -226,7 +226,7 @@ class SimulationOptions(object):
                         raise ValueError(
                             f"Optional input ''pml_alpha'' must be a 1 or {kgrid.dim} element numerical array.")
                     else:
-                        raise ValueError(f"Optional input ''PMLAlpha'' must be a single numerical value.")
+                        raise ValueError(f"Optional input ''pml_alpha'' must be a single numerical value.")
 
                 # assign input based on number of dimensions
                 if kgrid.dim == 1:

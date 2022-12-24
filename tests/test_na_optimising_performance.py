@@ -96,7 +96,7 @@ def test_na_optimising_performance():
     assert compare_against_ref(f'out_na_optimising_performance/input_2', input_file_full_path), \
         'Files do not match!'
 
-    # 3: as above with 'DataCast' set to 'single'
+    # 3: as above with 'data_cast' set to 'single'
     # set input arguments
     input_args = {
         'data_cast': 'single',
