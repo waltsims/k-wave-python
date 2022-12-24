@@ -9,11 +9,15 @@
 import os
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 from tests.diff_utils import compare_against_ref

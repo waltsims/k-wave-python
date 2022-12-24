@@ -1,11 +1,14 @@
+import os
 import tempfile
 
+import numpy as np
 from numpy.fft import ifftshift
 
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import *
+from kwave.kspaceFirstOrder import kspaceFirstOrderC, kspaceFirstOrderG
+from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc

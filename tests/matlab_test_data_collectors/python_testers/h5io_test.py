@@ -1,6 +1,10 @@
-from kwave.utils.io import *
-import numpy as np
+import os
 from pathlib import Path
+
+import h5py
+import numpy as np
+
+from kwave.utils.io import write_matrix, write_attributes, write_grid, write_flags
 
 
 def compare_h5_attributes(local_h5_path, ref_path):
