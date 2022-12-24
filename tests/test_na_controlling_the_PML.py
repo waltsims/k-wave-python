@@ -12,10 +12,11 @@ from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.ktransducer import *
 from kwave.utils.mapgen import make_disc, make_cart_circle
 from tests.diff_utils import compare_against_ref
 
@@ -65,7 +66,7 @@ def test_na_controlling_the_pml():
     sensor = kSensor(sensor_mask)
 
     # Example 1
-    input_filename = f'example_ivp_cont_pml_input.h5'
+    input_filename = f'input_1.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     input_args = {
