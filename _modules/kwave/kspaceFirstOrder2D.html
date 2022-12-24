@@ -275,7 +275,7 @@
 <span class="sd">    all input options, and all display options are ignored (only command</span>
 <span class="sd">    line outputs are given). See the k-Wave user manual for more</span>
 <span class="sd">    information.</span>
-<span class="sd">    The function works by appending the optional input &#39;SaveToDisk&#39; to</span>
+<span class="sd">    The function works by appending the optional input &#39;save_to_disk&#39; to</span>
 <span class="sd">    the user inputs and then calling kspaceFirstOrder2D to save the input</span>
 <span class="sd">    files to disk. The contents of sensor.record (if set) are parsed as</span>
 <span class="sd">    input flags, and the C++ code is run using the system command. The</span>
@@ -309,7 +309,7 @@
 <span class="sd">    kspaceFirstOrder3DC. Note, the C++ code does not support all input</span>
 <span class="sd">    options, and all display options are ignored (only command line</span>
 <span class="sd">    outputs are given). See the k-Wave user manual for more information.</span>
-<span class="sd">    The function works by appending the optional input &#39;SaveToDisk&#39; to</span>
+<span class="sd">    The function works by appending the optional input &#39;save_to_disk&#39; to</span>
 <span class="sd">    the user inputs and then calling kspaceFirstOrder2D to save the input</span>
 <span class="sd">    files to disk. The contents of sensor.record (if set) are parsed as</span>
 <span class="sd">    input flags, and the C++ code is run using the system command. The</span>
@@ -345,7 +345,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># generate the input file and save to disk</span>
     <span class="n">kspaceFirstOrder2D</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDisk&#39;</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;save_to_disk&#39;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="kspaceFirstOrder2D"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrder2D</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

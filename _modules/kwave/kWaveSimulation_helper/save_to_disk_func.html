@@ -275,7 +275,7 @@
     <span class="c1"># check for a binary sensor mask or cuboid corners</span>
     <span class="c1"># modified by Farid | disabled temporarily!</span>
     <span class="c1"># assert self.binary_sensor_mask or self.cuboid_corners, \</span>
-    <span class="c1">#     &quot;Optional input &#39;&#39;SaveToDisk&#39;&#39; only supported for sensor masks defined as a binary matrix or the opposing corners of a rectangle (2D) or cuboid (3D).&quot;</span>
+    <span class="c1">#     &quot;Optional input &#39;&#39;save_to_disk&#39;&#39; only supported for sensor masks defined as a binary matrix or the opposing corners of a rectangle (2D) or cuboid (3D).&quot;</span>
 
     <span class="c1"># =========================================================================</span>
     <span class="c1"># VARIABLE LIST</span>
@@ -305,7 +305,7 @@
     <span class="c1"># =========================================================================</span>
 
     <span class="n">remove_z_dimension</span><span class="p">(</span><span class="n">float_variables</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
-    <span class="n">save_file</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">,</span> <span class="n">integer_variables</span><span class="p">,</span> <span class="n">float_variables</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">hdf_compression_level</span><span class="p">)</span>
+    <span class="n">save_file</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">integer_variables</span><span class="p">,</span> <span class="n">float_variables</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">hdf_compression_level</span><span class="p">)</span>
 
     <span class="c1"># update command line status</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  completed in &#39;</span><span class="p">,</span> <span class="n">scale_time</span><span class="p">(</span><span class="n">TicToc</span><span class="o">.</span><span class="n">toc</span><span class="p">()))</span></div>
@@ -705,7 +705,7 @@
         <span class="n">save_mat_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">integer_variables</span><span class="p">,</span> <span class="n">float_variables</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># throw error for unknown filetype</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;unknown file extension for &#39;&#39;SaveToDisk&#39;&#39; filename&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;unknown file extension for &#39;&#39;save_to_disk&#39;&#39; filename&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="save_h5_file"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.save_to_disk_func.html#kwave.kWaveSimulation_helper.save_to_disk_func.save_h5_file">[docs]</a><span class="k">def</span> <span class="nf">save_h5_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">integer_variables</span><span class="p">,</span> <span class="n">float_variables</span><span class="p">,</span> <span class="n">hdf_compression_level</span><span class="p">):</span>

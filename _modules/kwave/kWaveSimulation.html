@@ -282,6 +282,7 @@
                  <span class="n">sensor</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span>
                  <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span> <span class="o">=</span> <span class="n">kgrid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">medium</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
@@ -720,9 +721,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_calling_func_name_and_dim</span><span class="p">(</span><span class="n">calling_func_name</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">)</span>
 
         <span class="c1"># run subscript to check optional inputs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">SimulationOptions</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">SimulationOptions</span><span class="o">.</span><span class="n">option_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span>
 
+        <span class="c1"># TODO(Walter): clean this up with getters in simulation options pml size</span>
         <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_z_size</span>
         <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span><span class="p">])</span>
 
@@ -967,7 +969,7 @@
                                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sensor.mask cuboid corners must be within the grid.&#39;</span><span class="p">)</span>
 
                         <span class="c1"># create a binary mask for display from the list of corners</span>
-                        <span class="c1"># TODO FARID mask should be init in sensor not here</span>
+                        <span class="c1"># TODO FARID mask should be option_factory in sensor not here</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">cuboid_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">cuboid_corners_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1335,6 +1337,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">user_medium_density_input</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_ux</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_uy</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_uz</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">u</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">u_max</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">u_rms</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.density must be explicitly defined if velocity inputs or outputs are used, even in homogeneous media.&#39;</span><span class="p">)</span>
 
+        <span class="c1"># TODO(walter): move to check medium</span>
         <span class="c1"># enforce density input if nonlinear equations are being used</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">user_medium_density_input</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">is_nonlinear</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.density must be explicitly defined if medium.BonA is specified.&#39;</span><span class="p">)</span>
@@ -1467,7 +1470,7 @@
 
         <span class="c1"># expand the computational grid if the PML is set to be outside the input</span>
         <span class="c1"># grid defined by the user</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">expand_results</span> <span class="o">=</span> <span class="n">expand_grid_matrices</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
                 <span class="n">dotdict</span><span class="p">({</span>
@@ -1583,7 +1586,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">sensor_mask_index</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># run subscript to create storage variables if not saving to disk</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sensor</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># TODO (Walter): this case is very broken but save to disk is currently always true!</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sensor</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">create_storage_variables</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
                 <span class="n">dotdict</span><span class="p">({</span>
@@ -1591,16 +1595,14 @@
                     <span class="s1">&#39;time_rev&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_rev</span><span class="p">,</span>
                     <span class="s1">&#39;blank_sensor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blank_sensor</span><span class="p">,</span>
                     <span class="s1">&#39;record_u_split_field&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">record_u_split_field</span><span class="p">,</span>
-                    <span class="s1">&#39;source_u_labelled&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_u_labelled</span><span class="p">,</span>
                     <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
                     <span class="s1">&#39;reorder_data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorder_data</span><span class="p">,</span>
-                    <span class="s1">&#39;transducer_receive_elevation_focus&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">transducer_receive_elevation_focus</span><span class="p">,</span>
                 <span class="p">}),</span>
                 <span class="n">dotdict</span><span class="p">({</span>
-                    <span class="s1">&#39;sensor_x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_x</span><span class="p">,</span>
-                    <span class="s1">&#39;sensor_mask_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_mask_index</span><span class="p">,</span>
+                    <span class="s1">&#39;sensor_x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                    <span class="s1">&#39;sensor_mask_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask_index</span><span class="p">,</span>
                     <span class="s1">&#39;record&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="p">,</span>
-                    <span class="s1">&#39;sensor_data_buffer_size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_data_buffer_size</span><span class="p">,</span>
+                    <span class="s1">&#39;sensor_data_buffer_size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">data_buffer_size</span><span class="p">,</span>
                 <span class="p">})</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">binary_sensor_mask</span>                 <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">binary_sensor_mask</span>
@@ -1615,7 +1617,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_eta</span> <span class="o">=</span> <span class="n">create_absorption_variables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equation_of_state</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.assign_pseudonyms"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">[docs]</a>    <span class="k">def</span> <span class="nf">assign_pseudonyms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

@@ -312,37 +312,35 @@
             <span class="n">args</span> <span class="o">=</span> <span class="n">dotdict</span><span class="p">()</span>
 
             <span class="c1"># check for user input on axisymmetric code</span>
-            <span class="k">if</span> <span class="s1">&#39;Axisymmetric&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">args</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Axisymmetric&#39;</span><span class="p">]</span>
+            <span class="c1"># check for user defined axisymmetric option</span>
+            <span class="k">if</span> <span class="s1">&#39;axisymmetric&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;axisymmetric&#39;</span><span class="p">]</span>
                 <span class="c1"># check option is true or false</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s2">&quot;Axisymmetric argument must be bool&quot;</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Axisymmetric&#39;</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s2">&quot;axisymmetric argument must be bool&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set axisymmetric to false</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="c1"># check for a user defined location for the binary</span>
-            <span class="k">if</span> <span class="s1">&#39;BinaryPath&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">binary_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;BinaryPath&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;binary_path&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">binary_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;binary_path&#39;</span><span class="p">]</span>
 
                 <span class="c1"># check for a trailing slash</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">binary_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">):</span>
                     <span class="n">binary_path</span> <span class="o">=</span> <span class="n">binary_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;BinaryPath&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set default path from environment variable</span>
                 <span class="n">binary_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;KWAVE_BINARY_PATH&#39;</span><span class="p">)</span>
 
             <span class="c1"># check for a user defined name for the binary</span>
-            <span class="k">if</span> <span class="s1">&#39;BinaryName&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">binary_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;BinaryName&#39;</span><span class="p">]</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;BinaryName&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;binary_name&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">binary_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;binary_name&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set default name for the binary</span>
                 <span class="n">binary_name</span> <span class="o">=</span> <span class="s1">&#39;kspaceFirstOrder-OMP&#39;</span> <span class="k">if</span> <span class="n">is_unix</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;kspaceFirstOrder-OMP.exe&#39;</span>
 
             <span class="c1"># check the binary exists and is in the correct place before doing anything else</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span><span class="n">binary_name</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">binary_name</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">                    The binary file </span><span class="si">{</span><span class="n">binary_name</span><span class="si">}</span><span class="s1"> could not be found in </span><span class="si">{</span><span class="n">binary_path</span><span class="si">}</span><span class="s1">. </span>
 <span class="s1">                    To use the C++ code, the C++ binaries for your operating system must be downloaded </span>
@@ -350,31 +348,29 @@
                      <span class="p">)</span>
 
             <span class="c1"># check for a user defined name for the MATLAB function to call</span>
-            <span class="k">if</span> <span class="s1">&#39;FunctionName&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">kwave_function_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;FunctionName&#39;</span><span class="p">]</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;FunctionName&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;function_name&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">kwave_function_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;function_name&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;function_name&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set default name for the k-Wave MATLAB function to call</span>
                 <span class="n">kwave_function_name</span> <span class="o">=</span> <span class="s1">&#39;kspaceFirstOrder3D&#39;</span>
 
             <span class="c1"># check for a user defined location for the input and output files</span>
-            <span class="k">if</span> <span class="s1">&#39;DataPath&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">data_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DataPath&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;data_path&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">data_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;data_path&#39;</span><span class="p">]</span>
 
                 <span class="c1"># check for a trailing slash</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">data_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">):</span>
                     <span class="n">data_path</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DataPath&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set default path</span>
                 <span class="n">data_path</span> <span class="o">=</span> <span class="n">gettempdir</span><span class="p">()</span>
 
             <span class="c1"># check for a user defined name for the input and output files</span>
-            <span class="k">if</span> <span class="s1">&#39;DataName&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">name_prefix</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DataName&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;data_name&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">name_prefix</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;data_name&#39;</span><span class="p">]</span>
                 <span class="n">input_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name_prefix</span><span class="si">}</span><span class="s1">_input.h5&#39;</span>
                 <span class="n">output_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name_prefix</span><span class="si">}</span><span class="s1">_output.h5&#39;</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DataName&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set the filename inputs to store data in the default temp directory</span>
                 <span class="n">date_string</span> <span class="o">=</span> <span class="n">get_date_string</span><span class="p">()</span>
@@ -386,36 +382,34 @@
             <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">)</span>
 
             <span class="c1"># check for delete data input</span>
-            <span class="k">if</span> <span class="s1">&#39;DeleteData&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">delete_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DeleteData&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;delete_data&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">delete_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;delete_data&#39;</span><span class="p">]</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">delete_data</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="s1">&#39;DeleteData argument must be bool&#39;</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DeleteData&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set data to be deleted</span>
                 <span class="n">delete_data</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># check for GPU device flag</span>
-            <span class="k">if</span> <span class="s1">&#39;DeviceNum&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;device_num&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="c1"># force to be positive integer or zero</span>
-                <span class="n">device_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DeviceNum&#39;</span><span class="p">]))</span>
+                <span class="n">device_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;device_num&#39;</span><span class="p">]))</span>
                 <span class="c1"># add the value of the parameter to the input options</span>
                 <span class="n">options_string</span> <span class="o">=</span> <span class="n">options_string</span> <span class="o">+</span> <span class="s1">&#39; -g &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">device_num</span><span class="p">)</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;DeviceNum&#39;</span><span class="p">]</span>
 
             <span class="c1"># check for user defined number of threads</span>
-            <span class="k">if</span> <span class="s1">&#39;NumThreads&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">num_threads</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;NumThreads&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;num_threads&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">num_threads</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;num_threads&#39;</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">num_threads</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
                     <span class="c1"># check value</span>
                     <span class="nb">isinstance</span><span class="p">(</span><span class="n">num_threads</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">num_threads</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">num_threads</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
                     <span class="c1"># add the value of the parameter to the input options</span>
                     <span class="n">options_string</span> <span class="o">=</span> <span class="n">options_string</span> <span class="o">+</span> <span class="s1">&#39; -t &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num_threads</span><span class="p">)</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;NumThreads&#39;</span><span class="p">]</span>
 
             <span class="c1"># check for user defined thread binding option</span>
-            <span class="k">if</span> <span class="s1">&#39;ThreadBinding&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">thread_binding</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ThreadBinding&#39;</span><span class="p">]</span>
+            <span class="c1"># check for user defined thread binding option</span>
+            <span class="k">if</span> <span class="s1">&#39;thread_binding&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">thread_binding</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;thread_binding&#39;</span><span class="p">]</span>
                 <span class="c1"># check value</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thread_binding</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">thread_binding</span> <span class="o">&lt;=</span> <span class="mi">1</span>
                 <span class="c1"># read the parameters and update the system options</span>
@@ -424,25 +418,22 @@
                 <span class="k">elif</span> <span class="n">thread_binding</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">system_string</span> <span class="o">=</span> <span class="n">system_string</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">env_set_str</span> <span class="o">+</span> <span class="s1">&#39;OMP_PROC_BIND=CLOSE&#39;</span> <span class="o">+</span> <span class="n">sys_sep_str</span>
 
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ThreadBinding&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># set to round robin over places</span>
                 <span class="n">system_string</span> <span class="o">=</span> <span class="n">system_string</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">env_set_str</span> <span class="o">+</span> <span class="s1">&#39;OMP_PROC_BIND=SPREAD&#39;</span> <span class="o">+</span> <span class="n">sys_sep_str</span>
 
             <span class="c1"># check for user input for system string</span>
-            <span class="k">if</span> <span class="s1">&#39;SystemCall&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;system_call&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="c1"># read the value of the parameter and add to the system options</span>
-                <span class="n">system_string</span> <span class="o">=</span> <span class="n">system_string</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SystemCall&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sys_sep_str</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SystemCall&#39;</span><span class="p">]</span>
+                <span class="n">system_string</span> <span class="o">=</span> <span class="n">system_string</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;system_call&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">sys_sep_str</span>
 
             <span class="c1"># check for user defined number of threads</span>
-            <span class="k">if</span> <span class="s1">&#39;VerboseLevel&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">verbose_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;VerboseLevel&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;verbose_level&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">verbose_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;verbose_level&#39;</span><span class="p">]</span>
                 <span class="c1"># check value</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose_level</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">verbose_level</span> <span class="o">&lt;=</span> <span class="mi">2</span>
                 <span class="c1"># add the value of the parameter to the input options</span>
                 <span class="n">options_string</span> <span class="o">=</span> <span class="n">options_string</span> <span class="o">+</span> <span class="s1">&#39; --verbose &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">verbose_level</span><span class="p">)</span>
-                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;VerboseLevel&#39;</span><span class="p">]</span>
 
             <span class="c1"># assign pseudonyms for input structures</span>
             <span class="n">kgrid</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="n">medium</span> <span class="o">=</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;kgrid&#39;</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;sensor&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">)(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -452,7 +443,7 @@
             <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;medium&#39;</span><span class="p">]</span>
 
             <span class="c1"># check if the sensor mask is defined as cuboid corners</span>
-            <span class="k">if</span> <span class="n">sensor</span><span class="o">.</span><span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="ow">and</span> <span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sensor</span><span class="o">.</span><span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">cuboid_corners</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">cuboid_corners</span> <span class="o">=</span> <span class="kc">False</span>
@@ -517,16 +508,6 @@
             <span class="k">if</span> <span class="n">sensor</span><span class="o">.</span><span class="n">record_start_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">options_string</span> <span class="o">=</span> <span class="n">options_string</span> <span class="o">+</span> <span class="s1">&#39; -s &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">record_start_index</span><span class="p">)</span>
 
-            <span class="c1"># append the save to disk parameter</span>
-            <span class="c1"># farid | modified behaviour here!</span>
-            <span class="c1"># Originally, kspaceFO-nD GPU and CPU version would ALWAYS add &#39;SaveToDisk&#39; option to kwargs</span>
-            <span class="c1"># And kspaceFO-nD would not add this option</span>
-            <span class="c1"># In our case all examples use CPU version. So some usages already pass &#39;SaveToDisk&#39; as kwarg</span>
-            <span class="c1"># For them, we don&#39;t override &#39;SaveToDisk&#39; options</span>
-            <span class="c1"># (originally it would have and it was required to be changed using DataPath &amp; DataName options)</span>
-            <span class="k">if</span> <span class="s1">&#39;SaveToDisk&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDisk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_filename</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;SaveToDiskExit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">res</span>
         <span class="k">return</span> <span class="n">wrapper</span>

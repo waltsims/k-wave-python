@@ -332,7 +332,25 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation_helper.create_storage_variables.get_num_of_sensor_points">
 <span class="sig-prename descclassname"><span class="pre">kwave.kWaveSimulation_helper.create_storage_variables.</span></span><span class="sig-name descname"><span class="pre">get_num_of_sensor_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_blank_sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_binary_sensor_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_mask_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation_helper/create_storage_variables.html#get_num_of_sensor_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation_helper.create_storage_variables.get_num_of_sensor_points" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the number of sensor points for a given set of sensor parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>is_blank_sensor</strong> (<em>bool</em>) – Whether the sensor is blank or not.</p></li>
+<li><p><strong>is_binary_sensor_mask</strong> (<em>bool</em>) – Whether the sensor mask is binary or not.</p></li>
+<li><p><strong>kgrid_k</strong> (<em>ndarray</em>) – An array of k-values for the k-Wave grid.</p></li>
+<li><p><strong>sensor_mask_index</strong> (<em>list</em>) – List of sensor mask indices.</p></li>
+<li><p><strong>sensor_x</strong> (<em>list</em>) – List of sensor x-coordinates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of sensor points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation_helper.create_storage_variables.get_num_recorded_time_points">
