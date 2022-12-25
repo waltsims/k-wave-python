@@ -169,7 +169,7 @@ if __name__ == '__main__':
                 'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
                 'data_cast': DATA_CAST,
                 'data_recast': True,
-                'save_to_disk': input_file_full_path,
+                'save_to_disk': True,
                 'save_to_disk_exit': False,
             }
 
