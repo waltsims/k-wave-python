@@ -8,15 +8,17 @@ from kwave.data import Array
 from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.utils.math import largest_prime_factor
 
-# default CFL number
-CFL_DEFAULT = 0.3
 
-# machine precision
-MACHINE_PRECISION = 100 * sys.float_info.epsilon
 
 
 @dataclass
 class kWaveGrid(object):
+    # default CFL number
+    CFL_DEFAULT = 0.3
+
+    # machine precision
+    MACHINE_PRECISION = 100 * sys.float_info.epsilon
+
     """
         kWaveGrid is the grid class used across the k-Wave Toolbox. An object
         of the kWaveGrid class contains the grid coordinates and wavenumber
@@ -118,7 +120,7 @@ class kWaveGrid(object):
             assert t_array[0] == 0, 't_array must begin at zero.'
 
             # check the time array is evenly spaced
-            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < MACHINE_PRECISION, \
+            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.MACHINE_PRECISION, \
                 't_array must be evenly spaced.'
 
             # check the time steps are increasing
@@ -231,7 +233,7 @@ class kWaveGrid(object):
             Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
         """
         if self.dim < 2:
-            return np.nan
+            return 0
         return self.size[1] * self.ky * self.dy / (2 * math.pi)
 
     @property
@@ -240,7 +242,7 @@ class kWaveGrid(object):
             Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
         """
         if self.dim < 3:
-            return np.nan
+            return 0
         return self.size[2] * self.kz * self.dz / (2 * math.pi)
 
     @property
@@ -268,10 +270,13 @@ class kWaveGrid(object):
         """
         if self.dim < 2:
             return np.nan
+
+        n_vec_y = np.array(self.n_vec.y).T
+
         if self.dim == 2:
-            return np.tile(self.n_vec.y.T, (self.Nx, 1)) if self.nonuniform else 0
+            return np.tile(n_vec_y, (self.Nx, 1)) if self.nonuniform else 0
         else:
-            return np.tile(self.n_vec.y.T, (self.Nx, 1, self.Nz)) if self.nonuniform else 0
+            return np.tile(n_vec_y, (self.Nx, 1, self.Nz)) if self.nonuniform else 0
 
     @property
     def zn(self):
@@ -282,14 +287,15 @@ class kWaveGrid(object):
         """
         if self.dim < 3:
             return np.nan
-        return np.tile(np.transpose(self.n_vec.z, (1, 2, 0)), (self.Nx, self.Ny, 1)) if self.nonuniform else 0
+        n_vec_z = np.atleast_1d(np.squeeze(self.n_vec.z))[None, None, :]
+        return np.tile(n_vec_z, (self.Nx, self.Ny, 1)) if self.nonuniform else 0
 
     @property
     def size(self):
         """
             Size of grid in the all directions [m]
         """
-        return self.N * self.spacing
+        return Array(self.N * self.spacing)
 
     @property
     def total_grid_points(self) -> np.ndarray:
@@ -480,6 +486,8 @@ class kWaveGrid(object):
         if (int(t_end / self.dt) != math.ceil(t_end / self.dt)) and (t_end % self.dt == 0):
             self.Nt = self.Nt + 1
 
+        return self.t_array, self.dt
+
     ##################################################
     ####
     #### FUNCTIONS BELOW WERE NOT TESTED FOR CORRECTNESS!
@@ -539,9 +547,9 @@ class kWaveGrid(object):
         """
 
         # compute the implied period of the input function
-        if dtt_type == 1:
+        if dtt_type == DiscreteCosine.TYPE_1:
             M = 2 * (Nx - 1)
-        elif dtt_type == 5:
+        elif dtt_type == DiscreteSine.TYPE_1:
             M = 2 * (Nx + 1)
         else:
             M = 2 * Nx
@@ -550,7 +558,7 @@ class kWaveGrid(object):
         if dtt_type == DiscreteCosine.TYPE_1:
             # whole-wavenumber DTT
             # WSWS / DCT-I
-            n = np.arange(0, M // 2).T
+            n = np.arange(0, M // 2 + 1).T
             kx_vec = 2 * math.pi * n / (M * dx)
         elif dtt_type == DiscreteCosine.TYPE_2:
             # whole-wavenumber DTT
@@ -565,7 +573,7 @@ class kWaveGrid(object):
         elif dtt_type == DiscreteSine.TYPE_2:
             # whole-wavenumber DTT
             # HAHA / DST-II
-            n = np.arange(1, M // 2).T
+            n = np.arange(1, M // 2 + 1).T
             kx_vec = 2 * math.pi * n / (M * dx)
         elif dtt_type in [DiscreteCosine.TYPE_3, DiscreteCosine.TYPE_4,
                           DiscreteSine.TYPE_3,   DiscreteSine.TYPE_4]:
@@ -604,24 +612,24 @@ class kWaveGrid(object):
 
         # force non-uniform grid spacing to be column vectors, and the
         # gradients to be in the correct direction for use with bsxfun
-        n_vec            = np.reshape(n_vec,    (-1, 1))
-        n_vec_sg         = np.reshape(n_vec_sg, (-1, 1))
+        n_vec            = np.reshape(n_vec,    (-1, 1), order='F')
+        n_vec_sg         = np.reshape(n_vec_sg, (-1, 1), order='F')
 
         if dim == 1:
-            dudn         = np.reshape(dudn,     (-1, 1))
-            dudn_sg      = np.reshape(dudn_sg,  (-1, 1))
+            dudn         = np.reshape(dudn,     (-1, 1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (-1, 1), order='F')
         elif dim == 2:
-            dudn         = np.reshape(dudn,     (1, -1))
-            dudn_sg      = np.reshape(dudn_sg,  (1, -1))
+            dudn         = np.reshape(dudn,     (1, -1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (1, -1), order='F')
         elif dim == 3:
-            dudn         = np.reshape(dudn,     (1, 1, -1))
-            dudn_sg      = np.reshape(dudn_sg,  (1, 1, -1))
+            dudn         = np.reshape(dudn,     (1, 1, -1), order='F')
+            dudn_sg      = np.reshape(dudn_sg,  (1, 1, -1), order='F')
 
         self.n_vec.assign_dim(self.dim, n_vec)
         self.n_vec_sg.assign_dim(self.dim, n_vec_sg)
 
         self.dudn.assign_dim(self.dim, dudn)
-        self.dudn_sg.assign_dim(self.dudn_sg, dudn_sg)
+        self.dudn_sg.assign_dim(self.dim, dudn_sg)
 
         # set non-uniform flag
         self.nonuniform = True
@@ -651,7 +659,7 @@ class kWaveGrid(object):
         dtt_type = np.array(dtt_type)
         assert (dtt_type.size in [1, self.dim]), f'dtt_type must be a scalar, or {self.dim}D vector'
         if self.dim == 1:
-            k, M = self.kx_vec_dtt(dtt_type)
+            k, M = self.kx_vec_dtt(dtt_type[0])
             return k, M
         elif self.dim == 2:
             # assign the grid parameters for the x and y spatial directions
@@ -660,9 +668,9 @@ class kWaveGrid(object):
 
             # define the wavenumber based on the wavenumber components
             k = np.zeros((self.Nx, self.Ny))
-            assert len(kx_vec_dtt.shape) == 3
-            k = np.reshape(kx_vec_dtt, (-1, 1, 1)) ** 2 + k
-            k = np.reshape(ky_vec_dtt, (1, -1, 1)) ** 2 + k
+            # assert len(kx_vec_dtt.shape) == 3
+            k += np.reshape(kx_vec_dtt, (-1, 1)) ** 2
+            k += np.reshape(ky_vec_dtt, (1, -1)) ** 2
             k = np.sqrt(k)
 
             # define product of implied period
