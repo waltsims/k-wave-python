@@ -266,13 +266,24 @@
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.kgrid.</span></span><span class="sig-name descname"><span class="pre">kWaveGrid</span></span><a class="reference internal" href="_modules/kwave/kgrid.html#kWaveGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kgrid.kWaveGrid" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>kWaveGrid is the grid class used across the k-Wave Toolbox. An object
+<p>kWaveGrid(N, spacing)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.CFL_DEFAULT">
+<span class="sig-name descname"><span class="pre">CFL_DEFAULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="headerlink" href="#kwave.kgrid.kWaveGrid.CFL_DEFAULT" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.MACHINE_PRECISION">
+<span class="sig-name descname"><span class="pre">MACHINE_PRECISION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.220446049250313e-14</span></em><a class="headerlink" href="#kwave.kgrid.kWaveGrid.MACHINE_PRECISION" title="Permalink to this definition">#</a></dt>
+<dd><p>kWaveGrid is the grid class used across the k-Wave Toolbox. An object
 of the kWaveGrid class contains the grid coordinates and wavenumber
 matrices used within the simulation and reconstruction functions in
 k-Wave. The grid matrices are indexed as: (x, 1) in 1D; (x, y) in
 2D; and (x, y, z) in 3D. The grid is assumed to be a regularly spaced
 Cartesian grid, with grid spacing given by dx, dy, dz (typically the
 grid spacing in each direction is constant).</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.kgrid.kWaveGrid.N">
 <span class="sig-name descname"><span class="pre">N</span></span><a class="headerlink" href="#kwave.kgrid.kWaveGrid.N" title="Permalink to this definition">#</a></dt>
@@ -795,6 +806,8 @@ based on the minimum value.</p>
             <ul>
 <li><a class="reference internal" href="#">kwave.kgrid module</a><ul>
 <li><a class="reference internal" href="#kwave.kgrid.kWaveGrid"><code class="docutils literal notranslate"><span class="pre">kWaveGrid</span></code></a><ul>
+<li><a class="reference internal" href="#kwave.kgrid.kWaveGrid.CFL_DEFAULT"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.CFL_DEFAULT</span></code></a></li>
+<li><a class="reference internal" href="#kwave.kgrid.kWaveGrid.MACHINE_PRECISION"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.MACHINE_PRECISION</span></code></a></li>
 <li><a class="reference internal" href="#kwave.kgrid.kWaveGrid.N"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.N</span></code></a></li>
 <li><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Nt"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Nt</span></code></a></li>
 <li><a class="reference internal" href="#kwave.kgrid.kWaveGrid.Nx"><code class="docutils literal notranslate"><span class="pre">kWaveGrid.Nx</span></code></a></li>
