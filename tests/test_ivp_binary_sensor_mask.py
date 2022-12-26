@@ -10,18 +10,20 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.ktransducer import *
+from kwave.ktransducer import kSensor
 from kwave.utils.mapgen import make_disc, make_circle
 from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_binary_sensor_mask():
-
     # create the computational grid
     Nx = 128  # number of grid points in the x (row) direction
     Ny = 128  # number of grid points in the y (column) direction

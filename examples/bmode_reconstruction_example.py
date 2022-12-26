@@ -1,12 +1,14 @@
 import os
 from tempfile import gettempdir
 
+import numpy as np
 import scipy.io
 
 from example_utils import download_from_gdrive_if_does_not_exist
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.ktransducer import *
+from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
@@ -169,7 +171,8 @@ if __name__ == '__main__':
                 'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
                 'data_cast': DATA_CAST,
                 'data_recast': True,
-                'save_to_disk': input_file_full_path,
+                'save_to_disk': True,
+                'input_filename': input_file_full_path,
                 'save_to_disk_exit': False,
             }
 
