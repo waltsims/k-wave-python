@@ -251,10 +251,13 @@
         </div>
         <article role="main">
           <h1>Source code for kwave.kspaceFirstOrder3D</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">kwave.executor</span> <span class="kn">import</span> <span class="n">Executor</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave.executor</span> <span class="kn">import</span> <span class="n">Executor</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation</span> <span class="kn">import</span> <span class="n">kWaveSimulation</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
-<span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="n">kspaceFirstOrderC</span><span class="p">,</span> <span class="n">kspaceFirstOrderG</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.interp</span> <span class="kn">import</span> <span class="n">interpolate3d</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.pml</span> <span class="kn">import</span> <span class="n">get_pml</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>

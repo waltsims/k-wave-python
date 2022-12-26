@@ -251,10 +251,15 @@
         </div>
         <article role="main">
           <h1>Source code for kwave.kWaveSimulation</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
-<span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">display_simulation_params</span><span class="p">,</span> <span class="n">set_sound_speed_ref</span><span class="p">,</span> <span class="n">expand_grid_matrices</span><span class="p">,</span> \
+    <span class="n">create_storage_variables</span><span class="p">,</span> <span class="n">create_absorption_variables</span><span class="p">,</span> <span class="n">scale_source_terms_func</span>
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
 <span class="kn">from</span> <span class="nn">kwave.kmedium</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
 <span class="kn">from</span> <span class="nn">kwave.ksensor</span> <span class="kn">import</span> <span class="n">kSensor</span>
 <span class="kn">from</span> <span class="nn">kwave.ksource</span> <span class="kn">import</span> <span class="n">kSource</span>
