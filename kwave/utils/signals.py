@@ -476,6 +476,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     else:
         signal = np.zeros([tone_index.size, signal_length])
 
+    # TODO (walter): Logic of signal length shorter than signal not covered
     for offset in range(tone_index.size):
         signal[offset, tone_index[offset]:tone_index[offset] + len(tone_burst)] = tone_burst.T
 
