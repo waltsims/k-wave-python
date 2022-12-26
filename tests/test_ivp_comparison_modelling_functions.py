@@ -17,7 +17,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.utils.interp import cart2grid
+from kwave.utils.conversion import cart2grid
 from kwave.utils.mapgen import make_disc, make_cart_circle
 from tests.diff_utils import compare_against_ref
 

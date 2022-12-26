@@ -1,140 +1,11 @@
 import math
-from math import floor
 from typing import Tuple, Union
 
 import numpy as np
 from numpy import ndarray
 
 from kwave import kWaveGrid
-
-
-def scale_time(seconds):
-    # switch to calculating years, weeks, and days if larger than 100 hours
-    if seconds > (60 * 60 * 100):
-        years = floor(seconds / (60 * 60 * 24 * 365))
-        seconds = seconds - years * 60 * 60 * 24 * 365
-        weeks = floor(seconds / (60 * 60 * 24 * 7))
-        seconds = seconds - weeks * 60 * 60 * 24 * 7
-        days = floor(seconds / (60 * 60 * 24))
-        seconds = seconds - days * 60 * 60 * 24
-    else:
-        years = 0
-        weeks = 0
-        days = 0
-
-    # calculate hours, minutes, and seconds
-    hours = floor(seconds / (60 * 60))
-    seconds = seconds - hours * 60 * 60
-    minutes = floor(seconds / 60)
-    seconds = seconds - minutes * 60
-
-    # write out as a string, to keep the output manageable, only the largest
-    # three units are written
-    if years > 0:
-        time = f'{years} years, {weeks} weeks, and {days} days'
-    elif weeks > 0:
-        time = f'{weeks} weeks, {days} days, and {hours} hours'
-    elif days > 0:
-        time = f'{days} days, {hours} hours, and {minutes} min'
-    elif hours > 0:
-        seconds = np.round(seconds, 4)
-        if np.abs(seconds - int(seconds)) < 1e-4:
-            seconds = int(seconds)
-        time = f'{hours}hours {minutes}min {seconds}s'
-    elif minutes > 0:
-        seconds = np.round(seconds, 4)
-        if np.abs(seconds - int(seconds)) < 1e-4:
-            seconds = int(seconds)
-        time = f'{minutes}min {seconds}s'
-    else:
-        precision = 10  # manually tuned number
-        seconds = round(seconds, precision)
-        time = f'{seconds}s'
-    return time
-
-
-def scale_SI(x):
-    # force the input to be a scalar
-    x = np.max(x)
-
-    # check for a negative input
-    if x < 0:
-        x = -x
-        negative = True
-    else:
-        negative = False
-
-    if x == 0:
-
-        # if x is zero, don't scale
-        x_sc = x
-        prefix = ''
-        prefix_fullname = ''
-        scale = 1
-
-    elif x < 1:
-
-        # update index and input
-        x_sc = x * 1e3
-        sym_index = 1
-
-        # find scaling parameter
-        while x_sc < 1 and sym_index < 8:
-            x_sc = x_sc * 1e3
-            sym_index = sym_index + 1
-
-        # define SI unit scalings
-        units = {
-            1: ('m', 'milli', 1e3),
-            2: ('u', 'micro', 1e6),
-            3: ('n', 'nano', 1e9),
-            4: ('p', 'pico', 1e12),
-            5: ('f', 'femto', 1e15),
-            6: ('a', 'atto', 1e18),
-            7: ('z', 'zepto', 1e21),
-            8: ('y', 'yocto', 1e24),
-        }
-        prefix, prefix_fullname, scale = units[sym_index]
-
-    elif x >= 1000:
-
-        # update index and input
-        x_sc = x * 1e-3
-        sym_index = 1
-
-        # find scaling parameter
-        while x_sc >= 1000 and sym_index < 8:
-            x_sc = x_sc * 1e-3
-            sym_index = sym_index + 1
-
-        # define SI unit scalings
-        units = {
-            1: ('k', 'kilo', 1e-3),
-            2: ('M', 'mega', 1e-6),
-            3: ('G', 'giga', 1e-9),
-            4: ('T', 'tera', 1e-12),
-            5: ('P', 'peta', 1e-15),
-            6: ('E', 'exa', 1e-18),
-            7: ('Z', 'zetta', 1e-21),
-            8: ('Y', 'yotta', 1e-24)
-        }
-        prefix, prefix_fullname, scale = units[sym_index]
-
-    else:
-        # if x is between 1 and 1000, don't scale
-        x_sc = x
-        prefix = ''
-        prefix_fullname = ''
-        scale = 1
-
-    # form scaling into a string
-    round_decimals = 6  # TODO this needs to be tuned
-    x_sc = x_sc.round(round_decimals)
-    if (x_sc - int(x_sc)) < (0.1 ** round_decimals):
-        # avoid values like X.0, instead have only X
-        x_sc = int(x_sc)
-    x_sc = f'-{x_sc}{prefix}' if negative else f'{x_sc}{prefix}'
-    return x_sc, scale, prefix, prefix_fullname
+from kwave.utils.matrix import sort_rows
 
 
 def db2neper(alpha: float, y: int = 1) -> float:
@@ -255,3 +126,152 @@ def freq2wavenumber(N: int, k_max: float, filter_cutoff: float, c: float, k_dim:
         filter_size = N
         filter_cutoff = k_max * c / (2 * np.pi)
     return filter_size, filter_cutoff
+
+
+def cart2grid(kgrid, cart_data, axisymmetric=False):
+    """
+    Interpolate a set of Cartesian points onto a binary grid.
+
+    Args:
+        kgrid:
+        cart_data:
+        axisymmetric:
+
+    Returns:
+        cart2grid interpolates the set of Cartesian points defined by
+        cart_data onto a binary matrix defined by the kWaveGrid object
+        kgrid using nearest neighbour interpolation. An error is returned if
+        the Cartesian points are outside the computational domain defined by
+        kgrid.
+    """
+    # check for axisymmetric input
+    if axisymmetric and kgrid.dim != 2:
+        raise AssertionError('Axisymmetric flag only supported in 2D.')
+
+    # detect whether the inputs are for one, two, or three dimensions
+    if kgrid.dim == 1:
+        # one-dimensional
+        data_x = cart_data[0, :]
+
+        # scale position values to grid centered pixel coordinates using
+        # nearest neighbour interpolation
+        data_x = np.round(data_x / kgrid.dx).astype(int)
+
+        # shift pixel coordinates to coincide with matrix indexing
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
+
+        # check if the points all lie within the grid
+        if data_x.max() > kgrid.Nx or data_x.min() < 1:
+            raise AssertionError('Cartesian points must lie within the grid defined by kgrid.')
+
+        # create empty grid
+        grid_data = np.zeros((kgrid.Nx, 1))
+
+        # create index variable
+        point_index = np.arange(1, data_x.size + 1)
+
+        # map values
+        for data_index in range(data_x.size):
+            grid_data[data_x[data_index]] = point_index[data_index]
+
+        # extract reordering index
+        reorder_index = np.reshape(grid_data[grid_data != 0], (-1, 1))
+
+    elif kgrid.dim == 2:
+        # two-dimensional
+        data_x = cart_data[0, :]
+        data_y = cart_data[1, :]
+
+        # scale position values to grid centered pixel coordinates using
+        # nearest neighbour interpolation
+        data_x = np.round(data_x / kgrid.dx).astype(int)
+        data_y = np.round(data_y / kgrid.dy).astype(int)
+
+        # shift pixel coordinates to coincide with matrix indexing (leave
+        # y-direction = radial-direction if axisymmetric)
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
+        if not axisymmetric:
+            data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
+        else:
+            data_y = data_y
+
+        # check if the points all lie within the grid
+        if data_x.max() >= kgrid.Nx or data_y.max() >= kgrid.Ny or data_x.min() < 0 or data_y.min() < 0:
+            raise AssertionError('Cartesian points must lie within the grid defined by kgrid.')
+
+        # create empty grid
+        grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny))
+
+        # map values
+        for data_index in range(data_x.size):
+            grid_data[data_x[data_index], data_y[data_index]] = int(data_index)
+
+        # extract reordering index
+        reorder_index = grid_data.flatten(order='F')[
+            grid_data.flatten(order='F') != -1
+            ]
+        reorder_index = reorder_index[:, None] + 1  # [N] => [N, 1]
+
+    elif kgrid.dim == 3:
+
+        # three dimensional
+        data_x = cart_data[0, :]
+        data_y = cart_data[1, :]
+        data_z = cart_data[2, :]
+
+        # scale position values to grid centered pixel coordinates using
+        # nearest neighbour interpolation
+        data_x = np.round(data_x / kgrid.dx).astype(int)
+        data_y = np.round(data_y / kgrid.dy).astype(int)
+        data_z = np.round(data_z / kgrid.dz).astype(int)
+
+        # shift pixel coordinates to coincide with matrix indexing
+        data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
+        data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
+        data_z = data_z + np.floor(kgrid.Nz // 2).astype(int)
+
+        # check if the points all lie within the grid
+        assert 0 <= data_x.min() and 0 <= data_y.min() and 0 <= data_z.min() and \
+               data_x.max() < kgrid.Nx and data_y.max() < kgrid.Ny and data_z.max() < kgrid.Nz, \
+            "Cartesian points must lie within the grid defined by kgrid."
+
+        # create empty grid
+        grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny, kgrid.Nz), dtype=int)
+
+        # create index variable
+        point_index = np.arange(1, data_x.size + 1)
+
+        # map values
+        for data_index in range(data_x.size):
+            grid_data[data_x[data_index], data_y[data_index], data_z[data_index]] = point_index[data_index]
+
+        # extract reordering index
+        reorder_index = grid_data.flatten(order='F')[
+            grid_data.flatten(order='F') != -1
+            ]
+        reorder_index = reorder_index[:, None, None]  # [N] => [N, 1, 1]
+    else:
+        raise ValueError('Input cart_data must be a 1, 2, or 3 dimensional matrix.')
+
+    # compute the reverse ordering index (i.e., what is the index of each point
+    # in the reordering vector)
+    order_index = np.ones((reorder_index.size, 2), dtype=int)
+    order_index[:, 0] = np.squeeze(reorder_index)
+    order_index[:, 1] = np.arange(1, reorder_index.size + 1)
+    order_index = sort_rows(order_index, 0)
+    order_index = order_index[:, 1]
+    order_index = order_index[:, None]  # [N] => [N, 1]
+
+    # reset binary grid values
+    if kgrid.dim == 1:
+        grid_data[grid_data != 0] = 1
+    else:
+        grid_data[grid_data != -1] = 1
+        grid_data[grid_data == -1] = 0
+
+    # check if any Cartesian points have been mapped to the same grid point,
+    # thereby reducing the total number of points
+    num_discarded_points = cart_data.shape[1] - np.sum(grid_data)
+    if num_discarded_points != 0:
+        print(f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
+    return grid_data.astype(np.int), order_index, reorder_index

@@ -10,10 +10,10 @@ from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.kspaceFirstOrder import kspaceFirstOrderC
-from kwave.utils.checks import num_dim2
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.math import sinc
+from kwave.utils.matrix import num_dim2
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 

@@ -8,8 +8,9 @@ import numpy as np
 import scipy
 from scipy import optimize
 
-from .conversion import scale_SI, db2neper, neper2db
-from .matlab import matlab_assign, matlab_find
+from .conversion import db2neper, neper2db
+from .data import scale_SI
+from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
 
@@ -1305,25 +1306,6 @@ def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus
             make_line(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
         )
     return arc
-
-
-def ind2sub(array_shape, ind):
-    # Matlab style ind2sub
-    # row, col = np.unravel_index(ind - 1, array_shape, order='F')
-    # return np.squeeze(row) + 1, np.squeeze(col) + 1
-
-    indices = np.unravel_index(ind - 1, array_shape, order='F')
-    indices = (np.squeeze(index) + 1 for index in indices)
-    return indices
-
-
-def sub2ind(array_shape, x, y, z) -> np.ndarray:
-    results = []
-    x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
-    for x_i, y_i, z_i in zip(x, y, z):
-        index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order='F')
-        results.append(index)
-    return np.array(results)
 
 
 def make_pixel_map_point(grid_size, centre_pos) -> np.ndarray:

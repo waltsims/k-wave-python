@@ -6,12 +6,12 @@ import scipy
 from numpy.fft import ifftshift, fft, ifft
 
 from kwave.kgrid import kWaveGrid
-from .checks import num_dim
-from .conversion import scale_SI, freq2wavenumber
+from .conversion import freq2wavenumber
+from .data import scale_SI
 from .mapgen import ndgrid
-from .math import sinc
+from .math import sinc, gaussian
 from .matlab import matlab_mask, unflatten_matlab_mask
-from .matrix import broadcast_axis
+from .matrix import broadcast_axis, num_dim
 
 
 def add_noise(signal, snr, mode="rms"):
@@ -445,7 +445,6 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
         # create the envelope
         if envelope == 'Gaussian':
-            from kwave.utils.filters import gaussian
             x_lim = 3
             window_x = np.arange(-x_lim, x_lim + 1e-8, 2 * x_lim / (len(tone_burst) - 1))
             window = gaussian(window_x, 1, 0, 1)

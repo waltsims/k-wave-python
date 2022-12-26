@@ -56,37 +56,6 @@ def check_field_names(dictionary, *fields):
         assert k in fields, f'The field {k} is not a valid field for the given dictionary'
 
 
-def num_dim(x):
-    """
-    Returns the number of dimensions in x, after collapsing any singleton dimensions.
-
-    Args:
-    x (np.ndarray): The input array.
-
-    Returns:
-    int: The number of dimensions in x.
-    """
-    return len(x.squeeze().shape)
-
-
-def num_dim2(x: np.ndarray):
-    """
-    Get the number of dimensions of an array after collapsing singleton dimensions.
-
-    Args:
-        x (np.ndarray): The input array.
-
-    Returns:
-        int: The number of dimensions of the array after collapsing singleton dimensions.
-    """
-    sz = np.squeeze(x).shape
-
-    if len(sz) > 2:
-        return len(sz)
-    else:
-        return np.sum(np.array(sz) > 1)
-
-
 def check_str_eq(value, target: str):
     """
     This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.

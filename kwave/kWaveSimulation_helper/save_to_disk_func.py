@@ -4,10 +4,10 @@ import numpy as np
 from scipy.io import savemat
 
 from kwave import kWaveMedium, kWaveGrid, SimulationOptions
-from kwave.utils.checks import num_dim2
-from kwave.utils.conversion import scale_time
+from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.io import write_attributes, write_matrix
+from kwave.utils.matrix import num_dim2
 from kwave.utils.tictoc import TicToc
 
 

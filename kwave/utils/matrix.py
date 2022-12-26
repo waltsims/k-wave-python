@@ -4,8 +4,7 @@ from typing import Tuple
 import numpy as np
 from scipy.interpolate import interpn, interp1d
 
-from .checks import num_dim2
-from .conversion import scale_time
+from .data import scale_time
 from .tictoc import TicToc
 
 
@@ -250,3 +249,39 @@ def revolve2d(mat2D):
     # update command line status
     print(f'  completed in {scale_time(TicToc.toc())}s')
     return mat3D
+
+
+def sort_rows(arr: np.ndarray, index: int):
+    assert arr.ndim == 2, "'sort_rows' currently supports only 2-dimensional matrices"
+    return arr[arr[:, index].argsort()]
+
+
+def num_dim(x):
+    """
+    Returns the number of dimensions in x, after collapsing any singleton dimensions.
+
+    Args:
+    x (np.ndarray): The input array.
+
+    Returns:
+    int: The number of dimensions in x.
+    """
+    return len(x.squeeze().shape)
+
+
+def num_dim2(x: np.ndarray):
+    """
+    Get the number of dimensions of an array after collapsing singleton dimensions.
+
+    Args:
+        x (np.ndarray): The input array.
+
+    Returns:
+        int: The number of dimensions of the array after collapsing singleton dimensions.
+    """
+    sz = np.squeeze(x).shape
+
+    if len(sz) > 2:
+        return len(sz)
+    else:
+        return np.sum(np.array(sz) > 1)

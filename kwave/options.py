@@ -6,7 +6,8 @@ from typing import List, Optional
 
 import numpy as np
 
-from kwave.utils.io import get_h5_literals, get_date_string
+from kwave.utils.data import get_date_string
+from kwave.utils.io import get_h5_literals
 from kwave.utils.pml import get_optimal_pml_size
 
 

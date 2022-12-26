@@ -11,7 +11,8 @@ from uff.position import Position
 
 from .shifted_transform import ShiftedTransform
 from .tools import make_time_vector, get_t0, get_origin_array, apodize
-from ..utils.conversion import scale_time, cart2pol
+from ..utils.conversion import cart2pol
+from ..utils.data import scale_time
 from ..utils.tictoc import TicToc
 
 

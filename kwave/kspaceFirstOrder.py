@@ -8,8 +8,8 @@ import numpy as np
 
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
+from kwave.utils.data import get_date_string
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.io import get_date_string
 
 
 def kspaceFirstOrderG(func):

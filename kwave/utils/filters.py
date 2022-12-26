@@ -1,43 +1,16 @@
-import math
-
 import numpy as np
 import scipy
 from scipy.fftpack import fft, ifft, ifftshift, fftshift
 from scipy.signal import lfilter
 
-from .checks import num_dim, num_dim2, is_number
-from .conversion import scale_SI
-from .math import find_closest, sinc
+from .checks import is_number
+from .data import scale_SI
+from .math import find_closest, sinc, next_pow2, norm_var, gaussian
+from .matrix import num_dim, num_dim2
 from .signals import get_win
 
 
 # Compute the next highest power of 2 of a 32–bit number `n`
-def next_pow2(n):
-    """
-    Calculate the next power of 2 that is greater than or equal to `n`.
-
-    This function takes a positive integer `n` and returns the smallest power of 2 that is greater
-    than or equal to `n`.
-
-    Args:
-        n: The number to find the next power of 2 for.
-
-    Returns:
-        The smallest power of 2 that is greater than or equal to `n`.
-    """
-
-    # decrement `n` (to handle cases when `n` itself is a power of 2)
-    n = n - 1
-
-    # set all bits after the last set bit
-    n |= n >> 1
-    n |= n >> 2
-    n |= n >> 4
-    n |= n >> 8
-    n |= n >> 16
-
-    # increment `n` and return
-    return n + 1
 
 
 def single_sided_correction(func_fft, fft_len, dim):
@@ -269,12 +242,6 @@ def brenner_sharpness(im):
     return s
 
 
-def norm_var(im):
-    mu = np.mean(im)
-    s = np.sum((im - mu) ** 2) / mu
-    return s
-
-
 def tenenbaum_sharpness(im):
     ndim = len(np.squeeze(im).shape)
     if ndim == 2:
@@ -359,47 +326,6 @@ def fwhm(f, x):
     fwhm_val = hmx[1] - hmx[0]
 
     return fwhm_val
-
-
-def gaussian(x, magnitude=None, mean=0, variance=1):
-    """
-    gaussian returns a Gaussian distribution f(x) with the specified
-    magnitude, mean, and variance. If these values are not specified, the
-    magnitude is normalised and values of variance = 1 and mean = 0 are
-    used. For example running
-
-        import matplotlib.pyplot as plt
-        x = np.arrange(-3,0.05,3)
-        plt.plot(x, gaussian(x))
-
-    will plot a normalised Gaussian distribution.
-
-    Note, the full width at half maximum of the resulting distribution
-    can be calculated by FWHM = 2 * sqrt(2 * log(2) * variance).
-
-
-    Args:
-        x:
-        magnitude:          Bell height. Defaults to normalized.
-        mean (float):       mean or expected value. Defaults to 0.
-        variance (float):   variance ~ bell width. Defaults to 1.
-
-    Returns:
-        gauss_distr: Gaussian distribution
-
-    """
-    if magnitude is None:
-        magnitude = (2 * math.pi * variance) ** -0.5
-
-    gauss_distr = magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
-
-    return gauss_distr
-    # return magnitude * norm.pdf(x, loc=mean, scale=variance)
-    """ # Former impl. form Farid
-        if magnitude is None:
-        magnitude = np.sqrt(2 * np.pi * variance)
-    return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
-    """
 
 
 def gaussian_filter(signal, Fs, frequency, bandwidth):

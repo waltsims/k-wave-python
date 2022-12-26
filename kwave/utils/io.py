@@ -10,6 +10,7 @@ import h5py
 import numpy as np
 
 from .conversion import cast_to_type
+from .data import get_date_string
 from .dotdictionary import dotdict
 
 
@@ -533,5 +534,3 @@ def load_image(path, is_gray):
     return img
 
 
-def get_date_string():
-    return datetime.now().strftime("%d-%b-%Y-%H-%M-%S")
