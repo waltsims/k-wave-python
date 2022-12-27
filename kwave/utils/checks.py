@@ -1,8 +1,13 @@
 import platform
 from copy import deepcopy
-from typing import List
+from typing import List, TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    # Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+    from kwave.kgrid import kWaveGrid
+    from kwave.kmedium import kWaveMedium
 
 from .conversion import db2neper
 from .math import sinc, primefactors
@@ -86,7 +91,7 @@ def check_str_in(value, target: List[str]) -> bool:
     return isinstance(value, str) and value in target
 
 
-def is_number(value):
+def is_number(value: Any) -> bool:
     """
     Check if the given value is a numeric type.
 
@@ -112,35 +117,37 @@ def is_unix():
     Check whether the current platform is a Unix-like system.
 
     Args:
-        None
 
     Returns:
-        bool: True if the current platform is a Unix-like system, False otherwise.
+        is_unix: (bool) True if the current platform is a Unix-like system, False otherwise.
 
     """
     return platform.system() in ['Linux', 'Darwin']
 
 
-def check_stability(kgrid, medium):
+def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
     """
-          checkStability calculates the maximum time step for which the k-space
-          propagation models kspaceFirstOrder1D, kspaceFirstOrder2D and
-          kspaceFirstOrder3D are stable. These models are unconditionally
-          stable when the reference sound speed is equal to or greater than the
-          maximum sound speed in the medium and there is no absorption.
-          However, when the reference sound speed is less than the maximum
-          sound speed the model is only stable for sufficiently small time
-          steps. The criterion is more stringent (the time step is smaller) in
-          the absorbing case.
+    Calculates the maximum time step for which the k-space
+    propagation models are stable.
 
-          The time steps given are accurate when the medium properties are
-          homogeneous. For a heterogeneous media they give a useful, but not
-          exact, estimate.
+    These models are unconditionally
+    stable when the reference sound speed is equal to or greater than the
+    maximum sound speed in the medium and there is no absorption.
+    However, when the reference sound speed is less than the maximum
+    sound speed the model is only stable for sufficiently small time
+    steps. The criterion is more stringent (the time step is smaller) in
+    the absorbing case.
+
+    The time steps given are accurate when the medium properties are
+    homogeneous. For a heterogeneous media they give a useful, but not
+    exact, estimate.
+
     Args:
-        kgrid: k-Wave grid object return by kWaveGrid
-        medium: structure containing the medium properties
+        kgrid: (kWaveGrid) k-Wave grid object return by kWaveGrid
+        medium: (kWaveMedium) object containing the medium properties
 
-    Returns: the maximum time step for which the models are stable.
+    Returns:
+         dt_stability_limit: (float) the maximum time step for which the models are stable.
             This is set to Inf when the model is unconditionally stable.
     """
     # why? : this function was migrated from Matlab.
@@ -296,4 +303,3 @@ def check_divisible(number: float, divider: float) -> bool:
     result = number / divider
     after_decimal = result % 1
     return after_decimal == 0
-

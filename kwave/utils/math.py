@@ -1,12 +1,21 @@
 import math
 from itertools import compress
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 
 import numpy as np
 from numpy.fft import ifftshift, fft, ifft
 
 
-def largest_prime_factor(n):
+def largest_prime_factor(n: int) -> int:
+    """
+    Finds the largest prime factor of a positive integer.
+
+    Args:
+        n: The positive integer to be factored.
+
+    Returns:
+        The largest prime factor of n.
+    """
     i = 2
     while i * i <= n:
         if n % i:
@@ -16,9 +25,16 @@ def largest_prime_factor(n):
     return n
 
 
-def rwh_primes(n):
-    # https://stackoverflow.com/questions/2068372/fastest-way-to-list-all-primes-below-n-in-python/3035188#3035188
-    """ Returns a list of primes < n for n > 2 """
+def rwh_primes(n: int) -> List[int]:
+    """
+    Generates a list of prime numbers less than a given integer.
+
+    Args:
+        n: The upper bound for the list of primes.
+
+    Returns:
+        A list of prime numbers less than n.
+    """
     sieve = bytearray([True]) * (n // 2 + 1)
     for i in range(1, int(n ** 0.5) // 2 + 1):
         if sieve[i]:
@@ -31,6 +47,17 @@ def fourier_shift(
         shift: float,
         shift_dim: Optional[int] = None
 ) -> np.ndarray:
+    """
+    Shifts an array along one of its dimensions using Fourier interpolation.
+
+    Args:
+        data: The input array.
+        shift: The amount of shift to apply.
+        shift_dim: The dimension along which to shift the array. Default is the last dimension.
+
+    Returns:
+        The shifted array.
+    """
     if shift_dim is None:
         shift_dim = data.ndim - 1
         if (shift_dim == 1) and (data.shape[1] == 1):
@@ -74,10 +101,10 @@ def round_even(x):
     Rounds to the nearest even integer.
 
     Args:
-        x (float): inpput value
+        x: (float) Inpput value
 
     Returns:
-        (int): nearest odd integer.
+        even: (int) Nearest odd integer.
     """
     return 2 * round(x / 2)
 
@@ -87,10 +114,10 @@ def round_odd(x):
     Rounds to the nearest odd integer.
 
     Args:
-        x (float): input value
+        x: (float)input value
 
     Returns:
-        (int): nearest odd integer.
+        odd: (int) nearest odd integer.
 
     """
     return 2 * round((x + 1) / 2) - 1
@@ -107,8 +134,8 @@ def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int]
     than one element with the closest value, the index of the first one is returned.
 
     Args:
-        A (np.ndarray): The array to search.
-        a (Union[float, int]): The value to find.
+        A: (np.ndarray) The array to search.
+        a: (Union[float, int]) The value to find.
 
     Returns:
         Tuple[Union[float, int], Tuple[int, ...]]: A tuple containing the closest value and its index in the input array.
@@ -120,12 +147,29 @@ def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int]
     return A[idx], idx
 
 
-def sinc(x):
+def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
+    """
+    Calculates the sinc function of a given value or array of values.
+
+    Args:
+        x: (Union[int, float, np.ndarray]) The value or array of values for which to calculate the sinc function.
+
+    Returns:
+        sinc_val: (Union[int, float, np.ndarray]) The sinc function of x.
+    """
     return np.sinc(x / np.pi)
 
 
-def primefactors(n):
-    # even number divisible
+def primefactors(n: int) -> List[int]:
+    """
+    Finds the prime factors of a given integer.
+
+    Args:
+        n: (int) The integer to factor.
+
+    Returns:
+        factors: (list[int]) A list of prime factors of n.
+    """
     factors = []
     while n % 2 == 0:
         factors.append(2),
@@ -144,7 +188,7 @@ def primefactors(n):
     return factors
 
 
-def next_pow2(n):
+def next_pow2(n: int) -> int:
     """
     Calculate the next power of 2 that is greater than or equal to `n`.
 
@@ -152,10 +196,10 @@ def next_pow2(n):
     than or equal to `n`.
 
     Args:
-        n: The number to find the next power of 2 for.
+        n: (int) The number to find the next power of 2 for.
 
     Returns:
-        The smallest power of 2 that is greater than or equal to `n`.
+        smallest_pow: (int) The smallest power of 2 that is greater than or equal to `n`.
     """
 
     # decrement `n` (to handle cases when `n` itself is a power of 2)
@@ -172,38 +216,47 @@ def next_pow2(n):
     return n + 1
 
 
-def norm_var(im):
+def norm_var(im: np.ndarray) -> float:
+    """
+    Calculates the normalized variance of an array of values.
+
+    Args:
+        im: (np.ndarray) The input array.
+
+    Returns:
+        s: (float) The normalized variance of im.
+    """
     mu = np.mean(im)
     s = np.sum((im - mu) ** 2) / mu
     return s
 
 
-def gaussian(x, magnitude=None, mean=0, variance=1):
+def gaussian(
+        x: Union[int, float, np.ndarray],
+        magnitude: Optional[Union[int, float]] = None,
+        mean: Optional[float] = 0,
+        variance: Optional[float] = 1,
+) -> Union[int, float, np.ndarray]:
     """
-    gaussian returns a Gaussian distribution f(x) with the specified
-    magnitude, mean, and variance. If these values are not specified, the
-    magnitude is normalised and values of variance = 1 and mean = 0 are
-    used. For example running
+    Returns a Gaussian distribution f(x) with the specified magnitude, mean, and variance. If these values are not specified,
+    the magnitude is normalised and values of variance = 1 and mean = 0 are used. For example running:
 
         import matplotlib.pyplot as plt
-        x = np.arrange(-3,0.05,3)
+        x = np.arange(-3, 0.05, 3)
         plt.plot(x, gaussian(x))
 
     will plot a normalised Gaussian distribution.
 
-    Note, the full width at half maximum of the resulting distribution
-    can be calculated by FWHM = 2 * sqrt(2 * log(2) * variance).
-
+    Note, the full width at half maximum of the resulting distribution can be calculated by FWHM = 2 * sqrt(2 * log(2) * variance).
 
     Args:
-        x:
-        magnitude:          Bell height. Defaults to normalized.
-        mean (float):       mean or expected value. Defaults to 0.
-        variance (float):   variance ~ bell width. Defaults to 1.
+        x: The input values.
+        magnitude: Bell height. Defaults to normalised.
+        mean: Mean or expected value. Defaults to 0.
+        variance: Variance, or bell width. Defaults to 1.
 
     Returns:
-        gauss_distr: Gaussian distribution
-
+        A Gaussian distribution.
     """
     if magnitude is None:
         magnitude = (2 * math.pi * variance) ** -0.5

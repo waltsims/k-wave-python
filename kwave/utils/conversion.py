@@ -1,10 +1,10 @@
 import math
-from typing import Tuple, Union
+from typing import Tuple, Union, Any
 
 import numpy as np
 from numpy import ndarray
 
-from kwave import kWaveGrid
+from kwave.kgrid import kWaveGrid
 from kwave.utils.matrix import sort_rows
 
 
@@ -34,7 +34,7 @@ def neper2db(alpha: float, y: int = 1) -> float:
         y: Power law exponent (default=1)
 
     Returns:
-        Attenuation in dB / (MHz ^ y cm)
+        alpha (float): Attenuation in dB / (MHz ^ y cm)
     """
 
     # calculate conversion
@@ -42,7 +42,16 @@ def neper2db(alpha: float, y: int = 1) -> float:
     return alpha
 
 
-def cast_to_type(data, matlab_type: str):
+def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
+    """
+
+    Args:
+        data:
+        matlab_type:
+
+    Returns:
+
+    """
     if not isinstance(data, np.ndarray):
         data = np.array(data)
     type_map = {
@@ -55,7 +64,7 @@ def cast_to_type(data, matlab_type: str):
     return data.astype(type_map[matlab_type])
 
 
-def cart2pol(x, y):
+def cart2pol(x: float, y: float) -> Tuple[float, float]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -101,12 +110,13 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     return cart_data.squeeze(), order_index
 
 
-def freq2wavenumber(N: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
+def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
     int, float]:
-    """Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.
+    """
+    Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.
 
     Args:
-        N: The size of the grid.
+        n: The size of the grid.
         k_max: The maximum wavenumber.
         filter_cutoff: The frequency to convert to a wavenumber cutoff.
         c: The speed of sound.
@@ -118,31 +128,31 @@ def freq2wavenumber(N: int, k_max: float, filter_cutoff: float, c: float, k_dim:
     k_cutoff = 2 * np.pi * filter_cutoff / c
 
     # set the alpha_filter size
-    filter_size = round(N * k_cutoff / k_dim[-1])
+    filter_size = round(n * k_cutoff / k_dim[-1])
 
     # check the alpha_filter size
-    if filter_size > N:
+    if filter_size > n:
         # set the alpha_filter size to be the same as the grid size
-        filter_size = N
+        filter_size = n
         filter_cutoff = k_max * c / (2 * np.pi)
     return filter_size, filter_cutoff
 
 
-def cart2grid(kgrid, cart_data, axisymmetric=False):
+def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False):
     """
-    Interpolate a set of Cartesian points onto a binary grid.
+    Interpolates the set of Cartesian points defined by
+    cart_data onto a binary matrix defined by the kWaveGrid object
+    kgrid using nearest neighbour interpolation. An error is returned if
+    the Cartesian points are outside the computational domain defined by
+    kgrid.
 
     Args:
-        kgrid:
-        cart_data:
-        axisymmetric:
+        kgrid: k:
+        cart_data(np.ndarray):
+        axisymmetric(bool):
 
     Returns:
-        cart2grid interpolates the set of Cartesian points defined by
-        cart_data onto a binary matrix defined by the kWaveGrid object
-        kgrid using nearest neighbour interpolation. An error is returned if
-        the Cartesian points are outside the computational domain defined by
-        kgrid.
+        grid(np.ndarray): binary grid
     """
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:

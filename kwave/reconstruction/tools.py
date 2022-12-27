@@ -25,7 +25,6 @@ def apodize(distance, aperture, window):
     """
     Function that assigns different apodization to a set of pixels and elements
 
-    To avoid the indetermination when both distance and aperture tend to 0
     """
 
 

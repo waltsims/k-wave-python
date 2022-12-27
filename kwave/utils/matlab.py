@@ -1,14 +1,39 @@
+from typing import Tuple, Union, Optional, List
+
 import numpy as np
 
 
-def matlab_assign(matrix: np.ndarray, indices, values):
+def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
+                  values: Union[int, float, np.ndarray]) -> np.ndarray:
+    """
+    Assigns values to elements of a matrix using subscript indices.
+
+    Args:
+        matrix: The matrix to which values will be assigned.
+        indices: The subscript indices of the elements to be assigned. Can be a single integer or a NumPy array.
+        values: The values to be assigned. Can be a single integer, float, or a NumPy array.
+
+    Returns:
+        The modified matrix.
+    """
     original_shape = matrix.shape
     matrix = matrix.flatten(order='F')
     matrix[indices] = values
     return matrix.reshape(original_shape, order='F')
 
 
-def matlab_find(arr, val=0, mode='neq'):
+def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = 'neq') -> np.ndarray:
+    """
+    Finds the indices of elements in an array that satisfy a given condition.
+
+    Args:
+        arr: The array to search. Can be a list or a NumPy array.
+        val: The value to compare against. Default is 0.
+        mode: The comparison mode. Can be either 'neq' (not equal) or 'eq' (equal). Default is 'neq'.
+
+    Returns:
+        A NumPy array of indices.
+    """
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     if mode == 'neq':
@@ -18,31 +43,74 @@ def matlab_find(arr, val=0, mode='neq'):
     return np.expand_dims(arr, -1)  # compatibility, n => [n, 1]
 
 
-def matlab_mask(arr, mask, diff=None):
+def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> np.ndarray:
+    """
+    Applies a mask to an array and returns the masked elements.
+
+    Args:
+        arr: The array to be masked.
+        mask: The mask array, which must be of the same shape as arr.
+        diff: An optional integer to add to the mask indices before applying the mask.
+
+    Returns:
+        A NumPy array containing the masked elements.
+    """
     if diff is None:
         return np.expand_dims(arr.ravel(order='F')[mask.ravel(order='F')], axis=-1)  # compatibility, n => [n, 1]
     else:
         return np.expand_dims(arr.ravel(order='F')[mask.ravel(order='F') + diff], axis=-1)  # compatibility, n => [n, 1]
 
 
-def unflatten_matlab_mask(arr, mask, diff=None):
+def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[
+    Union[int, np.ndarray], ...]:
+    """
+    Converts a mask array to a tuple of subscript indices for an n-dimensional array.
+
+    Args:
+        arr: The n-dimensional array for which the mask was created.
+        mask: The mask array, which can be of any dimensions.
+        diff: An optional integer to add to the mask indices before converting them to subscript indices.
+
+    Returns:
+        A tuple of integers or NumPy arrays representing the corresponding subscript indices.
+    """
     if diff is None:
         return np.unravel_index(mask.ravel(order='F'), arr.shape, order='F')
     else:
         return np.unravel_index(mask.ravel(order='F') + diff, arr.shape, order='F')
 
 
-def ind2sub(array_shape, ind):
-    # Matlab style ind2sub
-    # row, col = np.unravel_index(ind - 1, array_shape, order='F')
-    # return np.squeeze(row) + 1, np.squeeze(col) + 1
+def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
+    """
+    Converts a linear index to a tuple of subscript indices for an n-dimensional array.
 
+    Args:
+        array_shape: (Tuple[int, ...]) A tuple of integers representing the shape of the array.
+        ind: (int) The linear index to be converted.
+
+    Returns:
+        indices: (Tuple[int, ...]) A tuple of integers representing the corresponding subscript indices.
+    """
     indices = np.unravel_index(ind - 1, array_shape, order='F')
     indices = (np.squeeze(index) + 1 for index in indices)
     return indices
 
 
-def sub2ind(array_shape, x, y, z) -> np.ndarray:
+def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+    """
+    Convert 3D subscript indices to a linear index.
+
+    This function converts 3D subscript indices to a linear index in a way that is consistent with the way that MATLAB handles indexing. The output is a 1D numpy array containing the linear indices.
+
+    Args:
+        array_shape (Tuple[int, int, int]): A tuple containing the shape of the array.
+        x (np.ndarray): A 1D numpy array of subscript indices for the x-dimension.
+        y (np.ndarray): A 1D numpy array of subscript indices for the y-dimension.
+        z (np.ndarray): A 1D numpy array of subscript indices for the z-dimension.
+
+    Returns:
+        np.ndarray: A 1D numpy array containing the linear indices.
+    """
     results = []
     x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
     for x_i, y_i, z_i in zip(x, y, z):

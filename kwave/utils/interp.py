@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple, Optional
 
 import numpy as np
 from numpy.fft import fft, fftshift
@@ -13,13 +13,14 @@ from .tictoc import TicToc
 
 def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray]) -> np.ndarray:
     """
-        Interpolates input grid values at the given locations
-        Added by Farid
+    Interpolates input grid values at the given locations
+    Added by Farid
 
-        Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
-        SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
-        We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
-        While mapping we assume that only one axis per 3D grid changes throughout the grid.
+    Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
+    SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
+    We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
+    While mapping we assume that only one axis per 3D grid changes throughout the grid.
+
     Args:
         grid_points: List of 1D or 3D Numpy arrays
         grid_values: A 3D Numpy array which holds values at grid_points
@@ -60,13 +61,14 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
 def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray],
                   method='linear', copy_nans=True) -> np.ndarray:
     """
-        Interpolates input grid values at the given locations
-        Added by Farid
+    Interpolates input grid values at the given locations
+    Added by Farid
 
-        Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
-        SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
-        We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
-        While mapping we assume that only one axis per 3D grid changes throughout the grid.
+    Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
+    SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
+    We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
+    While mapping we assume that only one axis per 3D grid changes throughout the grid.
+
     Args:
         copy_nans:
         grid_points: List of 1D or 3D Numpy arrays
@@ -113,13 +115,13 @@ def interpolate2d_with_queries(
         copy_nans=True
 ) -> np.ndarray:
     """
-        Interpolates input grid values at the given locations
-        Added by Farid
+    Interpolates input grid values at the given locations
+    Added by Farid
 
-        Simplified version of `interpolate2D_coords`.
-        Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.
-        Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!
-        WARNING: supposed to support only 2D interpolation!
+    Simplified version of `interpolate2D_coords`.
+    Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.
+    Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!
+    WARNING: supposed to support only 2D interpolation!
     Args:
         copy_nans:
         grid_points: List of 1D or 3D Numpy arrays
@@ -145,18 +147,23 @@ def interpolate2d_with_queries(
     return result
 
 
-def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
+def get_bli(
+        func: np.ndarray,
+        dx: Optional[float] = 1,
+        up_sampling_factor: Optional[int] = 20,
+        plot: Optional[bool] = False,
+) -> Tuple[np.ndarray, np.ndarray]:
     """
+    Calculates the band-limited interpolant of a 1D input function.
 
     Args:
-        func: 1d input function
-        dx: spatial sampling [m] (default=1)
-        up_sampling_factor: up-sampling factor used to sample the underlying BLI (default=20)
-        plot:
+        func: The 1D input function.
+        dx: Spatial sampling in meters. Defaults to 1.
+        up_sampling_factor: Up-sampling factor used to sample the underlying BLI. Defaults to 20.
+        plot: Whether to plot the BLI. Defaults to False.
 
     Returns:
-        bli:    band-limited interpolant
-        x_fine: x-grid for BLI
+        A tuple containing the BLI and the x-grid for the BLI.
     """
 
     func = np.squeeze(func)
@@ -186,12 +193,12 @@ def get_bli(func, dx=1, up_sampling_factor=20, plot=False):
 
 def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp='nearest'):
     """
-     interp_cart_data takes a matrix of time-series data recorded over a set
+     Takes a matrix of time-series data recorded over a set
      of Cartesian sensor points given by cart_sensor_mask and computes the
      equivalent time-series at each sensor position on the binary sensor
      mask binary_sensor_mask using interpolation. The properties of
      binary_sensor_mask are defined by the k-Wave grid object kgrid.
-     Two and three dimensional data are supported.
+     Two and three-dimensional data are supported.
 
      Usage:
          binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
@@ -212,7 +219,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
                               (two-point) modes are supported
                               (default = 'nearest')
 
-     returns:
+     Returns:
          binary_sensor_data:   array of time-series corresponding to the
                                sensor positions given by binary_sensor_mask
     """

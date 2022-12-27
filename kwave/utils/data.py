@@ -1,5 +1,6 @@
 from datetime import datetime
 from math import floor
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -16,19 +17,31 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None):
     return default
 
 
-def intmax(dtype: str):
+def intmax(dtype: str) -> int:
     """
     Returns the maximum value for the given integer type.
 
-    :param dtype: The integer type.
-    :type dtype: str
-    :return: The maximum value for the given integer type.
+    Args:
+        dtype(str): The integer type.
+
+    Returns
+        max_val(int): The maximum value for the given integer type.
     :rtype: int
     """
     return np.iinfo(getattr(np, dtype)).max
 
 
-def scale_time(seconds):
+def scale_time(seconds: int) -> str:
+    """
+    Converts an integer number of seconds into hours, minutes,
+    and seconds, and returns a string with this information.
+
+    Args:
+        seconds(int): number of seconds
+
+    Returns:
+        time(str): string of scaled time
+    """
     # switch to calculating years, weeks, and days if larger than 100 hours
     if seconds > (60 * 60 * 100):
         years = floor(seconds / (60 * 60 * 24 * 365))
@@ -73,7 +86,20 @@ def scale_time(seconds):
     return time
 
 
-def scale_SI(x):
+def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
+    """
+    Scale a number to nearest SI unit prefix.
+
+    Args:
+        x(float):
+
+    Returns:
+        x_sc(float):string of scaled input and prefix
+        scale(float):numeric scale factor
+        prefix(str):single character scale prefix
+        prefix_fullname(str):full SI name for prefixReturns
+
+    """
     # force the input to be a scalar
     x = np.max(x)
 
