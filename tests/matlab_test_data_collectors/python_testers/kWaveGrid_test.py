@@ -9,7 +9,7 @@ from tests.matlab_test_data_collectors.python_testers.utils.check_equality impor
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_get_color_map():
+def test_kwave_grid():
     test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
     reader = TestRecordReader(test_record_path)
 
