@@ -317,8 +317,8 @@ def interpftn(x, sz: tuple, win=None):
          Resampled matrix
 
      Examples:
-         y = interpftn(x, sz)
-         y = interpftn(x, sz, win)
+         >>> y = interpftn(x, sz)
+         >>> y = interpftn(x, sz, win)
 
     """
 

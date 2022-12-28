@@ -157,7 +157,7 @@ def water_absorption(f, temp):
         abs:  absorption [dB / cm]
 
     Examples:
-        abs = waterAbsorption(f, T)
+        >>> abs = waterAbsorption(f, T)
 
     References:
         [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
@@ -256,7 +256,7 @@ def water_non_linearity(temp: float) -> float:
         BonA: parameter of nonlinearity
 
     Examples:
-         BonA = waterNonlinearity(T)
+         >>> BonA = waterNonlinearity(T)
 
      References:
          [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
