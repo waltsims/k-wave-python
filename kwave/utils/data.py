@@ -9,12 +9,12 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None) -
     """
     Returns the smallest possible type for the given array.
     Args:
-        max_array_val:
-        target_type_group:
-        default:
+        max_array_val: The maximum value in the array.
+        target_type_group: The type group to search for the smallest possible type.
+        default: The default type to return if no type is found.
 
     Returns:
-        type_:
+        type_: The smallest possible type for the given array.
 
     """
     types = {'uint', 'int'}
@@ -102,7 +102,7 @@ def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
     Scale a number to nearest SI unit prefix.
 
     Args:
-        x:
+        x: The number to scale.
 
     Returns:
         x_sc: string of scaled input and prefix
