@@ -280,7 +280,6 @@
             <span class="n">radius</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="sd">        Args:</span>
 <span class="sd">            kgrid: kWaveGrid object</span>
 <span class="sd">            number_elements: the total number of transducer elements</span>
@@ -289,7 +288,9 @@
 <span class="sd">            element_spacing: the spacing (kerf width) between the transducer elements in grid points</span>
 <span class="sd">            position: the position of the corner of the transducer in the grid</span>
 <span class="sd">            radius: the radius of curvature of the transducer [m]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># allocate the grid size and spacing</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stored_grid_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span><span class="p">]</span>    <span class="c1"># size of the grid in which the transducer is defined</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_spacing</span> <span class="o">=</span> <span class="p">[</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dz</span><span class="p">]</span>        <span class="c1"># corresponding grid spacing</span>
@@ -327,9 +328,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transducer_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            total width of the transducer in grid points</span>
+
+<span class="sd">        Total width of the transducer in grid points</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            the overall length of the transducer</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_elements</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_width</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_elements</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_spacing</span></div>
 
@@ -351,9 +355,9 @@
             <span class="n">steering_angle</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &#39;time_reversal_boundary_data&#39; and &#39;record&#39; fields should not be defined</span>
+<span class="sd">        for the objects of this class</span>
 
-<span class="sd">            &#39;time_reversal_boundary_data&#39; and &#39;record&#39; fields should not be defined</span>
-<span class="sd">            for the objects of this class</span>
 <span class="sd">        Args:</span>
 <span class="sd">            kgrid: kWaveGrid object</span>
 <span class="sd">            active_elements: the transducer elements that are currently active elements</span>
@@ -365,7 +369,9 @@
 <span class="sd">            input_signal:</span>
 <span class="sd">            steering_angle_max:</span>
 <span class="sd">            steering_angle:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transducer</span><span class="p">,</span> <span class="n">kWaveTransducerSimple</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transducer</span> <span class="o">=</span> <span class="n">transducer</span>
@@ -493,8 +499,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">beamforming_delays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            calculate the beamforming delays based on the focus and steering settings</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        calculate the beamforming delays based on the focus and steering settings</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># calculate the element pitch in [m]</span>
@@ -525,19 +530,22 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">beamforming_delays_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            offset used to make all the delays in the delay_mask positive (either set to &#39;auto&#39; or based on the setting for steering_angle_max)</span>
+<span class="sd">        Offset used to make all the delays in the delay_mask positive (either set to &#39;auto&#39; or based on the setting for steering_angle_max)</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            the stored value of the offset used to force the values in delay_mask to be &gt;= 0</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stored_beamforming_delays_offset</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            allow mask query to allow compatability with regular sensor structure - return the active sensor mask</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        Allow mask query to allow compatability with regular sensor structure - return the active sensor mask</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_elements_mask</span>
 
     <span class="nd">@property</span>
@@ -716,18 +724,18 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">appended_zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            number of zeros appended to input signal to allow a single time series to be used</span>
-<span class="sd">            within kspaceFirstOrder3D (either set to &#39;auto&#39; or based on the setting for steering_angle_max)</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        Number of zeros appended to input signal to allow a single time series to be used</span>
+<span class="sd">        within kspaceFirstOrder3D (either set to &#39;auto&#39; or based on the setting for steering_angle_max)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stored_appended_zeros</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grid_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            return the size of the grid</span>
-<span class="sd">        Returns: grid size</span>
+<span class="sd">        Returns:</span>
+<span class="sd">             grid size</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transducer</span><span class="o">.</span><span class="n">stored_grid_size</span>
@@ -735,8 +743,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">active_elements_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            return a binary mask showing the locations of the active elements</span>
 <span class="sd">        Returns:</span>
+<span class="sd">            A binary mask showing the locations of the active elements</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">indexed_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexed_mask</span><span class="p">)</span>
@@ -758,10 +766,11 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_elements_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            binary mask of all the transducer elements (both active and inactive)</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            a binary mask showing the locations of all the elements (both active and inactive)</span>
+<span class="sd">            A binary mask showing the locations of all the elements (both active and inactive)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexed_mask</span><span class="p">)</span>
         <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">mask</span>
@@ -778,15 +787,15 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transmit_apodization_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            % convert the transmit wave apodization into the form of a element mask,</span>
-<span class="sd">            % where the apodization values are placed at the grid points</span>
-<span class="sd">            % belonging to the active transducer elements. These values are</span>
-<span class="sd">            % then extracted in the correct order within</span>
-<span class="sd">            % kspaceFirstOrder_inputChecking using apodization =</span>
-<span class="sd">            % transmit_apodization_mask(active_elements_mask ~= 0)</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        convert the transmit wave apodization into the form of a element mask,</span>
+<span class="sd">        where the apodization values are placed at the grid points</span>
+<span class="sd">        belonging to the active transducer elements. These values are</span>
+<span class="sd">        then extracted in the correct order within</span>
+<span class="sd">        kspaceFirstOrder_inputChecking using apodization =</span>
+<span class="sd">        transmit_apodization_mask(active_elements_mask ~= 0)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># get transmit apodization</span>
         <span class="n">apodization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_transmit_apodization</span><span class="p">()</span>
 
@@ -801,9 +810,9 @@
 
 <div class="viewcode-block" id="NotATransducer.get_transmit_apodization"><a class="viewcode-back" href="../../kwave.ktransducer.html#kwave.ktransducer.NotATransducer.get_transmit_apodization">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmit_apodization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
 <span class="sd">            return the transmit apodization, converting strings of window</span>
 <span class="sd">            type to actual numbers using getWin</span>
-<span class="sd">        Returns:</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -829,10 +838,9 @@
 
 <div class="viewcode-block" id="NotATransducer.delay_mask"><a class="viewcode-back" href="../../kwave.ktransducer.html#kwave.ktransducer.NotATransducer.delay_mask">[docs]</a>    <span class="k">def</span> <span class="nf">delay_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            % mode == 1: both delays</span>
-<span class="sd">            % mode == 2: elevation only</span>
-<span class="sd">            % mode == 3: azimuth only</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        mode == 1: both delays</span>
+<span class="sd">        mode == 2: elevation only</span>
+<span class="sd">        mode == 3: azimuth only</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># assign the delays to a new mask using the indexed_element_mask</span>
@@ -876,8 +884,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elevation_beamforming_delays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            calculate the elevation beamforming delays based on the focus setting</span>
-<span class="sd">        Returns:</span>
+<span class="sd">        Calculate the elevation beamforming delays based on the focus setting</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elevation_focus_distance</span><span class="p">):</span>
             <span class="c1"># create indexing variable</span>

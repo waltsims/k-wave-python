@@ -265,25 +265,17 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.io.assign_str_attr">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.io.</span></span><span class="sig-name descname"><span class="pre">assign_str_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/io.html#assign_str_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.io.assign_str_attr" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Assigns HDF5 attribute with value as a fixed-length string</p>
-</div></blockquote>
+<dd><p>Assigns HDF5 attribute with value as a fixed-length string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>attrs</strong> – </p></li>
-<li><p><strong>attr_name</strong> – </p></li>
-<li><p><strong>attr_val</strong> – </p></li>
+<li><p><strong>attrs</strong> – HDF5 attribute object</p></li>
+<li><p><strong>attr_name</strong> – name of attribute</p></li>
+<li><p><strong>attr_val</strong> – value of attribute</p></li>
 </ul>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.io.get_date_string">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.io.</span></span><span class="sig-name descname"><span class="pre">get_date_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/io.html#get_date_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.io.get_date_string" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.io.get_h5_literals">
@@ -306,9 +298,9 @@ file_description is not provided, a default file description will be used.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – The name of the HDF5 file.</p></li>
-<li><p><strong>file_description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The description of the file. If not provided, a default description
+<li><p><strong>file_description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The description of the file. If not provided, a default description
 will be used.</p></li>
-<li><p><strong>legacy</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the function will use the deprecated legacy method to write attributes.
+<li><p><strong>legacy</strong> (<em>bool</em>) – If set to True, the function will use the deprecated legacy method to write attributes.
 If set to False, the function will use the new typed method. Defaults to False.</p></li>
 </ul>
 </dd>
@@ -371,18 +363,16 @@ s_source_many</p>
 <dd class="field-odd"><p><strong>filename</strong> – </p>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.io.write_grid">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.io.</span></span><span class="sig-name descname"><span class="pre">write_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/io.html#write_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.io.write_grid" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><dl>
-<dt>DESCRIPTION:</dt><dd><p>writeGrid creates and writes the wavenumber grids and PML variables
+<dd><p>Creates and writes the wavenumber grids and PML variables
 required by the k-Wave C++ code to the HDF5 file specified by the
 user.</p>
-<dl class="simple">
+<blockquote>
+<div><dl class="simple">
 <dt>List of parameters that are written:</dt><dd><p>Nx
 Ny
 Nz
@@ -400,10 +390,7 @@ pml_y_size
 pml_z_size</p>
 </dd>
 </dl>
-</dd>
-</dl>
 </div></blockquote>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -475,7 +462,6 @@ pml_z_size</p>
             <ul>
 <li><a class="reference internal" href="#">kwave.utils.io module</a><ul>
 <li><a class="reference internal" href="#kwave.utils.io.assign_str_attr"><code class="docutils literal notranslate"><span class="pre">assign_str_attr()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.io.get_date_string"><code class="docutils literal notranslate"><span class="pre">get_date_string()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.io.get_h5_literals"><code class="docutils literal notranslate"><span class="pre">get_h5_literals()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.io.load_image"><code class="docutils literal notranslate"><span class="pre">load_image()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.io.write_attributes"><code class="docutils literal notranslate"><span class="pre">write_attributes()</span></code></a></li>

@@ -265,40 +265,53 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.create_pixel_dim">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">create_pixel_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#create_pixel_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.create_pixel_dim" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Create an array of pixel dimensions and a pixel size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – The number of pixels in the x-dimension.</p></li>
+<li><p><strong>origin_size</strong> (<em>float</em>) – The size of the origin in the x-dimension.</p></li>
+<li><p><strong>shift</strong> (<em>float</em>) – The shift of the pixels in the x-dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The pixel dimensions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>ndarray</em>, float]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.fit_power_law_params">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">fit_power_law_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#fit_power_law_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.fit_power_law_params" title="Permalink to this definition">#</a></dt>
-<dd><p>fit_power_law_params calculates the absorption parameters that should
-be defined in the simulation functions given the desired power law
-absorption behaviour defined by a0 and y. This takes into account the
-actual absorption behaviour exhibited by the fractional Laplacian
-wave equation.</p>
-<p>This fitting is required when using large absorption values or high
-frequencies, as the fractional Laplacian wave equation solved in
-kspaceFirstOrderND and kspaceSecondOrder no longer encapsulates
-absorption of the form a = a0*f^y.</p>
-<p>The returned values should be used to define the medium.alpha_coeff
-and medium.alpha_power within the simulation functions. The
-absorption behaviour over the frequency range f_min:f_max will then
-follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()</p>
+<dd><p>Calculate absorption parameters that fit a power law over a given frequency range.</p>
+<p>This function calculates the absorption parameters that should be defined in the simulation functions
+to achieve the desired power law absorption behavior defined by <cite>a0</cite> and <cite>y</cite>. This takes into account
+the actual absorption behavior exhibited by the fractional Laplacian wave equation.</p>
+<p>This fitting is required when using large absorption values or high frequencies, as the fractional
+Laplacian wave equation solved in <cite>kspaceFirstOrderND</cite> and <cite>kspaceSecondOrder</cite> no longer encapsulates
+absorption of the form <cite>a = a0*f^y</cite>.</p>
+<p>The returned values should be used to define <cite>medium.alpha_coeff</cite> and <cite>medium.alpha_power</cite> within the
+simulation functions. The absorption behavior over the frequency range <cite>f_min</cite>:<cite>f_max</cite> will then
+follow the power law defined by <cite>a0</cite> and <cite>y</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>a0</strong> – </p></li>
-<li><p><strong>y</strong> – </p></li>
-<li><p><strong>c0</strong> – </p></li>
-<li><p><strong>f_min</strong> – </p></li>
-<li><p><strong>f_max</strong> – </p></li>
-<li><p><strong>plot_fit</strong> – </p></li>
+<li><p><strong>a0</strong> (<em>float</em>) – coefficient in the power law absorption equation</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – exponent in the power law absorption equation</p></li>
+<li><p><strong>c0</strong> (<em>float</em>) – speed of sound in the medium</p></li>
+<li><p><strong>f_min</strong> (<em>float</em>) – minimum frequency in the range to fit the power law</p></li>
+<li><p><strong>f_max</strong> (<em>float</em>) – maximum frequency in the range to fit the power law</p></li>
+<li><p><strong>plot_fit</strong> (<em>bool</em>) – whether to plot the fit</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>y_fit:</p>
+<dd class="field-even"><p>A tuple of the absorption coefficient and fitted exponent of the power law absorption equation.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a0_fit</p>
+<dd class="field-odd"><p><em>Tuple</em>[float, float]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -306,36 +319,26 @@ follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()<
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.focused_bowl_oneil">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">focused_bowl_oneil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lateral_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#focused_bowl_oneil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.focused_bowl_oneil" title="Permalink to this definition">#</a></dt>
-<dd><p>focused_bowl_oneil calculates O’Neil’s solution (O’Neil, H. Theory of
-focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949) for
-the axial and lateral pressure amplitude generated by a focused bowl
-transducer when uniformly driven by a continuous wave sinusoid at a
-given frequency and normal surface velocity.</p>
-<p>The solution is evaluated at the positions along the beam axis given
-by axial_position (where 0 corresponds to the transducer surface),
-and lateral positions through the geometric focus given by
-lateral_position (where 0 corresponds to the beam axis). To return
-only the axial or lateral pressure, set the either axial_position or
-lateral_position to [].</p>
-<p>Note, O’Neil’s formulae are derived under the assumptions of the
-Rayleigh integral, which are valid when the transducer diameter is
-large compared to both the transducer height and the acoustic
-wavelength.</p>
+<dd><p>Calculates O’Neil’s solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>radius</strong> (<em>float</em>) – </p></li>
-<li><p><strong>diameter</strong> (<em>float</em>) – </p></li>
-<li><p><strong>velocity</strong> (<em>float</em>) – </p></li>
-<li><p><strong>frequency</strong> (<em>float</em>) – </p></li>
-<li><p><strong>sound_speed</strong> (<em>float</em>) – </p></li>
-<li><p><strong>density</strong> (<em>float</em>) – </p></li>
-<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the transducer.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – The diameter of the transducer.</p></li>
+<li><p><strong>velocity</strong> (<em>float</em>) – The normal surface velocity of the transducer.</p></li>
+<li><p><strong>frequency</strong> (<em>float</em>) – The driving frequency of the sinusoid.</p></li>
+<li><p><strong>sound_speed</strong> (<em>float</em>) – The sound speed in the medium.</p></li>
+<li><p><strong>density</strong> (<em>float</em>) – The density of the medium.</p></li>
+<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ndarray</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.</p></li>
+<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ndarray</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>[&lt;class ‘float’&gt;, &lt;class ‘float’&gt;]</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The axial pressure amplitude.
+p-lateral: The lateral pressure amplitude.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>p-axial</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -355,104 +358,58 @@ lateral_position = np.arange(-15e-3, 15e-3 + 1e-4, 1e-4)  # [m]</p>
 <div><p>velocity, frequency, sound_speed, density,
 axial_position, lateral_position)</p>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pressure amplitude at the axial_position [Pa]
-p_lateral:         pressure amplitude at the lateral_position [Pa]</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>p_axial</p>
-</dd>
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>radius</strong> (<em>float</em>) – </p></li>
-<li><p><strong>diameter</strong> (<em>float</em>) – </p></li>
-<li><p><strong>velocity</strong> (<em>float</em>) – </p></li>
-<li><p><strong>frequency</strong> (<em>float</em>) – </p></li>
-<li><p><strong>sound_speed</strong> (<em>float</em>) – </p></li>
-<li><p><strong>density</strong> (<em>float</em>) – </p></li>
-<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>array</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – </p></li>
-</ul>
-</dd>
-</dl>
+<p class="rubric">References</p>
+<p>O’Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.get_spaced_points">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">get_spaced_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#get_spaced_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.get_spaced_points" title="Permalink to this definition">#</a></dt>
-<dd><p>getSpacedPoints generates a row vector of either logarithmically or
-linearly spaced points between X1 and X2. When spacing is set to
-‘linear’, the function is identical to the inbuilt np.linspace
-function. When spacing is set to ‘log’, the function is similar to
-the inbuilt np.logspace function, except that X1 and X2 define the start
-and end numbers, not decades. For logarithmically spaced points, X1
-must be &gt; 0. If N &lt; 2, X2 is returned.
-:param start:
-:param stop:
-:param n:
-:param spacing:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>points</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.mapgen.hounsfield2density">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">hounsfield2density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fitting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#hounsfield2density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.hounsfield2density" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert Hounsfield units in CT data to density values [kg / m ^ 3]
-based on the experimental data given by Schneider et al.
-The conversion is made using a np.piece-wise linear fit to the data.</p>
+<dd><p>Generate a row vector of either logarithmically or linearly spaced points between <cite>start</cite> and <cite>stop</cite>.</p>
+<p>When <cite>spacing</cite> is set to ‘linear’, the function is identical to the inbuilt <cite>np.linspace</cite> function.
+When <cite>spacing</cite> is set to ‘log’, the function is similar to the inbuilt <cite>np.logspace</cite> function, except
+that <cite>start</cite> and <cite>stop</cite> define the start and end numbers, not decades. For logarithmically spaced
+points, <cite>start</cite> must be &gt; 0. If <cite>n</cite> &lt; 2, <cite>stop</cite> is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ct_data</strong> – </p></li>
-<li><p><strong>plot_fitting</strong> – </p></li>
+<li><p><strong>start</strong> (<em>float</em>) – start value for the spaced points</p></li>
+<li><p><strong>stop</strong> (<em>float</em>) – end value for the spaced points</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – number of points to generate</p></li>
+<li><p><strong>spacing</strong> (<em>str</em>) – type of spacing to use, either ‘linear’ or ‘log’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>density in kg / m ^ 3</p>
+<dd class="field-even"><p>row vector of spaced points</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>density_map</p>
+<dd class="field-odd"><p>points</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>stop</cite> &lt;= <cite>start</cite> or <cite>spacing</cite> is not ‘linear’ or ‘log’</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.mapgen.hounsfield2soundspeed">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">hounsfield2soundspeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#hounsfield2soundspeed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.hounsfield2soundspeed" title="Permalink to this definition">#</a></dt>
-<dd><p>Calclulates the soundspeed of a medium given a CT of the medium.
-For soft-tissue, the approximate sound speed can also be returned
-using the empirical relationship given by Mast.</p>
-<p>Mast, T. D., “Empirical relationships between acoustic parameters
-in human soft tissues,” Acoust. Res. Lett. Online, 1(2), pp. 37-42
-(2000).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ct_data</strong> – </p>
-</dd>
-</dl>
-<p>Returns: sound_speed:       matrix of sound speed values of size of ct data</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.mapgen.ind2sub">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">ind2sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#ind2sub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.ind2sub" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_arc">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_arc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_arc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_arc" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Generates an arc shape with a given radius, diameter, and focus position.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
+<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – The position of the arc, given as a 1D array with the coordinates in each dimension.</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the arc.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – The diameter of the arc.</p></li>
+<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – The position of the focus, given as a 1D array with the coordinates in each dimension.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array with the arc shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -460,32 +417,26 @@ in human soft tissues,” Acoust. Res. Lett. Online, 1(2), pp. 37-42
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_ball">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ball</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_ball" title="Permalink to this definition">#</a></dt>
-<dd><p>MAKEBALL Create a binary map of a filled ball within a 3D grid.</p>
-<dl class="simple">
-<dt>DESCRIPTION:</dt><dd><p>make_ball creates a binary map of a filled ball within a
-three-dimensional grid (the ball position is denoted by 1’s in the
-matrix with 0’s elsewhere). A single grid point is taken as the ball
-centre thus the total diameter of the ball will always be an odd
-number of grid points.</p>
-</dd>
-</dl>
+<dd><p>Creates a binary map of a filled ball within a 3D grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> – size of the 3D grid in x-dimension [grid points]</p></li>
-<li><p><strong>Ny</strong> – size of the 3D grid in y-dimension [grid points]</p></li>
-<li><p><strong>Nz</strong> – size of the 3D grid in z-dimension [grid points]</p></li>
-<li><p><strong>cx</strong> – centre of the ball in x-dimension [grid points]</p></li>
-<li><p><strong>cy</strong> – centre of the ball in y-dimension [grid points]</p></li>
-<li><p><strong>cz</strong> – centre of the ball in z-dimension [grid points]</p></li>
-<li><p><strong>radius</strong> – ball radius [grid points]</p></li>
-<li><p><strong>plot_ball</strong> – Boolean controlling whether the ball is plotted using voxelPlot (default = false)</p></li>
-<li><p><strong>binary</strong> – Boolean controlling whether the ball map is returned as a double precision matrix (false)
-or a logical matrix (true) (default = false)</p></li>
+<li><p><strong>Nx</strong> (<em>int</em>) – size of the 3D grid in x-dimension [grid points].</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – size of the 3D grid in y-dimension [grid points].</p></li>
+<li><p><strong>Nz</strong> (<em>int</em>) – size of the 3D grid in z-dimension [grid points].</p></li>
+<li><p><strong>cx</strong> (<em>int</em>) – centre of the ball in x-dimension [grid points].</p></li>
+<li><p><strong>cy</strong> (<em>int</em>) – centre of the ball in y-dimension [grid points].</p></li>
+<li><p><strong>cz</strong> (<em>int</em>) – centre of the ball in z-dimension [grid points].</p></li>
+<li><p><strong>radius</strong> (<em>int</em>) – ball radius [grid points].</p></li>
+<li><p><strong>plot_ball</strong> (<em>bool</em>) – whether to plot the ball using voxelPlot (default = False).</p></li>
+<li><p><strong>binary</strong> (<em>bool</em>) – whether to return the ball map as a double precision matrix (False) or a logical matrix (True) (default = False).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>3D binary map of a filled ball</p>
+<dd class="field-even"><p>3D binary map of a filled ball.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ball</p>
 </dd>
 </dl>
 </dd></dl>
@@ -493,24 +444,54 @@ or a logical matrix (true) (default = false)</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_bowl">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_bowl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bowl_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_bowl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_bowl" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generate a matrix representing a bowl-shaped object in 3D space.</p>
+<p>This function generates a 3D matrix representing a bowl-shaped object with the specified radius and diameter. The position
+of the bowl and the focus point can be specified, as well as whether to return a binary matrix or a matrix with
+continuous values. The optional parameter ‘remove_overlap’ can be used to remove any overlap with the surrounding grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – size of the grid in each dimension</p></li>
+<li><p><strong>bowl_pos</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – position of the bowl in the grid</p></li>
+<li><p><strong>radius</strong> (<em>int</em>) – radius of the bowl</p></li>
+<li><p><strong>diameter</strong> (<em>int</em>) – diameter of the bowl</p></li>
+<li><p><strong>focus_pos</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – position of the focus point in the grid</p></li>
+<li><p><strong>binary</strong> (<em>bool</em>) – whether to return a binary matrix</p></li>
+<li><p><strong>remove_overlap</strong> (<em>bool</em>) – whether to remove overlap with the surrounding grid</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3D matrix representing the bowl-shaped object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if any of the input arguments are outside the valid range</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_circle">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.283185307179586</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_circle" title="Permalink to this definition">#</a></dt>
-<dd><p>make_cart_circle creates a set of points in cartesian coordinates defining a circle or arc.</p>
+<dd><p>Create a set of points in cartesian coordinates defining a circle or arc.</p>
+<p>This function creates a set of points in cartesian coordinates defining a circle or arc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>radius</strong> – </p></li>
-<li><p><strong>num_points</strong> – </p></li>
-<li><p><strong>center_pos</strong> – </p></li>
-<li><p><strong>arc_angle</strong> – Arc angle in radians.</p></li>
-<li><p><strong>plot_circle</strong> – </p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – radius of the circle or arc</p></li>
+<li><p><strong>num_points</strong> (<em>int</em>) – number of points to generate</p></li>
+<li><p><strong>center_pos</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – center position of the circle or arc</p></li>
+<li><p><strong>arc_angle</strong> (<em>float</em>) – arc angle in radians</p></li>
+<li><p><strong>plot_circle</strong> (<em>bool</em>) – whether to plot the circle or arc</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>2 x num_points array of cartesian coordinates</p>
+<dd class="field-even"><p>2 x <cite>num_points</cite> array of cartesian coordinates</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -518,20 +499,23 @@ or a logical matrix (true) (default = false)</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_sphere">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_sphere" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>make_cart_sphere creates a set of points in cartesian coordinates defining a sphere.</p>
-</div></blockquote>
+<dd><p>Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>radius</strong> – </p></li>
-<li><p><strong>num_points</strong> – </p></li>
-<li><p><strong>center_pos</strong> – </p></li>
-<li><p><strong>plot_sphere</strong> – </p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – the radius of the sphere.</p></li>
+<li><p><strong>num_points</strong> (<em>int</em>) – the number of points to be generated.</p></li>
+<li><p><strong>center_pos</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em>) – the coordinates of the center of the sphere. Defaults to (0, 0, 0).</p></li>
+<li><p><strong>plot_sphere</strong> (<em>bool</em>) – whether to plot the sphere. Defaults to False.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The points on the sphere.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[<em>Tuple</em>[float, float, float]], <em>Tuple</em>[<em>List</em>[<em>Tuple</em>[float, float, float]], <em>Any</em>]]</p>
+</dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -551,15 +535,15 @@ of the circle intersects the grid.</p>
 <li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the circle centre.</p></li>
 <li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the circle centre.</p></li>
 <li><p><strong>radius</strong> (<em>int</em>) – The radius of the circle.</p></li>
-<li><p><strong>arc_angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
-<li><p><strong>plot_circle</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the circle will be plotted using Matplotlib.</p></li>
+<li><p><strong>arc_angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
+<li><p><strong>plot_circle</strong> (<em>bool</em>) – If set to True, the circle will be plotted using Matplotlib.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A binary map of the circle in the 2D grid.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -576,19 +560,16 @@ side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points along the x-axis.</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points along the y-axis.</p></li>
-<li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the disc centre.</p></li>
-<li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the disc centre.</p></li>
-<li><p><strong>radius</strong> (<em>int</em>) – The radius of the disc.</p></li>
-<li><p><strong>plot_disc</strong> (<em>bool</em>) – If set to True, the disc will be plotted using Matplotlib.</p></li>
+<li><p><strong>Nx</strong> – The number of grid points along the x-axis.</p></li>
+<li><p><strong>Ny</strong> – The number of grid points along the y-axis.</p></li>
+<li><p><strong>cx</strong> – The x-coordinate of the disc centre.</p></li>
+<li><p><strong>cy</strong> – The y-coordinate of the disc centre.</p></li>
+<li><p><strong>radius</strong> – The radius of the disc.</p></li>
+<li><p><strong>plot_disc</strong> – If set to True, the disc will be plotted using Matplotlib.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A binary map of the disc in the 2D grid.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -596,19 +577,23 @@ side.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_line">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_line" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Generate a line shape with a given start and end point, angle, or length.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – </p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – </p></li>
-<li><p><strong>startpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – </p></li>
-<li><p><strong>endpoint</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
-<li><p><strong>length</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>Nx</strong> (<em>int</em>) – The number of pixels in the x-dimension.</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – The number of pixels in the y-dimension.</p></li>
+<li><p><strong>startpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The start point of the line, given as a tuple of x and y coordinates.</p></li>
+<li><p><strong>endpoint</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.</p></li>
+<li><p><strong>angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.</p></li>
+<li><p><strong>length</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>ndarray</em></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of the same size as the input parameters, with a value of 1 for pixels that are part of the line and 0 for pixels that are not.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>line</p>
 </dd>
 </dl>
 </dd></dl>
@@ -616,13 +601,26 @@ side.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_multi_arc">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_multi_arc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_multi_arc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_multi_arc" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid (assumed to be square).</p></li>
+<li><p><strong>arc_pos</strong> (<em>ndarray</em>) – An array containing the (x, y) coordinates of the center of each arc.</p></li>
+<li><p><strong>radius</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>ndarray</em><em>]</em>) – The radius of each arc. Can be a single value or an array with one value for each arc.</p></li>
+<li><p><strong>diameter</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>ndarray</em><em>]</em>) – The diameter of the arcs. Can be a single value or an array with one value for each arc.</p></li>
+<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – The (x, y) coordinates of the focus.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A binary mask of the arcs.
+arcs_labelled: A labelled mask of the arcs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>arcs</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match, or if the number of rows in arc_pos and diameter do not match.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -630,25 +628,57 @@ side.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_multi_bowl">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_multi_bowl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bowl_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_multi_bowl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_multi_bowl" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls, the radius of each bowl, the diameter of the bowls, and the position of the focus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>int</em>) – The size of the grid (assumed to be square).</p></li>
+<li><p><strong>bowl_pos</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – A list of tuples containing the (x, y) coordinates of the center of each bowl.</p></li>
+<li><p><strong>radius</strong> (<em>int</em>) – The radius of each bowl.</p></li>
+<li><p><strong>diameter</strong> (<em>int</em>) – The diameter of the bowls.</p></li>
+<li><p><strong>focus_pos</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The (x, y) coordinates of the focus.</p></li>
+<li><p><strong>binary</strong> (<em>bool</em>) – Whether to return a binary mask (default: False).</p></li>
+<li><p><strong>remove_overlap</strong> (<em>bool</em>) – Whether to remove overlap between the bowls (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>bowls_labeled:</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bowls</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map" title="Permalink to this definition">#</a></dt>
-<dd><p>make_pixel_map Create matrix of grid point distances from the centre point.</p>
-<blockquote>
-<div><dl>
-<dt>DESCRIPTION:</dt><dd><p>make_pixel_map generates a matrix populated with values of how far each
-pixel in a grid is from the centre (given in pixel coordinates). Both
-single and double pixel centres can be used by setting the optional
-input parameter ‘OriginSize’. For grids where the dimension size and
-centre pixel size are not both odd or even, the optional input
-parameter ‘Shift’ can be used to control the location of the
-centerpoint.</p>
-<p>examples for a 2D pixel map:</p>
+<dd><p>Generates a matrix with values of the distance of each pixel from the center of a grid.</p>
+<p>This function generates a matrix populated with values of how far each pixel in a grid is from the center. The center
+can be a single pixel or a double pixel, and the optional input parameter ‘OriginSize’ controls this. For grids where
+the dimension size and center pixel size are not both odd or even, the optional input parameter ‘Shift’ can be used to
+control the location of the center point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – number of pixels in the x-dimension</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – number of pixels in the y-dimension</p></li>
+<li><p><strong>Nz</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – number of pixels in the z-dimension</p></li>
+<li><p><strong>*args</strong> – additional optional arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pixel-radius</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>r</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
 <p>Single pixel origin size for odd and even (with ‘Shift’ = [1 1] and
 [0 0], respectively) grid sizes:</p>
-<p>x x x       x x x x         x x x x
+<blockquote>
+<div><p>x x x       x x x x         x x x x
 x 0 x       x x x x         x 0 x x
 x x x       x x 0 x         x x x x</p>
 <blockquote>
@@ -663,30 +693,54 @@ x x x x      x x 0 0 x        x x x x x</p>
 <blockquote>
 <div><p>x x x x x        x x x x x</p>
 </div></blockquote>
-<p>By default a single pixel centre is used which is shifted towards
+<p>By default, a single pixel centre is used which is shifted towards
 the final row and column.</p>
-</dd>
-</dl>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>*args</strong> – </p>
-</dd>
-</dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map_plane">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map_plane" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generates a pixel map of a plane with given normal vector and point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid as a NumPy array [Nx, Ny, Nz].</p></li>
+<li><p><strong>normal</strong> (<em>ndarray</em>) – The normal vector of the plane as a NumPy array [nx, ny, nz].</p></li>
+<li><p><strong>point</strong> (<em>ndarray</em>) – A point on the plane as a NumPy array [px, py, pz].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array with the distance of each pixel from the given plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pixel_map</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the normal vector is zero.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map_point">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map_point" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Generates a map of the distance of each pixel from a given centre position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
+<li><p><strong>centre_pos</strong> (<em>ndarray</em>) – The position of the centre, given as a 1D array with the coordinates in each dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array with the distance of each pixel from the given centre position.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em></p>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>grid_size</cite> and <cite>centre_pos</cite> do not have the same number of dimensions.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -694,12 +748,56 @@ the final row and column.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_sphere">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_sphere" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points in the x-dimension.</p></li>
+<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points in the y-dimension.</p></li>
+<li><p><strong>Nz</strong> (<em>int</em>) – The number of grid points in the z-dimension.</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the sphere.</p></li>
+<li><p><strong>plot_sphere</strong> (<em>bool</em>) – Whether to plot the sphere (default: False).</p></li>
+<li><p><strong>binary</strong> (<em>bool</em>) – Whether to return a binary mask (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sphere mask as a NumPy array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sphere</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_spherical_section">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_spherical_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_spherical_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_spherical_section" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generates a spherical section mask given the radius and height of the section and optional parameters to specify the width and/or plot and return a binary mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the spherical section.</p></li>
+<li><p><strong>height</strong> (<em>float</em>) – The height of the spherical section.</p></li>
+<li><p><strong>width</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The width of the spherical section (default: height).</p></li>
+<li><p><strong>plot_section</strong> (<em>bool</em>) – Whether to plot the spherical section (default: False).</p></li>
+<li><p><strong>binary</strong> (<em>bool</em>) – Whether to return a binary mask (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The spherical section mask as a NumPy array.
+dist_map: The distance map of the spherical section mask as a NumPy array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ss</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the width is not an odd number.</p></li>
+<li><p><strong>NotImplementedError</strong> – Plotting not currently supported.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.ndgrid">
@@ -709,41 +807,23 @@ the final row and column.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.power_law_kramers_kronig">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">power_law_kramers_kronig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#power_law_kramers_kronig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.power_law_kramers_kronig" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>POWERLAWKRAMERSKRONIG Calculate dispersion for power law absorption.</p>
-<dl class="simple">
-<dt>DESCRIPTION:</dt><dd><p>powerLawKramersKronig computes the variation in sound speed for an
-attenuating medium using the Kramers-Kronig for power law
-attenuation where att = a0*w^y. The power law parameters must be in
-Nepers / m, with the frequency in rad/s. The variation is given
-about the sound speed c0 at a reference frequency w0.</p>
-</dd>
-<dt>USAGE:</dt><dd><p>c_kk = power_law_kramers_kronig(w, w0, c0, a0, y)</p>
-</dd>
-</dl>
-<p>INPUTS:</p>
-<p>OUTPUTS:</p>
-</div></blockquote>
+<dd><p>Compute the variation in sound speed for an attenuating medium using the Kramers-Kronig for power law attenuation.</p>
+<p>This function computes the variation in sound speed for an attenuating medium using the Kramers-Kronig
+formula for power law attenuation, where <cite>att = a0 * w^y</cite>. The power law parameters must be in Nepers/m,
+with the frequency in rad/s. The variation is given about the sound speed <cite>c0</cite> at a reference frequency <cite>w0</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>w</strong> – input frequency array [rad/s]</p></li>
-<li><p><strong>w0</strong> – reference frequency [rad/s]</p></li>
-<li><p><strong>c0</strong> – sound speed at w0 [m/s]</p></li>
-<li><p><strong>a0</strong> – power law coefficient [Nepers/((rad/s)^y m)]</p></li>
-<li><p><strong>y</strong> – power law exponent, where 0 &lt; y &lt; 3</p></li>
+<li><p><strong>w</strong> (<em>ndarray</em>) – input frequency array [rad/s]</p></li>
+<li><p><strong>w0</strong> (<em>float</em>) – reference frequency [rad/s]</p></li>
+<li><p><strong>c0</strong> (<em>float</em>) – sound speed at w0 [m/s]</p></li>
+<li><p><strong>a0</strong> (<em>float</em>) – power law coefficient [Nepers/((rad/s)^y m)]</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – power law exponent, where 0 &lt; y &lt; 3</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>c_kk           variation of sound speed with w [m/s]</p>
+<dd class="field-even"><p>Variation of sound speed with w [m/s]</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.mapgen.sub2ind">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">sub2ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#sub2ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.sub2ind" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
@@ -753,20 +833,29 @@ about the sound speed c0 at a reference frequency w0.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.water_absorption">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_absorption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_absorption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_absorption" title="Permalink to this definition">#</a></dt>
-<dd><p>water_absorption Calculate ultrasound absorption in distilled water.</p>
-<p>DESCRIPTION:
-waterAbsorption calculates the ultrasonic absorption in distilled
+<dd><p>Calculates the ultrasonic absorption in distilled
 water at a given temperature and frequency using a 7 th order
 polynomial fitted to the data given by np.pinkerton(1949).</p>
-<p>USAGE:
-abs = waterAbsorption(f, T)</p>
-<p>INPUTS:
-f - f frequency value [MHz]
-T - water temperature value [degC]</p>
-<p>OUTPUTS:
-abs - absorption[dB / cm]</p>
-<p>REFERENCES:
-[1] np.pinkerton(1949) “The Absorption of Ultrasonic Waves in Liquids
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> – f frequency value [MHz]</p></li>
+<li><p><strong>T</strong> – water temperature value [degC]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>absorption [dB / cm]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>abs</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span> <span class="o">=</span> <span class="n">waterAbsorption</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<p>[1] np.pinkerton(1949) “The Absorption of Ultrasonic Waves in Liquids
 and its Relation to Molecular Constitution, ” Proceedings of the
 Physical Society.Section B, 2, 129 - 141</p>
 </dd></dl>
@@ -774,71 +863,80 @@ Physical Society.Section B, 2, 129 - 141</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.water_density">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_density" title="Permalink to this definition">#</a></dt>
-<dd><p>WATERDENSITY Calculate density of air - saturated water with temperature.</p>
-<p>DESCRIPTION:
-waterDensity calculates the density of air - saturated water at a given % temperature using the 4 th order polynomial given by Jones(1992).</p>
-<p>USAGE:
-density = waterDensity(T)</p>
-<p>INPUTS:
-T - water temperature in the range 5 to 40[degC]</p>
-<p>OUTPUTS:
-density - density of water[kg / m ^ 3]</p>
-<p>ABOUT:
-author - Bradley E.Treeby
-date - 22 nd February 2018
-last update - 4 th April 2019</p>
-<p>REFERENCES:
-[1] F.E.Jones and G.L.Harris(1992) “ITS-90 Density of Water
-Formulation for Volumetric Standards Calibration, ” J. Res. Natl.
-Inst.Stand.Technol., 97(3), 335 - 340.</p>
+<dd><p>Calculate the density of air-saturated water with temperature.</p>
+<p>This function calculates the density of air-saturated water at a given temperature using the 4th order polynomial
+given by Jones [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temp</strong> (<em>float</em>) – water temperature in the range 5 to 40 [degC]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>density of water [kg/m^3]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>density</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>temp</cite> is not between 5 and 40</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] F.E. Jones and G.L. Harris (1992) “ITS-90 Density of Water Formulation for Volumetric Standards Calibration,”
+J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.water_non_linearity">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_non_linearity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_non_linearity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_non_linearity" title="Permalink to this definition">#</a></dt>
-<dd><p>WATERNONLINEARITY Calculate B/A of water with temperature.</p>
-<dl class="simple">
-<dt>DESCRIPTION:</dt><dd><p>waterNonlinearity calculates the parameter of nonlinearity B/A at a
+<dd><blockquote>
+<div><p>Calculates the parameter of nonlinearity B/A at a
 given temperature using a fourth-order polynomial fitted to the data
 given by Beyer (1960).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temp</strong> (<em>float</em>) – water temperature in the range 0 to 100 [degC]</p>
 </dd>
-<dt>USAGE:</dt><dd><p>BonA = waterNonlinearity(T)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>parameter of nonlinearity</p>
 </dd>
-<dt>INPUTS:</dt><dd><p>T             - water temperature in the range 0 to 100 [degC]</p>
-</dd>
-<dt>OUTPUTS:</dt><dd><p>BonA          - parameter of nonlinearity</p>
-</dd>
-<dt>ABOUT:</dt><dd><p>author        - Bradley E. Treeby
-date          - 22nd February 2018
-last update   - 4th April 2019</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BonA</p>
 </dd>
 </dl>
-<p class="rubric">References</p>
-<p>[1] R. T Beyer (1960) “Parameter of nonlinearity in fluids,” J.
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">BonA</span> <span class="o">=</span> <span class="n">waterNonlinearity</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<blockquote>
+<div><dl class="simple">
+<dt>References:</dt><dd><p>[1] R. T Beyer (1960) “Parameter of nonlinearity in fluids,” J.
 Acoust. Soc. Am., 32(6), 719-721.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.water_sound_speed">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_sound_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_sound_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_sound_speed" title="Permalink to this definition">#</a></dt>
-<dd><p>WATERSOUNDSPEED Calculate the sound speed in distilled water with temperature.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>DESCRIPTION:</dt><dd><p>waterSoundSpeed calculates the sound speed in distilled water at a
-a given temperature using the 5th order polynomial given by Marczak
-(1997).</p>
+<dd><p>Calculate the sound speed in distilled water with temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temp</strong> (<em>float</em>) – The temperature of the water in degrees Celsius.</p>
 </dd>
-<dt>USAGE:</dt><dd><p>c = waterSoundSpeed(T)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sound speed in distilled water in m/s.</p>
 </dd>
-<dt>INPUTS:</dt><dd><p>T             - water temperature in the range 0 to 95 [degC]</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>c</p>
 </dd>
-<dt>OUTPUTS:</dt><dd><p>c             - sound speed [m/s]</p>
-</dd>
-<dt>REFERENCES:</dt><dd><p>[1] Marczak (1997) “Water as a standard in the measurements of speed
-of sound in liquids,” J. Acoust. Soc. Am., 102, 2776-2779.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>temp</cite> is not between 0 and 95</p>
 </dd>
 </dl>
-</div></blockquote>
+<p class="rubric">References</p>
+<p>Marczak, R. (1997). The sound velocity in water as a function of temperature. Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.</p>
 </dd></dl>
 
 </section>
@@ -903,9 +1001,6 @@ of sound in liquids,” J. Acoust. Soc. Am., 102, 2776-2779.</p>
 <li><a class="reference internal" href="#kwave.utils.mapgen.fit_power_law_params"><code class="docutils literal notranslate"><span class="pre">fit_power_law_params()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.focused_bowl_oneil"><code class="docutils literal notranslate"><span class="pre">focused_bowl_oneil()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.get_spaced_points"><code class="docutils literal notranslate"><span class="pre">get_spaced_points()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.mapgen.hounsfield2density"><code class="docutils literal notranslate"><span class="pre">hounsfield2density()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.mapgen.hounsfield2soundspeed"><code class="docutils literal notranslate"><span class="pre">hounsfield2soundspeed()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.mapgen.ind2sub"><code class="docutils literal notranslate"><span class="pre">ind2sub()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_arc"><code class="docutils literal notranslate"><span class="pre">make_arc()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_ball"><code class="docutils literal notranslate"><span class="pre">make_ball()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_bowl"><code class="docutils literal notranslate"><span class="pre">make_bowl()</span></code></a></li>
@@ -923,7 +1018,6 @@ of sound in liquids,” J. Acoust. Soc. Am., 102, 2776-2779.</p>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_spherical_section"><code class="docutils literal notranslate"><span class="pre">make_spherical_section()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.ndgrid"><code class="docutils literal notranslate"><span class="pre">ndgrid()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.power_law_kramers_kronig"><code class="docutils literal notranslate"><span class="pre">power_law_kramers_kronig()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.mapgen.sub2ind"><code class="docutils literal notranslate"><span class="pre">sub2ind()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_absorption"><code class="docutils literal notranslate"><span class="pre">water_absorption()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_density"><code class="docutils literal notranslate"><span class="pre">water_density()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_non_linearity"><code class="docutils literal notranslate"><span class="pre">water_non_linearity()</span></code></a></li>

@@ -266,15 +266,15 @@
 <span class="sd">    If the axisymmetric argument is set to True, the axial side of the radial PML will not be added.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        Nx (int): The number of grid points in the x direction.</span>
-<span class="sd">        dx (float): The spacing between grid points in the x direction.</span>
-<span class="sd">        dt (float): The time step size.</span>
-<span class="sd">        c (float): The wave speed in the medium.</span>
-<span class="sd">        pml_size (int): The size of the PML layer in grid points.</span>
-<span class="sd">        pml_alpha (float): The absorption coefficient of the PML layer.</span>
-<span class="sd">        staggered (bool): Whether to use a staggered grid for calculating the varying components of the PML.</span>
-<span class="sd">        dimension (int): The dimension of the PML (1, 2, or 3).</span>
-<span class="sd">        axisymmetric (bool, optional): Whether to use axisymmetry when calculating the PML. Defaults to False.</span>
+<span class="sd">        Nx: The number of grid points in the x direction.</span>
+<span class="sd">        dx: The spacing between grid points in the x direction.</span>
+<span class="sd">        dt: The time step size.</span>
+<span class="sd">        c: The wave speed in the medium.</span>
+<span class="sd">        pml_size: The size of the PML layer in grid points.</span>
+<span class="sd">        pml_alpha: The absorption coefficient of the PML layer.</span>
+<span class="sd">        staggered: Whether to use a staggered grid for calculating the varying components of the PML.</span>
+<span class="sd">        dimension: The dimension of the PML (1, 2, or 3).</span>
+<span class="sd">        axisymmetric: Whether to use axisymmetry when calculating the PML. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A 1D numpy array representing the PML variable.</span>
@@ -335,7 +335,7 @@
 <span class="sd">                        PML to the outside edge in the radial dimension.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">         pml_sz:       PML size that gives the overall grid with the smallest prime factors.</span>
+<span class="sd">         PML size that gives the overall grid with the smallest prime factors.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># check if grid size is given as kgrid, and extract grid size</span>

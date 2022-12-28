@@ -265,11 +265,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.checks.check_divisible">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">check_divisible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">divider</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#check_divisible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.check_divisible" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Checks whether number is divisible by divider without any remainder
+<dd><p>Checks whether number is divisible by divider without any remainder
 Why do we need such a function? -&gt; Because due to floating point precision we
 experience rounding errors while using standard modulo operator with floating point numbers</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -302,11 +300,8 @@ printed to the command line.</p>
 <li><p><strong>max_number</strong> (<em>int</em>) – integer specifying the upper bound of values to test</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -315,22 +310,25 @@ printed to the command line.</p>
 <dt class="sig sig-object py" id="kwave.utils.checks.check_field_names">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">check_field_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#check_field_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.check_field_names" title="Permalink to this definition">#</a></dt>
 <dd><p>This method checks if the keys of the given dictionary are valid fields.</p>
-<p>Args:
-dictionary: A dictionary where the keys will be checked for validity.
-<a href="#id1"><span class="problematic" id="id2">*</span></a>fields: A list of valid field names.</p>
-<p>Returns:
-None</p>
-<p>Raises:
-AssertionError: If any of the keys in the dictionary are not in the list of valid fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dictionary</strong> – A dictionary where the keys will be checked for validity.</p></li>
+<li><p><strong>*fields</strong> – A list of valid field names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If any of the keys in the dictionary are not in the list of valid fields.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.checks.check_stability">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">check_stability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#check_stability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.check_stability" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>checkStability calculates the maximum time step for which the k-space
-propagation models kspaceFirstOrder1D, kspaceFirstOrder2D and
-kspaceFirstOrder3D are stable. These models are unconditionally
+<dd><p>Calculates the maximum time step for which the k-space
+propagation models are stable.</p>
+<p>These models are unconditionally
 stable when the reference sound speed is equal to or greater than the
 maximum sound speed in the medium and there is no absorption.
 However, when the reference sound speed is less than the maximum
@@ -340,17 +338,18 @@ the absorbing case.</p>
 <p>The time steps given are accurate when the medium properties are
 homogeneous. For a heterogeneous media they give a useful, but not
 exact, estimate.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> – k-Wave grid object return by kWaveGrid</p></li>
-<li><p><strong>medium</strong> – structure containing the medium properties</p></li>
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – simulation grid</p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – medium properties</p></li>
 </ul>
 </dd>
-</dl>
-<dl class="simple">
-<dt>Returns: the maximum time step for which the models are stable.</dt><dd><p>This is set to Inf when the model is unconditionally stable.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The maximum time step for which the models are stable. This is set to Inf when the model is unconditionally stable.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -418,11 +417,17 @@ Added by &#64;Farid</p>
 <dt class="sig sig-object py" id="kwave.utils.checks.enforce_fields_obj">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">enforce_fields_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#enforce_fields_obj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.enforce_fields_obj" title="Permalink to this definition">#</a></dt>
 <dd><p>Enforces that certain fields are not None in the given object.</p>
-<p>Args:
-obj: Object to check the fields of.
-<a href="#id3"><span class="problematic" id="id4">*</span></a>fields: List of field names to check.</p>
-<p>Raises:
-AssertionError: If any of the given fields are None in the given object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – Object to check the fields of.</p></li>
+<li><p><strong>*fields</strong> – List of field names to check.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If any of the given fields are None in the given object.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -431,7 +436,7 @@ AssertionError: If any of the given fields are None in the given object.</p>
 <dd><p>Check if the given value is a numeric type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> – The value to check.</p>
+<dd class="field-odd"><p><strong>value</strong> (<em>Any</em>) – The value to check.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if the value is numeric, False otherwise.</p>
@@ -447,41 +452,11 @@ AssertionError: If any of the given fields are None in the given object.</p>
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">is_unix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#is_unix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.is_unix" title="Permalink to this definition">#</a></dt>
 <dd><p>Check whether the current platform is a Unix-like system.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the current platform is a Unix-like system, False otherwise.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the current platform is a Unix-like system, False otherwise.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.checks.num_dim">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">num_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#num_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.num_dim" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns the number of dimensions in x, after collapsing any singleton dimensions.</p>
-<p>Args:
-x (np.ndarray): The input array.</p>
-<p>Returns:
-int: The number of dimensions in x.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.checks.num_dim2">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.checks.</span></span><span class="sig-name descname"><span class="pre">num_dim2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/checks.html#num_dim2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.checks.num_dim2" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the number of dimensions of an array after collapsing singleton dimensions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – The input array.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The number of dimensions of the array after collapsing singleton dimensions.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -554,8 +529,6 @@ int: The number of dimensions in x.</p>
 <li><a class="reference internal" href="#kwave.utils.checks.enforce_fields_obj"><code class="docutils literal notranslate"><span class="pre">enforce_fields_obj()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.checks.is_number"><code class="docutils literal notranslate"><span class="pre">is_number()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.checks.is_unix"><code class="docutils literal notranslate"><span class="pre">is_unix()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.checks.num_dim"><code class="docutils literal notranslate"><span class="pre">num_dim()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.checks.num_dim2"><code class="docutils literal notranslate"><span class="pre">num_dim2()</span></code></a></li>
 </ul>
 </li>
 </ul>

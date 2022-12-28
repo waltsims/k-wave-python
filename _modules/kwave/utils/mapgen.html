@@ -254,81 +254,84 @@
 <span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span>
 
-<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">scale_SI</span><span class="p">,</span> <span class="n">db2neper</span><span class="p">,</span> <span class="n">neper2db</span>
-<span class="kn">from</span> <span class="nn">.matlab</span> <span class="kn">import</span> <span class="n">matlab_assign</span><span class="p">,</span> <span class="n">matlab_find</span>
+<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">db2neper</span><span class="p">,</span> <span class="n">neper2db</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_SI</span>
+<span class="kn">from</span> <span class="nn">.matlab</span> <span class="kn">import</span> <span class="n">matlab_assign</span><span class="p">,</span> <span class="n">matlab_find</span><span class="p">,</span> <span class="n">ind2sub</span><span class="p">,</span> <span class="n">sub2ind</span>
 <span class="kn">from</span> <span class="nn">.matrix</span> <span class="kn">import</span> <span class="n">max_nd</span>
 <span class="kn">from</span> <span class="nn">.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 
 
-<div class="viewcode-block" id="get_spaced_points"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.get_spaced_points">[docs]</a><span class="k">def</span> <span class="nf">get_spaced_points</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="get_spaced_points"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.get_spaced_points">[docs]</a><span class="k">def</span> <span class="nf">get_spaced_points</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    getSpacedPoints generates a row vector of either logarithmically or</span>
-<span class="sd">    linearly spaced points between X1 and X2. When spacing is set to</span>
-<span class="sd">    &#39;linear&#39;, the function is identical to the inbuilt np.linspace</span>
-<span class="sd">    function. When spacing is set to &#39;log&#39;, the function is similar to</span>
-<span class="sd">    the inbuilt np.logspace function, except that X1 and X2 define the start</span>
-<span class="sd">    and end numbers, not decades. For logarithmically spaced points, X1</span>
-<span class="sd">    must be &gt; 0. If N &lt; 2, X2 is returned.</span>
+<span class="sd">    Generate a row vector of either logarithmically or linearly spaced points between `start` and `stop`.</span>
+
+<span class="sd">    When `spacing` is set to &#39;linear&#39;, the function is identical to the inbuilt `np.linspace` function.</span>
+<span class="sd">    When `spacing` is set to &#39;log&#39;, the function is similar to the inbuilt `np.logspace` function, except</span>
+<span class="sd">    that `start` and `stop` define the start and end numbers, not decades. For logarithmically spaced</span>
+<span class="sd">    points, `start` must be &gt; 0. If `n` &lt; 2, `stop` is returned.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        start:</span>
-<span class="sd">        stop:</span>
-<span class="sd">        n:</span>
-<span class="sd">        spacing:</span>
+<span class="sd">        start: start value for the spaced points</span>
+<span class="sd">        stop: end value for the spaced points</span>
+<span class="sd">        n: number of points to generate</span>
+<span class="sd">        spacing: type of spacing to use, either &#39;linear&#39; or &#39;log&#39;</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        points:</span>
+<span class="sd">        points: row vector of spaced points</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `stop` &lt;= `start` or `spacing` is not &#39;linear&#39; or &#39;log&#39;</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># check if the end point is larger than the start point</span>
+
     <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;X2 must be larger than X1.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`stop` must be larger than `start`.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">spacing</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">spacing</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spacing </span><span class="si">{</span><span class="n">spacing</span><span class="si">}</span><span class="s2"> is not a valid argument. Choose from &#39;linear&#39; or &#39;log&#39;.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`spacing` </span><span class="si">{</span><span class="n">spacing</span><span class="si">}</span><span class="s2"> is not a valid argument. Choose from &#39;linear&#39; or &#39;log&#39;.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fit_power_law_params"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.fit_power_law_params">[docs]</a><span class="k">def</span> <span class="nf">fit_power_law_params</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">f_min</span><span class="p">,</span> <span class="n">f_max</span><span class="p">,</span> <span class="n">plot_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="fit_power_law_params"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.fit_power_law_params">[docs]</a><span class="k">def</span> <span class="nf">fit_power_law_params</span><span class="p">(</span><span class="n">a0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot_fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+    <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate absorption parameters that fit a power law over a given frequency range.</span>
 
-<span class="sd">    fit_power_law_params calculates the absorption parameters that should</span>
-<span class="sd">    be defined in the simulation functions given the desired power law</span>
-<span class="sd">    absorption behaviour defined by a0 and y. This takes into account the</span>
-<span class="sd">    actual absorption behaviour exhibited by the fractional Laplacian</span>
-<span class="sd">    wave equation.</span>
+<span class="sd">    This function calculates the absorption parameters that should be defined in the simulation functions</span>
+<span class="sd">    to achieve the desired power law absorption behavior defined by `a0` and `y`. This takes into account</span>
+<span class="sd">    the actual absorption behavior exhibited by the fractional Laplacian wave equation.</span>
 
-<span class="sd">    This fitting is required when using large absorption values or high</span>
-<span class="sd">    frequencies, as the fractional Laplacian wave equation solved in</span>
-<span class="sd">    kspaceFirstOrderND and kspaceSecondOrder no longer encapsulates</span>
-<span class="sd">    absorption of the form a = a0*f^y.</span>
+<span class="sd">    This fitting is required when using large absorption values or high frequencies, as the fractional</span>
+<span class="sd">    Laplacian wave equation solved in `kspaceFirstOrderND` and `kspaceSecondOrder` no longer encapsulates</span>
+<span class="sd">    absorption of the form `a = a0*f^y`.</span>
 
-<span class="sd">    The returned values should be used to define the medium.alpha_coeff</span>
-<span class="sd">    and medium.alpha_power within the simulation functions. The</span>
-<span class="sd">    absorption behaviour over the frequency range f_min:f_max will then</span>
-<span class="sd">    follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()</span>
+<span class="sd">    The returned values should be used to define `medium.alpha_coeff` and `medium.alpha_power` within the</span>
+<span class="sd">    simulation functions. The absorption behavior over the frequency range `f_min`:`f_max` will then</span>
+<span class="sd">    follow the power law defined by `a0` and `y`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        a0:</span>
-<span class="sd">        y:</span>
-<span class="sd">        c0:</span>
-<span class="sd">        f_min:</span>
-<span class="sd">        f_max:</span>
-<span class="sd">        plot_fit:</span>
+<span class="sd">        a0: coefficient in the power law absorption equation</span>
+<span class="sd">        y: exponent in the power law absorption equation</span>
+<span class="sd">        c0: speed of sound in the medium</span>
+<span class="sd">        f_min: minimum frequency in the range to fit the power law</span>
+<span class="sd">        f_max: maximum frequency in the range to fit the power law</span>
+<span class="sd">        plot_fit: whether to plot the fit</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        a0_fit:</span>
-<span class="sd">        y_fit:</span>
+<span class="sd">        A tuple of the absorption coefficient and fitted exponent of the power law absorption equation.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># define frequency axis</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">get_spaced_points</span><span class="p">(</span><span class="n">f_min</span><span class="p">,</span> <span class="n">f_max</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
     <span class="n">w</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span>
@@ -359,35 +362,26 @@
     <span class="k">return</span> <span class="n">a0_fit</span><span class="p">,</span> <span class="n">y_fit</span></div>
 
 
-<div class="viewcode-block" id="power_law_kramers_kronig"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.power_law_kramers_kronig">[docs]</a><span class="k">def</span> <span class="nf">power_law_kramers_kronig</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">w0</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="power_law_kramers_kronig"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.power_law_kramers_kronig">[docs]</a><span class="k">def</span> <span class="nf">power_law_kramers_kronig</span><span class="p">(</span><span class="n">w</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">w0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">     POWERLAWKRAMERSKRONIG Calculate dispersion for power law absorption.</span>
+<span class="sd">    Compute the variation in sound speed for an attenuating medium using the Kramers-Kronig for power law attenuation.</span>
 
-<span class="sd">     DESCRIPTION:</span>
-<span class="sd">         powerLawKramersKronig computes the variation in sound speed for an</span>
-<span class="sd">         attenuating medium using the Kramers-Kronig for power law</span>
-<span class="sd">         attenuation where att = a0*w^y. The power law parameters must be in</span>
-<span class="sd">         Nepers / m, with the frequency in rad/s. The variation is given</span>
-<span class="sd">         about the sound speed c0 at a reference frequency w0.</span>
-
-<span class="sd">     USAGE:</span>
-<span class="sd">         c_kk = power_law_kramers_kronig(w, w0, c0, a0, y)</span>
-
-<span class="sd">     INPUTS:</span>
-
-<span class="sd">     OUTPUTS:</span>
+<span class="sd">    This function computes the variation in sound speed for an attenuating medium using the Kramers-Kronig</span>
+<span class="sd">    formula for power law attenuation, where `att = a0 * w^y`. The power law parameters must be in Nepers/m,</span>
+<span class="sd">    with the frequency in rad/s. The variation is given about the sound speed `c0` at a reference frequency `w0`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">         w:             input frequency array [rad/s]</span>
-<span class="sd">         w0:            reference frequency [rad/s]</span>
-<span class="sd">         c0:            sound speed at w0 [m/s]</span>
-<span class="sd">         a0:            power law coefficient [Nepers/((rad/s)^y m)]</span>
-<span class="sd">         y:             power law exponent, where 0 &lt; y &lt; 3</span>
+<span class="sd">        w: input frequency array [rad/s]</span>
+<span class="sd">        w0: reference frequency [rad/s]</span>
+<span class="sd">        c0: sound speed at w0 [m/s]</span>
+<span class="sd">        a0: power law coefficient [Nepers/((rad/s)^y m)]</span>
+<span class="sd">        y: power law exponent, where 0 &lt; y &lt; 3</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">         c_kk           variation of sound speed with w [m/s]</span>
+<span class="sd">        Variation of sound speed with w [m/s]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="mi">0</span> <span class="o">&gt;=</span> <span class="n">y</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;y must be within the interval (0,3)&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
         <span class="n">c_kk</span> <span class="o">=</span> <span class="n">c0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
@@ -403,27 +397,25 @@
 
 <div class="viewcode-block" id="water_absorption"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_absorption">[docs]</a><span class="k">def</span> <span class="nf">water_absorption</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    water_absorption Calculate ultrasound absorption in distilled water.</span>
-
-<span class="sd">    DESCRIPTION:</span>
-<span class="sd">    waterAbsorption calculates the ultrasonic absorption in distilled</span>
+<span class="sd">    Calculates the ultrasonic absorption in distilled</span>
 <span class="sd">    water at a given temperature and frequency using a 7 th order</span>
 <span class="sd">    polynomial fitted to the data given by np.pinkerton(1949).</span>
 
-<span class="sd">    USAGE:</span>
-<span class="sd">    abs = waterAbsorption(f, T)</span>
 
-<span class="sd">    INPUTS:</span>
-<span class="sd">    f - f frequency value [MHz]</span>
-<span class="sd">    T - water temperature value [degC]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        f:   f frequency value [MHz]</span>
+<span class="sd">        T:   water temperature value [degC]</span>
 
-<span class="sd">    OUTPUTS:</span>
-<span class="sd">    abs - absorption[dB / cm]</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        abs:  absorption [dB / cm]</span>
 
-<span class="sd">    REFERENCES:</span>
-<span class="sd">    [1] np.pinkerton(1949) &quot;The Absorption of Ultrasonic Waves in Liquids</span>
-<span class="sd">    and its Relation to Molecular Constitution, &quot; Proceedings of the</span>
-<span class="sd">    Physical Society.Section B, 2, 129 - 141</span>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; abs = waterAbsorption(f, T)</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        [1] np.pinkerton(1949) &quot;The Absorption of Ultrasonic Waves in Liquids</span>
+<span class="sd">        and its Relation to Molecular Constitution, &quot; Proceedings of the</span>
+<span class="sd">        Physical Society.Section B, 2, 129 - 141</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -437,11 +429,6 @@
     <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mf">56.723531840522710</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.899633796917384</span><span class="p">,</span> <span class="mf">0.099253401567561</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.002067402501557</span><span class="p">,</span> <span class="mf">2.189417428917596e-005</span><span class="p">,</span>
          <span class="o">-</span><span class="mf">6.210860973978427e-008</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.402634551821596e-010</span><span class="p">,</span> <span class="mf">3.869387679459408e-012</span><span class="p">]</span>
 
-    <span class="c1"># TODO: this is not a vectorized version of this function. This is different than the MATLAB version</span>
-    <span class="c1"># make sure vectors are in the correct orientation</span>
-    <span class="c1"># T = reshape(T, 3, []);</span>
-    <span class="c1"># f = reshape(f, [], 1);</span>
-
     <span class="c1"># compute absorption</span>
     <span class="n">a_on_fsqr</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span>
         <span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-17</span>
@@ -450,94 +437,27 @@
     <span class="k">return</span> <span class="nb">abs</span></div>
 
 
-<div class="viewcode-block" id="hounsfield2soundspeed"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.hounsfield2soundspeed">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2soundspeed</span><span class="p">(</span><span class="n">ct_data</span><span class="p">):</span>
+<div class="viewcode-block" id="water_sound_speed"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_sound_speed">[docs]</a><span class="k">def</span> <span class="nf">water_sound_speed</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">    Calclulates the soundspeed of a medium given a CT of the medium.</span>
-<span class="sd">    For soft-tissue, the approximate sound speed can also be returned</span>
-<span class="sd">    using the empirical relationship given by Mast.</span>
-
-<span class="sd">    Mast, T. D., &quot;Empirical relationships between acoustic parameters</span>
-<span class="sd">    in human soft tissues,&quot; Acoust. Res. Lett. Online, 1(2), pp. 37-42</span>
-<span class="sd">    (2000).</span>
+<span class="sd">    Calculate the sound speed in distilled water with temperature.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        ct_data: </span>
-
-<span class="sd">    Returns: sound_speed:       matrix of sound speed values of size of ct data</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># calculate corresponding sound speed values if required using soft tissue  relationship</span>
-    <span class="c1"># TODO confirm that this linear relationship is correct</span>
-    <span class="n">sound_speed</span> <span class="o">=</span> <span class="p">(</span><span class="n">hounsfield2density</span><span class="p">(</span><span class="n">ct_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">349</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.893</span>
-
-    <span class="k">return</span> <span class="n">sound_speed</span></div>
-
-
-<div class="viewcode-block" id="hounsfield2density"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.hounsfield2density">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2density</span><span class="p">(</span><span class="n">ct_data</span><span class="p">,</span> <span class="n">plot_fitting</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert Hounsfield units in CT data to density values [kg / m ^ 3]</span>
-<span class="sd">    based on the experimental data given by Schneider et al.</span>
-<span class="sd">    The conversion is made using a np.piece-wise linear fit to the data.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ct_data:</span>
-<span class="sd">        plot_fitting:</span>
+<span class="sd">        temp: The temperature of the water in degrees Celsius.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        density_map:            density in kg / m ^ 3</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># create empty density matrix</span>
-    <span class="n">density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ct_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">like</span><span class="o">=</span><span class="n">ct_data</span><span class="p">)</span>
+<span class="sd">        c: The sound speed in distilled water in m/s.</span>
 
-    <span class="c1"># apply conversion in several parts using linear fits to the data</span>
-    <span class="c1"># Part 1: Less than 930 Hounsfield Units</span>
-    <span class="n">density</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">930</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">1.025793065681423</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.680404011488714</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">930</span><span class="p">])</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `temp` is not between 0 and 95</span>
 
-    <span class="c1"># Part 2: Between 930 and 1098(soft tissue region)</span>
-    <span class="n">index_selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mi">930</span> <span class="o">&lt;=</span> <span class="n">ct_data</span><span class="p">,</span> <span class="n">ct_data</span> <span class="o">&lt;=</span> <span class="mi">1098</span><span class="p">)</span>
-    <span class="n">density</span><span class="p">[</span><span class="n">index_selection</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.9082709691264</span><span class="p">,</span> <span class="mf">103.6151457847139</span><span class="p">],</span>
-                                          <span class="n">ct_data</span><span class="p">[</span><span class="n">index_selection</span><span class="p">])</span>
-
-    <span class="c1"># Part 3: Between 1098 and 1260(between soft tissue and bone)</span>
-    <span class="n">index_selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mi">1098</span> <span class="o">&lt;</span> <span class="n">ct_data</span><span class="p">,</span> <span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">1260</span><span class="p">)</span>
-    <span class="n">density</span><span class="p">[</span><span class="n">index_selection</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.5108369316599</span><span class="p">,</span> <span class="mf">539.9977189228704</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">index_selection</span><span class="p">])</span>
-
-    <span class="c1"># Part 4: Greater than 1260(bone region)</span>
-    <span class="n">density</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&gt;=</span> <span class="mi">1260</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.6625370912451</span><span class="p">,</span> <span class="mf">348.8555178455294</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&gt;=</span> <span class="mi">1260</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">plot_fitting</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Plotting function not implemented in Python&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">density</span></div>
-
-
-<div class="viewcode-block" id="water_sound_speed"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_sound_speed">[docs]</a><span class="k">def</span> <span class="nf">water_sound_speed</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    WATERSOUNDSPEED Calculate the sound speed in distilled water with temperature.</span>
-
-<span class="sd">     DESCRIPTION:</span>
-<span class="sd">         waterSoundSpeed calculates the sound speed in distilled water at a</span>
-<span class="sd">         a given temperature using the 5th order polynomial given by Marczak</span>
-<span class="sd">         (1997).</span>
-
-<span class="sd">     USAGE:</span>
-<span class="sd">         c = waterSoundSpeed(T)</span>
-
-<span class="sd">     INPUTS:</span>
-<span class="sd">         T             - water temperature in the range 0 to 95 [degC]</span>
-
-<span class="sd">     OUTPUTS:</span>
-<span class="sd">         c             - sound speed [m/s]</span>
-
-<span class="sd">     REFERENCES:</span>
-<span class="sd">         [1] Marczak (1997) &quot;Water as a standard in the measurements of speed</span>
-<span class="sd">         of sound in liquids,&quot; J. Acoust. Soc. Am., 102, 2776-2779.</span>
+<span class="sd">    References:</span>
+<span class="sd">        Marczak, R. (1997). The sound velocity in water as a function of temperature. Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># check limits</span>
-    <span class="k">assert</span> <span class="mi">95</span> <span class="o">&gt;=</span> <span class="n">temp</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;temp must be between 0 and 95.&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">temp</span> <span class="o">&lt;=</span> <span class="mi">95</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`temp` must be between 0 and 95.&quot;</span><span class="p">)</span>
 
     <span class="c1"># find value</span>
     <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.787860e-9</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.398845e-6</span><span class="p">,</span> <span class="mf">3.287156e-4</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.779136e-2</span><span class="p">,</span> <span class="mf">5.038813</span><span class="p">,</span> <span class="mf">1.402385e3</span><span class="p">]</span>
@@ -545,64 +465,53 @@
     <span class="k">return</span> <span class="n">c</span></div>
 
 
-<div class="viewcode-block" id="water_density"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_density">[docs]</a><span class="k">def</span> <span class="nf">water_density</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
+<div class="viewcode-block" id="water_density"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_density">[docs]</a><span class="k">def</span> <span class="nf">water_density</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">     WATERDENSITY Calculate density of air - saturated water with temperature.</span>
+<span class="sd">    Calculate the density of air-saturated water with temperature.</span>
 
-<span class="sd">     DESCRIPTION:</span>
-<span class="sd">     waterDensity calculates the density of air - saturated water at a given % temperature using the 4 th order polynomial given by Jones(1992).</span>
+<span class="sd">    This function calculates the density of air-saturated water at a given temperature using the 4th order polynomial</span>
+<span class="sd">    given by Jones [1].</span>
 
-<span class="sd">     USAGE:</span>
-<span class="sd">     density = waterDensity(T)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        temp: water temperature in the range 5 to 40 [degC]</span>
 
-<span class="sd">     INPUTS:</span>
-<span class="sd">     T - water temperature in the range 5 to 40[degC]</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        density: density of water [kg/m^3]</span>
 
-<span class="sd">     OUTPUTS:</span>
-<span class="sd">     density - density of water[kg / m ^ 3]</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `temp` is not between 5 and 40</span>
 
-<span class="sd">     ABOUT:</span>
-<span class="sd">     author - Bradley E.Treeby</span>
-<span class="sd">     date - 22 nd February 2018</span>
-<span class="sd">     last update - 4 th April 2019</span>
+<span class="sd">    References:</span>
+<span class="sd">        [1] F.E. Jones and G.L. Harris (1992) &quot;ITS-90 Density of Water Formulation for Volumetric Standards Calibration,&quot;</span>
+<span class="sd">        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.</span>
 
-<span class="sd">     REFERENCES:</span>
-<span class="sd">     [1] F.E.Jones and G.L.Harris(1992) &quot;ITS-90 Density of Water</span>
-<span class="sd">     Formulation for Volumetric Standards Calibration, &quot; J. Res. Natl.</span>
-<span class="sd">     Inst.Stand.Technol., 97(3), 335 - 340.</span>
-<span class="sd">     &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># check limits</span>
-    <span class="k">assert</span> <span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">temp</span> <span class="o">&lt;=</span> <span class="mi">40</span><span class="p">,</span> <span class="s2">&quot;T must be between 5 and 40.&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">temp</span> <span class="o">&lt;=</span> <span class="mi">40</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`temp` must be between 5 and 40.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># calculate density of air - saturated water</span>
+    <span class="c1"># calculate density of air-saturated water</span>
     <span class="n">density</span> <span class="o">=</span> <span class="mf">999.84847</span> <span class="o">+</span> <span class="mf">6.337563e-2</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">-</span> <span class="mf">8.523829e-3</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">6.943248e-5</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="mf">3.821216e-7</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">**</span> <span class="mi">4</span>
     <span class="k">return</span> <span class="n">density</span></div>
 
 
-<div class="viewcode-block" id="water_non_linearity"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_non_linearity">[docs]</a><span class="k">def</span> <span class="nf">water_non_linearity</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
+<div class="viewcode-block" id="water_non_linearity"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_non_linearity">[docs]</a><span class="k">def</span> <span class="nf">water_non_linearity</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">     WATERNONLINEARITY Calculate B/A of water with temperature.</span>
+<span class="sd">     Calculates the parameter of nonlinearity B/A at a</span>
+<span class="sd">     given temperature using a fourth-order polynomial fitted to the data</span>
+<span class="sd">     given by Beyer (1960).</span>
 
-<span class="sd">     DESCRIPTION:</span>
-<span class="sd">         waterNonlinearity calculates the parameter of nonlinearity B/A at a</span>
-<span class="sd">         given temperature using a fourth-order polynomial fitted to the data</span>
-<span class="sd">         given by Beyer (1960).</span>
+<span class="sd">    Args:</span>
+<span class="sd">        temp: water temperature in the range 0 to 100 [degC]</span>
 
-<span class="sd">     USAGE:</span>
-<span class="sd">         BonA = waterNonlinearity(T)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        BonA: parameter of nonlinearity</span>
 
-<span class="sd">     INPUTS:</span>
-<span class="sd">         T             - water temperature in the range 0 to 100 [degC]</span>
+<span class="sd">    Examples:</span>
+<span class="sd">         &gt;&gt;&gt; BonA = waterNonlinearity(T)</span>
 
-<span class="sd">     OUTPUTS:</span>
-<span class="sd">         BonA          - parameter of nonlinearity</span>
-
-<span class="sd">     ABOUT:</span>
-<span class="sd">         author        - Bradley E. Treeby</span>
-<span class="sd">         date          - 22nd February 2018</span>
-<span class="sd">         last update   - 4th April 2019</span>
-
-<span class="sd">     REFERENCES:</span>
+<span class="sd">     References:</span>
 <span class="sd">         [1] R. T Beyer (1960) &quot;Parameter of nonlinearity in fluids,&quot; J.</span>
 <span class="sd">         Acoust. Soc. Am., 32(6), 719-721.</span>
 
@@ -617,31 +526,28 @@
     <span class="k">return</span> <span class="n">BonA</span></div>
 
 
-<div class="viewcode-block" id="make_ball"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_ball">[docs]</a><span class="k">def</span> <span class="nf">make_ball</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">plot_ball</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="c1"># TODO: refactor to take 3 dimensional arrays</span>
+<div class="viewcode-block" id="make_ball"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_ball">[docs]</a><span class="k">def</span> <span class="nf">make_ball</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plot_ball</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    MAKEBALL Create a binary map of a filled ball within a 3D grid.</span>
+<span class="sd">    Creates a binary map of a filled ball within a 3D grid.</span>
 
-<span class="sd">    DESCRIPTION:</span>
-<span class="sd">         make_ball creates a binary map of a filled ball within a</span>
-<span class="sd">         three-dimensional grid (the ball position is denoted by 1&#39;s in the</span>
-<span class="sd">         matrix with 0&#39;s elsewhere). A single grid point is taken as the ball</span>
-<span class="sd">         centre thus the total diameter of the ball will always be an odd</span>
-<span class="sd">         number of grid points.</span>
 <span class="sd">    Args:</span>
-<span class="sd">        Nx: size of the 3D grid in x-dimension [grid points]</span>
-<span class="sd">        Ny: size of the 3D grid in y-dimension [grid points]</span>
-<span class="sd">        Nz: size of the 3D grid in z-dimension [grid points]</span>
-<span class="sd">        cx: centre of the ball in x-dimension [grid points]</span>
-<span class="sd">        cy: centre of the ball in y-dimension [grid points]</span>
-<span class="sd">        cz: centre of the ball in z-dimension [grid points]</span>
-<span class="sd">        radius: ball radius [grid points]</span>
-<span class="sd">        plot_ball: Boolean controlling whether the ball is plotted using voxelPlot (default = false)</span>
-<span class="sd">        binary: Boolean controlling whether the ball map is returned as a double precision matrix (false)</span>
-<span class="sd">                or a logical matrix (true) (default = false)</span>
+<span class="sd">        Nx: size of the 3D grid in x-dimension [grid points].</span>
+<span class="sd">        Ny: size of the 3D grid in y-dimension [grid points].</span>
+<span class="sd">        Nz: size of the 3D grid in z-dimension [grid points].</span>
+<span class="sd">        cx: centre of the ball in x-dimension [grid points].</span>
+<span class="sd">        cy: centre of the ball in y-dimension [grid points].</span>
+<span class="sd">        cz: centre of the ball in z-dimension [grid points].</span>
+<span class="sd">        radius: ball radius [grid points].</span>
+<span class="sd">        plot_ball: whether to plot the ball using voxelPlot (default = False).</span>
+<span class="sd">        binary: whether to return the ball map as a double precision matrix (False) or a logical matrix (True) (default = False).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        3D binary map of a filled ball</span>
+<span class="sd">        ball: 3D binary map of a filled ball.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># define literals</span>
     <span class="n">MAGNITUDE</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -685,19 +591,23 @@
     <span class="k">return</span> <span class="n">ball</span></div>
 
 
-<div class="viewcode-block" id="make_cart_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_cart_sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">center_pos</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">plot_sphere</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="make_cart_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_cart_sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">plot_sphere</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">       make_cart_sphere creates a set of points in cartesian coordinates defining a sphere.</span>
+<span class="sd">    Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        radius:</span>
-<span class="sd">        num_points:</span>
-<span class="sd">        center_pos:</span>
-<span class="sd">        plot_sphere:</span>
+<span class="sd">        radius: the radius of the sphere.</span>
+<span class="sd">        num_points: the number of points to be generated.</span>
+<span class="sd">        center_pos: the coordinates of the center of the sphere. Defaults to (0, 0, 0).</span>
+<span class="sd">        plot_sphere: whether to plot the sphere. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
+<span class="sd">        The points on the sphere.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span> <span class="o">=</span> <span class="n">center_pos</span>
 
     <span class="c1"># generate angle functions using the Golden Section Spiral method</span>
@@ -736,19 +646,22 @@
     <span class="k">return</span> <span class="n">sphere</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="make_cart_circle"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_circle">[docs]</a><span class="k">def</span> <span class="nf">make_cart_circle</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">center_pos</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">arc_angle</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">plot_circle</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="make_cart_circle"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_circle">[docs]</a><span class="k">def</span> <span class="nf">make_cart_circle</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">arc_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">plot_circle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    make_cart_circle creates a set of points in cartesian coordinates defining a circle or arc.</span>
+<span class="sd">    Create a set of points in cartesian coordinates defining a circle or arc.</span>
+
+<span class="sd">    This function creates a set of points in cartesian coordinates defining a circle or arc.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        radius:</span>
-<span class="sd">        num_points:</span>
-<span class="sd">        center_pos:</span>
-<span class="sd">        arc_angle:          Arc angle in radians.</span>
-<span class="sd">        plot_circle:</span>
+<span class="sd">        radius: radius of the circle or arc</span>
+<span class="sd">        num_points: number of points to generate</span>
+<span class="sd">        center_pos: center position of the circle or arc</span>
+<span class="sd">        arc_angle: arc angle in radians</span>
+<span class="sd">        plot_circle: whether to plot the circle or arc</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        2 x num_points array of cartesian coordinates</span>
+<span class="sd">        2 x `num_points` array of cartesian coordinates</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -800,16 +713,18 @@
 <span class="sd">    side.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        Nx (int): The number of grid points along the x-axis.</span>
-<span class="sd">        Ny (int): The number of grid points along the y-axis.</span>
-<span class="sd">        cx (int): The x-coordinate of the disc centre.</span>
-<span class="sd">        cy (int): The y-coordinate of the disc centre.</span>
-<span class="sd">        radius (int): The radius of the disc.</span>
-<span class="sd">        plot_disc (bool): If set to True, the disc will be plotted using Matplotlib.</span>
+<span class="sd">        Nx: The number of grid points along the x-axis.</span>
+<span class="sd">        Ny: The number of grid points along the y-axis.</span>
+<span class="sd">        cx: The x-coordinate of the disc centre.</span>
+<span class="sd">        cy: The y-coordinate of the disc centre.</span>
+<span class="sd">        radius: The radius of the disc.</span>
+<span class="sd">        plot_disc: If set to True, the disc will be plotted using Matplotlib.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray: A binary map of the disc in the 2D grid.</span>
+<span class="sd">        A binary map of the disc in the 2D grid.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># define literals</span>
     <span class="n">MAGNITUDE</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -861,17 +776,19 @@
 <span class="sd">    of the circle intersects the grid.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        Nx (int): The number of grid points along the x-axis.</span>
-<span class="sd">        Ny (int): The number of grid points along the y-axis.</span>
-<span class="sd">        cx (int): The x-coordinate of the circle centre.</span>
-<span class="sd">        cy (int): The y-coordinate of the circle centre.</span>
-<span class="sd">        radius (int): The radius of the circle.</span>
-<span class="sd">        arc_angle (Optional[float], optional): The angle of the circular arc in degrees. If set to None, a full circle will be created.</span>
-<span class="sd">        plot_circle (bool, optional): If set to True, the circle will be plotted using Matplotlib.</span>
+<span class="sd">        Nx: The number of grid points along the x-axis.</span>
+<span class="sd">        Ny: The number of grid points along the y-axis.</span>
+<span class="sd">        cx: The x-coordinate of the circle centre.</span>
+<span class="sd">        cy: The y-coordinate of the circle centre.</span>
+<span class="sd">        radius: The radius of the circle.</span>
+<span class="sd">        arc_angle: The angle of the circular arc in degrees. If set to None, a full circle will be created.</span>
+<span class="sd">        plot_circle: If set to True, the circle will be plotted using Matplotlib.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray: A binary map of the circle in the 2D grid.</span>
+<span class="sd">        A binary map of the circle in the 2D grid.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># define literals</span>
     <span class="n">MAGNITUDE</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -951,23 +868,28 @@
     <span class="k">return</span> <span class="n">circle</span></div>
 
 
-<div class="viewcode-block" id="make_pixel_map"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="make_pixel_map"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    make_pixel_map Create matrix of grid point distances from the centre point.</span>
+<span class="sd">    Generates a matrix with values of the distance of each pixel from the center of a grid.</span>
 
-<span class="sd">     DESCRIPTION:</span>
-<span class="sd">         make_pixel_map generates a matrix populated with values of how far each</span>
-<span class="sd">         pixel in a grid is from the centre (given in pixel coordinates). Both</span>
-<span class="sd">         single and double pixel centres can be used by setting the optional</span>
-<span class="sd">         input parameter &#39;OriginSize&#39;. For grids where the dimension size and</span>
-<span class="sd">         centre pixel size are not both odd or even, the optional input</span>
-<span class="sd">         parameter &#39;Shift&#39; can be used to control the location of the</span>
-<span class="sd">         centerpoint.</span>
+<span class="sd">    This function generates a matrix populated with values of how far each pixel in a grid is from the center. The center</span>
+<span class="sd">    can be a single pixel or a double pixel, and the optional input parameter &#39;OriginSize&#39; controls this. For grids where</span>
+<span class="sd">    the dimension size and center pixel size are not both odd or even, the optional input parameter &#39;Shift&#39; can be used to</span>
+<span class="sd">    control the location of the center point.</span>
 
-<span class="sd">         examples for a 2D pixel map:</span>
+<span class="sd">    Args:</span>
+<span class="sd">        Nx: number of pixels in the x-dimension</span>
+<span class="sd">        Ny: number of pixels in the y-dimension</span>
+<span class="sd">        Nz: number of pixels in the z-dimension</span>
+<span class="sd">        *args: additional optional arguments</span>
 
-<span class="sd">         Single pixel origin size for odd and even (with &#39;Shift&#39; = [1 1] and</span>
-<span class="sd">         [0 0], respectively) grid sizes:</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        r: pixel-radius</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        Single pixel origin size for odd and even (with &#39;Shift&#39; = [1 1] and</span>
+<span class="sd">        [0 0], respectively) grid sizes:</span>
 
 <span class="sd">         x x x       x x x x         x x x x</span>
 <span class="sd">         x 0 x       x x x x         x 0 x x</span>
@@ -983,14 +905,11 @@
 <span class="sd">         x x x x      x x 0 0 x        x x x x x</span>
 <span class="sd">                      x x x x x        x x x x x</span>
 
-<span class="sd">         By default a single pixel centre is used which is shifted towards</span>
+<span class="sd">         By default, a single pixel centre is used which is shifted towards</span>
 <span class="sd">         the final row and column.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        *args:</span>
-
-<span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># define defaults</span>
     <span class="n">origin_size</span> <span class="o">=</span> <span class="s1">&#39;single&#39;</span>
     <span class="n">shift_def</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1044,7 +963,20 @@
     <span class="k">return</span> <span class="n">r</span></div>
 
 
-<div class="viewcode-block" id="create_pixel_dim"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.create_pixel_dim">[docs]</a><span class="k">def</span> <span class="nf">create_pixel_dim</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">origin_size</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
+<div class="viewcode-block" id="create_pixel_dim"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.create_pixel_dim">[docs]</a><span class="k">def</span> <span class="nf">create_pixel_dim</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an array of pixel dimensions and a pixel size.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Nx: The number of pixels in the x-dimension.</span>
+<span class="sd">        origin_size: The size of the origin in the x-dimension.</span>
+<span class="sd">        shift: The shift of the pixels in the x-dimension.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The pixel dimensions.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Nested function to create the pixel radius variable</span>
 
     <span class="c1"># grid dimension has an even number of points</span>
@@ -1093,9 +1025,20 @@
         <span class="n">angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="c1"># =========================================================================</span>
-    <span class="c1"># INPUT CHECKING</span>
-    <span class="c1"># =========================================================================</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a line shape with a given start and end point, angle, or length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Nx: The number of pixels in the x-dimension.</span>
+<span class="sd">        Ny: The number of pixels in the y-dimension.</span>
+<span class="sd">        startpoint: The start point of the line, given as a tuple of x and y coordinates.</span>
+<span class="sd">        endpoint: The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.</span>
+<span class="sd">        angle: The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.</span>
+<span class="sd">        length: The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        line: A 2D array of the same size as the input parameters, with a value of 1 for pixels that are part of the line and 0 for pixels that are not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">startpoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">startpoint</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">endpoint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1461,7 +1404,21 @@
     <span class="k">return</span> <span class="n">line</span></div>
 
 
-<div class="viewcode-block" id="make_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_arc">[docs]</a><span class="k">def</span> <span class="nf">make_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<div class="viewcode-block" id="make_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_arc">[docs]</a><span class="k">def</span> <span class="nf">make_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates an arc shape with a given radius, diameter, and focus position.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: The size of the grid, given as a 1D array with the number of pixels in each dimension.</span>
+<span class="sd">        arc_pos: The position of the arc, given as a 1D array with the coordinates in each dimension.</span>
+<span class="sd">        radius: The radius of the arc.</span>
+<span class="sd">        diameter: The diameter of the arc.</span>
+<span class="sd">        focus_pos: The position of the focus, given as a 1D array with the coordinates in each dimension.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A 2D array with the arc shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># force integer input values</span>
     <span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">arc_pos</span> <span class="o">=</span> <span class="n">arc_pos</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -1560,26 +1517,20 @@
     <span class="k">return</span> <span class="n">arc</span></div>
 
 
-<div class="viewcode-block" id="ind2sub"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.ind2sub">[docs]</a><span class="k">def</span> <span class="nf">ind2sub</span><span class="p">(</span><span class="n">array_shape</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
-    <span class="c1"># Matlab style ind2sub</span>
-    <span class="c1"># row, col = np.unravel_index(ind - 1, array_shape, order=&#39;F&#39;)</span>
-    <span class="c1"># return np.squeeze(row) + 1, np.squeeze(col) + 1</span>
+<div class="viewcode-block" id="make_pixel_map_point"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_point">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_point</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">centre_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a map of the distance of each pixel from a given centre position.</span>
 
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">indices</span></div>
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: The size of the grid, given as a 1D array with the number of pixels in each dimension.</span>
+<span class="sd">        centre_pos: The position of the centre, given as a 1D array with the coordinates in each dimension.</span>
 
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A 2D array with the distance of each pixel from the given centre position.</span>
 
-<div class="viewcode-block" id="sub2ind"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.sub2ind">[docs]</a><span class="k">def</span> <span class="nf">sub2ind</span><span class="p">(</span><span class="n">array_shape</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">,</span> <span class="n">z_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">((</span><span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">,</span> <span class="n">z_i</span><span class="p">),</span> <span class="n">dims</span><span class="o">=</span><span class="n">array_shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="make_pixel_map_point"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_point">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_point</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">centre_pos</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If `grid_size` and `centre_pos` do not have the same number of dimensions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># check for number of dimensions</span>
     <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_size</span><span class="p">)</span>
 
@@ -1627,8 +1578,21 @@
     <span class="k">return</span> <span class="n">pixel_map</span></div>
 
 
-<div class="viewcode-block" id="make_pixel_map_plane"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_plane">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_plane</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-    <span class="c1"># error checking</span>
+<div class="viewcode-block" id="make_pixel_map_plane"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_plane">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_plane</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a pixel map of a plane with given normal vector and point.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: The size of the grid as a NumPy array [Nx, Ny, Nz].</span>
+<span class="sd">        normal: The normal vector of the plane as a NumPy array [nx, ny, nz].</span>
+<span class="sd">        point: A point on the plane as a NumPy array [px, py, pz].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pixel_map: A 2D array with the distance of each pixel from the given plane.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the normal vector is zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># error checking</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normal</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Normal vector should not be zero.&#39;</span><span class="p">)</span>
 
@@ -1674,7 +1638,30 @@
     <span class="k">return</span> <span class="n">pixel_map</span></div>
 
 
-<div class="viewcode-block" id="make_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">bowl_pos</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">focus_pos</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="make_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">bowl_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+              <span class="n">focus_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a matrix representing a bowl-shaped object in 3D space.</span>
+
+<span class="sd">    This function generates a 3D matrix representing a bowl-shaped object with the specified radius and diameter. The position</span>
+<span class="sd">    of the bowl and the focus point can be specified, as well as whether to return a binary matrix or a matrix with</span>
+<span class="sd">    continuous values. The optional parameter &#39;remove_overlap&#39; can be used to remove any overlap with the surrounding grid.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: size of the grid in each dimension</span>
+<span class="sd">        bowl_pos: position of the bowl in the grid</span>
+<span class="sd">        radius: radius of the bowl</span>
+<span class="sd">        diameter: diameter of the bowl</span>
+<span class="sd">        focus_pos: position of the focus point in the grid</span>
+<span class="sd">        binary: whether to return a binary matrix</span>
+<span class="sd">        remove_overlap: whether to remove overlap with the surrounding grid</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        matrix: 3D matrix representing the bowl-shaped object</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if any of the input arguments are outside the valid range</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># =========================================================================</span>
     <span class="c1"># DEFINE LITERALS</span>
     <span class="c1"># =========================================================================</span>
@@ -2226,14 +2213,25 @@
     <span class="k">return</span> <span class="n">bowl</span></div>
 
 
-<div class="viewcode-block" id="make_multi_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_multi_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">bowl_pos</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">focus_pos</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="c1"># =========================================================================</span>
-    <span class="c1"># DEFINE LITERALS</span>
-    <span class="c1"># =========================================================================</span>
+<div class="viewcode-block" id="make_multi_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_multi_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bowl_pos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                    <span class="n">focus_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls, the radius of each bowl, the diameter of the bowls, and the position of the focus.</span>
 
-    <span class="c1"># =========================================================================</span>
-    <span class="c1"># INPUT CHECKING</span>
-    <span class="c1"># =========================================================================</span>
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: The size of the grid (assumed to be square).</span>
+<span class="sd">        bowl_pos: A list of tuples containing the (x, y) coordinates of the center of each bowl.</span>
+<span class="sd">        radius: The radius of each bowl.</span>
+<span class="sd">        diameter: The diameter of the bowls.</span>
+<span class="sd">        focus_pos: The (x, y) coordinates of the focus.</span>
+<span class="sd">        binary: Whether to return a binary mask (default: False).</span>
+<span class="sd">        remove_overlap: Whether to remove overlap between the bowls (default: False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bowls:</span>
+<span class="sd">        bowls_labeled:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># check inputs</span>
     <span class="k">if</span> <span class="n">bowl_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
@@ -2321,7 +2319,25 @@
     <span class="k">return</span> <span class="n">bowls</span><span class="p">,</span> <span class="n">bowls_labelled</span></div>
 
 
-<div class="viewcode-block" id="make_multi_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_arc">[docs]</a><span class="k">def</span> <span class="nf">make_multi_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<div class="viewcode-block" id="make_multi_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_arc">[docs]</a><span class="k">def</span> <span class="nf">make_multi_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                   <span class="n">diameter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grid_size: The size of the grid (assumed to be square).</span>
+<span class="sd">        arc_pos: An array containing the (x, y) coordinates of the center of each arc.</span>
+<span class="sd">        radius: The radius of each arc. Can be a single value or an array with one value for each arc.</span>
+<span class="sd">        diameter: The diameter of the arcs. Can be a single value or an array with one value for each arc.</span>
+<span class="sd">        focus_pos: The (x, y) coordinates of the focus.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        arcs: A binary mask of the arcs.</span>
+<span class="sd">        arcs_labelled: A labelled mask of the arcs.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match, or if the number of rows in arc_pos and diameter do not match.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># check inputs</span>
     <span class="k">if</span> <span class="n">arc_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;arc_pos should contain 2 columns, with [ax, ay] in each row.&#39;</span><span class="p">)</span>
@@ -2392,7 +2408,22 @@
     <span class="k">return</span> <span class="n">arcs</span><span class="p">,</span> <span class="n">arcs_labelled</span></div>
 
 
-<div class="viewcode-block" id="make_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_sphere</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">plot_sphere</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="make_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_sphere</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot_sphere</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Nx: The number of grid points in the x-dimension.</span>
+<span class="sd">        Ny: The number of grid points in the y-dimension.</span>
+<span class="sd">        Nz: The number of grid points in the z-dimension.</span>
+<span class="sd">        radius: The radius of the sphere.</span>
+<span class="sd">        plot_sphere: Whether to plot the sphere (default: False).</span>
+<span class="sd">        binary: Whether to return a binary mask (default: False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        sphere: The sphere mask as a NumPy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># enforce a centered sphere</span>
     <span class="n">cx</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">Nx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">cy</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">Ny</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
@@ -2475,7 +2506,26 @@
     <span class="k">return</span> <span class="n">sphere</span></div>
 
 
-<div class="viewcode-block" id="make_spherical_section"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_spherical_section">[docs]</a><span class="k">def</span> <span class="nf">make_spherical_section</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_section</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="make_spherical_section"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_spherical_section">[docs]</a><span class="k">def</span> <span class="nf">make_spherical_section</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plot_section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                           <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a spherical section mask given the radius and height of the section and optional parameters to specify the width and/or plot and return a binary mask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        radius: The radius of the spherical section.</span>
+<span class="sd">        height: The height of the spherical section.</span>
+<span class="sd">        width: The width of the spherical section (default: height).</span>
+<span class="sd">        plot_section: Whether to plot the spherical section (default: False).</span>
+<span class="sd">        binary: Whether to return a binary mask (default: False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ss: The spherical section mask as a NumPy array.</span>
+<span class="sd">        dist_map: The distance map of the spherical section mask as a NumPy array.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the width is not an odd number.</span>
+<span class="sd">        NotImplementedError: Plotting not currently supported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">use_spherical_sections</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># force inputs to be integers</span>
@@ -2596,36 +2646,24 @@
 
 
 <div class="viewcode-block" id="focused_bowl_oneil"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.focused_bowl_oneil">[docs]</a><span class="k">def</span> <span class="nf">focused_bowl_oneil</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sound_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                       <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">axial_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                       <span class="n">lateral_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+                       <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">axial_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">lateral_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    focused_bowl_oneil calculates O&#39;Neil&#39;s solution (O&#39;Neil, H. Theory of</span>
-<span class="sd">    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949) for</span>
-<span class="sd">    the axial and lateral pressure amplitude generated by a focused bowl</span>
-<span class="sd">    transducer when uniformly driven by a continuous wave sinusoid at a</span>
-<span class="sd">    given frequency and normal surface velocity.</span>
-
-<span class="sd">    The solution is evaluated at the positions along the beam axis given</span>
-<span class="sd">    by axial_position (where 0 corresponds to the transducer surface),</span>
-<span class="sd">    and lateral positions through the geometric focus given by</span>
-<span class="sd">    lateral_position (where 0 corresponds to the beam axis). To return</span>
-<span class="sd">    only the axial or lateral pressure, set the either axial_position or</span>
-<span class="sd">    lateral_position to [].</span>
-
-<span class="sd">    Note, O&#39;Neil&#39;s formulae are derived under the assumptions of the</span>
-<span class="sd">    Rayleigh integral, which are valid when the transducer diameter is</span>
-<span class="sd">    large compared to both the transducer height and the acoustic</span>
-<span class="sd">    wavelength.</span>
+<span class="sd">    Calculates O&#39;Neil&#39;s solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        radius:</span>
-<span class="sd">        diameter:</span>
-<span class="sd">        velocity:</span>
-<span class="sd">        frequency:</span>
-<span class="sd">        sound_speed:</span>
-<span class="sd">        density:</span>
-<span class="sd">        axial_positions:</span>
-<span class="sd">        lateral_positions:</span>
+<span class="sd">        radius: The radius of the transducer.</span>
+<span class="sd">        diameter: The diameter of the transducer.</span>
+<span class="sd">        velocity: The normal surface velocity of the transducer.</span>
+<span class="sd">        frequency: The driving frequency of the sinusoid.</span>
+<span class="sd">        sound_speed: The sound speed in the medium.</span>
+<span class="sd">        density: The density of the medium.</span>
+<span class="sd">        axial_positions: The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.</span>
+<span class="sd">        lateral_positions: The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       p-axial: The axial pressure amplitude.</span>
+<span class="sd">       p-lateral: The lateral pressure amplitude.</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        # define transducer parameters</span>
@@ -2644,10 +2682,11 @@
 <span class="sd">        [p_axial, p_lateral] = focused_bowl_oneil(radius, diameter,</span>
 <span class="sd">                                                  velocity, frequency, sound_speed, density,</span>
 <span class="sd">                                                  axial_position, lateral_position)</span>
-<span class="sd">    Returns:</span>
-<span class="sd">         p_axial:           pressure amplitude at the axial_position [Pa]</span>
-<span class="sd">         p_lateral:         pressure amplitude at the lateral_position [Pa]</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        O&#39;Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">float_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
     <span class="k">def</span> <span class="nf">calculate_axial_pressure</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>

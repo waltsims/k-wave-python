@@ -255,11 +255,15 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">gettempdir</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">kwave.utils.io</span> <span class="kn">import</span> <span class="n">get_h5_literals</span><span class="p">,</span> <span class="n">get_date_string</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/</span>
+    <span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.data</span> <span class="kn">import</span> <span class="n">get_date_string</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.io</span> <span class="kn">import</span> <span class="n">get_h5_literals</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.pml</span> <span class="kn">import</span> <span class="n">get_optimal_pml_size</span>
 
 
@@ -399,11 +403,10 @@
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_fd</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_fd</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_fd</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]),</span> \
             <span class="s2">&quot;Optional input &#39;&#39;UseFD&#39;&#39; can only be set to 2, 4.&quot;</span>
 
-
 <div class="viewcode-block" id="SimulationOptions.option_factory"><a class="viewcode-back" href="../../kwave.options.html#kwave.options.SimulationOptions.option_factory">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">option_factory</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">option_factory</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="s2">&quot;kWaveGrid&quot;</span><span class="p">,</span> <span class="n">elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Initialize the Simulation Options</span>
+<span class="sd">        Initialize the Simulation Options</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kgrid: kWaveGrid instance</span>

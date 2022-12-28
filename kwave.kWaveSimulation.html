@@ -367,10 +367,8 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">
 <span class="sig-name descname"><span class="pre">assign_pseudonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.assign_pseudonyms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Shorten commonly used field names (these act only as pointers provided that the values aren’t modified)
+<dd><p>Shorten commonly used field names (these act only as pointers provided that the values aren’t modified)
 (done after enlarging and smoothing the grids)</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -390,8 +388,8 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.axisymmetric">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axisymmetric</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.axisymmetric" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the code is axisymmetric
-:returns: True if fluid axisymmetric simulation</p>
+<dd><p>Returns:
+True if fluid axisymmetric simulation</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -403,8 +401,8 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.blank_sensor">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blank_sensor</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.blank_sensor" title="Permalink to this definition">#</a></dt>
-<dd><p>true if sensor.mask is not defined but _max_all or _final variables are still recorded
-Returns:</p>
+<dd><p>Returns
+True if sensor.mask is not defined but _max_all or _final variables are still recorded</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -416,9 +414,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_calling_func_name_and_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calling_func_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_calling_func_name_and_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check correct function has been called for the dimensionality of kgrid</p>
-</div></blockquote>
+<dd><p>Check correct function has been called for the dimensionality of kgrid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -438,9 +434,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_input_combinations">
 <span class="sig-name descname"><span class="pre">check_input_combinations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_medium_density_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_input_combinations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_input_combinations" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check the input combinations for correctness and validity</p>
-</div></blockquote>
+<dd><p>Check the input combinations for correctness and validity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -463,9 +457,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_kgrid_time">
 <span class="sig-name descname"><span class="pre">check_kgrid_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_kgrid_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_kgrid_time" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check time-related kWaveGrid inputs</p>
-</div></blockquote>
+<dd><p>Check time-related kWaveGrid inputs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -479,9 +471,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_medium">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_medium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_elastic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_axisymmetric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_medium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_medium" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check the properties of the medium structure for correctness and validity</p>
-</div></blockquote>
+<dd><p>Check the properties of the medium structure for correctness and validity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -500,9 +490,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_sensor">
 <span class="sig-name descname"><span class="pre">check_sensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_Nt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_sensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_sensor" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check the Sensor properties for correctness and validity</p>
-</div></blockquote>
+<dd><p>Check the Sensor properties for correctness and validity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -522,9 +510,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.check_source">
 <span class="sig-name descname"><span class="pre">check_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.check_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.check_source" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check the source properties for correctness and validity</p>
-</div></blockquote>
+<dd><p>Check the source properties for correctness and validity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>kgrid_dim</strong> – kWaveGrid dimension</p>
@@ -541,17 +527,15 @@ Returns:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.compute_directivity">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_directivity</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.compute_directivity" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the directivity should be computed
-:returns: True if directivity calculations in 2D are used by setting sensor.directivity_angle</p>
+<dd><p>Returns:
+True if directivity calculations in 2D are used by setting sensor.directivity_angle</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.create_absorption_vars">
 <span class="sig-name descname"><span class="pre">create_absorption_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.create_absorption_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.create_absorption_vars" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Create absorption variables for the fluid code based on
+<dd><p>Create absorption variables for the fluid code based on
 the expanded and smoothed values of the medium parameters (if not saving to disk)</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -565,10 +549,8 @@ the expanded and smoothed values of the medium parameters (if not saving to disk
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">
 <span class="sig-name descname"><span class="pre">create_pml_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_inside</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_axisymmetric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.create_pml_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Define index variables to remove the PML from the display if the optional
+<dd><p>Define index variables to remove the PML from the display if the optional
 input ‘PlotPML’ is set to false</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -580,15 +562,12 @@ input ‘PlotPML’ is set to false</p>
 </ul>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.create_sensor_variables">
 <span class="sig-name descname"><span class="pre">create_sensor_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.create_sensor_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.create_sensor_variables" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Create the sensor related variables</p>
-</div></blockquote>
+<dd><p>Create the sensor related variables</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -602,7 +581,8 @@ input ‘PlotPML’ is set to false</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.cuboid_corners">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cuboid_corners</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.cuboid_corners" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the sensor.mask is a list of cuboid corners</p>
+<dd><p>Returns:
+Whether the sensor.mask is a list of cuboid corners</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -620,30 +600,28 @@ input ‘PlotPML’ is set to false</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.elastic_code">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elastic_code</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.elastic_code" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the simulation is elastic or fluid
-:returns: True if elastic simulation</p>
+<dd><p>Returns:
+True if elastic simulation False if fluid simulation</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.elastic_time_rev">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elastic_time_rev</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.elastic_time_rev" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the simulation is time reversal and elastic code
-:returns: True if using time reversal with the elastic code</p>
+<dd><p>Returns:
+True if using time reversal with the elastic code</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.equation_of_state">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equation_of_state</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.equation_of_state" title="Permalink to this definition">#</a></dt>
-<dd><p>Set equation of state variable
-Returns:</p>
+<dd><p>Returns:
+Set equation of state variable</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.input_checking">
 <span class="sig-name descname"><span class="pre">input_checking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calling_func_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.input_checking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.input_checking" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Check the input fields for correctness and validness</p>
-</div></blockquote>
+<dd><p>Check the input fields for correctness and validness</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>calling_func_name</strong> – Name of the script that calls this function</p>
@@ -660,21 +638,22 @@ Returns:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.kelvin_voigt_model">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kelvin_voigt_model</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.kelvin_voigt_model" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the simulation is elastic with absorption</p>
+<dd><p>Returns:
+Whether the simulation is elastic with absorption</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.kspace_elastic_code">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kspace_elastic_code</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.kspace_elastic_code" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the simulation is k-space elastic code or an ordinary elastic code
-:returns: True if elastic simulation with k-space correction</p>
+<dd><p>Returns:
+True if elastic simulation with k-space correction False if ordinary</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.nonuniform_grid">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nonuniform_grid</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.nonuniform_grid" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the grid is nonuniform
-:returns: True if the computational grid is non-uniform</p>
+<dd><p>Returns:
+True if the computational grid is non-uniform</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -686,9 +665,7 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.print_start_status">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">print_start_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_elastic_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.print_start_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.print_start_status" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Update command-line status with the start time</p>
-</div></blockquote>
+<dd><p>Update command-line status with the start time</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_elastic_code</strong> – is the simulation elastic</p>
@@ -725,9 +702,7 @@ and thus must be re-ordered</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.scale_source_terms">
 <span class="sig-name descname"><span class="pre">scale_source_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_scale_source_terms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.scale_source_terms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.scale_source_terms" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Scale the source terms based on the expanded and smoothed values of the medium parameters</p>
-</div></blockquote>
+<dd><p>Scale the source terms based on the expanded and smoothed values of the medium parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_scale_source_terms</strong> – Should the source terms be scaled</p>
@@ -744,9 +719,7 @@ and thus must be re-ordered</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.select_precision">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.select_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.select_precision" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Select the minimal precision for storing the data</p>
-</div></blockquote>
+<dd><p>Select the minimal precision for storing the data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>opt</strong> (<a class="reference internal" href="kwave.options.html#kwave.options.SimulationOptions" title="kwave.options.SimulationOptions"><em>SimulationOptions</em></a>) – SimulationOptions instance</p>
@@ -760,10 +733,8 @@ and thus must be re-ordered</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.set_index_data_type">
 <span class="sig-name descname"><span class="pre">set_index_data_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.set_index_data_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.set_index_data_type" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Pre-calculate the data type needed to store the matrix indices given the
+<dd><p>Pre-calculate the data type needed to store the matrix indices given the
 total number of grid points: indexing variables will be created using this data type to save memory</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -777,9 +748,7 @@ total number of grid points: indexing variables will be created using this data 
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.smooth_and_enlarge">
 <span class="sig-name descname"><span class="pre">smooth_and_enlarge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid_N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation.html#kWaveSimulation.smooth_and_enlarge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.smooth_and_enlarge" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Smooth and enlarge grids</p>
-</div></blockquote>
+<dd><p>Smooth and enlarge grids</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -801,99 +770,113 @@ total number of grid points: indexing variables will be created using this data 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_p">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_p</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_p" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying pressure source is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying pressure source is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_p0">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_p0</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_p0" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether initial pressure source is present (default=False)</p>
+<dd><p>Returns:
+Whether initial pressure source is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_p0_elastic">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_p0_elastic</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_p0_elastic" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether initial pressure source is present in the elastic code (default=False)</p>
+<dd><p>Returns:
+Whether initial pressure source is present in the elastic code (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_p_labelled">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_p_labelled</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_p_labelled" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying pressure source with labelled source mask is present (default=False)
-:returns: True/False if labelled/binary source mask, respectively.</p>
+<dd><p>Returns:
+True/False if labelled/binary source mask, respectively.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_s_labelled">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_s_labelled</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_s_labelled" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source with labelled source mask is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source with labelled source mask is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_sxx">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_sxx</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_sxx" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in X-&gt;X direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in X-&gt;X direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_sxy">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_sxy</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_sxy" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in X-&gt;Y direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in X-&gt;Y direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_sxz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_sxz</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_sxz" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in X-&gt;Z direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in X-&gt;Z direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_syy">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_syy</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_syy" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in Y-&gt;Y direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in Y-&gt;Y direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_syz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_syz</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_syz" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in Y-&gt;Z direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in Y-&gt;Z direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_szz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_szz</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_szz" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying stress source in Z-&gt;Z direction is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying stress source in Z-&gt;Z direction is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_u_labelled">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_u_labelled</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_u_labelled" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying velocity source with labelled source mask is present (default=False)</p>
+<dd><p>Returns:
+Whether time-varying velocity source with labelled source mask is present (default=False)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_ux">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_ux</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_ux" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying particle velocity source is used in X-direction</p>
+<dd><p>Returns:
+Whether time-varying particle velocity source is used in X-direction</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_uy">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_uy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_uy" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying particle velocity source is used in Y-direction</p>
+<dd><p>Returns:
+Whether time-varying particle velocity source is used in Y-direction</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.source_uz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_uz</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.source_uz" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether time-varying particle velocity source is used in Z-direction</p>
+<dd><p>Returns:
+Whether time-varying particle velocity source is used in Z-direction</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.time_rev">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_rev</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.time_rev" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether the simulation is time reversal
-:returns: True for time reversal simulaions using sensor.time_reversal_boundary_data</p>
+<dd><p>Returns:
+True for time reversal simulaions using sensor.time_reversal_boundary_data</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -923,20 +906,22 @@ total number of grid points: indexing variables will be created using this data 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.use_sensor">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_sensor</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.use_sensor" title="Permalink to this definition">#</a></dt>
-<dd><p>False if no output of any kind is required
-Returns:</p>
+<dd><p>Returns:
+False if no output of any kind is required</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_p">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_w_source_correction_p</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_p" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether to use the w source correction instead of the k-space source correction for pressure sources</p>
+<dd><p>Returns:
+Whether to use the w source correction instead of the k-space source correction for pressure sources</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_u">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_w_source_correction_u</span></span><a class="headerlink" href="#kwave.kWaveSimulation.kWaveSimulation.use_w_source_correction_u" title="Permalink to this definition">#</a></dt>
-<dd><p>Whether to use the w source correction instead of the k-space source correction for velocity sources</p>
+<dd><p>Returns:
+Whether to use the w source correction instead of the k-space source correction for velocity sources</p>
 </dd></dl>
 
 <dl class="py attribute">

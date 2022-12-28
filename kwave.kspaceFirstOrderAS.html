@@ -265,8 +265,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">
 <span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderAS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderAS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Axisymmetric time-domain simulation of wave propagation.</p>
+<dd><p>Axisymmetric time-domain simulation of wave propagation.</p>
 <p>kspaceFirstOrderAS simulates the time-domain propagation of
 compressional waves through an axisymmetric homogeneous or
 heterogeneous acoustic medium. The code is functionally very similar
@@ -312,7 +311,6 @@ medium.density must be given in matrix form with the same dimensions as
 kgrid. For homogeneous medium parameters, these can be given as single
 numeric values. If the medium is homogeneous and velocity inputs or
 outputs are not required, it is not necessary to specify medium.density.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -330,8 +328,7 @@ outputs are not required, it is not necessary to specify medium.density.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">
 <span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderASC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderASC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Axisymmetric time-domain simulation of wave propagation using C++ code.</p>
+<dd><p>Axisymmetric time-domain simulation of wave propagation using C++ code.</p>
 <p>kspaceFirstOrderASC provides a blind interface to the C++ version of
 kspaceFirstOrderAS (called kspaceFirstOrder-OMP) in the same way as
 kspaceFirstOrder3DC. Note, the C++ code does not support all input
@@ -363,7 +360,6 @@ optional input parameters ‘BinaryName’ and ‘BinariesPath’.</p>
 <p>This function is essentially a wrapper and directly uses the capabilities
 of kspaceFirstOrder3DC by replacing the binary name with the name of the
 GPU binary.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>**kwargs</strong> – </p>

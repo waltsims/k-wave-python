@@ -252,142 +252,13 @@
         <article role="main">
           <h1>Source code for kwave.utils.conversion</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
-
-
-<div class="viewcode-block" id="scale_time"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.scale_time">[docs]</a><span class="k">def</span> <span class="nf">scale_time</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
-    <span class="c1"># switch to calculating years, weeks, and days if larger than 100 hours</span>
-    <span class="k">if</span> <span class="n">seconds</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">100</span><span class="p">):</span>
-        <span class="n">years</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="p">))</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">years</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span>
-        <span class="n">weeks</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span><span class="p">))</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">weeks</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span>
-        <span class="n">days</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span><span class="p">))</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">days</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">years</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">weeks</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">days</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># calculate hours, minutes, and seconds</span>
-    <span class="n">hours</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span>
-    <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">hours</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
-    <span class="n">minutes</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
-    <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">minutes</span> <span class="o">*</span> <span class="mi">60</span>
-
-    <span class="c1"># write out as a string, to keep the output manageable, only the largest</span>
-    <span class="c1"># three units are written</span>
-    <span class="k">if</span> <span class="n">years</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">years</span><span class="si">}</span><span class="s1"> years, </span><span class="si">{</span><span class="n">weeks</span><span class="si">}</span><span class="s1"> weeks, and </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days&#39;</span>
-    <span class="k">elif</span> <span class="n">weeks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">weeks</span><span class="si">}</span><span class="s1"> weeks, </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days, and </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1"> hours&#39;</span>
-    <span class="k">elif</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days, </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1"> hours, and </span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1"> min&#39;</span>
-    <span class="k">elif</span> <span class="n">hours</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">seconds</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
-            <span class="n">seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1">hours </span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1">min </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
-    <span class="k">elif</span> <span class="n">minutes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">seconds</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
-            <span class="n">seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1">min </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># manually tuned number</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
-    <span class="k">return</span> <span class="n">time</span></div>
-
-
-<div class="viewcode-block" id="scale_SI"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.scale_SI">[docs]</a><span class="k">def</span> <span class="nf">scale_SI</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="c1"># force the input to be a scalar</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="c1"># check for a negative input</span>
-    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
-        <span class="n">negative</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">negative</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-
-        <span class="c1"># if x is zero, don&#39;t scale</span>
-        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">prefix_fullname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-
-        <span class="c1"># update index and input</span>
-        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1e3</span>
-        <span class="n">sym_index</span> <span class="o">=</span> <span class="mi">1</span>
-
-        <span class="c1"># find scaling parameter</span>
-        <span class="k">while</span> <span class="n">x_sc</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sym_index</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span> <span class="o">*</span> <span class="mf">1e3</span>
-            <span class="n">sym_index</span> <span class="o">=</span> <span class="n">sym_index</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="c1"># define SI unit scalings</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;milli&#39;</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">),</span>
-            <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;micro&#39;</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">),</span>
-            <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;nano&#39;</span><span class="p">,</span> <span class="mf">1e9</span><span class="p">),</span>
-            <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;pico&#39;</span><span class="p">,</span> <span class="mf">1e12</span><span class="p">),</span>
-            <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;femto&#39;</span><span class="p">,</span> <span class="mf">1e15</span><span class="p">),</span>
-            <span class="mi">6</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;atto&#39;</span><span class="p">,</span> <span class="mf">1e18</span><span class="p">),</span>
-            <span class="mi">7</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;zepto&#39;</span><span class="p">,</span> <span class="mf">1e21</span><span class="p">),</span>
-            <span class="mi">8</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yocto&#39;</span><span class="p">,</span> <span class="mf">1e24</span><span class="p">),</span>
-        <span class="p">}</span>
-        <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">sym_index</span><span class="p">]</span>
-
-    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
-
-        <span class="c1"># update index and input</span>
-        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1e-3</span>
-        <span class="n">sym_index</span> <span class="o">=</span> <span class="mi">1</span>
-
-        <span class="c1"># find scaling parameter</span>
-        <span class="k">while</span> <span class="n">x_sc</span> <span class="o">&gt;=</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">sym_index</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span> <span class="o">*</span> <span class="mf">1e-3</span>
-            <span class="n">sym_index</span> <span class="o">=</span> <span class="n">sym_index</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="c1"># define SI unit scalings</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;kilo&#39;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
-            <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;mega&#39;</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">),</span>
-            <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;giga&#39;</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">),</span>
-            <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;tera&#39;</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">),</span>
-            <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;peta&#39;</span><span class="p">,</span> <span class="mf">1e-15</span><span class="p">),</span>
-            <span class="mi">6</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;exa&#39;</span><span class="p">,</span> <span class="mf">1e-18</span><span class="p">),</span>
-            <span class="mi">7</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;zetta&#39;</span><span class="p">,</span> <span class="mf">1e-21</span><span class="p">),</span>
-            <span class="mi">8</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;yotta&#39;</span><span class="p">,</span> <span class="mf">1e-24</span><span class="p">)</span>
-        <span class="p">}</span>
-        <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">sym_index</span><span class="p">]</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># if x is between 1 and 1000, don&#39;t scale</span>
-        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">prefix_fullname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="c1"># form scaling into a string</span>
-    <span class="n">round_decimals</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># TODO this needs to be tuned</span>
-    <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">round_decimals</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">x_sc</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_sc</span><span class="p">))</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mf">0.1</span> <span class="o">**</span> <span class="n">round_decimals</span><span class="p">):</span>
-        <span class="c1"># avoid values like X.0, instead have only X</span>
-        <span class="n">x_sc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_sc</span><span class="p">)</span>
-    <span class="n">x_sc</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;-</span><span class="si">{</span><span class="n">x_sc</span><span class="si">}{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">negative</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x_sc</span><span class="si">}{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">&#39;</span>
-    <span class="k">return</span> <span class="n">x_sc</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span></div>
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.matrix</span> <span class="kn">import</span> <span class="n">sort_rows</span>
 
 
 <div class="viewcode-block" id="db2neper"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.db2neper">[docs]</a><span class="k">def</span> <span class="nf">db2neper</span><span class="p">(</span><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -400,6 +271,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Attenuation in Nepers / ((rad / s) ^ y m).</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># calculate conversion</span>
@@ -417,6 +289,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Attenuation in dB / (MHz ^ y cm)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># calculate conversion</span>
@@ -424,7 +297,17 @@
     <span class="k">return</span> <span class="n">alpha</span></div>
 
 
-<div class="viewcode-block" id="cast_to_type"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cast_to_type">[docs]</a><span class="k">def</span> <span class="nf">cast_to_type</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">matlab_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="cast_to_type"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cast_to_type">[docs]</a><span class="k">def</span> <span class="nf">cast_to_type</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">matlab_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: The data to cast.</span>
+<span class="sd">        matlab_type: The type to cast to.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The cast data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">type_map</span> <span class="o">=</span> <span class="p">{</span>
@@ -437,17 +320,19 @@
     <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">type_map</span><span class="p">[</span><span class="n">matlab_type</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="cart2pol"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cart2pol">[docs]</a><span class="k">def</span> <span class="nf">cart2pol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="cart2pol"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cart2pol">[docs]</a><span class="k">def</span> <span class="nf">cart2pol</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert from cartesian to polar coordinates.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    x: The x-coordinate of the point.</span>
-<span class="sd">    y: The y-coordinate of the point.</span>
+<span class="sd">        x: The x-coordinate of the point.</span>
+<span class="sd">        y: The y-coordinate of the point.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    A tuple containing the polar coordinates of the point.</span>
+<span class="sd">        A tuple containing the polar coordinates of the point.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">phi</span><span class="p">,</span> <span class="n">rho</span></div>
@@ -464,9 +349,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        cart_data: 1 x N, 2 x N, or 3 x N (for 1, 2, and 3 dimensions) array of Cartesian sensor points</span>
 <span class="sd">        order_index: returns a list of indices of the returned cart_data coordinates.</span>
+
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: when input_kgrid.dim is not in [1, 2, 3]</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">grid_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">grid_selection</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">cart_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">input_kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)))</span>
 
@@ -483,12 +371,13 @@
     <span class="k">return</span> <span class="n">cart_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">order_index</span></div>
 
 
-<div class="viewcode-block" id="freq2wavenumber"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.freq2wavenumber">[docs]</a><span class="k">def</span> <span class="nf">freq2wavenumber</span><span class="p">(</span><span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">filter_cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+<div class="viewcode-block" id="freq2wavenumber"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.freq2wavenumber">[docs]</a><span class="k">def</span> <span class="nf">freq2wavenumber</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">filter_cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
     <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        N: The size of the grid.</span>
+<span class="sd">        n: The size of the grid.</span>
 <span class="sd">        k_max: The maximum wavenumber.</span>
 <span class="sd">        filter_cutoff: The frequency to convert to a wavenumber cutoff.</span>
 <span class="sd">        c: The speed of sound.</span>
@@ -496,18 +385,232 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A tuple containing the calculated filter size and wavenumber cutoff.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">k_cutoff</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">filter_cutoff</span> <span class="o">/</span> <span class="n">c</span>
 
     <span class="c1"># set the alpha_filter size</span>
-    <span class="n">filter_size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">k_cutoff</span> <span class="o">/</span> <span class="n">k_dim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">filter_size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">k_cutoff</span> <span class="o">/</span> <span class="n">k_dim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># check the alpha_filter size</span>
-    <span class="k">if</span> <span class="n">filter_size</span> <span class="o">&gt;</span> <span class="n">N</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">filter_size</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="c1"># set the alpha_filter size to be the same as the grid size</span>
-        <span class="n">filter_size</span> <span class="o">=</span> <span class="n">N</span>
+        <span class="n">filter_size</span> <span class="o">=</span> <span class="n">n</span>
         <span class="n">filter_cutoff</span> <span class="o">=</span> <span class="n">k_max</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">filter_size</span><span class="p">,</span> <span class="n">filter_cutoff</span></div>
+
+
+<div class="viewcode-block" id="cart2grid"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cart2grid">[docs]</a><span class="k">def</span> <span class="nf">cart2grid</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span> <span class="n">cart_data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolates the set of Cartesian points defined by</span>
+<span class="sd">    cart_data onto a binary matrix defined by the kWaveGrid object</span>
+<span class="sd">    kgrid using nearest neighbour interpolation. An error is returned if</span>
+<span class="sd">    the Cartesian points are outside the computational domain defined by</span>
+<span class="sd">    kgrid.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kgrid: simulation grid</span>
+<span class="sd">        cart_data: Cartesian sensor points</span>
+<span class="sd">        axisymmetric: set to True to use axisymmetric interpolation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A binary grid</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># check for axisymmetric input</span>
+    <span class="k">if</span> <span class="n">axisymmetric</span> <span class="ow">and</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Axisymmetric flag only supported in 2D.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># detect whether the inputs are for one, two, or three dimensions</span>
+    <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># one-dimensional</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
+        <span class="c1"># nearest neighbour interpolation</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># shift pixel coordinates to coincide with matrix indexing</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># check if the points all lie within the grid</span>
+        <span class="k">if</span> <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">or</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Cartesian points must lie within the grid defined by kgrid.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create empty grid</span>
+        <span class="n">grid_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># create index variable</span>
+        <span class="n">point_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data_x</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># map values</span>
+        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">point_index</span><span class="p">[</span><span class="n">data_index</span><span class="p">]</span>
+
+        <span class="c1"># extract reordering index</span>
+        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># two-dimensional</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
+        <span class="c1"># nearest neighbour interpolation</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_y</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># shift pixel coordinates to coincide with matrix indexing (leave</span>
+        <span class="c1"># y-direction = radial-direction if axisymmetric)</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">axisymmetric</span><span class="p">:</span>
+            <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span>
+
+        <span class="c1"># check if the points all lie within the grid</span>
+        <span class="k">if</span> <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">or</span> <span class="n">data_y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="ow">or</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">data_y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Cartesian points must lie within the grid defined by kgrid.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create empty grid</span>
+        <span class="n">grid_data</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span>
+
+        <span class="c1"># map values</span>
+        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_y</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_index</span><span class="p">)</span>
+
+        <span class="c1"># extract reordering index</span>
+        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span>
+            <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="p">]</span>
+        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">reorder_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># [N] =&gt; [N, 1]</span>
+
+    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+        <span class="c1"># three dimensional</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">data_z</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
+        <span class="c1"># nearest neighbour interpolation</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_y</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_z</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dz</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># shift pixel coordinates to coincide with matrix indexing</span>
+        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data_z</span> <span class="o">=</span> <span class="n">data_z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># check if the points all lie within the grid</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_z</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> \
+               <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">and</span> <span class="n">data_y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="ow">and</span> <span class="n">data_z</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span><span class="p">,</span> \
+            <span class="s2">&quot;Cartesian points must lie within the grid defined by kgrid.&quot;</span>
+
+        <span class="c1"># create empty grid</span>
+        <span class="n">grid_data</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># create index variable</span>
+        <span class="n">point_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data_x</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># map values</span>
+        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_y</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_z</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">point_index</span><span class="p">[</span><span class="n">data_index</span><span class="p">]</span>
+
+        <span class="c1"># extract reordering index</span>
+        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span>
+            <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="p">]</span>
+        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">reorder_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># [N] =&gt; [N, 1, 1]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input cart_data must be a 1, 2, or 3 dimensional matrix.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># compute the reverse ordering index (i.e., what is the index of each point</span>
+    <span class="c1"># in the reordering vector)</span>
+    <span class="n">order_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">reorder_index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reorder_index</span><span class="p">)</span>
+    <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">reorder_index</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">order_index</span> <span class="o">=</span> <span class="n">sort_rows</span><span class="p">(</span><span class="n">order_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">order_index</span> <span class="o">=</span> <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">order_index</span> <span class="o">=</span> <span class="n">order_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># [N] =&gt; [N, 1]</span>
+
+    <span class="c1"># reset binary grid values</span>
+    <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># check if any Cartesian points have been mapped to the same grid point,</span>
+    <span class="c1"># thereby reducing the total number of points</span>
+    <span class="n">num_discarded_points</span> <span class="o">=</span> <span class="n">cart_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_discarded_points</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  cart2grid: </span><span class="si">{</span><span class="n">num_discarded_points</span><span class="si">}</span><span class="s1"> Cartesian points mapped to overlapping grid points&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span> <span class="n">order_index</span><span class="p">,</span> <span class="n">reorder_index</span></div>
+
+
+<div class="viewcode-block" id="hounsfield2soundspeed"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.hounsfield2soundspeed">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2soundspeed</span><span class="p">(</span><span class="n">ct_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the sound speed of a medium given a CT (computed tomography) of the medium.</span>
+<span class="sd">    For soft tissue, the approximate sound speed can also be returned using the empirical relationship</span>
+<span class="sd">    given by Mast [1].</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ct_data: matrix of Hounsfield values.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A matrix of sound speed values of size of ct_data.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        [1] Mast, T. D., &quot;Empirical relationships between acoustic parameters in human soft tissues,&quot;</span>
+<span class="sd">        Acoust. Res. Lett. Online, 1(2), pp. 37-42 (2000).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># calculate corresponding sound speed values if required using soft tissue relationship</span>
+    <span class="c1"># TODO confirm that this linear relationship is correct</span>
+    <span class="n">sound_speed</span> <span class="o">=</span> <span class="p">(</span><span class="n">hounsfield2density</span><span class="p">(</span><span class="n">ct_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">349</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.893</span>
+
+    <span class="k">return</span> <span class="n">sound_speed</span></div>
+
+
+<div class="viewcode-block" id="hounsfield2density"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.hounsfield2density">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2density</span><span class="p">(</span><span class="n">ct_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">plot_fitting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ct_data: The CT data in Hounsfield units.</span>
+<span class="sd">        plot_fitting (bool, optional): Whether to plot the fitting curve (default: False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The density values in [kg / m ^ 3].</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># create empty density matrix</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ct_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">like</span><span class="o">=</span><span class="n">ct_data</span><span class="p">)</span>
+
+    <span class="c1"># apply conversion in several parts using linear fits to the data</span>
+    <span class="c1"># Part 1: Less than 930 Hounsfield Units</span>
+    <span class="n">density</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">930</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">1.025793065681423</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.680404011488714</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">930</span><span class="p">])</span>
+
+    <span class="c1"># Part 2: Between 930 and 1098(soft tissue region)</span>
+    <span class="n">index_selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mi">930</span> <span class="o">&lt;=</span> <span class="n">ct_data</span><span class="p">,</span> <span class="n">ct_data</span> <span class="o">&lt;=</span> <span class="mi">1098</span><span class="p">)</span>
+    <span class="n">density</span><span class="p">[</span><span class="n">index_selection</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.9082709691264</span><span class="p">,</span> <span class="mf">103.6151457847139</span><span class="p">],</span>
+                                          <span class="n">ct_data</span><span class="p">[</span><span class="n">index_selection</span><span class="p">])</span>
+
+    <span class="c1"># Part 3: Between 1098 and 1260(between soft tissue and bone)</span>
+    <span class="n">index_selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mi">1098</span> <span class="o">&lt;</span> <span class="n">ct_data</span><span class="p">,</span> <span class="n">ct_data</span> <span class="o">&lt;</span> <span class="mi">1260</span><span class="p">)</span>
+    <span class="n">density</span><span class="p">[</span><span class="n">index_selection</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.5108369316599</span><span class="p">,</span> <span class="mf">539.9977189228704</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">index_selection</span><span class="p">])</span>
+
+    <span class="c1"># Part 4: Greater than 1260(bone region)</span>
+    <span class="n">density</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&gt;=</span> <span class="mi">1260</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">([</span><span class="mf">0.6625370912451</span><span class="p">,</span> <span class="mf">348.8555178455294</span><span class="p">],</span> <span class="n">ct_data</span><span class="p">[</span><span class="n">ct_data</span> <span class="o">&gt;=</span> <span class="mi">1260</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">plot_fitting</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Plotting function not implemented in Python&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">density</span></div>
 </pre></div>
         </article>
       </div>

@@ -262,13 +262,14 @@
 <span class="kn">from</span> <span class="nn">uff</span> <span class="kn">import</span> <span class="n">ChannelData</span>
 <span class="kn">from</span> <span class="nn">uff.position</span> <span class="kn">import</span> <span class="n">Position</span>
 
+<span class="kn">from</span> <span class="nn">kwave.utils.conversion</span> <span class="kn">import</span> <span class="n">cart2pol</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.data</span> <span class="kn">import</span> <span class="n">scale_time</span>
+<span class="kn">from</span> <span class="nn">kwave.utils.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 <span class="kn">from</span> <span class="nn">.shifted_transform</span> <span class="kn">import</span> <span class="n">ShiftedTransform</span>
 <span class="kn">from</span> <span class="nn">.tools</span> <span class="kn">import</span> <span class="n">make_time_vector</span><span class="p">,</span> <span class="n">get_t0</span><span class="p">,</span> <span class="n">get_origin_array</span><span class="p">,</span> <span class="n">apodize</span>
-<span class="kn">from</span> <span class="nn">..utils.conversion</span> <span class="kn">import</span> <span class="n">scale_time</span><span class="p">,</span> <span class="n">cart2pol</span>
-<span class="kn">from</span> <span class="nn">..utils.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 
 
-<div class="viewcode-block" id="beamform"><a class="viewcode-back" href="../../../kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.beamform">[docs]</a><span class="k">def</span> <span class="nf">beamform</span><span class="p">(</span><span class="n">channel_data</span><span class="p">:</span> <span class="n">ChannelData</span><span class="p">):</span>
+<div class="viewcode-block" id="beamform"><a class="viewcode-back" href="../../../kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.beamform">[docs]</a><span class="k">def</span> <span class="nf">beamform</span><span class="p">(</span><span class="n">channel_data</span><span class="p">:</span> <span class="n">ChannelData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Args:</span>
@@ -376,17 +377,19 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;z[mm]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">channel_data</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="focus"><a class="viewcode-back" href="../../../kwave.reconstruction.beamform.html#kwave.reconstruction.beamform.focus">[docs]</a><span class="k">def</span> <span class="nf">focus</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">input_signal</span><span class="p">,</span> <span class="n">source_mask</span><span class="p">,</span> <span class="n">focus_position</span><span class="p">,</span> <span class="n">sound_speed</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        focus Create input signal based on source mask and focus position.</span>
-<span class="sd">        focus takes a single input signal and a source mask and creates an</span>
-<span class="sd">        input signal matrix (with one input signal for each source point).</span>
-<span class="sd">        The appropriate time delays required to focus the signals at a given</span>
-<span class="sd">        position in Cartesian space are automatically added based on the user</span>
-<span class="sd">        inputs for focus_position and sound_speed.</span>
+<span class="sd">    focus Create input signal based on source mask and focus position.</span>
+<span class="sd">    focus takes a single input signal and a source mask and creates an</span>
+<span class="sd">    input signal matrix (with one input signal for each source point).</span>
+<span class="sd">    The appropriate time delays required to focus the signals at a given</span>
+<span class="sd">    position in Cartesian space are automatically added based on the user</span>
+<span class="sd">    inputs for focus_position and sound_speed.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">         kgrid:             k-Wave grid object returned by kWaveGrid</span>

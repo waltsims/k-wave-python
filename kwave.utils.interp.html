@@ -263,45 +263,23 @@
           <section id="module-kwave.utils.interp">
 <span id="kwave-utils-interp-module"></span><h1>kwave.utils.interp module<a class="headerlink" href="#module-kwave.utils.interp" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.interp.cart2grid">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">cart2grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cart_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#cart2grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.cart2grid" title="Permalink to this definition">#</a></dt>
-<dd><p>Interpolate a set of Cartesian points onto a binary grid.</p>
+<dt class="sig sig-object py" id="kwave.utils.interp.get_bli">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">get_bli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_sampling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#get_bli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.get_bli" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the band-limited interpolant of a 1D input function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> – </p></li>
-<li><p><strong>cart_data</strong> – </p></li>
-<li><p><strong>axisymmetric</strong> – </p></li>
+<li><p><strong>func</strong> (<em>ndarray</em>) – The 1D input function.</p></li>
+<li><p><strong>dx</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – Spatial sampling in meters. Defaults to 1.</p></li>
+<li><p><strong>up_sampling_factor</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Up-sampling factor used to sample the underlying BLI. Defaults to 20.</p></li>
+<li><p><strong>plot</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to plot the BLI. Defaults to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>cart2grid interpolates the set of Cartesian points defined by
-cart_data onto a binary matrix defined by the kWaveGrid object
-kgrid using nearest neighbour interpolation. An error is returned if
-the Cartesian points are outside the computational domain defined by
-kgrid.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.interp.get_bli">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">get_bli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_sampling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#get_bli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.get_bli" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>func</strong> – 1d input function</p></li>
-<li><p><strong>dx</strong> – spatial sampling [m] (default=1)</p></li>
-<li><p><strong>up_sampling_factor</strong> – up-sampling factor used to sample the underlying BLI (default=20)</p></li>
-<li><p><strong>plot</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>band-limited interpolant
-x_fine: x-grid for BLI</p>
+<dd class="field-even"><p>A tuple containing the BLI and the x-grid for the BLI.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bli</p>
+<dd class="field-odd"><p><em>Tuple</em>[<em>ndarray</em>, <em>ndarray</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,12 +287,12 @@ x_fine: x-grid for BLI</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.interp.interp_cart_data">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">interp_cart_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cart_sensor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cart_sensor_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_sensor_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#interp_cart_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.interp_cart_data" title="Permalink to this definition">#</a></dt>
-<dd><p>interp_cart_data takes a matrix of time-series data recorded over a set
+<dd><p>Takes a matrix of time-series data recorded over a set
 of Cartesian sensor points given by cart_sensor_mask and computes the
 equivalent time-series at each sensor position on the binary sensor
 mask binary_sensor_mask using interpolation. The properties of
 binary_sensor_mask are defined by the k-Wave grid object kgrid.
-Two and three dimensional data are supported.</p>
+Two and three-dimensional data are supported.</p>
 <dl class="simple">
 <dt>Usage:</dt><dd><p>binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
 binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)</p>
@@ -338,14 +316,7 @@ time-series, both ‘nearest’ and ‘linear’
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>array of time-series corresponding to the</dt><dd><p>sensor positions given by binary_sensor_mask</p>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>binary_sensor_data</p>
+<dd class="field-even"><p>array of time-series corresponding to the sensor positions given by binary_sensor_mask</p>
 </dd>
 </dl>
 </dd></dl>
@@ -354,11 +325,6 @@ time-series, both ‘nearest’ and ‘linear’
 <dt class="sig sig-object py" id="kwave.utils.interp.interpftn">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">interpftn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">win</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#interpftn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.interpftn" title="Permalink to this definition">#</a></dt>
 <dd><p>Resamples an N-D matrix to the size given in sz using Fourier interpolation.</p>
-<dl class="simple">
-<dt>USAGE:</dt><dd><p>y = interpftn(x, sz)
-y = interpftn(x, sz, win)</p>
-</dd>
-</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -368,25 +334,25 @@ y = interpftn(x, sz, win)</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>resampled matrix</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>y</p>
+<dd class="field-even"><p>Resampled matrix</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">interpftn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">interpftn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">win</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.interp.interpolate2d">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">interpolate2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_locs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_nans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#interpolate2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.interpolate2d" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Interpolates input grid values at the given locations
+<dd><p>Interpolates input grid values at the given locations
 Added by Farid</p>
 <p>Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
 SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
 We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
 While mapping we assume that only one axis per 3D grid changes throughout the grid.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -400,20 +366,17 @@ While mapping we assume that only one axis per 3D grid changes throughout the gr
 <dd class="field-even"><p><em>ndarray</em></p>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.interp.interpolate2d_with_queries">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">interpolate2d_with_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_nans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#interpolate2d_with_queries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.interpolate2d_with_queries" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Interpolates input grid values at the given locations
+<dd><p>Interpolates input grid values at the given locations
 Added by Farid</p>
 <p>Simplified version of <cite>interpolate2D_coords</cite>.
 Expects <cite>interp_locs</cite> to be [N, 2] coordinates of the interpolation locations.
 Does not create meshgrid on the <cite>interp_locs</cite> as <cite>interpolate2D_coords</cite>!
 WARNING: supposed to support only 2D interpolation!</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -427,20 +390,17 @@ WARNING: supposed to support only 2D interpolation!</p>
 <dd class="field-even"><p><em>ndarray</em></p>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.interp.interpolate3d">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">interpolate3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_locs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#interpolate3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.interpolate3d" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Interpolates input grid values at the given locations
+<dd><p>Interpolates input grid values at the given locations
 Added by Farid</p>
 <p>Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using
 SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.
 We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.
 While mapping we assume that only one axis per 3D grid changes throughout the grid.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -451,20 +411,6 @@ While mapping we assume that only one axis per 3D grid changes throughout the gr
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>ndarray</em></p>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.interp.sort_rows">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.interp.</span></span><span class="sig-name descname"><span class="pre">sort_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/interp.html#sort_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.interp.sort_rows" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arr</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>index</strong> (<em>int</em>) – </p></li>
-</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -527,14 +473,12 @@ While mapping we assume that only one axis per 3D grid changes throughout the gr
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">kwave.utils.interp module</a><ul>
-<li><a class="reference internal" href="#kwave.utils.interp.cart2grid"><code class="docutils literal notranslate"><span class="pre">cart2grid()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.get_bli"><code class="docutils literal notranslate"><span class="pre">get_bli()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.interp_cart_data"><code class="docutils literal notranslate"><span class="pre">interp_cart_data()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.interpftn"><code class="docutils literal notranslate"><span class="pre">interpftn()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.interpolate2d"><code class="docutils literal notranslate"><span class="pre">interpolate2d()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.interpolate2d_with_queries"><code class="docutils literal notranslate"><span class="pre">interpolate2d_with_queries()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.interp.interpolate3d"><code class="docutils literal notranslate"><span class="pre">interpolate3d()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.interp.sort_rows"><code class="docutils literal notranslate"><span class="pre">sort_rows()</span></code></a></li>
 </ul>
 </li>
 </ul>

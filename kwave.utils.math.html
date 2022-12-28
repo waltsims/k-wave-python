@@ -274,15 +274,15 @@ than one element with the closest value, the index of the first one is returned.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>A</strong> (<em>np.ndarray</em>) – The array to search.</p></li>
+<li><p><strong>A</strong> (<em>ndarray</em>) – The array to search.</p></li>
 <li><p><strong>a</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>int</em><em>]</em>) – The value to find.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing the closest value and its index in the input array.</p>
+<dd class="field-even"><p>A tuple containing the value and index of the closest element in A to a.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple[Union[float, int], Tuple[int, …]]</p>
+<dd class="field-odd"><p><em>Tuple</em>[<em>Union</em>[float, int], <em>Tuple</em>[int, …]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -290,16 +290,50 @@ than one element with the closest value, the index of the first one is returned.
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.fourier_shift">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">fourier_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#fourier_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.fourier_shift" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Shifts an array along one of its dimensions using Fourier interpolation.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>shift</strong> (<em>float</em>) – </p></li>
-<li><p><strong>shift_dim</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>data</strong> (<em>ndarray</em>) – The input array.</p></li>
+<li><p><strong>shift</strong> (<em>float</em>) – The amount of shift to apply.</p></li>
+<li><p><strong>shift_dim</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The dimension along which to shift the array. Default is the last dimension.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>ndarray</em></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The shifted array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.math.gaussian">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.gaussian" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a Gaussian distribution f(x) with the specified magnitude, mean, and variance. If these values are not specified,
+the magnitude is normalised and values of variance = 1 and mean = 0 are used. For example running:</p>
+<blockquote>
+<div><p>import matplotlib.pyplot as plt
+x = np.arange(-3, 0.05, 3)
+plt.plot(x, gaussian(x))</p>
+</div></blockquote>
+<p>will plot a normalised Gaussian distribution.</p>
+<p>Note, the full width at half maximum of the resulting distribution can be calculated by FWHM = 2 * sqrt(2 * log(2) * variance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>, </em><em>ndarray</em><em>]</em>) – The input values.</p></li>
+<li><p><strong>magnitude</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em><em>]</em>) – Bell height. Defaults to normalised.</p></li>
+<li><p><strong>mean</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – Mean or expected value. Defaults to 0.</p></li>
+<li><p><strong>variance</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – Variance, or bell width. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Gaussian distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[int, float, <em>ndarray</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -307,12 +341,72 @@ than one element with the closest value, the index of the first one is returned.
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.largest_prime_factor">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">largest_prime_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#largest_prime_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.largest_prime_factor" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Finds the largest prime factor of a positive integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The positive integer to be factored.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The largest prime factor of n.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.math.next_pow2">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">next_pow2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#next_pow2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.next_pow2" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the next power of 2 that is greater than or equal to <cite>n</cite>.</p>
+<p>This function takes a positive integer <cite>n</cite> and returns the smallest power of 2 that is greater
+than or equal to <cite>n</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The number to find the next power of 2 for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The smallest power of 2 that is greater than or equal to <cite>n</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.math.norm_var">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">norm_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">im</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#norm_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.norm_var" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the normalized variance of an array of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>im</strong> (<em>ndarray</em>) – The input array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized variance of im.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.primefactors">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">primefactors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#primefactors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.primefactors" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Finds the prime factors of a given integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The integer to factor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of prime factors of n.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[int]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.round_even">
@@ -320,13 +414,10 @@ than one element with the closest value, the index of the first one is returned.
 <dd><p>Rounds to the nearest even integer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>float</em>) – inpput value</p>
+<dd class="field-odd"><p><strong>x</strong> – Input value</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>nearest odd integer.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(int)</p>
+<dd class="field-even"><p>Nearest even integer.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -337,13 +428,10 @@ than one element with the closest value, the index of the first one is returned.
 <dd><p>Rounds to the nearest odd integer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>float</em>) – input value</p>
+<dd class="field-odd"><p><strong>x</strong> – Input value</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>nearest odd integer.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(int)</p>
+<dd class="field-even"><p>Nearest odd integer.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -351,13 +439,36 @@ than one element with the closest value, the index of the first one is returned.
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.rwh_primes">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">rwh_primes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#rwh_primes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.rwh_primes" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a list of primes &lt; n for n &gt; 2</p>
+<dd><p>Generates a list of prime numbers less than a given integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The upper bound for the list of primes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of prime numbers less than n.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[int]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.sinc">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">sinc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#sinc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.sinc" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Calculates the sinc function of a given value or array of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>, </em><em>ndarray</em><em>]</em>) – The value or array of values for which to calculate the sinc function.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sinc function of x.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[int, float, <em>ndarray</em>]</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -419,7 +530,10 @@ than one element with the closest value, the index of the first one is returned.
 <li><a class="reference internal" href="#">kwave.utils.math module</a><ul>
 <li><a class="reference internal" href="#kwave.utils.math.find_closest"><code class="docutils literal notranslate"><span class="pre">find_closest()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.fourier_shift"><code class="docutils literal notranslate"><span class="pre">fourier_shift()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.math.gaussian"><code class="docutils literal notranslate"><span class="pre">gaussian()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.largest_prime_factor"><code class="docutils literal notranslate"><span class="pre">largest_prime_factor()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.math.next_pow2"><code class="docutils literal notranslate"><span class="pre">next_pow2()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.math.norm_var"><code class="docutils literal notranslate"><span class="pre">norm_var()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.primefactors"><code class="docutils literal notranslate"><span class="pre">primefactors()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.round_even"><code class="docutils literal notranslate"><span class="pre">round_even()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.round_odd"><code class="docutils literal notranslate"><span class="pre">round_odd()</span></code></a></li>

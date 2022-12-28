@@ -263,14 +263,48 @@
           <section id="module-kwave.utils.conversion">
 <span id="kwave-utils-conversion-module"></span><h1>kwave.utils.conversion module<a class="headerlink" href="#module-kwave.utils.conversion" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.conversion.cart2grid">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">cart2grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cart_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#cart2grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.cart2grid" title="Permalink to this definition">#</a></dt>
+<dd><p>Interpolates the set of Cartesian points defined by
+cart_data onto a binary matrix defined by the kWaveGrid object
+kgrid using nearest neighbour interpolation. An error is returned if
+the Cartesian points are outside the computational domain defined by
+kgrid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – simulation grid</p></li>
+<li><p><strong>cart_data</strong> (<em>ndarray</em>) – Cartesian sensor points</p></li>
+<li><p><strong>axisymmetric</strong> – set to True to use axisymmetric interpolation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A binary grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.conversion.cart2pol">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">cart2pol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#cart2pol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.cart2pol" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert from cartesian to polar coordinates.</p>
-<p>Args:
-x: The x-coordinate of the point.
-y: The y-coordinate of the point.</p>
-<p>Returns:
-A tuple containing the polar coordinates of the point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – The x-coordinate of the point.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – The y-coordinate of the point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the polar coordinates of the point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[float, float]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -278,7 +312,16 @@ A tuple containing the polar coordinates of the point.</p>
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">cast_to_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matlab_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#cast_to_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.cast_to_type" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>matlab_type</strong> (<em>str</em>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – The data to cast.</p></li>
+<li><p><strong>matlab_type</strong> (<em>str</em>) – The type to cast to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cast data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -305,12 +348,12 @@ A tuple containing the polar coordinates of the point.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.conversion.freq2wavenumber">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">freq2wavenumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#freq2wavenumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.freq2wavenumber" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">freq2wavenumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#freq2wavenumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.freq2wavenumber" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>N</strong> (<em>int</em>) – The size of the grid.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – The size of the grid.</p></li>
 <li><p><strong>k_max</strong> (<em>float</em>) – The maximum wavenumber.</p></li>
 <li><p><strong>filter_cutoff</strong> (<em>float</em>) – The frequency to convert to a wavenumber cutoff.</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – The speed of sound.</p></li>
@@ -351,6 +394,48 @@ order_index: returns a list of indices of the returned cart_data coordinates.</p
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.conversion.hounsfield2density">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">hounsfield2density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fitting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#hounsfield2density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.hounsfield2density" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ct_data</strong> (<em>ndarray</em>) – The CT data in Hounsfield units.</p></li>
+<li><p><strong>plot_fitting</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the fitting curve (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The density values in [kg / m ^ 3].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.conversion.hounsfield2soundspeed">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">hounsfield2soundspeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ct_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#hounsfield2soundspeed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.hounsfield2soundspeed" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
+For soft tissue, the approximate sound speed can also be returned using the empirical relationship
+given by Mast [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ct_data</strong> (<em>ndarray</em>) – matrix of Hounsfield values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A matrix of sound speed values of size of ct_data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Mast, T. D., “Empirical relationships between acoustic parameters in human soft tissues,”
+Acoust. Res. Lett. Online, 1(2), pp. 37-42 (2000).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.conversion.neper2db">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">neper2db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#neper2db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.neper2db" title="Permalink to this definition">#</a></dt>
 <dd><p>Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).</p>
@@ -369,16 +454,6 @@ order_index: returns a list of indices of the returned cart_data coordinates.</p
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.conversion.scale_SI">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">scale_SI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#scale_SI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.scale_SI" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kwave.utils.conversion.scale_time">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.conversion.</span></span><span class="sig-name descname"><span class="pre">scale_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/conversion.html#scale_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.conversion.scale_time" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 </section>
 
@@ -438,14 +513,15 @@ order_index: returns a list of indices of the returned cart_data coordinates.</p
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">kwave.utils.conversion module</a><ul>
+<li><a class="reference internal" href="#kwave.utils.conversion.cart2grid"><code class="docutils literal notranslate"><span class="pre">cart2grid()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.cart2pol"><code class="docutils literal notranslate"><span class="pre">cart2pol()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.cast_to_type"><code class="docutils literal notranslate"><span class="pre">cast_to_type()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.db2neper"><code class="docutils literal notranslate"><span class="pre">db2neper()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.freq2wavenumber"><code class="docutils literal notranslate"><span class="pre">freq2wavenumber()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.grid2cart"><code class="docutils literal notranslate"><span class="pre">grid2cart()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.conversion.hounsfield2density"><code class="docutils literal notranslate"><span class="pre">hounsfield2density()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.conversion.hounsfield2soundspeed"><code class="docutils literal notranslate"><span class="pre">hounsfield2soundspeed()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.conversion.neper2db"><code class="docutils literal notranslate"><span class="pre">neper2db()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.conversion.scale_SI"><code class="docutils literal notranslate"><span class="pre">scale_SI()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.utils.conversion.scale_time"><code class="docutils literal notranslate"><span class="pre">scale_time()</span></code></a></li>
 </ul>
 </li>
 </ul>

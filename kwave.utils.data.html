@@ -263,9 +263,26 @@
           <section id="module-kwave.utils.data">
 <span id="kwave-utils-data-module"></span><h1>kwave.utils.data module<a class="headerlink" href="#module-kwave.utils.data" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.data.get_date_string">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.data.</span></span><span class="sig-name descname"><span class="pre">get_date_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/data.html#get_date_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.data.get_date_string" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.data.get_smallest_possible_type">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.data.</span></span><span class="sig-name descname"><span class="pre">get_smallest_possible_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_array_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/data.html#get_smallest_possible_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.data.get_smallest_possible_type" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the smallest possible type for the given array.
+:param max_array_val: The maximum value in the array.
+:param target_type_group: The type group to search for the smallest possible type.
+:param default: The default type to return if no type is found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The smallest possible type for the given array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Optional</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.data.intmax">
@@ -275,11 +292,47 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dtype</strong> (<em>str</em>) – The integer type.</p>
 </dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>The maximum value for the given integer type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.data.scale_SI">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.data.</span></span><span class="sig-name descname"><span class="pre">scale_SI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/data.html#scale_SI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.data.scale_SI" title="Permalink to this definition">#</a></dt>
+<dd><p>Scale a number to the nearest SI unit prefix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>float</em>) – The number to scale.</p>
+</dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The maximum value for the given integer type.</p>
+<dd class="field-even"><p>A tuple containing a sting of the scaled number, a numeric scaling factor, the prefix, and the unit.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p><em>Tuple</em>[float, <em>Union</em>[int, float], str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.data.scale_time">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.data.</span></span><span class="sig-name descname"><span class="pre">scale_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/data.html#scale_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.data.scale_time" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts an integer number of seconds into hours, minutes,
+and seconds, and returns a string with this information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seconds</strong> (<em>int</em>) – number of seconds</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String of scaled time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,8 +395,11 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">kwave.utils.data module</a><ul>
+<li><a class="reference internal" href="#kwave.utils.data.get_date_string"><code class="docutils literal notranslate"><span class="pre">get_date_string()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.data.get_smallest_possible_type"><code class="docutils literal notranslate"><span class="pre">get_smallest_possible_type()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.data.intmax"><code class="docutils literal notranslate"><span class="pre">intmax()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.data.scale_SI"><code class="docutils literal notranslate"><span class="pre">scale_SI()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.data.scale_time"><code class="docutils literal notranslate"><span class="pre">scale_time()</span></code></a></li>
 </ul>
 </li>
 </ul>

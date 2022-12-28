@@ -258,26 +258,25 @@
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span>
 
-<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
-<span class="kn">from</span> <span class="nn">.checks</span> <span class="kn">import</span> <span class="n">num_dim</span>
-<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">scale_SI</span><span class="p">,</span> <span class="n">freq2wavenumber</span>
+<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">freq2wavenumber</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_SI</span>
 <span class="kn">from</span> <span class="nn">.mapgen</span> <span class="kn">import</span> <span class="n">ndgrid</span>
-<span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="n">sinc</span>
+<span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="n">sinc</span><span class="p">,</span> <span class="n">gaussian</span>
 <span class="kn">from</span> <span class="nn">.matlab</span> <span class="kn">import</span> <span class="n">matlab_mask</span><span class="p">,</span> <span class="n">unflatten_matlab_mask</span>
-<span class="kn">from</span> <span class="nn">.matrix</span> <span class="kn">import</span> <span class="n">broadcast_axis</span>
+<span class="kn">from</span> <span class="nn">.matrix</span> <span class="kn">import</span> <span class="n">broadcast_axis</span><span class="p">,</span> <span class="n">num_dim</span>
 
 
-<div class="viewcode-block" id="add_noise"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.add_noise">[docs]</a><span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">snr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="add_noise"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.add_noise">[docs]</a><span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span><span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">snr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add Gaussian noise to a signal.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        signal (np.array):      input signal</span>
-<span class="sd">        snr (float):            desired signal snr (signal-to-noise ratio) in decibels after adding noise</span>
-<span class="sd">        mode (str):             &#39;rms&#39; (default) or &#39;peak&#39;</span>
+<span class="sd">        signal:      input signal</span>
+<span class="sd">        snr:         desired signal snr (signal-to-noise ratio) in decibels after adding noise</span>
+<span class="sd">        mode:        &#39;rms&#39; (default) or &#39;peak&#39;</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        signal (np.array):      signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.</span>
+<span class="sd">        Signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;rms&quot;</span><span class="p">:</span>
@@ -313,76 +312,34 @@
             <span class="n">symmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">square</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a frequency domain windowing function</span>
-<span class="sd">        getWin returns a 1D, 2D, or 3D frequency domain window of the</span>
-<span class="sd">        specified type of the given dimensions. By default, higher</span>
-<span class="sd">        dimensional windows are created using the outer product. The windows</span>
-<span class="sd">        can alternatively be created using rotation by setting the optional</span>
-<span class="sd">        input &#39;Rotation&#39; to true. The coherent gain of the window can also be</span>
-<span class="sd">        returned.</span>
+
+<span class="sd">   A frequency domain windowing function of specified type and dimensions.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        N: - number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D</span>
-<span class="sd">        type_: - window type. Supported values are</span>
-<span class="sd">                           &#39;Bartlett&#39;</span>
-<span class="sd">                           &#39;Bartlett-Hanning&#39;</span>
-<span class="sd">                           &#39;Blackman&#39;</span>
-<span class="sd">                           &#39;Blackman-Harris&#39;</span>
-<span class="sd">                           &#39;Blackman-Nuttall&#39;</span>
-<span class="sd">                           &#39;Cosine&#39;</span>
-<span class="sd">                           &#39;Flattop&#39;</span>
-<span class="sd">                           &#39;Gaussian&#39;</span>
-<span class="sd">                           &#39;HalfBand&#39;</span>
-<span class="sd">                           &#39;Hamming&#39;</span>
-<span class="sd">                           &#39;Hanning&#39;</span>
-<span class="sd">                           &#39;Kaiser&#39;</span>
-<span class="sd">                           &#39;Lanczos&#39;</span>
-<span class="sd">                           &#39;Nuttall&#39;</span>
-<span class="sd">                           &#39;Rectangular&#39;</span>
-<span class="sd">                           &#39;Triangular&#39;</span>
-<span class="sd">                           &#39;Tukey&#39;</span>
-<span class="sd">             plot_win:      - Boolean controlling whether the window is displayed</span>
-<span class="sd">                           (default = false).</span>
-
-<span class="sd">             param:     Control parameter for the Tukey, Blackman, Gaussian,</span>
-<span class="sd">                           and Kaiser windows:</span>
-
-<span class="sd">                           Tukey: taper ratio (default = 0.5)</span>
-<span class="sd">                           Blackman: alpha (default = 0.16)</span>
-<span class="sd">                           Gaussian: standard deviation (default = 0.5)</span>
-<span class="sd">                           Kaiser: alpha (default = 3)</span>
-
-<span class="sd">             rotation:  - Boolean controlling whether 2D and 3D windows are</span>
-<span class="sd">                           created via rotation or the outer product (default =</span>
-<span class="sd">                           false). Windows created via rotation will have edge</span>
-<span class="sd">                           values outside the window radius set to the first</span>
-<span class="sd">                           window value.</span>
-
-<span class="sd">             symmetric: - Boolean controlling whether the window is symmetrical</span>
-<span class="sd">                           (default = true). If set to false, a window of length N</span>
-<span class="sd">                           + 1 is created and the first N points are returned. For</span>
-<span class="sd">                           2D and 3D windows, &#39;Symmetric&#39; can be defined as a</span>
-<span class="sd">                           vector defining the symmetry in each matrix dimension.</span>
-
-<span class="sd">             square:    - Boolean controlling whether the window is forced to</span>
-<span class="sd">                           be square (default = false). If set to true and Nx</span>
-<span class="sd">                           and Nz are not equal, the window is created using the</span>
-<span class="sd">                           smaller variable, and then padded with zeros.</span>
+<span class="sd">        N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.</span>
+<span class="sd">        type_: Window type. Supported values: &#39;Bartlett&#39;, &#39;Bartlett-Hanning&#39;, &#39;Blackman&#39;, &#39;Blackman-Harris&#39;, &#39;Blackman-Nuttall&#39;, &#39;Cosine&#39;, &#39;Flattop&#39;, &#39;Gaussian&#39;, &#39;HalfBand&#39;, &#39;Hamming&#39;, &#39;Hanning&#39;, &#39;Kaiser&#39;, &#39;Lanczos&#39;, &#39;Nuttall&#39;, &#39;Rectangular&#39;, &#39;Triangular&#39;, &#39;Tukey&#39;.</span>
+<span class="sd">        plot_win: Boolean to display the window (default = False).</span>
+<span class="sd">        param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey), alpha (Blackman, Kaiser), standard deviation (Gaussian) (default = 0.5, 0.16, 3 respectively).</span>
+<span class="sd">        rotation: Boolean to create windows via rotation or outer product (default = False).</span>
+<span class="sd">        symmetric: Boolean to make the window symmetrical (default = True). Can also be a vector defining the symmetry in each matrix dimension.</span>
+<span class="sd">        square: Boolean to force the window to be square (default = False).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        win: the window</span>
-<span class="sd">        cg: the coherent gain of the window</span>
-
+<span class="sd">        A tuple of (win, cg) where win is the window and cg is the coherent gain of the window.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">cosine_series</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cosine_series</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Sub-function to calculate a summed filter cosine series.</span>
+
+<span class="sd">        Sub-function to calculate a summed filter cosine series.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            n:</span>
-<span class="sd">            N:</span>
-<span class="sd">            coeffs:</span>
+<span class="sd">            n: An integer representing the current index in the series.</span>
+<span class="sd">            N: An integer representing the total number of terms in the series.</span>
+<span class="sd">            coeffs: A list of floats representing the coefficients of the cosine terms.</span>
 
 <span class="sd">        Returns:</span>
+<span class="sd">            A numpy ndarray containing the calculated series.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">series</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -609,45 +566,23 @@
 <div class="viewcode-block" id="tone_burst"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.tone_burst">[docs]</a><span class="k">def</span> <span class="nf">tone_burst</span><span class="p">(</span><span class="n">sample_freq</span><span class="p">,</span> <span class="n">signal_freq</span><span class="p">,</span> <span class="n">num_cycles</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span> <span class="n">plot_signal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">signal_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                <span class="n">signal_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create an enveloped single frequency tone burst.</span>
-<span class="sd">        tone_burst creates an enveloped single frequency tone burst for use in</span>
-<span class="sd">        ultrasound simulations. If an array is given for the optional input</span>
-<span class="sd">        &#39;SignalOffset&#39;, a matrix of tone bursts is created where each row</span>
-<span class="sd">        corresponds to a tone burst for each value of the &#39;SignalOffset&#39;. If</span>
-<span class="sd">        a value for the optional input &#39;SignalLength&#39; is  given, the tone</span>
-<span class="sd">        burst/s are zero padded to this length (in samples).</span>
+<span class="sd">    Create an enveloped single frequency tone burst.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        plot_signal:</span>
-<span class="sd">        signal_offset:</span>
-<span class="sd">        signal_length:</span>
-<span class="sd">        plot:</span>
-<span class="sd">        sample_freq: sampling frequency [Hz]</span>
-<span class="sd">        signal_freq: frequency of the tone burst signal [Hz]</span>
+<span class="sd">        sample_freq: sampling frequency in Hz</span>
+<span class="sd">        signal_freq: frequency of the tone burst signal in Hz</span>
 <span class="sd">        num_cycles: number of sinusoidal oscillations</span>
-<span class="sd">        OPTIONAL INPUTS:</span>
-<span class="sd">            Optional &#39;string&#39;, value pairs that may be used to modify the default</span>
-<span class="sd">            computational settings.</span>
+<span class="sd">        envelope: Envelope used to taper the tone burst. Valid inputs are:</span>
+<span class="sd">            - &#39;Gaussian&#39; (the default)</span>
+<span class="sd">            - &#39;Rectangular&#39;</span>
+<span class="sd">            - [num_ring_up_cycles, num_ring_down_cycles]</span>
+<span class="sd">                The last option generates a continuous wave signal with a cosine taper of the specified length at the beginning and end.</span>
+<span class="sd">        plot: Boolean controlling whether the created tone burst is plotted.</span>
+<span class="sd">        signal_length: Signal length in number of samples. If longer than the tone burst length, the signal is appended with zeros.</span>
+<span class="sd">        signal_offset: Signal offset before the tone burst starts in number of samples. If an array is given, a matrix of tone bursts is created where each row corresponds to a tone burst for each value of the &#39;SignalOffset&#39;.</span>
 
-<span class="sd">            envelope:      - Envelope used to taper the tone burst. Valid inputs</span>
-<span class="sd">                              are:</span>
-
-<span class="sd">                                  &#39;Gaussian&#39; (the default)</span>
-<span class="sd">                                  &#39;Rectangular&#39;</span>
-<span class="sd">                                  [num_ring_up_cycles, num_ring_down_cycles]</span>
-
-<span class="sd">                              The last option generates a continuous wave signal</span>
-<span class="sd">                              with a cosine taper of the specified length at the</span>
-<span class="sd">                              beginning and end.</span>
-
-<span class="sd">            plot:             Boolean controlling whether the created tone</span>
-<span class="sd">                              burst is plotted.</span>
-<span class="sd">            signal_length:    Signal length in number of samples, if longer</span>
-<span class="sd">                              than the tone burst length, the signal is</span>
-<span class="sd">                              appended with zeros.</span>
-<span class="sd">            signal_offset:    Signal offset before the tone burst starts in</span>
-<span class="sd">                              number of samples.</span>
-
-<span class="sd">    Returns: created tone burst</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        created tone burst</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">signal_offset</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s2">&quot;signal_offset must be integer&quot;</span>
@@ -698,7 +633,6 @@
 
         <span class="c1"># create the envelope</span>
         <span class="k">if</span> <span class="n">envelope</span> <span class="o">==</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">kwave.utils.filters</span> <span class="kn">import</span> <span class="n">gaussian</span>
             <span class="n">x_lim</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="n">window_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">x_lim</span><span class="p">,</span> <span class="n">x_lim</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x_lim</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tone_burst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">window</span> <span class="o">=</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">window_x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -741,12 +675,12 @@
 
 <div class="viewcode-block" id="reorder_binary_sensor_data"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.reorder_binary_sensor_data">[docs]</a><span class="k">def</span> <span class="nf">reorder_binary_sensor_data</span><span class="p">(</span><span class="n">sensor_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">reorder_index</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="sd">    Args:</span>
 <span class="sd">        sensor_data: N x K</span>
 <span class="sd">        reorder_index: N</span>
 
 <span class="sd">    Returns:</span>
+<span class="sd">        reordered sensor data</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reorder_index</span><span class="p">)</span>
@@ -764,24 +698,22 @@
 <div class="viewcode-block" id="get_alpha_filter"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.get_alpha_filter">[docs]</a><span class="k">def</span> <span class="nf">get_alpha_filter</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">filter_cutoff</span><span class="p">,</span> <span class="n">taper_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     get_alpha_filter uses get_win to create a Tukey window via rotation to</span>
-<span class="sd">     pass to the medium.alpha_filter input field of the first order</span>
-<span class="sd">     simulation functions (kspaceFirstOrder1D, kspaceFirstOrder2D, and</span>
-<span class="sd">     kspaceFirstOrder3D). This parameter is used to regularise time</span>
-<span class="sd">     reversal image reconstruction when absorption compensation is</span>
-<span class="sd">     included.</span>
+<span class="sd">     pass to the medium.alpha_filter. This parameter is used to regularise time</span>
+<span class="sd">     reversal image reconstruction when absorption compensation is included.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        kgrid (kWaveGrid):</span>
-<span class="sd">        medium (Medium):</span>
-<span class="sd">        filter_cutoff (list): Any of the filter_cutoff inputs may be set to &#39;max&#39; to set the cutoff frequency to the maximum frequency supported by the grid</span>
-<span class="sd">        taper_ratio:</span>
+<span class="sd">        kgrid: simulation grid</span>
+<span class="sd">        medium: simulation medium</span>
+<span class="sd">        filter_cutoff: Any of the filter_cutoff inputs may be set to &#39;max&#39; to set the cutoff frequency to the maximum frequency supported by the grid</span>
+<span class="sd">        taper_ratio: The taper_ratio input is used to control the width of the transition region between the passband and stopband. The default value is 0.5, which corresponds to a transition region of 50% of the filter width.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        alpha_filter:</span>
+<span class="sd">        alpha_filter</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">dim</span> <span class="o">=</span> <span class="n">num_dim</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    taber ratio: </span><span class="si">{</span><span class="n">taper_ratio</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    taper ratio: </span><span class="si">{</span><span class="n">taper_ratio</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="c1"># extract the maximum sound speed</span>
     <span class="n">c</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
 
@@ -832,19 +764,20 @@
     <span class="k">return</span> <span class="n">kx</span></div>
 
 
-<div class="viewcode-block" id="gradient_spect"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.gradient_spect">[docs]</a><span class="k">def</span> <span class="nf">gradient_spect</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dn</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deriv_order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="gradient_spect"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.gradient_spect">[docs]</a><span class="k">def</span> <span class="nf">gradient_spect</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dn</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">deriv_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    gradient_spect calculates the gradient of an n-dimensional input</span>
-<span class="sd">    matrix using the Fourier collocation spectral method. The gradient</span>
-<span class="sd">    for singleton dimensions is returned as 0.</span>
+<span class="sd">    gradient_spect calculates the gradient of an n-dimensional input matrix using the Fourier collocation spectral method.</span>
+<span class="sd">    The gradient for singleton dimensions is returned as 0.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        f:</span>
-<span class="sd">        dn:</span>
-<span class="sd">        dim:</span>
-<span class="sd">        deriv_order:</span>
+<span class="sd">        f: A numpy ndarray representing the input matrix.</span>
+<span class="sd">        dn: A list of floats representing the grid spacings in each dimension.</span>
+<span class="sd">        dim: An optional integer or list of integers representing the dimensions along which to calculate the gradient.</span>
+<span class="sd">        deriv_order: An integer representing the order of the derivative to calculate. Default is 1.</span>
 
 <span class="sd">    Returns:</span>
+<span class="sd">        A numpy ndarray containing the calculated gradient.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -916,12 +849,12 @@
 <span class="sd">    Reorders the sensor data based on the coordinates of the sensor points.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        kgrid (object): The k-Wave grid object.</span>
-<span class="sd">        sensor (object): The k-Wave sensor object.</span>
-<span class="sd">        sensor_data (np.ndarray): The sensor data to be reordered.</span>
+<span class="sd">        kgrid: The k-Wave grid object.</span>
+<span class="sd">        sensor: The k-Wave sensor object.</span>
+<span class="sd">        sensor_data: The sensor data to be reordered.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray: The reordered sensor data.</span>
+<span class="sd">        np.ndarray of the reordered sensor data.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.</span>
@@ -953,18 +886,14 @@
     <span class="k">return</span> <span class="n">reordered_sensor_data</span></div>
 
 
-<div class="viewcode-block" id="create_cw_signals"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.create_cw_signals">[docs]</a><span class="k">def</span> <span class="nf">create_cw_signals</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">amp</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">ramp_length</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<div class="viewcode-block" id="create_cw_signals"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.create_cw_signals">[docs]</a><span class="k">def</span> <span class="nf">create_cw_signals</span><span class="p">(</span><span class="n">t_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">amp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">ramp_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">   create_cw_signals generates a series of continuous wave (CW) signals</span>
-<span class="sd">   based on the 1D or 2D input matrices amp and phase, where each signal</span>
-<span class="sd">   is given by:</span>
+<span class="sd">   create_cw_signals generates a series of continuous wave (CW) signals based on the 1D or 2D input matrices amp and phase, where each signal is given by:</span>
 
 <span class="sd">       amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));</span>
 
-<span class="sd">   To avoid startup transients, a cosine tapered up-ramp is applied to</span>
-<span class="sd">   the beginning of the signal. By default, the length of this ramp is</span>
-<span class="sd">   four periods of the wave. The up-ramp can be turned off by setting</span>
-<span class="sd">   the ramp_length to 0.</span>
+<span class="sd">   To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length of this ramp is four periods of the wave. The up-ramp can be turned off by setting the ramp_length to 0.</span>
 
 <span class="sd">    Example:</span>
 
@@ -983,16 +912,16 @@
 <span class="sd">        cw_signal = create_cw_signals(t_array, f, amp, phase)</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        t_array:</span>
-<span class="sd">        freq:</span>
-<span class="sd">        amp:</span>
-<span class="sd">        phase:</span>
-<span class="sd">        ramp_length:</span>
+<span class="sd">        t_array: A numpy ndarray representing the time values.</span>
+<span class="sd">        freq: A float representing the frequency of the signals.</span>
+<span class="sd">        amp: A numpy ndarray representing the amplitudes of the signals.</span>
+<span class="sd">        phase: A numpy ndarray representing the phases of the signals.</span>
+<span class="sd">        ramp_length: An optional integer representing the length of the cosine up-ramp in periods of the wave. Default is 4.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        cw_signals:</span>
-
+<span class="sd">        A numpy ndarray containing the generated CW signals.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 

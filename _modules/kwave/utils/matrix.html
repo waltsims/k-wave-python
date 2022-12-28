@@ -252,28 +252,28 @@
         <article role="main">
           <h1>Source code for kwave.utils.matrix</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interpn</span><span class="p">,</span> <span class="n">interp1d</span>
 
-<span class="kn">from</span> <span class="nn">.checks</span> <span class="kn">import</span> <span class="n">num_dim2</span>
-<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">scale_time</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_time</span>
 <span class="kn">from</span> <span class="nn">.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 
 
 <div class="viewcode-block" id="expand_matrix"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.expand_matrix">[docs]</a><span class="k">def</span> <span class="nf">expand_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">exp_coeff</span><span class="p">,</span> <span class="n">edge_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Enlarge a matrix by extending the edge values.</span>
+<span class="sd">    Enlarge a matrix by extending the edge values.</span>
 
-<span class="sd">        expandMatrix enlarges an input matrix by extension of the values at</span>
-<span class="sd">        the outer faces of the matrix (endpoints in 1D, outer edges in 2D,</span>
-<span class="sd">        outer surfaces in 3D). Alternatively, if an input for edge_val is</span>
-<span class="sd">        given, all expanded matrix elements will have this value. The values</span>
-<span class="sd">        for exp_coeff are forced to be real positive integers (or zero).</span>
+<span class="sd">    expandMatrix enlarges an input matrix by extension of the values at</span>
+<span class="sd">    the outer faces of the matrix (endpoints in 1D, outer edges in 2D,</span>
+<span class="sd">    outer surfaces in 3D). Alternatively, if an input for edge_val is</span>
+<span class="sd">    given, all expanded matrix elements will have this value. The values</span>
+<span class="sd">    for exp_coeff are forced to be real positive integers (or zero).</span>
 
-<span class="sd">        Note, indexing is done inline with other k-Wave functions using</span>
-<span class="sd">        mat(x) in 1D, mat(x, y) in 2D, and mat(x, y, z) in 3D.</span>
+<span class="sd">    Note, indexing is done inline with other k-Wave functions using</span>
+<span class="sd">    mat(x) in 1D, mat(x, y) in 2D, and mat(x, y, z) in 3D.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        matrix: the matrix to enlarge</span>
 <span class="sd">        exp_coeff: the number of elements to add in each dimension</span>
@@ -284,8 +284,10 @@
 <span class="sd">                           [x_start, x_end, y_start, y_end, z_start, z_end]</span>
 <span class="sd">                           (here &#39;a&#39; is applied to all dimensions)</span>
 <span class="sd">        edge_val: value to use in the matrix expansion</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        expanded matrix</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">opts</span> <span class="o">=</span> <span class="p">{}</span>
@@ -320,9 +322,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="resize"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.resize">[docs]</a><span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">new_size</span><span class="p">,</span> <span class="n">interp_mode</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="resize"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.resize">[docs]</a><span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]],</span> <span class="n">new_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+           <span class="n">interp_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    resize: resamples a &quot;matrix&quot; of spatial samples to a desired &quot;resolution&quot; or spatial sampling frequency via interpolation</span>
+<span class="sd">    resamples a &quot;matrix&quot; of spatial samples to a desired &quot;resolution&quot; or spatial sampling frequency via interpolation</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        mat:                matrix to be &quot;resized&quot; i.e. resampled</span>
@@ -330,7 +333,7 @@
 <span class="sd">        interp_mode:        interpolation method</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        res_mat:            &quot;resized&quot; matrix</span>
+<span class="sd">       &quot;resized&quot; matrix</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -374,39 +377,23 @@
     <span class="k">return</span> <span class="n">mat_rs</span></div>
 
 
-<div class="viewcode-block" id="gradient_fd"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.gradient_fd">[docs]</a><span class="k">def</span> <span class="nf">gradient_fd</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deriv_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="gradient_fd"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.gradient_fd">[docs]</a><span class="k">def</span> <span class="nf">gradient_fd</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deriv_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accuracy_order</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A wrapper of the numpy gradient method for use in the k-wave library.</span>
+<span class="sd">    Calculate the gradient of an n-dimensional input matrix using the finite-difference method.</span>
 
-<span class="sd">    gradient_fd calculates the gradient of an n-dimensional input matrix</span>
-<span class="sd">    using the finite-difference method. For one-dimensional inputs, the</span>
-<span class="sd">    gradient is always computed along the non-singleton dimension. For</span>
-<span class="sd">    higher dimensional inputs, the gradient for singleton dimensions is</span>
-<span class="sd">    returned as 0. For elements in the centre of the grid, the gradient</span>
-<span class="sd">    is computed using centered finite-differences. For elements on the</span>
-<span class="sd">    edge of the grid, the gradient is computed using forward or backward</span>
-<span class="sd">    finite-differences. The order of accuracy of the finite-difference</span>
-<span class="sd">    approximation is controlled by accuracy_order (default = 2). The</span>
-<span class="sd">    calculations are done using sparse multiplication, so the input</span>
-<span class="sd">    matrix is always cast to double precision.</span>
+<span class="sd">    This function is a wrapper of the numpy gradient method for use in the k-wave library. For one-dimensional inputs, the gradient is always computed along the non-singleton dimension. For higher dimensional inputs, the gradient for singleton dimensions is returned as 0. For elements in the center of the grid, the gradient is computed using centered finite-differences. For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences. The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2). The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        f:</span>
-<span class="sd">        dx:                 array of values for the grid point spacing in each</span>
-<span class="sd">                            dimension. If a value for dim is given, dn is the</span>
-<span class="sd">                            spacing in dimension dim.</span>
-<span class="sd">        dim:                optional input to specify a single dimension over which to compute the gradient for</span>
-<span class="sd">                            n-dimension input functions</span>
-<span class="sd">        deriv_order:        order of the derivative to compute, e.g., use 1 to</span>
-<span class="sd">                            compute df/dx, 2 to compute df^2/dx^2, etc.</span>
-<span class="sd">                            (default = 1)</span>
-<span class="sd">        accuracy_order:     order of accuracy for the finite difference</span>
-<span class="sd">                            coefficients. Because centered differences are</span>
-<span class="sd">                            used, this must be set to an integer multiple of</span>
-<span class="sd">                            2 (default = 2)</span>
+<span class="sd">        f: Input matrix.</span>
+<span class="sd">        dx: Array of values for the grid point spacing in each dimension. If a value for `dim` is given, `dn` is the spacing in dimension `dim`.</span>
+<span class="sd">        dim: Optional input to specify a single dimension over which to compute the gradient for</span>
+<span class="sd">        deriv_order: Order of the derivative to compute, e.g., use 1 to compute df/dx, 2 to compute df^2/dx^2, etc. (default = 1).</span>
+<span class="sd">        accuracy_order: Order of accuracy for the finite difference coefficients. Because centered differences are used, this must be set to an integer multiple of 2 (default = 2).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        fx, fy, ...         gradient</span>
+<span class="sd">        A list of ndarrays (or a single ndarray if there is only one dimension)</span>
+<span class="sd">        corresponding to the derivatives of f with respect to each dimension.</span>
+<span class="sd">        Each derivative has the same shape as f.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -426,6 +413,22 @@
 
 
 <div class="viewcode-block" id="min_nd"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.min_nd">[docs]</a><span class="k">def</span> <span class="nf">min_nd</span><span class="p">(</span><span class="n">matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the minimum value and its indices in a numpy array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        matrix: A numpy array of any value type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple containing the minimum value and a tuple of indices in the form (row, column, ...). Indices are 1-based, following the convention used in MATLAB.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])</span>
+<span class="sd">        &gt;&gt;&gt; min_nd(matrix)</span>
+<span class="sd">        (1, (1, 1))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">min_val</span><span class="p">,</span> <span class="n">linear_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">matrix</span><span class="p">),</span> <span class="n">matrix</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
     <span class="n">numpy_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">linear_index</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">matlab_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">numpy_index</span><span class="p">)</span>
@@ -437,13 +440,14 @@
 <span class="sd">    Returns the maximum value in a n-dimensional array and its index.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        matrix (np.ndarray): n-dimensional array of values.</span>
+<span class="sd">        matrix: n-dimensional array of values.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A tuple containing the maximum value in the array, and a tuple containing the index of the</span>
 <span class="sd">        maximum value. The index is given in the MATLAB convention, where indexing starts at 1.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Get the maximum value and its linear index</span>
     <span class="n">max_val</span><span class="p">,</span> <span class="n">linear_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">matrix</span><span class="p">),</span> <span class="n">matrix</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
 
@@ -458,51 +462,140 @@
 
 
 <div class="viewcode-block" id="broadcast_axis"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.broadcast_axis">[docs]</a><span class="k">def</span> <span class="nf">broadcast_axis</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Broadcast the given axis of the data to the specified number of dimensions.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Broadcast the given axis of the data to the specified number of dimensions.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data (np.ndarray): The data to broadcast.</span>
-<span class="sd">        ndims (int): The number of dimensions to broadcast the axis to.</span>
-<span class="sd">        axis (int): The axis to broadcast.</span>
+<span class="sd">        data: The data to broadcast.</span>
+<span class="sd">        ndims: The number of dimensions to broadcast the axis to.</span>
+<span class="sd">        axis: The axis to broadcast.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The broadcasted data.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">newshape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ndims</span>
     <span class="n">newshape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="n">newshape</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="revolve2d"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.revolve2d">[docs]</a><span class="k">def</span> <span class="nf">revolve2d</span><span class="p">(</span><span class="n">mat2D</span><span class="p">):</span>
-    <span class="c1"># start timer</span>
+<div class="viewcode-block" id="revolve2d"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.revolve2d">[docs]</a><span class="k">def</span> <span class="nf">revolve2d</span><span class="p">(</span><span class="n">mat2d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Revolve a 2D numpy array in a clockwise direction to form a 3D numpy array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mat2d: A 2D numpy array of any value type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A 3D numpy array formed by revolving the input array in a clockwise direction.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; mat2d = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])</span>
+<span class="sd">        &gt;&gt;&gt; revolve2d(mat2d)</span>
+<span class="sd">        array([[[1, 2, 3],</span>
+<span class="sd">                [4, 5, 6],</span>
+<span class="sd">                [7, 8, 9]],</span>
+<span class="sd">               [[7, 4, 1],</span>
+<span class="sd">                [8, 5, 2],</span>
+<span class="sd">                [9, 6, 3]],</span>
+<span class="sd">               [[9, 8, 7],</span>
+<span class="sd">                [6, 5, 4],</span>
+<span class="sd">                [3, 2, 1]]])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Start timer</span>
     <span class="n">TicToc</span><span class="o">.</span><span class="n">tic</span><span class="p">()</span>
 
-    <span class="c1"># update command line status</span>
+    <span class="c1"># Update command line status</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Revolving 2D matrix to form a 3D matrix...&#39;</span><span class="p">)</span>
 
-    <span class="c1"># get size of matrix</span>
-    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">mat2D</span><span class="o">.</span><span class="n">shape</span>
+    <span class="c1"># Get size of matrix</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">mat2d</span><span class="o">.</span><span class="n">shape</span>
 
-    <span class="c1"># create the reference axis for the 2D image</span>
+    <span class="c1"># Create the reference axis for the 2D image</span>
     <span class="n">r_axis_one_sided</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
     <span class="n">r_axis_two_sided</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
 
-    <span class="c1"># compute the distance from every pixel in the z-y cross-section of the 3D</span>
+    <span class="c1"># Compute the distance from every pixel in the z-y cross-section of the 3D</span>
     <span class="c1"># matrix to the rotation axis</span>
     <span class="n">z</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">r_axis_two_sided</span><span class="p">,</span> <span class="n">r_axis_two_sided</span><span class="p">)</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="c1"># create empty image matrix</span>
+    <span class="c1"># Create empty image matrix</span>
     <span class="n">mat3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="c1"># loop through each cross section and create 3D matrix</span>
+    <span class="c1"># Loop through each cross-section and create 3D matrix</span>
     <span class="k">for</span> <span class="n">x_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
-        <span class="n">interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">r_axis_one_sided</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">mat2D</span><span class="p">[</span><span class="n">x_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">r_axis_one_sided</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">mat2d</span><span class="p">[</span><span class="n">x_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">mat3D</span><span class="p">[</span><span class="n">x_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">interp</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
-    <span class="c1"># update command line status</span>
+    <span class="c1"># Update command line status</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  completed in </span><span class="si">{</span><span class="n">scale_time</span><span class="p">(</span><span class="n">TicToc</span><span class="o">.</span><span class="n">toc</span><span class="p">())</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mat3D</span></div>
+
+
+<div class="viewcode-block" id="sort_rows"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.sort_rows">[docs]</a><span class="k">def</span> <span class="nf">sort_rows</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort the rows of a 2D numpy array by the values in a specific column.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        arr: A 2D numpy array.</span>
+<span class="sd">        index: The index of the column to sort by.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A copy of the input array with the rows sorted by the values in the specified column.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: If `arr` is not a 2D numpy array.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; arr = np.array([[3, 2, 1], [1, 3, 2], [2, 1, 3]])</span>
+<span class="sd">        &gt;&gt;&gt; sort_rows(arr, 0)</span>
+<span class="sd">        array([[1, 3, 2],</span>
+<span class="sd">               [2, 1, 3],</span>
+<span class="sd">               [3, 2, 1]])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;&#39;sort_rows&#39; currently supports only 2-dimensional matrices&quot;</span>
+    <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">arr</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span></div>
+
+
+<div class="viewcode-block" id="num_dim"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.num_dim">[docs]</a><span class="k">def</span> <span class="nf">num_dim</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the number of dimensions in x, after collapsing any singleton dimensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The number of dimensions in x.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="num_dim2"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.num_dim2">[docs]</a><span class="k">def</span> <span class="nf">num_dim2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the number of dimensions of an array after collapsing singleton dimensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The number of dimensions of the array after collapsing singleton dimensions.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

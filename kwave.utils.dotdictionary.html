@@ -272,12 +272,14 @@ items using dot notation (e.g. <cite>dotdict.a.b.c</cite>) instead of square bra
 notation (e.g. <cite>dotdict[‘a’][‘b’][‘c’]</cite>). The class also provides a
 <cite>lookup</cite> method for looking up a value in a nested dictionary structure
 using a dot-separated path (e.g. “a.b.c”).</p>
-<p>Examples:
-&gt;&gt;&gt; d = dotdict({‘a’: {‘b’: {‘c’: 1}}})
-&gt;&gt;&gt; d.a.b.c
-1
-&gt;&gt;&gt; d.lookup(‘a.b.c’)
-1</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">dotdict</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">c</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;a.b.c&#39;</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.utils.dotdictionary.dotdict.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/dotdictionary.html#dotdict.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.dotdictionary.dotdict.__init__" title="Permalink to this definition">#</a></dt>

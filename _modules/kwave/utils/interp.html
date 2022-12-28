@@ -251,38 +251,36 @@
         </div>
         <article role="main">
           <h1>Source code for kwave.utils.interp</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">fft</span><span class="p">,</span> <span class="n">fftshift</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interpn</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">resample</span>
 
-<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">scale_time</span><span class="p">,</span> <span class="n">grid2cart</span>
+<span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">grid2cart</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_time</span>
+<span class="kn">from</span> <span class="nn">.matrix</span> <span class="kn">import</span> <span class="n">sort_rows</span>
 <span class="kn">from</span> <span class="nn">.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
-
-
-<div class="viewcode-block" id="sort_rows"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.sort_rows">[docs]</a><span class="k">def</span> <span class="nf">sort_rows</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;&#39;sort_rows&#39; currently supports only 2-dimensional matrices&quot;</span>
-    <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">arr</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span></div>
 
 
 <div class="viewcode-block" id="interpolate3d"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interpolate3d">[docs]</a><span class="k">def</span> <span class="nf">interpolate3d</span><span class="p">(</span><span class="n">grid_points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">grid_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interp_locs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Interpolates input grid values at the given locations</span>
-<span class="sd">        Added by Farid</span>
+<span class="sd">    Interpolates input grid values at the given locations</span>
+<span class="sd">    Added by Farid</span>
 
-<span class="sd">        Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using</span>
-<span class="sd">        SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.</span>
-<span class="sd">        We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.</span>
-<span class="sd">        While mapping we assume that only one axis per 3D grid changes throughout the grid.</span>
+<span class="sd">    Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using</span>
+<span class="sd">    SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.</span>
+<span class="sd">    We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.</span>
+<span class="sd">    While mapping we assume that only one axis per 3D grid changes throughout the grid.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        grid_points: List of 1D or 3D Numpy arrays</span>
 <span class="sd">        grid_values: A 3D Numpy array which holds values at grid_points</span>
 <span class="sd">        interp_locs: List of 1D or 3D Numpy arrays</span>
-<span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;interpolate3D supports only 3D interpolation&#39;</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">interp_locs</span><span class="p">)</span>
 
@@ -316,21 +314,22 @@
 <div class="viewcode-block" id="interpolate2d"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interpolate2d">[docs]</a><span class="k">def</span> <span class="nf">interpolate2d</span><span class="p">(</span><span class="n">grid_points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">grid_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interp_locs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
                   <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">copy_nans</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Interpolates input grid values at the given locations</span>
-<span class="sd">        Added by Farid</span>
+<span class="sd">    Interpolates input grid values at the given locations</span>
+<span class="sd">    Added by Farid</span>
 
-<span class="sd">        Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using</span>
-<span class="sd">        SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.</span>
-<span class="sd">        We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.</span>
-<span class="sd">        While mapping we assume that only one axis per 3D grid changes throughout the grid.</span>
+<span class="sd">    Matlab version of this function assumes unstructured grid. Interpolating such grid in Python using</span>
+<span class="sd">    SciPy is very expensive. Thankfully, working with structured grid is fine for our purposes.</span>
+<span class="sd">    We still support 3D arguments for backward compatibility even though they are mapped to 1D grid.</span>
+<span class="sd">    While mapping we assume that only one axis per 3D grid changes throughout the grid.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        copy_nans:</span>
 <span class="sd">        grid_points: List of 1D or 3D Numpy arrays</span>
 <span class="sd">        grid_values: A 3D Numpy array which holds values at grid_points</span>
 <span class="sd">        interp_locs: List of 1D or 3D Numpy arrays</span>
-<span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;interpolate2D supports only 2D interpolation&#39;</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">interp_locs</span><span class="p">)</span>
 
@@ -369,19 +368,19 @@
         <span class="n">copy_nans</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Interpolates input grid values at the given locations</span>
-<span class="sd">        Added by Farid</span>
+<span class="sd">    Interpolates input grid values at the given locations</span>
+<span class="sd">    Added by Farid</span>
 
-<span class="sd">        Simplified version of `interpolate2D_coords`.</span>
-<span class="sd">        Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.</span>
-<span class="sd">        Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!</span>
-<span class="sd">        WARNING: supposed to support only 2D interpolation!</span>
+<span class="sd">    Simplified version of `interpolate2D_coords`.</span>
+<span class="sd">    Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.</span>
+<span class="sd">    Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!</span>
+<span class="sd">    WARNING: supposed to support only 2D interpolation!</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        copy_nans:</span>
 <span class="sd">        grid_points: List of 1D or 3D Numpy arrays</span>
 <span class="sd">        grid_values: A 3D Numpy array which holds values at grid_points</span>
 <span class="sd">        queries: Numpy array with shape [N, 2]</span>
-<span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;interpolate2D supports only 2D interpolation&#39;</span>
@@ -401,167 +400,24 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="cart2grid"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.cart2grid">[docs]</a><span class="k">def</span> <span class="nf">cart2grid</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">cart_data</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="get_bli"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.get_bli">[docs]</a><span class="k">def</span> <span class="nf">get_bli</span><span class="p">(</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">dx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">up_sampling_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">plot</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interpolate a set of Cartesian points onto a binary grid.</span>
+<span class="sd">    Calculates the band-limited interpolant of a 1D input function.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        kgrid:</span>
-<span class="sd">        cart_data:</span>
-<span class="sd">        axisymmetric:</span>
+<span class="sd">        func: The 1D input function.</span>
+<span class="sd">        dx: Spatial sampling in meters. Defaults to 1.</span>
+<span class="sd">        up_sampling_factor: Up-sampling factor used to sample the underlying BLI. Defaults to 20.</span>
+<span class="sd">        plot: Whether to plot the BLI. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        cart2grid interpolates the set of Cartesian points defined by</span>
-<span class="sd">        cart_data onto a binary matrix defined by the kWaveGrid object</span>
-<span class="sd">        kgrid using nearest neighbour interpolation. An error is returned if</span>
-<span class="sd">        the Cartesian points are outside the computational domain defined by</span>
-<span class="sd">        kgrid.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># check for axisymmetric input</span>
-    <span class="k">if</span> <span class="n">axisymmetric</span> <span class="ow">and</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Axisymmetric flag only supported in 2D.&#39;</span><span class="p">)</span>
+<span class="sd">        A tuple containing the BLI and the x-grid for the BLI.</span>
 
-    <span class="c1"># detect whether the inputs are for one, two, or three dimensions</span>
-    <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># one-dimensional</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-
-        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
-        <span class="c1"># nearest neighbour interpolation</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># shift pixel coordinates to coincide with matrix indexing</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># check if the points all lie within the grid</span>
-        <span class="k">if</span> <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">or</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Cartesian points must lie within the grid defined by kgrid.&#39;</span><span class="p">)</span>
-
-        <span class="c1"># create empty grid</span>
-        <span class="n">grid_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
-        <span class="c1"># create index variable</span>
-        <span class="n">point_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data_x</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># map values</span>
-        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">point_index</span><span class="p">[</span><span class="n">data_index</span><span class="p">]</span>
-
-        <span class="c1"># extract reordering index</span>
-        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
-    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="c1"># two-dimensional</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">data_y</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-
-        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
-        <span class="c1"># nearest neighbour interpolation</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_y</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># shift pixel coordinates to coincide with matrix indexing (leave</span>
-        <span class="c1"># y-direction = radial-direction if axisymmetric)</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">axisymmetric</span><span class="p">:</span>
-            <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span>
-
-        <span class="c1"># check if the points all lie within the grid</span>
-        <span class="k">if</span> <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">or</span> <span class="n">data_y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="ow">or</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">data_y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Cartesian points must lie within the grid defined by kgrid.&#39;</span><span class="p">)</span>
-
-        <span class="c1"># create empty grid</span>
-        <span class="n">grid_data</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">))</span>
-
-        <span class="c1"># map values</span>
-        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_y</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_index</span><span class="p">)</span>
-
-        <span class="c1"># extract reordering index</span>
-        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span>
-            <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="p">]</span>
-        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">reorder_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># [N] =&gt; [N, 1]</span>
-
-    <span class="k">elif</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-
-        <span class="c1"># three dimensional</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">data_y</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">data_z</span> <span class="o">=</span> <span class="n">cart_data</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
-
-        <span class="c1"># scale position values to grid centered pixel coordinates using</span>
-        <span class="c1"># nearest neighbour interpolation</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_x</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_y</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">data_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_z</span> <span class="o">/</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dz</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># shift pixel coordinates to coincide with matrix indexing</span>
-        <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">data_z</span> <span class="o">=</span> <span class="n">data_z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># check if the points all lie within the grid</span>
-        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">data_z</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="ow">and</span> \
-               <span class="n">data_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span> <span class="ow">and</span> <span class="n">data_y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span> <span class="ow">and</span> <span class="n">data_z</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span><span class="p">,</span> \
-            <span class="s2">&quot;Cartesian points must lie within the grid defined by kgrid.&quot;</span>
-
-        <span class="c1"># create empty grid</span>
-        <span class="n">grid_data</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># create index variable</span>
-        <span class="n">point_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data_x</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># map values</span>
-        <span class="k">for</span> <span class="n">data_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-            <span class="n">grid_data</span><span class="p">[</span><span class="n">data_x</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_y</span><span class="p">[</span><span class="n">data_index</span><span class="p">],</span> <span class="n">data_z</span><span class="p">[</span><span class="n">data_index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">point_index</span><span class="p">[</span><span class="n">data_index</span><span class="p">]</span>
-
-        <span class="c1"># extract reordering index</span>
-        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[</span>
-            <span class="n">grid_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="p">]</span>
-        <span class="n">reorder_index</span> <span class="o">=</span> <span class="n">reorder_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># [N] =&gt; [N, 1, 1]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input cart_data must be a 1, 2, or 3 dimensional matrix.&#39;</span><span class="p">)</span>
-
-    <span class="c1"># compute the reverse ordering index (i.e., what is the index of each point</span>
-    <span class="c1"># in the reordering vector)</span>
-    <span class="n">order_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">reorder_index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reorder_index</span><span class="p">)</span>
-    <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">reorder_index</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">order_index</span> <span class="o">=</span> <span class="n">sort_rows</span><span class="p">(</span><span class="n">order_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">order_index</span> <span class="o">=</span> <span class="n">order_index</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="n">order_index</span> <span class="o">=</span> <span class="n">order_index</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># [N] =&gt; [N, 1]</span>
-
-    <span class="c1"># reset binary grid values</span>
-    <span class="k">if</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">grid_data</span><span class="p">[</span><span class="n">grid_data</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># check if any Cartesian points have been mapped to the same grid point,</span>
-    <span class="c1"># thereby reducing the total number of points</span>
-    <span class="n">num_discarded_points</span> <span class="o">=</span> <span class="n">cart_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">num_discarded_points</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  cart2grid: </span><span class="si">{</span><span class="n">num_discarded_points</span><span class="si">}</span><span class="s1"> Cartesian points mapped to overlapping grid points&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span> <span class="n">order_index</span><span class="p">,</span> <span class="n">reorder_index</span></div>
-
-
-<div class="viewcode-block" id="get_bli"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.get_bli">[docs]</a><span class="k">def</span> <span class="nf">get_bli</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">up_sampling_factor</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        func: 1d input function</span>
-<span class="sd">        dx: spatial sampling [m] (default=1)</span>
-<span class="sd">        up_sampling_factor: up-sampling factor used to sample the underlying BLI (default=20)</span>
-<span class="sd">        plot:</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        bli:    band-limited interpolant</span>
-<span class="sd">        x_fine: x-grid for BLI</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -591,12 +447,12 @@
 
 <div class="viewcode-block" id="interp_cart_data"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interp_cart_data">[docs]</a><span class="k">def</span> <span class="nf">interp_cart_data</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">cart_sensor_data</span><span class="p">,</span> <span class="n">cart_sensor_mask</span><span class="p">,</span> <span class="n">binary_sensor_mask</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">     interp_cart_data takes a matrix of time-series data recorded over a set</span>
+<span class="sd">     Takes a matrix of time-series data recorded over a set</span>
 <span class="sd">     of Cartesian sensor points given by cart_sensor_mask and computes the</span>
 <span class="sd">     equivalent time-series at each sensor position on the binary sensor</span>
 <span class="sd">     mask binary_sensor_mask using interpolation. The properties of</span>
 <span class="sd">     binary_sensor_mask are defined by the k-Wave grid object kgrid.</span>
-<span class="sd">     Two and three dimensional data are supported.</span>
+<span class="sd">     Two and three-dimensional data are supported.</span>
 
 <span class="sd">     Usage:</span>
 <span class="sd">         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)</span>
@@ -617,9 +473,9 @@
 <span class="sd">                              (two-point) modes are supported</span>
 <span class="sd">                              (default = &#39;nearest&#39;)</span>
 
-<span class="sd">     returns:</span>
-<span class="sd">         binary_sensor_data:   array of time-series corresponding to the</span>
-<span class="sd">                               sensor positions given by binary_sensor_mask</span>
+<span class="sd">     Returns:</span>
+<span class="sd">         array of time-series corresponding to the sensor positions given by binary_sensor_mask</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># make timer</span>
@@ -704,9 +560,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     Resamples an N-D matrix to the size given in sz using Fourier interpolation.</span>
 
-<span class="sd">     USAGE:</span>
-<span class="sd">         y = interpftn(x, sz)</span>
-<span class="sd">         y = interpftn(x, sz, win)</span>
 
 <span class="sd">     Args:</span>
 <span class="sd">         x:           matrix to interpolate</span>
@@ -714,7 +567,12 @@
 <span class="sd">         win:         (optional) name of windowing function to use</span>
 
 <span class="sd">     Returns:</span>
-<span class="sd">         y:           resampled matrix</span>
+<span class="sd">         Resampled matrix</span>
+
+<span class="sd">     Examples:</span>
+<span class="sd">         &gt;&gt;&gt; y = interpftn(x, sz)</span>
+<span class="sd">         &gt;&gt;&gt; y = interpftn(x, sz, win)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># extract the size of the input matrix</span>

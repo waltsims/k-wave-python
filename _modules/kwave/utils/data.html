@@ -251,10 +251,26 @@
         </div>
         <article role="main">
           <h1>Source code for kwave.utils.data</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="get_smallest_possible_type"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.get_smallest_possible_type">[docs]</a><span class="k">def</span> <span class="nf">get_smallest_possible_type</span><span class="p">(</span><span class="n">max_array_val</span><span class="p">,</span> <span class="n">target_type_group</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_smallest_possible_type"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.get_smallest_possible_type">[docs]</a><span class="k">def</span> <span class="nf">get_smallest_possible_type</span><span class="p">(</span><span class="n">max_array_val</span><span class="p">,</span> <span class="n">target_type_group</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the smallest possible type for the given array.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        max_array_val: The maximum value in the array.</span>
+<span class="sd">        target_type_group: The type group to search for the smallest possible type.</span>
+<span class="sd">        default: The default type to return if no type is found.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The smallest possible type for the given array.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;uint&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="n">target_type_group</span> <span class="ow">in</span> <span class="n">types</span>
 
@@ -263,19 +279,179 @@
         <span class="k">if</span> <span class="n">max_array_val</span> <span class="o">&lt;</span> <span class="n">intmax</span><span class="p">(</span><span class="n">type_</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">type_</span>
 
-    <span class="k">return</span> <span class="n">default</span></div>
+    <span class="n">type_</span> <span class="o">=</span> <span class="n">default</span>
+    <span class="k">return</span> <span class="n">type_</span></div>
 
 
-<div class="viewcode-block" id="intmax"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.intmax">[docs]</a><span class="k">def</span> <span class="nf">intmax</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="intmax"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.intmax">[docs]</a><span class="k">def</span> <span class="nf">intmax</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the maximum value for the given integer type.</span>
 
-<span class="sd">    :param dtype: The integer type.</span>
-<span class="sd">    :type dtype: str</span>
-<span class="sd">    :return: The maximum value for the given integer type.</span>
-<span class="sd">    :rtype: int</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dtype: The integer type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">        The maximum value for the given integer type.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="n">dtype</span><span class="p">))</span><span class="o">.</span><span class="n">max</span></div>
+
+
+<div class="viewcode-block" id="scale_time"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.scale_time">[docs]</a><span class="k">def</span> <span class="nf">scale_time</span><span class="p">(</span><span class="n">seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an integer number of seconds into hours, minutes,</span>
+<span class="sd">    and seconds, and returns a string with this information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        seconds: number of seconds</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        String of scaled time.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># switch to calculating years, weeks, and days if larger than 100 hours</span>
+    <span class="k">if</span> <span class="n">seconds</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="n">years</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="p">))</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">years</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span>
+        <span class="n">weeks</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span><span class="p">))</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">weeks</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span><span class="p">))</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">days</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">years</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">weeks</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># calculate hours, minutes, and seconds</span>
+    <span class="n">hours</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span>
+    <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">hours</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
+    <span class="n">minutes</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">seconds</span> <span class="o">=</span> <span class="n">seconds</span> <span class="o">-</span> <span class="n">minutes</span> <span class="o">*</span> <span class="mi">60</span>
+
+    <span class="c1"># write out as a string, to keep the output manageable, only the largest</span>
+    <span class="c1"># three units are written</span>
+    <span class="k">if</span> <span class="n">years</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">years</span><span class="si">}</span><span class="s1"> years, </span><span class="si">{</span><span class="n">weeks</span><span class="si">}</span><span class="s1"> weeks, and </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days&#39;</span>
+    <span class="k">elif</span> <span class="n">weeks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">weeks</span><span class="si">}</span><span class="s1"> weeks, </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days, and </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1"> hours&#39;</span>
+    <span class="k">elif</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s1"> days, </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1"> hours, and </span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1"> min&#39;</span>
+    <span class="k">elif</span> <span class="n">hours</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">seconds</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1">hours </span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1">min </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
+    <span class="k">elif</span> <span class="n">minutes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">seconds</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1">min </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># manually tuned number</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span>
+    <span class="k">return</span> <span class="n">time</span></div>
+
+
+<div class="viewcode-block" id="scale_SI"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.scale_SI">[docs]</a><span class="k">def</span> <span class="nf">scale_SI</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scale a number to the nearest SI unit prefix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The number to scale.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple containing a sting of the scaled number, a numeric scaling factor, the prefix, and the unit.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># force the input to be a scalar</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># check for a negative input</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
+        <span class="n">negative</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">negative</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="c1"># if x is zero, don&#39;t scale</span>
+        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">prefix_fullname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="c1"># update index and input</span>
+        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1e3</span>
+        <span class="n">sym_index</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># find scaling parameter</span>
+        <span class="k">while</span> <span class="n">x_sc</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sym_index</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span> <span class="o">*</span> <span class="mf">1e3</span>
+            <span class="n">sym_index</span> <span class="o">=</span> <span class="n">sym_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># define SI unit scalings</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;milli&#39;</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">),</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;micro&#39;</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">),</span>
+            <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;nano&#39;</span><span class="p">,</span> <span class="mf">1e9</span><span class="p">),</span>
+            <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;pico&#39;</span><span class="p">,</span> <span class="mf">1e12</span><span class="p">),</span>
+            <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;femto&#39;</span><span class="p">,</span> <span class="mf">1e15</span><span class="p">),</span>
+            <span class="mi">6</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;atto&#39;</span><span class="p">,</span> <span class="mf">1e18</span><span class="p">),</span>
+            <span class="mi">7</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;zepto&#39;</span><span class="p">,</span> <span class="mf">1e21</span><span class="p">),</span>
+            <span class="mi">8</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yocto&#39;</span><span class="p">,</span> <span class="mf">1e24</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">sym_index</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+
+        <span class="c1"># update index and input</span>
+        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1e-3</span>
+        <span class="n">sym_index</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># find scaling parameter</span>
+        <span class="k">while</span> <span class="n">x_sc</span> <span class="o">&gt;=</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">sym_index</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span> <span class="o">*</span> <span class="mf">1e-3</span>
+            <span class="n">sym_index</span> <span class="o">=</span> <span class="n">sym_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># define SI unit scalings</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;kilo&#39;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;mega&#39;</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">),</span>
+            <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;giga&#39;</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">),</span>
+            <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;tera&#39;</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">),</span>
+            <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;peta&#39;</span><span class="p">,</span> <span class="mf">1e-15</span><span class="p">),</span>
+            <span class="mi">6</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;exa&#39;</span><span class="p">,</span> <span class="mf">1e-18</span><span class="p">),</span>
+            <span class="mi">7</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;zetta&#39;</span><span class="p">,</span> <span class="mf">1e-21</span><span class="p">),</span>
+            <span class="mi">8</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;yotta&#39;</span><span class="p">,</span> <span class="mf">1e-24</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">sym_index</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># if x is between 1 and 1000, don&#39;t scale</span>
+        <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">prefix_fullname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># form scaling into a string</span>
+    <span class="n">round_decimals</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># TODO this needs to be tuned</span>
+    <span class="n">x_sc</span> <span class="o">=</span> <span class="n">x_sc</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">round_decimals</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x_sc</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_sc</span><span class="p">))</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mf">0.1</span> <span class="o">**</span> <span class="n">round_decimals</span><span class="p">):</span>
+        <span class="c1"># avoid values like X.0, instead have only X</span>
+        <span class="n">x_sc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_sc</span><span class="p">)</span>
+    <span class="n">x_sc</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;-</span><span class="si">{</span><span class="n">x_sc</span><span class="si">}{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">negative</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x_sc</span><span class="si">}{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">x_sc</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">prefix_fullname</span></div>
+
+
+<div class="viewcode-block" id="get_date_string"><a class="viewcode-back" href="../../../kwave.utils.data.html#kwave.utils.data.get_date_string">[docs]</a><span class="k">def</span> <span class="nf">get_date_string</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y-%H-%M-%S&quot;</span><span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

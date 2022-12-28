@@ -253,9 +253,14 @@
           <h1>Source code for kwave.utils.checks</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/</span>
+    <span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+    <span class="kn">from</span> <span class="nn">kwave.kmedium</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
 
 <span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">db2neper</span>
 <span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="n">sinc</span><span class="p">,</span> <span class="n">primefactors</span>
@@ -271,7 +276,9 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        AssertionError: If any of the specified fields are not in the dictionary.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be defined in the given dictionary&#39;</span><span class="p">]</span></div>
 
@@ -281,12 +288,14 @@
 <span class="sd">    Enforces that certain fields are not None in the given object.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    obj: Object to check the fields of.</span>
-<span class="sd">    *fields: List of field names to check.</span>
+<span class="sd">        obj: Object to check the fields of.</span>
+<span class="sd">        *fields: List of field names to check.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">    AssertionError: If any of the given fields are None in the given object.</span>
+<span class="sd">        AssertionError: If any of the given fields are None in the given object.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be not None in the given object&#39;</span></div>
 
@@ -296,51 +305,19 @@
 <span class="sd">    This method checks if the keys of the given dictionary are valid fields.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    dictionary: A dictionary where the keys will be checked for validity.</span>
-<span class="sd">    *fields: A list of valid field names.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">    None</span>
+<span class="sd">        dictionary: A dictionary where the keys will be checked for validity.</span>
+<span class="sd">        *fields: A list of valid field names.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">    AssertionError: If any of the keys in the dictionary are not in the list of valid fields.</span>
+<span class="sd">        AssertionError: If any of the keys in the dictionary are not in the list of valid fields.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> is not a valid field for the given dictionary&#39;</span></div>
 
 
-<div class="viewcode-block" id="num_dim"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.num_dim">[docs]</a><span class="k">def</span> <span class="nf">num_dim</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the number of dimensions in x, after collapsing any singleton dimensions.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">    x (np.ndarray): The input array.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">    int: The number of dimensions in x.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="num_dim2"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.num_dim2">[docs]</a><span class="k">def</span> <span class="nf">num_dim2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the number of dimensions of an array after collapsing singleton dimensions.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        x (np.ndarray): The input array.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        int: The number of dimensions of the array after collapsing singleton dimensions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="check_str_eq"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_eq">[docs]</a><span class="k">def</span> <span class="nf">check_str_eq</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="check_str_eq"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_eq">[docs]</a><span class="k">def</span> <span class="nf">check_str_eq</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.</span>
 
@@ -349,8 +326,10 @@
 <span class="sd">        target: The target string to compare with.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool: True if the value is a string and is equal to the target, False otherwise.</span>
+<span class="sd">        True if the value is a string and is equal to the target, False otherwise.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">==</span> <span class="n">target</span></div>
 
 
@@ -366,11 +345,13 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        True if `value` is a string and is present in `target`, otherwise False</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">target</span></div>
 
 
-<div class="viewcode-block" id="is_number"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_number">[docs]</a><span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="is_number"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_number">[docs]</a><span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the given value is a numeric type.</span>
 
@@ -378,8 +359,10 @@
 <span class="sd">        value: The value to check.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool: True if the value is numeric, False otherwise.</span>
+<span class="sd">        True if the value is numeric, False otherwise.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
@@ -391,42 +374,43 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="is_unix"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_unix">[docs]</a><span class="k">def</span> <span class="nf">is_unix</span><span class="p">():</span>
+<div class="viewcode-block" id="is_unix"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_unix">[docs]</a><span class="k">def</span> <span class="nf">is_unix</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether the current platform is a Unix-like system.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        None</span>
-
 <span class="sd">    Returns:</span>
-<span class="sd">        bool: True if the current platform is a Unix-like system, False otherwise.</span>
+<span class="sd">        True if the current platform is a Unix-like system, False otherwise.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Linux&#39;</span><span class="p">,</span> <span class="s1">&#39;Darwin&#39;</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="check_stability"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_stability">[docs]</a><span class="k">def</span> <span class="nf">check_stability</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">):</span>
+<div class="viewcode-block" id="check_stability"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_stability">[docs]</a><span class="k">def</span> <span class="nf">check_stability</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="s2">&quot;kWaveGrid&quot;</span><span class="p">,</span> <span class="n">medium</span><span class="p">:</span> <span class="s2">&quot;kWaveMedium&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">          checkStability calculates the maximum time step for which the k-space</span>
-<span class="sd">          propagation models kspaceFirstOrder1D, kspaceFirstOrder2D and</span>
-<span class="sd">          kspaceFirstOrder3D are stable. These models are unconditionally</span>
-<span class="sd">          stable when the reference sound speed is equal to or greater than the</span>
-<span class="sd">          maximum sound speed in the medium and there is no absorption.</span>
-<span class="sd">          However, when the reference sound speed is less than the maximum</span>
-<span class="sd">          sound speed the model is only stable for sufficiently small time</span>
-<span class="sd">          steps. The criterion is more stringent (the time step is smaller) in</span>
-<span class="sd">          the absorbing case.</span>
+<span class="sd">    Calculates the maximum time step for which the k-space</span>
+<span class="sd">    propagation models are stable.</span>
 
-<span class="sd">          The time steps given are accurate when the medium properties are</span>
-<span class="sd">          homogeneous. For a heterogeneous media they give a useful, but not</span>
-<span class="sd">          exact, estimate.</span>
+<span class="sd">    These models are unconditionally</span>
+<span class="sd">    stable when the reference sound speed is equal to or greater than the</span>
+<span class="sd">    maximum sound speed in the medium and there is no absorption.</span>
+<span class="sd">    However, when the reference sound speed is less than the maximum</span>
+<span class="sd">    sound speed the model is only stable for sufficiently small time</span>
+<span class="sd">    steps. The criterion is more stringent (the time step is smaller) in</span>
+<span class="sd">    the absorbing case.</span>
+
+<span class="sd">    The time steps given are accurate when the medium properties are</span>
+<span class="sd">    homogeneous. For a heterogeneous media they give a useful, but not</span>
+<span class="sd">    exact, estimate.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        kgrid: k-Wave grid object return by kWaveGrid</span>
-<span class="sd">        medium: structure containing the medium properties</span>
+<span class="sd">        kgrid: simulation grid</span>
+<span class="sd">        medium: medium properties</span>
 
-<span class="sd">    Returns: the maximum time step for which the models are stable.</span>
-<span class="sd">            This is set to Inf when the model is unconditionally stable.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         The maximum time step for which the models are stable. This is set to Inf when the model is unconditionally stable.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># why? : this function was migrated from Matlab.</span>
     <span class="c1"># Matlab would treat the &#39;medium&#39; as a &quot;pass by value&quot; argument.</span>
     <span class="c1"># In python argument is passed by reference and changes in this function will cause original data to be changed.</span>
@@ -545,8 +529,6 @@
 <span class="sd">        min_number: integer specifying the lower bound of values to test</span>
 <span class="sd">        max_number: integer specifying the upper bound of values to test</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># compute the factors and maximum prime factors for each number in the range</span>
@@ -567,20 +549,22 @@
 
 <div class="viewcode-block" id="check_divisible"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_divisible">[docs]</a><span class="k">def</span> <span class="nf">check_divisible</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">divider</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks whether number is divisible by divider without any remainder</span>
-<span class="sd">        Why do we need such a function? -&gt; Because due to floating point precision we</span>
-<span class="sd">        experience rounding errors while using standard modulo operator with floating point numbers</span>
+<span class="sd">    Checks whether number is divisible by divider without any remainder</span>
+<span class="sd">    Why do we need such a function? -&gt; Because due to floating point precision we</span>
+<span class="sd">    experience rounding errors while using standard modulo operator with floating point numbers</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        number: Number that&#39;s supposed to be divided</span>
 <span class="sd">        divider: Divider that should devide the number</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool: True if number is divisible by divider, False otherwise</span>
+<span class="sd">        True if number is divisible by divider, False otherwise</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">result</span> <span class="o">=</span> <span class="n">number</span> <span class="o">/</span> <span class="n">divider</span>
     <span class="n">after_decimal</span> <span class="o">=</span> <span class="n">result</span> <span class="o">%</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">after_decimal</span> <span class="o">==</span> <span class="mi">0</span></div>
-
 </pre></div>
         </article>
       </div>

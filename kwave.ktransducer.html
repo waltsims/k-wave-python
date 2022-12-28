@@ -269,10 +269,8 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transducer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_focus_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receive_apodization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Rectangular'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmit_apodization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Rectangular'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1540</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_signal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steering_angle_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steering_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/ktransducer.html#NotATransducer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.ktransducer.NotATransducer.__init__" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>‘time_reversal_boundary_data’ and ‘record’ fields should not be defined
+<dd><p>‘time_reversal_boundary_data’ and ‘record’ fields should not be defined
 for the objects of this class</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -295,39 +293,39 @@ for the objects of this class</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.active_elements_mask">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active_elements_mask</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.active_elements_mask" title="Permalink to this definition">#</a></dt>
-<dd><p>return a binary mask showing the locations of the active elements
-Returns:</p>
+<dd><p>Returns:
+A binary mask showing the locations of the active elements</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.all_elements_mask">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_elements_mask</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.all_elements_mask" title="Permalink to this definition">#</a></dt>
-<dd><p>binary mask of all the transducer elements (both active and inactive)
-:returns: a binary mask showing the locations of all the elements (both active and inactive)</p>
+<dd><p>Returns:
+A binary mask showing the locations of all the elements (both active and inactive)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.appended_zeros">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">appended_zeros</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.appended_zeros" title="Permalink to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>number of zeros appended to input signal to allow a single time series to be used</dt><dd><p>within kspaceFirstOrder3D (either set to ‘auto’ or based on the setting for steering_angle_max)</p>
-</dd>
-</dl>
-<p>Returns:</p>
+<dd><p>Number of zeros appended to input signal to allow a single time series to be used
+within kspaceFirstOrder3D (either set to ‘auto’ or based on the setting for steering_angle_max)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.beamforming_delays">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beamforming_delays</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.beamforming_delays" title="Permalink to this definition">#</a></dt>
-<dd><p>calculate the beamforming delays based on the focus and steering settings
-Returns:</p>
+<dd><p>calculate the beamforming delays based on the focus and steering settings</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.beamforming_delays_offset">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beamforming_delays_offset</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.beamforming_delays_offset" title="Permalink to this definition">#</a></dt>
-<dd><p>offset used to make all the delays in the delay_mask positive (either set to ‘auto’ or based on the setting for steering_angle_max)
-:returns: the stored value of the offset used to force the values in delay_mask to be &gt;= 0</p>
+<dd><p>Offset used to make all the delays in the delay_mask positive (either set to ‘auto’ or based on the setting for steering_angle_max)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the stored value of the offset used to force the values in delay_mask to be &gt;= 0</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -338,19 +336,15 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.delay_mask">
 <span class="sig-name descname"><span class="pre">delay_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/ktransducer.html#NotATransducer.delay_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.ktransducer.NotATransducer.delay_mask" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>% mode == 1: both delays
-% mode == 2: elevation only
-% mode == 3: azimuth only</p>
-</div></blockquote>
-<p>Returns:</p>
+<dd><p>mode == 1: both delays
+mode == 2: elevation only
+mode == 3: azimuth only</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.elevation_beamforming_delays">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elevation_beamforming_delays</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.elevation_beamforming_delays" title="Permalink to this definition">#</a></dt>
-<dd><p>calculate the elevation beamforming delays based on the focus setting
-Returns:</p>
+<dd><p>Calculate the elevation beamforming delays based on the focus setting</p>
 </dd></dl>
 
 <dl class="py property">
@@ -378,18 +372,19 @@ this has already been converted to a binary mask for display in inputChecking)</
 <dl class="py method">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.get_transmit_apodization">
 <span class="sig-name descname"><span class="pre">get_transmit_apodization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/ktransducer.html#NotATransducer.get_transmit_apodization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.ktransducer.NotATransducer.get_transmit_apodization" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>return the transmit apodization, converting strings of window
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>return the transmit apodization, converting strings of window
 type to actual numbers using getWin</p>
-</div></blockquote>
-<p>Returns:</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.grid_size">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grid_size</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.grid_size" title="Permalink to this definition">#</a></dt>
-<dd><p>return the size of the grid
-Returns: grid size</p>
+<dd><p>Returns:
+grid size</p>
 </dd></dl>
 
 <dl class="py property">
@@ -415,8 +410,7 @@ Returns: grid size</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.mask">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mask</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.mask" title="Permalink to this definition">#</a></dt>
-<dd><p>allow mask query to allow compatability with regular sensor structure - return the active sensor mask
-Returns:</p>
+<dd><p>Allow mask query to allow compatability with regular sensor structure - return the active sensor mask</p>
 </dd></dl>
 
 <dl class="py property">
@@ -442,15 +436,12 @@ Returns:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.NotATransducer.transmit_apodization_mask">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmit_apodization_mask</span></span><a class="headerlink" href="#kwave.ktransducer.NotATransducer.transmit_apodization_mask" title="Permalink to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>% convert the transmit wave apodization into the form of a element mask,</dt><dd><p>% where the apodization values are placed at the grid points
-% belonging to the active transducer elements. These values are
-% then extracted in the correct order within
-% kspaceFirstOrder_inputChecking using apodization =
-% transmit_apodization_mask(active_elements_mask ~= 0)</p>
-</dd>
-</dl>
-<p>Returns:</p>
+<dd><p>convert the transmit wave apodization into the form of a element mask,
+where the apodization values are placed at the grid points
+belonging to the active transducer elements. These values are
+then extracted in the correct order within
+kspaceFirstOrder_inputChecking using apodization =
+transmit_apodization_mask(active_elements_mask ~= 0)</p>
 </dd></dl>
 
 </dd></dl>
@@ -485,8 +476,12 @@ Returns:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="kwave.ktransducer.kWaveTransducerSimple.transducer_width">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transducer_width</span></span><a class="headerlink" href="#kwave.ktransducer.kWaveTransducerSimple.transducer_width" title="Permalink to this definition">#</a></dt>
-<dd><p>total width of the transducer in grid points
-:returns: the overall length of the transducer</p>
+<dd><p>Total width of the transducer in grid points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the overall length of the transducer</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

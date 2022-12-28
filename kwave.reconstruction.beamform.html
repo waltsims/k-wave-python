@@ -269,6 +269,9 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>channel_data</strong> (<em>ChannelData</em>) – shape =&gt; (1, 96, 32, 1585)</p>
 </dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
 </dl>
 <p>Returns:</p>
 </dd></dl>
@@ -292,14 +295,12 @@ the last axis.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.reconstruction.beamform.focus">
 <span class="sig-prename descclassname"><span class="pre">kwave.reconstruction.beamform.</span></span><span class="sig-name descname"><span class="pre">focus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focus_position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/reconstruction/beamform.html#focus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.reconstruction.beamform.focus" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>focus Create input signal based on source mask and focus position.
+<dd><p>focus Create input signal based on source mask and focus position.
 focus takes a single input signal and a source mask and creates an
 input signal matrix (with one input signal for each source point).
 The appropriate time delays required to focus the signals at a given
 position in Cartesian space are automatically added based on the user
 inputs for focus_position and sound_speed.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

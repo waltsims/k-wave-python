@@ -253,13 +253,24 @@
           <h1>Source code for kwave.utils.math</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span>
 
 
-<div class="viewcode-block" id="largest_prime_factor"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.largest_prime_factor">[docs]</a><span class="k">def</span> <span class="nf">largest_prime_factor</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="largest_prime_factor"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.largest_prime_factor">[docs]</a><span class="k">def</span> <span class="nf">largest_prime_factor</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the largest prime factor of a positive integer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n: The positive integer to be factored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The largest prime factor of n.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="k">while</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="n">i</span><span class="p">:</span>
@@ -269,9 +280,18 @@
     <span class="k">return</span> <span class="n">n</span></div>
 
 
-<div class="viewcode-block" id="rwh_primes"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.rwh_primes">[docs]</a><span class="k">def</span> <span class="nf">rwh_primes</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="c1"># https://stackoverflow.com/questions/2068372/fastest-way-to-list-all-primes-below-n-in-python/3035188#3035188</span>
-    <span class="sd">&quot;&quot;&quot; Returns a list of primes &lt; n for n &gt; 2 &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="rwh_primes"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.rwh_primes">[docs]</a><span class="k">def</span> <span class="nf">rwh_primes</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a list of prime numbers less than a given integer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n: The upper bound for the list of primes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of prime numbers less than n.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">sieve</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="kc">True</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">sieve</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
@@ -284,6 +304,19 @@
         <span class="n">shift</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">shift_dim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shifts an array along one of its dimensions using Fourier interpolation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: The input array.</span>
+<span class="sd">        shift: The amount of shift to apply.</span>
+<span class="sd">        shift_dim: The dimension along which to shift the array. Default is the last dimension.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The shifted array.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="n">shift_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">shift_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">shift_dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
@@ -327,11 +360,13 @@
 <span class="sd">    Rounds to the nearest even integer.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (float): inpput value</span>
+<span class="sd">        x: Input value</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (int): nearest odd integer.</span>
+<span class="sd">        Nearest even integer.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
@@ -340,12 +375,13 @@
 <span class="sd">    Rounds to the nearest odd integer.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (float): input value</span>
+<span class="sd">        x: Input value</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (int): nearest odd integer.</span>
+<span class="sd">        Nearest odd integer.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span></div>
 
 
@@ -360,11 +396,12 @@
 <span class="sd">    than one element with the closest value, the index of the first one is returned.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        A (np.ndarray): The array to search.</span>
-<span class="sd">        a (Union[float, int]): The value to find.</span>
+<span class="sd">        A: The array to search.</span>
+<span class="sd">        a: The value to find.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[Union[float, int], Tuple[int, ...]]: A tuple containing the closest value and its index in the input array.</span>
+<span class="sd">        A tuple containing the value and index of the closest element in A to a.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="s2">&quot;A must be an np.array&quot;</span>
@@ -373,12 +410,33 @@
     <span class="k">return</span> <span class="n">A</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">idx</span></div>
 
 
-<div class="viewcode-block" id="sinc"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.sinc">[docs]</a><span class="k">def</span> <span class="nf">sinc</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="sinc"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.sinc">[docs]</a><span class="k">def</span> <span class="nf">sinc</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the sinc function of a given value or array of values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The value or array of values for which to calculate the sinc function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The sinc function of x.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="primefactors"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.primefactors">[docs]</a><span class="k">def</span> <span class="nf">primefactors</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="c1"># even number divisible</span>
+<div class="viewcode-block" id="primefactors"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.primefactors">[docs]</a><span class="k">def</span> <span class="nf">primefactors</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the prime factors of a given integer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n: The integer to factor.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of prime factors of n.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">factors</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">factors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
@@ -395,6 +453,95 @@
         <span class="n">factors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">factors</span></div>
+
+
+<div class="viewcode-block" id="next_pow2"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.next_pow2">[docs]</a><span class="k">def</span> <span class="nf">next_pow2</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the next power of 2 that is greater than or equal to `n`.</span>
+
+<span class="sd">    This function takes a positive integer `n` and returns the smallest power of 2 that is greater</span>
+<span class="sd">    than or equal to `n`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n: The number to find the next power of 2 for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The smallest power of 2 that is greater than or equal to `n`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># decrement `n` (to handle cases when `n` itself is a power of 2)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># set all bits after the last set bit</span>
+    <span class="n">n</span> <span class="o">|=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+    <span class="n">n</span> <span class="o">|=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span>
+    <span class="n">n</span> <span class="o">|=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+    <span class="n">n</span> <span class="o">|=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span>
+    <span class="n">n</span> <span class="o">|=</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span>
+
+    <span class="c1"># increment `n` and return</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="norm_var"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.norm_var">[docs]</a><span class="k">def</span> <span class="nf">norm_var</span><span class="p">(</span><span class="n">im</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the normalized variance of an array of values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        im: The input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The normalized variance of im.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">im</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mu</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">magnitude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">variance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a Gaussian distribution f(x) with the specified magnitude, mean, and variance. If these values are not specified,</span>
+<span class="sd">    the magnitude is normalised and values of variance = 1 and mean = 0 are used. For example running:</span>
+
+<span class="sd">        import matplotlib.pyplot as plt</span>
+<span class="sd">        x = np.arange(-3, 0.05, 3)</span>
+<span class="sd">        plt.plot(x, gaussian(x))</span>
+
+<span class="sd">    will plot a normalised Gaussian distribution.</span>
+
+<span class="sd">    Note, the full width at half maximum of the resulting distribution can be calculated by FWHM = 2 * sqrt(2 * log(2) * variance).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The input values.</span>
+<span class="sd">        magnitude: Bell height. Defaults to normalised.</span>
+<span class="sd">        mean: Mean or expected value. Defaults to 0.</span>
+<span class="sd">        variance: Variance, or bell width. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A Gaussian distribution.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">magnitude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">magnitude</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">variance</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+
+    <span class="n">gauss_distr</span> <span class="o">=</span> <span class="n">magnitude</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">variance</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">gauss_distr</span>
+    <span class="c1"># return magnitude * norm.pdf(x, loc=mean, scale=variance)</span>
+    <span class="sd">&quot;&quot;&quot; # Former impl. form Farid</span>
+<span class="sd">        if magnitude is None:</span>
+<span class="sd">        magnitude = np.sqrt(2 * np.pi * variance)</span>
+<span class="sd">    return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 </pre></div>
         </article>
       </div>

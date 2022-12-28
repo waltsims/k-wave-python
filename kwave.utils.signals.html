@@ -269,16 +269,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>signal</strong> (<em>np.array</em>) – input signal</p></li>
+<li><p><strong>signal</strong> (<em>ndarray</em>) – input signal</p></li>
 <li><p><strong>snr</strong> (<em>float</em>) – desired signal snr (signal-to-noise ratio) in decibels after adding noise</p></li>
-<li><p><strong>mode</strong> (<em>str</em>) – ‘rms’ (default) or ‘peak’</p></li>
+<li><p><strong>mode</strong> – ‘rms’ (default) or ‘peak’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>signal (np.array)</p>
+<dd class="field-even"><p>Signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -291,16 +288,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.signals.create_cw_signals">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">create_cw_signals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#create_cw_signals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.create_cw_signals" title="Permalink to this definition">#</a></dt>
-<dd><p>create_cw_signals generates a series of continuous wave (CW) signals
-based on the 1D or 2D input matrices amp and phase, where each signal
-is given by:</p>
+<dd><p>create_cw_signals generates a series of continuous wave (CW) signals based on the 1D or 2D input matrices amp and phase, where each signal is given by:</p>
 <blockquote>
 <div><p>amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));</p>
 </div></blockquote>
-<p>To avoid startup transients, a cosine tapered up-ramp is applied to
-the beginning of the signal. By default, the length of this ramp is
-four periods of the wave. The up-ramp can be turned off by setting
-the ramp_length to 0.</p>
+<p>To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length of this ramp is four periods of the wave. The up-ramp can be turned off by setting the ramp_length to 0.</p>
 <blockquote>
 <div><p>Example:</p>
 <blockquote>
@@ -317,16 +309,30 @@ phase = np.arange(0, 2*pi, 9).T</p>
 cw_signal = create_cw_signals(t_array, f, amp, phase)</p>
 </div></blockquote>
 <dl class="simple">
-<dt>Args:</dt><dd><p>t_array:
-freq:
-amp:
-phase:
-ramp_length:</p>
+<dt>Args:</dt><dd><p>t_array: A numpy ndarray representing the time values.
+freq: A float representing the frequency of the signals.
+amp: A numpy ndarray representing the amplitudes of the signals.
+phase: A numpy ndarray representing the phases of the signals.
+ramp_length: An optional integer representing the length of the cosine up-ramp in periods of the wave. Default is 4.</p>
 </dd>
-<dt>Returns:</dt><dd><p>cw_signals:</p>
+<dt>Returns:</dt><dd><p>A numpy ndarray containing the generated CW signals.</p>
 </dd>
 </dl>
 </div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_array</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>freq</strong> (<em>float</em>) – </p></li>
+<li><p><strong>amp</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>phase</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>ramp_length</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -334,22 +340,19 @@ ramp_length:</p>
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">get_alpha_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#get_alpha_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.get_alpha_filter" title="Permalink to this definition">#</a></dt>
 <dd><blockquote>
 <div><p>get_alpha_filter uses get_win to create a Tukey window via rotation to
-pass to the medium.alpha_filter input field of the first order
-simulation functions (kspaceFirstOrder1D, kspaceFirstOrder2D, and
-kspaceFirstOrder3D). This parameter is used to regularise time
-reversal image reconstruction when absorption compensation is
-included.</p>
+pass to the medium.alpha_filter. This parameter is used to regularise time
+reversal image reconstruction when absorption compensation is included.</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – </p></li>
-<li><p><strong>medium</strong> (<em>Medium</em>) – </p></li>
-<li><p><strong>filter_cutoff</strong> (<em>list</em>) – Any of the filter_cutoff inputs may be set to ‘max’ to set the cutoff frequency to the maximum frequency supported by the grid</p></li>
-<li><p><strong>taper_ratio</strong> – </p></li>
+<li><p><strong>kgrid</strong> – simulation grid</p></li>
+<li><p><strong>medium</strong> – simulation medium</p></li>
+<li><p><strong>filter_cutoff</strong> – Any of the filter_cutoff inputs may be set to ‘max’ to set the cutoff frequency to the maximum frequency supported by the grid</p></li>
+<li><p><strong>taper_ratio</strong> – The taper_ratio input is used to control the width of the transition region between the passband and stopband. The default value is 0.5, which corresponds to a transition region of 50% of the filter width.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>alpha_filter</p>
 </dd>
 </dl>
@@ -363,70 +366,25 @@ included.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.signals.get_win">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">get_win</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_win</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#get_win"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.get_win" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Return a frequency domain windowing function
-getWin returns a 1D, 2D, or 3D frequency domain window of the
-specified type of the given dimensions. By default, higher
-dimensional windows are created using the outer product. The windows
-can alternatively be created using rotation by setting the optional
-input ‘Rotation’ to true. The coherent gain of the window can also be
-returned.</p>
+<dd><p>A frequency domain windowing function of specified type and dimensions.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.
+<a href="#id1"><span class="problematic" id="id2">type_</span></a>: Window type. Supported values: ‘Bartlett’, ‘Bartlett-Hanning’, ‘Blackman’, ‘Blackman-Harris’, ‘Blackman-Nuttall’, ‘Cosine’, ‘Flattop’, ‘Gaussian’, ‘HalfBand’, ‘Hamming’, ‘Hanning’, ‘Kaiser’, ‘Lanczos’, ‘Nuttall’, ‘Rectangular’, ‘Triangular’, ‘Tukey’.
+plot_win: Boolean to display the window (default = False).
+param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey), alpha (Blackman, Kaiser), standard deviation (Gaussian) (default = 0.5, 0.16, 3 respectively).
+rotation: Boolean to create windows via rotation or outer product (default = False).
+symmetric: Boolean to make the window symmetrical (default = True). Can also be a vector defining the symmetry in each matrix dimension.
+square: Boolean to force the window to be square (default = False).</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tuple of (win, cg) where win is the window and cg is the coherent gain of the window.</p>
+</dd>
+</dl>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>N</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – <ul>
-<li><p>number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D</p></li>
-</ul>
-</p></li>
-<li><p><strong>type</strong> – <ul>
-<li><dl class="simple">
-<dt>window type. Supported values are</dt><dd><p>’Bartlett’
-‘Bartlett-Hanning’
-‘Blackman’
-‘Blackman-Harris’
-‘Blackman-Nuttall’
-‘Cosine’
-‘Flattop’
-‘Gaussian’
-‘HalfBand’
-‘Hamming’
-‘Hanning’
-‘Kaiser’
-‘Lanczos’
-‘Nuttall’
-‘Rectangular’
-‘Triangular’
-‘Tukey’</p>
-</dd>
-</dl>
-</li>
-</ul>
-<dl>
-<dt>plot_win:      - Boolean controlling whether the window is displayed</dt><dd><p>(default = false).</p>
-</dd>
-<dt>param:     Control parameter for the Tukey, Blackman, Gaussian,</dt><dd><p>and Kaiser windows:</p>
-<p>Tukey: taper ratio (default = 0.5)
-Blackman: alpha (default = 0.16)
-Gaussian: standard deviation (default = 0.5)
-Kaiser: alpha (default = 3)</p>
-</dd>
-<dt>rotation:  - Boolean controlling whether 2D and 3D windows are</dt><dd><p>created via rotation or the outer product (default =
-false). Windows created via rotation will have edge
-values outside the window radius set to the first
-window value.</p>
-</dd>
-<dt>symmetric: - Boolean controlling whether the window is symmetrical</dt><dd><p>(default = true). If set to false, a window of length N
-+ 1 is created and the first N points are returned. For
-2D and 3D windows, ‘Symmetric’ can be defined as a
-vector defining the symmetry in each matrix dimension.</p>
-</dd>
-<dt>square:    - Boolean controlling whether the window is forced to</dt><dd><p>be square (default = false). If set to true and Nx
-and Nz are not equal, the window is created using the
-smaller variable, and then padded with zeros.</p>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>N</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – </p></li>
 <li><p><strong>type_</strong> (<em>str</em>) – </p></li>
 <li><p><strong>plot_win</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>param</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
@@ -435,33 +393,30 @@ smaller variable, and then padded with zeros.</p>
 <li><p><strong>square</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the window
-cg: the coherent gain of the window</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>win</p>
-</dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.signals.gradient_spect">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">gradient_spect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriv_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#gradient_spect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.gradient_spect" title="Permalink to this definition">#</a></dt>
-<dd><p>gradient_spect calculates the gradient of an n-dimensional input
-matrix using the Fourier collocation spectral method. The gradient
-for singleton dimensions is returned as 0.</p>
+<dd><p>gradient_spect calculates the gradient of an n-dimensional input matrix using the Fourier collocation spectral method.
+The gradient for singleton dimensions is returned as 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> – </p></li>
-<li><p><strong>dn</strong> – </p></li>
-<li><p><strong>dim</strong> – </p></li>
-<li><p><strong>deriv_order</strong> – </p></li>
+<li><p><strong>f</strong> (<em>ndarray</em>) – A numpy ndarray representing the input matrix.</p></li>
+<li><p><strong>dn</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – A list of floats representing the grid spacings in each dimension.</p></li>
+<li><p><strong>dim</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – An optional integer or list of integers representing the dimensions along which to calculate the gradient.</p></li>
+<li><p><strong>deriv_order</strong> (<em>int</em>) – An integer representing the order of the derivative to calculate. Default is 1.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy ndarray containing the calculated gradient.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -474,8 +429,10 @@ for singleton dimensions is returned as 0.</p>
 <li><p><strong>reorder_index</strong> (<em>ndarray</em>) – N</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reordered sensor data</p>
+</dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -485,19 +442,19 @@ for singleton dimensions is returned as 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> (<em>object</em>) – The k-Wave grid object.</p></li>
-<li><p><strong>sensor</strong> (<em>object</em>) – The k-Wave sensor object.</p></li>
-<li><p><strong>sensor_data</strong> (<em>np.ndarray</em>) – The sensor data to be reordered.</p></li>
+<li><p><strong>kgrid</strong> – The k-Wave grid object.</p></li>
+<li><p><strong>sensor</strong> – The k-Wave sensor object.</p></li>
+<li><p><strong>sensor_data</strong> (<em>ndarray</em>) – The sensor data to be reordered.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The reordered sensor data.</p>
+<dd class="field-even"><p>np.ndarray of the reordered sensor data.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the simulation is not 2D or the sensor is not defined as a binary mask.</p>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the simulation is not 2D or the sensor is not defined as a binary mask.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -505,51 +462,30 @@ for singleton dimensions is returned as 0.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.signals.tone_burst">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">tone_burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cycles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">envelope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_signal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#tone_burst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.tone_burst" title="Permalink to this definition">#</a></dt>
-<dd><blockquote>
-<div><p>Create an enveloped single frequency tone burst.
-tone_burst creates an enveloped single frequency tone burst for use in
-ultrasound simulations. If an array is given for the optional input
-‘SignalOffset’, a matrix of tone bursts is created where each row
-corresponds to a tone burst for each value of the ‘SignalOffset’. If
-a value for the optional input ‘SignalLength’ is  given, the tone
-burst/s are zero padded to this length (in samples).</p>
-</div></blockquote>
+<dd><p>Create an enveloped single frequency tone burst.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>plot_signal</strong> – </p></li>
-<li><p><strong>signal_offset</strong> – </p></li>
-<li><p><strong>signal_length</strong> – </p></li>
-<li><p><strong>plot</strong> – </p></li>
-<li><p><strong>sample_freq</strong> – sampling frequency [Hz]</p></li>
-<li><p><strong>signal_freq</strong> – frequency of the tone burst signal [Hz]</p></li>
+<li><p><strong>sample_freq</strong> – sampling frequency in Hz</p></li>
+<li><p><strong>signal_freq</strong> – frequency of the tone burst signal in Hz</p></li>
 <li><p><strong>num_cycles</strong> – number of sinusoidal oscillations</p></li>
-<li><p><strong>INPUTS</strong> (<em>OPTIONAL</em>) – <p>Optional ‘string’, value pairs that may be used to modify the default
-computational settings.</p>
-<dl>
-<dt>envelope:      - Envelope used to taper the tone burst. Valid inputs</dt><dd><p>are:</p>
+<li><p><strong>envelope</strong> – <p>Envelope used to taper the tone burst. Valid inputs are:
+- ‘Gaussian’ (the default)
+- ‘Rectangular’
+- [num_ring_up_cycles, num_ring_down_cycles]</p>
 <blockquote>
-<div><p>’Gaussian’ (the default)
-‘Rectangular’
-[num_ring_up_cycles, num_ring_down_cycles]</p>
+<div><p>The last option generates a continuous wave signal with a cosine taper of the specified length at the beginning and end.</p>
 </div></blockquote>
-<p>The last option generates a continuous wave signal
-with a cosine taper of the specified length at the
-beginning and end.</p>
-</dd>
-<dt>plot:             Boolean controlling whether the created tone</dt><dd><p>burst is plotted.</p>
-</dd>
-<dt>signal_length:    Signal length in number of samples, if longer</dt><dd><p>than the tone burst length, the signal is
-appended with zeros.</p>
-</dd>
-<dt>signal_offset:    Signal offset before the tone burst starts in</dt><dd><p>number of samples.</p>
-</dd>
-</dl>
 </p></li>
+<li><p><strong>plot</strong> – Boolean controlling whether the created tone burst is plotted.</p></li>
+<li><p><strong>signal_length</strong> – Signal length in number of samples. If longer than the tone burst length, the signal is appended with zeros.</p></li>
+<li><p><strong>signal_offset</strong> – Signal offset before the tone burst starts in number of samples. If an array is given, a matrix of tone bursts is created where each row corresponds to a tone burst for each value of the ‘SignalOffset’.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>created tone burst</p>
+</dd>
 </dl>
-<p>Returns: created tone burst</p>
 </dd></dl>
 
 <dl class="py function">
