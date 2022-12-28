@@ -228,7 +228,7 @@ def next_pow2(n: int) -> int:
     n |= n >> 16
 
     # increment `n` and return
-    return np.log(n + 1)
+    return np.log2(n + 1)
 
 
 def norm_var(im: np.ndarray) -> float:
