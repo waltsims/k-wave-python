@@ -490,7 +490,8 @@ class NotATransducer(kSensor):
     @property
     def active_elements_mask(self):
         """
-        Return a binary mask showing the locations of the active elements
+        Returns:
+            A binary mask showing the locations of the active elements
 
         """
         indexed_mask = np.copy(self.indexed_mask)
@@ -513,7 +514,7 @@ class NotATransducer(kSensor):
     def all_elements_mask(self):
         """
         Returns:
-            a binary mask showing the locations of all the elements (both active and inactive)
+            A binary mask showing the locations of all the elements (both active and inactive)
 
         """
 
@@ -556,9 +557,9 @@ class NotATransducer(kSensor):
 
     def get_transmit_apodization(self):
         """
+        Returns:
             return the transmit apodization, converting strings of window
             type to actual numbers using getWin
-        Returns:
 
         """
 

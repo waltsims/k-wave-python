@@ -124,8 +124,8 @@ class kWaveSimulation(object):
     @property
     def equation_of_state(self):
         """
-            Set equation of state variable
         Returns:
+            Set equation of state variable
         """
         if self.medium.absorbing:
             if self.medium.stokes:
@@ -138,8 +138,8 @@ class kWaveSimulation(object):
     @property
     def use_sensor(self):
         """
-            False if no output of any kind is required
         Returns:
+            False if no output of any kind is required
 
         """
         return self.sensor is not None
@@ -842,7 +842,7 @@ class kWaveSimulation(object):
 
     def check_sensor(self, k_dim, k_Nt) -> None:
         """
-            Check the Sensor properties for correctness and validity
+        Check the Sensor properties for correctness and validity
 
         Args:
             k_dim: kWaveGrid dimensionality
@@ -1393,8 +1393,8 @@ class kWaveSimulation(object):
 
     def create_absorption_vars(self) -> None:
         """
-            Create absorption variables for the fluid code based on
-            the expanded and smoothed values of the medium parameters (if not saving to disk)
+        Create absorption variables for the fluid code based on
+        the expanded and smoothed values of the medium parameters (if not saving to disk)
 
         Returns:
             None

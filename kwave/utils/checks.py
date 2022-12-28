@@ -296,9 +296,10 @@ def check_factors(min_number: int, max_number: int) -> None:
 
 def check_divisible(number: float, divider: float) -> bool:
     """
-        Checks whether number is divisible by divider without any remainder
-        Why do we need such a function? -> Because due to floating point precision we
-        experience rounding errors while using standard modulo operator with floating point numbers
+    Checks whether number is divisible by divider without any remainder
+    Why do we need such a function? -> Because due to floating point precision we
+    experience rounding errors while using standard modulo operator with floating point numbers
+
     Args:
         number: Number that's supposed to be divided
         divider: Divider that should devide the number
