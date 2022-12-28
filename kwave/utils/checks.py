@@ -143,11 +143,11 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
     exact, estimate.
 
     Args:
-        kgrid: (kWaveGrid) k-Wave grid object return by kWaveGrid
-        medium: (kWaveMedium) object containing the medium properties
+        kgrid: simulation grid
+        medium: medium properties
 
     Returns:
-         dt_stability_limit: (float) the maximum time step for which the models are stable.
+         dt_stability_limit: the maximum time step for which the models are stable.
             This is set to Inf when the model is unconditionally stable.
     """
     # why? : this function was migrated from Matlab.
