@@ -15,8 +15,7 @@ from ..kmedium import kWaveMedium
 
 
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
-    """
-    Correct the single-sided magnitude by multiplying the symmetric points by 2.
+    """Correct the single-sided magnitude by multiplying the symmetric points by 2.
 
     The DC and Nyquist components are unique and are not multiplied by 2.
     The Nyquist component only exists for even numbered FFT lengths.
