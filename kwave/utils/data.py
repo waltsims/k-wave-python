@@ -14,9 +14,10 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None) -
         default: The default type to return if no type is found.
 
     Returns:
-        type_: The smallest possible type for the given array.
+        The smallest possible type for the given array.
 
     """
+
     types = {'uint', 'int'}
     assert target_type_group in types
 
@@ -37,8 +38,10 @@ def intmax(dtype: str) -> int:
         dtype: The integer type.
 
     Returns
-        max_val: The maximum value for the given integer type.
+        The maximum value for the given integer type.
+
     """
+
     return np.iinfo(getattr(np, dtype)).max
 
 
@@ -51,8 +54,10 @@ def scale_time(seconds: int) -> str:
         seconds: number of seconds
 
     Returns:
-        time: string of scaled time
+        String of scaled time.
+
     """
+
     # switch to calculating years, weeks, and days if larger than 100 hours
     if seconds > (60 * 60 * 100):
         years = floor(seconds / (60 * 60 * 24 * 365))
@@ -99,18 +104,16 @@ def scale_time(seconds: int) -> str:
 
 def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
     """
-    Scale a number to nearest SI unit prefix.
+    Scale a number to the nearest SI unit prefix.
 
     Args:
         x: The number to scale.
 
     Returns:
-        x_sc: string of scaled input and prefix
-        scale:numeric scale factor
-        prefix: single character scale prefix
-        prefix_fullname: full SI name for prefixReturns
+        A tuple containing a sting of the scaled number, a numeric scaling factor, the prefix, and the unit.
 
     """
+
     # force the input to be a scalar
     x = np.max(x)
 

@@ -31,8 +31,10 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
                            [x_start, x_end, y_start, y_end, z_start, z_end]
                            (here 'a' is applied to all dimensions)
         edge_val: value to use in the matrix expansion
+
     Returns:
         expanded matrix
+
     """
 
     opts = {}
@@ -73,14 +75,14 @@ def resize(mat: Union[np.ndarray, List[List[Union[int, float]]]], new_size: Unio
     resamples a "matrix" of spatial samples to a desired "resolution" or spatial sampling frequency via interpolation
 
     Args:
-        mat:                matrix to be "resized" i.e. resampled (numpy array or list of lists of ints/floats)
-        new_size:         desired output resolution (int or tuple of ints)
-        interp_mode:        interpolation method (str, optional)
+        mat:                matrix to be "resized" i.e. resampled
+        new_size:         desired output resolution
+        interp_mode:        interpolation method
 
     Returns:
-        res_mat:            "resized" matrix (numpy array or list of lists of ints/floats)
-    """
+       "resized" matrix
 
+    """
 
     # start the timer
     TicToc.tic()
@@ -122,21 +124,24 @@ def resize(mat: Union[np.ndarray, List[List[Union[int, float]]]], new_size: Unio
     return mat_rs
 
 
-def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None):
+def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> List[np.ndarray]:
     """
     Calculate the gradient of an n-dimensional input matrix using the finite-difference method.
 
     This function is a wrapper of the numpy gradient method for use in the k-wave library. For one-dimensional inputs, the gradient is always computed along the non-singleton dimension. For higher dimensional inputs, the gradient for singleton dimensions is returned as 0. For elements in the center of the grid, the gradient is computed using centered finite-differences. For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences. The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2). The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.
 
     Args:
-        f (ndarray): Input matrix.
-        dx (Union[float, ndarray]): Array of values for the grid point spacing in each dimension. If a value for `dim` is given, `dn` is the spacing in dimension `dim`.
-        dim (Union[int, None]): Optional input to specify a single dimension over which to compute the gradient for
-        deriv_order (Union[int, None]): Order of the derivative to compute, e.g., use 1 to compute df/dx, 2 to compute df^2/dx^2, etc. (default = 1).
-        accuracy_order (Union[int, None]): Order of accuracy for the finite difference coefficients. Because centered differences are used, this must be set to an integer multiple of 2 (default = 2).
+        f: Input matrix.
+        dx: Array of values for the grid point spacing in each dimension. If a value for `dim` is given, `dn` is the spacing in dimension `dim`.
+        dim: Optional input to specify a single dimension over which to compute the gradient for
+        deriv_order: Order of the derivative to compute, e.g., use 1 to compute df/dx, 2 to compute df^2/dx^2, etc. (default = 1).
+        accuracy_order: Order of accuracy for the finite difference coefficients. Because centered differences are used, this must be set to an integer multiple of 2 (default = 2).
 
     Returns:
-        fx, fy, ...: Gradient.
+        A list of ndarrays (or a single ndarray if there is only one dimension)
+        corresponding to the derivatives of f with respect to each dimension.
+        Each derivative has the same shape as f.
+
     """
 
     if deriv_order:
@@ -159,16 +164,18 @@ def min_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
     Find the minimum value and its indices in a numpy array.
 
     Args:
-        matrix (np.ndarray): A numpy array of any value type.
+        matrix: A numpy array of any value type.
 
     Returns:
-        Tuple[float, Tuple]: A tuple containing the minimum value and a tuple of indices in the form (row, column, ...). Indices are 1-based, following the convention used in MATLAB.
+        A tuple containing the minimum value and a tuple of indices in the form (row, column, ...). Indices are 1-based, following the convention used in MATLAB.
 
     Examples:
         >>> matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         >>> min_nd(matrix)
         (1, (1, 1))
+
     """
+
     min_val, linear_index = np.min(matrix), matrix.argmin()
     numpy_index = np.unravel_index(linear_index, matrix.shape)
     matlab_index = tuple(idx + 1 for idx in numpy_index)
@@ -180,13 +187,14 @@ def max_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
     Returns the maximum value in a n-dimensional array and its index.
 
     Args:
-        matrix (np.ndarray): n-dimensional array of values.
+        matrix: n-dimensional array of values.
 
     Returns:
         A tuple containing the maximum value in the array, and a tuple containing the index of the
         maximum value. The index is given in the MATLAB convention, where indexing starts at 1.
 
     """
+
     # Get the maximum value and its linear index
     max_val, linear_index = np.max(matrix), matrix.argmax()
 
@@ -205,13 +213,15 @@ def broadcast_axis(data: np.ndarray, ndims: int, axis: int) -> np.ndarray:
     Broadcast the given axis of the data to the specified number of dimensions.
 
     Args:
-        data (np.ndarray): The data to broadcast.
-        ndims (int): The number of dimensions to broadcast the axis to.
-        axis (int): The axis to broadcast.
+        data: The data to broadcast.
+        ndims: The number of dimensions to broadcast the axis to.
+        axis: The axis to broadcast.
 
     Returns:
         The broadcasted data.
+
     """
+
     newshape = [1] * ndims
     newshape[axis] = -1
     return data.reshape(*newshape)
@@ -222,10 +232,10 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
     Revolve a 2D numpy array in a clockwise direction to form a 3D numpy array.
 
     Args:
-        mat2d (np.ndarray): A 2D numpy array of any value type.
+        mat2d: A 2D numpy array of any value type.
 
     Returns:
-        np.ndarray: A 3D numpy array formed by revolving the input array in a clockwise direction.
+        A 3D numpy array formed by revolving the input array in a clockwise direction.
 
     Examples:
         >>> mat2d = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
@@ -239,7 +249,9 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
                [[9, 8, 7],
                 [6, 5, 4],
                 [3, 2, 1]]])
+
     """
+
     # Start timer
     TicToc.tic()
 
@@ -276,11 +288,11 @@ def sort_rows(arr: np.ndarray, index: int) -> np.ndarray:
     Sort the rows of a 2D numpy array by the values in a specific column.
 
     Args:
-        arr (np.ndarray): A 2D numpy array.
-        index (int): The index of the column to sort by.
+        arr: A 2D numpy array.
+        index: The index of the column to sort by.
 
     Returns:
-        np.ndarray: A copy of the input array with the rows sorted by the values in the specified column.
+        A copy of the input array with the rows sorted by the values in the specified column.
 
     Raises:
         AssertionError: If `arr` is not a 2D numpy array.
@@ -291,7 +303,9 @@ def sort_rows(arr: np.ndarray, index: int) -> np.ndarray:
         array([[1, 3, 2],
                [2, 1, 3],
                [3, 2, 1]])
+
     """
+
     assert arr.ndim == 2, "'sort_rows' currently supports only 2-dimensional matrices"
     return arr[arr[:, index].argsort()]
 
@@ -301,10 +315,11 @@ def num_dim(x: np.ndarray) -> int:
     Returns the number of dimensions in x, after collapsing any singleton dimensions.
 
     Args:
-        x (np.ndarray): The input array.
+        x: The input array.
 
     Returns:
-        int: The number of dimensions in x.
+        The number of dimensions in x.
+
     """
 
     return len(x.squeeze().shape)
@@ -315,10 +330,11 @@ def num_dim2(x: np.ndarray) -> int:
     Get the number of dimensions of an array after collapsing singleton dimensions.
 
     Args:
-        x (np.ndarray): The input array.
+        x: The input array.
 
     Returns:
-        int: The number of dimensions of the array after collapsing singleton dimensions.
+        The number of dimensions of the array after collapsing singleton dimensions.
+
     """
 
     sz = np.squeeze(x).shape

@@ -25,9 +25,9 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
         grid_points: List of 1D or 3D Numpy arrays
         grid_values: A 3D Numpy array which holds values at grid_points
         interp_locs: List of 1D or 3D Numpy arrays
-    Returns:
 
     """
+
     assert len(grid_points) == 3, 'interpolate3D supports only 3D interpolation'
     assert len(grid_points) == len(interp_locs)
 
@@ -74,9 +74,9 @@ def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
         grid_points: List of 1D or 3D Numpy arrays
         grid_values: A 3D Numpy array which holds values at grid_points
         interp_locs: List of 1D or 3D Numpy arrays
-    Returns:
 
     """
+
     assert len(grid_points) == 2, 'interpolate2D supports only 2D interpolation'
     assert len(grid_points) == len(interp_locs)
 
@@ -122,12 +122,12 @@ def interpolate2d_with_queries(
     Expects `interp_locs` to be [N, 2] coordinates of the interpolation locations.
     Does not create meshgrid on the `interp_locs` as `interpolate2D_coords`!
     WARNING: supposed to support only 2D interpolation!
+
     Args:
         copy_nans:
         grid_points: List of 1D or 3D Numpy arrays
         grid_values: A 3D Numpy array which holds values at grid_points
         queries: Numpy array with shape [N, 2]
-    Returns:
 
     """
     assert len(grid_points) == 2, 'interpolate2D supports only 2D interpolation'
@@ -164,6 +164,7 @@ def get_bli(
 
     Returns:
         A tuple containing the BLI and the x-grid for the BLI.
+
     """
 
     func = np.squeeze(func)
@@ -220,8 +221,8 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
                               (default = 'nearest')
 
      Returns:
-         binary_sensor_data:   array of time-series corresponding to the
-                               sensor positions given by binary_sensor_mask
+         array of time-series corresponding to the sensor positions given by binary_sensor_mask
+
     """
 
     # make timer
@@ -306,9 +307,6 @@ def interpftn(x, sz: tuple, win=None):
     """
      Resamples an N-D matrix to the size given in sz using Fourier interpolation.
 
-     USAGE:
-         y = interpftn(x, sz)
-         y = interpftn(x, sz, win)
 
      Args:
          x:           matrix to interpolate
@@ -316,7 +314,12 @@ def interpftn(x, sz: tuple, win=None):
          win:         (optional) name of windowing function to use
 
      Returns:
-         y:           resampled matrix
+         Resampled matrix
+
+     Examples:
+         y = interpftn(x, sz)
+         y = interpftn(x, sz, win)
+
     """
 
     # extract the size of the input matrix

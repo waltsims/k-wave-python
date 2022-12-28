@@ -14,9 +14,6 @@ from ..kgrid import kWaveGrid
 from ..kmedium import kWaveMedium
 
 
-# Compute the next highest power of 2 of a 32–bit number `n`
-
-
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
     """
     Correct the single-sided magnitude by multiplying the symmetric points by 2.
@@ -25,12 +22,12 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
     The Nyquist component only exists for even numbered FFT lengths.
 
     Args:
-        func_fft: (np.ndarray) The FFT of the function to be corrected.
-        fft_len: (int) The length of the FFT.
-        dim: (int) The number of dimensions of `func_fft`.
+        func_fft: The FFT of the function to be corrected.
+        fft_len: The length of the FFT.
+        dim: The number of dimensions of `func_fft`.
 
     Returns:
-        func_fft: (np.ndarray) The corrected FFT of the function.
+        The corrected FFT of the function.
     """
     if fft_len % 2:
 
@@ -70,20 +67,20 @@ def spect(
     Calculates the spectrum of a signal.
 
     Args:
-        func: (np.ndarray)The signal to analyse.
-        Fs: (float)The sampling frequency in Hz.
-        dim: (Optional[str, int]) The dimension over which the spectrum is calculated. Defaults to 'auto'.
-        fft_len: (int) The length of the FFT. If the set length is smaller than the signal length, the default value is used
+        func: The signal to analyse.
+        Fs: The sampling frequency in Hz.
+        dim: The dimension over which the spectrum is calculated. Defaults to 'auto'.
+        fft_len: The length of the FFT. If the set length is smaller than the signal length, the default value is used
                  instead (default = signal length).
-        power_two: (bool) Whether the FFT length is forced to be the next highest power of 2 (default = False).
-        unwrap_phase: (bool) Whether to unwrap the phase spectrum (default = False).
+        power_two: Whether the FFT length is forced to be the next highest power of 2 (default = False).
+        unwrap_phase: Whether to unwrap the phase spectrum (default = False).
         window: (str) The window type used to filter the signal before the FFT is taken (default = 'Rectangular'). Any valid
                 input types for get_win may be used.
 
     Returns:
-        f: (np.ndarray) Frequency array
-        func_as: (np.ndarray) Single-sided amplitude spectrum
-        func_ps: (np.ndarray) Single-sided phase spectrum
+        f: Frequency array
+        func_as: Single-sided amplitude spectrum
+        func_ps: Single-sided phase spectrum
 
     Raises:
         ValueError: If the input signal is scalar or has more than 4 dimensions.
@@ -176,17 +173,16 @@ def extract_amp_phase(data: np.ndarray, Fs: float, source_freq: float, dim: Tupl
     to the highest non-singleton dimension.
 
     Args:
-        data: (np.ndarray) Matrix of time signals [s]
-        Fs: (float) Sampling frequency [Hz]
-        source_freq: (float) Frequency at which the amplitude and phase should be extracted [Hz]
-        dim: (Tuple[str, int]) The time dimension of the input data. If 'auto', the highest non-singleton dimension is used.
-        fft_padding: (int) The amount of zero padding to apply to the FFT.
-        window: (str) The windowing function to use for the FFT.
+        data: Matrix of time signals [s]
+        Fs: Sampling frequency [Hz]
+        source_freq: Frequency at which the amplitude and phase should be extracted [Hz]
+        dim: The time dimension of the input data. If 'auto', the highest non-singleton dimension is used.
+        fft_padding: The amount of zero padding to apply to the FFT.
+        window: The windowing function to use for the FFT.
 
     Returns:
-        amp: (np.ndarray) The extracted amplitude values
-        phase: (np.ndarray) The extracted phase values
-        f: (np.ndarray) The frequencies of the FFT spectrum
+        A tuple of the amplitude, phase and frequency of the extracted signal.
+
     """
 
     # check for the dim input
@@ -273,11 +269,11 @@ def sharpness(
     Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.
 
     Args:
-        im: (np.ndarray) The image matrix.
-        metric: (Optional[str]) The metric to use. Defaults to "Brenner".
+        im: The image matrix.
+        metric: The metric to use. Defaults to "Brenner".
 
     Returns:
-        metric: (float) A scalar sharpness metric.
+        A scalar sharpness metric.
 
     Raises:
         AssertionError: If `im` is not a NumPy array.
@@ -285,7 +281,9 @@ def sharpness(
     References:
         B. E. Treeby, T. K. Varslot, E. Z. Zhang, J. G. Laufer, and P. C. Beard, "Automatic sound speed selection in
         photoacoustic image reconstruction using an autofocus approach," J. Biomed. Opt., vol. 16, no. 9, p. 090501, 2011.
+
     """
+
     assert isinstance(im, np.ndarray), "Argument im must be of type numpy array"
 
     if metric == "Brenner":
@@ -308,11 +306,11 @@ def fwhm(f, x):
 
 
     Args:
-        f:       (np.ndarray) jf(x)
-        x:       (np.ndarray) x
+        f:        f(x)
+        x:        x
 
     Returns:
-        fwhm_val:   (float)FWHM of f(x)
+        FWHM of f(x)
 
     """
 
@@ -349,13 +347,14 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
     applied to each matrix row.
 
     Args:
-        signal:         (Union[np.ndarray, List[float]]) signal to filter
-        Fs:             (float) sampling frequency [Hz]
-        frequency:      (float) center frequency of filter [Hz]
-        bandwidth:      (float) bandwidth of filter in percentage
+        signal:         Signal to filter
+        Fs:             Sampling frequency [Hz]
+        frequency:      Center frequency of filter [Hz]
+        bandwidth:      Bandwidth of filter in percentage
 
     Returns:
-        signal:         (Union[np.ndarray, List[float]]) filtered signal
+        The filtered signal
+
     """
 
     N = len(signal)
@@ -397,39 +396,38 @@ def filter_time_series(
     between the amount of noise reduction and the amount of signal distortion.
 
     Args:
-        kgrid: (kWaveGrid) The kWaveGrid grid.
-        medium: (kWaveMedium) The kWavemedium.
-        signal: (np.ndarray) The time-domain signal to filter.
-        ppw: (Optional[int]) The minimum number of points per wavelength in the signal. This determines the
+        kgrid: The kWaveGrid grid.
+        medium: The kWavemedium.
+        signal: The time-domain signal to filter.
+        ppw: The minimum number of points per wavelength in the signal. This determines the
             minimum frequency that will be passed through the filter. Higher values of ppw
             result in a lower cut-off frequency and more noise reduction, but may also result
             in more signal distortion. Defaults to 3.
-        rppw:  (Optional[int]) The number of points per wavelength in the smoothing ramp applied to the beginning
+        rppw:  The number of points per wavelength in the smoothing ramp applied to the beginning
             of the signal. This can be used to reduce ringing artifacts caused by the sudden
             transition from the filtered signal to the unfiltered signal. Defaults to 0.
-        stop_band_atten: (Optional[float])The stop-band attenuation in dB. This determines the steepness of the
+        stop_band_atten: The stop-band attenuation in dB. This determines the steepness of the
             filter's transition from the pass-band to the stop-band. Higher values result in a
             steeper transition and more noise reduction, but may also result in more signal
             distortion. Defaults to 60.
-        transition_width: (Optional[int]) The transition width as a proportion of the sampling frequency. This
+        transition_width: The transition width as a proportion of the sampling frequency. This
             determines the width of the transition region between the pass-band and the stop-band.
             Smaller values result in a narrower transition and more noise reduction, but may also
             result in more signal distortion. Defaults to 0.1.
-        zerophase: (Optional[bool]) Whether to implement the filter as a zero-phase filter. Zero-phase filtering
+        zerophase: Whether to implement the filter as a zero-phase filter. Zero-phase filtering
             can be used to preserve the phase information in the signal, which can be important
             for some applications. However, it may also result in more signal distortion.
             Defaults to False.
-        plot_spectrums (Optional[bool]): Whether to plot the spectrums of the input and filtered signals.
+        plot_spectrums: Whether to plot the spectrums of the input and filtered signals.
             Defaults to False.
-        plot_signals (Optional[bool]): Whether to plot the input and filtered signals. Defaults to False.
+        plot_signals: Whether to plot the input and filtered signals. Defaults to False.
 
     Raises:
         ValueError: Checks correctness of passed arguments.
         NotImplementedError: Cannot currently plot anything.
 
-
     Returns:
-        filtered_signal:
+        The filtered signal.
 
     """
 
@@ -534,16 +532,17 @@ def apply_filter(
     Both causal and zero phase filters can be applied.
 
     Args:
-        signal: (np.ndarray) The input signal.
-        Fs: (float) The sampling frequency of the signal.
-        cutoff_f: (float) The cut-off frequency of the filter.
-        filter_type: (str) The type of filter to apply, either 'HighPass', 'LowPass' or 'BandPass'.
-        zero_phase: (Optional[bool]) Whether to apply a zero-phase filter. Defaults to False.
-        transition_width: (Optional[float]) The transition width of the filter, as a proportion of the sampling frequency. Defaults to 0.1.
-        stop_band_atten: (Optional[int]) The stop-band attenuation of the filter in dB. Defaults to 60.
+        signal: The input signal.
+        Fs: The sampling frequency of the signal.
+        cutoff_f: The cut-off frequency of the filter.
+        filter_type: The type of filter to apply, either 'HighPass', 'LowPass' or 'BandPass'.
+        zero_phase: Whether to apply a zero-phase filter. Defaults to False.
+        transition_width: The transition width of the filter, as a proportion of the sampling frequency. Defaults to 0.1.
+        stop_band_atten: The stop-band attenuation of the filter in dB. Defaults to 60.
 
     Returns:
-        filtered_signal: (np.ndarray) The filtered signal.
+        The filtered signal.
+
     """
 
     # for a bandpass filter, use applyFilter recursively
@@ -635,12 +634,13 @@ def smooth(
     Smooths a matrix.
 
     Args:
-        a: (np.ndarray) The spatial distribution to smooth.
-        restore_max: (Optional[bool]) Boolean controlling whether the maximum value is restored after smoothing. Defaults to False.
-        window_type: (Optional[str]) Shape of the smoothing window. Any valid inputs to get_win are supported. Defaults to 'Blackman'.
+        a: The spatial distribution to smooth.
+        restore_max: Boolean controlling whether the maximum value is restored after smoothing. Defaults to False.
+        window_type: Shape of the smoothing window. Any valid inputs to get_win are supported. Defaults to 'Blackman'.
 
     Returns:
-        (np.ndarray) The smoothed matrix.
+        a_sm: The smoothed matrix.
+
     """
 
     DEF_USE_ROTATION = True

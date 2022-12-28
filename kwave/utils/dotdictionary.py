@@ -12,11 +12,11 @@ class dotdict(dict):
     using a dot-separated path (e.g. "a.b.c").
 
     Examples:
-    >>> d = dotdict({'a': {'b': {'c': 1}}})
-    >>> d.a.b.c
-    1
-    >>> d.lookup('a.b.c')
-    1
+        >>> d = dotdict({'a': {'b': {'c': 1}}})
+        >>> d.a.b.c
+        1
+        >>> d.lookup('a.b.c')
+        1
 
     """
 

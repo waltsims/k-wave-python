@@ -15,7 +15,9 @@ def largest_prime_factor(n: int) -> int:
 
     Returns:
         The largest prime factor of n.
+
     """
+
     i = 2
     while i * i <= n:
         if n % i:
@@ -34,7 +36,9 @@ def rwh_primes(n: int) -> List[int]:
 
     Returns:
         A list of prime numbers less than n.
+
     """
+
     sieve = bytearray([True]) * (n // 2 + 1)
     for i in range(1, int(n ** 0.5) // 2 + 1):
         if sieve[i]:
@@ -57,7 +61,9 @@ def fourier_shift(
 
     Returns:
         The shifted array.
+
     """
+
     if shift_dim is None:
         shift_dim = data.ndim - 1
         if (shift_dim == 1) and (data.shape[1] == 1):
@@ -101,11 +107,13 @@ def round_even(x):
     Rounds to the nearest even integer.
 
     Args:
-        x: (float) Inpput value
+        x: Input value
 
     Returns:
-        even: (int) Nearest odd integer.
+        Nearest even integer.
+
     """
+
     return 2 * round(x / 2)
 
 
@@ -114,12 +122,13 @@ def round_odd(x):
     Rounds to the nearest odd integer.
 
     Args:
-        x: (float)input value
+        x: Input value
 
     Returns:
-        odd: (int) nearest odd integer.
+        Nearest odd integer.
 
     """
+
     return 2 * round((x + 1) / 2) - 1
 
 
@@ -134,11 +143,12 @@ def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int]
     than one element with the closest value, the index of the first one is returned.
 
     Args:
-        A: (np.ndarray) The array to search.
-        a: (Union[float, int]) The value to find.
+        A: The array to search.
+        a: The value to find.
 
     Returns:
-        Tuple[Union[float, int], Tuple[int, ...]]: A tuple containing the closest value and its index in the input array.
+        A tuple containing the value and index of the closest element in A to a.
+
     """
 
     assert isinstance(A, np.ndarray), "A must be an np.array"
@@ -152,11 +162,13 @@ def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
     Calculates the sinc function of a given value or array of values.
 
     Args:
-        x: (Union[int, float, np.ndarray]) The value or array of values for which to calculate the sinc function.
+        x: The value or array of values for which to calculate the sinc function.
 
     Returns:
-        sinc_val: (Union[int, float, np.ndarray]) The sinc function of x.
+        The sinc function of x.
+
     """
+
     return np.sinc(x / np.pi)
 
 
@@ -165,11 +177,13 @@ def primefactors(n: int) -> List[int]:
     Finds the prime factors of a given integer.
 
     Args:
-        n: (int) The integer to factor.
+        n: The integer to factor.
 
     Returns:
-        factors: (list[int]) A list of prime factors of n.
+        A list of prime factors of n.
+
     """
+
     factors = []
     while n % 2 == 0:
         factors.append(2),
@@ -196,10 +210,11 @@ def next_pow2(n: int) -> int:
     than or equal to `n`.
 
     Args:
-        n: (int) The number to find the next power of 2 for.
+        n: The number to find the next power of 2 for.
 
     Returns:
-        smallest_pow: (int) The smallest power of 2 that is greater than or equal to `n`.
+        The smallest power of 2 that is greater than or equal to `n`.
+
     """
 
     # decrement `n` (to handle cases when `n` itself is a power of 2)
@@ -221,11 +236,13 @@ def norm_var(im: np.ndarray) -> float:
     Calculates the normalized variance of an array of values.
 
     Args:
-        im: (np.ndarray) The input array.
+        im: The input array.
 
     Returns:
-        s: (float) The normalized variance of im.
+        The normalized variance of im.
+
     """
+
     mu = np.mean(im)
     s = np.sum((im - mu) ** 2) / mu
     return s
@@ -257,7 +274,9 @@ def gaussian(
 
     Returns:
         A Gaussian distribution.
+
     """
+
     if magnitude is None:
         magnitude = (2 * math.pi * variance) ** -0.5
 

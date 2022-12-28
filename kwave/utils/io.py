@@ -17,36 +17,36 @@ from .dotdictionary import dotdict
 def get_h5_literals():
     literals = dotdict({
         # data type
-        'DATA_TYPE_ATT_NAME':                   'data_type',
-        'MATRIX_DATA_TYPE_MATLAB':              'single',
-        'MATRIX_DATA_TYPE_C':                   'float',
-        'INTEGER_DATA_TYPE_MATLAB':             'uint64',
-        'INTEGER_DATA_TYPE_C':                  'long',
+        'DATA_TYPE_ATT_NAME': 'data_type',
+        'MATRIX_DATA_TYPE_MATLAB': 'single',
+        'MATRIX_DATA_TYPE_C': 'float',
+        'INTEGER_DATA_TYPE_MATLAB': 'uint64',
+        'INTEGER_DATA_TYPE_C': 'long',
 
         # real / complex
-        'DOMAIN_TYPE_ATT_NAME':                 'domain_type',
-        'DOMAIN_TYPE_REAL':                     'real',
-        'DOMAIN_TYPE_COMPLEX':                  'complex',
+        'DOMAIN_TYPE_ATT_NAME': 'domain_type',
+        'DOMAIN_TYPE_REAL': 'real',
+        'DOMAIN_TYPE_COMPLEX': 'complex',
 
         # file descriptors
-        'FILE_MAJOR_VER_ATT_NAME':              'major_version',
-        'FILE_MINOR_VER_ATT_NAME':              'minor_version',
-        'FILE_DESCR_ATT_NAME':                  'file_description',
-        'FILE_CREATION_DATE_ATT_NAME':          'creation_date',
-        'CREATED_BY_ATT_NAME':                  'created_by',
+        'FILE_MAJOR_VER_ATT_NAME': 'major_version',
+        'FILE_MINOR_VER_ATT_NAME': 'minor_version',
+        'FILE_DESCR_ATT_NAME': 'file_description',
+        'FILE_CREATION_DATE_ATT_NAME': 'creation_date',
+        'CREATED_BY_ATT_NAME': 'created_by',
 
         # file type
-        'FILE_TYPE_ATT_NAME':                   'file_type',
-        'HDF_INPUT_FILE':                       'input',
-        'HDF_OUTPUT_FILE':                      'output',
-        'HDF_CHECKPOINT_FILE':                  'checkpoint',
+        'FILE_TYPE_ATT_NAME': 'file_type',
+        'HDF_INPUT_FILE': 'input',
+        'HDF_OUTPUT_FILE': 'output',
+        'HDF_CHECKPOINT_FILE': 'checkpoint',
 
         # file version information
-        'HDF_FILE_MAJOR_VERSION':               '1',
-        'HDF_FILE_MINOR_VERSION':               '2',
+        'HDF_FILE_MAJOR_VERSION': '1',
+        'HDF_FILE_MINOR_VERSION': '2',
 
         # compression level
-        'HDF_COMPRESSION_LEVEL':                0
+        'HDF_COMPRESSION_LEVEL': 0
     })
     return literals
 
@@ -84,7 +84,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         chunk_size = [Nx, 1, 1]
     elif dims <= 1:
         # check that the matrix size is greater than 1 MB
-        one_mb = (1024**2) / 8
+        one_mb = (1024 ** 2) / 8
         if matrix.size > one_mb:
             # set chunk size to 1 MB
             if Nx > Ny:
@@ -235,15 +235,17 @@ def write_attributes(filename: str, file_description: Optional[str] = None, lega
     file_description is not provided, a default file description will be used.
 
     Args:
-        filename (str): The name of the HDF5 file.
-        file_description (Optional[str], optional): The description of the file. If not provided, a default description
+        filename: The name of the HDF5 file.
+        file_description: The description of the file. If not provided, a default description
             will be used.
-        legacy (bool, optional): If set to True, the function will use the deprecated legacy method to write attributes.
+        legacy: If set to True, the function will use the deprecated legacy method to write attributes.
             If set to False, the function will use the new typed method. Defaults to False.
 
     Raises:
         DeprecationWarning: If legacy is set to True, a DeprecationWarning will be raised.
+
     """
+
     if not legacy:
         write_attributes_typed(filename, file_description)
         return
@@ -284,6 +286,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None, lega
         for key, value in attributes.items():
             assign_str_attr(f.attrs, key, value)
 
+
 def write_flags(filename):
     """
      writeFlags reads the input HDF5 file and derives and writes the
@@ -321,12 +324,12 @@ def write_flags(filename):
          p_source_many
          s_source_mode
          s_source_many
+
     Args:
         filename:
 
-    Returns:
-
     """
+
     h5_literals = get_h5_literals()
 
     with h5py.File(filename, 'r') as hf:
@@ -431,13 +434,9 @@ def write_flags(filename):
 
 def write_grid(filename, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c_ref):
     """
-
-
-
-     DESCRIPTION:
-         writeGrid creates and writes the wavenumber grids and PML variables
-         required by the k-Wave C++ code to the HDF5 file specified by the
-         user.
+     Creates and writes the wavenumber grids and PML variables
+     required by the k-Wave C++ code to the HDF5 file specified by the
+     user.
 
          List of parameters that are written:
              Nx
@@ -456,9 +455,8 @@ def write_grid(filename, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c
              pml_y_size
              pml_z_size
 
-    Returns:
-
     """
+
     h5_literals = get_h5_literals()
 
     # =========================================================================
@@ -507,13 +505,12 @@ def write_grid(filename, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c
 
 def assign_str_attr(attrs, attr_name, attr_val):
     """
-        Assigns HDF5 attribute with value as a fixed-length string
-    Args:
-        attrs:
-        attr_name:
-        attr_val:
+    Assigns HDF5 attribute with value as a fixed-length string
 
-    Returns:
+    Args:
+        attrs: HDF5 attribute object
+        attr_name: name of attribute
+        attr_val: value of attribute
 
     """
     attrs.create(attr_name, attr_val, None, dtype=f'<S{len(attr_val)}')
@@ -532,5 +529,3 @@ def load_image(path, is_gray):
     img = img.max() - img
     img = img * (1 / img.max())
     return img
-
-

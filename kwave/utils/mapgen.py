@@ -35,7 +35,9 @@ def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'l
 
     Raises:
         ValueError: if `stop` <= `start` or `spacing` is not 'linear' or 'log'
+
     """
+
     if stop <= start:
         raise ValueError('`stop` must be larger than `start`.')
 
@@ -73,9 +75,10 @@ def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: fl
         plot_fit: whether to plot the fit
 
     Returns:
-        a0_fit: fitted coefficient for the power law absorption equation
-        y_fit: fitted exponent for the power law absorption equation
+        A tuple of the absorption coefficient and fitted exponent of the power law absorption equation.
+
     """
+
     # define frequency axis
     f = get_spaced_points(f_min, f_max, 200)
     w = 2 * np.pi * f
@@ -122,7 +125,8 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
         y: power law exponent, where 0 < y < 3
 
     Returns:
-        c_kk: variation of sound speed with w [m/s]
+        Variation of sound speed with w [m/s]
+
     """
 
     if 0 >= y or y >= 3:
@@ -150,12 +154,12 @@ def water_absorption(f, temp):
         T:   water temperature value [degC]
 
     Returns:
-        abs:  absorption[dB / cm]
+        abs:  absorption [dB / cm]
 
     Examples:
         abs = waterAbsorption(f, T)
 
-    REFERENCES:
+    References:
         [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
         and its Relation to Molecular Constitution, " Proceedings of the
         Physical Society.Section B, 2, 129 - 141
@@ -195,7 +199,9 @@ def water_sound_speed(temp: float) -> float:
 
     References:
         Marczak, R. (1997). The sound velocity in water as a function of temperature. Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+
     """
+
     # check limits
     if not (0 <= temp <= 95):
         raise ValueError("`temp` must be between 0 and 95.")
@@ -225,7 +231,9 @@ def water_density(temp: float) -> float:
     References:
         [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
         J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
+
     """
+
     # check limits
     if not (5 <= temp <= 40):
         raise ValueError("`temp` must be between 5 and 40.")
@@ -284,7 +292,9 @@ def make_ball(Nx: int, Ny: int, Nz: int, cx: int, cy: int, cz: int, radius: int,
 
     Returns:
         ball: 3D binary map of a filled ball.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -341,8 +351,10 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Tuple[float, fl
         plot_sphere: whether to plot the sphere. Defaults to False.
 
     Returns:
-        points: the points on the sphere.
+        The points on the sphere.
+
     """
+
     cx, cy, cz = center_pos
 
     # generate angle functions using the Golden Section Spiral method
@@ -397,6 +409,7 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Tuple[float, fl
 
     Returns:
         2 x `num_points` array of cartesian coordinates
+
     """
 
     # check for arc_angle input
@@ -455,8 +468,10 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
         plot_disc: If set to True, the disc will be plotted using Matplotlib.
 
     Returns:
-        np.ndarray: A binary map of the disc in the 2D grid.
+        A binary map of the disc in the 2D grid.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -517,8 +532,10 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
         plot_circle: If set to True, the circle will be plotted using Matplotlib.
 
     Returns:
-        np.ndarray: A binary map of the circle in the 2D grid.
+        A binary map of the circle in the 2D grid.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -616,28 +633,30 @@ def make_pixel_map(Nx: int, Ny: int, Nz: Optional[int] = None, *args) -> np.ndar
     Returns:
         r: pixel-radius
 
-    Examples for a 2D pixel map:
+    Examples:
 
-    Single pixel origin size for odd and even (with 'Shift' = [1 1] and
-    [0 0], respectively) grid sizes:
+        Single pixel origin size for odd and even (with 'Shift' = [1 1] and
+        [0 0], respectively) grid sizes:
 
-     x x x       x x x x         x x x x
-     x 0 x       x x x x         x 0 x x
-     x x x       x x 0 x         x x x x
-                 x x x x         x x x x
+         x x x       x x x x         x x x x
+         x 0 x       x x x x         x 0 x x
+         x x x       x x 0 x         x x x x
+                     x x x x         x x x x
 
-     Double pixel origin size for even and odd (with 'Shift' = [1 1] and
-     [0 0], respectively) grid sizes:
+         Double pixel origin size for even and odd (with 'Shift' = [1 1] and
+         [0 0], respectively) grid sizes:
 
-     x x x x      x x x x x        x x x x x
-     x 0 0 x      x x x x x        x 0 0 x x
-     x 0 0 x      x x 0 0 x        x 0 0 x x
-     x x x x      x x 0 0 x        x x x x x
-                  x x x x x        x x x x x
+         x x x x      x x x x x        x x x x x
+         x 0 0 x      x x x x x        x 0 0 x x
+         x 0 0 x      x x 0 0 x        x 0 0 x x
+         x x x x      x x 0 0 x        x x x x x
+                      x x x x x        x x x x x
 
-     By default, a single pixel centre is used which is shifted towards
-     the final row and column.
+         By default, a single pixel centre is used which is shifted towards
+         the final row and column.
+
     """
+
     # define defaults
     origin_size = 'single'
     shift_def = 1
@@ -701,8 +720,10 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
         shift: The shift of the pixels in the x-dimension.
 
     Returns:
-        nx: The pixel dimensions.
+        The pixel dimensions.
+
     """
+
     # Nested function to create the pixel radius variable
 
     # grid dimension has an even number of points
@@ -1374,13 +1395,13 @@ def make_bowl(grid_size: Tuple[int, int, int], bowl_pos: Tuple[int, int, int], r
     continuous values. The optional parameter 'remove_overlap' can be used to remove any overlap with the surrounding grid.
 
     Args:
-        grid_size: size of the grid in each dimension (tuple of 3 ints)
-        bowl_pos: position of the bowl in the grid (tuple of 3 ints)
-        radius: radius of the bowl (int)
-        diameter: diameter of the bowl (int)
-        focus_pos: position of the focus point in the grid (tuple of 3 ints)
-        binary: whether to return a binary matrix (bool)
-        remove_overlap: whether to remove overlap with the surrounding grid (bool)
+        grid_size: size of the grid in each dimension
+        bowl_pos: position of the bowl in the grid
+        radius: radius of the bowl
+        diameter: diameter of the bowl
+        focus_pos: position of the focus point in the grid
+        binary: whether to return a binary matrix
+        remove_overlap: whether to remove overlap with the surrounding grid
 
     Returns:
         matrix: 3D matrix representing the bowl-shaped object
@@ -2051,14 +2072,15 @@ def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: Union[int
     Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.
 
     Args:
-        grid_size (np.ndarray): The size of the grid (assumed to be square).
-        arc_pos (np.ndarray): An array containing the (x, y) coordinates of the center of each arc.
-        radius (Union[int, np.ndarray]): The radius of each arc. Can be a single value or an array with one value for each arc.
-        diameter (Union[int, np.ndarray]): The diameter of the arcs. Can be a single value or an array with one value for each arc.
-        focus_pos (np.ndarray): The (x, y) coordinates of the focus.
+        grid_size: The size of the grid (assumed to be square).
+        arc_pos: An array containing the (x, y) coordinates of the center of each arc.
+        radius: The radius of each arc. Can be a single value or an array with one value for each arc.
+        diameter: The diameter of the arcs. Can be a single value or an array with one value for each arc.
+        focus_pos: The (x, y) coordinates of the focus.
 
     Returns:
-        np.ndarray: The multi-arc mask as a NumPy array.
+        arcs: A binary mask of the arcs.
+        arcs_labelled: A labelled mask of the arcs.
 
     Raises:
         ValueError: If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match, or if the number of rows in arc_pos and diameter do not match.
@@ -2139,12 +2161,12 @@ def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = Fa
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.
 
     Args:
-        Nx (int): The number of grid points in the x-dimension.
-        Ny (int): The number of grid points in the y-dimension.
-        Nz (int): The number of grid points in the z-dimension.
-        radius (float): The radius of the sphere.
-        plot_sphere (bool, optional): Whether to plot the sphere (default: False).
-        binary (bool, optional): Whether to return a binary mask (default: False).
+        Nx: The number of grid points in the x-dimension.
+        Ny: The number of grid points in the y-dimension.
+        Nz: The number of grid points in the z-dimension.
+        radius: The radius of the sphere.
+        plot_sphere: Whether to plot the sphere (default: False).
+        binary: Whether to return a binary mask (default: False).
 
     Returns:
         sphere: The sphere mask as a NumPy array.

@@ -18,6 +18,7 @@ def db2neper(alpha: float, y: int = 1) -> float:
 
     Returns:
         Attenuation in Nepers / ((rad / s) ^ y m).
+
     """
 
     # calculate conversion
@@ -34,7 +35,8 @@ def neper2db(alpha: float, y: int = 1) -> float:
         y: Power law exponent (default=1)
 
     Returns:
-        alpha: Attenuation in dB / (MHz ^ y cm)
+        Attenuation in dB / (MHz ^ y cm)
+
     """
 
     # calculate conversion
@@ -70,12 +72,14 @@ def cart2pol(x: float, y: float) -> Tuple[float, float]:
     Convert from cartesian to polar coordinates.
 
     Args:
-    x: The x-coordinate of the point.
-    y: The y-coordinate of the point.
+        x: The x-coordinate of the point.
+        y: The y-coordinate of the point.
 
     Returns:
-    A tuple containing the polar coordinates of the point.
+        A tuple containing the polar coordinates of the point.
+
     """
+
     rho = np.sqrt(x ** 2 + y ** 2)
     phi = np.arctan2(y, x)
     return phi, rho
@@ -92,9 +96,12 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     Returns:
         cart_data: 1 x N, 2 x N, or 3 x N (for 1, 2, and 3 dimensions) array of Cartesian sensor points
         order_index: returns a list of indices of the returned cart_data coordinates.
+
     Raises:
         ValueError: when input_kgrid.dim is not in [1, 2, 3]
+
     """
+
     grid_data = np.array((grid_selection != 0), dtype=bool)
     cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
 
@@ -125,7 +132,9 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
 
     Returns:
         A tuple containing the calculated filter size and wavenumber cutoff.
+
     """
+
     k_cutoff = 2 * np.pi * filter_cutoff / c
 
     # set the alpha_filter size
@@ -153,8 +162,10 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarr
         axisymmetric: set to True to use axisymmetric interpolation
 
     Returns:
-        grid: binary grid
+        A binary grid
+
     """
+
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:
         raise AssertionError('Axisymmetric flag only supported in 2D.')
@@ -295,10 +306,10 @@ def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
     given by Mast [1].
 
     Args:
-        ct_data: matrix of Hounsfield values (np.ndarray)
+        ct_data: matrix of Hounsfield values.
 
     Returns:
-        sound_speed: matrix of sound speed values of size of ct_data (np.ndarray)
+        A matrix of sound speed values of size of ct_data.
 
     References:
         [1] Mast, T. D., "Empirical relationships between acoustic parameters in human soft tissues,"
@@ -316,12 +327,14 @@ def hounsfield2density(ct_data: np.ndarray, plot_fitting: bool = False) -> np.nd
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
     Args:
-        ct_data (np.ndarray): The CT data in Hounsfield units.
+        ct_data: The CT data in Hounsfield units.
         plot_fitting (bool, optional): Whether to plot the fitting curve (default: False).
 
     Returns:
-        np.ndarray: The density values in [kg / m ^ 3].
+        The density values in [kg / m ^ 3].
+
     """
+
     # create empty density matrix
     density = np.zeros(ct_data.shape, like=ct_data)
 

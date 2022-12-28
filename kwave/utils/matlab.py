@@ -15,6 +15,7 @@ def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
 
     Returns:
         The modified matrix.
+
     """
     original_shape = matrix.shape
     matrix = matrix.flatten(order='F')
@@ -33,7 +34,9 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = 'ne
 
     Returns:
         A NumPy array of indices.
+
     """
+
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     if mode == 'neq':
@@ -54,7 +57,9 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
 
     Returns:
         A NumPy array containing the masked elements.
+
     """
+
     if diff is None:
         return np.expand_dims(arr.ravel(order='F')[mask.ravel(order='F')], axis=-1)  # compatibility, n => [n, 1]
     else:
@@ -73,7 +78,9 @@ def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int]
 
     Returns:
         A tuple of integers or NumPy arrays representing the corresponding subscript indices.
+
     """
+
     if diff is None:
         return np.unravel_index(mask.ravel(order='F'), arr.shape, order='F')
     else:
@@ -85,12 +92,14 @@ def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
     Converts a linear index to a tuple of subscript indices for an n-dimensional array.
 
     Args:
-        array_shape: (Tuple[int, ...]) A tuple of integers representing the shape of the array.
-        ind: (int) The linear index to be converted.
+        array_shape: A tuple of integers representing the shape of the array.
+        ind: The linear index to be converted.
 
     Returns:
-        indices: (Tuple[int, ...]) A tuple of integers representing the corresponding subscript indices.
+        A tuple of integers representing the corresponding subscript indices.
+
     """
+
     indices = np.unravel_index(ind - 1, array_shape, order='F')
     indices = (np.squeeze(index) + 1 for index in indices)
     return indices
@@ -103,14 +112,16 @@ def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: 
     This function converts 3D subscript indices to a linear index in a way that is consistent with the way that MATLAB handles indexing. The output is a 1D numpy array containing the linear indices.
 
     Args:
-        array_shape (Tuple[int, int, int]): A tuple containing the shape of the array.
-        x (np.ndarray): A 1D numpy array of subscript indices for the x-dimension.
-        y (np.ndarray): A 1D numpy array of subscript indices for the y-dimension.
-        z (np.ndarray): A 1D numpy array of subscript indices for the z-dimension.
+        array_shape: A tuple containing the shape of the array.
+        x: A 1D numpy array of subscript indices for the x-dimension.
+        y: A 1D numpy array of subscript indices for the y-dimension.
+        z: A 1D numpy array of subscript indices for the z-dimension.
 
     Returns:
-        np.ndarray: A 1D numpy array containing the linear indices.
+        A 1D numpy array containing the linear indices.
+
     """
+
     results = []
     x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
     for x_i, y_i, z_i in zip(x, y, z):

@@ -5,7 +5,6 @@ import numpy as np
 import scipy
 from numpy.fft import ifftshift, fft, ifft
 
-from kwave.kgrid import kWaveGrid
 from .conversion import freq2wavenumber
 from .data import scale_SI
 from .mapgen import ndgrid
@@ -14,17 +13,17 @@ from .matlab import matlab_mask, unflatten_matlab_mask
 from .matrix import broadcast_axis, num_dim
 
 
-def add_noise(signal, snr, mode="rms"):
+def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     """
     Add Gaussian noise to a signal.
 
     Args:
-        signal (np.array):      input signal
-        snr (float):            desired signal snr (signal-to-noise ratio) in decibels after adding noise
-        mode (str):             'rms' (default) or 'peak'
+        signal:      input signal
+        snr:         desired signal snr (signal-to-noise ratio) in decibels after adding noise
+        mode:        'rms' (default) or 'peak'
 
     Returns:
-        signal (np.array):      signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.
+        Signal with augmented with noise. This behaviour differs from the k-Wave MATLAB implementation in that the SNR is nor returned.
 
     """
     if mode == "rms":
@@ -60,76 +59,34 @@ def get_win(N: Union[int, List[int]],
             symmetric: bool = True,
             square: bool = False):
     """
-        Return a frequency domain windowing function
-        getWin returns a 1D, 2D, or 3D frequency domain window of the
-        specified type of the given dimensions. By default, higher
-        dimensional windows are created using the outer product. The windows
-        can alternatively be created using rotation by setting the optional
-        input 'Rotation' to true. The coherent gain of the window can also be
-        returned.
+
+   A frequency domain windowing function of specified type and dimensions.
+
     Args:
-        N: - number of samples, use. N = Nx for 1D | N = [Nx Ny] for 2D | N = [Nx Ny Nz] for 3D
-        type_: - window type. Supported values are
-                           'Bartlett'
-                           'Bartlett-Hanning'
-                           'Blackman'
-                           'Blackman-Harris'
-                           'Blackman-Nuttall'
-                           'Cosine'
-                           'Flattop'
-                           'Gaussian'
-                           'HalfBand'
-                           'Hamming'
-                           'Hanning'
-                           'Kaiser'
-                           'Lanczos'
-                           'Nuttall'
-                           'Rectangular'
-                           'Triangular'
-                           'Tukey'
-             plot_win:      - Boolean controlling whether the window is displayed
-                           (default = false).
-
-             param:     Control parameter for the Tukey, Blackman, Gaussian,
-                           and Kaiser windows:
-
-                           Tukey: taper ratio (default = 0.5)
-                           Blackman: alpha (default = 0.16)
-                           Gaussian: standard deviation (default = 0.5)
-                           Kaiser: alpha (default = 3)
-
-             rotation:  - Boolean controlling whether 2D and 3D windows are
-                           created via rotation or the outer product (default =
-                           false). Windows created via rotation will have edge
-                           values outside the window radius set to the first
-                           window value.
-
-             symmetric: - Boolean controlling whether the window is symmetrical
-                           (default = true). If set to false, a window of length N
-                           + 1 is created and the first N points are returned. For
-                           2D and 3D windows, 'Symmetric' can be defined as a
-                           vector defining the symmetry in each matrix dimension.
-
-             square:    - Boolean controlling whether the window is forced to
-                           be square (default = false). If set to true and Nx
-                           and Nz are not equal, the window is created using the
-                           smaller variable, and then padded with zeros.
+        N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.
+        type_: Window type. Supported values: 'Bartlett', 'Bartlett-Hanning', 'Blackman', 'Blackman-Harris', 'Blackman-Nuttall', 'Cosine', 'Flattop', 'Gaussian', 'HalfBand', 'Hamming', 'Hanning', 'Kaiser', 'Lanczos', 'Nuttall', 'Rectangular', 'Triangular', 'Tukey'.
+        plot_win: Boolean to display the window (default = False).
+        param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey), alpha (Blackman, Kaiser), standard deviation (Gaussian) (default = 0.5, 0.16, 3 respectively).
+        rotation: Boolean to create windows via rotation or outer product (default = False).
+        symmetric: Boolean to make the window symmetrical (default = True). Can also be a vector defining the symmetry in each matrix dimension.
+        square: Boolean to force the window to be square (default = False).
 
     Returns:
-        win: the window
-        cg: the coherent gain of the window
-
+        A tuple of (win, cg) where win is the window and cg is the coherent gain of the window.
     """
 
-    def cosine_series(n, N, coeffs):
+    def cosine_series(n: int, N: int, coeffs: List[float]) -> np.ndarray:
         """
-            Sub-function to calculate a summed filter cosine series.
+
+        Sub-function to calculate a summed filter cosine series.
+
         Args:
-            n:
-            N:
-            coeffs:
+            n: An integer representing the current index in the series.
+            N: An integer representing the total number of terms in the series.
+            coeffs: A list of floats representing the coefficients of the cosine terms.
 
         Returns:
+            A numpy ndarray containing the calculated series.
 
         """
         series = coeffs[0]
@@ -356,45 +313,23 @@ def get_win(N: Union[int, List[int]],
 def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
                signal_offset=0):
     """
-        Create an enveloped single frequency tone burst.
-        tone_burst creates an enveloped single frequency tone burst for use in
-        ultrasound simulations. If an array is given for the optional input
-        'SignalOffset', a matrix of tone bursts is created where each row
-        corresponds to a tone burst for each value of the 'SignalOffset'. If
-        a value for the optional input 'SignalLength' is  given, the tone
-        burst/s are zero padded to this length (in samples).
+    Create an enveloped single frequency tone burst.
+
     Args:
-        plot_signal:
-        signal_offset:
-        signal_length:
-        plot:
-        sample_freq: sampling frequency [Hz]
-        signal_freq: frequency of the tone burst signal [Hz]
+        sample_freq: sampling frequency in Hz
+        signal_freq: frequency of the tone burst signal in Hz
         num_cycles: number of sinusoidal oscillations
-        OPTIONAL INPUTS:
-            Optional 'string', value pairs that may be used to modify the default
-            computational settings.
+        envelope: Envelope used to taper the tone burst. Valid inputs are:
+            - 'Gaussian' (the default)
+            - 'Rectangular'
+            - [num_ring_up_cycles, num_ring_down_cycles]
+                The last option generates a continuous wave signal with a cosine taper of the specified length at the beginning and end.
+        plot: Boolean controlling whether the created tone burst is plotted.
+        signal_length: Signal length in number of samples. If longer than the tone burst length, the signal is appended with zeros.
+        signal_offset: Signal offset before the tone burst starts in number of samples. If an array is given, a matrix of tone bursts is created where each row corresponds to a tone burst for each value of the 'SignalOffset'.
 
-            envelope:      - Envelope used to taper the tone burst. Valid inputs
-                              are:
-
-                                  'Gaussian' (the default)
-                                  'Rectangular'
-                                  [num_ring_up_cycles, num_ring_down_cycles]
-
-                              The last option generates a continuous wave signal
-                              with a cosine taper of the specified length at the
-                              beginning and end.
-
-            plot:             Boolean controlling whether the created tone
-                              burst is plotted.
-            signal_length:    Signal length in number of samples, if longer
-                              than the tone burst length, the signal is
-                              appended with zeros.
-            signal_offset:    Signal offset before the tone burst starts in
-                              number of samples.
-
-    Returns: created tone burst
+    Returns:
+        created tone burst
 
     """
     assert isinstance(signal_offset, int), "signal_offset must be integer"
@@ -487,12 +422,12 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
 def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarray):
     """
-
     Args:
         sensor_data: N x K
         reorder_index: N
 
     Returns:
+        reordered sensor data
 
     """
     reorder_index = np.squeeze(reorder_index)
@@ -510,24 +445,22 @@ def calc_max_freq(max_spat_freq, c):
 def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     """
      get_alpha_filter uses get_win to create a Tukey window via rotation to
-     pass to the medium.alpha_filter input field of the first order
-     simulation functions (kspaceFirstOrder1D, kspaceFirstOrder2D, and
-     kspaceFirstOrder3D). This parameter is used to regularise time
-     reversal image reconstruction when absorption compensation is
-     included.
+     pass to the medium.alpha_filter. This parameter is used to regularise time
+     reversal image reconstruction when absorption compensation is included.
 
     Args:
-        kgrid (kWaveGrid):
-        medium (Medium):
-        filter_cutoff (list): Any of the filter_cutoff inputs may be set to 'max' to set the cutoff frequency to the maximum frequency supported by the grid
-        taper_ratio:
+        kgrid: simulation grid
+        medium: simulation medium
+        filter_cutoff: Any of the filter_cutoff inputs may be set to 'max' to set the cutoff frequency to the maximum frequency supported by the grid
+        taper_ratio: The taper_ratio input is used to control the width of the transition region between the passband and stopband. The default value is 0.5, which corresponds to a transition region of 50% of the filter width.
 
     Returns:
-        alpha_filter:
+        alpha_filter
+
     """
 
     dim = num_dim(kgrid.k)
-    print(f'    taber ratio: {taper_ratio}')
+    print(f'    taper ratio: {taper_ratio}')
     # extract the maximum sound speed
     c = max(medium.sound_speed)
 
@@ -578,19 +511,20 @@ def get_wave_number(Nx, dx, dim):
     return kx
 
 
-def gradient_spect(f, dn, dim=None, deriv_order=1):
+def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List[int]]] = None,
+                   deriv_order: int = 1) -> np.ndarray:
     """
-    gradient_spect calculates the gradient of an n-dimensional input
-    matrix using the Fourier collocation spectral method. The gradient
-    for singleton dimensions is returned as 0.
+    gradient_spect calculates the gradient of an n-dimensional input matrix using the Fourier collocation spectral method.
+    The gradient for singleton dimensions is returned as 0.
 
     Args:
-        f:
-        dn:
-        dim:
-        deriv_order:
+        f: A numpy ndarray representing the input matrix.
+        dn: A list of floats representing the grid spacings in each dimension.
+        dim: An optional integer or list of integers representing the dimensions along which to calculate the gradient.
+        deriv_order: An integer representing the order of the derivative to calculate. Default is 1.
 
     Returns:
+        A numpy ndarray containing the calculated gradient.
 
     """
 
@@ -662,12 +596,12 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     Reorders the sensor data based on the coordinates of the sensor points.
 
     Args:
-        kgrid (object): The k-Wave grid object.
-        sensor (object): The k-Wave sensor object.
-        sensor_data (np.ndarray): The sensor data to be reordered.
+        kgrid: The k-Wave grid object.
+        sensor: The k-Wave sensor object.
+        sensor_data: The sensor data to be reordered.
 
     Returns:
-        np.ndarray: The reordered sensor data.
+        np.ndarray of the reordered sensor data.
 
     Raises:
         ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
@@ -699,18 +633,14 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     return reordered_sensor_data
 
 
-def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
+def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: np.ndarray,
+                      ramp_length: int = 4) -> np.ndarray:
     """
-   create_cw_signals generates a series of continuous wave (CW) signals
-   based on the 1D or 2D input matrices amp and phase, where each signal
-   is given by:
+   create_cw_signals generates a series of continuous wave (CW) signals based on the 1D or 2D input matrices amp and phase, where each signal is given by:
 
        amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));
 
-   To avoid startup transients, a cosine tapered up-ramp is applied to
-   the beginning of the signal. By default, the length of this ramp is
-   four periods of the wave. The up-ramp can be turned off by setting
-   the ramp_length to 0.
+   To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length of this ramp is four periods of the wave. The up-ramp can be turned off by setting the ramp_length to 0.
 
     Example:
 
@@ -729,16 +659,16 @@ def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
         cw_signal = create_cw_signals(t_array, f, amp, phase)
 
     Args:
-        t_array:
-        freq:
-        amp:
-        phase:
-        ramp_length:
+        t_array: A numpy ndarray representing the time values.
+        freq: A float representing the frequency of the signals.
+        amp: A numpy ndarray representing the amplitudes of the signals.
+        phase: A numpy ndarray representing the phases of the signals.
+        ramp_length: An optional integer representing the length of the cosine up-ramp in periods of the wave. Default is 4.
 
     Returns:
-        cw_signals:
-
+        A numpy ndarray containing the generated CW signals.
     """
+
     if len(phase) == 1:
         phase = phase * np.ones(amp.shape)
 
