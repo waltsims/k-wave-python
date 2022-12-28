@@ -61,7 +61,7 @@ def check_field_names(dictionary, *fields):
         assert k in fields, f'The field {k} is not a valid field for the given dictionary'
 
 
-def check_str_eq(value, target: str):
+def check_str_eq(value, target: str) -> bool:
     """
     This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.
 
@@ -112,14 +112,14 @@ def is_number(value: Any) -> bool:
     return np.issubdtype(np.array(value), np.number)
 
 
-def is_unix():
+def is_unix() -> bool:
     """
     Check whether the current platform is a Unix-like system.
 
     Args:
 
     Returns:
-        is_unix: (bool) True if the current platform is a Unix-like system, False otherwise.
+        is_unix: True if the current platform is a Unix-like system, False otherwise.
 
     """
     return platform.system() in ['Linux', 'Darwin']

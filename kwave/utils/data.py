@@ -5,7 +5,18 @@ from typing import Tuple, Union
 import numpy as np
 
 
-def get_smallest_possible_type(max_array_val, target_type_group, default=None):
+def get_smallest_possible_type(max_array_val, target_type_group, default=None) -> Union[str, None]:
+    """
+    Returns the smallest possible type for the given array.
+    Args:
+        max_array_val:
+        target_type_group:
+        default:
+
+    Returns:
+        type_:
+
+    """
     types = {'uint', 'int'}
     assert target_type_group in types
 
@@ -14,7 +25,8 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None):
         if max_array_val < intmax(type_):
             return type_
 
-    return default
+    type_ = default
+    return type_
 
 
 def intmax(dtype: str) -> int:
@@ -22,11 +34,10 @@ def intmax(dtype: str) -> int:
     Returns the maximum value for the given integer type.
 
     Args:
-        dtype(str): The integer type.
+        dtype: The integer type.
 
     Returns
-        max_val(int): The maximum value for the given integer type.
-    :rtype: int
+        max_val: The maximum value for the given integer type.
     """
     return np.iinfo(getattr(np, dtype)).max
 
@@ -37,10 +48,10 @@ def scale_time(seconds: int) -> str:
     and seconds, and returns a string with this information.
 
     Args:
-        seconds(int): number of seconds
+        seconds: number of seconds
 
     Returns:
-        time(str): string of scaled time
+        time: string of scaled time
     """
     # switch to calculating years, weeks, and days if larger than 100 hours
     if seconds > (60 * 60 * 100):
@@ -91,13 +102,13 @@ def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
     Scale a number to nearest SI unit prefix.
 
     Args:
-        x(float):
+        x:
 
     Returns:
-        x_sc(float):string of scaled input and prefix
-        scale(float):numeric scale factor
-        prefix(str):single character scale prefix
-        prefix_fullname(str):full SI name for prefixReturns
+        x_sc: string of scaled input and prefix
+        scale:numeric scale factor
+        prefix: single character scale prefix
+        prefix_fullname: full SI name for prefixReturns
 
     """
     # force the input to be a scalar
