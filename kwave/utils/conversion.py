@@ -34,7 +34,7 @@ def neper2db(alpha: float, y: int = 1) -> float:
         y: Power law exponent (default=1)
 
     Returns:
-        alpha (float): Attenuation in dB / (MHz ^ y cm)
+        alpha: Attenuation in dB / (MHz ^ y cm)
     """
 
     # calculate conversion
@@ -46,10 +46,11 @@ def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
     """
 
     Args:
-        data:
-        matlab_type:
+        data: The data to cast.
+        matlab_type: The type to cast to.
 
     Returns:
+        The cast data.
 
     """
     if not isinstance(data, np.ndarray):
@@ -138,7 +139,7 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
     return filter_size, filter_cutoff
 
 
-def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False):
+def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarray:
     """
     Interpolates the set of Cartesian points defined by
     cart_data onto a binary matrix defined by the kWaveGrid object
@@ -147,12 +148,12 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False):
     kgrid.
 
     Args:
-        kgrid: k:
-        cart_data(np.ndarray):
-        axisymmetric(bool):
+        kgrid: simulation grid
+        cart_data: Cartesian sensor points
+        axisymmetric: set to True to use axisymmetric interpolation
 
     Returns:
-        grid(np.ndarray): binary grid
+        grid: binary grid
     """
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:
@@ -285,3 +286,62 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False):
     if num_discarded_points != 0:
         print(f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
     return grid_data.astype(np.int), order_index, reorder_index
+
+
+def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
+    """
+    Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
+    For soft tissue, the approximate sound speed can also be returned using the empirical relationship
+    given by Mast [1].
+
+    Args:
+        ct_data: matrix of Hounsfield values (np.ndarray)
+
+    Returns:
+        sound_speed: matrix of sound speed values of size of ct_data (np.ndarray)
+
+    References:
+        [1] Mast, T. D., "Empirical relationships between acoustic parameters in human soft tissues,"
+        Acoust. Res. Lett. Online, 1(2), pp. 37-42 (2000).
+    """
+    # calculate corresponding sound speed values if required using soft tissue relationship
+    # TODO confirm that this linear relationship is correct
+    sound_speed = (hounsfield2density(ct_data) + 349) / 0.893
+
+    return sound_speed
+
+
+def hounsfield2density(ct_data: np.ndarray, plot_fitting: bool = False) -> np.ndarray:
+    """
+    Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
+
+    Args:
+        ct_data (np.ndarray): The CT data in Hounsfield units.
+        plot_fitting (bool, optional): Whether to plot the fitting curve (default: False).
+
+    Returns:
+        np.ndarray: The density values in [kg / m ^ 3].
+    """
+    # create empty density matrix
+    density = np.zeros(ct_data.shape, like=ct_data)
+
+    # apply conversion in several parts using linear fits to the data
+    # Part 1: Less than 930 Hounsfield Units
+    density[ct_data < 930] = np.polyval([1.025793065681423, -5.680404011488714], ct_data[ct_data < 930])
+
+    # Part 2: Between 930 and 1098(soft tissue region)
+    index_selection = np.logical_and(930 <= ct_data, ct_data <= 1098)
+    density[index_selection] = np.polyval([0.9082709691264, 103.6151457847139],
+                                          ct_data[index_selection])
+
+    # Part 3: Between 1098 and 1260(between soft tissue and bone)
+    index_selection = np.logical_and(1098 < ct_data, ct_data < 1260)
+    density[index_selection] = np.polyval([0.5108369316599, 539.9977189228704], ct_data[index_selection])
+
+    # Part 4: Greater than 1260(bone region)
+    density[ct_data >= 1260] = np.polyval([0.6625370912451, 348.8555178455294], ct_data[ct_data >= 1260])
+
+    if plot_fitting:
+        raise NotImplementedError("Plotting function not implemented in Python")
+
+    return density
