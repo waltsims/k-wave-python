@@ -37,7 +37,7 @@ def next_pow2(n):
     n |= n >> 16
 
     # increment `n` and return
-    return n + 1
+    return np.log2(n + 1)
 
 
 def single_sided_correction(func_fft, fft_len, dim):
