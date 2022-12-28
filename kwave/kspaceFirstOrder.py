@@ -33,7 +33,7 @@ def kspaceFirstOrderG(func):
 
 def kspaceFirstOrderC():
     """
-        Decorator for the kspaceFO-CPU functions
+    Decorator for the kspaceFO-CPU functions
 
     Args:
         func: kspaceFirstOrderNDC function where 1 <= N <= 3

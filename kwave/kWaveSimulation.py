@@ -147,8 +147,8 @@ class kWaveSimulation(object):
     @property
     def blank_sensor(self):
         """
-            true if sensor.mask is not defined but _max_all or _final variables are still recorded
-        Returns:
+        Returns
+            True if sensor.mask is not defined but _max_all or _final variables are still recorded
 
         """
         fields = ['p', 'p_max', 'p_min', 'p_rms', 'u', 'u_non_staggered',
@@ -160,27 +160,26 @@ class kWaveSimulation(object):
     @property
     def elastic_code(self):
         """
-            Whether the simulation is elastic or fluid
         Returns:
-            True if elastic simulation
+            True if elastic simulation False if fluid simulation
         """
         return self.calling_func_name.startswith(('pstdElastic', 'kspaceElastic'))
 
     @property
     def kspace_elastic_code(self):
         """
-            Whether the simulation is k-space elastic code or an ordinary elastic code
         Returns:
-            True if elastic simulation with k-space correction
+            True if elastic simulation with k-space correction False if ordinary
+
         """
         return self.calling_func_name.startswith('kspaceElastic')
 
     @property
     def axisymmetric(self):
         """
-            Whether the code is axisymmetric
         Returns:
             True if fluid axisymmetric simulation
+
         """
         if self.calling_func_name.startswith('kspaceFirstOrderAS'):
             return True
@@ -190,25 +189,27 @@ class kWaveSimulation(object):
     @property
     def kelvin_voigt_model(self):
         """
+        Returns:
             Whether the simulation is elastic with absorption
+
         """
         return False
 
     @property
     def nonuniform_grid(self):
         """
-            Whether the grid is nonuniform
         Returns:
             True if the computational grid is non-uniform
+
         """
         return self.kgrid.nonuniform
 
     @property
     def time_rev(self):
         """
-            Whether the simulation is time reversal
         Returns:
             True for time reversal simulaions using sensor.time_reversal_boundary_data
+
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
@@ -219,18 +220,18 @@ class kWaveSimulation(object):
     @property
     def elastic_time_rev(self):
         """
-            Whether the simulation is time reversal and elastic code
         Returns:
             True if using time reversal with the elastic code
+
         """
         return False
 
     @property
     def compute_directivity(self):
         """
-            Whether the directivity should be computed
         Returns:
             True if directivity calculations in 2D are used by setting sensor.directivity_angle
+
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if self.kgrid.dim == 2:
@@ -243,6 +244,7 @@ class kWaveSimulation(object):
     @property
     def cuboid_corners(self):
         """
+        Returns:
             Whether the sensor.mask is a list of cuboid corners
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
@@ -256,7 +258,9 @@ class kWaveSimulation(object):
     @property
     def source_p0(self):  # initial pressure
         """
+        Returns:
             Whether initial pressure source is present (default=False)
+
         """
         flag = False  # default
         if not isinstance(self.source, NotATransducer) and self.source.p0 is not None:
@@ -267,7 +271,9 @@ class kWaveSimulation(object):
     @property
     def source_p0_elastic(self):  # initial pressure in the elastic code
         """
+        Returns:
             Whether initial pressure source is present in the elastic code (default=False)
+
         """
         # Not clear where this flag is set
         return False
@@ -275,7 +281,9 @@ class kWaveSimulation(object):
     @property
     def source_p(self):
         """
+        Returns:
             Whether time-varying pressure source is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
@@ -287,9 +295,9 @@ class kWaveSimulation(object):
     @property
     def source_p_labelled(self):  # time-varying pressure with labelled source mask
         """
-            Whether time-varying pressure source with labelled source mask is present (default=False)
         Returns:
             True/False if labelled/binary source mask, respectively.
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
@@ -301,7 +309,9 @@ class kWaveSimulation(object):
     @property
     def source_ux(self) -> bool:
         """
+        Returns:
             Whether time-varying particle velocity source is used in X-direction
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.ux is not None:
@@ -313,7 +323,9 @@ class kWaveSimulation(object):
     @property
     def source_uy(self) -> bool:
         """
+        Returns:
             Whether time-varying particle velocity source is used in Y-direction
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uy is not None:
@@ -325,7 +337,9 @@ class kWaveSimulation(object):
     @property
     def source_uz(self) -> bool:
         """
+        Returns:
             Whether time-varying particle velocity source is used in Z-direction
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uz is not None:
@@ -337,7 +351,9 @@ class kWaveSimulation(object):
     @property
     def source_u_labelled(self):
         """
+        Returns:
             Whether time-varying velocity source with labelled source mask is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.u_mask is not None:
@@ -354,6 +370,7 @@ class kWaveSimulation(object):
     @property
     def source_sxx(self):
         """
+        Returns:
             Whether time-varying stress source in X->X direction is present (default=False)
         """
         flag = False
@@ -364,7 +381,9 @@ class kWaveSimulation(object):
     @property
     def source_syy(self):
         """
+        Returns:
             Whether time-varying stress source in Y->Y direction is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syy is not None:
@@ -374,7 +393,9 @@ class kWaveSimulation(object):
     @property
     def source_szz(self):
         """
+        Returns:
             Whether time-varying stress source in Z->Z direction is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.szz is not None:
@@ -384,7 +405,9 @@ class kWaveSimulation(object):
     @property
     def source_sxy(self):
         """
+        Returns:
             Whether time-varying stress source in X->Y direction is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxy is not None:
@@ -394,7 +417,9 @@ class kWaveSimulation(object):
     @property
     def source_sxz(self):
         """
+        Returns:
             Whether time-varying stress source in X->Z direction is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxz is not None:
@@ -404,7 +429,9 @@ class kWaveSimulation(object):
     @property
     def source_syz(self):
         """
+        Returns:
             Whether time-varying stress source in Y->Z direction is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syz is not None:
@@ -414,7 +441,9 @@ class kWaveSimulation(object):
     @property
     def source_s_labelled(self):
         """
+        Returns:
             Whether time-varying stress source with labelled source mask is present (default=False)
+
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.s_mask is not None:
@@ -431,6 +460,7 @@ class kWaveSimulation(object):
     @property
     def use_w_source_correction_p(self):
         """
+        Returns:
             Whether to use the w source correction instead of the k-space source correction for pressure sources
         """
         flag = False
@@ -442,6 +472,7 @@ class kWaveSimulation(object):
     @property
     def use_w_source_correction_u(self):
         """
+        Returns:
             Whether to use the w source correction instead of the k-space source correction for velocity sources
         """
         flag = False
@@ -453,7 +484,7 @@ class kWaveSimulation(object):
 
     def input_checking(self, calling_func_name) -> None:
         """
-            Check the input fields for correctness and validness
+        Check the input fields for correctness and validness
 
         Args:
             calling_func_name: Name of the script that calls this function
@@ -507,7 +538,7 @@ class kWaveSimulation(object):
     @staticmethod
     def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
         """
-            Check correct function has been called for the dimensionality of kgrid
+        Check correct function has been called for the dimensionality of kgrid
 
         Args:
             calling_func_name: Name of the script that makes calls to kWaveSimulation
@@ -529,7 +560,7 @@ class kWaveSimulation(object):
     @staticmethod
     def print_start_status(is_elastic_code) -> None:
         """
-            Update command-line status with the start time
+        Update command-line status with the start time
 
         Args:
             is_elastic_code: is the simulation elastic
@@ -545,8 +576,8 @@ class kWaveSimulation(object):
 
     def set_index_data_type(self) -> None:
         """
-            Pre-calculate the data type needed to store the matrix indices given the
-            total number of grid points: indexing variables will be created using this data type to save memory
+        Pre-calculate the data type needed to store the matrix indices given the
+        total number of grid points: indexing variables will be created using this data type to save memory
 
         Returns:
             None
@@ -557,7 +588,7 @@ class kWaveSimulation(object):
     @staticmethod
     def check_medium(medium, kgrid_k, is_elastic, is_axisymmetric):
         """
-            Check the properties of the medium structure for correctness and validity
+        Check the properties of the medium structure for correctness and validity
 
         Args:
             medium: kWaveMedium instance
@@ -588,7 +619,7 @@ class kWaveSimulation(object):
 
     def check_source(self, kgrid_dim) -> None:
         """
-            Check the source properties for correctness and validity
+        Check the source properties for correctness and validity
 
         Args:
             kgrid_dim: kWaveGrid dimension
@@ -998,7 +1029,7 @@ class kWaveSimulation(object):
 
     def check_kgrid_time(self) -> None:
         """
-            Check time-related kWaveGrid inputs
+        Check time-related kWaveGrid inputs
 
         Returns:
             None
@@ -1036,7 +1067,7 @@ class kWaveSimulation(object):
     @staticmethod
     def select_precision(opt: SimulationOptions):
         """
-            Select the minimal precision for storing the data
+        Select the minimal precision for storing the data
 
         Args:
             opt: SimulationOptions instance
@@ -1068,7 +1099,7 @@ class kWaveSimulation(object):
 
     def check_input_combinations(self, opt: SimulationOptions, user_medium_density_input: bool, k_dim, pml_size, kgrid_N) -> None:
         """
-            Check the input combinations for correctness and validity
+        Check the input combinations for correctness and validity
 
         Args:
             opt: SimulationOptions instance
@@ -1160,7 +1191,7 @@ class kWaveSimulation(object):
 
     def smooth_and_enlarge(self, source, k_dim, kgrid_N, opt: SimulationOptions) -> None:
         """
-            Smooth and enlarge grids
+        Smooth and enlarge grids
 
         Args:
             source: kWaveSource instance
@@ -1279,7 +1310,7 @@ class kWaveSimulation(object):
 
     def create_sensor_variables(self) -> None:
         """
-            Create the sensor related variables
+        Create the sensor related variables
 
         Returns:
             None
@@ -1373,8 +1404,8 @@ class kWaveSimulation(object):
 
     def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:
         """
-            Shorten commonly used field names (these act only as pointers provided that the values aren't modified)
-            (done after enlarging and smoothing the grids)
+        Shorten commonly used field names (these act only as pointers provided that the values aren't modified)
+        (done after enlarging and smoothing the grids)
 
         Args:
             medium: kWaveMedium instance
@@ -1389,7 +1420,7 @@ class kWaveSimulation(object):
 
     def scale_source_terms(self, is_scale_source_terms) -> None:
         """
-            Scale the source terms based on the expanded and smoothed values of the medium parameters
+        Scale the source terms based on the expanded and smoothed values of the medium parameters
 
         Args:
             is_scale_source_terms: Should the source terms be scaled
@@ -1439,8 +1470,8 @@ class kWaveSimulation(object):
 
     def create_pml_indices(self, kgrid_dim, kgrid_N: Array, pml_size, pml_inside, is_axisymmetric):
         """
-            Define index variables to remove the PML from the display if the optional
-            input 'PlotPML' is set to false
+        Define index variables to remove the PML from the display if the optional
+        input 'PlotPML' is set to false
 
         Args:
             kgrid_dim: kWaveGrid dimensinality
@@ -1448,8 +1479,6 @@ class kWaveSimulation(object):
             pml_size: Size of the PML
             pml_inside: Whether the PML is inside the grid defined by the user
             is_axisymmetric: Whether the simulation is axisymmetric
-
-        Returns:
 
         """
         # comment by Farid: PlotPML is always False in Python version,

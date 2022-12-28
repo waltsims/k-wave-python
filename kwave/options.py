@@ -153,7 +153,7 @@ class SimulationOptions(object):
     @staticmethod
     def option_factory(kgrid: "kWaveGrid", elastic_code: bool, axisymmetric: bool, **kwargs):
         """
-            Initialize the Simulation Options
+        Initialize the Simulation Options
 
         Args:
             kgrid: kWaveGrid instance
