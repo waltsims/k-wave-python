@@ -27,7 +27,6 @@ class kWaveTransducerSimple(object):
             radius=float('inf')
     ):
         """
-
         Args:
             kgrid: kWaveGrid object
             number_elements: the total number of transducer elements
@@ -36,7 +35,9 @@ class kWaveTransducerSimple(object):
             element_spacing: the spacing (kerf width) between the transducer elements in grid points
             position: the position of the corner of the transducer in the grid
             radius: the radius of curvature of the transducer [m]
+
         """
+
         # allocate the grid size and spacing
         self.stored_grid_size = [kgrid.Nx, kgrid.Ny, kgrid.Nz]    # size of the grid in which the transducer is defined
         self.grid_spacing = [kgrid.dx, kgrid.dy, kgrid.dz]        # corresponding grid spacing
@@ -74,9 +75,12 @@ class kWaveTransducerSimple(object):
     @property
     def transducer_width(self):
         """
-            total width of the transducer in grid points
+
+        Total width of the transducer in grid points
+
         Returns:
             the overall length of the transducer
+
         """
         return self.number_elements * self.element_width + (self.number_elements - 1) * self.element_spacing
 
@@ -98,9 +102,9 @@ class NotATransducer(kSensor):
             steering_angle=None
     ):
         """
+        'time_reversal_boundary_data' and 'record' fields should not be defined
+        for the objects of this class
 
-            'time_reversal_boundary_data' and 'record' fields should not be defined
-            for the objects of this class
         Args:
             kgrid: kWaveGrid object
             active_elements: the transducer elements that are currently active elements
@@ -112,7 +116,9 @@ class NotATransducer(kSensor):
             input_signal:
             steering_angle_max:
             steering_angle:
+
         """
+
         super().__init__()
         assert isinstance(transducer, kWaveTransducerSimple)
         self.transducer = transducer
@@ -240,8 +246,7 @@ class NotATransducer(kSensor):
     @property
     def beamforming_delays(self):
         """
-            calculate the beamforming delays based on the focus and steering settings
-        Returns:
+        calculate the beamforming delays based on the focus and steering settings
 
         """
         # calculate the element pitch in [m]
@@ -272,19 +277,22 @@ class NotATransducer(kSensor):
     @property
     def beamforming_delays_offset(self):
         """
-            offset used to make all the delays in the delay_mask positive (either set to 'auto' or based on the setting for steering_angle_max)
+        Offset used to make all the delays in the delay_mask positive (either set to 'auto' or based on the setting for steering_angle_max)
+
         Returns:
             the stored value of the offset used to force the values in delay_mask to be >= 0
+
         """
+
         return self.stored_beamforming_delays_offset
 
     @property
     def mask(self):
         """
-            allow mask query to allow compatability with regular sensor structure - return the active sensor mask
-        Returns:
+        Allow mask query to allow compatability with regular sensor structure - return the active sensor mask
 
         """
+
         return self.active_elements_mask
 
     @property
@@ -463,18 +471,18 @@ class NotATransducer(kSensor):
     @property
     def appended_zeros(self):
         """
-            number of zeros appended to input signal to allow a single time series to be used
-            within kspaceFirstOrder3D (either set to 'auto' or based on the setting for steering_angle_max)
-        Returns:
+        Number of zeros appended to input signal to allow a single time series to be used
+        within kspaceFirstOrder3D (either set to 'auto' or based on the setting for steering_angle_max)
 
         """
+
         return self.stored_appended_zeros
 
     @property
     def grid_size(self):
         """
-            return the size of the grid
-        Returns: grid size
+        Returns:
+             grid size
 
         """
         return self.transducer.stored_grid_size
@@ -482,8 +490,8 @@ class NotATransducer(kSensor):
     @property
     def active_elements_mask(self):
         """
-            return a binary mask showing the locations of the active elements
         Returns:
+            A binary mask showing the locations of the active elements
 
         """
         indexed_mask = np.copy(self.indexed_mask)
@@ -505,10 +513,11 @@ class NotATransducer(kSensor):
     @property
     def all_elements_mask(self):
         """
-            binary mask of all the transducer elements (both active and inactive)
         Returns:
-            a binary mask showing the locations of all the elements (both active and inactive)
+            A binary mask showing the locations of all the elements (both active and inactive)
+
         """
+
         mask = np.copy(self.indexed_mask)
         mask[mask != 0] = 1
         return mask
@@ -525,15 +534,15 @@ class NotATransducer(kSensor):
     @property
     def transmit_apodization_mask(self):
         """
-            % convert the transmit wave apodization into the form of a element mask,
-            % where the apodization values are placed at the grid points
-            % belonging to the active transducer elements. These values are
-            % then extracted in the correct order within
-            % kspaceFirstOrder_inputChecking using apodization =
-            % transmit_apodization_mask(active_elements_mask ~= 0)
-        Returns:
+        convert the transmit wave apodization into the form of a element mask,
+        where the apodization values are placed at the grid points
+        belonging to the active transducer elements. These values are
+        then extracted in the correct order within
+        kspaceFirstOrder_inputChecking using apodization =
+        transmit_apodization_mask(active_elements_mask ~= 0)
 
         """
+
         # get transmit apodization
         apodization = self.get_transmit_apodization()
 
@@ -548,9 +557,9 @@ class NotATransducer(kSensor):
 
     def get_transmit_apodization(self):
         """
+        Returns:
             return the transmit apodization, converting strings of window
             type to actual numbers using getWin
-        Returns:
 
         """
 
@@ -576,10 +585,9 @@ class NotATransducer(kSensor):
 
     def delay_mask(self, mode=None):
         """
-            % mode == 1: both delays
-            % mode == 2: elevation only
-            % mode == 3: azimuth only
-        Returns:
+        mode == 1: both delays
+        mode == 2: elevation only
+        mode == 3: azimuth only
 
         """
         # assign the delays to a new mask using the indexed_element_mask
@@ -623,8 +631,8 @@ class NotATransducer(kSensor):
     @property
     def elevation_beamforming_delays(self):
         """
-            calculate the elevation beamforming delays based on the focus setting
-        Returns:
+        Calculate the elevation beamforming delays based on the focus setting
+
         """
         if not np.isinf(self.elevation_focus_distance):
             # create indexing variable

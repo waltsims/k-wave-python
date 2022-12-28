@@ -2,11 +2,15 @@ import numbers
 import os
 from dataclasses import dataclass, field
 from tempfile import gettempdir
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import numpy as np
 
-from kwave.utils.io import get_h5_literals, get_date_string
+if TYPE_CHECKING:
+    # Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+    from kwave.kgrid import kWaveGrid
+from kwave.utils.data import get_date_string
+from kwave.utils.io import get_h5_literals
 from kwave.utils.pml import get_optimal_pml_size
 
 
@@ -146,11 +150,10 @@ class SimulationOptions(object):
         assert self.use_fd is None or (np.issubdtype(self.use_fd, np.number) and self.use_fd in [2, 4]), \
             "Optional input ''UseFD'' can only be set to 2, 4."
 
-
     @staticmethod
-    def option_factory(kgrid, elastic_code: bool, axisymmetric: bool, **kwargs):
+    def option_factory(kgrid: "kWaveGrid", elastic_code: bool, axisymmetric: bool, **kwargs):
         """
-            Initialize the Simulation Options
+        Initialize the Simulation Options
 
         Args:
             kgrid: kWaveGrid instance

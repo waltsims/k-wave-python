@@ -2,13 +2,12 @@ import numpy as np
 import pytest
 from phantominator import shepp_logan
 
-from kwave.utils.checks import num_dim
-from kwave.utils.conversion import db2neper, neper2db
+from kwave.utils.conversion import db2neper, neper2db, hounsfield2density
 from kwave.utils.filters import extract_amp_phase, spect, apply_filter
 from kwave.utils.interp import get_bli
-from kwave.utils.mapgen import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, \
+from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig, make_cart_circle, \
     make_cart_sphere
-from kwave.utils.matrix import gradient_fd, resize
+from kwave.utils.matrix import gradient_fd, resize, num_dim
 from kwave.utils.signals import tone_burst, add_noise, gradient_spect
 
 input_signal = np.array([0., 0.00099663, 0.00646706, 0.01316044, 0.01851998,

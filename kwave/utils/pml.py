@@ -13,15 +13,15 @@ def get_pml(Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: f
     If the axisymmetric argument is set to True, the axial side of the radial PML will not be added.
 
     Args:
-        Nx (int): The number of grid points in the x direction.
-        dx (float): The spacing between grid points in the x direction.
-        dt (float): The time step size.
-        c (float): The wave speed in the medium.
-        pml_size (int): The size of the PML layer in grid points.
-        pml_alpha (float): The absorption coefficient of the PML layer.
-        staggered (bool): Whether to use a staggered grid for calculating the varying components of the PML.
-        dimension (int): The dimension of the PML (1, 2, or 3).
-        axisymmetric (bool, optional): Whether to use axisymmetry when calculating the PML. Defaults to False.
+        Nx: The number of grid points in the x direction.
+        dx: The spacing between grid points in the x direction.
+        dt: The time step size.
+        c: The wave speed in the medium.
+        pml_size: The size of the PML layer in grid points.
+        pml_alpha: The absorption coefficient of the PML layer.
+        staggered: Whether to use a staggered grid for calculating the varying components of the PML.
+        dimension: The dimension of the PML (1, 2, or 3).
+        axisymmetric: Whether to use axisymmetry when calculating the PML. Defaults to False.
 
     Returns:
         A 1D numpy array representing the PML variable.
@@ -82,7 +82,7 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
                         PML to the outside edge in the radial dimension.
 
     Returns:
-         pml_sz:       PML size that gives the overall grid with the smallest prime factors.
+         PML size that gives the overall grid with the smallest prime factors.
 
     """
     # check if grid size is given as kgrid, and extract grid size

@@ -3,8 +3,9 @@ from math import pi
 import numpy as np
 
 from kwave.reconstruction.beamform import envelope_detection
-from kwave.utils.filters import gaussian, fwhm, sharpness, \
+from kwave.utils.filters import fwhm, sharpness, \
     smooth
+from kwave.utils.math import gaussian
 from kwave.utils.signals import create_cw_signals
 from kwave.utils.signals import get_win
 

@@ -1,15 +1,10 @@
-from unittest.mock import Mock
-
-from kwave.utils.mapgen import make_circle, make_line
-
-from kwave.utils.interp import cart2grid
-
-from kwave.utils.conversion import scale_time
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.mapgen import make_line
 
 
 def test_makeLine():
