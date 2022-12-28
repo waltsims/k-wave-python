@@ -22,6 +22,63 @@ def angular_spectrum(
         loops_for_time_est=5,
         record_time_series=False
 ):
+    """
+    Projects a 2D input plane (given as a 3D matrix of
+    time series at each spatial position) using the angular spectrum
+    method. The time series are decomposed into spectral components and
+    then each frequency is propagated using the spectral propagator with
+    angular restriction described in reference [1].
+
+
+    Args:
+      input_plane: 3D matrix containing the time varying pressure
+      over a 2D input plane indexed as (x, y, t) [Pa].
+      dx: Spatial step between grid points in the input plane [m].
+      dt: Temporal step between time points in the input plane [s].
+      z_pos: Vector specifying the relative z-position of
+      the planes to which the data is projected [m].
+      medium: Medium object.
+      angular_restriction: Boolean controlling whether angular
+      restriction is used as described in [1] (default = True).
+      grid_expansion: Scalar value controlling the expansion of the input
+      grid prior to computation (default = 0).
+      fft_length: String or integer controlling the length of the FFT used for
+      the angular spectrum method. The options are 'auto', which
+      uses the next power of 2 greater than or equal to the length
+      of the input data, or a specific integer value. The FFT
+      length has a significant impact on the computation time and
+      memory requirements (default = 'auto').
+      data_cast: String input of the data type that variables
+      are cast to before computation. For example,
+      setting to 'single' will speed up the computation time
+      (due to the improved efficiency of fft2 and ifft2)
+      but may introduce numerical errors. The default value is 'off'
+      which performs no data casting (default = 'off').
+      data_recast: Boolean controlling whether the output data is recast to the
+      original data type after computation (default = False).
+      reverse_proj: Boolean controlling whether the projection is performed
+      in the opposite direction (default = False).
+      absorbing: Boolean controlling whether the input data has an
+      absorbing boundary applied prior to computation (default = False).
+      plot_updates: Boolean controlling whether a plot is shown during
+      computation to display the progress (default = False).
+      loops_for_time_est: Integer controlling the number of loops used to
+      estimate the computation time. This is used to
+      display an estimated time remaining during
+      computation (default = 5).
+      record_time_series: Boolean controlling whether the time series data is recorded
+
+    Examples:
+      >>>    pressure_max = angularSpectrum(input_plane, dx, dt, z_pos, c0)
+      >>>    pressure_max = angularSpectrum(input_plane, dx, dt, z_pos, medium)
+      >>>    (pressure_max, pressure_time) = angularSpectrum(input_plane, dx, dt, z_pos, c0)
+      >>>    (pressure_max, pressure_time) = angularSpectrum(input_plane, dx, dt, z_pos, medium)
+
+     References:
+       [1] Zeng, X., & McGough, R. J. (2008). Evaluation of the angular
+            spectrum approach for simulations of near-field pressures.
+            The Journal of the Acoustical Society of America, 123(1), 68-76.
+    """
     TicToc.tic()
     # check list of valid inputs
     if not isinstance(data_cast, str):
