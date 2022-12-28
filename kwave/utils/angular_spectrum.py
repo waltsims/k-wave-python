@@ -1,14 +1,12 @@
 import time
 
 import numpy as np
+from matplotlib import pyplot as plt
+
 from kwave.utils.conversion import scale_SI, scale_time, db2neper
 from kwave.utils.filters import next_pow2
 from kwave.utils.matrix import expand_matrix
-from matplotlib import pyplot as plt
-
 from kwave.utils.tictoc import TicToc
-
-from scipy.io import loadmat
 
 
 def angular_spectrum(
