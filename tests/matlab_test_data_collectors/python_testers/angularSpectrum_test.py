@@ -3,10 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kwave.enums import DiscreteCosine, DiscreteSine
-from kwave.kgrid import kWaveGrid
 from kwave.utils.angular_spectrum import angular_spectrum
-from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
