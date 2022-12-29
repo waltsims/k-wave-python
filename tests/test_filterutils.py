@@ -12,24 +12,7 @@ from kwave.utils.signals import get_win
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_gaussian():
-    test_record_path = os.path.join(Path(__file__).parent, Path(
-        'matlab_test_data_collectors/python_testers/collectedValues/gaussian.mat'))
-    reader = TestRecordReader(test_record_path)
-    x = reader.expected_value_of('x')
-
-    y = gaussian(x)
-    y_prime = reader.expected_value_of('y')
-    assert np.allclose(y, y_prime), "Gaussian distribution did not match expected distribution"
-
-
-def generate_test_signal(fs):
-    dt = 1 / fs  # [s]
-    duration = 0.25  # [s]
-    t = np.arange(0, duration, dt)  # [s]
-    F = 15
-    return np.sin(2 * pi * F * t)
-
+# todo:
 def test_tannenbaum_sharpness2():
     image = np.ones((5, 5))
     image[:2, :] = 0.0
