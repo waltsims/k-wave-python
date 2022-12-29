@@ -1,4 +1,6 @@
+import os
 from math import pi
+from pathlib import Path
 
 import numpy as np
 
@@ -7,39 +9,18 @@ from kwave.utils.filters import gaussian, fwhm, sharpness, \
     smooth
 from kwave.utils.signals import create_cw_signals
 from kwave.utils.signals import get_win
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_gaussian():
-    x = np.arange(-3, 3.05, 0.05)
+    test_record_path = os.path.join(Path(__file__).parent, Path(
+        'matlab_test_data_collectors/python_testers/collectedValues/gaussian.mat'))
+    reader = TestRecordReader(test_record_path)
+    x = reader.expected_value_of('x')
 
-    # TODO: refactor
-    gauss_distr = gaussian(x)
-    expected_gaussian = np.array([[0.00443185, 0.00514264, 0.00595253, 0.00687277, 0.00791545,
-                                   0.00909356, 0.01042093, 0.01191224, 0.01358297, 0.01544935,
-                                   0.0175283, 0.01983735, 0.02239453, 0.02521822, 0.02832704,
-                                   0.03173965, 0.03547459, 0.03955004, 0.0439836, 0.04879202,
-                                   0.05399097, 0.05959471, 0.06561581, 0.07206487, 0.07895016,
-                                   0.08627732, 0.09404908, 0.10226492, 0.11092083, 0.120009,
-                                   0.1295176, 0.13943057, 0.14972747, 0.16038333, 0.17136859,
-                                   0.18264909, 0.19418605, 0.20593627, 0.21785218, 0.22988214,
-                                   0.24197072, 0.25405906, 0.26608525, 0.27798489, 0.28969155,
-                                   0.30113743, 0.31225393, 0.32297236, 0.3332246, 0.34294386,
-                                   0.35206533, 0.36052696, 0.36827014, 0.37524035, 0.38138782,
-                                   0.38666812, 0.39104269, 0.39447933, 0.39695255, 0.39844391,
-                                   0.39894228, 0.39844391, 0.39695255, 0.39447933, 0.39104269,
-                                   0.38666812, 0.38138782, 0.37524035, 0.36827014, 0.36052696,
-                                   0.35206533, 0.34294386, 0.3332246, 0.32297236, 0.31225393,
-                                   0.30113743, 0.28969155, 0.27798489, 0.26608525, 0.25405906,
-                                   0.24197072, 0.22988214, 0.21785218, 0.20593627, 0.19418605,
-                                   0.18264909, 0.17136859, 0.16038333, 0.14972747, 0.13943057,
-                                   0.1295176, 0.120009, 0.11092083, 0.10226492, 0.09404908,
-                                   0.08627732, 0.07895016, 0.07206487, 0.06561581, 0.05959471,
-                                   0.05399097, 0.04879202, 0.0439836, 0.03955004, 0.03547459,
-                                   0.03173965, 0.02832704, 0.02521822, 0.02239453, 0.01983735,
-                                   0.0175283, 0.01544935, 0.01358297, 0.01191224, 0.01042093,
-                                   0.00909356, 0.00791545, 0.00687277, 0.00595253, 0.00514264,
-                                   0.00443185]])
-    assert (expected_gaussian - gauss_distr < 1e-6).all(), "Gaussian distribution did not match expected distribution"
+    y = gaussian(x)
+    y_prime = reader.expected_value_of('y')
+    assert np.allclose(y, y_prime), "Gaussian distribution did not match expected distribution"
 
 
 def generate_test_signal(fs):
