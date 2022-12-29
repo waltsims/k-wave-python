@@ -12,6 +12,7 @@ from kwave.utils.signals import get_win
 def test_gaussian():
     x = np.arange(-3, 3.05, 0.05)
 
+    # TODO: refactor
     gauss_distr = gaussian(x)
     expected_gaussian = np.array([[0.00443185, 0.00514264, 0.00595253, 0.00687277, 0.00791545,
                                    0.00909356, 0.01042093, 0.01191224, 0.01358297, 0.01544935,
@@ -118,6 +119,7 @@ def test_create_cw_signals():
 def test_smooth():
     A = np.diag(np.ones(6))
     A_sm = np.array(smooth(A))
+    # TODO: refactor
     expected_A_sm = np.array([[0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705, 0.23343146],
                      [0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705],
                      [0.09246705, 0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708],
