@@ -93,7 +93,6 @@ def test_apply_filter_lowpass():
     pass
 
 
-# TODO:
 def test_apply_filter_highpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")

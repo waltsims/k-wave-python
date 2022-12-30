@@ -1,5 +1,5 @@
 import warnings
-from typing import Tuple
+from typing import Tuple, Union, List
 
 import numpy as np
 from scipy.interpolate import interpn, interp1d
@@ -67,32 +67,25 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
     return np.pad(matrix, **opts)
 
 
-def resize(mat, new_size, interp_mode='linear'):
+def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 'linear') -> np.ndarray:
     """
-    resize: resamples a "matrix" of spatial samples to a desired "resolution" or spatial sampling frequency via interpolation
+    Resizes a matrix of spatial samples to a desired resolution or spatial sampling frequency
+    via interpolation.
 
-    Args:
-        mat:                matrix to be "resized" i.e. resampled
-        new_size:         desired output resolution
-        interp_mode:        interpolation method
+    Parameters:
+        mat: Matrix to be resized (i.e., resampled).
+        new_size: Desired output resolution.
+        interp_mode: Interpolation method.
 
     Returns:
-        res_mat:            "resized" matrix
-
+        Resized matrix.
     """
-
-    # start the timer
-    TicToc.tic()
-
-    # update command line status
-    print('Resizing matrix...')
 
     # check inputs
     assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
 
     mat = mat.squeeze()
-    mat_shape = mat.shape
 
     axis = []
     for dim in range(len(mat.shape)):
@@ -116,7 +109,6 @@ def resize(mat, new_size, interp_mode='linear'):
     else:
         mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
-    print(f'  completed in {scale_time(TicToc.toc())}')
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 

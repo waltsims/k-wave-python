@@ -20,7 +20,7 @@ def test_resize():
         mat = recorded_data['volume']
         expected_mat = recorded_data['resized_volume'].squeeze()
         new_size = recorded_data['new_size'][0]
-        method = recorded_data['type'][0]  # TODO: does not work for nearest or spline cases
+        method = recorded_data['method'][0]  # TODO: does not work for spline cases
 
         resized_mat = resize(mat, new_size, interp_mode=method)
 
