@@ -8,7 +8,6 @@ from kwave.utils.signals import create_cw_signals
 from kwave.utils.signals import get_win
 
 
-# TODO:
 def test_envelope_detection():
     fs = 512  # [Hz]
     dt = 1 / fs  # [s]
@@ -17,17 +16,20 @@ def test_envelope_detection():
     F = 60
     data = np.sin(2 * pi * F * t)
     data = envelope_detection(data)
-    assert (abs(data - 1) < 1e-4).all()
+    assert np.allclose(data, 1)
 
 
-# TODO:
 def test_fwhm():
+    # Define a function that returns a peak at a given center point
     def peak(x, c):
         return np.exp(-np.power(x - c, 2) / 16.0)
 
+    # Create an array of x values from 0 to 20 with 21 elements
     x = np.linspace(0, 20, 21)
+    # Get the y values for the peak centered at x=10
     y = peak(x, 10)
-    assert abs(fwhm(y, x) - 6.691) < 1e-3
+    # Assert that the full width at half maximum (fwhm) of the peak is approximately 6.691
+    assert np.isclose(fwhm(y, x), 6.691, rtol=1e-3)
 
 
 # TODO:
