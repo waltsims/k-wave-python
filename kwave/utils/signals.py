@@ -1,4 +1,4 @@
-from math import floor, pi
+from math import floor
 from typing import Union, List, Optional
 
 import numpy as np
@@ -701,20 +701,18 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     return reordered_sensor_data
 
 
-def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
+def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: np.ndarray,
+                      ramp_length: int = 4) -> np.ndarray:
     """
-   create_cw_signals generates a series of continuous wave (CW) signals
-   based on the 1D or 2D input matrices amp and phase, where each signal
-   is given by:
+    Generate a series of continuous wave (CW) signals based on the 1D or 2D input matrices `amp` and `phase`, where each signal
+    is given by:
 
-       amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));
+        amp[i, j] .* sin(2 * pi * freq * t_array + phase[i, j]);
 
-   To avoid startup transients, a cosine tapered up-ramp is applied to
-   the beginning of the signal. By default, the length of this ramp is
-   four periods of the wave. The up-ramp can be turned off by setting
-   the ramp_length to 0.
+    To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length
+    of this ramp is four periods of the wave. The up-ramp can be turned off by setting the `ramp_length` to 0.
 
-    Example:
+    Examples:
 
         # define sampling parameters
         f = 5e6
@@ -731,42 +729,58 @@ def create_cw_signals(t_array, freq, amp, phase, ramp_length=4):
         cw_signal = create_cw_signals(t_array, f, amp, phase)
 
     Args:
-        t_array:
-        freq:
-        amp:
-        phase:
-        ramp_length:
+        t_array: 1D array of time points.
+        freq: Frequency of the wave.
+        amp: 1D or 2D array of amplitudes.
+        phase: 1D or 2D array of phases.
+        ramp_length: Length of the cosine up-ramp, in periods of the wave. Default is 4.
 
     Returns:
-        cw_signals:
+        np.ndarray: 2D array of CW signals.
 
     """
-    if len(phase) == 1:
-        phase = phase * np.ones(amp.shape)
 
-    N1, N2 = amp.T.shape
+    if amp.ndim > 1:
+        N1, N2 = amp.shape
+    else:
+        N1, N2 = amp.shape[0], 1
 
-    cw_signals = np.zeros([N1, N2, len(t_array)])
+    # create input signals
+    cw_signal = np.zeros((N1, N2, len(t_array)))
 
-    for idx1 in range(N1 - 1):
-        for idx2 in range(N2 - 1):
-            cw_signals[idx1, idx2, :] = amp[idx1, idx2] * np.sin(2 * pi * freq * t_array + phase[idx1, idx2])
+    # create signal
+    for index1 in range(N1):
+        for index2 in range(N2):
+            if amp.ndim > 1:
+                cw_signal[index1, index2, :] = amp[index1, index2] * np.sin(
+                    2 * np.pi * freq * t_array + phase[index1, index2])
+            else:
+                cw_signal[index1, index2, :] = amp[index1] * np.sin(2 * np.pi * freq * t_array + phase[index1])
 
+    # apply ramp to avoid startup transients
     if ramp_length != 0:
-        # get period and time-step
+        # get period and time step (assuming dt is constant)
         period = 1 / freq
         dt = t_array[1] - t_array[0]
 
-        # create ramp x-axis between 0 and pi
-        ramp_length_points = int(np.round(ramp_length * period / dt))
-        ramp_axis = np.arange(0, pi, pi / (ramp_length_points))
+        # create x-axis for ramp between 0 and pi
+        ramp_length_points = round(ramp_length * period / dt)
+        ramp_axis = np.linspace(0, np.pi, ramp_length_points)
 
         # create ramp using a shifted cosine
         ramp = (-np.cos(ramp_axis) + 1) * 0.5
-        ramp = np.reshape(ramp, (1, 1, -1))
+        ramp = np.expand_dims(ramp, axis=(0, 1))
 
         # apply ramp to all signals simultaneously
+        cw_signal[:, :, :ramp_length_points] = ramp * cw_signal[:, :, :ramp_length_points]
 
-        cw_signals[:, :, :ramp_length_points] *= ramp
+    # remove singleton dimensions if cw_signal has more than two dimensions
+    if cw_signal.ndim > 2:
+        cw_signal = np.squeeze(cw_signal)
 
-    return np.squeeze(cw_signals)
+    # if only a single amplitude and phase is given, force time to be the
+    # second dimensions
+    if amp.ndim == 1:
+        cw_signal = np.reshape(cw_signal, (N1, -1))
+
+    return cw_signal

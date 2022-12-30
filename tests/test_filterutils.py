@@ -4,8 +4,6 @@ import numpy as np
 
 from kwave.reconstruction.beamform import envelope_detection
 from kwave.utils.filters import fwhm
-from kwave.utils.signals import create_cw_signals
-from kwave.utils.signals import get_win
 
 
 def test_envelope_detection():
@@ -30,20 +28,3 @@ def test_fwhm():
     y = peak(x, 10)
     # Assert that the full width at half maximum (fwhm) of the peak is approximately 6.691
     assert np.isclose(fwhm(y, x), 6.691, rtol=1e-3)
-
-
-# TODO:
-def test_create_cw_signals():
-    # define sampling parameters
-    f = 5e6
-    T = 1 / f
-    Fs = 100e6
-    dt = 1 / Fs
-    t_array = np.arange(0, 10 * T, dt)
-
-    # define amplitude and phase
-    amp, cg = get_win(9, type_='Gaussian')
-    phase = np.arange(0, 2 * pi, 9).T
-
-    # create signals
-    cw_signal = create_cw_signals(t_array, f, amp, phase)
