@@ -3,13 +3,12 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from phantominator import shepp_logan
 
 from kwave.utils.checks import num_dim
 from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import extract_amp_phase, spect, apply_filter
 from kwave.utils.interp import get_bli
-from kwave.utils.mapgen import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
+from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, resize
 from kwave.utils.signals import tone_burst, add_noise, gradient_spect
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
@@ -22,21 +21,6 @@ def test_nepers2db():
 
 def test_db2nepers():
     assert abs(db2neper(1.6) - 2.931742395517710e-06) < 1e-6, "Point check of nepers2db incorrect"
-    return
-
-
-# Todo:
-def test_hounsfield2soundspeed():
-    ph = shepp_logan(5)
-
-    expected_density = np.array([[-5.68040401, -5.68040401, -5.68040401, -5.68040401, -5.68040401],
-                                 [-5.68040401, -5.4752454, -5.37266609, -5.4752454, -5.68040401],
-                                 [-5.68040401, -5.4752454, -5.4752454, -5.4752454, -5.68040401],
-                                 [-5.68040401, -5.4752454, -5.4752454, -5.4752454, -5.68040401],
-                                 [-5.68040401, -5.68040401, -5.68040401, -5.68040401, -5.68040401]])
-
-    assert ((expected_density - hounsfield2density(ph)) < 1).all(), "Generated denisty does not match expected value"
-
     return
 
 
@@ -75,7 +59,7 @@ def test_signal_offset():
 
 
 def test_num_dim():
-    assert num_dim(np.ones((1, 2))) == 1, " num_dim fails for len 3"
+    assert num_dim(np.ones((1, 2))) == 1, "num_dim fails for len 3"
     assert num_dim(np.ones((2, 2))) == 2, "num_dim fails for len 2"
     return
 
