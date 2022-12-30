@@ -3,7 +3,7 @@ from math import pi
 import numpy as np
 
 from kwave.reconstruction.beamform import envelope_detection
-from kwave.utils.filters import fwhm, smooth
+from kwave.utils.filters import fwhm
 from kwave.utils.signals import create_cw_signals
 from kwave.utils.signals import get_win
 
@@ -47,17 +47,3 @@ def test_create_cw_signals():
 
     # create signals
     cw_signal = create_cw_signals(t_array, f, amp, phase)
-
-
-# TODO:
-def test_smooth():
-    A = np.diag(np.ones(6))
-    A_sm = np.array(smooth(A))
-    # TODO: refactor
-    expected_A_sm = np.array([[0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705, 0.23343146],
-                     [0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708, 0.09246705],
-                     [0.09246705, 0.23343146, 0.3150659, 0.23343146, 0.09246705, 0.03313708],
-                     [0.03313708, 0.09246705, 0.23343146, 0.3150659, 0.23343146, 0.09246705],
-                     [0.09246705, 0.03313708, 0.09246705, 0.23343146, 0.3150659, 0.23343146],
-                     [0.23343146, 0.09246705, 0.03313708, 0.09246705, 0.23343146, 0.3150659]])
-    assert (A_sm - expected_A_sm < 0.001).all()

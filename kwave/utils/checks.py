@@ -126,6 +126,7 @@ def is_number(value):
 
     Returns:
         bool: True if the value is numeric, False otherwise.
+
     """
     if value is None:
         return False
@@ -133,8 +134,8 @@ def is_number(value):
         return True
     if isinstance(value, str):
         return False
-    if value.dtype in [np.float32, np.float64]:
-        return True
+    if isinstance(value, np.ndarray):
+        return np.issubdtype(value.dtype, np.number)
     return np.issubdtype(np.array(value), np.number)
 
 
