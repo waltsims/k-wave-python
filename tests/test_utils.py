@@ -9,8 +9,7 @@ from kwave.utils.checks import num_dim
 from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import extract_amp_phase, spect, apply_filter
 from kwave.utils.interp import get_bli
-from kwave.utils.mapgen import hounsfield2density, fit_power_law_params, power_law_kramers_kronig, make_cart_circle, \
-    make_cart_sphere
+from kwave.utils.mapgen import hounsfield2density, fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, resize
 from kwave.utils.signals import tone_burst, add_noise, gradient_spect
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
@@ -26,6 +25,7 @@ def test_db2nepers():
     return
 
 
+# Todo:
 def test_hounsfield2soundspeed():
     ph = shepp_logan(5)
 
@@ -109,6 +109,7 @@ def test_apply_filter_lowpass():
     pass
 
 
+# TODO:
 def test_apply_filter_highpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
@@ -164,21 +165,21 @@ def test_gradient_spacing():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     dx = 2
     grad = gradient_fd(f, dx)
-    assert np.isclose(np.array(grad), np.array([0.5, 0.75, 1.25, 1.75, 2.25, 2.5])).all()
+    assert np.allclose(np.array(grad), np.array([0.5, 0.75, 1.25, 1.75, 2.25, 2.5]))
 
 
 def test_gradient_spacing_ndim():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     x = np.arange(f.size)
     grad = gradient_fd(f, x)
-    assert np.isclose(grad, np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.])).all()
+    assert np.allclose(grad, np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.]))
 
 
 def test_gradeint_spacing_uneven():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     x = np.array([0., 1., 1.5, 3.5, 4., 6.], dtype=float)
     grad = gradient_fd(f, x)
-    assert np.isclose(grad, np.array([1., 3., 3.5, 6.7, 6.9, 2.5])).all()
+    assert np.allclose(grad, np.array([1., 3., 3.5, 6.7, 6.9, 2.5]))
 
 
 def test_gradient_FD_2D():
@@ -186,8 +187,8 @@ def test_gradient_FD_2D():
     grad = gradient_fd(f)
 
     assert len(grad) == 2, "gradient_fd did not return two gradient matrices."
-    assert np.isclose(np.array(grad), [np.array([[2., 2., -1.], [2., 2., -1.]]),
-                                       np.array([[1., 2.5, 4.], [1., 1., 1.]])]).all()
+    assert np.allclose(np.array(grad), [np.array([[2., 2., -1.], [2., 2., -1.]]),
+                                        np.array([[1., 2.5, 4.], [1., 1., 1.]])])
 
     pass
 
@@ -219,6 +220,7 @@ def test_gradient_spect_2D():
     pass
 
 
+# TODO:
 def test_resize_2D_splinef2d():
     mat = np.ones([10, 10])
     out = resize(mat, [20, 20], 'splinef2d')
@@ -298,13 +300,3 @@ def test_resize_2D_nearest_smaller():
     p1 = resize(p0, new_size, interp_mode='nearest')
     assert p1.shape == tuple(new_size)
     assert np.all(p1.T == [0., 1.])
-
-
-def test_make_cart_circle():
-    # test it runs
-    make_cart_circle(5, 40)
-
-
-def test_make_cart_sphere():
-    # test it runs
-    make_cart_sphere(5, 40)
