@@ -1,8 +1,13 @@
 import platform
 from copy import deepcopy
-from typing import List
+from typing import List, TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    # Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+    from kwave.kgrid import kWaveGrid
+    from kwave.kmedium import kWaveMedium
 
 from .conversion import db2neper
 from .math import sinc, primefactors
@@ -18,7 +23,9 @@ def enforce_fields(dictionary, *fields):
 
     Raises:
         AssertionError: If any of the specified fields are not in the dictionary.
+
     """
+
     for f in fields:
         assert f in dictionary.keys(), [f'The field {f} must be defined in the given dictionary']
 
@@ -28,12 +35,14 @@ def enforce_fields_obj(obj, *fields):
     Enforces that certain fields are not None in the given object.
 
     Args:
-    obj: Object to check the fields of.
-    *fields: List of field names to check.
+        obj: Object to check the fields of.
+        *fields: List of field names to check.
 
     Raises:
-    AssertionError: If any of the given fields are None in the given object.
+        AssertionError: If any of the given fields are None in the given object.
+
     """
+
     for f in fields:
         assert getattr(obj, f) is not None, f'The field {f} must be not None in the given object'
 
@@ -43,51 +52,19 @@ def check_field_names(dictionary, *fields):
     This method checks if the keys of the given dictionary are valid fields.
 
     Args:
-    dictionary: A dictionary where the keys will be checked for validity.
-    *fields: A list of valid field names.
-
-    Returns:
-    None
+        dictionary: A dictionary where the keys will be checked for validity.
+        *fields: A list of valid field names.
 
     Raises:
-    AssertionError: If any of the keys in the dictionary are not in the list of valid fields.
+        AssertionError: If any of the keys in the dictionary are not in the list of valid fields.
+
     """
+
     for k in dictionary.keys():
         assert k in fields, f'The field {k} is not a valid field for the given dictionary'
 
 
-def num_dim(x):
-    """
-    Returns the number of dimensions in x, after collapsing any singleton dimensions.
-
-    Args:
-    x (np.ndarray): The input array.
-
-    Returns:
-    int: The number of dimensions in x.
-    """
-    return len(x.squeeze().shape)
-
-
-def num_dim2(x: np.ndarray):
-    """
-    Get the number of dimensions of an array after collapsing singleton dimensions.
-
-    Args:
-        x (np.ndarray): The input array.
-
-    Returns:
-        int: The number of dimensions of the array after collapsing singleton dimensions.
-    """
-    sz = np.squeeze(x).shape
-
-    if len(sz) > 2:
-        return len(sz)
-    else:
-        return np.sum(np.array(sz) > 1)
-
-
-def check_str_eq(value, target: str):
+def check_str_eq(value, target: str) -> bool:
     """
     This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.
 
@@ -96,8 +73,10 @@ def check_str_eq(value, target: str):
         target: The target string to compare with.
 
     Returns:
-        bool: True if the value is a string and is equal to the target, False otherwise.
+        True if the value is a string and is equal to the target, False otherwise.
+
     """
+
     return isinstance(value, str) and value == target
 
 
@@ -113,11 +92,13 @@ def check_str_in(value, target: List[str]) -> bool:
 
     Returns:
         True if `value` is a string and is present in `target`, otherwise False
+
     """
+
     return isinstance(value, str) and value in target
 
 
-def is_number(value):
+def is_number(value: Any) -> bool:
     """
     Check if the given value is a numeric type.
 
@@ -125,9 +106,10 @@ def is_number(value):
         value: The value to check.
 
     Returns:
-        bool: True if the value is numeric, False otherwise.
+        True if the value is numeric, False otherwise.
 
     """
+
     if value is None:
         return False
     if isinstance(value, (int, float)):
@@ -139,42 +121,43 @@ def is_number(value):
     return np.issubdtype(np.array(value), np.number)
 
 
-def is_unix():
+def is_unix() -> bool:
     """
     Check whether the current platform is a Unix-like system.
 
-    Args:
-        None
-
     Returns:
-        bool: True if the current platform is a Unix-like system, False otherwise.
+        True if the current platform is a Unix-like system, False otherwise.
 
     """
     return platform.system() in ['Linux', 'Darwin']
 
 
-def check_stability(kgrid, medium):
+def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
     """
-          checkStability calculates the maximum time step for which the k-space
-          propagation models kspaceFirstOrder1D, kspaceFirstOrder2D and
-          kspaceFirstOrder3D are stable. These models are unconditionally
-          stable when the reference sound speed is equal to or greater than the
-          maximum sound speed in the medium and there is no absorption.
-          However, when the reference sound speed is less than the maximum
-          sound speed the model is only stable for sufficiently small time
-          steps. The criterion is more stringent (the time step is smaller) in
-          the absorbing case.
+    Calculates the maximum time step for which the k-space
+    propagation models are stable.
 
-          The time steps given are accurate when the medium properties are
-          homogeneous. For a heterogeneous media they give a useful, but not
-          exact, estimate.
+    These models are unconditionally
+    stable when the reference sound speed is equal to or greater than the
+    maximum sound speed in the medium and there is no absorption.
+    However, when the reference sound speed is less than the maximum
+    sound speed the model is only stable for sufficiently small time
+    steps. The criterion is more stringent (the time step is smaller) in
+    the absorbing case.
+
+    The time steps given are accurate when the medium properties are
+    homogeneous. For a heterogeneous media they give a useful, but not
+    exact, estimate.
+
     Args:
-        kgrid: k-Wave grid object return by kWaveGrid
-        medium: structure containing the medium properties
+        kgrid: simulation grid
+        medium: medium properties
 
-    Returns: the maximum time step for which the models are stable.
-            This is set to Inf when the model is unconditionally stable.
+    Returns:
+         The maximum time step for which the models are stable. This is set to Inf when the model is unconditionally stable.
+
     """
+
     # why? : this function was migrated from Matlab.
     # Matlab would treat the 'medium' as a "pass by value" argument.
     # In python argument is passed by reference and changes in this function will cause original data to be changed.
@@ -293,8 +276,6 @@ def check_factors(min_number: int, max_number: int) -> None:
         min_number: integer specifying the lower bound of values to test
         max_number: integer specifying the upper bound of values to test
 
-    Returns:
-        None
     """
 
     # compute the factors and maximum prime factors for each number in the range
@@ -315,17 +296,19 @@ def check_factors(min_number: int, max_number: int) -> None:
 
 def check_divisible(number: float, divider: float) -> bool:
     """
-        Checks whether number is divisible by divider without any remainder
-        Why do we need such a function? -> Because due to floating point precision we
-        experience rounding errors while using standard modulo operator with floating point numbers
+    Checks whether number is divisible by divider without any remainder
+    Why do we need such a function? -> Because due to floating point precision we
+    experience rounding errors while using standard modulo operator with floating point numbers
+
     Args:
         number: Number that's supposed to be divided
         divider: Divider that should devide the number
 
     Returns:
-        bool: True if number is divisible by divider, False otherwise
+        True if number is divisible by divider, False otherwise
+
     """
+
     result = number / divider
     after_decimal = result % 1
     return after_decimal == 0
-

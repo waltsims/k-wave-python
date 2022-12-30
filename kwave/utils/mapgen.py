@@ -1,81 +1,84 @@
 import math
 import warnings
 from math import floor
-from typing import Tuple, Optional, Union
+from typing import Tuple, Optional, Union, List, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
 
-from .conversion import scale_SI, db2neper, neper2db
-from .matlab import matlab_assign, matlab_find
+from .conversion import db2neper, neper2db
+from .data import scale_SI
+from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
 
 
-def get_spaced_points(start, stop, n=100, spacing='linear'):
+def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
     """
-    getSpacedPoints generates a row vector of either logarithmically or
-    linearly spaced points between X1 and X2. When spacing is set to
-    'linear', the function is identical to the inbuilt np.linspace
-    function. When spacing is set to 'log', the function is similar to
-    the inbuilt np.logspace function, except that X1 and X2 define the start
-    and end numbers, not decades. For logarithmically spaced points, X1
-    must be > 0. If N < 2, X2 is returned.
+    Generate a row vector of either logarithmically or linearly spaced points between `start` and `stop`.
+
+    When `spacing` is set to 'linear', the function is identical to the inbuilt `np.linspace` function.
+    When `spacing` is set to 'log', the function is similar to the inbuilt `np.logspace` function, except
+    that `start` and `stop` define the start and end numbers, not decades. For logarithmically spaced
+    points, `start` must be > 0. If `n` < 2, `stop` is returned.
+
     Args:
-        start:
-        stop:
-        n:
-        spacing:
+        start: start value for the spaced points
+        stop: end value for the spaced points
+        n: number of points to generate
+        spacing: type of spacing to use, either 'linear' or 'log'
 
     Returns:
-        points:
+        points: row vector of spaced points
+
+    Raises:
+        ValueError: if `stop` <= `start` or `spacing` is not 'linear' or 'log'
+
     """
-    # check if the end point is larger than the start point
+
     if stop <= start:
-        raise ValueError('X2 must be larger than X1.')
+        raise ValueError('`stop` must be larger than `start`.')
 
     if spacing == 'linear':
         return np.linspace(start, stop, num=n)
     elif spacing == 'log':
         return np.geomspace(start, stop, num=n)
     else:
-        raise ValueError(f"spacing {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
+        raise ValueError(f"`spacing` {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
 
 
-def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
+def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: float, plot_fit: bool = False) -> Tuple[
+    float, float]:
     """
+    Calculate absorption parameters that fit a power law over a given frequency range.
 
-    fit_power_law_params calculates the absorption parameters that should
-    be defined in the simulation functions given the desired power law
-    absorption behaviour defined by a0 and y. This takes into account the
-    actual absorption behaviour exhibited by the fractional Laplacian
-    wave equation.
+    This function calculates the absorption parameters that should be defined in the simulation functions
+    to achieve the desired power law absorption behavior defined by `a0` and `y`. This takes into account
+    the actual absorption behavior exhibited by the fractional Laplacian wave equation.
 
-    This fitting is required when using large absorption values or high
-    frequencies, as the fractional Laplacian wave equation solved in
-    kspaceFirstOrderND and kspaceSecondOrder no longer encapsulates
-    absorption of the form a = a0*f^y.
+    This fitting is required when using large absorption values or high frequencies, as the fractional
+    Laplacian wave equation solved in `kspaceFirstOrderND` and `kspaceSecondOrder` no longer encapsulates
+    absorption of the form `a = a0*f^y`.
 
-    The returned values should be used to define the medium.alpha_coeff
-    and medium.alpha_power within the simulation functions. The
-    absorption behaviour over the frequency range f_min:f_max will then
-    follow the power law defined by a0 and y.Add testing for get_optimal_pml_size()
+    The returned values should be used to define `medium.alpha_coeff` and `medium.alpha_power` within the
+    simulation functions. The absorption behavior over the frequency range `f_min`:`f_max` will then
+    follow the power law defined by `a0` and `y`.
 
     Args:
-        a0:
-        y:
-        c0:
-        f_min:
-        f_max:
-        plot_fit:
+        a0: coefficient in the power law absorption equation
+        y: exponent in the power law absorption equation
+        c0: speed of sound in the medium
+        f_min: minimum frequency in the range to fit the power law
+        f_max: maximum frequency in the range to fit the power law
+        plot_fit: whether to plot the fit
 
     Returns:
-        a0_fit:
-        y_fit:
+        A tuple of the absorption coefficient and fitted exponent of the power law absorption equation.
 
     """
+
     # define frequency axis
     f = get_spaced_points(f_min, f_max, 200)
     w = 2 * np.pi * f
@@ -106,35 +109,26 @@ def fit_power_law_params(a0, y, c0, f_min, f_max, plot_fit=False):
     return a0_fit, y_fit
 
 
-def power_law_kramers_kronig(w, w0, c0, a0, y):
+def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: float) -> np.ndarray:
     """
-     POWERLAWKRAMERSKRONIG Calculate dispersion for power law absorption.
+    Compute the variation in sound speed for an attenuating medium using the Kramers-Kronig for power law attenuation.
 
-     DESCRIPTION:
-         powerLawKramersKronig computes the variation in sound speed for an
-         attenuating medium using the Kramers-Kronig for power law
-         attenuation where att = a0*w^y. The power law parameters must be in
-         Nepers / m, with the frequency in rad/s. The variation is given
-         about the sound speed c0 at a reference frequency w0.
-
-     USAGE:
-         c_kk = power_law_kramers_kronig(w, w0, c0, a0, y)
-
-     INPUTS:
-
-     OUTPUTS:
+    This function computes the variation in sound speed for an attenuating medium using the Kramers-Kronig
+    formula for power law attenuation, where `att = a0 * w^y`. The power law parameters must be in Nepers/m,
+    with the frequency in rad/s. The variation is given about the sound speed `c0` at a reference frequency `w0`.
 
     Args:
-         w:             input frequency array [rad/s]
-         w0:            reference frequency [rad/s]
-         c0:            sound speed at w0 [m/s]
-         a0:            power law coefficient [Nepers/((rad/s)^y m)]
-         y:             power law exponent, where 0 < y < 3
+        w: input frequency array [rad/s]
+        w0: reference frequency [rad/s]
+        c0: sound speed at w0 [m/s]
+        a0: power law coefficient [Nepers/((rad/s)^y m)]
+        y: power law exponent, where 0 < y < 3
 
     Returns:
-         c_kk           variation of sound speed with w [m/s]
+        Variation of sound speed with w [m/s]
 
     """
+
     if 0 >= y or y >= 3:
         warnings.warn("y must be within the interval (0,3)", UserWarning)
         c_kk = c0 * np.ones_like(w)
@@ -150,27 +144,25 @@ def power_law_kramers_kronig(w, w0, c0, a0, y):
 
 def water_absorption(f, temp):
     """
-    water_absorption Calculate ultrasound absorption in distilled water.
-
-    DESCRIPTION:
-    waterAbsorption calculates the ultrasonic absorption in distilled
+    Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
     polynomial fitted to the data given by np.pinkerton(1949).
 
-    USAGE:
-    abs = waterAbsorption(f, T)
 
-    INPUTS:
-    f - f frequency value [MHz]
-    T - water temperature value [degC]
+    Args:
+        f:   f frequency value [MHz]
+        T:   water temperature value [degC]
 
-    OUTPUTS:
-    abs - absorption[dB / cm]
+    Returns:
+        abs:  absorption [dB / cm]
 
-    REFERENCES:
-    [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
-    and its Relation to Molecular Constitution, " Proceedings of the
-    Physical Society.Section B, 2, 129 - 141
+    Examples:
+        >>> abs = waterAbsorption(f, T)
+
+    References:
+        [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
+        and its Relation to Molecular Constitution, " Proceedings of the
+        Physical Society.Section B, 2, 129 - 141
 
     """
 
@@ -184,11 +176,6 @@ def water_absorption(f, temp):
     a = [56.723531840522710, -2.899633796917384, 0.099253401567561, -0.002067402501557, 2.189417428917596e-005,
          -6.210860973978427e-008, -6.402634551821596e-010, 3.869387679459408e-012]
 
-    # TODO: this is not a vectorized version of this function. This is different than the MATLAB version
-    # make sure vectors are in the correct orientation
-    # T = reshape(T, 3, []);
-    # f = reshape(f, [], 1);
-
     # compute absorption
     a_on_fsqr = (a[0] + a[1] * temp + a[2] * temp ** 2 + a[3] * temp ** 3 + a[4] * temp ** 4 + a[5] * temp ** 5 + a[
         6] * temp ** 6 + a[7] * temp ** 7) * 1e-17
@@ -197,94 +184,27 @@ def water_absorption(f, temp):
     return abs
 
 
-def hounsfield2soundspeed(ct_data):
+def water_sound_speed(temp: float) -> float:
     """
-
-    Calclulates the soundspeed of a medium given a CT of the medium.
-    For soft-tissue, the approximate sound speed can also be returned
-    using the empirical relationship given by Mast.
-
-    Mast, T. D., "Empirical relationships between acoustic parameters
-    in human soft tissues," Acoust. Res. Lett. Online, 1(2), pp. 37-42
-    (2000).
+    Calculate the sound speed in distilled water with temperature.
 
     Args:
-        ct_data: 
-
-    Returns: sound_speed:       matrix of sound speed values of size of ct data
-
-    """
-    # calculate corresponding sound speed values if required using soft tissue  relationship
-    # TODO confirm that this linear relationship is correct
-    sound_speed = (hounsfield2density(ct_data) + 349) / 0.893
-
-    return sound_speed
-
-
-def hounsfield2density(ct_data, plot_fitting=False):
-    """
-    Convert Hounsfield units in CT data to density values [kg / m ^ 3]
-    based on the experimental data given by Schneider et al.
-    The conversion is made using a np.piece-wise linear fit to the data.
-
-    Args:
-        ct_data:
-        plot_fitting:
+        temp: The temperature of the water in degrees Celsius.
 
     Returns:
-        density_map:            density in kg / m ^ 3
-    """
-    # create empty density matrix
-    density = np.zeros(ct_data.shape, like=ct_data)
+        c: The sound speed in distilled water in m/s.
 
-    # apply conversion in several parts using linear fits to the data
-    # Part 1: Less than 930 Hounsfield Units
-    density[ct_data < 930] = np.polyval([1.025793065681423, -5.680404011488714], ct_data[ct_data < 930])
+    Raises:
+        ValueError: if `temp` is not between 0 and 95
 
-    # Part 2: Between 930 and 1098(soft tissue region)
-    index_selection = np.logical_and(930 <= ct_data, ct_data <= 1098)
-    density[index_selection] = np.polyval([0.9082709691264, 103.6151457847139],
-                                          ct_data[index_selection])
-
-    # Part 3: Between 1098 and 1260(between soft tissue and bone)
-    index_selection = np.logical_and(1098 < ct_data, ct_data < 1260)
-    density[index_selection] = np.polyval([0.5108369316599, 539.9977189228704], ct_data[index_selection])
-
-    # Part 4: Greater than 1260(bone region)
-    density[ct_data >= 1260] = np.polyval([0.6625370912451, 348.8555178455294], ct_data[ct_data >= 1260])
-
-    if plot_fitting:
-        raise NotImplementedError("Plotting function not implemented in Python")
-
-    return density
-
-
-def water_sound_speed(temp):
-    """
-    WATERSOUNDSPEED Calculate the sound speed in distilled water with temperature.
-
-     DESCRIPTION:
-         waterSoundSpeed calculates the sound speed in distilled water at a
-         a given temperature using the 5th order polynomial given by Marczak
-         (1997).
-
-     USAGE:
-         c = waterSoundSpeed(T)
-
-     INPUTS:
-         T             - water temperature in the range 0 to 95 [degC]
-
-     OUTPUTS:
-         c             - sound speed [m/s]
-
-     REFERENCES:
-         [1] Marczak (1997) "Water as a standard in the measurements of speed
-         of sound in liquids," J. Acoust. Soc. Am., 102, 2776-2779.
+    References:
+        Marczak, R. (1997). The sound velocity in water as a function of temperature. Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
     # check limits
-    assert 95 >= temp >= 0, "temp must be between 0 and 95."
+    if not (0 <= temp <= 95):
+        raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
     p = [2.787860e-9, -1.398845e-6, 3.287156e-4, -5.779136e-2, 5.038813, 1.402385e3]
@@ -292,64 +212,53 @@ def water_sound_speed(temp):
     return c
 
 
-def water_density(temp):
+def water_density(temp: float) -> float:
     """
-     WATERDENSITY Calculate density of air - saturated water with temperature.
+    Calculate the density of air-saturated water with temperature.
 
-     DESCRIPTION:
-     waterDensity calculates the density of air - saturated water at a given % temperature using the 4 th order polynomial given by Jones(1992).
+    This function calculates the density of air-saturated water at a given temperature using the 4th order polynomial
+    given by Jones [1].
 
-     USAGE:
-     density = waterDensity(T)
+    Args:
+        temp: water temperature in the range 5 to 40 [degC]
 
-     INPUTS:
-     T - water temperature in the range 5 to 40[degC]
+    Returns:
+        density: density of water [kg/m^3]
 
-     OUTPUTS:
-     density - density of water[kg / m ^ 3]
+    Raises:
+        ValueError: if `temp` is not between 5 and 40
 
-     ABOUT:
-     author - Bradley E.Treeby
-     date - 22 nd February 2018
-     last update - 4 th April 2019
+    References:
+        [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
+        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
 
-     REFERENCES:
-     [1] F.E.Jones and G.L.Harris(1992) "ITS-90 Density of Water
-     Formulation for Volumetric Standards Calibration, " J. Res. Natl.
-     Inst.Stand.Technol., 97(3), 335 - 340.
-     """
+    """
+
     # check limits
-    assert 5 <= temp <= 40, "T must be between 5 and 40."
+    if not (5 <= temp <= 40):
+        raise ValueError("`temp` must be between 5 and 40.")
 
-    # calculate density of air - saturated water
+    # calculate density of air-saturated water
     density = 999.84847 + 6.337563e-2 * temp - 8.523829e-3 * temp ** 2 + 6.943248e-5 * temp ** 3 - 3.821216e-7 * temp ** 4
     return density
 
 
-def water_non_linearity(temp):
+def water_non_linearity(temp: float) -> float:
     """
-     WATERNONLINEARITY Calculate B/A of water with temperature.
+     Calculates the parameter of nonlinearity B/A at a
+     given temperature using a fourth-order polynomial fitted to the data
+     given by Beyer (1960).
 
-     DESCRIPTION:
-         waterNonlinearity calculates the parameter of nonlinearity B/A at a
-         given temperature using a fourth-order polynomial fitted to the data
-         given by Beyer (1960).
+    Args:
+        temp: water temperature in the range 0 to 100 [degC]
 
-     USAGE:
-         BonA = waterNonlinearity(T)
+    Returns:
+        BonA: parameter of nonlinearity
 
-     INPUTS:
-         T             - water temperature in the range 0 to 100 [degC]
+    Examples:
+         >>> BonA = waterNonlinearity(T)
 
-     OUTPUTS:
-         BonA          - parameter of nonlinearity
-
-     ABOUT:
-         author        - Bradley E. Treeby
-         date          - 22nd February 2018
-         last update   - 4th April 2019
-
-     REFERENCES:
+     References:
          [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
          Acoust. Soc. Am., 32(6), 719-721.
 
@@ -364,31 +273,28 @@ def water_non_linearity(temp):
     return BonA
 
 
-def make_ball(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
+# TODO: refactor to take 3 dimensional arrays
+def make_ball(Nx: int, Ny: int, Nz: int, cx: int, cy: int, cz: int, radius: int, plot_ball: bool = False,
+              binary: bool = False) -> np.ndarray:
     """
-    MAKEBALL Create a binary map of a filled ball within a 3D grid.
+    Creates a binary map of a filled ball within a 3D grid.
 
-    DESCRIPTION:
-         make_ball creates a binary map of a filled ball within a
-         three-dimensional grid (the ball position is denoted by 1's in the
-         matrix with 0's elsewhere). A single grid point is taken as the ball
-         centre thus the total diameter of the ball will always be an odd
-         number of grid points.
     Args:
-        Nx: size of the 3D grid in x-dimension [grid points]
-        Ny: size of the 3D grid in y-dimension [grid points]
-        Nz: size of the 3D grid in z-dimension [grid points]
-        cx: centre of the ball in x-dimension [grid points]
-        cy: centre of the ball in y-dimension [grid points]
-        cz: centre of the ball in z-dimension [grid points]
-        radius: ball radius [grid points]
-        plot_ball: Boolean controlling whether the ball is plotted using voxelPlot (default = false)
-        binary: Boolean controlling whether the ball map is returned as a double precision matrix (false)
-                or a logical matrix (true) (default = false)
+        Nx: size of the 3D grid in x-dimension [grid points].
+        Ny: size of the 3D grid in y-dimension [grid points].
+        Nz: size of the 3D grid in z-dimension [grid points].
+        cx: centre of the ball in x-dimension [grid points].
+        cy: centre of the ball in y-dimension [grid points].
+        cz: centre of the ball in z-dimension [grid points].
+        radius: ball radius [grid points].
+        plot_ball: whether to plot the ball using voxelPlot (default = False).
+        binary: whether to return the ball map as a double precision matrix (False) or a logical matrix (True) (default = False).
 
     Returns:
-        3D binary map of a filled ball
+        ball: 3D binary map of a filled ball.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -432,19 +338,23 @@ def make_ball(Nx, Ny, Nz, cx, cy, cz, radius, plot_ball=False, binary=False):
     return ball
 
 
-def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False):
+def make_cart_sphere(radius: float, num_points: int, center_pos: Tuple[float, float, float] = (0, 0, 0),
+                     plot_sphere: bool = False) -> Union[
+    List[Tuple[float, float, float]], Tuple[List[Tuple[float, float, float]], Any]]:
     """
-       make_cart_sphere creates a set of points in cartesian coordinates defining a sphere.
+    Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
 
     Args:
-        radius:
-        num_points:
-        center_pos:
-        plot_sphere:
+        radius: the radius of the sphere.
+        num_points: the number of points to be generated.
+        center_pos: the coordinates of the center of the sphere. Defaults to (0, 0, 0).
+        plot_sphere: whether to plot the sphere. Defaults to False.
 
     Returns:
+        The points on the sphere.
 
     """
+
     cx, cy, cz = center_pos
 
     # generate angle functions using the Golden Section Spiral method
@@ -483,19 +393,22 @@ def make_cart_sphere(radius, num_points, center_pos=(0, 0, 0), plot_sphere=False
     return sphere.squeeze()
 
 
-def make_cart_circle(radius, num_points, center_pos=(0, 0), arc_angle=2 * np.pi, plot_circle=False):
+def make_cart_circle(radius: float, num_points: int, center_pos: Tuple[float, float] = (0, 0),
+                     arc_angle: float = 2 * np.pi, plot_circle: bool = False) -> np.ndarray:
     """
-    make_cart_circle creates a set of points in cartesian coordinates defining a circle or arc.
+    Create a set of points in cartesian coordinates defining a circle or arc.
+
+    This function creates a set of points in cartesian coordinates defining a circle or arc.
 
     Args:
-        radius:
-        num_points:
-        center_pos:
-        arc_angle:          Arc angle in radians.
-        plot_circle:
+        radius: radius of the circle or arc
+        num_points: number of points to generate
+        center_pos: center position of the circle or arc
+        arc_angle: arc angle in radians
+        plot_circle: whether to plot the circle or arc
 
     Returns:
-        2 x num_points array of cartesian coordinates
+        2 x `num_points` array of cartesian coordinates
 
     """
 
@@ -547,16 +460,18 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     side.
 
     Args:
-        Nx (int): The number of grid points along the x-axis.
-        Ny (int): The number of grid points along the y-axis.
-        cx (int): The x-coordinate of the disc centre.
-        cy (int): The y-coordinate of the disc centre.
-        radius (int): The radius of the disc.
-        plot_disc (bool): If set to True, the disc will be plotted using Matplotlib.
+        Nx: The number of grid points along the x-axis.
+        Ny: The number of grid points along the y-axis.
+        cx: The x-coordinate of the disc centre.
+        cy: The y-coordinate of the disc centre.
+        radius: The radius of the disc.
+        plot_disc: If set to True, the disc will be plotted using Matplotlib.
 
     Returns:
-        np.ndarray: A binary map of the disc in the 2D grid.
+        A binary map of the disc in the 2D grid.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -608,17 +523,19 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
     of the circle intersects the grid.
 
     Args:
-        Nx (int): The number of grid points along the x-axis.
-        Ny (int): The number of grid points along the y-axis.
-        cx (int): The x-coordinate of the circle centre.
-        cy (int): The y-coordinate of the circle centre.
-        radius (int): The radius of the circle.
-        arc_angle (Optional[float], optional): The angle of the circular arc in degrees. If set to None, a full circle will be created.
-        plot_circle (bool, optional): If set to True, the circle will be plotted using Matplotlib.
+        Nx: The number of grid points along the x-axis.
+        Ny: The number of grid points along the y-axis.
+        cx: The x-coordinate of the circle centre.
+        cy: The y-coordinate of the circle centre.
+        radius: The radius of the circle.
+        arc_angle: The angle of the circular arc in degrees. If set to None, a full circle will be created.
+        plot_circle: If set to True, the circle will be plotted using Matplotlib.
 
     Returns:
-        np.ndarray: A binary map of the circle in the 2D grid.
+        A binary map of the circle in the 2D grid.
+
     """
+
     # define literals
     MAGNITUDE = 1
 
@@ -698,23 +615,28 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
     return circle
 
 
-def make_pixel_map(Nx, Ny, Nz=None, *args):
+def make_pixel_map(Nx: int, Ny: int, Nz: Optional[int] = None, *args) -> np.ndarray:
     """
-    make_pixel_map Create matrix of grid point distances from the centre point.
+    Generates a matrix with values of the distance of each pixel from the center of a grid.
 
-     DESCRIPTION:
-         make_pixel_map generates a matrix populated with values of how far each
-         pixel in a grid is from the centre (given in pixel coordinates). Both
-         single and double pixel centres can be used by setting the optional
-         input parameter 'OriginSize'. For grids where the dimension size and
-         centre pixel size are not both odd or even, the optional input
-         parameter 'Shift' can be used to control the location of the
-         centerpoint.
+    This function generates a matrix populated with values of how far each pixel in a grid is from the center. The center
+    can be a single pixel or a double pixel, and the optional input parameter 'OriginSize' controls this. For grids where
+    the dimension size and center pixel size are not both odd or even, the optional input parameter 'Shift' can be used to
+    control the location of the center point.
 
-         examples for a 2D pixel map:
+    Args:
+        Nx: number of pixels in the x-dimension
+        Ny: number of pixels in the y-dimension
+        Nz: number of pixels in the z-dimension
+        *args: additional optional arguments
 
-         Single pixel origin size for odd and even (with 'Shift' = [1 1] and
-         [0 0], respectively) grid sizes:
+    Returns:
+        r: pixel-radius
+
+    Examples:
+
+        Single pixel origin size for odd and even (with 'Shift' = [1 1] and
+        [0 0], respectively) grid sizes:
 
          x x x       x x x x         x x x x
          x 0 x       x x x x         x 0 x x
@@ -730,14 +652,11 @@ def make_pixel_map(Nx, Ny, Nz=None, *args):
          x x x x      x x 0 0 x        x x x x x
                       x x x x x        x x x x x
 
-         By default a single pixel centre is used which is shifted towards
+         By default, a single pixel centre is used which is shifted towards
          the final row and column.
-    Args:
-        *args:
-
-    Returns:
 
     """
+
     # define defaults
     origin_size = 'single'
     shift_def = 1
@@ -791,7 +710,20 @@ def make_pixel_map(Nx, Ny, Nz=None, *args):
     return r
 
 
-def create_pixel_dim(Nx, origin_size, shift):
+def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndarray, float]:
+    """
+    Create an array of pixel dimensions and a pixel size.
+
+    Args:
+        Nx: The number of pixels in the x-dimension.
+        origin_size: The size of the origin in the x-dimension.
+        shift: The shift of the pixels in the x-dimension.
+
+    Returns:
+        The pixel dimensions.
+
+    """
+
     # Nested function to create the pixel radius variable
 
     # grid dimension has an even number of points
@@ -840,9 +772,20 @@ def make_line(
         angle: Optional[float] = None,
         length: Optional[int] = None
 ) -> np.ndarray:
-    # =========================================================================
-    # INPUT CHECKING
-    # =========================================================================
+    """
+    Generate a line shape with a given start and end point, angle, or length.
+
+    Args:
+        Nx: The number of pixels in the x-dimension.
+        Ny: The number of pixels in the y-dimension.
+        startpoint: The start point of the line, given as a tuple of x and y coordinates.
+        endpoint: The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.
+        angle: The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.
+        length: The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.
+
+    Returns:
+        line: A 2D array of the same size as the input parameters, with a value of 1 for pixels that are part of the line and 0 for pixels that are not.
+    """
 
     startpoint = np.array(startpoint, dtype=int)
     if endpoint is not None:
@@ -1208,7 +1151,21 @@ def make_line(
     return line
 
 
-def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: float, diameter: float,
+             focus_pos: np.ndarray) -> np.ndarray:
+    """
+    Generates an arc shape with a given radius, diameter, and focus position.
+
+    Args:
+        grid_size: The size of the grid, given as a 1D array with the number of pixels in each dimension.
+        arc_pos: The position of the arc, given as a 1D array with the coordinates in each dimension.
+        radius: The radius of the arc.
+        diameter: The diameter of the arc.
+        focus_pos: The position of the focus, given as a 1D array with the coordinates in each dimension.
+
+    Returns:
+        np.ndarray: A 2D array with the arc shape.
+    """
     # force integer input values
     grid_size = grid_size.round().astype(int)
     arc_pos = arc_pos.round().astype(int)
@@ -1307,26 +1264,20 @@ def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus
     return arc
 
 
-def ind2sub(array_shape, ind):
-    # Matlab style ind2sub
-    # row, col = np.unravel_index(ind - 1, array_shape, order='F')
-    # return np.squeeze(row) + 1, np.squeeze(col) + 1
+def make_pixel_map_point(grid_size: np.ndarray, centre_pos: np.ndarray) -> np.ndarray:
+    """
+    Generates a map of the distance of each pixel from a given centre position.
 
-    indices = np.unravel_index(ind - 1, array_shape, order='F')
-    indices = (np.squeeze(index) + 1 for index in indices)
-    return indices
+    Args:
+        grid_size: The size of the grid, given as a 1D array with the number of pixels in each dimension.
+        centre_pos: The position of the centre, given as a 1D array with the coordinates in each dimension.
 
+    Returns:
+        np.ndarray: A 2D array with the distance of each pixel from the given centre position.
 
-def sub2ind(array_shape, x, y, z) -> np.ndarray:
-    results = []
-    x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
-    for x_i, y_i, z_i in zip(x, y, z):
-        index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order='F')
-        results.append(index)
-    return np.array(results)
-
-
-def make_pixel_map_point(grid_size, centre_pos) -> np.ndarray:
+    Raises:
+        ValueError: If `grid_size` and `centre_pos` do not have the same number of dimensions.
+    """
     # check for number of dimensions
     num_dim = len(grid_size)
 
@@ -1374,8 +1325,21 @@ def make_pixel_map_point(grid_size, centre_pos) -> np.ndarray:
     return pixel_map
 
 
-def make_pixel_map_plane(grid_size, normal, point):
-    # error checking
+def make_pixel_map_plane(grid_size: np.ndarray, normal: np.ndarray, point: np.ndarray) -> np.ndarray:
+    """
+    Generates a pixel map of a plane with given normal vector and point.
+
+    Args:
+        grid_size: The size of the grid as a NumPy array [Nx, Ny, Nz].
+        normal: The normal vector of the plane as a NumPy array [nx, ny, nz].
+        point: A point on the plane as a NumPy array [px, py, pz].
+
+    Returns:
+        pixel_map: A 2D array with the distance of each pixel from the given plane.
+
+    Raises:
+        ValueError: If the normal vector is zero.
+    """  # error checking
     if np.all(normal == 0):
         raise ValueError('Normal vector should not be zero.')
 
@@ -1421,7 +1385,30 @@ def make_pixel_map_plane(grid_size, normal, point):
     return pixel_map
 
 
-def make_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
+def make_bowl(grid_size: Tuple[int, int, int], bowl_pos: Tuple[int, int, int], radius: int, diameter: int,
+              focus_pos: Tuple[int, int, int], binary: bool = False, remove_overlap: bool = False) -> np.ndarray:
+    """
+    Generate a matrix representing a bowl-shaped object in 3D space.
+
+    This function generates a 3D matrix representing a bowl-shaped object with the specified radius and diameter. The position
+    of the bowl and the focus point can be specified, as well as whether to return a binary matrix or a matrix with
+    continuous values. The optional parameter 'remove_overlap' can be used to remove any overlap with the surrounding grid.
+
+    Args:
+        grid_size: size of the grid in each dimension
+        bowl_pos: position of the bowl in the grid
+        radius: radius of the bowl
+        diameter: diameter of the bowl
+        focus_pos: position of the focus point in the grid
+        binary: whether to return a binary matrix
+        remove_overlap: whether to remove overlap with the surrounding grid
+
+    Returns:
+        matrix: 3D matrix representing the bowl-shaped object
+
+    Raises:
+        ValueError: if any of the input arguments are outside the valid range
+    """
     # =========================================================================
     # DEFINE LITERALS
     # =========================================================================
@@ -1973,14 +1960,25 @@ def make_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, re
     return bowl
 
 
-def make_multi_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=False, remove_overlap=False):
-    # =========================================================================
-    # DEFINE LITERALS
-    # =========================================================================
+def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int, diameter: int,
+                    focus_pos: Tuple[int, int], binary: bool = False, remove_overlap: bool = False) -> Tuple[
+    np.ndarray, List[np.ndarray]]:
+    """
+    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls, the radius of each bowl, the diameter of the bowls, and the position of the focus.
 
-    # =========================================================================
-    # INPUT CHECKING
-    # =========================================================================
+    Args:
+        grid_size: The size of the grid (assumed to be square).
+        bowl_pos: A list of tuples containing the (x, y) coordinates of the center of each bowl.
+        radius: The radius of each bowl.
+        diameter: The diameter of the bowls.
+        focus_pos: The (x, y) coordinates of the focus.
+        binary: Whether to return a binary mask (default: False).
+        remove_overlap: Whether to remove overlap between the bowls (default: False).
+
+    Returns:
+        bowls:
+        bowls_labeled:
+    """
 
     # check inputs
     if bowl_pos.shape[-1] != 3:
@@ -2068,7 +2066,25 @@ def make_multi_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=Fal
     return bowls, bowls_labelled
 
 
-def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter, focus_pos: np.ndarray):
+def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
+                   diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
+    """
+    Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.
+
+    Args:
+        grid_size: The size of the grid (assumed to be square).
+        arc_pos: An array containing the (x, y) coordinates of the center of each arc.
+        radius: The radius of each arc. Can be a single value or an array with one value for each arc.
+        diameter: The diameter of the arcs. Can be a single value or an array with one value for each arc.
+        focus_pos: The (x, y) coordinates of the focus.
+
+    Returns:
+        arcs: A binary mask of the arcs.
+        arcs_labelled: A labelled mask of the arcs.
+
+    Raises:
+        ValueError: If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match, or if the number of rows in arc_pos and diameter do not match.
+    """
     # check inputs
     if arc_pos.shape[-1] != 2:
         raise ValueError('arc_pos should contain 2 columns, with [ax, ay] in each row.')
@@ -2139,7 +2155,22 @@ def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius, diameter,
     return arcs, arcs_labelled
 
 
-def make_sphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
+def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = False,
+                binary: bool = False) -> np.ndarray:
+    """
+    Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.
+
+    Args:
+        Nx: The number of grid points in the x-dimension.
+        Ny: The number of grid points in the y-dimension.
+        Nz: The number of grid points in the z-dimension.
+        radius: The radius of the sphere.
+        plot_sphere: Whether to plot the sphere (default: False).
+        binary: Whether to return a binary mask (default: False).
+
+    Returns:
+        sphere: The sphere mask as a NumPy array.
+    """
     # enforce a centered sphere
     cx = floor(Nx / 2) + 1
     cy = floor(Ny / 2) + 1
@@ -2222,7 +2253,26 @@ def make_sphere(Nx, Ny, Nz, radius, plot_sphere=False, binary=False):
     return sphere
 
 
-def make_spherical_section(radius, height, width=None, plot_section=False, binary=False):
+def make_spherical_section(radius: float, height: float, width: float = None, plot_section: bool = False,
+                           binary: bool = False) -> np.ndarray:
+    """
+    Generates a spherical section mask given the radius and height of the section and optional parameters to specify the width and/or plot and return a binary mask.
+
+    Args:
+        radius: The radius of the spherical section.
+        height: The height of the spherical section.
+        width: The width of the spherical section (default: height).
+        plot_section: Whether to plot the spherical section (default: False).
+        binary: Whether to return a binary mask (default: False).
+
+    Returns:
+        ss: The spherical section mask as a NumPy array.
+        dist_map: The distance map of the spherical section mask as a NumPy array.
+
+    Raises:
+        ValueError: If the width is not an odd number.
+        NotImplementedError: Plotting not currently supported.
+    """
     use_spherical_sections = True
 
     # force inputs to be integers
@@ -2343,36 +2393,24 @@ def make_spherical_section(radius, height, width=None, plot_section=False, binar
 
 
 def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequency: float, sound_speed: float,
-                       density: float, axial_positions: Union[np.array, float, list] = None,
-                       lateral_positions: Union[np.array, float, list] = None) -> [float, float]:
+                       density: float, axial_positions: Union[np.ndarray, float, list] = None,
+                       lateral_positions: Union[np.ndarray, float, list] = None) -> [float, float]:
     """
-    focused_bowl_oneil calculates O'Neil's solution (O'Neil, H. Theory of
-    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949) for
-    the axial and lateral pressure amplitude generated by a focused bowl
-    transducer when uniformly driven by a continuous wave sinusoid at a
-    given frequency and normal surface velocity.
-
-    The solution is evaluated at the positions along the beam axis given
-    by axial_position (where 0 corresponds to the transducer surface),
-    and lateral positions through the geometric focus given by
-    lateral_position (where 0 corresponds to the beam axis). To return
-    only the axial or lateral pressure, set the either axial_position or
-    lateral_position to [].
-
-    Note, O'Neil's formulae are derived under the assumptions of the
-    Rayleigh integral, which are valid when the transducer diameter is
-    large compared to both the transducer height and the acoustic
-    wavelength.
+    Calculates O'Neil's solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.
 
     Args:
-        radius:
-        diameter:
-        velocity:
-        frequency:
-        sound_speed:
-        density:
-        axial_positions:
-        lateral_positions:
+        radius: The radius of the transducer.
+        diameter: The diameter of the transducer.
+        velocity: The normal surface velocity of the transducer.
+        frequency: The driving frequency of the sinusoid.
+        sound_speed: The sound speed in the medium.
+        density: The density of the medium.
+        axial_positions: The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.
+        lateral_positions: The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.
+
+    Returns:
+       p-axial: The axial pressure amplitude.
+       p-lateral: The lateral pressure amplitude.
 
     Example:
         # define transducer parameters
@@ -2391,10 +2429,11 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         [p_axial, p_lateral] = focused_bowl_oneil(radius, diameter,
                                                   velocity, frequency, sound_speed, density,
                                                   axial_position, lateral_position)
-    Returns:
-         p_axial:           pressure amplitude at the axial_position [Pa]
-         p_lateral:         pressure amplitude at the lateral_position [Pa]
+
+    References:
+        O'Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.
     """
+
     float_eps = np.finfo(float).eps
 
     def calculate_axial_pressure() -> float:

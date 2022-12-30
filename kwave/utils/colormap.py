@@ -16,7 +16,9 @@ def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
 
     Returns:
         A three-column color map matrix which can be applied using colormap.
+
     """
+
     if num_colors is None:
         neg_pad = 48
         num_colors = 256
@@ -38,9 +40,12 @@ def hot(m: int) -> np.ndarray:
 
     Args:
         m: The length of the colormap.
+
     Returns:
         An m-by-3 array containing the hot colormap.
+
     """
+
     n = int(np.fix(3 / 8 * m))
 
     r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m-n)])
@@ -72,6 +77,7 @@ def gray(m: int) -> np.ndarray:
 
     Returns:
         An M-by-3 matrix containing the grayscale colormap.
+
     """
 
     g = np.arange(m) / max(m - 1, 1)
