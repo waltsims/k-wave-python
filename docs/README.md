@@ -4,19 +4,27 @@ This project is a Python implementation of most of the [MATLAB toolbox k-Wave](h
 
 ## Mission
 
-With this project, we hope to increase accessibility and reproducablitiy of [k-Wave](http://www.k-wave.org/) simulations for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs in order to leverage pythonic practices.
-
+With this project, we hope to increase accessibility and reproducablitiy of [k-Wave](http://www.k-wave.org/) simulations
+for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
+be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
+in order to leverage pythonic practices.
 
 ## Installation
+
 To install the most recent build of k-Wave-python from PyPI, run:
+
 ```bash
 pip install k-wave-python
 ```
 
-Currently, we are looking for beta testers on Windows.
+After installation, you can download the binaries by running:
 
+```bash
+python install_binaries.py
+```
 
 ## Getting started
+
 ![](_static/example_bmode.png)
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
