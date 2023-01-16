@@ -1,10 +1,10 @@
+import logging
+import os
 import stat
 import sys
 import unittest.mock
-import logging
-
 from pathlib import Path
-import os
+
 import h5py
 import numpy as np
 
@@ -28,7 +28,7 @@ class Executor:
         if self._is_linux:
             binary_folder = 'linux'
         elif self._is_windows:
-            binary_folder = 'windows'
+            binary_folder = 'cygwin'
             binary_name += '.exe'
         elif self._is_darwin:
             raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')

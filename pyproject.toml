@@ -57,7 +57,14 @@ path = "kwave/__init__.py"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages=["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/docs",
+]
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]
