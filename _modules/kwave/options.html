@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.options - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -269,7 +269,7 @@
 
 <div class="viewcode-block" id="SimulationOptions"><a class="viewcode-back" href="../../kwave.options.html#kwave.options.SimulationOptions">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">SimulationOptions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        axisymmetric: Flag that indicates whether axisymmetric simulation is used</span>
 <span class="sd">        cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to &#39;nearest&#39; and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = &#39;linear&#39;).</span>
@@ -405,7 +405,7 @@
 
 <div class="viewcode-block" id="SimulationOptions.option_factory"><a class="viewcode-back" href="../../kwave.options.html#kwave.options.SimulationOptions.option_factory">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">option_factory</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="s2">&quot;kWaveGrid&quot;</span><span class="p">,</span> <span class="n">elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Simulation Options</span>
 
 <span class="sd">        Args:</span>
@@ -562,9 +562,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/scripts/furo.js"></script>

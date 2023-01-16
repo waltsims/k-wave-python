@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.kWaveSimulation - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -376,7 +376,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">equation_of_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Set equation of state variable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -390,7 +390,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            False if no output of any kind is required</span>
 
@@ -399,7 +399,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">blank_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns</span>
 <span class="sd">            True if sensor.mask is not defined but _max_all or _final variables are still recorded</span>
 
@@ -412,7 +412,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elastic_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if elastic simulation False if fluid simulation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -420,7 +420,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kspace_elastic_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if elastic simulation with k-space correction False if ordinary</span>
 
@@ -429,7 +429,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">axisymmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if fluid axisymmetric simulation</span>
 
@@ -441,7 +441,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kelvin_voigt_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether the simulation is elastic with absorption</span>
 
@@ -450,7 +450,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nonuniform_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if the computational grid is non-uniform</span>
 
@@ -459,7 +459,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">time_rev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True for time reversal simulaions using sensor.time_reversal_boundary_data</span>
 
@@ -472,7 +472,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elastic_time_rev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if using time reversal with the elastic code</span>
 
@@ -481,7 +481,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">compute_directivity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True if directivity calculations in 2D are used by setting sensor.directivity_angle</span>
 
@@ -496,7 +496,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cuboid_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether the sensor.mask is a list of cuboid corners</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -510,7 +510,7 @@
     <span class="c1">##############</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># initial pressure</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether initial pressure source is present (default=False)</span>
 
@@ -523,7 +523,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_p0_elastic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># initial pressure in the elastic code</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether initial pressure source is present in the elastic code (default=False)</span>
 
@@ -533,7 +533,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying pressure source is present (default=False)</span>
 
@@ -547,7 +547,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_p_labelled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># time-varying pressure with labelled source mask</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True/False if labelled/binary source mask, respectively.</span>
 
@@ -561,7 +561,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_ux</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying particle velocity source is used in X-direction</span>
 
@@ -575,7 +575,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_uy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying particle velocity source is used in Y-direction</span>
 
@@ -589,7 +589,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_uz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying particle velocity source is used in Z-direction</span>
 
@@ -603,7 +603,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_u_labelled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying velocity source with labelled source mask is present (default=False)</span>
 
@@ -622,7 +622,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_sxx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in X-&gt;X direction is present (default=False)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -633,7 +633,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_syy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in Y-&gt;Y direction is present (default=False)</span>
 
@@ -645,7 +645,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_szz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in Z-&gt;Z direction is present (default=False)</span>
 
@@ -657,7 +657,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_sxy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in X-&gt;Y direction is present (default=False)</span>
 
@@ -669,7 +669,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_sxz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in X-&gt;Z direction is present (default=False)</span>
 
@@ -681,7 +681,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_syz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source in Y-&gt;Z direction is present (default=False)</span>
 
@@ -693,7 +693,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_s_labelled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether time-varying stress source with labelled source mask is present (default=False)</span>
 
@@ -712,7 +712,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_w_source_correction_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether to use the w source correction instead of the k-space source correction for pressure sources</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -724,7 +724,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_w_source_correction_u</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether to use the w source correction instead of the k-space source correction for velocity sources</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -736,7 +736,7 @@
         <span class="k">return</span> <span class="n">flag</span>
 
 <div class="viewcode-block" id="kWaveSimulation.input_checking"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.input_checking">[docs]</a>    <span class="k">def</span> <span class="nf">input_checking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calling_func_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the input fields for correctness and validness</span>
 
 <span class="sd">        Args:</span>
@@ -790,7 +790,7 @@
 
 <div class="viewcode-block" id="kWaveSimulation.check_calling_func_name_and_dim"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_calling_func_name_and_dim</span><span class="p">(</span><span class="n">calling_func_name</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check correct function has been called for the dimensionality of kgrid</span>
 
 <span class="sd">        Args:</span>
@@ -812,7 +812,7 @@
 
 <div class="viewcode-block" id="kWaveSimulation.print_start_status"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.print_start_status">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">print_start_status</span><span class="p">(</span><span class="n">is_elastic_code</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update command-line status with the start time</span>
 
 <span class="sd">        Args:</span>
@@ -828,7 +828,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  start time: </span><span class="si">{</span><span class="n">get_date_string</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.set_index_data_type"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.set_index_data_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_index_data_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pre-calculate the data type needed to store the matrix indices given the</span>
 <span class="sd">        total number of grid points: indexing variables will be created using this data type to save memory</span>
 
@@ -840,7 +840,7 @@
 
 <div class="viewcode-block" id="kWaveSimulation.check_medium"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_medium">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_medium</span><span class="p">(</span><span class="n">medium</span><span class="p">,</span> <span class="n">kgrid_k</span><span class="p">,</span> <span class="n">is_elastic</span><span class="p">,</span> <span class="n">is_axisymmetric</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the properties of the medium structure for correctness and validity</span>
 
 <span class="sd">        Args:</span>
@@ -871,7 +871,7 @@
         <span class="k">return</span> <span class="n">user_medium_density_input</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_source"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_source">[docs]</a>    <span class="k">def</span> <span class="nf">check_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the source properties for correctness and validity</span>
 
 <span class="sd">        Args:</span>
@@ -1064,7 +1064,7 @@
                         <span class="c1"># the order of the binary sensor_mask</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_rev</span><span class="p">:</span>
                             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-                            <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">                            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">                            # append the reordering data</span>
 <span class="sd">                            new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;</span>
 <span class="sd">                            sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;</span>
@@ -1094,7 +1094,7 @@
             <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;WARNING: sensor directivity fields are not used for time reversal.&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_sensor"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_sensor">[docs]</a>    <span class="k">def</span> <span class="nf">check_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">k_Nt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the Sensor properties for correctness and validity</span>
 
 <span class="sd">        Args:</span>
@@ -1120,7 +1120,7 @@
             <span class="c1"># SOURCE IS NOT A TRANSDUCER</span>
             <span class="c1"># --------------------------</span>
 
-            <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">                check allowable source types</span>
 <span class="sd">                </span>
 <span class="sd">                Depending on the kgrid dimensionality and the simulation type, </span>
@@ -1281,7 +1281,7 @@
             <span class="k">del</span> <span class="n">active_elements_mask</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_kgrid_time"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_kgrid_time">[docs]</a>    <span class="k">def</span> <span class="nf">check_kgrid_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check time-related kWaveGrid inputs</span>
 
 <span class="sd">        Returns:</span>
@@ -1319,7 +1319,7 @@
 
 <div class="viewcode-block" id="kWaveSimulation.select_precision"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.select_precision">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">select_precision</span><span class="p">(</span><span class="n">opt</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Select the minimal precision for storing the data</span>
 
 <span class="sd">        Args:</span>
@@ -1351,7 +1351,7 @@
         <span class="k">return</span> <span class="n">precision</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_input_combinations"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_input_combinations">[docs]</a>    <span class="k">def</span> <span class="nf">check_input_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">user_medium_density_input</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the input combinations for correctness and validity</span>
 
 <span class="sd">        Args:</span>
@@ -1443,7 +1443,7 @@
                 <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.smooth_and_enlarge"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.smooth_and_enlarge">[docs]</a>    <span class="k">def</span> <span class="nf">smooth_and_enlarge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Smooth and enlarge grids</span>
 
 <span class="sd">        Args:</span>
@@ -1562,7 +1562,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">density</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.create_sensor_variables"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_sensor_variables">[docs]</a>    <span class="k">def</span> <span class="nf">create_sensor_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create the sensor related variables</span>
 
 <span class="sd">        Returns:</span>
@@ -1645,7 +1645,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">transducer_receive_elevation_focus</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">transducer_receive_elevation_focus</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.create_absorption_vars"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_absorption_vars">[docs]</a>    <span class="k">def</span> <span class="nf">create_absorption_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create absorption variables for the fluid code based on</span>
 <span class="sd">        the expanded and smoothed values of the medium parameters (if not saving to disk)</span>
 
@@ -1656,7 +1656,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_eta</span> <span class="o">=</span> <span class="n">create_absorption_variables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equation_of_state</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.assign_pseudonyms"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">[docs]</a>    <span class="k">def</span> <span class="nf">assign_pseudonyms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shorten commonly used field names (these act only as pointers provided that the values aren&#39;t modified)</span>
 <span class="sd">        (done after enlarging and smoothing the grids)</span>
 
@@ -1672,7 +1672,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">c0</span> <span class="o">=</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.scale_source_terms"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.scale_source_terms">[docs]</a>    <span class="k">def</span> <span class="nf">scale_source_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_scale_source_terms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scale the source terms based on the expanded and smoothed values of the medium parameters</span>
 
 <span class="sd">        Args:</span>
@@ -1722,7 +1722,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.create_pml_indices"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">[docs]</a>    <span class="k">def</span> <span class="nf">create_pml_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">pml_inside</span><span class="p">,</span> <span class="n">is_axisymmetric</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define index variables to remove the PML from the display if the optional</span>
 <span class="sd">        input &#39;PlotPML&#39; is set to false</span>
 
@@ -1793,9 +1793,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/scripts/furo.js"></script>

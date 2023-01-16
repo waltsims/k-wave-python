@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.utils.tictoc module" href="kwave.utils.tictoc.html" /><link rel="prev" title="kwave.utils.pml module" href="kwave.utils.pml.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.signals module - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -384,10 +384,10 @@ square: Boolean to force the window to be square (default = False).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>N</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>N</strong> (<em>int</em><em> | </em><em>List</em><em>[</em><em>int</em><em>]</em>) – </p></li>
 <li><p><strong>type_</strong> (<em>str</em>) – </p></li>
 <li><p><strong>plot_win</strong> (<em>bool</em>) – </p></li>
-<li><p><strong>param</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>param</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>rotation</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>symmetric</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>square</strong> (<em>bool</em>) – </p></li>
@@ -406,7 +406,7 @@ The gradient for singleton dimensions is returned as 0.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>f</strong> (<em>ndarray</em>) – A numpy ndarray representing the input matrix.</p></li>
 <li><p><strong>dn</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – A list of floats representing the grid spacings in each dimension.</p></li>
-<li><p><strong>dim</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – An optional integer or list of integers representing the dimensions along which to calculate the gradient.</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em> | </em><em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>) – An optional integer or list of integers representing the dimensions along which to calculate the gradient.</p></li>
 <li><p><strong>deriv_order</strong> (<em>int</em>) – An integer representing the order of the derivative to calculate. Default is 1.</p></li>
 </ul>
 </dd>
@@ -582,9 +582,6 @@ The gradient for singleton dimensions is returned as 0.</p>
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>

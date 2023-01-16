@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.conversion - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -262,7 +262,7 @@
 
 
 <div class="viewcode-block" id="db2neper"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.db2neper">[docs]</a><span class="k">def</span> <span class="nf">db2neper</span><span class="p">(</span><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert decibels to nepers.</span>
 
 <span class="sd">    Args:</span>
@@ -280,7 +280,7 @@
 
 
 <div class="viewcode-block" id="neper2db"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.neper2db">[docs]</a><span class="k">def</span> <span class="nf">neper2db</span><span class="p">(</span><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).</span>
 
 <span class="sd">    Args:</span>
@@ -298,7 +298,7 @@
 
 
 <div class="viewcode-block" id="cast_to_type"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cast_to_type">[docs]</a><span class="k">def</span> <span class="nf">cast_to_type</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">matlab_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: The data to cast.</span>
@@ -321,7 +321,7 @@
 
 
 <div class="viewcode-block" id="cart2pol"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cart2pol">[docs]</a><span class="k">def</span> <span class="nf">cart2pol</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert from cartesian to polar coordinates.</span>
 
 <span class="sd">    Args:</span>
@@ -339,7 +339,7 @@
 
 
 <div class="viewcode-block" id="grid2cart"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.grid2cart">[docs]</a><span class="k">def</span> <span class="nf">grid2cart</span><span class="p">(</span><span class="n">input_kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span> <span class="n">grid_selection</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the Cartesian coordinates of the non-zero points of a binary grid.</span>
 
 <span class="sd">    Args:</span>
@@ -373,7 +373,7 @@
 
 <div class="viewcode-block" id="freq2wavenumber"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.freq2wavenumber">[docs]</a><span class="k">def</span> <span class="nf">freq2wavenumber</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">filter_cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
     <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.</span>
 
 <span class="sd">    Args:</span>
@@ -402,7 +402,7 @@
 
 
 <div class="viewcode-block" id="cart2grid"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.cart2grid">[docs]</a><span class="k">def</span> <span class="nf">cart2grid</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span> <span class="n">cart_data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interpolates the set of Cartesian points defined by</span>
 <span class="sd">    cart_data onto a binary matrix defined by the kWaveGrid object</span>
 <span class="sd">    kgrid using nearest neighbour interpolation. An error is returned if</span>
@@ -553,7 +553,7 @@
 
 
 <div class="viewcode-block" id="hounsfield2soundspeed"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.hounsfield2soundspeed">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2soundspeed</span><span class="p">(</span><span class="n">ct_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the sound speed of a medium given a CT (computed tomography) of the medium.</span>
 <span class="sd">    For soft tissue, the approximate sound speed can also be returned using the empirical relationship</span>
 <span class="sd">    given by Mast [1].</span>
@@ -576,7 +576,7 @@
 
 
 <div class="viewcode-block" id="hounsfield2density"><a class="viewcode-back" href="../../../kwave.utils.conversion.html#kwave.utils.conversion.hounsfield2density">[docs]</a><span class="k">def</span> <span class="nf">hounsfield2density</span><span class="p">(</span><span class="n">ct_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">plot_fitting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.</span>
 
 <span class="sd">    Args:</span>
@@ -644,9 +644,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>

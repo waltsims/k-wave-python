@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.kmedium - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -285,7 +285,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sound_speed</span>                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">)</span>
 
 <div class="viewcode-block" id="kWaveMedium.check_fields"><a class="viewcode-back" href="../../kwave.kmedium.html#kwave.kmedium.kWaveMedium.check_fields">[docs]</a>    <span class="k">def</span> <span class="nf">check_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_shape</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check whether the given properties are valid</span>
 
 <span class="sd">        Args:</span>
@@ -312,7 +312,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;medium.alpha_coeff must be non-negative and real.&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveMedium.is_defined"><a class="viewcode-back" href="../../kwave.kmedium.html#kwave.kmedium.kWaveMedium.is_defined">[docs]</a>    <span class="k">def</span> <span class="nf">is_defined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check if the field(s) are defined or None</span>
 
 <span class="sd">        Args:</span>
@@ -327,7 +327,7 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="kWaveMedium.ensure_defined"><a class="viewcode-back" href="../../kwave.kmedium.html#kwave.kmedium.kWaveMedium.ensure_defined">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_defined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Assert that the field(s) are defined (not None)</span>
 
 <span class="sd">        Args:</span>
@@ -340,7 +340,7 @@
             <span class="k">assert</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The field </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> must be not be None&#39;</span></div>
 
 <div class="viewcode-block" id="kWaveMedium.is_nonlinear"><a class="viewcode-back" href="../../kwave.kmedium.html#kwave.kmedium.kWaveMedium.is_nonlinear">[docs]</a>    <span class="k">def</span> <span class="nf">is_nonlinear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check if the medium is nonlinear</span>
 
 <span class="sd">        Returns:</span>
@@ -349,7 +349,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">BonA</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="kWaveMedium.set_absorbing"><a class="viewcode-back" href="../../kwave.kmedium.html#kwave.kmedium.kWaveMedium.set_absorbing">[docs]</a>    <span class="k">def</span> <span class="nf">set_absorbing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_absorbing</span><span class="p">,</span> <span class="n">is_stokes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Change medium&#39;s absorbing and stokes properties</span>
 
 <span class="sd">        Args:</span>
@@ -367,7 +367,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_check_absorbing_without_stokes</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_check_absorbing_without_stokes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check if the medium properties are set correctly for absorbing simulation without stokes</span>
 
 <span class="sd">        Returns:</span>
@@ -386,13 +386,13 @@
         <span class="c1"># display warning if y is close to 1 and the dispersion term has not been set to zero</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">!=</span> <span class="s1">&#39;no_dispersion&#39;</span><span class="p">:</span>
             <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_power</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">,</span> \
-                <span class="sd">&quot;&quot;&quot;The power law dispersion term in the equation of state is not valid for medium.alpha_power = 1.</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;The power law dispersion term in the equation of state is not valid for medium.alpha_power = 1.</span>
 <span class="sd">                This error can be avoided by choosing a power law exponent close to, but not exactly, 1.</span>
 <span class="sd">                If modelling acoustic absorption for medium.alpha_power = 1 is important and modelling dispersion is not</span>
 <span class="sd">                critical, this error can also be avoided by setting medium.alpha_mode to &#39;no_dispersion&#39;&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_check_absorbing_with_stokes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check if the medium properties are set correctly for absorbing simulation with stokes</span>
 
 <span class="sd">        Returns:</span>
@@ -425,42 +425,42 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sound_speed_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Shear sound speed (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sound_speed_ref_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Shear sound speed reference (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sound_speed_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Compression sound speed (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sound_speed_ref_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Compression sound speed reference (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alpha_coeff_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Compression alpha coefficient (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alpha_coeff_shear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Shear alpha coefficient (used in elastic simulations | not supported currently!)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ELASTIC_CODE_ACCESS_ERROR_TEXT_</span><span class="p">)</span></div>
@@ -497,9 +497,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/scripts/furo.js"></script>

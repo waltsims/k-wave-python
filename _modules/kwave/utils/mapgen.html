@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.mapgen - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -269,7 +269,7 @@
 
 
 <div class="viewcode-block" id="get_spaced_points"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.get_spaced_points">[docs]</a><span class="k">def</span> <span class="nf">get_spaced_points</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a row vector of either logarithmically or linearly spaced points between `start` and `stop`.</span>
 
 <span class="sd">    When `spacing` is set to &#39;linear&#39;, the function is identical to the inbuilt `np.linspace` function.</span>
@@ -304,7 +304,7 @@
 
 <div class="viewcode-block" id="fit_power_law_params"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.fit_power_law_params">[docs]</a><span class="k">def</span> <span class="nf">fit_power_law_params</span><span class="p">(</span><span class="n">a0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot_fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
     <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate absorption parameters that fit a power law over a given frequency range.</span>
 
 <span class="sd">    This function calculates the absorption parameters that should be defined in the simulation functions</span>
@@ -341,7 +341,7 @@
     <span class="n">desired_absorption</span> <span class="o">=</span> <span class="n">a0_np</span> <span class="o">*</span> <span class="n">w</span> <span class="o">**</span> <span class="n">y</span>
 
     <span class="k">def</span> <span class="nf">abs_func</span><span class="p">(</span><span class="n">trial_vals</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Second-order absorption error&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Second-order absorption error&quot;&quot;&quot;</span>
         <span class="n">a0_np_trial</span><span class="p">,</span> <span class="n">y_trial</span> <span class="o">=</span> <span class="n">trial_vals</span>
 
         <span class="n">actual_absorption</span> <span class="o">=</span> <span class="n">a0_np_trial</span> <span class="o">*</span> <span class="n">w</span> <span class="o">**</span> <span class="n">y_trial</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_trial</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
@@ -363,7 +363,7 @@
 
 
 <div class="viewcode-block" id="power_law_kramers_kronig"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.power_law_kramers_kronig">[docs]</a><span class="k">def</span> <span class="nf">power_law_kramers_kronig</span><span class="p">(</span><span class="n">w</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">w0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the variation in sound speed for an attenuating medium using the Kramers-Kronig for power law attenuation.</span>
 
 <span class="sd">    This function computes the variation in sound speed for an attenuating medium using the Kramers-Kronig</span>
@@ -396,7 +396,7 @@
 
 
 <div class="viewcode-block" id="water_absorption"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_absorption">[docs]</a><span class="k">def</span> <span class="nf">water_absorption</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the ultrasonic absorption in distilled</span>
 <span class="sd">    water at a given temperature and frequency using a 7 th order</span>
 <span class="sd">    polynomial fitted to the data given by np.pinkerton(1949).</span>
@@ -438,7 +438,7 @@
 
 
 <div class="viewcode-block" id="water_sound_speed"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_sound_speed">[docs]</a><span class="k">def</span> <span class="nf">water_sound_speed</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the sound speed in distilled water with temperature.</span>
 
 <span class="sd">    Args:</span>
@@ -466,7 +466,7 @@
 
 
 <div class="viewcode-block" id="water_density"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_density">[docs]</a><span class="k">def</span> <span class="nf">water_density</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the density of air-saturated water with temperature.</span>
 
 <span class="sd">    This function calculates the density of air-saturated water at a given temperature using the 4th order polynomial</span>
@@ -497,7 +497,7 @@
 
 
 <div class="viewcode-block" id="water_non_linearity"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.water_non_linearity">[docs]</a><span class="k">def</span> <span class="nf">water_non_linearity</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     Calculates the parameter of nonlinearity B/A at a</span>
 <span class="sd">     given temperature using a fourth-order polynomial fitted to the data</span>
 <span class="sd">     given by Beyer (1960).</span>
@@ -529,7 +529,7 @@
 <span class="c1"># TODO: refactor to take 3 dimensional arrays</span>
 <div class="viewcode-block" id="make_ball"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_ball">[docs]</a><span class="k">def</span> <span class="nf">make_ball</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plot_ball</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
               <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a binary map of a filled ball within a 3D grid.</span>
 
 <span class="sd">    Args:</span>
@@ -594,7 +594,7 @@
 <div class="viewcode-block" id="make_cart_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_cart_sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                      <span class="n">plot_sphere</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.</span>
 
 <span class="sd">    Args:</span>
@@ -648,7 +648,7 @@
 
 <div class="viewcode-block" id="make_cart_circle"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_circle">[docs]</a><span class="k">def</span> <span class="nf">make_cart_circle</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                      <span class="n">arc_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">plot_circle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a set of points in cartesian coordinates defining a circle or arc.</span>
 
 <span class="sd">    This function creates a set of points in cartesian coordinates defining a circle or arc.</span>
@@ -703,7 +703,7 @@
 
 
 <div class="viewcode-block" id="make_disc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_disc">[docs]</a><span class="k">def</span> <span class="nf">make_disc</span><span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">plot_disc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a binary map of a filled disc within a 2D grid.</span>
 
 <span class="sd">    This function creates a binary map of a filled disc within a two-dimensional grid. The disc position is denoted by 1&#39;s</span>
@@ -766,7 +766,7 @@
 
 <div class="viewcode-block" id="make_circle"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_circle">[docs]</a><span class="k">def</span> <span class="nf">make_circle</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">arc_angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">plot_circle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a binary map of a circle within a 2D grid.</span>
 
 <span class="sd">    This function creates a binary map of a circle (or arc) using the midpoint circle algorithm within a two-dimensional grid.</span>
@@ -869,7 +869,7 @@
 
 
 <div class="viewcode-block" id="make_pixel_map"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a matrix with values of the distance of each pixel from the center of a grid.</span>
 
 <span class="sd">    This function generates a matrix populated with values of how far each pixel in a grid is from the center. The center</span>
@@ -964,7 +964,7 @@
 
 
 <div class="viewcode-block" id="create_pixel_dim"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.create_pixel_dim">[docs]</a><span class="k">def</span> <span class="nf">create_pixel_dim</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create an array of pixel dimensions and a pixel size.</span>
 
 <span class="sd">    Args:</span>
@@ -1025,7 +1025,7 @@
         <span class="n">angle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a line shape with a given start and end point, angle, or length.</span>
 
 <span class="sd">    Args:</span>
@@ -1406,7 +1406,7 @@
 
 <div class="viewcode-block" id="make_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_arc">[docs]</a><span class="k">def</span> <span class="nf">make_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
              <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates an arc shape with a given radius, diameter, and focus position.</span>
 
 <span class="sd">    Args:</span>
@@ -1518,7 +1518,7 @@
 
 
 <div class="viewcode-block" id="make_pixel_map_point"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_point">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_point</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">centre_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a map of the distance of each pixel from a given centre position.</span>
 
 <span class="sd">    Args:</span>
@@ -1579,7 +1579,7 @@
 
 
 <div class="viewcode-block" id="make_pixel_map_plane"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_pixel_map_plane">[docs]</a><span class="k">def</span> <span class="nf">make_pixel_map_plane</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a pixel map of a plane with given normal vector and point.</span>
 
 <span class="sd">    Args:</span>
@@ -1640,7 +1640,7 @@
 
 <div class="viewcode-block" id="make_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">bowl_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
               <span class="n">focus_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a matrix representing a bowl-shaped object in 3D space.</span>
 
 <span class="sd">    This function generates a 3D matrix representing a bowl-shaped object with the specified radius and diameter. The position</span>
@@ -2216,7 +2216,7 @@
 <div class="viewcode-block" id="make_multi_bowl"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_bowl">[docs]</a><span class="k">def</span> <span class="nf">make_multi_bowl</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bowl_pos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                     <span class="n">focus_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls, the radius of each bowl, the diameter of the bowls, and the position of the focus.</span>
 
 <span class="sd">    Args:</span>
@@ -2311,7 +2311,7 @@
     <span class="n">max_nd_val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">max_nd</span><span class="p">(</span><span class="n">bowls</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">max_nd_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># display warning</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;WARNING: </span><span class="si">{</span><span class="n">max_nd_val</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s1"> bowls are overlapping&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;WARNING: </span><span class="si">{</span><span class="n">max_nd_val</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> bowls are overlapping&#39;</span><span class="p">)</span>
 
         <span class="c1"># force the output to be binary</span>
         <span class="n">bowls</span><span class="p">[</span><span class="n">bowls</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2321,7 +2321,7 @@
 
 <div class="viewcode-block" id="make_multi_arc"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_multi_arc">[docs]</a><span class="k">def</span> <span class="nf">make_multi_arc</span><span class="p">(</span><span class="n">grid_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">arc_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
                    <span class="n">diameter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">focus_pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.</span>
 
 <span class="sd">    Args:</span>
@@ -2400,7 +2400,7 @@
     <span class="n">max_nd_val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">max_nd</span><span class="p">(</span><span class="n">arcs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">max_nd_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># display warning</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;WARNING: </span><span class="si">{</span><span class="n">max_nd_val</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s1"> arcs are overlapping&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;WARNING: </span><span class="si">{</span><span class="n">max_nd_val</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> arcs are overlapping&#39;</span><span class="p">)</span>
 
         <span class="c1"># force the output to be binary</span>
         <span class="n">arcs</span><span class="p">[</span><span class="n">arcs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2410,7 +2410,7 @@
 
 <div class="viewcode-block" id="make_sphere"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_sphere">[docs]</a><span class="k">def</span> <span class="nf">make_sphere</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Nz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot_sphere</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.</span>
 
 <span class="sd">    Args:</span>
@@ -2508,7 +2508,7 @@
 
 <div class="viewcode-block" id="make_spherical_section"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_spherical_section">[docs]</a><span class="k">def</span> <span class="nf">make_spherical_section</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plot_section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                            <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a spherical section mask given the radius and height of the section and optional parameters to specify the width and/or plot and return a binary mask.</span>
 
 <span class="sd">    Args:</span>
@@ -2648,7 +2648,7 @@
 <div class="viewcode-block" id="focused_bowl_oneil"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.focused_bowl_oneil">[docs]</a><span class="k">def</span> <span class="nf">focused_bowl_oneil</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sound_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                        <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">axial_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">lateral_positions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates O&#39;Neil&#39;s solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.</span>
 
 <span class="sd">    Args:</span>
@@ -2768,9 +2768,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>

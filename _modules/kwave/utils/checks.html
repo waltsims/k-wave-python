@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.checks - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -267,7 +267,7 @@
 
 
 <div class="viewcode-block" id="enforce_fields"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.enforce_fields">[docs]</a><span class="k">def</span> <span class="nf">enforce_fields</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensures that the given dictionary contains the specified fields.</span>
 
 <span class="sd">    Args:</span>
@@ -284,7 +284,7 @@
 
 
 <div class="viewcode-block" id="enforce_fields_obj"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.enforce_fields_obj">[docs]</a><span class="k">def</span> <span class="nf">enforce_fields_obj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Enforces that certain fields are not None in the given object.</span>
 
 <span class="sd">    Args:</span>
@@ -301,7 +301,7 @@
 
 
 <div class="viewcode-block" id="check_field_names"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_field_names">[docs]</a><span class="k">def</span> <span class="nf">check_field_names</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method checks if the keys of the given dictionary are valid fields.</span>
 
 <span class="sd">    Args:</span>
@@ -318,7 +318,7 @@
 
 
 <div class="viewcode-block" id="check_str_eq"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_eq">[docs]</a><span class="k">def</span> <span class="nf">check_str_eq</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.</span>
 
 <span class="sd">    Args:</span>
@@ -334,7 +334,7 @@
 
 
 <div class="viewcode-block" id="check_str_in"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_str_in">[docs]</a><span class="k">def</span> <span class="nf">check_str_in</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if value is in the given list only if the value is string.</span>
 <span class="sd">    Helps to avoid FutureWarnings when value is not a string.</span>
 <span class="sd">    Added by @Farid</span>
@@ -352,7 +352,7 @@
 
 
 <div class="viewcode-block" id="is_number"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_number">[docs]</a><span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the given value is a numeric type.</span>
 
 <span class="sd">    Args:</span>
@@ -375,7 +375,7 @@
 
 
 <div class="viewcode-block" id="is_unix"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.is_unix">[docs]</a><span class="k">def</span> <span class="nf">is_unix</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether the current platform is a Unix-like system.</span>
 
 <span class="sd">    Returns:</span>
@@ -386,7 +386,7 @@
 
 
 <div class="viewcode-block" id="check_stability"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_stability">[docs]</a><span class="k">def</span> <span class="nf">check_stability</span><span class="p">(</span><span class="n">kgrid</span><span class="p">:</span> <span class="s2">&quot;kWaveGrid&quot;</span><span class="p">,</span> <span class="n">medium</span><span class="p">:</span> <span class="s2">&quot;kWaveMedium&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the maximum time step for which the k-space</span>
 <span class="sd">    propagation models are stable.</span>
 
@@ -516,7 +516,7 @@
 
 
 <div class="viewcode-block" id="check_factors"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_factors">[docs]</a><span class="k">def</span> <span class="nf">check_factors</span><span class="p">(</span><span class="n">min_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the maximum prime factor for a range of numbers.</span>
 
 <span class="sd">    checkFactors loops through the given range of numbers and finds the</span>
@@ -548,7 +548,7 @@
 
 
 <div class="viewcode-block" id="check_divisible"><a class="viewcode-back" href="../../../kwave.utils.checks.html#kwave.utils.checks.check_divisible">[docs]</a><span class="k">def</span> <span class="nf">check_divisible</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">divider</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks whether number is divisible by divider without any remainder</span>
 <span class="sd">    Why do we need such a function? -&gt; Because due to floating point precision we</span>
 <span class="sd">    experience rounding errors while using standard modulo operator with floating point numbers</span>
@@ -598,9 +598,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>

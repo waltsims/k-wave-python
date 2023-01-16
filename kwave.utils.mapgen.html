@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.utils.math module" href="kwave.utils.math.html" /><link rel="prev" title="kwave.utils.io module" href="kwave.utils.io.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.mapgen module - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -329,8 +329,8 @@ follow the power law defined by <cite>a0</cite> and <cite>y</cite>.</p>
 <li><p><strong>frequency</strong> (<em>float</em>) – The driving frequency of the sinusoid.</p></li>
 <li><p><strong>sound_speed</strong> (<em>float</em>) – The sound speed in the medium.</p></li>
 <li><p><strong>density</strong> (<em>float</em>) – The density of the medium.</p></li>
-<li><p><strong>axial_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ndarray</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.</p></li>
-<li><p><strong>lateral_positions</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ndarray</em><em>, </em><em>float</em><em>, </em><em>list</em><em>]</em><em>]</em>) – The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.</p></li>
+<li><p><strong>axial_positions</strong> (<em>ndarray</em><em> | </em><em>float</em><em> | </em><em>list</em><em> | </em><em>None</em>) – The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.</p></li>
+<li><p><strong>lateral_positions</strong> (<em>ndarray</em><em> | </em><em>float</em><em> | </em><em>list</em><em> | </em><em>None</em>) – The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -513,7 +513,7 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 <dd class="field-even"><p>The points on the sphere.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Union</em>[<em>List</em>[<em>Tuple</em>[float, float, float]], <em>Tuple</em>[<em>List</em>[<em>Tuple</em>[float, float, float]], <em>Any</em>]]</p>
+<dd class="field-odd"><p><em>List</em>[<em>Tuple</em>[float, float, float]] | <em>Tuple</em>[<em>List</em>[<em>Tuple</em>[float, float, float]], <em>Any</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -535,7 +535,7 @@ of the circle intersects the grid.</p>
 <li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the circle centre.</p></li>
 <li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the circle centre.</p></li>
 <li><p><strong>radius</strong> (<em>int</em>) – The radius of the circle.</p></li>
-<li><p><strong>arc_angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
+<li><p><strong>arc_angle</strong> (<em>float</em><em> | </em><em>None</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
 <li><p><strong>plot_circle</strong> (<em>bool</em>) – If set to True, the circle will be plotted using Matplotlib.</p></li>
 </ul>
 </dd>
@@ -584,9 +584,9 @@ side.</p>
 <li><p><strong>Nx</strong> (<em>int</em>) – The number of pixels in the x-dimension.</p></li>
 <li><p><strong>Ny</strong> (<em>int</em>) – The number of pixels in the y-dimension.</p></li>
 <li><p><strong>startpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The start point of the line, given as a tuple of x and y coordinates.</p></li>
-<li><p><strong>endpoint</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.</p></li>
-<li><p><strong>angle</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.</p></li>
-<li><p><strong>length</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.</p></li>
+<li><p><strong>endpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>| </em><em>None</em>) – The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.</p></li>
+<li><p><strong>angle</strong> (<em>float</em><em> | </em><em>None</em>) – The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.</p></li>
+<li><p><strong>length</strong> (<em>int</em><em> | </em><em>None</em>) – The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -607,8 +607,8 @@ side.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid (assumed to be square).</p></li>
 <li><p><strong>arc_pos</strong> (<em>ndarray</em>) – An array containing the (x, y) coordinates of the center of each arc.</p></li>
-<li><p><strong>radius</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>ndarray</em><em>]</em>) – The radius of each arc. Can be a single value or an array with one value for each arc.</p></li>
-<li><p><strong>diameter</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>ndarray</em><em>]</em>) – The diameter of the arcs. Can be a single value or an array with one value for each arc.</p></li>
+<li><p><strong>radius</strong> (<em>int</em><em> | </em><em>ndarray</em>) – The radius of each arc. Can be a single value or an array with one value for each arc.</p></li>
+<li><p><strong>diameter</strong> (<em>int</em><em> | </em><em>ndarray</em>) – The diameter of the arcs. Can be a single value or an array with one value for each arc.</p></li>
 <li><p><strong>focus_pos</strong> (<em>ndarray</em>) – The (x, y) coordinates of the focus.</p></li>
 </ul>
 </dd>
@@ -663,7 +663,7 @@ control the location of the center point.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Nx</strong> (<em>int</em>) – number of pixels in the x-dimension</p></li>
 <li><p><strong>Ny</strong> (<em>int</em>) – number of pixels in the y-dimension</p></li>
-<li><p><strong>Nz</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – number of pixels in the z-dimension</p></li>
+<li><p><strong>Nz</strong> (<em>int</em><em> | </em><em>None</em>) – number of pixels in the z-dimension</p></li>
 <li><p><strong>*args</strong> – additional optional arguments</p></li>
 </ul>
 </dd>
@@ -778,7 +778,7 @@ the final row and column.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>radius</strong> (<em>float</em>) – The radius of the spherical section.</p></li>
 <li><p><strong>height</strong> (<em>float</em>) – The height of the spherical section.</p></li>
-<li><p><strong>width</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The width of the spherical section (default: height).</p></li>
+<li><p><strong>width</strong> (<em>float</em><em> | </em><em>None</em>) – The width of the spherical section (default: height).</p></li>
 <li><p><strong>plot_section</strong> (<em>bool</em>) – Whether to plot the spherical section (default: False).</p></li>
 <li><p><strong>binary</strong> (<em>bool</em>) – Whether to return a binary mask (default: False).</p></li>
 </ul>
@@ -1034,9 +1034,6 @@ Acoust. Soc. Am., 32(6), 719-721.</p>
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>

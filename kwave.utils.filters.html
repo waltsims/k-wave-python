@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.utils.interp module" href="kwave.utils.interp.html" /><link rel="prev" title="kwave.utils.dotdictionary module" href="kwave.utils.dotdictionary.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.filters module - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -274,9 +274,9 @@ Both causal and zero phase filters can be applied.</p>
 <li><p><strong>Fs</strong> (<em>float</em>) – The sampling frequency of the signal.</p></li>
 <li><p><strong>cutoff_f</strong> (<em>float</em>) – The cut-off frequency of the filter.</p></li>
 <li><p><strong>filter_type</strong> (<em>str</em>) – The type of filter to apply, either ‘HighPass’, ‘LowPass’ or ‘BandPass’.</p></li>
-<li><p><strong>zero_phase</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to apply a zero-phase filter. Defaults to False.</p></li>
-<li><p><strong>transition_width</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The transition width of the filter, as a proportion of the sampling frequency. Defaults to 0.1.</p></li>
-<li><p><strong>stop_band_atten</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The stop-band attenuation of the filter in dB. Defaults to 60.</p></li>
+<li><p><strong>zero_phase</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to apply a zero-phase filter. Defaults to False.</p></li>
+<li><p><strong>transition_width</strong> (<em>float</em><em> | </em><em>None</em>) – The transition width of the filter, as a proportion of the sampling frequency. Defaults to 0.1.</p></li>
+<li><p><strong>stop_band_atten</strong> (<em>int</em><em> | </em><em>None</em>) – The stop-band attenuation of the filter in dB. Defaults to 60.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -333,28 +333,28 @@ between the amount of noise reduction and the amount of signal distortion.</p>
 <li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – The kWaveGrid grid.</p></li>
 <li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – The kWavemedium.</p></li>
 <li><p><strong>signal</strong> (<em>ndarray</em>) – The time-domain signal to filter.</p></li>
-<li><p><strong>ppw</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The minimum number of points per wavelength in the signal. This determines the
+<li><p><strong>ppw</strong> (<em>int</em><em> | </em><em>None</em>) – The minimum number of points per wavelength in the signal. This determines the
 minimum frequency that will be passed through the filter. Higher values of ppw
 result in a lower cut-off frequency and more noise reduction, but may also result
 in more signal distortion. Defaults to 3.</p></li>
-<li><p><strong>rppw</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The number of points per wavelength in the smoothing ramp applied to the beginning
+<li><p><strong>rppw</strong> (<em>int</em><em> | </em><em>None</em>) – The number of points per wavelength in the smoothing ramp applied to the beginning
 of the signal. This can be used to reduce ringing artifacts caused by the sudden
 transition from the filtered signal to the unfiltered signal. Defaults to 0.</p></li>
-<li><p><strong>stop_band_atten</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The stop-band attenuation in dB. This determines the steepness of the
+<li><p><strong>stop_band_atten</strong> (<em>int</em><em> | </em><em>None</em>) – The stop-band attenuation in dB. This determines the steepness of the
 filter’s transition from the pass-band to the stop-band. Higher values result in a
 steeper transition and more noise reduction, but may also result in more signal
 distortion. Defaults to 60.</p></li>
-<li><p><strong>transition_width</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – The transition width as a proportion of the sampling frequency. This
+<li><p><strong>transition_width</strong> (<em>float</em><em> | </em><em>None</em>) – The transition width as a proportion of the sampling frequency. This
 determines the width of the transition region between the pass-band and the stop-band.
 Smaller values result in a narrower transition and more noise reduction, but may also
 result in more signal distortion. Defaults to 0.1.</p></li>
-<li><p><strong>zerophase</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to implement the filter as a zero-phase filter. Zero-phase filtering
+<li><p><strong>zerophase</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to implement the filter as a zero-phase filter. Zero-phase filtering
 can be used to preserve the phase information in the signal, which can be important
 for some applications. However, it may also result in more signal distortion.
 Defaults to False.</p></li>
-<li><p><strong>plot_spectrums</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to plot the spectrums of the input and filtered signals.
+<li><p><strong>plot_spectrums</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to plot the spectrums of the input and filtered signals.
 Defaults to False.</p></li>
-<li><p><strong>plot_signals</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to plot the input and filtered signals. Defaults to False.</p></li>
+<li><p><strong>plot_signals</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to plot the input and filtered signals. Defaults to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -400,7 +400,7 @@ applied to each matrix row.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>signal</strong> (<em>Union</em><em>[</em><em>ndarray</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Signal to filter</p></li>
+<li><p><strong>signal</strong> (<em>ndarray</em><em> | </em><em>List</em><em>[</em><em>float</em><em>]</em>) – Signal to filter</p></li>
 <li><p><strong>Fs</strong> (<em>float</em>) – Sampling frequency [Hz]</p></li>
 <li><p><strong>frequency</strong> (<em>float</em>) – Center frequency of filter [Hz]</p></li>
 <li><p><strong>bandwidth</strong> (<em>float</em>) – Bandwidth of filter in percentage</p></li>
@@ -410,7 +410,7 @@ applied to each matrix row.</p>
 <dd class="field-even"><p>The filtered signal</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Union</em>[<em>ndarray</em>, <em>List</em>[float]]</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>List</em>[float]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -423,7 +423,7 @@ applied to each matrix row.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>im</strong> (<em>ndarray</em>) – The image matrix.</p></li>
-<li><p><strong>metric</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The metric to use. Defaults to “Brenner”.</p></li>
+<li><p><strong>metric</strong> (<em>str</em><em> | </em><em>None</em>) – The metric to use. Defaults to “Brenner”.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -472,8 +472,8 @@ The Nyquist component only exists for even numbered FFT lengths.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>a</strong> (<em>ndarray</em>) – The spatial distribution to smooth.</p></li>
-<li><p><strong>restore_max</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Boolean controlling whether the maximum value is restored after smoothing. Defaults to False.</p></li>
-<li><p><strong>window_type</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Shape of the smoothing window. Any valid inputs to get_win are supported. Defaults to ‘Blackman’.</p></li>
+<li><p><strong>restore_max</strong> (<em>bool</em><em> | </em><em>None</em>) – Boolean controlling whether the maximum value is restored after smoothing. Defaults to False.</p></li>
+<li><p><strong>window_type</strong> (<em>str</em><em> | </em><em>None</em>) – Shape of the smoothing window. Any valid inputs to get_win are supported. Defaults to ‘Blackman’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -494,12 +494,12 @@ The Nyquist component only exists for even numbered FFT lengths.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>func</strong> (<em>ndarray</em>) – The signal to analyse.</p></li>
 <li><p><strong>Fs</strong> (<em>float</em>) – The sampling frequency in Hz.</p></li>
-<li><p><strong>dim</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>]</em>) – The dimension over which the spectrum is calculated. Defaults to ‘auto’.</p></li>
-<li><p><strong>fft_len</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The length of the FFT. If the set length is smaller than the signal length, the default value is used
+<li><p><strong>dim</strong> (<em>int</em><em> | </em><em>str</em><em> | </em><em>None</em>) – The dimension over which the spectrum is calculated. Defaults to ‘auto’.</p></li>
+<li><p><strong>fft_len</strong> (<em>int</em><em> | </em><em>None</em>) – The length of the FFT. If the set length is smaller than the signal length, the default value is used
 instead (default = signal length).</p></li>
-<li><p><strong>power_two</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether the FFT length is forced to be the next highest power of 2 (default = False).</p></li>
-<li><p><strong>unwrap_phase</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to unwrap the phase spectrum (default = False).</p></li>
-<li><p><strong>window</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – (str) The window type used to filter the signal before the FFT is taken (default = ‘Rectangular’). Any valid
+<li><p><strong>power_two</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether the FFT length is forced to be the next highest power of 2 (default = False).</p></li>
+<li><p><strong>unwrap_phase</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to unwrap the phase spectrum (default = False).</p></li>
+<li><p><strong>window</strong> (<em>str</em><em> | </em><em>None</em>) – (str) The window type used to filter the signal before the FFT is taken (default = ‘Rectangular’). Any valid
 input types for get_win may be used.</p></li>
 </ul>
 </dd>
@@ -603,9 +603,6 @@ func_ps: Single-sided phase spectrum</p>
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>

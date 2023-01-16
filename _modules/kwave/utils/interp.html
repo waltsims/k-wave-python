@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.interp - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -265,7 +265,7 @@
 
 
 <div class="viewcode-block" id="interpolate3d"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interpolate3d">[docs]</a><span class="k">def</span> <span class="nf">interpolate3d</span><span class="p">(</span><span class="n">grid_points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">grid_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interp_locs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interpolates input grid values at the given locations</span>
 <span class="sd">    Added by Farid</span>
 
@@ -313,7 +313,7 @@
 
 <div class="viewcode-block" id="interpolate2d"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interpolate2d">[docs]</a><span class="k">def</span> <span class="nf">interpolate2d</span><span class="p">(</span><span class="n">grid_points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">grid_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interp_locs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
                   <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">copy_nans</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interpolates input grid values at the given locations</span>
 <span class="sd">    Added by Farid</span>
 
@@ -367,7 +367,7 @@
         <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
         <span class="n">copy_nans</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interpolates input grid values at the given locations</span>
 <span class="sd">    Added by Farid</span>
 
@@ -406,7 +406,7 @@
         <span class="n">up_sampling_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">plot</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the band-limited interpolant of a 1D input function.</span>
 
 <span class="sd">    Args:</span>
@@ -446,7 +446,7 @@
 
 
 <div class="viewcode-block" id="interp_cart_data"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interp_cart_data">[docs]</a><span class="k">def</span> <span class="nf">interp_cart_data</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">cart_sensor_data</span><span class="p">,</span> <span class="n">cart_sensor_mask</span><span class="p">,</span> <span class="n">binary_sensor_mask</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     Takes a matrix of time-series data recorded over a set</span>
 <span class="sd">     of Cartesian sensor points given by cart_sensor_mask and computes the</span>
 <span class="sd">     equivalent time-series at each sensor position on the binary sensor</span>
@@ -557,7 +557,7 @@
 
 
 <div class="viewcode-block" id="interpftn"><a class="viewcode-back" href="../../../kwave.utils.interp.html#kwave.utils.interp.interpftn">[docs]</a><span class="k">def</span> <span class="nf">interpftn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sz</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">win</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     Resamples an N-D matrix to the size given in sz using Fourier interpolation.</span>
 
 
@@ -622,9 +622,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>

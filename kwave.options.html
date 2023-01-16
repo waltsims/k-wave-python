@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="kwave.recorder module" href="kwave.recorder.html" /><link rel="prev" title="kwave.ktransducer module" href="kwave.ktransducer.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.options module - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -321,28 +321,28 @@
 <li><p><strong>smooth_p0</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>use_kspace</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>use_sg</strong> (<em>bool</em>) – </p></li>
-<li><p><strong>use_fd</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>use_fd</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>pml_auto</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>create_log</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>use_finite_difference</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>stream_to_disk</strong> (<em>bool</em>) – </p></li>
-<li><p><strong>data_recast</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – </p></li>
+<li><p><strong>data_recast</strong> (<em>bool</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>cartesian_interp</strong> (<em>str</em>) – </p></li>
-<li><p><strong>hdf_compression_level</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>hdf_compression_level</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>data_cast</strong> (<em>str</em>) – </p></li>
 <li><p><strong>pml_search_range</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – </p></li>
 <li><p><strong>radial_symmetry</strong> (<em>str</em>) – </p></li>
 <li><p><strong>multi_axial_PML_ratio</strong> (<em>float</em>) – </p></li>
-<li><p><strong>data_path</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>output_filename</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>input_filename</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>pml_x_alpha</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
-<li><p><strong>pml_y_alpha</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
-<li><p><strong>pml_z_alpha</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
-<li><p><strong>pml_size</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>pml_x_size</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
-<li><p><strong>pml_y_size</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
-<li><p><strong>pml_z_size</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>data_path</strong> (<em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>output_filename</strong> (<em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>input_filename</strong> (<em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_x_alpha</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_y_alpha</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_z_alpha</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_size</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>pml_x_size</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_y_size</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pml_z_size</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -378,12 +378,12 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_path">
-<span class="sig-name descname"><span class="pre">data_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_path" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">data_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_path" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.data_recast">
-<span class="sig-name descname"><span class="pre">data_recast</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_recast" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">data_recast</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.data_recast" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -393,12 +393,12 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.hdf_compression_level">
-<span class="sig-name descname"><span class="pre">hdf_compression_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.hdf_compression_level" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">hdf_compression_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.hdf_compression_level" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.input_filename">
-<span class="sig-name descname"><span class="pre">input_filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kwave.options.SimulationOptions.input_filename" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">input_filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.input_filename" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -448,7 +448,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.output_filename">
-<span class="sig-name descname"><span class="pre">output_filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kwave.options.SimulationOptions.output_filename" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">output_filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.output_filename" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -473,37 +473,37 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_size">
-<span class="sig-name descname"><span class="pre">pml_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_size" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_size" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_alpha">
-<span class="sig-name descname"><span class="pre">pml_x_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_alpha" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_x_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_alpha" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_x_size">
-<span class="sig-name descname"><span class="pre">pml_x_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_size" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_x_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_x_size" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_alpha">
-<span class="sig-name descname"><span class="pre">pml_y_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_alpha" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_y_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_alpha" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_y_size">
-<span class="sig-name descname"><span class="pre">pml_y_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_size" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_y_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_y_size" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_alpha">
-<span class="sig-name descname"><span class="pre">pml_z_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_alpha" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_z_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_alpha" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.pml_z_size">
-<span class="sig-name descname"><span class="pre">pml_z_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_size" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pml_z_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.pml_z_size" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -548,7 +548,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kwave.options.SimulationOptions.use_fd">
-<span class="sig-name descname"><span class="pre">use_fd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_fd" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">use_fd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kwave.options.SimulationOptions.use_fd" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -678,9 +678,6 @@
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>

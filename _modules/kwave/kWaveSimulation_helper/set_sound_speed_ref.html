@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.kWaveSimulation_helper.set_sound_speed_ref - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -256,7 +256,7 @@
 
 
 <div class="viewcode-block" id="set_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">set_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">kspace_elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        select the reference sound speed used in the k-space operator</span>
 <span class="sd">        based on the heterogeneous sound speed map</span>
 <span class="sd">    Args:</span>
@@ -276,7 +276,7 @@
 
 
 <div class="viewcode-block" id="get_ordinary_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_ordinary_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">get_ordinary_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        calculate the reference sound speed for the fluid code, using the</span>
 <span class="sd">        maximum by default which ensures the model is unconditionally stable</span>
 <span class="sd">    Args:</span>
@@ -291,7 +291,7 @@
 
 
 <div class="viewcode-block" id="get_pstd_elastic_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_pstd_elastic_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">get_pstd_elastic_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        in the pstd elastic case, the reference sound speed is only used to</span>
 <span class="sd">        calculate the PML absorption, so just use the compressional wave speed</span>
 <span class="sd">    Args:</span>
@@ -306,7 +306,7 @@
 
 
 <div class="viewcode-block" id="get_kspace_elastic_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_kspace_elastic_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">get_kspace_elastic_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        in the k-space elastic case, there are two reference sound speeds for</span>
 <span class="sd">        the compressional and shear waves, so compute them seperately</span>
 <span class="sd">    Args:</span>
@@ -375,9 +375,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>

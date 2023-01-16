@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kwave.utils.pml - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -258,7 +258,7 @@
 
 <div class="viewcode-block" id="get_pml"><a class="viewcode-back" href="../../../kwave.utils.pml.html#kwave.utils.pml.get_pml">[docs]</a><span class="k">def</span> <span class="nf">get_pml</span><span class="p">(</span><span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">pml_alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">staggered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a 1D perfectly matched layer variable based on the given size and absorption coefficient.</span>
 
 <span class="sd">    This function calculates a 1D perfectly matched layer (PML) variable based on the specified size and absorption coefficient.</span>
@@ -318,7 +318,7 @@
 
 
 <div class="viewcode-block" id="get_optimal_pml_size"><a class="viewcode-back" href="../../../kwave.utils.pml.html#kwave.utils.pml.get_optimal_pml_size">[docs]</a><span class="k">def</span> <span class="nf">get_optimal_pml_size</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">pml_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axisymmetric</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     get_optimal_pml_size finds the size of the perfectly matched layer (PML)</span>
 <span class="sd">     that gives an overall grid size with the smallest prime factors when</span>
 <span class="sd">     using the first-order simulation functions in k-Wave with the</span>
@@ -432,9 +432,6 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>
