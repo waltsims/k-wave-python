@@ -48,7 +48,8 @@ def binaries_present() -> bool:
             "kspaceFirstOrder-OMP",
             "kspaceFirstOrder-CUDA"
         ],
-        "cygwin": specific_omp_filenames + specific_cuda_filenames + common_filenames
+        "cygwin": specific_omp_filenames + specific_cuda_filenames + common_filenames,
+        "win32": specific_omp_filenames + specific_cuda_filenames + common_filenames,
     }
 
     for binary in binary_list[system]:
@@ -81,6 +82,10 @@ def download_binaries(system_os: str, bin_type: str):
         #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
         # },
         "cygwin": {
+            "cuda": get_windows_release_urls("CUDA", "windows"),
+            "cpu": get_windows_release_urls("OMP", "windows"),
+        },
+        "win32": {
             "cuda": get_windows_release_urls("CUDA", "windows"),
             "cpu": get_windows_release_urls("OMP", "windows"),
         },
