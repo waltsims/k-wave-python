@@ -1,7 +1,7 @@
 output_file = 'collectedValues/angularSpectrumCW.mat';
 
 
-recorder = TestRecorder(output_file);
+recorder = utils.TestRecorder(output_file);
 
 input_plane = rand(44, 100);
 dx = 1.0000e-04;
