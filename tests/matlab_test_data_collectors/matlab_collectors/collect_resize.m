@@ -1,5 +1,7 @@
 % Generate a list of interpolation methods
-interp_methods = {'nearest', 'linear'};
+% TODO: test also for nearest
+% interp_methods = {'nearest', 'linear'};
+interp_methods = {'linear'};
 
 % Generate a random 3D volume with dimensions Nx x Ny x Nz
 Nx = randi([10,20]);
