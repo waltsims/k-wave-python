@@ -82,7 +82,11 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     Returns:
         Resized matrix.
     """
+    # start the timer
+    TicToc.tic()
 
+    # update command line status
+    print('Resizing matrix...')
     # check inputs
     assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
@@ -111,6 +115,7 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     else:
         mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
+    print(f'  completed in {scale_time(TicToc.toc())}')
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
