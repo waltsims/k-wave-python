@@ -322,33 +322,29 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="resize"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.resize">[docs]</a><span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]],</span> <span class="n">new_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
-           <span class="n">interp_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]]:</span>
+<div class="viewcode-block" id="resize"><a class="viewcode-back" href="../../../kwave.utils.matrix.html#kwave.utils.matrix.resize">[docs]</a><span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">interp_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    resamples a &quot;matrix&quot; of spatial samples to a desired &quot;resolution&quot; or spatial sampling frequency via interpolation</span>
+<span class="sd">    Resizes a matrix of spatial samples to a desired resolution or spatial sampling frequency</span>
+<span class="sd">    via interpolation.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        mat:                matrix to be &quot;resized&quot; i.e. resampled</span>
-<span class="sd">        new_size:         desired output resolution</span>
-<span class="sd">        interp_mode:        interpolation method</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        mat: Matrix to be resized (i.e., resampled).</span>
+<span class="sd">        new_size: Desired output resolution.</span>
+<span class="sd">        interp_mode: Interpolation method.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">       &quot;resized&quot; matrix</span>
-
+<span class="sd">        Resized matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># start the timer</span>
     <span class="n">TicToc</span><span class="o">.</span><span class="n">tic</span><span class="p">()</span>
 
     <span class="c1"># update command line status</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resizing matrix...&#39;</span><span class="p">)</span>
-
     <span class="c1"># check inputs</span>
     <span class="k">assert</span> <span class="n">num_dim2</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_size</span><span class="p">),</span> \
         <span class="s1">&#39;Resolution input must have the same number of elements as data dimensions.&#39;</span>
 
     <span class="n">mat</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-    <span class="n">mat_shape</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="n">axis</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>

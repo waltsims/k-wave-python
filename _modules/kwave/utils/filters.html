@@ -256,7 +256,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy.fftpack</span> <span class="kn">import</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span><span class="p">,</span> <span class="n">ifftshift</span><span class="p">,</span> <span class="n">fftshift</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">lfilter</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">lfilter</span><span class="p">,</span> <span class="n">convolve</span>
 
 <span class="kn">from</span> <span class="nn">.checks</span> <span class="kn">import</span> <span class="n">is_number</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_SI</span>
@@ -486,37 +486,64 @@
 
 
 <div class="viewcode-block" id="brenner_sharpness"><a class="viewcode-back" href="../../../kwave.utils.filters.html#kwave.utils.filters.brenner_sharpness">[docs]</a><span class="k">def</span> <span class="nf">brenner_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">):</span>
-    <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">im</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="n">num_dim</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="k">if</span> <span class="n">num_dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># compute metric</span>
         <span class="n">bren_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">im</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">im</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="n">bren_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">im</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">im</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">bren_x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">bren_y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bren_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bren_y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">num_dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># compute metric</span>
         <span class="n">bren_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">im</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">im</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="n">bren_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">im</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">im</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="n">bren_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">im</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">im</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">bren_x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">bren_y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">bren_z</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid number of dimensions in im&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bren_x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bren_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bren_z</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">s</span></div>
 
 
 <div class="viewcode-block" id="tenenbaum_sharpness"><a class="viewcode-back" href="../../../kwave.utils.filters.html#kwave.utils.filters.tenenbaum_sharpness">[docs]</a><span class="k">def</span> <span class="nf">tenenbaum_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">):</span>
-    <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">im</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">sobel</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">sobel</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">sobel</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">sobel</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="n">num_dim</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="k">if</span> <span class="n">num_dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># define the 2D sobel gradient operator</span>
+        <span class="n">sobel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid number of dimensions in im&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">sobel</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+        <span class="c1"># compute metric</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">convolve</span><span class="p">(</span><span class="n">sobel</span><span class="p">,</span> <span class="n">im</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">convolve</span><span class="p">(</span><span class="n">sobel</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">im</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">num_dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># define the 3D sobel gradient operator</span>
+        <span class="n">sobel3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">sobel3D</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">sobel3D</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">sobel3D</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># compute metric</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">convolve</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">sobel3D</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">convolve</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">sobel3D</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+             <span class="n">convolve</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">sobel3D</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+    <span class="c1"># TODO: get this passing the tests</span>
+    <span class="c1"># NOTE: Walter thinks this is the proper way to do this, but it doesn&#39;t match the MATLAB version</span>
+    <span class="c1"># num_dim = im.ndim</span>
+    <span class="c1"># if num_dim == 2:</span>
+    <span class="c1">#     # compute metric</span>
+    <span class="c1">#     sx = sobel(im, axis=0, mode=&#39;constant&#39;)</span>
+    <span class="c1">#     sy = sobel(im, axis=1, mode=&#39;constant&#39;)</span>
+    <span class="c1">#     s = (sx ** 2) + (sy ** 2)</span>
+    <span class="c1">#     s = np.sum(s)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif num_dim == 3:</span>
+    <span class="c1">#     # compute metric</span>
+    <span class="c1">#     sx = sobel(im, axis=0, mode=&#39;constant&#39;)</span>
+    <span class="c1">#     sy = sobel(im, axis=1, mode=&#39;constant&#39;)</span>
+    <span class="c1">#     sz = sobel(im, axis=2, mode=&#39;constant&#39;)</span>
+    <span class="c1">#     s = (sx ** 2) + (sy ** 2) + (sz ** 2)</span>
+    <span class="c1">#     s = np.sum(s)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     raise ValueError(&quot;Invalid number of dimensions in im&quot;)</span>
 
 
 <div class="viewcode-block" id="sharpness"><a class="viewcode-back" href="../../../kwave.utils.filters.html#kwave.utils.filters.sharpness">[docs]</a><span class="k">def</span> <span class="nf">sharpness</span><span class="p">(</span>
         <span class="n">im</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">metric</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Brenner&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Brenner&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.</span>
 
@@ -538,17 +565,17 @@
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="s2">&quot;Argument im must be of type numpy array&quot;</span>
 
-    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Brenner&quot;</span><span class="p">:</span>
-        <span class="n">sharp_met</span> <span class="o">=</span> <span class="n">brenner_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;Tenenbaum&quot;</span><span class="p">:</span>
-        <span class="n">sharp_met</span> <span class="o">=</span> <span class="n">tenenbaum_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;NormVariance&quot;</span><span class="p">:</span>
-        <span class="n">sharp_met</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;Brenner&quot;</span><span class="p">:</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">brenner_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;Tenenbaum&quot;</span><span class="p">:</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">tenenbaum_sharpness</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;NormVariance&quot;</span><span class="p">:</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;Unrecognized sharpness metric passed. Valid values are [&#39;Brenner&#39;, &#39;Tanenbaum&#39;, &#39;NormVariance&#39;]&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">sharp_met</span></div>
+    <span class="k">return</span> <span class="n">metric</span></div>
 
 
 <div class="viewcode-block" id="fwhm"><a class="viewcode-back" href="../../../kwave.utils.filters.html#kwave.utils.filters.fwhm">[docs]</a><span class="k">def</span> <span class="nf">fwhm</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>

@@ -423,20 +423,21 @@ maximum value. The index is given in the MATLAB convention, where indexing start
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.matrix.resize">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.matrix.</span></span><span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/matrix.html#resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.matrix.resize" title="Permalink to this definition">#</a></dt>
-<dd><p>resamples a “matrix” of spatial samples to a desired “resolution” or spatial sampling frequency via interpolation</p>
+<dd><p>Resizes a matrix of spatial samples to a desired resolution or spatial sampling frequency
+via interpolation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mat</strong> (<em>ndarray</em><em> | </em><em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em> | </em><em>float</em><em>]</em><em>]</em>) – matrix to be “resized” i.e. resampled</p></li>
-<li><p><strong>new_size</strong> (<em>int</em><em> | </em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – desired output resolution</p></li>
-<li><p><strong>interp_mode</strong> (<em>str</em>) – interpolation method</p></li>
+<li><p><strong>mat</strong> (<em>ndarray</em>) – Matrix to be resized (i.e., resampled).</p></li>
+<li><p><strong>new_size</strong> (<em>int</em><em> | </em><em>List</em><em>[</em><em>int</em><em>]</em>) – Desired output resolution.</p></li>
+<li><p><strong>interp_mode</strong> (<em>str</em>) – Interpolation method.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>“resized” matrix</p>
+<dd class="field-even"><p>Resized matrix.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | <em>List</em>[<em>List</em>[int | float]]</p>
+<dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>

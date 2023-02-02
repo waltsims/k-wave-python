@@ -288,15 +288,15 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.signals.create_cw_signals">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.signals.</span></span><span class="sig-name descname"><span class="pre">create_cw_signals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/signals.html#create_cw_signals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.signals.create_cw_signals" title="Permalink to this definition">#</a></dt>
-<dd><p>create_cw_signals generates a series of continuous wave (CW) signals based on the 1D or 2D input matrices amp and phase, where each signal is given by:</p>
+<dd><p>Generate a series of continuous wave (CW) signals based on the 1D or 2D input matrices <cite>amp</cite> and <cite>phase</cite>, where each signal
+is given by:</p>
 <blockquote>
-<div><p>amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));</p>
+<div><p>amp[i, j] .* sin(2 * pi * freq * t_array + phase[i, j]);</p>
 </div></blockquote>
-<p>To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length of this ramp is four periods of the wave. The up-ramp can be turned off by setting the ramp_length to 0.</p>
-<blockquote>
-<div><p>Example:</p>
-<blockquote>
-<div><p># define sampling parameters
+<p>To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length
+of this ramp is four periods of the wave. The up-ramp can be turned off by setting the <cite>ramp_length</cite> to 0.</p>
+<p class="rubric">Examples</p>
+<p># define sampling parameters
 f = 5e6
 T = 1/f
 Fs = 100e6
@@ -307,30 +307,21 @@ amp = get_win(9, ‘Gaussian’)
 phase = np.arange(0, 2*pi, 9).T</p>
 <p># create signals and plot
 cw_signal = create_cw_signals(t_array, f, amp, phase)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Args:</dt><dd><p>t_array: A numpy ndarray representing the time values.
-freq: A float representing the frequency of the signals.
-amp: A numpy ndarray representing the amplitudes of the signals.
-phase: A numpy ndarray representing the phases of the signals.
-ramp_length: An optional integer representing the length of the cosine up-ramp in periods of the wave. Default is 4.</p>
-</dd>
-<dt>Returns:</dt><dd><p>A numpy ndarray containing the generated CW signals.</p>
-</dd>
-</dl>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t_array</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>freq</strong> (<em>float</em>) – </p></li>
-<li><p><strong>amp</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>phase</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>ramp_length</strong> (<em>int</em>) – </p></li>
+<li><p><strong>t_array</strong> (<em>ndarray</em>) – A numpy ndarray representing the time values.</p></li>
+<li><p><strong>freq</strong> (<em>float</em>) – A float representing the frequency of the signals.</p></li>
+<li><p><strong>amp</strong> (<em>ndarray</em>) – A numpy ndarray representing the amplitudes of the signals.</p></li>
+<li><p><strong>phase</strong> (<em>ndarray</em>) – A numpy ndarray representing the phases of the signals.</p></li>
+<li><p><strong>ramp_length</strong> (<em>int</em>) – An optional integer representing the length of the cosine up-ramp in periods of the wave. Default is 4.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>ndarray</em></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy ndarray containing the generated CW signals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>

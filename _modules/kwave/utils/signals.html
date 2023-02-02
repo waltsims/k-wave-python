@@ -251,7 +251,7 @@
         </div>
         <article role="main">
           <h1>Source code for kwave.utils.signals</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span><span class="p">,</span> <span class="n">pi</span>
+<span></span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -655,16 +655,18 @@
     <span class="c1"># w_var = 1/(4*pi^2*t_var)</span>
     <span class="c1"># fw = 2 * sqrt(2 * log(2) * w_var)</span>
 
-    <span class="c1"># create the signal with the offset tone burst</span>
+    <span class="c1"># Convert tone_index and signal_offset to numpy arrays</span>
     <span class="n">tone_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tone_index</span><span class="p">])</span>
     <span class="n">signal_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">signal_offset</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">signal_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">tone_index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">signal_offset</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tone_burst</span><span class="p">)))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">tone_index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">signal_length</span><span class="p">])</span>
 
-    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tone_index</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-        <span class="n">signal</span><span class="p">[</span><span class="n">offset</span><span class="p">,</span> <span class="n">tone_index</span><span class="p">[</span><span class="n">offset</span><span class="p">]:</span><span class="n">tone_index</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tone_burst</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tone_burst</span><span class="o">.</span><span class="n">T</span>
+    <span class="c1"># Determine the length of the signal array</span>
+    <span class="n">signal_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">signal_length</span><span class="p">,</span> <span class="n">signal_offset</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tone_burst</span><span class="p">))</span>
+
+    <span class="c1"># Create the signal array with the correct size</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">tone_index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">signal_length</span><span class="p">))</span>
+
+    <span class="c1"># Add the tone burst to the signal array</span>
+    <span class="n">signal</span><span class="p">[:,</span> <span class="n">tone_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">tone_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tone_burst</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tone_burst</span><span class="o">.</span><span class="n">T</span>
 
     <span class="c1"># plot the signal if required</span>
     <span class="k">if</span> <span class="n">plot_signal</span><span class="p">:</span>
@@ -889,13 +891,15 @@
 <div class="viewcode-block" id="create_cw_signals"><a class="viewcode-back" href="../../../kwave.utils.signals.html#kwave.utils.signals.create_cw_signals">[docs]</a><span class="k">def</span> <span class="nf">create_cw_signals</span><span class="p">(</span><span class="n">t_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">amp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                       <span class="n">ramp_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">   create_cw_signals generates a series of continuous wave (CW) signals based on the 1D or 2D input matrices amp and phase, where each signal is given by:</span>
+<span class="sd">    Generate a series of continuous wave (CW) signals based on the 1D or 2D input matrices `amp` and `phase`, where each signal</span>
+<span class="sd">    is given by:</span>
 
-<span class="sd">       amp(i, j) .* sin(2 .* pi .* freq .* t_array + phase(i, j));</span>
+<span class="sd">        amp[i, j] .* sin(2 * pi * freq * t_array + phase[i, j]);</span>
 
-<span class="sd">   To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length of this ramp is four periods of the wave. The up-ramp can be turned off by setting the ramp_length to 0.</span>
+<span class="sd">    To avoid startup transients, a cosine tapered up-ramp is applied to the beginning of the signal. By default, the length</span>
+<span class="sd">    of this ramp is four periods of the wave. The up-ramp can be turned off by setting the `ramp_length` to 0.</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 
 <span class="sd">        # define sampling parameters</span>
 <span class="sd">        f = 5e6</span>
@@ -925,32 +929,50 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-    <span class="n">N1</span><span class="p">,</span> <span class="n">N2</span> <span class="o">=</span> <span class="n">amp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="n">amp</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">N1</span><span class="p">,</span> <span class="n">N2</span> <span class="o">=</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">N1</span><span class="p">,</span> <span class="n">N2</span> <span class="o">=</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span>
 
-    <span class="n">cw_signals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N1</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_array</span><span class="p">)])</span>
+    <span class="c1"># create input signals</span>
+    <span class="n">cw_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N1</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_array</span><span class="p">)))</span>
 
-    <span class="k">for</span> <span class="n">idx1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">idx2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">cw_signals</span><span class="p">[</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">amp</span><span class="p">[</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t_array</span> <span class="o">+</span> <span class="n">phase</span><span class="p">[</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">])</span>
+    <span class="c1"># create signal</span>
+    <span class="k">for</span> <span class="n">index1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">amp</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cw_signal</span><span class="p">[</span><span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">amp</span><span class="p">[</span><span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t_array</span> <span class="o">+</span> <span class="n">phase</span><span class="p">[</span><span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cw_signal</span><span class="p">[</span><span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">amp</span><span class="p">[</span><span class="n">index1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t_array</span> <span class="o">+</span> <span class="n">phase</span><span class="p">[</span><span class="n">index1</span><span class="p">])</span>
 
+    <span class="c1"># apply ramp to avoid startup transients</span>
     <span class="k">if</span> <span class="n">ramp_length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># get period and time-step</span>
+        <span class="c1"># get period and time step (assuming dt is constant)</span>
         <span class="n">period</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">freq</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># create ramp x-axis between 0 and pi</span>
-        <span class="n">ramp_length_points</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ramp_length</span> <span class="o">*</span> <span class="n">period</span> <span class="o">/</span> <span class="n">dt</span><span class="p">))</span>
-        <span class="n">ramp_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">ramp_length_points</span><span class="p">))</span>
+        <span class="c1"># create x-axis for ramp between 0 and pi</span>
+        <span class="n">ramp_length_points</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">ramp_length</span> <span class="o">*</span> <span class="n">period</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span>
+        <span class="n">ramp_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">ramp_length_points</span><span class="p">)</span>
 
         <span class="c1"># create ramp using a shifted cosine</span>
         <span class="n">ramp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ramp_axis</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
-        <span class="n">ramp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ramp</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ramp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">ramp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># apply ramp to all signals simultaneously</span>
+        <span class="n">cw_signal</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">ramp_length_points</span><span class="p">]</span> <span class="o">=</span> <span class="n">ramp</span> <span class="o">*</span> <span class="n">cw_signal</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">ramp_length_points</span><span class="p">]</span>
 
-        <span class="n">cw_signals</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">ramp_length_points</span><span class="p">]</span> <span class="o">*=</span> <span class="n">ramp</span>
+    <span class="c1"># remove singleton dimensions if cw_signal has more than two dimensions</span>
+    <span class="k">if</span> <span class="n">cw_signal</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">cw_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">cw_signal</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">cw_signals</span><span class="p">)</span></div>
+    <span class="c1"># if only a single amplitude and phase is given, force time to be the</span>
+    <span class="c1"># second dimensions</span>
+    <span class="k">if</span> <span class="n">amp</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">cw_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">cw_signal</span><span class="p">,</span> <span class="p">(</span><span class="n">N1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">cw_signal</span></div>
 </pre></div>
         </article>
       </div>
