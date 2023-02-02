@@ -116,8 +116,8 @@ def is_number(value: Any) -> bool:
         return True
     if isinstance(value, str):
         return False
-    if value.dtype in [np.float32, np.float64]:
-        return True
+    if isinstance(value, np.ndarray):
+        return np.issubdtype(value.dtype, np.number)
     return np.issubdtype(np.array(value), np.number)
 
 

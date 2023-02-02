@@ -22,3 +22,6 @@ class TestRecordReader(object):
         self._step += 1
         if self._step > self._total_steps:
             raise ValueError("Exceeded total recorded steps. Perhaps something is wrong with logic?")
+
+    def __len__(self):
+        return self._total_steps
