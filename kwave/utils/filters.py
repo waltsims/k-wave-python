@@ -267,6 +267,7 @@ def tenenbaum_sharpness(im):
              convolve(im, np.transpose(sobel3D, (1, 2, 0))) ** 2).sum()
     return s
 
+    # TODO: get this passing the tests
     # NOTE: Walter thinks this is the proper way to do this, but it doesn't match the MATLAB version
     # num_dim = im.ndim
     # if num_dim == 2:
