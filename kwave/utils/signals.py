@@ -402,17 +402,18 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     # w_var = 1/(4*pi^2*t_var)
     # fw = 2 * sqrt(2 * log(2) * w_var)
 
-    # create the signal with the offset tone burst
+    # Convert tone_index and signal_offset to numpy arrays
     tone_index = np.array([tone_index])
     signal_offset = np.array(signal_offset)
-    if signal_length == 0:
-        signal = np.zeros((tone_index.size, signal_offset.max() + len(tone_burst)))
-    else:
-        signal = np.zeros([tone_index.size, signal_length])
 
-    # TODO (walter): Logic of signal length shorter than signal not covered
-    for offset in range(tone_index.size):
-        signal[offset, tone_index[offset]:tone_index[offset] + len(tone_burst)] = tone_burst.T
+    # Determine the length of the signal array
+    signal_length = max(signal_length, signal_offset.max() + len(tone_burst))
+
+    # Create the signal array with the correct size
+    signal = np.zeros((tone_index.size, signal_length))
+
+    # Add the tone burst to the signal array
+    signal[:, tone_index[0]:tone_index[0] + len(tone_burst)] = tone_burst.T
 
     # plot the signal if required
     if plot_signal:
