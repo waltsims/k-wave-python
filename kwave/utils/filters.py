@@ -3,7 +3,7 @@ from typing import Optional, Union, Tuple, List
 import numpy as np
 import scipy
 from scipy.fftpack import fft, ifft, ifftshift, fftshift
-from scipy.signal import lfilter
+from scipy.signal import lfilter, convolve
 
 from .checks import is_number
 from .data import scale_SI
@@ -233,37 +233,64 @@ def extract_amp_phase(data: np.ndarray, Fs: float, source_freq: float, dim: Tupl
 
 
 def brenner_sharpness(im):
-    ndim = len(np.squeeze(im).shape)
-
-    if ndim == 2:
+    num_dim = im.ndim
+    if num_dim == 2:
+        # compute metric
         bren_x = (im[:-2, :] - im[2:, :]) ** 2
         bren_y = (im[:, :-2] - im[:, 2:]) ** 2
-        s = bren_x.sum() + bren_y.sum()
-    elif ndim == 3:
+        s = np.sum(bren_x) + np.sum(bren_y)
+    elif num_dim == 3:
+        # compute metric
         bren_x = (im[:-2, :, :] - im[2:, :, :]) ** 2
         bren_y = (im[:, :-2, :] - im[:, 2:, :]) ** 2
         bren_z = (im[:, :, :-2] - im[:, :, 2:]) ** 2
-        s = bren_x.sum() + bren_y.sum() + bren_z.sum()
-    else:
-        raise ValueError("Invalid number of dimensions in im")
+        s = np.sum(bren_x) + np.sum(bren_y) + np.sum(bren_z)
     return s
 
 
 def tenenbaum_sharpness(im):
-    ndim = len(np.squeeze(im).shape)
-    if ndim == 2:
-        sobel = scipy.ndimage.sobel(im)
-    elif ndim == 3:
-        sobel = scipy.ndimage.sobel(im)
+    num_dim = im.ndim
+    if num_dim == 2:
+        # define the 2D sobel gradient operator
+        sobel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
 
-    else:
-        raise ValueError("Invalid number of dimensions in im")
-    return sobel.sum()
+        # compute metric
+        s = (convolve(sobel, im) ** 2 + convolve(sobel.T, im) ** 2).sum()
+    elif num_dim == 3:
+        # define the 3D sobel gradient operator
+        sobel3D = np.zeros((3, 3, 3))
+        sobel3D[:, :, 0] = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
+        sobel3D[:, :, 2] = -sobel3D[:, :, 0]
+
+        # compute metric
+        s = (convolve(im, sobel3D) ** 2 + convolve(im, np.transpose(sobel3D, (2, 0, 1))) ** 2 +
+             convolve(im, np.transpose(sobel3D, (1, 2, 0))) ** 2).sum()
+    return s
+
+    # TODO: get this passing the tests
+    # NOTE: Walter thinks this is the proper way to do this, but it doesn't match the MATLAB version
+    # num_dim = im.ndim
+    # if num_dim == 2:
+    #     # compute metric
+    #     sx = sobel(im, axis=0, mode='constant')
+    #     sy = sobel(im, axis=1, mode='constant')
+    #     s = (sx ** 2) + (sy ** 2)
+    #     s = np.sum(s)
+    #
+    # elif num_dim == 3:
+    #     # compute metric
+    #     sx = sobel(im, axis=0, mode='constant')
+    #     sy = sobel(im, axis=1, mode='constant')
+    #     sz = sobel(im, axis=2, mode='constant')
+    #     s = (sx ** 2) + (sy ** 2) + (sz ** 2)
+    #     s = np.sum(s)
+    # else:
+    #     raise ValueError("Invalid number of dimensions in im")
 
 
 def sharpness(
         im: np.ndarray,
-        metric: Optional[str] = "Brenner") -> float:
+        mode: Optional[str] = "Brenner") -> float:
     """
     Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.
 
@@ -285,17 +312,17 @@ def sharpness(
 
     assert isinstance(im, np.ndarray), "Argument im must be of type numpy array"
 
-    if metric == "Brenner":
-        sharp_met = brenner_sharpness(im)
-    elif metric == "Tenenbaum":
-        sharp_met = tenenbaum_sharpness(im)
-    elif metric == "NormVariance":
-        sharp_met = norm_var(im)
+    if mode == "Brenner":
+        metric = brenner_sharpness(im)
+    elif mode == "Tenenbaum":
+        metric = tenenbaum_sharpness(im)
+    elif mode == "NormVariance":
+        metric = norm_var(im)
     else:
         raise ValueError(
             "Unrecognized sharpness metric passed. Valid values are ['Brenner', 'Tanenbaum', 'NormVariance']")
 
-    return sharp_met
+    return metric
 
 
 def fwhm(f, x):
