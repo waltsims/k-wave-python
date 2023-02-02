@@ -3,9 +3,9 @@ import re
 from pathlib import Path
 
 import numpy as np
-from scipy.io import loadmat
 
 from kwave.utils.signals import tone_burst
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def camel_to_snake(string):
@@ -22,11 +22,11 @@ def parse_args(input_args, vararg_strings):
     # Iterate through the input arguments
     while i < len(input_args):
         # Check if the current input argument is a string
-        if isinstance(input_args[i][0], str):
+        if isinstance(input_args[i], str):
             # If it is a string, check if it is a vararg string
-            if input_args[i][0] in vararg_strings:
+            if input_args[i] in vararg_strings:
                 # If it is a vararg string, store the next input argument in the vararg_inputs dictionary
-                camel_case_key = camel_to_snake(np.squeeze(input_args[i][0]))
+                camel_case_key = camel_to_snake(input_args[i])
                 val = input_args[i + 1]
                 if np.squeeze(val).size == 1:
                     vararg_inputs[camel_case_key] = int(val) if str(np.squeeze(val)).isnumeric() else str(
@@ -38,29 +38,22 @@ def parse_args(input_args, vararg_strings):
         else:
             # If it is not a string, it is a regular input argument
             # Convert it to a float if the input argument is an array-like object with length one
-            if isinstance(input_args[i], (list, np.ndarray)) and len(input_args[i]) == 1:
-                if np.squeeze(input_args[i]).size == 1:
-                    args.append(float(np.squeeze(input_args[i])))
-                    np.delete(input_args, i, axis=0)
-                else:
-                    args.append(np.squeeze(input_args[i]))
-                    np.delete(input_args, i, axis=0)
+            args.append(input_args[i])
+            np.delete(input_args, i, axis=0)
             i = i + 1
     return args, vararg_inputs
 
 
 def test_tone_burst():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/toneBurst')
-    num_collected_values = len(os.listdir(collected_values_folder))
+    reader = TestRecordReader(os.path.join(Path(__file__).parent, 'collectedValues/tone_burst.mat'))
 
-    for i in range(num_collected_values):
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
-        params = np.squeeze(recorded_data['params'][0][i])
+    for i in range(len(reader)):
+        params = reader.expected_value_of("params")
+        expected_signal = reader.expected_value_of("input_signal")
 
         args, varargs = parse_args(params, {'Envelope', 'SignalOffset', 'SignalLength'})
         assert len(args) == 3
-        local_output = tone_burst(*args, **varargs)
-        output_signal = np.squeeze(recorded_data['input_signal'])
+        input_signal = tone_burst(*args, **varargs)
 
-        assert np.allclose(output_signal, local_output)
+        assert np.allclose(input_signal, expected_signal), "tone_burst did not match expected tone_burst"
+        reader.increment()

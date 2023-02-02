@@ -11,11 +11,16 @@ params = { ...
     {10e6, 0.5e6, 200, 'Envelope', [40, 90], 'SignalLength', 8000, 'SignalOffset', 200} ...
 }; 
 
+output_file = 'collectedValues/tone_burst.mat';
+recorder = utils.TestRecorder(output_file);
 for param_idx = 1:length(params)
+    
     input_signal = toneBurst(params{param_idx}{:});
-    idx_padded = sprintf('%06d', param_idx - 1);
-    filename = ['collectedValues/toneBurst/' idx_padded '.mat'];
-    save(filename, 'params', 'input_signal');
-end
 
+    recorder.recordVariable('params', params{param_idx});
+    recorder.recordVariable('input_signal', input_signal);
+    recorder.increment();
+
+end
+recorder.saveRecordsToDisk();
 disp('Done.')
