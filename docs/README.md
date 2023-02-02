@@ -17,11 +17,8 @@ To install the most recent build of k-Wave-python from PyPI, run:
 pip install k-wave-python
 ```
 
-After installation, you can download the binaries by running:
-
-```bash
-python install_binaries.py
-```
+After installing the python package, the required binaries will be downloaded and installed the first time you run a
+simulation.
 
 ## Getting started
 
