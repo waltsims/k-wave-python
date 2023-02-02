@@ -13,8 +13,15 @@ VERSION = '0.1.0'
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
 
-# Get current system type
-system = sys.platform
+platform = sys.platform
+
+if platform.startswith('linux'):
+    system = 'linux'
+elif platform.startswith(('win', 'cygwin')):
+    system = 'windows'
+elif platform.startswith('darwin'):
+    system = 'darwin'
+    raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 
 binary_path = os.path.join(os.getcwd(), 'kwave', 'bin', system)
 environ['KWAVE_BINARY_PATH'] = binary_path
@@ -48,7 +55,7 @@ def binaries_present() -> bool:
             "kspaceFirstOrder-OMP",
             "kspaceFirstOrder-CUDA"
         ],
-        "cygwin": specific_omp_filenames + specific_cuda_filenames + common_filenames
+        "windows": specific_omp_filenames + specific_cuda_filenames + common_filenames
     }
 
     for binary in binary_list[system]:
@@ -80,7 +87,7 @@ def download_binaries(system_os: str, bin_type: str):
         #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
         #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
         # },
-        "cygwin": {
+        "windows": {
             "cuda": get_windows_release_urls("CUDA", "windows"),
             "cpu": get_windows_release_urls("OMP", "windows"),
         },
