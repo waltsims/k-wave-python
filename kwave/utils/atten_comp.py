@@ -6,8 +6,10 @@ from matplotlib import pyplot as plt
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
 from kwave.utils.filters import next_pow2
+from kwave.utils.math import find_closest
 from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
+from scipy.io import loadmat
 
 
 # =========================================================================
@@ -87,7 +89,7 @@ def atten_comp(
         mav_terms = int(round(N * 1e-2))
         mav_terms = mav_terms + (mav_terms % 2)
 
-    elif fit_type != 'linear' or fit_type == 'spline':
+    elif fit_type not in ['linear', 'spline']:
 
         # throw error for unknown input
         raise ValueError('Optional input ''FitType'' must be set to ''spline'', ''mav'', or ''linear''.')
@@ -106,7 +108,7 @@ def atten_comp(
     if N %  2 == 0:
 
         # N is even
-        f_array = np.arange(-N/2 -1, N/2) * Fs / N
+        f_array = np.arange(-N/2, N/2) * Fs / N
 
     else:
 
@@ -126,11 +128,17 @@ def atten_comp(
         # compute the TFD of the input signal
 
         if distribution == 'Rihaczek':
-            tfd = np.conj(np.fft.fft(signal[:, 0])) @ signal[:, 0]
+            tfd = np.outer(np.conj(np.fft.fft(signal[:, 0])), signal[:, 0])
             if num_signals > 1:
                 for index in range(1, num_signals):
-                    tfd += np.conj(np.fft.fft(signal[:, index])) @ signal[:, index]
-            tfd *= np.exp(-1j * np.arange(2 * np.pi / N, 2 * np.pi * (1 - 1 / N), 2 * np.pi / N) @ np.arange(N))
+                    tfd += np.outer(np.conj(np.fft.fft(signal[:, index])), signal[:, index])
+            inc = 2 * np.pi / N
+            tfd *= np.exp(
+                np.outer(
+                    -1j * np.arange(0, 2 * np.pi * (1 - 1 / N) + inc, inc),
+                    np.arange(N)
+                )
+            )
             tfd = np.fft.fftshift(tfd, 0) / (N * num_signals)
         elif distribution == 'Wigner':
             def qwigner2(x, Fs):
@@ -171,10 +179,12 @@ def atten_comp(
         tfd_int = np.cumsum(tfd_hs, axis=0)
         tfd_tot = np.sum(tfd_hs, axis=0)
 
-        cutoff_index = np.zeros(t_array.shape)
+        cutoff_index = np.zeros(t_array.shape, dtype=int)
 
         for tw_index in range(len(tfd_tot)):
-            [_, cutoff_index[tw_index]] = findClosest(tfd_int[:, tw_index] / tfd_tot[tw_index], energy_cutoff)
+            _, closes_idx = find_closest(tfd_int[:, tw_index] / tfd_tot[tw_index], energy_cutoff)
+            assert len(closes_idx) == 1
+            cutoff_index[tw_index] = closes_idx[0]
 
         cutoff_freq_array = f_array_hs[cutoff_index] * freq_multiplier
 
@@ -184,25 +194,25 @@ def atten_comp(
             plt.plot((np.arange(N) * dt * 1e6, -cutoff_freq_array * 1e-6, 'y-'))
             plt.draw()
 
-            if fit_type == 'linear':
-                neg_penalty = 10
-                x0 = np.array([-f_array_hs[-1] / N, f_array_hs[int(len(f_array_hs) / 2)]])
-                opt_vals = opt.fmin(constlinfit, x0, args=(1, N, cutoff_freq_array, neg_penalty))
-                x = np.array(list(range(1, N + 1)))
-                cutoff_freq_array = opt_vals[0] * x + opt_vals[1]
+        if fit_type == 'linear':
+            neg_penalty = 10
+            x0 = np.array([-f_array_hs[-1] / N, f_array_hs[int(len(f_array_hs) / 2)]])
+            opt_vals = opt.fmin(constlinfit, x0, args=(1, N, cutoff_freq_array, neg_penalty))
+            x = np.array(list(range(1, N + 1)))
+            cutoff_freq_array = opt_vals[0] * x + opt_vals[1]
 
-            elif fit_type == 'spline':
-                pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, 'r')
-                cutoff_freq_array = ppval(pp, list(range(1, N + 1)))
+        elif fit_type == 'spline':
+            pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, 'r')
+            cutoff_freq_array = ppval(pp, list(range(1, N + 1)))
 
-            elif fit_type == 'mav':
-                cutoff_freq_array = np.convolve(cutoff_freq_array, np.ones(mav_terms) / mav_terms, mode='same')
-                cutoff_freq_array = np.roll(cutoff_freq_array, int(-(mav_terms // 2)))
+        elif fit_type == 'mav':
+            cutoff_freq_array = np.convolve(cutoff_freq_array, np.ones(mav_terms) / mav_terms, mode='same')
+            cutoff_freq_array = np.roll(cutoff_freq_array, int(-(mav_terms // 2)))
 
-            elif fit_type == 'off':
-                pass
-            else:
-                raise ValueError('unknown fit_type setting')
+        elif fit_type == 'off':
+            pass
+        else:
+            raise ValueError('unknown fit_type setting')
 
     else:
         assert not isinstance(filter_cutoff, str)
@@ -242,14 +252,17 @@ def atten_comp(
 
     # create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
+    part_1 = (2 * np.pi * np.abs(f_mat)) ** y
+    part_2 = 1j * np.tan(np.pi * y / 2)
+    part_3 = (2 * np.pi * f_mat)
+    part_4 = (2 * np.pi * np.abs(f_mat)) ** (y - 1)
     tv_filter = alpha_0 * dist_mat * (
-            (2 * np.pi * np.abs(f_mat)) ** y
-            - 1j * np.tan(np.pi * y / 2) * (2 * np.pi * f_mat) * (2 * np.pi * np.abs(f_mat)) ** (y - 1)
+            part_1 - part_2 * part_3 * part_4
     )
 
     # convert cutoff frequency to a window size
     N_win_array = np.floor((cutoff_freq_array / f_array[-1]) * N) - 1
-    N_win_array[np.mod(N_win_array, 2) == 1] = N_win_array[np.mod(N_win_array, 2) == 1] + 1
+    N_win_array[np.fmod(N_win_array, 2) == 1] = N_win_array[np.fmod(N_win_array, 2) == 1] + 1
 
     # loop through each time/distance and create a row of the filter
     for t_index in range(N):
