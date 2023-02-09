@@ -51,15 +51,20 @@ docs = ["m2r2==0.3.2",
 [tool.hatch.version]
 path = "kwave/__init__.py"
 
-[tool.hatch.build]
-artifacts = ["!/kwave/bin"]
-
 [tool.hatch.metadata]
+
 # can be removed as soon as uff is published and no longer a direct reference
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages=["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/docs",
+]
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]

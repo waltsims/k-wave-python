@@ -1,10 +1,10 @@
+import logging
+import os
 import stat
 import sys
 import unittest.mock
-import logging
-
 from pathlib import Path
-import os
+
 import h5py
 import numpy as np
 
