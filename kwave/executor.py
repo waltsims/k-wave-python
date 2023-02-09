@@ -43,7 +43,7 @@ class Executor:
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
         env_variables = {
-            'LD_LIBRARY_PATH': '',
+            # 'LD_LIBRARY_PATH': '', # TODO(walter): I'm not sure why we overwrite the system LD_LIBRARY_PATH... Commenting out for now to run on machines with non-standard LD_LIBRARY_PATH.
             'OMP_PLACES': 'cores',
             'OMP_PROC_BIND': 'SPREAD',
         }
