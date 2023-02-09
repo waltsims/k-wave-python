@@ -2,6 +2,7 @@ import os
 import sys
 import urllib.request
 from os import environ
+from pathlib import Path
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -23,7 +24,7 @@ elif platform.startswith('darwin'):
     system = 'darwin'
     raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 
-binary_path = os.path.join(__file__, 'bin', system)
+binary_path = os.path.join(Path(__file__).parent, 'bin', system)
 environ['KWAVE_BINARY_PATH'] = binary_path
 
 url_base = "https://github.com/waltsims/"
