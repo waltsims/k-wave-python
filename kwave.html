@@ -972,6 +972,58 @@
 </section>
 <section id="module-kwave">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-kwave" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.binaries_present">
+<span class="sig-prename descclassname"><span class="pre">kwave.</span></span><span class="sig-name descname"><span class="pre">binaries_present</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave.html#binaries_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.binaries_present" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if binaries are present
+:returns: bool, True if binaries are present, False otherwise</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.download_binaries">
+<span class="sig-prename descclassname"><span class="pre">kwave.</span></span><span class="sig-name descname"><span class="pre">download_binaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_os</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave.html#download_binaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.download_binaries" title="Permalink to this definition">#</a></dt>
+<dd><p>Download binary from release url
+:param system_os: string, current system type
+:param bin_type: string of “OMP” or “CUDA”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>system_os</strong> (<em>str</em>) – </p></li>
+<li><p><strong>bin_type</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.get_windows_release_urls">
+<span class="sig-prename descclassname"><span class="pre">kwave.</span></span><span class="sig-name descname"><span class="pre">get_windows_release_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave.html#get_windows_release_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.get_windows_release_urls" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> (<em>str</em>) – </p></li>
+<li><p><strong>system_type</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.install_binaries">
+<span class="sig-prename descclassname"><span class="pre">kwave.</span></span><span class="sig-name descname"><span class="pre">install_binaries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave.html#install_binaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.install_binaries" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 </section>
 </section>
 
@@ -1015,7 +1067,13 @@
 <li><a class="reference internal" href="#">kwave package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-kwave">Module contents</a></li>
+<li><a class="reference internal" href="#module-kwave">Module contents</a><ul>
+<li><a class="reference internal" href="#kwave.binaries_present"><code class="docutils literal notranslate"><span class="pre">binaries_present()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.download_binaries"><code class="docutils literal notranslate"><span class="pre">download_binaries()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.get_windows_release_urls"><code class="docutils literal notranslate"><span class="pre">get_windows_release_urls()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.install_binaries"><code class="docutils literal notranslate"><span class="pre">install_binaries()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

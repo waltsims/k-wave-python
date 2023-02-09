@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
     <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
-        <title>Overview: module code - k-wave-python documentation</title>
+        <title>kwave - k-wave-python documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-toolbox-code.css" />
@@ -250,51 +250,139 @@
           </label>
         </div>
         <article role="main">
-          <h1>All modules for which code is available</h1>
-<ul><li><a href="kwave.html">kwave</a></li>
-<ul><li><a href="kwave/data.html">kwave.data</a></li>
-<li><a href="kwave/enums.html">kwave.enums</a></li>
-<li><a href="kwave/executor.html">kwave.executor</a></li>
-<li><a href="kwave/kWaveSimulation.html">kwave.kWaveSimulation</a></li>
-<li><a href="kwave/kWaveSimulation_helper/create_absorption_variables.html">kwave.kWaveSimulation_helper.create_absorption_variables</a></li>
-<li><a href="kwave/kWaveSimulation_helper/create_storage_variables.html">kwave.kWaveSimulation_helper.create_storage_variables</a></li>
-<li><a href="kwave/kWaveSimulation_helper/data_cast.html">kwave.kWaveSimulation_helper.data_cast</a></li>
-<li><a href="kwave/kWaveSimulation_helper/display_simulation_params.html">kwave.kWaveSimulation_helper.display_simulation_params</a></li>
-<li><a href="kwave/kWaveSimulation_helper/expand_grid_matrices.html">kwave.kWaveSimulation_helper.expand_grid_matrices</a></li>
-<li><a href="kwave/kWaveSimulation_helper/retract_transducer_grid_size.html">kwave.kWaveSimulation_helper.retract_transducer_grid_size</a></li>
-<li><a href="kwave/kWaveSimulation_helper/save_to_disk_func.html">kwave.kWaveSimulation_helper.save_to_disk_func</a></li>
-<li><a href="kwave/kWaveSimulation_helper/scale_source_terms_func.html">kwave.kWaveSimulation_helper.scale_source_terms_func</a></li>
-<li><a href="kwave/kWaveSimulation_helper/set_sound_speed_ref.html">kwave.kWaveSimulation_helper.set_sound_speed_ref</a></li>
-<li><a href="kwave/kgrid.html">kwave.kgrid</a></li>
-<li><a href="kwave/kmedium.html">kwave.kmedium</a></li>
-<li><a href="kwave/ksensor.html">kwave.ksensor</a></li>
-<li><a href="kwave/ksource.html">kwave.ksource</a></li>
-<li><a href="kwave/kspaceFirstOrder.html">kwave.kspaceFirstOrder</a></li>
-<li><a href="kwave/kspaceFirstOrder2D.html">kwave.kspaceFirstOrder2D</a></li>
-<li><a href="kwave/kspaceFirstOrder3D.html">kwave.kspaceFirstOrder3D</a></li>
-<li><a href="kwave/kspaceFirstOrderAS.html">kwave.kspaceFirstOrderAS</a></li>
-<li><a href="kwave/ktransducer.html">kwave.ktransducer</a></li>
-<li><a href="kwave/options.html">kwave.options</a></li>
-<li><a href="kwave/reconstruction/beamform.html">kwave.reconstruction.beamform</a></li>
-<li><a href="kwave/reconstruction/converter.html">kwave.reconstruction.converter</a></li>
-<li><a href="kwave/reconstruction/shifted_transform.html">kwave.reconstruction.shifted_transform</a></li>
-<li><a href="kwave/reconstruction/tools.html">kwave.reconstruction.tools</a></li>
-<li><a href="kwave/recorder.html">kwave.recorder</a></li>
-<li><a href="kwave/utils/checks.html">kwave.utils.checks</a></li>
-<li><a href="kwave/utils/colormap.html">kwave.utils.colormap</a></li>
-<li><a href="kwave/utils/conversion.html">kwave.utils.conversion</a></li>
-<li><a href="kwave/utils/data.html">kwave.utils.data</a></li>
-<li><a href="kwave/utils/dotdictionary.html">kwave.utils.dotdictionary</a></li>
-<li><a href="kwave/utils/filters.html">kwave.utils.filters</a></li>
-<li><a href="kwave/utils/interp.html">kwave.utils.interp</a></li>
-<li><a href="kwave/utils/io.html">kwave.utils.io</a></li>
-<li><a href="kwave/utils/mapgen.html">kwave.utils.mapgen</a></li>
-<li><a href="kwave/utils/math.html">kwave.utils.math</a></li>
-<li><a href="kwave/utils/matrix.html">kwave.utils.matrix</a></li>
-<li><a href="kwave/utils/pml.html">kwave.utils.pml</a></li>
-<li><a href="kwave/utils/signals.html">kwave.utils.signals</a></li>
-<li><a href="kwave/utils/tictoc.html">kwave.utils.tictoc</a></li>
-</ul></ul>
+          <h1>Source code for kwave</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">environ</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.kmedium</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
+<span class="kn">from</span> <span class="nn">kwave.ktransducer</span> <span class="kn">import</span> <span class="n">NotATransducer</span>
+<span class="kn">from</span> <span class="nn">kwave.options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span>
+
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
+<span class="c1"># Set environment variable to binaries to get rid of user warning</span>
+<span class="c1"># This code is a crutch and should be removed when kspaceFirstOrder</span>
+<span class="c1"># is refactored</span>
+
+<span class="n">platform</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span>
+
+<span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;linux&#39;</span><span class="p">):</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="s1">&#39;linux&#39;</span>
+<span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;win&#39;</span><span class="p">,</span> <span class="s1">&#39;cygwin&#39;</span><span class="p">)):</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="s1">&#39;windows&#39;</span>
+<span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;darwin&#39;</span><span class="p">):</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="s1">&#39;darwin&#39;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;k-wave-python is currently unsupported on MacOS.&#39;</span><span class="p">)</span>
+
+<span class="n">binary_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;bin&#39;</span><span class="p">,</span> <span class="n">system</span><span class="p">)</span>
+<span class="n">environ</span><span class="p">[</span><span class="s1">&#39;KWAVE_BINARY_PATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binary_path</span>
+
+<span class="n">url_base</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/waltsims/&quot;</span>
+
+<span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/waltsims/kspaceFirstOrder-</span><span class="si">{0}</span><span class="s2">-</span><span class="si">{1}</span><span class="s2">/releases/download/v1.3.0/&quot;</span>
+
+<span class="n">common_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cufft64_10.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;hdf5.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;hdf5_hl.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;libiomp5md.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;libmmd.dll&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;msvcp140.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;svml_dispmd.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;szip.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;vcruntime140.dll&quot;</span><span class="p">,</span> <span class="s2">&quot;zlib.dll&quot;</span><span class="p">]</span>
+
+<span class="n">specific_omp_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;kspaceFirstOrder-OMP.exe&quot;</span><span class="p">]</span>
+<span class="n">specific_cuda_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;kspaceFirstOrder-CUDA.exe&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="binaries_present"><a class="viewcode-back" href="../kwave.html#kwave.binaries_present">[docs]</a><span class="k">def</span> <span class="nf">binaries_present</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if binaries are present</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool, True if binaries are present, False otherwise</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">binary_list</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;linux&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="c1"># &quot;acousticFieldPropagator-OMP&quot;,</span>
+            <span class="s2">&quot;kspaceFirstOrder-OMP&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kspaceFirstOrder-CUDA&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;darwin&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="c1"># &quot;acousticFieldPropagator-OMP&quot;,</span>
+            <span class="s2">&quot;kspaceFirstOrder-OMP&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kspaceFirstOrder-CUDA&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;windows&quot;</span><span class="p">:</span> <span class="n">specific_omp_filenames</span> <span class="o">+</span> <span class="n">specific_cuda_filenames</span> <span class="o">+</span> <span class="n">common_filenames</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">binary</span> <span class="ow">in</span> <span class="n">binary_list</span><span class="p">[</span><span class="n">system</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">binary</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">binary</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="download_binaries"><a class="viewcode-back" href="../kwave.html#kwave.download_binaries">[docs]</a><span class="k">def</span> <span class="nf">download_binaries</span><span class="p">(</span><span class="n">system_os</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bin_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download binary from release url</span>
+<span class="sd">    Args:</span>
+<span class="sd">        system_os: string, current system type</span>
+<span class="sd">        bin_type: string of &quot;OMP&quot; or &quot;CUDA&quot;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># GitHub release URLs</span>
+    <span class="n">url_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;linux&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;cuda&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">url_base</span> <span class="o">+</span> <span class="s2">&quot;kspaceFirstOrder-CUDA-linux/releases/download/v1.3.1/kspaceFirstOrder-CUDA&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">url_base</span> <span class="o">+</span> <span class="s2">&quot;kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="c1"># &quot;darwin&quot;: {</span>
+        <span class="c1">#     &quot;cuda&quot;: [url_base + &quot;kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA&quot;],</span>
+        <span class="c1">#     &quot;cpu&quot;: [url_base + &quot;kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP&quot;],</span>
+        <span class="c1"># },</span>
+        <span class="s2">&quot;windows&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;cuda&quot;</span><span class="p">:</span> <span class="n">get_windows_release_urls</span><span class="p">(</span><span class="s2">&quot;CUDA&quot;</span><span class="p">,</span> <span class="s2">&quot;windows&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="n">get_windows_release_urls</span><span class="p">(</span><span class="s2">&quot;OMP&quot;</span><span class="p">,</span> <span class="s2">&quot;windows&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">url_dict</span><span class="p">[</span><span class="n">system_os</span><span class="p">][</span><span class="n">bin_type</span><span class="p">]:</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;kwave/bin/</span><span class="si">{</span><span class="n">system_os</span><span class="si">}</span><span class="s2">/&quot;</span>
+
+        <span class="c1"># Extract the file name from the GitHub release URL</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create the directory if it does not yet exist</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Download the binary file</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_windows_release_urls"><a class="viewcode-back" href="../kwave.html#kwave.get_windows_release_urls">[docs]</a><span class="k">def</span> <span class="nf">get_windows_release_urls</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">system_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;OMP&quot;</span><span class="p">:</span>
+        <span class="n">specific_filenames</span> <span class="o">=</span> <span class="n">specific_omp_filenames</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;CUDA&quot;</span><span class="p">:</span>
+        <span class="n">specific_filenames</span> <span class="o">=</span> <span class="n">specific_cuda_filenames</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">specific_filenames</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">release_urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">common_filenames</span> <span class="o">+</span> <span class="n">specific_filenames</span><span class="p">:</span>
+        <span class="n">release_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prefix</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">system_type</span><span class="p">)</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">release_urls</span></div>
+
+
+<div class="viewcode-block" id="install_binaries"><a class="viewcode-back" href="../kwave.html#kwave.install_binaries">[docs]</a><span class="k">def</span> <span class="nf">install_binaries</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">binary_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;cuda&quot;</span><span class="p">]:</span>
+        <span class="n">download_binaries</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">binaries_present</span><span class="p">():</span>
+    <span class="n">install_binaries</span><span class="p">()</span>
+</pre></div>
         </article>
       </div>
       <footer>

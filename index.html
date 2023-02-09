@@ -263,14 +263,21 @@
           <section id="welcome-to-k-wave-python-s-documentation">
 <h1>Welcome to k-Wave-python’s documentation!<a class="headerlink" href="#welcome-to-k-wave-python-s-documentation" title="Permalink to this heading">#</a></h1>
 <p>k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradley Treeby and Ben Cox (University College London) and Jiri Jaros (Brno University of Technology). The software is designed for time domain acoustic and ultrasound simulations in complex and tissue-realistic media. The simulation functions are based on the k-space pseudospectral method and are both fast and easy to use.</p>
-<p>With this project, we hope to increase accessibility and reproducablitiy of <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> simulations for medical imaging, algorithmic prototyping and testing. Many tools and methods of <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> can be found here, but this project has and will continue to diverge from the original <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> APIs in order to leverage pythonic practices.</p>
+<section id="mission">
+<h2>Mission<a class="headerlink" href="#mission" title="Permalink to this heading">#</a></h2>
+<p>With this project, we hope to increase accessibility and reproducibility of <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> simulations
+for medical imaging, algorithmic prototyping and testing. Many tools and methods of <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> can
+be found here, but this project has and will continue to diverge from the original <a class="reference external" href="http://www.k-wave.org/">k-Wave</a> APIs
+in order to leverage pythonic practices.</p>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
 <p>To install the most recent build of k-Wave-python from PyPI, run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>k-wave-python
 </pre></div>
 </div>
-<p>Currently, we are looking for beta testers on Windows.</p>
+<p>After installing the python package, the required binaries will be downloaded and installed the first time you run a
+simulation.</p>
 </section>
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">#</a></h2>
@@ -278,7 +285,7 @@
 <p>After installation, run the B-mode reconstruction example in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory of the repository:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/waltsims/k-wave-python
 <span class="nb">cd</span><span class="w"> </span>k-wave-python
-pip<span class="w"> </span>install<span class="w"> </span>--editable<span class="w"> </span><span class="s1">&#39;.[example]&#39;</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;.[example]&#39;</span>
 python3<span class="w"> </span>examples/bmode_reconstruction_example.py
 </pre></div>
 </div>
@@ -366,6 +373,7 @@ and JIT compilation in Julia.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Welcome to k-Wave-python’s documentation!</a><ul>
+<li><a class="reference internal" href="#mission">Mission</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#getting-started">Getting started</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
