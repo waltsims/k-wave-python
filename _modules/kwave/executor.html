@@ -296,7 +296,7 @@
 
 <div class="viewcode-block" id="Executor.run_simulation"><a class="viewcode-back" href="../../kwave.executor.html#kwave.executor.Executor.run_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">env_variables</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;LD_LIBRARY_PATH&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="c1"># &#39;LD_LIBRARY_PATH&#39;: &#39;&#39;, # TODO(walter): I&#39;m not sure why we overwrite the system LD_LIBRARY_PATH... Commenting out for now to run on machines with non-standard LD_LIBRARY_PATH.</span>
             <span class="s1">&#39;OMP_PLACES&#39;</span><span class="p">:</span> <span class="s1">&#39;cores&#39;</span><span class="p">,</span>
             <span class="s1">&#39;OMP_PROC_BIND&#39;</span><span class="p">:</span> <span class="s1">&#39;SPREAD&#39;</span><span class="p">,</span>
         <span class="p">}</span>
