@@ -7,9 +7,8 @@ from kwave.utils.atten_comp import atten_comp
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_angular_spectrum():
-    # test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/attenComp.mat')
-    test_record_path = os.path.join('/Users/farid/workspace/black_box_testing', 'collectedValues/attenComp.mat')
+def test_atten_comp():
+    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/attenComp.mat')
     reader = TestRecordReader(test_record_path)
 
     inp_signal = reader.expected_value_of('inp_signal')

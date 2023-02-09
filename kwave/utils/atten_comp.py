@@ -287,16 +287,16 @@ def atten_comp(
 
     # shift frequency axis (filter_mat is created with 0 in center) and then
     # compute the inverse FFT
-    tv_filter = np.real(np.fft.ifft(np.fft.ifftshift(tv_filter, axis=1), axis=1))
+    tv_filter = np.real(np.fft.ifft(np.fft.ifftshift(tv_filter, axes=[1]), axis=1))
 
     # apply circular shift
-    for t_index in range(N):
-        tv_filter[t_index, :] = np.roll(tv_filter[t_index, :], t_index - 1)
+    for t_index in range(0, N):
+        tv_filter[t_index, :] = np.roll(tv_filter[t_index, :], t_index)
 
     # zero out lower and upper triangles
     ones_mat = np.ones((N, N))
-    tv_filter[np.tril_indices(N, -np.ceil(N / 2) + 1)[0]] = 0
-    tv_filter[np.triu_indices(N, np.ceil(N / 2))[0]] = 0
+    tv_filter[np.tril_indices(N, -np.ceil(N / 2) + 1)] = 0
+    tv_filter[np.triu_indices(N, np.ceil(N / 2) + 1)] = 0
 
     # apply the filter
     for index in range(num_signals):
