@@ -23,7 +23,7 @@ elif platform.startswith('darwin'):
     system = 'darwin'
     raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 
-binary_path = os.path.join(os.getcwd(), 'kwave', 'bin', system)
+binary_path = os.path.join(__file__, 'bin', system)
 environ['KWAVE_BINARY_PATH'] = binary_path
 
 url_base = "https://github.com/waltsims/"

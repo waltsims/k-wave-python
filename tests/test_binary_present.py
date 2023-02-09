@@ -1,7 +1,10 @@
 import os
 import os.path
+
 import pytest
 
+
+# TODO: refactor this for new lazy install strategy
 
 @pytest.mark.skipif(os.environ.get("CI") == 'true', reason="Running in GitHub Workflow.")
 def test_linux_afp_binaries_present():
