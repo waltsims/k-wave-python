@@ -81,7 +81,7 @@ def download_binaries(system_os: str, bin_type: str):
     # GitHub release URLs
     url_dict = {
         "linux": {
-            "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
+            "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3.1/kspaceFirstOrder-CUDA"],
             "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
         },
         # "darwin": {
