@@ -94,18 +94,17 @@ def download_binaries(system_os: str, bin_type: str):
         },
     }
     for url in url_dict[system_os][bin_type]:
-        dirname = f"kwave/bin/{system_os}/"
 
         # Extract the file name from the GitHub release URL
         filename = url.split("/")[-1]
 
-        print(f"Downloading {filename}...")
+        print(f"Downloading {filename} to {binary_path}...")
 
         # Create the directory if it does not yet exist
-        os.makedirs(dirname, exist_ok=True)
+        os.makedirs(binary_path, exist_ok=True)
 
         # Download the binary file
-        urllib.request.urlretrieve(url, f"{dirname}/{filename}")
+        urllib.request.urlretrieve(url, os.path.join(binary_path, filename))
 
 
 def get_windows_release_urls(version: str, system_type: str) -> list:
