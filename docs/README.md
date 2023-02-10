@@ -1,8 +1,7 @@
 # k-Wave-python
 
 This project is a Python implementation of most of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
-interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (
-Hopper) GPUs.
+interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
 ## Mission
 
