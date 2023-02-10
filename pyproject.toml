@@ -64,6 +64,9 @@ packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulati
 exclude = [
     "/.github",
     "/docs",
+    "/examples",
+    "/tests",
+    "*.mat",
 ]
 
 [tools.pytest.ini_options]
