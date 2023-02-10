@@ -30,7 +30,7 @@ dependencies = [
     "matplotlib==3.6.3",
     "numpy>=1.22.2,<1.25.0",
     "scikit-image==0.19.3",
-    "uff-reader==0.0.1",
+    "uff-reader==0.0.2",
 ]
 
 [project.urls]
