@@ -9,7 +9,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ktransducer import NotATransducer
 from kwave.options import SimulationOptions
 
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
