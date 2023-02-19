@@ -1,9 +1,11 @@
 import os
 import tempfile
+from typing import Union
 
 import numpy as np
 
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 
 from kwave.ktransducer import NotATransducer
 
@@ -58,7 +60,7 @@ def kspace_first_order_2d_gpu(
     of kspaceFirstOrder3DC by replacing the binary name with the name of the
     GPU binary.
     """
-    assert simulation_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    assert execution_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
     sensor_data = kspaceFirstOrder2DC(
         kgrid=kgrid,
         source=source,
@@ -73,7 +75,7 @@ def kspace_first_order_2d_gpu(
 def kspaceFirstOrder2DC(
         kgrid: kWaveGrid,
         source: kSource,
-        sensor: NotATransducer,
+        sensor: Union[NotATransducer, kSensor],
         medium: kWaveMedium,
         simulation_options: SimulationOptions,
         execution_options: SimulationExecutionOptions
@@ -136,7 +138,7 @@ def kspaceFirstOrder2DC(
 def kspaceFirstOrder2D(
         kgrid: kWaveGrid,
         source: kSource,
-        sensor: NotATransducer,
+        sensor: Union[NotATransducer, kSensor],
         medium: kWaveMedium,
         simulation_options: SimulationOptions,
         execution_options: SimulationExecutionOptions

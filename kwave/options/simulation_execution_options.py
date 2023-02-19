@@ -10,8 +10,6 @@ from kwave.utils.checks import is_unix
 
 @dataclass
 class SimulationExecutionOptions:
-    kgrid_dim: int
-
     # Are we going to run the simulation on the GPU?
     # Affects binary name and the way the simulation is run
     is_gpu_simulation: bool = False
