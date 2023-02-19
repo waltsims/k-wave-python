@@ -1,263 +1,241 @@
-import functools
 import os
-from operator import itemgetter
+from dataclasses import dataclass
+from pathlib import Path
 from tempfile import gettempdir
+from typing import Optional, Union
 from warnings import warn
 
 import numpy as np
 
+from kwave.ksource import kSource
+from kwave.ktransducer import NotATransducer
+
+from kwave.kmedium import kWaveMedium
+
+from kwave.kgrid import kWaveGrid
+
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
 from kwave.utils.data import get_date_string
-from kwave.utils.dotdictionary import dotdict
 
 
-def kspaceFirstOrderG(func):
-    """
-        Decorator for the kspaceFO-GPU functions
+@dataclass
+class KSpaceFirstOrderArgs:
+    kgrid: kWaveGrid
+    source: kSource
+    sensor: NotATransducer
+    medium: kWaveMedium
 
-    Args:
-        func: kspaceFirstOrderNDG function where 1 <= N <= 3
+    # Are we going to run the simulation on the GPU?
+    # Affects binary name and the way the simulation is run
+    is_gpu_simulation: bool = False
 
-    Returns:
-        Function wrapper
-    """
-    @functools.wraps(func)
-    def wrapper(**kwargs):
-        # Check for the binary name input. If not defined, set the default name of the GPU binary
-        if 'BinaryName' not in kwargs.keys():
-            kwargs['BinaryName'] = 'kspaceFirstOrder-CUDA' if is_unix() else 'kspaceFirstOrder-CUDA.exe'
-        return func(**kwargs)
-    return wrapper
+    # user input on axisymmetric code
+    axisymmetric: bool = False
+    # user defined location for the binary
+    binary_path: Optional[str] = os.getenv('KWAVE_BINARY_PATH')
+    # user defined location for the binary
+    binary_name: Optional[str] = None
+    # user defined number of threads
+    kwave_function_name: Optional[str] = 'kspaceFirstOrder3D'
+    # user defined location for the input and output files
+    data_path = gettempdir()
+    # user defined location for the input and output files
+    data_name: Optional[str] = None
+    # Whether to delete the input and output files after the simulation
+    delete_data: bool = True
+    # GPU device flag
+    device_num: Optional[int] = None
+    # number of threads
+    num_threads: Optional[Union[int, str]] = None
 
+    # user defined thread binding option
+    thread_binding: Optional[bool] = None
 
-def kspaceFirstOrderC():
-    """
-    Decorator for the kspaceFO-CPU functions
+    # user input for system string
+    system_call: Optional[str] = None
+    verbose_level: Optional[int] = None
 
-    Args:
-        func: kspaceFirstOrderNDC function where 1 <= N <= 3
+    _input_filename: Optional[str] = None
+    _output_filename: Optional[str] = None
+    _cuboid_corners: Optional[bool] = None
+    _time_rev: Optional[bool] = None
 
-    Returns:
-        Function wrapper
-    """
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(**kwargs):
-            # set empty options string
-            options_string = ''
+    def __post_init__(self):
+        self.validate()
 
-            # set OS string for setting environment variables
-            if is_unix():
-                env_set_str = ''
-                sys_sep_str = ' '
+        if not self.binary_path.endswith(os.path.sep):
+            self.binary_path = self.binary_path + os.path.sep
+
+        if self.binary_name is None:
+            if self.is_gpu_simulation:
+                self.binary_name = 'kspaceFirstOrder-CUDA' if is_unix() else 'kspaceFirstOrder-CUDA.exe'
             else:
-                env_set_str = 'set '
-                sys_sep_str = ' & '
+                self.binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
 
-            # set system string to define domain for thread migration
-            system_string = env_set_str + 'OMP_PLACES=cores' + sys_sep_str
+        # check for a trailing slash
+        if not self.data_path.endswith(os.path.sep):
+            self.data_path = self.data_path + os.path.sep
 
-            args = dotdict()
+        if self.data_name:
+            name_prefix = self.data_name
+            input_filename = f'{name_prefix}_input.h5'
+            output_filename = f'{name_prefix}_output.h5'
+        else:
+            # set the filename inputs to store data in the default temp directory
+            date_string = get_date_string()
+            input_filename = 'kwave_input_data' + date_string + '.h5'
+            output_filename = 'kwave_output_data' + date_string + '.h5'
 
-            # check for user input on axisymmetric code
-            # check for user defined axisymmetric option
-            if 'axisymmetric' in kwargs.keys():
-                args.axisymmetric = kwargs['axisymmetric']
-                # check option is true or false
-                assert isinstance(args.axisymmetric, bool), "axisymmetric argument must be bool"
+        self._input_filename = os.path.join(self.data_path, input_filename)
+        self._output_filename = os.path.join(self.data_path, output_filename)
+
+        # check if the sensor mask is defined as cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self._cuboid_corners = True
+        else:
+            self._cuboid_corners = False
+
+        # check if performing time reversal, and replace inputs to explicitly use a
+        # source with a dirichlet boundary condition
+        if self.sensor.time_reversal_boundary_data is not None:
+            # define a new source structure
+            source = {
+                'p_mask': self.sensor.p_mask,
+                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
+                'p_mode': 'dirichlet'
+            }
+
+            # define a new sensor structure
+            Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
+            sensor = kSensor(
+                mask=np.ones((Nx, Ny, max(1, Nz))),
+                record=['p_final']
+            )
+            # set time reversal flag
+            self._time_rev = True
+        else:
+            # set time reversal flag
+            self._time_rev = False
+
+    def validate(self):
+        assert isinstance(self.axisymmetric, bool), 'Axisymmetric argument must be bool'
+
+        # check the binary exists and is in the correct place before doing anything else
+        if not Path(self.binary_path, self.binary_name).exists():
+            warn(f'''
+                        The binary file {self.binary_name} could not be found in {self.binary_path}. 
+                        To use the C++ code, the C++ binaries for your operating system must be downloaded 
+                        from www.k-wave.org/download.php and placed in the binaries folder.'''
+                 )
+
+        if self.num_threads:
+            if isinstance(self.num_threads, int):
+                assert self.num_threads > 0 and self.num_threads != float('inf')
             else:
-                # set axisymmetric to false
-                args.axisymmetric = False
+                assert self.num_threads == 'all'
 
-            # check for a user defined location for the binary
-            if 'binary_path' in kwargs.keys():
-                binary_path = kwargs['binary_path']
+        assert isinstance(self.verbose_level, int) and 0 <= self.verbose_level <= 2
 
-                # check for a trailing slash
-                if not binary_path.endswith(os.path.sep):
-                    binary_path = binary_path + os.path.sep
-            else:
-                # set default path from environment variable
-                binary_path = os.getenv('KWAVE_BINARY_PATH')
+    @property
+    def input_filename(self) -> str:
+        return self._input_filename
 
-            # check for a user defined name for the binary
-            if 'binary_name' in kwargs.keys():
-                binary_name = kwargs['binary_name']
-            else:
-                # set default name for the binary
-                binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
+    @property
+    def output_filename(self) -> str:
+        return self._output_filename
 
-            # check the binary exists and is in the correct place before doing anything else
-            if not os.path.exists(f'{os.path.join(binary_path, binary_name)}'):
-                warn(f'''
-                    The binary file {binary_name} could not be found in {binary_path}. 
-                    To use the C++ code, the C++ binaries for your operating system must be downloaded 
-                    from www.k-wave.org/download.php and placed in the binaries folder.'''
-                     )
+    @property
+    def cuboid_corners(self) -> bool:
+        assert self._cuboid_corners is not None, \
+            'cuboid_corners should have been set in __post_init__. Something went wrong.'
+        return self._cuboid_corners
 
-            # check for a user defined name for the MATLAB function to call
-            if 'function_name' in kwargs.keys():
-                kwave_function_name = kwargs['function_name']
-                del kwargs['function_name']
-            else:
-                # set default name for the k-Wave MATLAB function to call
-                kwave_function_name = 'kspaceFirstOrder3D'
+    @property
+    def time_rev(self) -> bool:
+        assert self._time_rev is not None, \
+            'time_rev should have been set in __post_init__. Something went wrong.'
+        return self._time_rev
 
-            # check for a user defined location for the input and output files
-            if 'data_path' in kwargs.keys():
-                data_path = kwargs['data_path']
+    @property
+    def options_string(self):
+        options_dict = {}
+        if self.device_num:
+            options_dict['-g'] = self.device_num
 
-                # check for a trailing slash
-                if not data_path.endswith(os.path.sep):
-                    data_path = data_path + os.path.sep
-            else:
-                # set default path
-                data_path = gettempdir()
+        if self.num_threads:
+            options_dict['-t'] = self.num_threads
 
-            # check for a user defined name for the input and output files
-            if 'data_name' in kwargs.keys():
-                name_prefix = kwargs['data_name']
-                input_filename = f'{name_prefix}_input.h5'
-                output_filename = f'{name_prefix}_output.h5'
-            else:
-                # set the filename inputs to store data in the default temp directory
-                date_string = get_date_string()
-                input_filename = 'kwave_input_data' + date_string + '.h5'
-                output_filename = 'kwave_output_data' + date_string + '.h5'
+        if self.verbose_level:
+            options_dict['--verbose'] = self.verbose_level
 
-            # add pathname to input and output filenames
-            input_filename = os.path.join(data_path, input_filename)
-            output_filename = os.path.join(data_path, output_filename)
+        options_string = ''
+        for flag, value in options_dict.items():
+            options_string += f' {flag} {str(value)}'
 
-            # check for delete data input
-            if 'delete_data' in kwargs.keys():
-                delete_data = kwargs['delete_data']
-                assert isinstance(delete_data, bool), 'DeleteData argument must be bool'
-            else:
-                # set data to be deleted
-                delete_data = True
+        # check if sensor.record is given
+        if self.sensor.record is not None:
+            record = self.sensor.record
 
-            # check for GPU device flag
-            if 'device_num' in kwargs.keys():
-                # force to be positive integer or zero
-                device_num = int(abs(kwargs['device_num']))
-                # add the value of the parameter to the input options
-                options_string = options_string + ' -g ' + str(device_num)
+            # set the options string to record the required output fields
+            record_options_map = {
+                'p': 'p_raw',
+                'p_max': 'p_max',
+                'p_min': 'p_min',
+                'p_rms': 'p_rms',
+                'p_max_all': 'p_max_all',
+                'p_min_all': 'p_min_all',
+                'p_final': 'p_final',
+                'u': 'u_raw',
+                'u_max': 'u_max',
+                'u_min': 'u_min',
+                'u_rms': 'u_rms',
+                'u_max_all': 'u_max_all',
+                'u_min_all': 'u_min_all',
+                'u_final': 'u_final'
+            }
+            for k, v in record_options_map.items():
+                if k in record:
+                    options_string = options_string + f' --{v}'
 
-            # check for user defined number of threads
-            if 'num_threads' in kwargs.keys():
-                num_threads = kwargs['num_threads']
+            if 'u_non_staggered' in record or 'I_avg' in record or 'I' in record:
+                options_string = options_string + ' --u_non_staggered_raw'
 
-                if num_threads != 'all':
-                    # check value
-                    isinstance(num_threads, int) and num_threads > 0 and num_threads != float('inf')
-                    # add the value of the parameter to the input options
-                    options_string = options_string + ' -t ' + str(num_threads)
-
-            # check for user defined thread binding option
-            # check for user defined thread binding option
-            if 'thread_binding' in kwargs.keys():
-                thread_binding = kwargs['thread_binding']
-                # check value
-                assert isinstance(thread_binding, int) and 0 <= thread_binding <= 1
-                # read the parameters and update the system options
-                if thread_binding == 0:
-                    system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=SPREAD' + sys_sep_str
-                elif thread_binding == 1:
-                    system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=CLOSE' + sys_sep_str
-
-            else:
-                # set to round robin over places
-                system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=SPREAD' + sys_sep_str
-
-            # check for user input for system string
-            if 'system_call' in kwargs.keys():
-                # read the value of the parameter and add to the system options
-                system_string = system_string + ' ' + kwargs['system_call'] + sys_sep_str
-
-            # check for user defined number of threads
-            if 'verbose_level' in kwargs.keys():
-                verbose_level = kwargs['verbose_level']
-                # check value
-                assert isinstance(verbose_level, int) and 0 <= verbose_level <= 2
-                # add the value of the parameter to the input options
-                options_string = options_string + ' --verbose ' + str(verbose_level)
-
-            # assign pseudonyms for input structures
-            kgrid, source, sensor, medium = itemgetter('kgrid', 'source', 'sensor', 'medium')(kwargs)
-            del kwargs['kgrid']
-            del kwargs['source']
-            del kwargs['sensor']
-            del kwargs['medium']
-
-            # check if the sensor mask is defined as cuboid corners
-            if sensor.mask is not None and sensor.mask.shape[0] == (2 * kgrid.dim):
-                args.cuboid_corners = True
-            else:
-                args.cuboid_corners = False
-
-            # check if performing time reversal, and replace inputs to explicitly use a
-            # source with a dirichlet boundary condition
-            if sensor.time_reversal_boundary_data is not None:
-                # define a new source structure
-                source = {
-                    'p_mask': sensor.p_mask,
-                    'p': np.flip(sensor.time_reversal_boundary_data, 2),
-                    'p_mode': 'dirichlet'
-                }
-
-                # define a new sensor structure
-                Nx, Ny, Nz = kgrid.Nx, kgrid.Ny, kgrid.Nz
-                sensor = kSensor(
-                    mask=np.ones((Nx, Ny, max(1, Nz))),
-                    record=['p_final']
-                )
-                # set time reversal flag
-                args.time_rev = True
-            else:
-                # set time reversal flag
-                args.time_rev = False
-
-            # check if sensor.record is given
-            if sensor.record is not None:
-                record = sensor.record
-
-                # set the options string to record the required output fields
-                record_options_map = {
-                    'p':            'p_raw',
-                    'p_max':        'p_max',
-                    'p_min':        'p_min',
-                    'p_rms':        'p_rms',
-                    'p_max_all':    'p_max_all',
-                    'p_min_all':    'p_min_all',
-                    'p_final':      'p_final',
-                    'u':            'u_raw',
-                    'u_max':        'u_max',
-                    'u_min':        'u_min',
-                    'u_rms':        'u_rms',
-                    'u_max_all':    'u_max_all',
-                    'u_min_all':    'u_min_all',
-                    'u_final':      'u_final'
-                }
-                for k, v in record_options_map.items():
-                    if k in record:
-                        options_string = options_string + f' --{v}'
-
-                if 'u_non_staggered' in record or 'I_avg' in record or 'I' in record:
-                    options_string = options_string + ' --u_non_staggered_raw'
-
-                if ('I_avg' in record or 'I' in record) and ('p' not in record):
-                    options_string = options_string + ' --p_raw'
-            else:
-                # if sensor.record is not given, record the raw time series of p
+            if ('I_avg' in record or 'I' in record) and ('p' not in record):
                 options_string = options_string + ' --p_raw'
+        else:
+            # if sensor.record is not given, record the raw time series of p
+            options_string = options_string + ' --p_raw'
 
-            # check if sensor.record_start_imdex is given
-            if sensor.record_start_index is not None:
-                options_string = options_string + ' -s ' + str(sensor.record_start_index)
+        # check if sensor.record_start_imdex is given
+        if self.sensor.record_start_index is not None:
+            options_string = options_string + ' -s ' + str(self.sensor.record_start_index)
+        return options_string
 
-            res = func(kgrid=kgrid, medium=medium, source=source, sensor=sensor, **args, **kwargs)
-            return res
-        return wrapper
-    return decorator
+    @property
+    def system_string(self):
+        # set OS string for setting environment variables
+        if is_unix():
+            env_set_str = ''
+            sys_sep_str = ' '
+        else:
+            env_set_str = 'set '
+            sys_sep_str = ' & '
+
+        # set system string to define domain for thread migration
+        system_string = env_set_str + 'OMP_PLACES=cores' + sys_sep_str
+
+        if self.thread_binding is not None:
+            # read the parameters and update the system options
+            if self.thread_binding:
+                system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=SPREAD' + sys_sep_str
+            else:
+                system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=CLOSE' + sys_sep_str
+        else:
+            # set to round-robin over places
+            system_string = system_string + ' ' + env_set_str + 'OMP_PROC_BIND=SPREAD' + sys_sep_str
+
+        if self.system_call:
+            system_string = system_string + ' ' + self.system_call + sys_sep_str
+
+        return system_string
