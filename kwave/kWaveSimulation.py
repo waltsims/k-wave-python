@@ -10,6 +10,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
+from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
 from kwave.ktransducer import NotATransducer
 from kwave.options import SimulationOptions
 from kwave.recorder import Recorder
@@ -26,19 +27,13 @@ from kwave.utils.matrix import num_dim2
 @dataclass
 class kWaveSimulation(object):
 
-    def __init__(self,
-                 kgrid: kWaveGrid,
-                 medium: kWaveMedium,
-                 source,
-                 sensor,
-                 **kwargs
-                 ):
+    def __init__(self, args: KSpaceFirstOrderArgs):
         self.precision = None
-        self.kgrid = kgrid
-        self.medium = medium
-        self.source = source
-        self.sensor = sensor
-        self.kwargs = kwargs
+        self.kgrid = args.kgrid
+        self.medium = args.medium
+        self.source = args.source
+        self.sensor = args.sensor
+        self.args = args
 
         # =========================================================================
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)

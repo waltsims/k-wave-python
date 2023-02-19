@@ -3,15 +3,14 @@ import numpy as np
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import kspaceFirstOrderC, kspaceFirstOrderG
+from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate3d
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-@kspaceFirstOrderG
-def kspaceFirstOrder3DG(**kwargs):
+def kspaceFirstOrder3DG(args: KSpaceFirstOrderArgs):
     """
         3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -48,12 +47,12 @@ def kspaceFirstOrder3DG(**kwargs):
     Returns:
 
     """
-    sensor_data = kspaceFirstOrder3DC(**kwargs)  # pass inputs to CPU version
+    assert args.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    sensor_data = kspaceFirstOrder3DC(args=args)  # pass inputs to CPU version
     return sensor_data
 
 
-@kspaceFirstOrderC()
-def kspaceFirstOrder3DC(**kwargs):
+def kspaceFirstOrder3DC(args: KSpaceFirstOrderArgs):
     """
         3D time-domain simulation of wave propagation using C++ code.
 
@@ -92,11 +91,11 @@ def kspaceFirstOrder3DC(**kwargs):
 
     """
     # generate the input file and save to disk
-    sensor_data = kspaceFirstOrder3D(**kwargs)
+    sensor_data = kspaceFirstOrder3D(args=args)
     return sensor_data
 
 
-def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
+def kspaceFirstOrder3D(args: KSpaceFirstOrderArgs):
     """
     3D time-domain simulation of wave propagation.
 
@@ -254,7 +253,7 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(kgrid, medium, source, sensor, **kwargs)
+    k_sim = kWaveSimulation(args=args)
     k_sim.input_checking('kspaceFirstOrder3D')
 
     # =========================================================================

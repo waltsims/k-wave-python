@@ -9,7 +9,7 @@ from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import kspaceFirstOrderC
+from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.math import sinc
@@ -18,8 +18,7 @@ from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-@kspaceFirstOrderC()
-def kspaceFirstOrderASC(**kwargs):
+def kspaceFirstOrderASC(args: KSpaceFirstOrderArgs):
     """
     Axisymmetric time-domain simulation of wave propagation using C++ code.
 
@@ -65,11 +64,11 @@ def kspaceFirstOrderASC(**kwargs):
     Returns:
     """
     # generate the input file and save to disk
-    kspaceFirstOrderAS(**kwargs)
-    return kwargs['save_to_disk']
+    sensor_data = kspaceFirstOrderAS(args=args)
+    return sensor_data
 
 
-def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
+def kspaceFirstOrderAS(args: KSpaceFirstOrderArgs):
     """
     Axisymmetric time-domain simulation of wave propagation.
 
@@ -135,7 +134,7 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(kgrid, medium, source, sensor, **kwargs)
+    k_sim = kWaveSimulation(args=args)
     k_sim.input_checking('kspaceFirstOrderAS')
 
     # =========================================================================
@@ -210,7 +209,7 @@ def kspaceFirstOrderAS(kgrid, medium, source, sensor, **kwargs):
             # symmetries in WSWS
             kgrid_exp = kWaveGrid([Nx, Ny * 2 - 2], [dx, dy])
         # define operators, rotating y-direction for use with bsxfun
-        k_sim.ddy_k = ifftshift(1j * kgrid.k_vec.y).T
+        k_sim.ddy_k = ifftshift(1j * k_sim.kgrid.k_vec.y).T
         k_sim.y_shift_pos = ifftshift(np.exp(1j * kgrid_exp.k_vec.y * kgrid_exp.dy / 2)).T
         k_sim.y_shift_neg = ifftshift(np.exp(-1j * kgrid_exp.k_vec.y * kgrid_exp.dy / 2)).T
 

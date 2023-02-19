@@ -7,15 +7,14 @@ from numpy.fft import ifftshift
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import kspaceFirstOrderC, kspaceFirstOrderG
+from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-@kspaceFirstOrderG
-def kspaceFirstOrder2DG(**kwargs):
+def kspaceFirstOrder2DG(args: KSpaceFirstOrderArgs):
     """
     2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -45,12 +44,12 @@ def kspaceFirstOrder2DG(**kwargs):
     of kspaceFirstOrder3DC by replacing the binary name with the name of the
     GPU binary.
     """
-    sensor_data = kspaceFirstOrder2DC(**kwargs)  # pass inputs to CPU version
+    assert args.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    sensor_data = kspaceFirstOrder2DC(args=args)  # pass inputs to CPU version
     return sensor_data
 
 
-@kspaceFirstOrderC()
-def kspaceFirstOrder2DC(**kwargs):
+def kspaceFirstOrder2DC(args: KSpaceFirstOrderArgs):
     """
     2D time-domain simulation of wave propagation using C++ code.
 
@@ -94,11 +93,11 @@ def kspaceFirstOrder2DC(**kwargs):
 
     """
     # generate the input file and save to disk
-    kspaceFirstOrder2D(**kwargs)
-    return kwargs['save_to_disk']
+    sensor_data = kspaceFirstOrder2D(args=args)
+    return sensor_data
 
 
-def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
+def kspaceFirstOrder2D(args: KSpaceFirstOrderArgs):
     """
     2D time-domain simulation of wave propagation.
 
@@ -247,7 +246,7 @@ def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(kgrid, medium, source, sensor, **kwargs)
+    k_sim = kWaveSimulation(args=args)
     k_sim.input_checking('kspaceFirstOrder2D')
 
     # =========================================================================
