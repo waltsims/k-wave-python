@@ -10,9 +10,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
 from kwave.ktransducer import NotATransducer
-from kwave.options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.recorder import Recorder
 from kwave.utils.checks import check_stability
 from kwave.utils.colormap import get_color_map
@@ -27,24 +26,50 @@ from kwave.utils.matrix import num_dim2
 @dataclass
 class kWaveSimulation(object):
 
-    def __init__(self, args: KSpaceFirstOrderArgs):
+    def __init__(self,
+                 kgrid: kWaveGrid,
+                 source: kSource,
+                 sensor: NotATransducer,
+                 medium: kWaveMedium,
+                 simulation_options: SimulationOptions):
         self.precision = None
-        self.kgrid = args.kgrid
-        self.medium = args.medium
-        self.source = args.source
-        self.sensor = args.sensor
-        self.args = args
+        self.kgrid = kgrid
+        self.medium = medium
+        self.source = source
+        self.sensor = sensor
+        self.options = simulation_options
 
         # =========================================================================
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
         # flags which control the type of simulation
         #: Whether simulation type is axisymmetric
-        self.userarg_axisymmetric      = kwargs['axisymmetric']
+        self.userarg_axisymmetric      = self.options.axisymmetric
 
         # flags which control the characteristics of the sensor
         #: Whether time reversal simulation is enabled
-        self.userarg_time_rev          = kwargs['time_rev']
+
+        # check if performing time reversal, and replace inputs to explicitly use a
+        # source with a dirichlet boundary condition
+        if self.sensor.time_reversal_boundary_data is not None:
+            # define a new source structure
+            source = {
+                'p_mask': self.sensor.p_mask,
+                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
+                'p_mode': 'dirichlet'
+            }
+
+            # define a new sensor structure
+            Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
+            sensor = kSensor(
+                mask=np.ones((Nx, Ny, max(1, Nz))),
+                record=['p_final']
+            )
+            # set time reversal flag
+            self.userarg_time_rev = True
+        else:
+            # set time reversal flag
+            self.userarg_time_rev = False
 
         #: Whether sensor.mask should be re-ordered.
         #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
@@ -54,8 +79,11 @@ class kWaveSimulation(object):
         #: Whether the sensor.mask is binary
         self.binary_sensor_mask        = True
 
-        #: If the sensor.mask is a list of cuboid corners
-        self.userarg_cuboid_corners    = kwargs['cuboid_corners']
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
 
         #: If tse sensor is an object of the kWaveTransducer class
         self.transducer_sensor         = False
@@ -85,9 +113,6 @@ class kWaveSimulation(object):
         self.STREAM_TO_DISK_FILENAME         = 'temp_sensor_data.bin'   #: default disk stream filename
         self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]  #: default log filename
 
-        del kwargs['axisymmetric']
-        del kwargs['cuboid_corners']
-        del kwargs['time_rev']
         self.calling_func_name = None
         print(f'  start time: {get_date_string()}')
 
@@ -498,7 +523,7 @@ class kWaveSimulation(object):
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
         # run subscript to check optional inputs
-        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, **self.kwargs)
+        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, self.args)
         opt = self.options
 
         # TODO(Walter): clean this up with getters in simulation options pml size

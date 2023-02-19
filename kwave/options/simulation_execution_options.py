@@ -1,47 +1,27 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from tempfile import gettempdir
 from typing import Optional, Union
 from warnings import warn
 
-import numpy as np
-
-from kwave.ksource import kSource
-from kwave.ktransducer import NotATransducer
-
-from kwave.kmedium import kWaveMedium
-
-from kwave.kgrid import kWaveGrid
-
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
-from kwave.utils.data import get_date_string
 
 
 @dataclass
-class KSpaceFirstOrderArgs:
-    kgrid: kWaveGrid
-    source: kSource
-    sensor: NotATransducer
-    medium: kWaveMedium
+class SimulationExecutionOptions:
+    kgrid_dim: int
 
     # Are we going to run the simulation on the GPU?
     # Affects binary name and the way the simulation is run
     is_gpu_simulation: bool = False
 
-    # user input on axisymmetric code
-    axisymmetric: bool = False
     # user defined location for the binary
     binary_path: Optional[str] = os.getenv('KWAVE_BINARY_PATH')
     # user defined location for the binary
     binary_name: Optional[str] = None
     # user defined number of threads
     kwave_function_name: Optional[str] = 'kspaceFirstOrder3D'
-    # user defined location for the input and output files
-    data_path = gettempdir()
-    # user defined location for the input and output files
-    data_name: Optional[str] = None
     # Whether to delete the input and output files after the simulation
     delete_data: bool = True
     # GPU device flag
@@ -56,11 +36,6 @@ class KSpaceFirstOrderArgs:
     system_call: Optional[str] = None
     verbose_level: Optional[int] = None
 
-    _input_filename: Optional[str] = None
-    _output_filename: Optional[str] = None
-    _cuboid_corners: Optional[bool] = None
-    _time_rev: Optional[bool] = None
-
     def __post_init__(self):
         self.validate()
 
@@ -73,53 +48,7 @@ class KSpaceFirstOrderArgs:
             else:
                 self.binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
 
-        # check for a trailing slash
-        if not self.data_path.endswith(os.path.sep):
-            self.data_path = self.data_path + os.path.sep
-
-        if self.data_name:
-            name_prefix = self.data_name
-            input_filename = f'{name_prefix}_input.h5'
-            output_filename = f'{name_prefix}_output.h5'
-        else:
-            # set the filename inputs to store data in the default temp directory
-            date_string = get_date_string()
-            input_filename = 'kwave_input_data' + date_string + '.h5'
-            output_filename = 'kwave_output_data' + date_string + '.h5'
-
-        self._input_filename = os.path.join(self.data_path, input_filename)
-        self._output_filename = os.path.join(self.data_path, output_filename)
-
-        # check if the sensor mask is defined as cuboid corners
-        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-            self._cuboid_corners = True
-        else:
-            self._cuboid_corners = False
-
-        # check if performing time reversal, and replace inputs to explicitly use a
-        # source with a dirichlet boundary condition
-        if self.sensor.time_reversal_boundary_data is not None:
-            # define a new source structure
-            source = {
-                'p_mask': self.sensor.p_mask,
-                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
-                'p_mode': 'dirichlet'
-            }
-
-            # define a new sensor structure
-            Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
-            sensor = kSensor(
-                mask=np.ones((Nx, Ny, max(1, Nz))),
-                record=['p_final']
-            )
-            # set time reversal flag
-            self._time_rev = True
-        else:
-            # set time reversal flag
-            self._time_rev = False
-
     def validate(self):
-        assert isinstance(self.axisymmetric, bool), 'Axisymmetric argument must be bool'
 
         # check the binary exists and is in the correct place before doing anything else
         if not Path(self.binary_path, self.binary_name).exists():
@@ -137,28 +66,7 @@ class KSpaceFirstOrderArgs:
 
         assert isinstance(self.verbose_level, int) and 0 <= self.verbose_level <= 2
 
-    @property
-    def input_filename(self) -> str:
-        return self._input_filename
-
-    @property
-    def output_filename(self) -> str:
-        return self._output_filename
-
-    @property
-    def cuboid_corners(self) -> bool:
-        assert self._cuboid_corners is not None, \
-            'cuboid_corners should have been set in __post_init__. Something went wrong.'
-        return self._cuboid_corners
-
-    @property
-    def time_rev(self) -> bool:
-        assert self._time_rev is not None, \
-            'time_rev should have been set in __post_init__. Something went wrong.'
-        return self._time_rev
-
-    @property
-    def options_string(self):
+    def get_options_string(self, sensor: kSensor) -> str:
         options_dict = {}
         if self.device_num:
             options_dict['-g'] = self.device_num
@@ -174,8 +82,8 @@ class KSpaceFirstOrderArgs:
             options_string += f' {flag} {str(value)}'
 
         # check if sensor.record is given
-        if self.sensor.record is not None:
-            record = self.sensor.record
+        if sensor.record is not None:
+            record = sensor.record
 
             # set the options string to record the required output fields
             record_options_map = {
@@ -208,8 +116,8 @@ class KSpaceFirstOrderArgs:
             options_string = options_string + ' --p_raw'
 
         # check if sensor.record_start_imdex is given
-        if self.sensor.record_start_index is not None:
-            options_string = options_string + ' -s ' + str(self.sensor.record_start_index)
+        if sensor.record_start_index is not None:
+            options_string = options_string + ' -s ' + str(sensor.record_start_index)
         return options_string
 
     @property

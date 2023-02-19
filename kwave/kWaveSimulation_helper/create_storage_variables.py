@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.fft import ifftshift
 
-from kwave import SimulationOptions, kWaveGrid
+from kwave.options.simulation_options import SimulationOptions, kWaveGrid
 from kwave.data import Array
 from kwave.utils.dotdictionary import dotdict
 

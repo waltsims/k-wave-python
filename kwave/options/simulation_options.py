@@ -76,8 +76,8 @@ class SimulationOptions(object):
     radial_symmetry: str = 'WSWA-FFT'
     multi_axial_PML_ratio: float = 0.1
     data_path: Optional[str] = field(default_factory=lambda: gettempdir())
-    output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}kwave_input.h5")
-    input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}kwave_output.h5")
+    output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
+    input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
@@ -87,6 +87,8 @@ class SimulationOptions(object):
     pml_z_size: Optional[int] = None
 
     def __post_init__(self):
+        assert isinstance(self.axisymmetric, bool), 'Axisymmetric argument must be bool'
+
         assert self.cartesian_interp in ['linear', 'nearest'], \
             "Optional input ''cartesian_interp'' must be set to ''linear'' or ''nearest''."
 

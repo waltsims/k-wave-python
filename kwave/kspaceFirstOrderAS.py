@@ -2,6 +2,10 @@ import os
 import tempfile
 
 import numpy as np
+
+from kwave.kmedium import kWaveMedium
+
+from kwave.ktransducer import NotATransducer
 from numpy.fft import ifftshift
 
 from kwave import kWaveGrid
@@ -9,7 +13,9 @@ from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import KSpaceFirstOrderArgs
+from kwave.ksource import kSource
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.math import sinc
@@ -18,7 +24,14 @@ from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-def kspaceFirstOrderASC(args: KSpaceFirstOrderArgs):
+def kspaceFirstOrderASC(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: NotATransducer,
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
     Axisymmetric time-domain simulation of wave propagation using C++ code.
 
@@ -64,11 +77,25 @@ def kspaceFirstOrderASC(args: KSpaceFirstOrderArgs):
     Returns:
     """
     # generate the input file and save to disk
-    sensor_data = kspaceFirstOrderAS(args=args)
+    sensor_data = kspaceFirstOrderAS(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options,
+        execution_options=execution_options
+    )
     return sensor_data
 
 
-def kspaceFirstOrderAS(args: KSpaceFirstOrderArgs):
+def kspaceFirstOrderAS(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: NotATransducer,
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
     Axisymmetric time-domain simulation of wave propagation.
 
@@ -134,7 +161,13 @@ def kspaceFirstOrderAS(args: KSpaceFirstOrderArgs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(args=args)
+    k_sim = kWaveSimulation(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options
+    )
     k_sim.input_checking('kspaceFirstOrderAS')
 
     # =========================================================================
@@ -329,5 +362,6 @@ def kspaceFirstOrderAS(args: KSpaceFirstOrderArgs):
         output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
 
         executor = Executor(device='gpu')
-        sensor_data = executor.run_simulation(input_filename, output_filename, options='--p_raw')
+        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
+        sensor_data = executor.run_simulation(input_filename, output_filename, options=executor_options)
         return k_sim.sensor.combine_sensor_data(sensor_data)
