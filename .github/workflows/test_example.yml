@@ -18,6 +18,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e '.[example]'
-      - name: Test with pytest
+      - name: Run example script
         run: |
           python3 examples/bmode_reconstruction_example.py
