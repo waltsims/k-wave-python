@@ -1,10 +1,9 @@
-name: pytest
+name: test_example
 
 on: [ push ]
 
 jobs:
   test_example:
-    needs: collect_references
     strategy:
       matrix:
         os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
