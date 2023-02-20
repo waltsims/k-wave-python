@@ -14,120 +14,201 @@ from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 
-# Define the pathname for the input and output files
-temp_dir = gettempdir()
+if __name__ == '__main__':
+    # pathname for the input and output files
+    pathname = gettempdir()
 
-# Define the simulation settings
-data_cast = 'single'
-run_simulation = False
-# set the file name of the mat file for later
-sensor_data_file_name = 'sensor_data.mat'
-sensor_data_path = os.path.join(temp_dir, sensor_data_file_name)
+    # simulation settings
+    DATA_CAST = 'single'
+    RUN_SIMULATION = True
 
-# Define the k-wave grid
-pml_sizes = [20, 10, 10]  # [grid points]
-grid_sizes = [256, 128, 128]  # [grid points]
-dx = 40e-3 / (np.array(grid_sizes) - 2 * np.array(pml_sizes))
-kgrid = kWaveGrid(grid_sizes, dx)
+    # =========================================================================
+    # DEFINE THE K-WAVE GRID
+    # =========================================================================
+    print("Setting up the k-wave grid...")
 
-# Define the medium parameters
-medium = kWaveMedium(sound_speed=1540, density=1000, alpha_coeff=0.75, alpha_power=1.5, BonA=6)
-t_end = (np.prod(grid_sizes) * np.prod(dx)) * 2.2 / medium.sound_speed
-kgrid.makeTime(medium.sound_speed, t_end=t_end)
+    # set the size of the perfectly matched layer (PML)
+    PML_X_SIZE = 20  # [grid points]
+    PML_Y_SIZE = 10  # [grid points]
+    PML_Z_SIZE = 10  # [grid points]
 
-# Define the input signal
-source_strength = 1e6  # [Pa]
-tone_burst_freq = 1.5e6  # [Hz]
-tone_burst_cycles = 4
-input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
-input_signal *= source_strength / (medium.sound_speed * medium.density)
+    # set total number of grid points not including the PML
+    Nx = 256 - 2 * PML_X_SIZE  # [grid points]
+    Ny = 128 - 2 * PML_Y_SIZE  # [grid points]
+    Nz = 128 - 2 * PML_Z_SIZE  # [grid points]
 
-# Define the ultrasound transducer
-transducer = dotdict({
-    'number_elements': 32,
-    'element_width': 2,
-    'element_length': 24,
-    'element_spacing': 0,
-    'radius': float('inf'),
-})
-transducer_width = transducer.number_elements * transducer.element_width + (
-            transducer.number_elements - 1) * transducer.element_spacing
-transducer_position = [1, (grid_sizes[1] - transducer_width) / 2, (grid_sizes[2] - transducer.element_length) / 2]
-not_transducer = dotdict({
-    'sound_speed': medium.sound_speed,
-    'focus_distance': 20e-3,
-    'elevation_focus_distance': 19e-3,
-    'steering_angle': 0,
-    'transmit_apodization': 'Hanning',
-    'receive_apodization': 'Rectangular',
-    'active_elements': np.ones((transducer.number_elements, 1)),
-    'input_signal': input_signal,
-})
-transducer = kWaveTransducerSimple(kgrid, **transducer)
-not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
+    # set desired grid size in the x-direction not including the PML
+    x = 40e-3  # [m]
 
-# =========================================================================
-# DEFINE THE MEDIUM PROPERTIES
-# =========================================================================
-# define a large image size to move across
-number_scan_lines = 96
+    # calculate the spacing between the grid points
+    dx = x / Nx  # [m]
+    dy = dx  # [m]
+    dz = dx  # [m]
 
-print("Fetching phantom data...")
-phantom_data_path = os.path.join(temp_dir, 'phantom_data.mat')
-PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
-download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
+    # create the k-space grid
+    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
 
-phantom = scipy.io.loadmat(phantom_data_path)
-sound_speed_map = phantom['sound_speed_map']
-density_map = phantom['density_map']
+    # =========================================================================
+    # DEFINE THE MEDIUM PARAMETERS
+    # =========================================================================
+    # define the properties of the propagation medium
+    c0 = 1540
+    rho0 = 1000
 
-# =========================================================================
-# RUN THE SIMULATION
-# =========================================================================
-if run_simulation:
-    print("Running the simulation...")
+    medium = kWaveMedium(
+        sound_speed=None,  # will be set later
+        alpha_coeff=0.75,
+        alpha_power=1.5,
+        BonA=6
+    )
 
-    # assign the medium parameters
-    medium.set_medium(kgrid)
+    # create the time array
+    t_end = (Nx * dx) * 2.2 / c0  # [s]
+    kgrid.makeTime(c0, t_end=t_end)
 
-    # define the sensor mask covering the entire grid
-    sensor_mask = np.zeros(grid_sizes)
-    sensor_mask[:, :, :] = 1
+    # =========================================================================
+    # DEFINE THE INPUT SIGNAL
+    # =========================================================================
+    print("Defining the input signal...")
 
-    # run the simulation
-    input_args = {
-        'PMLSize': pml_sizes,
-        'PlotPML': False,
-        'PMLInside': False,
-        'DataCast': data_cast,
-        'PMLAlpha': 2,
-        'PMLSizeLateral': 1.5,
-        'PMLSizeTop': 1.5,
-        'PMLSizeBottom': 1.5,
-        'RecordMovie': False,
-        'SaveToDisk': True,
-        'MovieArgs': {
-            'SaveGif': False,
-            'FileName': os.path.join(temp_dir, 'movie.gif')
-        }
-    }
+    # define properties of the input signal
+    source_strength = 1e6  # [Pa]
+    tone_burst_freq = 1.5e6  # [Hz]
+    tone_burst_cycles = 4
 
-    sensor_data = kspaceFirstOrder3DC(kgrid, medium, not_transducer, sensor_mask, **input_args)
+    # create the input signal using tone_burst
+    input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 
-    # save the sensor data
-    scipy.io.savemat(sensor_data_file_name, {'sensor_data': sensor_data})
+    # scale the source magnitude by the source_strength divided by the
+    # impedance (the source is assigned to the particle velocity)
+    input_signal = (source_strength / (c0 * rho0)) * input_signal
 
-# download the data if the file does not exist
-download_from_gdrive_if_does_not_exist('168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C', sensor_data_path)
+    # =========================================================================
+    # DEFINE THE ULTRASOUND TRANSDUCER
+    # =========================================================================
+    print("Setting up the transducer configuration...")
 
-# load the data
-sensor_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
+    # physical properties of the transducer
+    transducer = dotdict()
+    transducer.number_elements = 32  # total number of transducer elements
+    transducer.element_width = 2  # width of each element [grid points/voxels]
+    transducer.element_length = 24  # length of each element [grid points/voxels]
+    transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
+    transducer.radius = float('inf')  # radius of curvature of the transducer [m]
 
-sensor_data = sensor_data[None, :]
+    # calculate the width of the transducer in grid points
+    transducer_width = transducer.number_elements * transducer.element_width + (
+                transducer.number_elements - 1) * transducer.element_spacing
 
-# build channel data
-channel_data = build_channel_data(sensor_data=sensor_data, kgrid=kgrid, not_transducer=not_transducer,
-                                  sampling_frequency=2.773e7, prf=1000, focal_depth=0.02)
+    # use this to position the transducer in the middle of the computational grid
+    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
 
-# beamforming
-beamform(channel_data)
+    # properties used to derive the beamforming delays
+    not_transducer = dotdict()
+    not_transducer.sound_speed = c0  # sound speed [m/s]
+    not_transducer.focus_distance = 20e-3  # focus distance [m]
+    not_transducer.elevation_focus_distance = 19e-3  # focus distance in the elevation plane [m]
+    not_transducer.steering_angle = 0  # steering angle [degrees]
+
+    # apodization
+    not_transducer.transmit_apodization = 'Hanning'
+    not_transducer.receive_apodization = 'Rectangular'
+
+    # define the transducer elements that are currently active
+    not_transducer.active_elements = np.ones((transducer.number_elements, 1))
+
+    # append input signal used to drive the transducer
+    not_transducer.input_signal = input_signal
+
+    # create the transducer using the defined settings
+    transducer = kWaveTransducerSimple(kgrid, **transducer)
+    not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
+
+    # =========================================================================
+    # DEFINE THE MEDIUM PROPERTIES
+    # =========================================================================
+    # define a large image size to move across
+    number_scan_lines = 96
+
+    print("Fetching phantom data...")
+    phantom_data_path = 'phantom_data.mat'
+    PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
+    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
+
+    phantom = scipy.io.loadmat(phantom_data_path)
+    sound_speed_map = phantom['sound_speed_map']
+    density_map = phantom['density_map']
+
+    # =========================================================================
+    # RUN THE SIMULATION
+    # =========================================================================
+    print(f"RUN_SIMULATION set to {RUN_SIMULATION}")
+    # run the simulation if set to true, otherwise, load previous results from disk
+    if RUN_SIMULATION:
+        print("Running simulation locally...")
+
+        # set medium position
+        medium_position = 0
+
+        # preallocate the storage
+        simulation_data = []
+
+        # loop through the scan lines
+        for scan_line_index in range(1, number_scan_lines + 1):
+            # for scan_line_index in range(1, 10):
+            # update the command line status
+            print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
+
+            # load the current section of the medium
+            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
+            medium.density = density_map[:, medium_position:medium_position + Ny, :]
+
+            # set the input settings
+            input_filename = f'example_input_{scan_line_index}.h5'
+            input_file_full_path = os.path.join(pathname, input_filename)
+            # set the input settings
+            input_args = {
+                'pml_inside': False,
+                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+                'data_cast': DATA_CAST,
+                'data_recast': True,
+                'save_to_disk': True,
+                'input_filename': input_file_full_path,
+                'save_to_disk_exit': False,
+            }
+
+            # run the simulation
+            sensor_data = kspaceFirstOrder3DC(**{
+                'medium': medium,
+                'kgrid': kgrid,
+                'source': not_transducer,
+                'sensor': not_transducer,
+                **input_args
+            })
+            simulation_data.append(sensor_data)
+
+            # update medium position
+            medium_position = medium_position + transducer.element_width
+
+        simulation_data = np.stack(simulation_data, axis=0)
+        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
+
+    else:
+        print("Downloading data from remote server...")
+        SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
+        sensor_data_path = 'sensor_data.mat'
+        download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
+
+        simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
+
+    # temporary fix for dimensionality
+    simulation_data = simulation_data[None, :]
+
+    sampling_frequency = 2.772000000000000e+07
+    prf = 10000
+    focal_depth = 0.020000000000000
+    channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
+                                      sampling_frequency, prf, focal_depth)
+
+    print("Beamforming channel data and reconstructing the image...")
+    beamform(channel_data)
