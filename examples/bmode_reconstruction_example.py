@@ -15,11 +15,14 @@ from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 
 # Define the pathname for the input and output files
-pathname = gettempdir()
+temp_dir = gettempdir()
 
 # Define the simulation settings
 data_cast = 'single'
 run_simulation = False
+# set the file name of the mat file for later
+sensor_data_file_name = 'sensor_data.mat'
+sensor_data_path = os.path.join(temp_dir, sensor_data_file_name)
 
 # Define the k-wave grid
 pml_sizes = [20, 10, 10]  # [grid points]
@@ -61,7 +64,7 @@ not_transducer = dotdict({
     'input_signal': input_signal,
 })
 transducer = kWaveTransducerSimple(kgrid, **transducer)
-not_transducer = NotATransducer(transducer, kgrid)
+not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
 # =========================================================================
 # DEFINE THE MEDIUM PROPERTIES
@@ -70,7 +73,7 @@ not_transducer = NotATransducer(transducer, kgrid)
 number_scan_lines = 96
 
 print("Fetching phantom data...")
-phantom_data_path = 'phantom_data.mat'
+phantom_data_path = os.path.join(temp_dir, 'phantom_data.mat')
 PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
 download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
 
@@ -105,27 +108,26 @@ if run_simulation:
         'SaveToDisk': True,
         'MovieArgs': {
             'SaveGif': False,
-            'FileName': os.path.join(pathname, 'movie.gif')
+            'FileName': os.path.join(temp_dir, 'movie.gif')
         }
     }
 
     sensor_data = kspaceFirstOrder3DC(kgrid, medium, not_transducer, sensor_mask, **input_args)
 
-    # set the filename of the HDF5 file
-    file_name = os.path.join(pathname, 'sensor_data.mat')
-
     # save the sensor data
-    scipy.io.savemat(file_name, {'sensor_data': sensor_data})
+    scipy.io.savemat(sensor_data_file_name, {'sensor_data': sensor_data})
 
 # download the data if the file does not exist
-download_from_gdrive_if_does_not_exist(file_name, '1oLI4wx4OmGdqyJi32a8nXkEjL7PzyYfu')
+download_from_gdrive_if_does_not_exist('168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C', sensor_data_path)
 
 # load the data
-sensor_data = scipy.io.loadmat(file_name)['sensor_data']
+sensor_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
+
+sensor_data = sensor_data[None, :]
 
 # build channel data
-channel_data = build_channel_data(sensor_data)
+channel_data = build_channel_data(sensor_data=sensor_data, kgrid=kgrid, not_transducer=not_transducer,
+                                  sampling_frequency=2.773e7, prf=1000, focal_depth=0.02)
 
 # beamforming
-not_transducer.update_data(channel_data)
-beamform(kgrid, medium, not_transducer, None)  # Beamform and plot
+beamform(channel_data)

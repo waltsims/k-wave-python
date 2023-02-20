@@ -14,6 +14,5 @@ def download_from_gdrive(file_id, output_path):
 
 
 def download_from_gdrive_if_does_not_exist(file_id, output_path):
-
     if not os.path.exists(output_path):
         download_from_gdrive(file_id, output_path)
