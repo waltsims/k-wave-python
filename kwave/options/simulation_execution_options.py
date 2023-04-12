@@ -32,7 +32,7 @@ class SimulationExecutionOptions:
 
     # user input for system string
     system_call: Optional[str] = None
-    verbose_level: Optional[int] = None
+    verbose_level: int = 0
 
     def __post_init__(self):
         self.validate()
