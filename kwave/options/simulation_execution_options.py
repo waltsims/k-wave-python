@@ -25,7 +25,7 @@ class SimulationExecutionOptions:
     # GPU device flag
     device_num: Optional[int] = None
     # number of threads
-    num_threads: Optional[Union[int, str]] = None
+    num_threads: Union[int, str] = 'all'
 
     # user defined thread binding option
     thread_binding: Optional[bool] = None
@@ -37,7 +37,7 @@ class SimulationExecutionOptions:
     def __post_init__(self):
         self.validate()
 
-        if not self.binary_path.endswith(os.path.sep):
+        if (self.binary_path is not None) and (not self.binary_path.endswith(os.path.sep)):
             self.binary_path = self.binary_path + os.path.sep
 
         if self.binary_name is None:
@@ -57,11 +57,10 @@ class SimulationExecutionOptions:
         #                 from www.k-wave.org/download.php and placed in the binaries folder.'''
         #          )
 
-        if self.num_threads:
-            if isinstance(self.num_threads, int):
-                assert self.num_threads > 0 and self.num_threads != float('inf')
-            else:
-                assert self.num_threads == 'all'
+        if isinstance(self.num_threads, int):
+            assert self.num_threads > 0 and self.num_threads != float('inf')
+        else:
+            assert self.num_threads == 'all'
 
         assert isinstance(self.verbose_level, int) and 0 <= self.verbose_level <= 2
 
