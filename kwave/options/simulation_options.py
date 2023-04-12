@@ -221,59 +221,58 @@ class SimulationOptions(object):
                 options.plot_scale = [-1, 1]
 
         # replace defaults with user defined values if provided and check inputs
-        for key, val in kwargs.items():
-            if key == 'pml_alpha':
-                # check input is correct size
-                val = np.atleast_1d(val)
-                if val.size > kgrid.dim:
-                    if kgrid.dim > 1:
-                        raise ValueError(
-                            f"Optional input ''pml_alpha'' must be a 1 or {kgrid.dim} element numerical array.")
-                    else:
-                        raise ValueError(f"Optional input ''pml_alpha'' must be a single numerical value.")
+        if (val := options.pml_alpha) is not None and options.pml_alpha != 'auto':
+            # check input is correct size
+            val = np.atleast_1d(val)
+            if val.size > kgrid.dim:
+                if kgrid.dim > 1:
+                    raise ValueError(
+                        f"Optional input ''pml_alpha'' must be a 1 or {kgrid.dim} element numerical array.")
+                else:
+                    raise ValueError(f"Optional input ''pml_alpha'' must be a single numerical value.")
 
-                # assign input based on number of dimensions
-                if kgrid.dim == 1:
-                    options.pml_x_alpha = val
-                elif kgrid.dim == 2:
-                    options.pml_x_alpha = val[0]
-                    options.pml_y_alpha = val[-1]
-                elif kgrid.dim == 2:
-                    options.pml_x_alpha = val[0]
-                    options.pml_y_alpha = val[len(val) // 2]
-                    options.pml_z_alpha = val[-1]
+            # assign input based on number of dimensions
+            if kgrid.dim == 1:
+                options.pml_x_alpha = val
+            elif kgrid.dim == 2:
+                options.pml_x_alpha = val[0]
+                options.pml_y_alpha = val[-1]
+            elif kgrid.dim == 2:
+                options.pml_x_alpha = val[0]
+                options.pml_y_alpha = val[len(val) // 2]
+                options.pml_z_alpha = val[-1]
 
-            elif options.save_to_disk_exit:
-                assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
+        if options.save_to_disk_exit:
+            assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
 
-            elif options.stream_to_disk:
-                assert not options.elastic_code and kgrid.dim == 3, \
-                    "Optional input ''stream_to_disk'' is currently only compatible with 3D fluid simulations."
-                # if given as a Boolean, replace with the default number of time steps
-                if isinstance(options.stream_to_disk, bool) and options.stream_to_disk:
-                    options.stream_to_disk = STREAM_TO_DISK_STEPS_DEF
+        if options.stream_to_disk:
+            assert not options.elastic_code and kgrid.dim == 3, \
+                "Optional input ''stream_to_disk'' is currently only compatible with 3D fluid simulations."
+            # if given as a Boolean, replace with the default number of time steps
+            if isinstance(options.stream_to_disk, bool) and options.stream_to_disk:
+                options.stream_to_disk = STREAM_TO_DISK_STEPS_DEF
 
-            elif options.save_to_disk or options.save_to_disk_exit:
-                assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
+        if options.save_to_disk or options.save_to_disk_exit:
+            assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
 
-            if options.use_fd:
-                # input only supported in 1D fluid code
-                assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''use_fd'' only supported in 1D."
-            # get optimal pml size
-            if options.axisymmetric or options.pml_auto:
-                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+        if options.use_fd:
+            # input only supported in 1D fluid code
+            assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''use_fd'' only supported in 1D."
+        # get optimal pml size
+        if options.axisymmetric or options.pml_auto:
+            pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
 
-                # assign to individual variables
-                if kgrid.dim == 1:
-                    options.pml_x_size = int(pml_size_temp[0])
-                elif kgrid.dim == 2:
-                    options.pml_x_size = int(pml_size_temp[1])
-                    options.pml_y_size = int(pml_size_temp[2])
-                elif kgrid.dim == 3:
-                    options.pml_x_size = int(pml_size_temp[0])
-                    options.pml_y_size = int(pml_size_temp[1])
-                    options.pml_z_size = int(pml_size_temp[2])
+            # assign to individual variables
+            if kgrid.dim == 1:
+                options.pml_x_size = int(pml_size_temp[0])
+            elif kgrid.dim == 2:
+                options.pml_x_size = int(pml_size_temp[1])
+                options.pml_y_size = int(pml_size_temp[2])
+            elif kgrid.dim == 3:
+                options.pml_x_size = int(pml_size_temp[0])
+                options.pml_y_size = int(pml_size_temp[1])
+                options.pml_z_size = int(pml_size_temp[2])
 
-                # cleanup unused variables
-                del pml_size_temp
-            return options
+            # cleanup unused variables
+            del pml_size_temp
+        return options
