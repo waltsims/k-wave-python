@@ -11,6 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -94,20 +95,24 @@ def test_ivp_photoacoustic_waveforms():
     input_filename = f'example_ivp_pa_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'data_cast': 'single',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    input_args = SimulationOptions(
+        data_cast='single',
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+
+    # run the simulation
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
+
     assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
         'Files do not match!'
 

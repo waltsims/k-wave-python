@@ -116,8 +116,6 @@ class kWaveSimulation(object):
         self.calling_func_name = None
         print(f'  start time: {get_date_string()}')
 
-        self.options = None
-
         self.c_ref, self.c_ref_compression, self.c_ref_shear = [None] * 3
         self.transducer_input_signal = None
 
@@ -523,7 +521,7 @@ class kWaveSimulation(object):
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
         # run subscript to check optional inputs
-        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, self.args)
+        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, self.options)
         opt = self.options
 
         # TODO(Walter): clean this up with getters in simulation options pml size

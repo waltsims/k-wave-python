@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numbers
 import os
 from dataclasses import dataclass, field
@@ -153,7 +154,7 @@ class SimulationOptions(object):
             "Optional input ''UseFD'' can only be set to 2, 4."
 
     @staticmethod
-    def option_factory(kgrid: "kWaveGrid", elastic_code: bool, axisymmetric: bool, **kwargs):
+    def option_factory(kgrid: "kWaveGrid", elastic_code: bool, axisymmetric: bool, options: SimulationOptions):
         """
         Initialize the Simulation Options
 
@@ -187,8 +188,6 @@ class SimulationOptions(object):
         """
 
         STREAM_TO_DISK_STEPS_DEF = 200  # number of steps before streaming to disk
-
-        options = SimulationOptions(**kwargs)
 
         if options.pml_size is not None or not isinstance(options.pml_size, bool):
             options.pml_size = np.atleast_1d(options.pml_size)
