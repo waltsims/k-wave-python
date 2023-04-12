@@ -49,12 +49,13 @@ class SimulationExecutionOptions:
     def validate(self):
 
         # check the binary exists and is in the correct place before doing anything else
-        if not Path(self.binary_path, self.binary_name).exists():
-            warn(f'''
-                        The binary file {self.binary_name} could not be found in {self.binary_path}. 
-                        To use the C++ code, the C++ binaries for your operating system must be downloaded 
-                        from www.k-wave.org/download.php and placed in the binaries folder.'''
-                 )
+        # TODO re-enable this check
+        # if not Path(self.binary_path, self.binary_name).exists():
+        #     warn(f'''
+        #                 The binary file {self.binary_name} could not be found in {self.binary_path}.
+        #                 To use the C++ code, the C++ binaries for your operating system must be downloaded
+        #                 from www.k-wave.org/download.php and placed in the binaries folder.'''
+        #          )
 
         if self.num_threads:
             if isinstance(self.num_threads, int):
