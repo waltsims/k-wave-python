@@ -7,9 +7,11 @@
     Simulating Ultrasound Beam Patterns examples.
 """
 import os
+from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -61,20 +63,19 @@ def test_tvsp_homogeneous_medium_monopole():
     input_filename = f'example_tvsp_homo_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    input_args = SimulationOptions(
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
     # run the simulation
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': source,
-        'sensor': sensor,
-        **input_args
-    })
-
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_tvsp_homogeneous_medium_monopole', input_file_full_path), 'Files do not match!'
