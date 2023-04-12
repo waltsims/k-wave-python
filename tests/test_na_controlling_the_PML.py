@@ -10,6 +10,8 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -69,73 +71,77 @@ def test_na_controlling_the_pml():
     input_filename = f'input_1.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_alpha': 0,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    input_args = SimulationOptions(
+        pml_alpha=0,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_1', input_file_full_path), \
         'Files do not match!'
 
     # Example 2
-    input_args = {
-        'pml_alpha': 1e6,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    input_args = SimulationOptions(
+        pml_alpha=1e6,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_2', input_file_full_path), \
         'Files do not match!'
 
     # Example 3
-    input_args = {
-        'pml_size': 2,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    input_args = SimulationOptions(
+        pml_size=2,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_3', input_file_full_path), \
         'Files do not match!'
 
     # Example 4
-    input_args = {
-        'pml_inside': False,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    input_args = SimulationOptions(
+        pml_inside=False,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_4', input_file_full_path), \
         'Files do not match!'
