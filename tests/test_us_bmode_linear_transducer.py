@@ -10,6 +10,7 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -224,25 +225,25 @@ def test_us_bmode_linear_transducer():
             input_filename = f'example_lin_tran_input.h5'
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)
-            input_args = {
-                'pml_inside': False,
-                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'data_cast': DATA_CAST,
-                'data_recast': True,
-                'save_to_disk': True,
-                'input_filename': input_filename,
-                'data_path': pathname,
-                'save_to_disk_exit': True
-            }
-
+            input_args = SimulationOptions(
+                pml_inside=False,
+                pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+                data_cast=DATA_CAST,
+                data_recast=True,
+                save_to_disk=True,
+                input_filename=input_filename,
+                save_to_disk_exit=True,
+                data_path=pathname
+            )
             # run the simulation
-            kspaceFirstOrder3DC(**{
-                'medium': medium,
-                'kgrid': kgrid,
-                'source': not_transducer,
-                'sensor': not_transducer,
-                **input_args
-            })
+            kspaceFirstOrder3DC(
+                medium=medium,
+                kgrid=kgrid,
+                source=not_transducer,
+                sensor=not_transducer,
+                simulation_options=input_args,
+                execution_options=SimulationExecutionOptions()
+            )
 
             assert compare_against_ref(f'out_us_bmode_linear_transducer/input_{scan_line_index}', input_file_full_path, precision=6), \
                 'Files do not match!'

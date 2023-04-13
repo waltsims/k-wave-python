@@ -10,6 +10,7 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -149,24 +150,24 @@ def test_us_defining_transducer():
     input_filename = f'example_def_tran_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_inside': False,
-        'pml_size': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
-        'data_cast': DATA_CAST,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    input_args = SimulationOptions(
+        pml_inside=False,
+        pml_size=np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
+        data_cast=DATA_CAST,
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
     # run the simulation
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': not_transducer,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=not_transducer,
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
 
     # display the required syntax to run the C++ simulation
     print(f'Using a terminal window, navigate to the {os.path.sep}binaries folder of the k-Wave Toolbox')
