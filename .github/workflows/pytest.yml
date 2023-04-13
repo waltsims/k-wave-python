@@ -23,6 +23,9 @@ jobs:
         uses: matlab-actions/run-command@v1
         with:
           command: |
+            ls;
+            pwd;
+            if exist('k-wave'); ls 'k-wave'; end;;
             addpath('k-Wave-python','k-wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
