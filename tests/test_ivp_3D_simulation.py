@@ -18,6 +18,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kSensor
+from kwave.options import SimulationExecutionOptions, SimulationOptions
 from kwave.utils.mapgen import make_ball
 from tests.diff_utils import compare_against_ref
 
@@ -73,22 +74,21 @@ def test_ivp_3D_simulation():
     input_filename = f'example_ivp_3D_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'data_cast': 'single',
-        'cart_interp': 'nearest',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    input_args = SimulationOptions(
+        data_cast='single',
+        cart_interp='nearest',
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
     # run the simulation
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': source,
-        'sensor': sensor,
-        **input_args
-    })
-
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        simulation_options=input_args,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_ivp_3D_simulation', input_file_full_path), 'Files do not match!'
