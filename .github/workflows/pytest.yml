@@ -25,8 +25,8 @@ jobs:
           command: |
             ls;
             pwd;
-            if exist('k-wave'); ls 'k-wave'; end;;
-            addpath('k-Wave-python','k-wave');
+            if exist('k-wave/k-Wave'); ls 'k-wave/k-Wave'; end;
+            addpath('k-Wave-python','k-wave/k-Wave',);
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
       - name: compress artifact
