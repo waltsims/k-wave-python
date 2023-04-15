@@ -20,24 +20,24 @@ class Vector(np.ndarray):
 
     @property
     def y(self):
-        if self.size > 1:
+        if self.shape[0] > 1:
             return self[1]
-        return None
+        return np.nan
 
     @y.setter
     def y(self, value):
-        if self.size > 1:
+        if self.shape[0] > 1:
             self[1] = value
 
     @property
     def z(self):
-        if self.size > 2:
+        if self.shape[0] > 2:
             return self[2]
-        return None
+        return np.nan
 
     @z.setter
     def z(self, value):
-        if self.size > 2:
+        if self.shape[0] > 2:
             self[2] = value
 
     def assign_dim(self, dim: int, val: Any):
@@ -49,7 +49,7 @@ class Vector(np.ndarray):
 
 
 @dataclass
-class Array(object):
+class FlexibleVector(object):
     """
         This class is very similar to Numpy.ndarray but there are differences:
             - It can have 3 elements at max

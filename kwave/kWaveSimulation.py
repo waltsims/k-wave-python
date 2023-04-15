@@ -3,7 +3,7 @@ from warnings import warn
 
 import numpy as np
 
-from kwave.data import Array, Vector
+from kwave.data import Vector
 from kwave.kWaveSimulation_helper import display_simulation_params, set_sound_speed_ref, expand_grid_matrices, \
     create_storage_variables, create_absorption_variables, scale_source_terms_func
 from kwave.kgrid import kWaveGrid

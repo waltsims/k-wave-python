@@ -10,7 +10,8 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_kwave_grid():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
+    # test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
+    test_record_path = "/Users/farid/workspace/black_box_testing/collectedValues/kWaveGrid.mat"
     reader = TestRecordReader(test_record_path)
 
     Nx = 10

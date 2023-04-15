@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from kwave.data import Array, Vector
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
 

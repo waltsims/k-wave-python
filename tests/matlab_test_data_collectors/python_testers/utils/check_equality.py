@@ -49,6 +49,7 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
         else:
             ignore_if_nan = False
 
+        print(mapped_key)
         actual_value = recursive_getattr(kgrid_object, mapped_key, None)
         actual_value = np.squeeze(actual_value)
         expected_value = np.array(expected_value)
