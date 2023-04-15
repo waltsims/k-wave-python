@@ -1,6 +1,47 @@
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
+
+
+class Vector(np.ndarray):
+    def __new__(cls, elements: list):
+        elements = list(elements)[:3]  # Truncate the input list to have at most 3 elements
+        obj = np.array(elements).view(cls)
+        return obj
+
+    @property
+    def x(self):
+        return self[0]
+
+    @x.setter
+    def x(self, value):
+        self[0] = value
+
+    @property
+    def y(self):
+        if self.size > 1:
+            return self[1]
+        return None
+
+    @y.setter
+    def y(self, value):
+        if self.size > 1:
+            self[1] = value
+
+    @property
+    def z(self):
+        if self.size > 2:
+            return self[2]
+        return None
+
+    @z.setter
+    def z(self, value):
+        if self.size > 2:
+            self[2] = value
+
+    def assign_dim(self, dim: int, val: Any):
+        self[dim - 1] = val
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from kwave.data import Array
+from kwave.data import Array, Vector
 from kwave.kgrid import kWaveGrid
 
 
@@ -60,7 +60,7 @@ class Recorder(object):
         # is given and 'p' is not set (default is true)
         self.p = ('p' in flags_list)
 
-    def set_index_variables(self, kgrid: kWaveGrid, pml_size: Array, is_pml_inside: bool, is_axisymmetric: bool) -> None:
+    def set_index_variables(self, kgrid: kWaveGrid, pml_size: Vector, is_pml_inside: bool, is_axisymmetric: bool) -> None:
         """
         Assign the index variables
 

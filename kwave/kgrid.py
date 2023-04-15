@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from kwave.data import Array
+from kwave.data import Array, Vector
 from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.utils.math import largest_prime_factor
 
@@ -50,18 +50,18 @@ class kWaveGrid(object):
         self.Nt = 'auto'                    #: number of time steps [s]
 
         # originally there was [xn_vec, yn_vec, zn_vec]
-        self.n_vec      = Array([0] * self.dim)  #: position vectors for the grid points in [0, 1]
+        self.n_vec      = Vector([0] * self.dim)  #: position vectors for the grid points in [0, 1]
         # originally there was [xn_vec_sgx, yn_vec_sgy, zn_vec_sgz]
-        self.n_vec_sg   = Array([0] * self.dim)  #: position vectors for the staggered grid points in [0, 1]
+        self.n_vec_sg   = Vector([0] * self.dim)  #: position vectors for the staggered grid points in [0, 1]
 
         # originally there was [dxudxn, dyudyn, dzudzn]
-        self.dudn       = Array([0] * self.dim)  #: transformation gradients between uniform and staggered grids
+        self.dudn       = Vector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
         # originally there was [dxudxn_sgx, dyudyn_sgy, dzudzn_sgz]
-        self.dudn_sg    = Array([0] * self.dim)  #: transformation gradients between uniform and staggered grids
+        self.dudn_sg    = Vector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
 
         # assign the grid parameters for the x spatial direction
         # originally kx_vec
-        self.k_vec = Array([self.makeDim(self.Nx, self.dx)])  #: Nx x 1 vector of wavenumber components in the x-direction [rad/m]
+        self.k_vec = Vector([self.makeDim(self.Nx, self.dx)])  #: Nx x 1 vector of wavenumber components in the x-direction [rad/m]
 
         if self.dim == 1:
             # define the scalar wavenumber based on the wavenumber components
@@ -295,7 +295,7 @@ class kWaveGrid(object):
         """
             Size of grid in the all directions [m]
         """
-        return Array(self.N * self.spacing)
+        return Vector(self.N * self.spacing)
 
     @property
     def total_grid_points(self) -> np.ndarray:
@@ -372,7 +372,7 @@ class kWaveGrid(object):
         kx_max = np.abs(self.k_vec.x).max()
         ky_max = np.abs(self.k_vec.y).max() if self.dim >= 2 else np.nan
         kz_max = np.abs(self.k_vec.z).max() if self.dim == 3 else np.nan
-        return Array([kx_max, ky_max, kz_max])
+        return Vector([kx_max, ky_max, kz_max])
 
     @property
     def k_max_all(self):

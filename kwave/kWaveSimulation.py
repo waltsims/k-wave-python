@@ -3,7 +3,7 @@ from warnings import warn
 
 import numpy as np
 
-from kwave.data import Array
+from kwave.data import Array, Vector
 from kwave.kWaveSimulation_helper import display_simulation_params, set_sound_speed_ref, expand_grid_matrices, \
     create_storage_variables, create_absorption_variables, scale_source_terms_func
 from kwave.kgrid import kWaveGrid
@@ -508,7 +508,7 @@ class kWaveSimulation(object):
 
         # TODO(Walter): clean this up with getters in simulation options pml size
         pml_x_size, pml_y_size, pml_z_size = opt.pml_x_size, opt.pml_y_size, opt.pml_z_size
-        pml_size = Array([pml_x_size, pml_y_size, pml_z_size])
+        pml_size = Vector([pml_x_size, pml_y_size, pml_z_size])
 
         self.print_start_status(self.elastic_code)
         self.set_index_data_type()
@@ -528,12 +528,12 @@ class kWaveSimulation(object):
         # run subscript to display time step, max supported frequency etc.
         display_simulation_params(self.kgrid, self.medium, self.elastic_code)
 
-        self.smooth_and_enlarge(self.source, k_dim, Array(self.kgrid.N), opt)
+        self.smooth_and_enlarge(self.source, k_dim, Vector(self.kgrid.N), opt)
         self.create_sensor_variables()
         self.create_absorption_vars()
         self.assign_pseudonyms(self.medium, self.kgrid)
         self.scale_source_terms(opt.scale_source_terms)
-        self.create_pml_indices(self.kgrid.dim, Array(self.kgrid.N), pml_size, opt.pml_inside, self.axisymmetric)
+        self.create_pml_indices(self.kgrid.dim, Vector(self.kgrid.N), pml_size, opt.pml_inside, self.axisymmetric)
 
     @staticmethod
     def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
@@ -1468,7 +1468,7 @@ class kWaveSimulation(object):
             })
         )
 
-    def create_pml_indices(self, kgrid_dim, kgrid_N: Array, pml_size, pml_inside, is_axisymmetric):
+    def create_pml_indices(self, kgrid_dim, kgrid_N: Vector, pml_size, pml_inside, is_axisymmetric):
         """
         Define index variables to remove the PML from the display if the optional
         input 'PlotPML' is set to false

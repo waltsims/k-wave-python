@@ -1,7 +1,7 @@
 import numpy as np
 
 from kwave import kWaveGrid, kWaveMedium, SimulationOptions, NotATransducer
-from kwave.data import Array
+from kwave.data import Array, Vector
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.matlab import matlab_find
@@ -20,7 +20,7 @@ def expand_grid_matrices(
 
     # retaining the values for kgrid time array
     pml_size = [opt.pml_x_size, opt.pml_y_size, opt.pml_z_size]
-    pml_size = Array(pml_size[:kgrid.dim])
+    pml_size = Vector(pml_size[:kgrid.dim])
 
     p_source_pos_index = values.p_source_pos_index
     u_source_pos_index = values.u_source_pos_index
@@ -260,7 +260,7 @@ def print_grid_size(kgrid):
         print('  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'by', int(k_Nz), 'grid points')
 
 
-def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Array):
+def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):
     """
         add the PML size to cuboid corner indices if using a cuboid sensor mask
     Args:

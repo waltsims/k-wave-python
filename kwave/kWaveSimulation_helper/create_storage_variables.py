@@ -2,7 +2,7 @@ import numpy as np
 from numpy.fft import ifftshift
 
 from kwave import SimulationOptions, kWaveGrid
-from kwave.data import Array
+from kwave.data import Array, Vector
 from kwave.utils.dotdictionary import dotdict
 
 
@@ -36,7 +36,7 @@ def create_storage_variables(
     create_normalized_wavenumber_vectors(record, kgrid, flags.record_u_split_field)
 
     pml_size = [opt.pml_x_size, opt.pml_y_size, opt.pml_z_size]
-    pml_size = Array(pml_size[:kgrid.dim])
+    pml_size = Vector(pml_size[:kgrid.dim])
     all_vars_size = calculate_all_vars_size(kgrid, opt.pml_inside, pml_size)
 
     sensor_data = create_sensor_variables(values.record, kgrid, num_sensor_points, num_recorded_time_points,
