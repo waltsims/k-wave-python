@@ -95,7 +95,7 @@ def test_sd_directional_array_elements():
     input_filename = f'example_sd_direct_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_alpha=np.array([2, 0]),
         smooth_p0=False,
         save_to_disk=True,
@@ -109,7 +109,7 @@ def test_sd_directional_array_elements():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=deepcopy(sensor),
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
 

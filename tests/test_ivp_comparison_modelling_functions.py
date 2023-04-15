@@ -78,7 +78,7 @@ def test_ivp_comparison_modelling_functions():
     input_filename = f'example_ivp_comp_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_alpha=0,
         save_to_disk=True,
         input_filename=input_filename,
@@ -90,7 +90,7 @@ def test_ivp_comparison_modelling_functions():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_ivp_comparison_modelling_functions/input_1', input_file_full_path), \
@@ -104,7 +104,7 @@ def test_ivp_comparison_modelling_functions():
     input_filename = f'example_comparison_modeling_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_inside=False,
         save_to_disk=True,
         input_filename=input_filename,
@@ -116,7 +116,7 @@ def test_ivp_comparison_modelling_functions():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_ivp_comparison_modelling_functions/input_2', input_file_full_path), \

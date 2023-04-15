@@ -72,7 +72,7 @@ def test_pr_2D_TR_directional_sensors():
     input_filename = f'example_tr_dir_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=PML_size,
         smooth_p0=False,
@@ -87,7 +87,7 @@ def test_pr_2D_TR_directional_sensors():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=deepcopy(sensor),
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
@@ -111,7 +111,7 @@ def test_pr_2D_TR_directional_sensors():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=deepcopy(sensor),
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'

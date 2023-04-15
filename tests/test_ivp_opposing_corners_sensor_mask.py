@@ -76,7 +76,7 @@ def test_ivp_opposing_corners_sensor_mask():
     input_filename = f'example_ivp_corn_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
@@ -89,7 +89,7 @@ def test_ivp_opposing_corners_sensor_mask():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
 

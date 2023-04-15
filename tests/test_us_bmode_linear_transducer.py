@@ -225,7 +225,7 @@ def test_us_bmode_linear_transducer():
             input_filename = f'example_lin_tran_input.h5'
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)
-            input_args = SimulationOptions(
+            simulation_options = SimulationOptions(
                 pml_inside=False,
                 pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
                 data_cast=DATA_CAST,
@@ -241,7 +241,7 @@ def test_us_bmode_linear_transducer():
                 kgrid=kgrid,
                 source=not_transducer,
                 sensor=not_transducer,
-                simulation_options=input_args,
+                simulation_options=simulation_options,
                 execution_options=SimulationExecutionOptions()
             )
 

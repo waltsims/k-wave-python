@@ -72,7 +72,7 @@ def test_tvsp_3D_simulation():
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # input arguments
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         data_cast='single',
         cart_interp='nearest',
         save_to_disk=True,
@@ -86,7 +86,7 @@ def test_tvsp_3D_simulation():
         kgrid=kgrid,
         source=source,
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_tvsp_3D_simulation', input_file_full_path), \

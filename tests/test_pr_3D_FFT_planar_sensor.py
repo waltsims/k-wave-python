@@ -62,7 +62,7 @@ def test_pr_3D_FFT_planar_sensor():
     input_filename = f'example_3D_fft_planar_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=PML_size,
         smooth_p0=False,
@@ -77,7 +77,7 @@ def test_pr_3D_FFT_planar_sensor():
         kgrid=kgrid,
         source=source,
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
 

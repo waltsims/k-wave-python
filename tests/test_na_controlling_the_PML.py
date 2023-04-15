@@ -71,7 +71,7 @@ def test_na_controlling_the_pml():
     input_filename = f'input_1.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_alpha=0,
         save_to_disk=True,
         input_filename=input_filename,
@@ -83,14 +83,14 @@ def test_na_controlling_the_pml():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_1', input_file_full_path), \
         'Files do not match!'
 
     # Example 2
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_alpha=1e6,
         save_to_disk=True,
         input_filename=input_filename,
@@ -102,14 +102,14 @@ def test_na_controlling_the_pml():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_2', input_file_full_path), \
         'Files do not match!'
 
     # Example 3
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_size=2,
         save_to_disk=True,
         input_filename=input_filename,
@@ -121,14 +121,14 @@ def test_na_controlling_the_pml():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_3', input_file_full_path), \
         'Files do not match!'
 
     # Example 4
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_inside=False,
         save_to_disk=True,
         input_filename=input_filename,
@@ -140,7 +140,7 @@ def test_na_controlling_the_pml():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_controlling_the_PML/input_4', input_file_full_path), \

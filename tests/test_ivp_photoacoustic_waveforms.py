@@ -95,7 +95,7 @@ def test_ivp_photoacoustic_waveforms():
     input_filename = f'example_ivp_pa_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         data_cast='single',
         save_to_disk=True,
         input_filename=input_filename,
@@ -109,7 +109,7 @@ def test_ivp_photoacoustic_waveforms():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
 
@@ -134,7 +134,7 @@ def test_ivp_photoacoustic_waveforms():
     sensor.mask[Nx//2 - source_sensor_distance - 1, Nx//2 - 1, Nx//2 - 1] = 1
 
     # run the simulation
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         data_cast='single',
         save_to_disk=True,
         input_filename=input_filename,
@@ -147,7 +147,7 @@ def test_ivp_photoacoustic_waveforms():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \

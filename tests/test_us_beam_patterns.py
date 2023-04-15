@@ -162,7 +162,7 @@ def test_us_beam_patterns():
     input_filename = f'example_beam_pat_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
         data_cast=DATA_CAST,
@@ -175,7 +175,7 @@ def test_us_beam_patterns():
 
     # stream the data to disk in blocks of 100 if storing the complete time history
     if not USE_STATISTICS:
-        input_args.stream_to_disk = 100
+        simulation_options.stream_to_disk = 100
 
     # run the simulation
     kspaceFirstOrder3DC(
@@ -183,7 +183,7 @@ def test_us_beam_patterns():
         kgrid=kgrid,
         source=not_transducer,
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_us_beam_patterns', input_file_full_path), \

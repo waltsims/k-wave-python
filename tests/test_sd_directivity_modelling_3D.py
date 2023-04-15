@@ -86,7 +86,7 @@ def test_sd_directivity_modelling_3D():
         input_filename = f'example_input_{source_loop + 1}_input.h5'
         pathname = gettempdir()
         input_file_full_path = os.path.join(pathname, input_filename)
-        input_args = SimulationOptions(
+        simulation_options = SimulationOptions(
             pml_size=10,
             save_to_disk=True,
             input_filename=input_filename,
@@ -99,7 +99,7 @@ def test_sd_directivity_modelling_3D():
             kgrid=kgrid,
             source=deepcopy(source),
             sensor=sensor,
-            simulation_options=input_args,
+            simulation_options=simulation_options,
             execution_options=SimulationExecutionOptions()
         )
 

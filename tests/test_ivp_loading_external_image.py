@@ -56,7 +56,7 @@ def test_ivp_loading_external_image():
     input_filename = f'example_ivp_ext_img_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
@@ -69,7 +69,7 @@ def test_ivp_loading_external_image():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
 

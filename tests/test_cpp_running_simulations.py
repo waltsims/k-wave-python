@@ -109,7 +109,7 @@ def test_cpp_running_simulations():
 
     if example_number == 1:
         # save the input data to disk and then exit
-        input_args = SimulationOptions(
+        simulation_options = SimulationOptions(
             pml_size=pml_size,
             save_to_disk=True,
             input_filename=input_filename,
@@ -122,7 +122,7 @@ def test_cpp_running_simulations():
             kgrid=kgrid,
             source=source,
             sensor=sensor,
-            simulation_options=input_args,
+            simulation_options=simulation_options,
             execution_options=SimulationExecutionOptions()
         )
 
@@ -149,7 +149,7 @@ def test_cpp_running_simulations():
         sensor.record = ['p_final', 'p_max']
 
         # run the C++ simulation using the wrapper function
-        input_args = SimulationOptions(
+        simulation_options = SimulationOptions(
             pml_size=pml_size,
             save_to_disk=True,
             input_filename=input_filename,
@@ -162,7 +162,7 @@ def test_cpp_running_simulations():
             kgrid=kgrid,
             source=source,
             sensor=sensor,
-            simulation_options=input_args,
+            simulation_options=simulation_options,
             execution_options=SimulationExecutionOptions()
         )
 
@@ -171,7 +171,7 @@ def test_cpp_running_simulations():
         sensor.record = ['p_final', 'p_max']
 
         # run the C++ simulation using the wrapper function
-        input_args = SimulationOptions(
+        simulation_options = SimulationOptions(
             pml_size=pml_size,
             save_to_disk=True,
             input_filename=input_filename,
@@ -184,6 +184,6 @@ def test_cpp_running_simulations():
             kgrid=kgrid,
             source=source,
             sensor=sensor,
-            simulation_options=input_args,
+            simulation_options=simulation_options,
             execution_options=SimulationExecutionOptions()
         )

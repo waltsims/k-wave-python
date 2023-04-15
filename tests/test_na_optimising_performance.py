@@ -63,7 +63,7 @@ def test_na_optimising_performance():
     input_filename = f'example_opt_perf_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
@@ -74,14 +74,14 @@ def test_na_optimising_performance():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=deepcopy(sensor),
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_optimising_performance/input_1', input_file_full_path), \
         'Files do not match!'
 
     # 2: nearest neighbour Cartesian interpolation and plotting switched off
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
@@ -94,7 +94,7 @@ def test_na_optimising_performance():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_optimising_performance/input_2', input_file_full_path), \
@@ -102,7 +102,7 @@ def test_na_optimising_performance():
 
     # 3: as above with 'data_cast' set to 'single'
     # set input arguments
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         data_cast='single',
         save_to_disk=True,
         input_filename=input_filename,
@@ -114,7 +114,7 @@ def test_na_optimising_performance():
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_na_optimising_performance/input_3', input_file_full_path), \

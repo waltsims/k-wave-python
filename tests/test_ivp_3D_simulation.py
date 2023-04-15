@@ -74,7 +74,7 @@ def test_ivp_3D_simulation():
     input_filename = f'example_ivp_3D_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = SimulationOptions(
+    simulation_options = SimulationOptions(
         data_cast='single',
         cart_interp='nearest',
         save_to_disk=True,
@@ -88,7 +88,7 @@ def test_ivp_3D_simulation():
         kgrid=kgrid,
         source=source,
         sensor=sensor,
-        simulation_options=input_args,
+        simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
     assert compare_against_ref(f'out_ivp_3D_simulation', input_file_full_path), 'Files do not match!'
