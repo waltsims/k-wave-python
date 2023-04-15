@@ -114,3 +114,4 @@ class FlexibleVector(object):
     def append(self, val):
         assert len(self.data) <= 2
         self.data.append(val)
+        return self
