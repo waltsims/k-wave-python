@@ -33,7 +33,7 @@ def expand_grid_matrices(
     #####################
 
     # expand the computational grid, replacing the original grid
-    kgrid = expand_kgrid(kgrid, flags.axisymmetric, pml_size.numpy())
+    kgrid = expand_kgrid(kgrid, flags.axisymmetric, pml_size)
 
     expand_size = calculate_expand_size(kgrid, flags.axisymmetric, pml_size)
 

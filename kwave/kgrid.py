@@ -384,7 +384,7 @@ class kWaveGrid(object):
             Scalar in [rad/m]
         """
         #
-        return np.nanmin(self.k_max.numpy())
+        return np.nanmin(self.k_max)
 
     ########################################
     # functions that can only be accessed by class members
