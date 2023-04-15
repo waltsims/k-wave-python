@@ -80,7 +80,6 @@ def kspaceFirstOrder2DC(
         simulation_options: SimulationOptions,
         execution_options: SimulationExecutionOptions
 ):
-    # TODO update docstring
     """
     2D time-domain simulation of wave propagation using C++ code.
 
@@ -118,10 +117,15 @@ def kspaceFirstOrder2DC(
     GPU binary.
 
     Args:
-        **kwargs:
+        kgrid: kWaveGrid instance
+        source: kWaveSource instance
+        sensor: NotATransducer or kSensor instance
+        medium: kWaveMedium instance
+        simulation_options: SimulationOptions instance
+        execution_options: SimulationExecutionOptions instance
 
     Returns:
-
+        Sensor data as a numpy array
     """
     # generate the input file and save to disk
     sensor_data = kspaceFirstOrder2D(
