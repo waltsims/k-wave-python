@@ -43,6 +43,13 @@ class Vector(np.ndarray):
     def assign_dim(self, dim: int, val: Any):
         self[dim - 1] = val
 
+    def append(self, value):
+        if self.size < 3:
+            self.resize(self.size + 1, refcheck=False)
+            self[-1] = value
+        else:
+            raise ValueError("Cannot append more than 3 elements to a Vector.")
+
 
 @dataclass
 class Array(object):
