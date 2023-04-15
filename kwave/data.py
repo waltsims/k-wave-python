@@ -44,11 +44,8 @@ class Vector(np.ndarray):
         self[dim - 1] = val
 
     def append(self, value):
-        if self.size < 3:
-            self.resize(self.size + 1, refcheck=False)
-            self[-1] = value
-        else:
-            raise ValueError("Cannot append more than 3 elements to a Vector.")
+        new_coordinates = list(self) + [value]
+        return Vector(new_coordinates)
 
 
 @dataclass

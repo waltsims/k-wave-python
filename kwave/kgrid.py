@@ -70,7 +70,7 @@ class kWaveGrid(object):
         if self.dim >= 2:
             # assign the grid parameters for the x and y spatial directions
             # Ny x 1 vector of wavenumber components in the y-direction [rad/m]
-            self.k_vec.append(self.makeDim(self.Ny, self.dy))
+            self.k_vec = self.k_vec.append(self.makeDim(self.Ny, self.dy))
 
             if self.dim == 2:
                 # define the wavenumber based on the wavenumber components
@@ -82,7 +82,7 @@ class kWaveGrid(object):
         if self.dim == 3:
             # assign the grid parameters for the x, y, and z spatial directions
             # Nz x 1 vector of wavenumber components in the z-direction [rad/m]
-            self.k_vec.append(self.makeDim(self.Nz, self.dz))
+            self.k_vec = self.k_vec.append(self.makeDim(self.Nz, self.dz))
 
             # define the wavenumber based on the wavenumber components
             self.k = np.zeros((self.Nx, self.Ny, self.Nz))
