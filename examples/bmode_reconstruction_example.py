@@ -144,40 +144,40 @@ if __name__ == '__main__':
     # =========================================================================
     print(f"RUN_SIMULATION set to {RUN_SIMULATION}")
     # run the simulation if set to true, otherwise, load previous results from disk
-    if RUN_SIMULATION:
-        print("Running simulation locally...")
 
-        # set medium position
-        medium_position = 0
+    # set medium position
+    medium_position = 0
 
-        # preallocate the storage
-        simulation_data = []
+    # preallocate the storage
+    simulation_data = []
 
-        # loop through the scan lines
-        for scan_line_index in range(1, number_scan_lines + 1):
-            # for scan_line_index in range(1, 10):
-            # update the command line status
-            print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
+    # loop through the scan lines
+    for scan_line_index in range(1, number_scan_lines + 1):
+        # for scan_line_index in range(1, 10):
+        # update the command line status
 
-            # load the current section of the medium
-            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
-            medium.density = density_map[:, medium_position:medium_position + Ny, :]
+        # load the current section of the medium
+        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
+        medium.density = density_map[:, medium_position:medium_position + Ny, :]
 
-            # set the input settings
-            input_filename = f'example_input_{scan_line_index}.h5'
-            input_file_full_path = os.path.join(pathname, input_filename)
-            # set the input settings
-            input_args = {
-                'pml_inside': False,
-                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'data_cast': DATA_CAST,
-                'data_recast': True,
-                'save_to_disk': True,
-                'input_filename': input_file_full_path,
-                'save_to_disk_exit': False,
-            }
+        # set the input settings
+        input_filename = f'example_input_{scan_line_index}.h5'
+        input_file_full_path = os.path.join(pathname, input_filename)
+        # set the input settings
+        input_args = {
+            'pml_inside': False,
+            'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+            'data_cast': DATA_CAST,
+            'data_recast': True,
+            'save_to_disk': True,
+            'input_filename': input_file_full_path,
+            'save_to_disk_exit': False,
+        }
 
-            # run the simulation
+        # run the simulation
+
+        if RUN_SIMULATION:
+            print(f'Computing scan line {scan_line_index} of {number_scan_lines}.')
             sensor_data = kspaceFirstOrder3DC(**{
                 'medium': medium,
                 'kgrid': kgrid,
@@ -187,11 +187,12 @@ if __name__ == '__main__':
             })
             simulation_data.append(sensor_data)
 
-            # update medium position
-            medium_position = medium_position + transducer.element_width
+        # update medium position
+        medium_position = medium_position + transducer.element_width
 
+    if RUN_SIMULATION:
         simulation_data = np.stack(simulation_data, axis=0)
-        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
+        # scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
         print("Downloading data from remote server...")
@@ -204,9 +205,9 @@ if __name__ == '__main__':
     # temporary fix for dimensionality
     simulation_data = simulation_data[None, :]
 
-    sampling_frequency = 2.772000000000000e+07
-    prf = 10000
-    focal_depth = 0.020000000000000
+    sampling_frequency = 2.772e+07
+    prf = 1e4
+    focal_depth = 20e-3  # [m]
     channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
                                       sampling_frequency, prf, focal_depth)
 
