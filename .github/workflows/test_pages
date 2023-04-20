@@ -1,0 +1,20 @@
+name: test_pages
+on:
+  push:
+    branches:
+    - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+    - name: Build and Commit
+      uses: waltsims/pages@pyproject.toml-support
+      with:
+        pyproject_toml_deps: ".[docs]"
+        
