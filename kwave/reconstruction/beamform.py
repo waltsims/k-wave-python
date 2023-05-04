@@ -9,13 +9,14 @@ from scipy.signal import hilbert
 from uff import ChannelData
 from uff.position import Position
 
+from kwave.utils.conversion import cart2pol
+from kwave.utils.data import scale_time
+from kwave.utils.tictoc import TicToc
 from .shifted_transform import ShiftedTransform
 from .tools import make_time_vector, get_t0, get_origin_array, apodize
-from ..utils.conversion import scale_time, cart2pol
-from ..utils.tictoc import TicToc
 
 
-def beamform(channel_data: ChannelData):
+def beamform(channel_data: ChannelData) -> None:
     """
 
     Args:
@@ -125,15 +126,17 @@ def beamform(channel_data: ChannelData):
     plt.colorbar()
     plt.show()
 
+    pass
+
 
 def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     """
-        focus Create input signal based on source mask and focus position.
-        focus takes a single input signal and a source mask and creates an
-        input signal matrix (with one input signal for each source point).
-        The appropriate time delays required to focus the signals at a given
-        position in Cartesian space are automatically added based on the user
-        inputs for focus_position and sound_speed.
+    focus Create input signal based on source mask and focus position.
+    focus takes a single input signal and a source mask and creates an
+    input signal matrix (with one input signal for each source point).
+    The appropriate time delays required to focus the signals at a given
+    position in Cartesian space are automatically added based on the user
+    inputs for focus_position and sound_speed.
 
     Args:
          kgrid:             k-Wave grid object returned by kWaveGrid

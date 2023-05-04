@@ -10,12 +10,15 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.ktransducer import *
 from kwave.utils.io import load_image
 from kwave.utils.mapgen import make_cart_circle
 from tests.diff_utils import compare_against_ref

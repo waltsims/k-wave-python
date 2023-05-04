@@ -1,9 +1,10 @@
-from kwave.utils.conversion import scale_time
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.data import scale_time
 
 
 def test_scale_time():

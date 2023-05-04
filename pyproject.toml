@@ -18,19 +18,19 @@ maintainers = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" }
 ]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
     "h5py==3.6.0",
     "scipy==1.7.3",
-    "opencv-python==4.6.0.66",
-    "deepdiff==5.2.3",
-    "matplotlib==3.6.1",
-    "numpy~=1.22.2",
+    "opencv-python==4.7.0.68",
+    "deepdiff==6.2.3",
+    "matplotlib==3.7.1",
+    "numpy>=1.22.2,<1.25.0",
     "scikit-image==0.19.3",
-    "UFF.py @ git+https://github.com/waltsims/uff.py@a672319b5cfbe3a676837e47c5958a3fdea12fa7"
+    "uff-reader==0.0.2",
 ]
 
 [project.urls]
@@ -41,25 +41,34 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest", "phantominator"]
-example = ["gdown==4.5.3"]
-docs = ["m2r2==0.3.2",
+example = ["gdown==4.6.4"]
+docs = ["m2r2==0.3.3.post2",
     "sphinx-copybutton==0.5.1",
     "sphinx-tabs==3.4.1",
-    "sphinx-toolbox==3.2.0",
+    "sphinx-toolbox==3.4.0",
     "furo==2022.12.7"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
 
-[tool.hatch.build]
-artifacts = ["!/kwave/bin"]
-
 [tool.hatch.metadata]
+
 # can be removed as soon as uff is published and no longer a direct reference
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages=["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/docs",
+    "/examples",
+    "/tests",
+    "/kwave/bin/*",
+    "*.mat",
+]
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]

@@ -28,8 +28,8 @@ def test_cpp_io_in_parts():
     example_number = 1
 
     # input and output filenames (these must have the .h5 extension)
-    input_filename  = 'example_input.h5'
-    output_filename = 'example_output.h5'
+    input_filename = 'out_cpp_io_in_parts_input.h5'
+    output_filename = 'out_cpp_io_in_parts_ouput.h5'
 
     # pathname for the input and output files
     pathname = gettempdir()

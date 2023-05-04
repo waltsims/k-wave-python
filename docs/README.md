@@ -1,22 +1,28 @@
 # k-Wave-python
 
-This project is a Python implementation of most of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 3.0 to sm 7.5.
+This project is a Python implementation of most of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
+interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
 ## Mission
 
-With this project, we hope to increase accessibility and reproducablitiy of [k-Wave](http://www.k-wave.org/) simulations for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs in order to leverage pythonic practices.
-
+With this project, we hope to increase accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
+for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
+be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
+in order to leverage pythonic practices.
 
 ## Installation
+
 To install the most recent build of k-Wave-python from PyPI, run:
+
 ```bash
 pip install k-wave-python
 ```
 
-Currently, we are looking for beta testers on Windows.
-
+After installing the python package, the required binaries will be downloaded and installed the first time you run a
+simulation.
 
 ## Getting started
+
 ![](_static/example_bmode.png)
 
 After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
@@ -24,7 +30,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-pip install --editable '.[example]' 
+pip install '.[example]' 
 python3 examples/bmode_reconstruction_example.py
 ```
 

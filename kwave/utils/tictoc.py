@@ -2,7 +2,8 @@ from time import perf_counter
 
 
 class TicToc(object):
-    """A class for measuring the execution time of a code block.
+    """
+    A class for measuring the execution time of a code block.
 
     This class uses the perf_counter function from the time module to measure the
     execution time of a code block. It provides a simple interface with two methods:
@@ -14,7 +15,8 @@ class TicToc(object):
 
     @staticmethod
     def tic():
-        """Start the timer.
+        """
+        Start the timer.
 
         This method sets the start_time attribute to the current time, as measured
         by the perf_counter function from the time module.

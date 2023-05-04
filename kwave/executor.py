@@ -5,7 +5,7 @@ import sys
 import unittest.mock
 import warnings
 from pathlib import Path
-
+import os
 import h5py
 import numpy as np
 
@@ -36,6 +36,18 @@ class Executor:
         else:
             raise ValueError("Unrecognized value passed as target device. Options are 'gpu' or 'cpu'.")
 
+        self._is_linux = sys.platform.startswith('linux')
+        self._is_windows = sys.platform.startswith(('win', 'cygwin'))
+        self._is_darwin = sys.platform.startswith('darwin')
+
+        if self._is_linux:
+            binary_folder = 'linux'
+        elif self._is_windows:
+            binary_folder = 'windows'
+            binary_name += '.exe'
+        elif self._is_darwin:
+            raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
+
         path_of_this_file = Path(__file__).parent.resolve()
         self.binary_path = path_of_this_file / 'bin' / binary_folder / binary_name
 
@@ -46,7 +58,7 @@ class Executor:
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
         env_variables = {
-            'LD_LIBRARY_PATH': '',
+            # 'LD_LIBRARY_PATH': '', # TODO(walter): I'm not sure why we overwrite the system LD_LIBRARY_PATH... Commenting out for now to run on machines with non-standard LD_LIBRARY_PATH.
             'OMP_PLACES': 'cores',
             'OMP_PROC_BIND': 'SPREAD',
         }

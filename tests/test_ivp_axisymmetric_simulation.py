@@ -9,12 +9,15 @@
 import os
 from tempfile import gettempdir
 
+import numpy as np
+
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.ktransducer import *
 from kwave.utils.mapgen import make_disc
 from tests.diff_utils import compare_against_ref
 

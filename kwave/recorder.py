@@ -37,7 +37,7 @@ class Recorder(object):
 
     def set_flags_from_list(self, flags_list: List[str], is_elastic_code: bool) -> None:
         """
-            Set Recorder flags that are present in the string list to True
+        Set Recorder flags that are present in the string list to True
 
         Args:
             flags_list: String list of flags that should be set to True
@@ -62,7 +62,7 @@ class Recorder(object):
 
     def set_index_variables(self, kgrid: kWaveGrid, pml_size: Array, is_pml_inside: bool, is_axisymmetric: bool) -> None:
         """
-            Assign the index variables
+        Assign the index variables
 
         Args:
             kgrid: kWaveGrid instance
@@ -100,7 +100,7 @@ class Recorder(object):
     @staticmethod
     def get_allowed_flags(is_elastic_code):
         """
-            Get the list of allowed flags for a given simulation type
+        Get the list of allowed flags for a given simulation type
 
         Args:
             is_elastic_code: Whether the simulation is axisymmetric
@@ -117,7 +117,7 @@ class Recorder(object):
 
     def is_set(self, attrs: List[str]) -> List[bool]:
         """
-            Check if the attributes are set
+        Check if the attributes are set
 
         Args:
             attrs: Attributes to check

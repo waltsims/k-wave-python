@@ -4,10 +4,12 @@ from operator import itemgetter
 from tempfile import gettempdir
 from warnings import warn
 
-from kwave.ktransducer import *
+import numpy as np
+
+from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
+from kwave.utils.data import get_date_string
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.io import get_date_string
 
 
 def kspaceFirstOrderG(func):
@@ -31,7 +33,7 @@ def kspaceFirstOrderG(func):
 
 def kspaceFirstOrderC():
     """
-        Decorator for the kspaceFO-CPU functions
+    Decorator for the kspaceFO-CPU functions
 
     Args:
         func: kspaceFirstOrderNDC function where 1 <= N <= 3
