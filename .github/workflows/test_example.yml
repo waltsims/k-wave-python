@@ -25,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: example_bmode_reconstruction_results_${{ matrix.os }}_${{ matrix.python-version }}
-          path: ${GITHUB_WORKSPACE}/example_bmode.png
+          path: ${github.workspace}/example_bmode.png
