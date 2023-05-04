@@ -23,7 +23,6 @@ jobs:
           python3 examples/bmode_reconstruction_example.py
       - name: Upload example results
         uses: actions/upload-artifact@v3
-        run: ls ${{ github.workspace }}
         with:
           name: example_bmode_reconstruction_results_${{ matrix.os }}_${{ matrix.python-version }}
           path: ${{ github.workspace }}/example_bmode.png
