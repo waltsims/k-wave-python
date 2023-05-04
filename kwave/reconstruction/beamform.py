@@ -1,5 +1,4 @@
 import os
-import time
 import warnings
 from typing import Tuple, Optional
 
@@ -16,33 +15,6 @@ from kwave.utils.data import scale_time
 from kwave.utils.tictoc import TicToc
 from .shifted_transform import ShiftedTransform
 from .tools import make_time_vector, get_t0, get_origin_array, apodize
-
-
-def display_or_save(path=os.getcwd(), filename="bmode.png"):
-    plt.plot([1, 2, 3, 4])  # example plot
-    plt.title("Example plot")
-    plt.xlabel("X-axis")
-    plt.ylabel("Y-axis")
-
-    print("Do you want to display the plot on the _s_creen or save the plot to _d_isk? ([d]/s)")
-    t0 = time.time()  # get the current time
-
-    while True:
-        if time.time() - t0 > 15:  # if 15 seconds have passed
-            print("No user input detected. Saving to disk by default.")
-            plt.savefig(os.path.join(path, filename))
-            break
-        else:
-            user_input = input()
-            if user_input.lower() == "d":
-                plt.savefig(os.path.join(path, filename))
-                print(f"Plot saved to {os.path.join(path, filename)}")
-                break
-            elif user_input.lower() == "s":
-                plt.show()
-                break
-            else:
-                print("Invalid input. Please enter 's' or 'd'.")
 
 
 def beamform(channel_data: ChannelData) -> None:
@@ -154,7 +126,9 @@ def beamform(channel_data: ChannelData) -> None:
     plt.title(channel_data.description)
     plt.colorbar()
 
-    display_or_save()
+    filename = f"{channel_data.description}.png"
+    plt.savefig(os.path.join(os.getcwd(), filename))
+    print(f"Plot saved to {os.path.join(os.getcwd(), filename)}")
 
     pass
 
