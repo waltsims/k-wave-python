@@ -126,7 +126,7 @@ def beamform(channel_data: ChannelData) -> None:
     plt.title(channel_data.description)
     plt.colorbar()
 
-    filename = f"{channel_data.description}.png"
+    filename = f"example_bmode.png"
     plt.savefig(os.path.join(os.getcwd(), filename))
     print(f"Plot saved to {os.path.join(os.getcwd(), filename)}")
 
