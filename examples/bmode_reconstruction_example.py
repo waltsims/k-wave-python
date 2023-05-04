@@ -28,22 +28,22 @@ if __name__ == '__main__':
     print("Setting up the k-wave grid...")
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20            # [grid points]
-    PML_Y_SIZE = 10            # [grid points]
-    PML_Z_SIZE = 10            # [grid points]
+    PML_X_SIZE = 20  # [grid points]
+    PML_Y_SIZE = 10  # [grid points]
+    PML_Z_SIZE = 10  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 256 - 2*PML_X_SIZE    # [grid points]
-    Ny = 128 - 2*PML_Y_SIZE    # [grid points]
-    Nz = 128 - 2*PML_Z_SIZE     # [grid points]
+    Nx = 256 - 2 * PML_X_SIZE  # [grid points]
+    Ny = 128 - 2 * PML_Y_SIZE  # [grid points]
+    Nz = 128 - 2 * PML_Z_SIZE  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3                  # [m]
+    x = 40e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x/Nx                  # [m]
-    dy = dx                    # [m]
-    dz = dx                    # [m]
+    dx = x / Nx  # [m]
+    dy = dx  # [m]
+    dz = dx  # [m]
 
     # create the k-space grid
     kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     )
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0   # [s]
+    t_end = (Nx * dx) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -72,8 +72,8 @@ if __name__ == '__main__':
     print("Defining the input signal...")
 
     # define properties of the input signal
-    source_strength = 1e6          # [Pa]
-    tone_burst_freq = 1.5e6        # [Hz]
+    source_strength = 1e6  # [Pa]
+    tone_burst_freq = 1.5e6  # [Hz]
     tone_burst_cycles = 4
 
     # create the input signal using tone_burst
@@ -90,24 +90,25 @@ if __name__ == '__main__':
 
     # physical properties of the transducer
     transducer = dotdict()
-    transducer.number_elements = 32    # total number of transducer elements
-    transducer.element_width = 2       # width of each element [grid points/voxels]
-    transducer.element_length = 24     # length of each element [grid points/voxels]
-    transducer.element_spacing = 0     # spacing (kerf  width) between the elements [grid points/voxels]
-    transducer.radius = float('inf')   # radius of curvature of the transducer [m]
+    transducer.number_elements = 32  # total number of transducer elements
+    transducer.element_width = 2  # width of each element [grid points/voxels]
+    transducer.element_length = 24  # length of each element [grid points/voxels]
+    transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
+    transducer.radius = float('inf')  # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
+    transducer_width = transducer.number_elements * transducer.element_width + (
+                transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny/2 - transducer_width/2, Nz/2 - transducer.element_length/2])
+    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
-    not_transducer.sound_speed = c0                    # sound speed [m/s]
-    not_transducer.focus_distance = 20e-3              # focus distance [m]
-    not_transducer.elevation_focus_distance = 19e-3    # focus distance in the elevation plane [m]
-    not_transducer.steering_angle = 0                  # steering angle [degrees]
+    not_transducer.sound_speed = c0  # sound speed [m/s]
+    not_transducer.focus_distance = 20e-3  # focus distance [m]
+    not_transducer.elevation_focus_distance = 19e-3  # focus distance in the elevation plane [m]
+    not_transducer.steering_angle = 0  # steering angle [degrees]
 
     # apodization
     not_transducer.transmit_apodization = 'Hanning'
@@ -135,48 +136,48 @@ if __name__ == '__main__':
     download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
 
     phantom = scipy.io.loadmat(phantom_data_path)
-    sound_speed_map     = phantom['sound_speed_map']
-    density_map         = phantom['density_map']
+    sound_speed_map = phantom['sound_speed_map']
+    density_map = phantom['density_map']
 
     # =========================================================================
     # RUN THE SIMULATION
     # =========================================================================
     print(f"RUN_SIMULATION set to {RUN_SIMULATION}")
     # run the simulation if set to true, otherwise, load previous results from disk
-    if RUN_SIMULATION:
-        print("Running simulation locally...")
 
-        # set medium position
-        medium_position = 0
+    # set medium position
+    medium_position = 0
 
-        # preallocate the storage
-        simulation_data = []
+    # preallocate the storage
+    simulation_data = []
 
-        # loop through the scan lines
-        for scan_line_index in range(1, number_scan_lines + 1):
-            # for scan_line_index in range(1, 10):
-            # update the command line status
-            print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
+    # loop through the scan lines
+    for scan_line_index in range(1, number_scan_lines + 1):
+        # for scan_line_index in range(1, 10):
+        # update the command line status
 
-            # load the current section of the medium
-            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
-            medium.density = density_map[:, medium_position:medium_position + Ny, :]
+        # load the current section of the medium
+        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
+        medium.density = density_map[:, medium_position:medium_position + Ny, :]
 
-            # set the input settings
-            input_filename  = f'example_input_{scan_line_index}.h5'
-            input_file_full_path = os.path.join(pathname, input_filename)
-            # set the input settings
-            input_args = {
-                'pml_inside': False,
-                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'data_cast': DATA_CAST,
-                'data_recast': True,
-                'save_to_disk': True,
-                'input_filename': input_file_full_path,
-                'save_to_disk_exit': False,
-            }
+        # set the input settings
+        input_filename = f'example_input_{scan_line_index}.h5'
+        input_file_full_path = os.path.join(pathname, input_filename)
+        # set the input settings
+        input_args = {
+            'pml_inside': False,
+            'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+            'data_cast': DATA_CAST,
+            'data_recast': True,
+            'save_to_disk': True,
+            'input_filename': input_file_full_path,
+            'save_to_disk_exit': False,
+        }
 
-            # run the simulation
+        # run the simulation
+
+        if RUN_SIMULATION:
+            print(f'Computing scan line {scan_line_index} of {number_scan_lines}.')
             sensor_data = kspaceFirstOrder3DC(**{
                 'medium': medium,
                 'kgrid': kgrid,
@@ -186,11 +187,12 @@ if __name__ == '__main__':
             })
             simulation_data.append(sensor_data)
 
-            # update medium position
-            medium_position = medium_position + transducer.element_width
+        # update medium position
+        medium_position = medium_position + transducer.element_width
 
+    if RUN_SIMULATION:
         simulation_data = np.stack(simulation_data, axis=0)
-        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
+        # scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
         print("Downloading data from remote server...")
@@ -203,9 +205,9 @@ if __name__ == '__main__':
     # temporary fix for dimensionality
     simulation_data = simulation_data[None, :]
 
-    sampling_frequency = 2.772000000000000e+07
-    prf = 10000
-    focal_depth = 0.020000000000000
+    sampling_frequency = 2.772e+07
+    prf = 1e4
+    focal_depth = 20e-3  # [m]
     channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
                                       sampling_frequency, prf, focal_depth)
 
