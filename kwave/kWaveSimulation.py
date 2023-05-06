@@ -226,7 +226,8 @@ class kWaveSimulation(object):
 
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
+            if not self.options.simulation_type.is_elastic_simulation() and \
+                    self.sensor.time_reversal_boundary_data is not None:
                 return True
         else:
             return self.userarg_time_rev
@@ -702,7 +703,7 @@ class kWaveSimulation(object):
                     pass
 
                 # check for time reversal inputs and set flgs
-                if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
+                if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
 
                 # check for sensor.record and set usage flgs - if no flgs are
@@ -718,7 +719,7 @@ class kWaveSimulation(object):
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
 
                     # check the sensor record flgs
-                    self.record.set_flags_from_list(self.sensor.record, self.elastic_code)
+                    self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic_simulation())
 
                 # enforce the sensor.mask field unless just recording the max_all
                 # and _final variables
@@ -1075,7 +1076,7 @@ class kWaveSimulation(object):
             self.kgrid.makeTime(self.medium.sound_speed, self.KSPACE_CFL)
 
         # check kgrid.t_array for stability given medium properties
-        if not self.elastic_code:
+        if not self.options.simulation_type.is_elastic_simulation():
 
             # calculate the largest timestep for which the model is stable
 

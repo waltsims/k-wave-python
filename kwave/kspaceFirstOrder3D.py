@@ -449,8 +449,8 @@ def kspaceFirstOrder3D(
 
                               'transducer_source': k_sim.transducer_source,
                               'nonuniform_grid': k_sim.nonuniform_grid,
-                              'elastic_code': k_sim.elastic_code,
-                              'axisymmetric': k_sim.axisymmetric,
+                              'elastic_code': k_sim.options.simulation_type.is_elastic_simulation(),
+                              'axisymmetric': k_sim.options.simulation_type.is_axisymmetric(),
                               'cuboid_corners': k_sim.cuboid_corners,
                           }))
 
