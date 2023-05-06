@@ -16,7 +16,7 @@ from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.ksource import kSource
-from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
@@ -162,6 +162,11 @@ def kspaceFirstOrderAS(
     """
     # start the timer and store the start time
     TicToc.tic()
+
+    if simulation_options.simulation_type is not SimulationType.AXISYMMETRIC:
+        print("WARNING: simulation type is not set to axisymmetric while using kSapceFirstOrderAS. "
+              "Setting simulation type to axisymmetric.")
+        simulation_options.simulation_type = SimulationType.AXISYMMETRIC
 
     k_sim = kWaveSimulation(
         kgrid=kgrid,
