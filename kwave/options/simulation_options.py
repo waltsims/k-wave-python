@@ -290,8 +290,8 @@ class SimulationOptions(object):
             if kgrid.dim == 1:
                 options.pml_x_size = int(pml_size_temp[0])
             elif kgrid.dim == 2:
-                options.pml_x_size = int(pml_size_temp[1])
-                options.pml_y_size = int(pml_size_temp[2])
+                options.pml_x_size = int(pml_size_temp[0])
+                options.pml_y_size = int(pml_size_temp[1])
             elif kgrid.dim == 3:
                 options.pml_x_size = int(pml_size_temp[0])
                 options.pml_y_size = int(pml_size_temp[1])
