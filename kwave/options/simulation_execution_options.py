@@ -47,16 +47,6 @@ class SimulationExecutionOptions:
                 self.binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
 
     def validate(self):
-
-        # check the binary exists and is in the correct place before doing anything else
-        # TODO re-enable this check
-        # if not Path(self.binary_path, self.binary_name).exists():
-        #     warn(f'''
-        #                 The binary file {self.binary_name} could not be found in {self.binary_path}.
-        #                 To use the C++ code, the C++ binaries for your operating system must be downloaded
-        #                 from www.k-wave.org/download.php and placed in the binaries folder.'''
-        #          )
-
         if isinstance(self.num_threads, int):
             assert self.num_threads > 0 and self.num_threads != float('inf')
         else:

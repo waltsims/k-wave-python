@@ -2,6 +2,7 @@ from __future__ import annotations
 import numbers
 import os
 from dataclasses import dataclass, field
+from enum import Enum
 from tempfile import gettempdir
 from typing import List, Optional, TYPE_CHECKING
 
@@ -13,6 +14,31 @@ if TYPE_CHECKING:
 from kwave.utils.data import get_date_string
 from kwave.utils.io import get_h5_literals
 from kwave.utils.pml import get_optimal_pml_size
+
+
+class SimulationType(Enum):
+    """
+    Enum for the simulation type
+
+    In the original matlab code, simulation type was determined
+        by looking at the calling function name and the user args.
+
+    Rules from the original matlab code:
+        AXISYMMETRIC => if the calling function name started with 'kspaceFirstOrderAS'
+                            or if the userarg_axisymmetric is set to true
+        ELASTIC => if the calling function name started with 'pstdElastic' or 'kspaceElastic'
+        ELASTIC_WITH_KSPACE_CORRECTION => if the calling function name started with 'kspaceElastic'
+    """
+    FLUID = 1
+    AXISYMMETRIC = 2
+    ELASTIC = 3
+    ELASTIC_WITH_KSPACE_CORRECTION = 4
+
+    def is_elastic_simulation(self):
+        return self in [SimulationType.ELASTIC, SimulationType.ELASTIC_WITH_KSPACE_CORRECTION]
+
+    def is_axisymmetric(self):
+        return self == SimulationType.AXISYMMETRIC
 
 
 @dataclass
@@ -51,8 +77,7 @@ class SimulationOptions(object):
         pml_z_size: PML Size for z-axis
         """
 
-    axisymmetric: bool = False
-    elastic_code: bool = False
+    simulation_type: SimulationType = SimulationType.FLUID
     cart_interp: str = 'linear'
     pml_inside: bool = True
     pml_alpha: float = 2.0
@@ -88,8 +113,6 @@ class SimulationOptions(object):
     pml_z_size: Optional[int] = None
 
     def __post_init__(self):
-        assert isinstance(self.axisymmetric, bool), 'Axisymmetric argument must be bool'
-
         assert self.cartesian_interp in ['linear', 'nearest'], \
             "Optional input ''cartesian_interp'' must be set to ''linear'' or ''nearest''."
 
@@ -154,7 +177,7 @@ class SimulationOptions(object):
             "Optional input ''UseFD'' can only be set to 2, 4."
 
     @staticmethod
-    def option_factory(kgrid: "kWaveGrid", elastic_code: bool, axisymmetric: bool, options: SimulationOptions):
+    def option_factory(kgrid: "kWaveGrid", options: SimulationOptions):
         """
         Initialize the Simulation Options
 
@@ -246,7 +269,7 @@ class SimulationOptions(object):
             assert kgrid.dim != 1, "Optional input ''save_to_disk'' is not compatible with 1D simulations."
 
         if options.stream_to_disk:
-            assert not options.elastic_code and kgrid.dim == 3, \
+            assert not options.simulation_type.is_elastic_simulation() and kgrid.dim == 3, \
                 "Optional input ''stream_to_disk'' is currently only compatible with 3D fluid simulations."
             # if given as a Boolean, replace with the default number of time steps
             if isinstance(options.stream_to_disk, bool) and options.stream_to_disk:
@@ -257,9 +280,10 @@ class SimulationOptions(object):
 
         if options.use_fd:
             # input only supported in 1D fluid code
-            assert kgrid.dim == 1 and not options.elastic_code, "Optional input ''use_fd'' only supported in 1D."
+            assert kgrid.dim == 1 and not options.simulation_type.is_elastic_simulation(), \
+                "Optional input ''use_fd'' only supported in 1D."
         # get optimal pml size
-        if options.axisymmetric or options.pml_auto:
+        if options.simulation_type.is_axisymmetric() or options.pml_auto:
             pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
 
             # assign to individual variables
