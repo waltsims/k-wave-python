@@ -1,8 +1,6 @@
-name: Publish_Pages
-on:
-  push:
-    branches:
-    - master
+name: test_pages
+on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,8 +15,4 @@ jobs:
       uses: waltsims/pages@pyproject.toml-support
       with:
         pyproject_toml_deps: ".[docs]"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: gh-pages
+        

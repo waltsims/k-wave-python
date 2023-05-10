@@ -10,6 +10,8 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -76,20 +78,21 @@ def test_ivp_comparison_modelling_functions():
     input_filename = f'example_ivp_comp_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_alpha': 0,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        pml_alpha=0,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_ivp_comparison_modelling_functions/input_1', input_file_full_path), \
         'Files do not match!'
 
@@ -101,21 +104,21 @@ def test_ivp_comparison_modelling_functions():
     input_filename = f'example_comparison_modeling_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-
-    input_args = {
-        'pml_inside': False,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        pml_inside=False,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_ivp_comparison_modelling_functions/input_2', input_file_full_path), \
         'Files do not match!'
 

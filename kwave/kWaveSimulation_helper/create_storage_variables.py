@@ -1,4 +1,5 @@
 import numpy as np
+from kwave.kgrid import kWaveGrid
 from numpy.fft import ifftshift
 
 from kwave import SimulationOptions, kWaveGrid

@@ -7,7 +7,7 @@ from pathlib import Path
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ktransducer import NotATransducer
-from kwave.options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions
 
 VERSION = '0.2.1'
 # Set environment variable to binaries to get rid of user warning

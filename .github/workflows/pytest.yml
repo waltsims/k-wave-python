@@ -14,16 +14,19 @@ jobs:
       - name: checkout reference k-Wave repo
         uses: actions/checkout@v3
         with:
-          repository: waltsims/k-Wave
-          path: k-Wave
-          ref: v1.3.0
+          repository: ucl-bug/k-wave
+          path: k-wave
+          ref: v1.4.0
       - name: setup MATLAB
         uses: matlab-actions/setup-matlab@v1
       - name: run reference generation
         uses: matlab-actions/run-command@v1
         with:
           command: |
-            addpath('k-Wave-python','k-Wave');
+            ls;
+            pwd;
+            if exist('k-wave/k-Wave'); ls 'k-wave/k-Wave'; end;
+            addpath('k-Wave-python','k-wave/k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
       - name: compress artifact

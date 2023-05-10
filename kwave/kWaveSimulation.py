@@ -11,7 +11,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
-from kwave.options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.recorder import Recorder
 from kwave.utils.checks import check_stability
 from kwave.utils.colormap import get_color_map
@@ -28,28 +28,44 @@ class kWaveSimulation(object):
 
     def __init__(self,
                  kgrid: kWaveGrid,
+                 source: kSource,
+                 sensor: NotATransducer,
                  medium: kWaveMedium,
-                 source,
-                 sensor,
-                 **kwargs
-                 ):
+                 simulation_options: SimulationOptions):
         self.precision = None
         self.kgrid = kgrid
         self.medium = medium
         self.source = source
         self.sensor = sensor
-        self.kwargs = kwargs
+        self.options = simulation_options
 
         # =========================================================================
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
-        # flags which control the type of simulation
-        #: Whether simulation type is axisymmetric
-        self.userarg_axisymmetric      = kwargs['axisymmetric']
-
         # flags which control the characteristics of the sensor
         #: Whether time reversal simulation is enabled
-        self.userarg_time_rev          = kwargs['time_rev']
+
+        # check if performing time reversal, and replace inputs to explicitly use a
+        # source with a dirichlet boundary condition
+        if self.sensor.time_reversal_boundary_data is not None:
+            # define a new source structure
+            source = {
+                'p_mask': self.sensor.p_mask,
+                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
+                'p_mode': 'dirichlet'
+            }
+
+            # define a new sensor structure
+            Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
+            sensor = kSensor(
+                mask=np.ones((Nx, Ny, max(1, Nz))),
+                record=['p_final']
+            )
+            # set time reversal flag
+            self.userarg_time_rev = True
+        else:
+            # set time reversal flag
+            self.userarg_time_rev = False
 
         #: Whether sensor.mask should be re-ordered.
         #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
@@ -59,8 +75,11 @@ class kWaveSimulation(object):
         #: Whether the sensor.mask is binary
         self.binary_sensor_mask        = True
 
-        #: If the sensor.mask is a list of cuboid corners
-        self.userarg_cuboid_corners    = kwargs['cuboid_corners']
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
 
         #: If tse sensor is an object of the kWaveTransducer class
         self.transducer_sensor         = False
@@ -90,13 +109,8 @@ class kWaveSimulation(object):
         self.STREAM_TO_DISK_FILENAME         = 'temp_sensor_data.bin'   #: default disk stream filename
         self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]  #: default log filename
 
-        del kwargs['axisymmetric']
-        del kwargs['cuboid_corners']
-        del kwargs['time_rev']
         self.calling_func_name = None
         print(f'  start time: {get_date_string()}')
-
-        self.options = None
 
         self.c_ref, self.c_ref_compression, self.c_ref_shear = [None] * 3
         self.transducer_input_signal = None
@@ -158,35 +172,6 @@ class kWaveSimulation(object):
         return False
 
     @property
-    def elastic_code(self):
-        """
-        Returns:
-            True if elastic simulation False if fluid simulation
-        """
-        return self.calling_func_name.startswith(('pstdElastic', 'kspaceElastic'))
-
-    @property
-    def kspace_elastic_code(self):
-        """
-        Returns:
-            True if elastic simulation with k-space correction False if ordinary
-
-        """
-        return self.calling_func_name.startswith('kspaceElastic')
-
-    @property
-    def axisymmetric(self):
-        """
-        Returns:
-            True if fluid axisymmetric simulation
-
-        """
-        if self.calling_func_name.startswith('kspaceFirstOrderAS'):
-            return True
-        else:
-            return self.userarg_axisymmetric
-
-    @property
     def kelvin_voigt_model(self):
         """
         Returns:
@@ -212,7 +197,8 @@ class kWaveSimulation(object):
 
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
+            if not self.options.simulation_type.is_elastic_simulation() and \
+                    self.sensor.time_reversal_boundary_data is not None:
                 return True
         else:
             return self.userarg_time_rev
@@ -503,21 +489,22 @@ class kWaveSimulation(object):
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
         # run subscript to check optional inputs
-        self.options = SimulationOptions.option_factory(self.kgrid, self.elastic_code, self.axisymmetric, **self.kwargs)
+        self.options = SimulationOptions.option_factory(self.kgrid, self.options)
         opt = self.options
 
         # TODO(Walter): clean this up with getters in simulation options pml size
         pml_x_size, pml_y_size, pml_z_size = opt.pml_x_size, opt.pml_y_size, opt.pml_z_size
         pml_size = Vector([pml_x_size, pml_y_size, pml_z_size])
 
-        self.print_start_status(self.elastic_code)
+        is_elastic_code = opt.simulation_type.is_elastic_simulation()
+        self.print_start_status(is_elastic_code=is_elastic_code)
         self.set_index_data_type()
 
-        user_medium_density_input = self.check_medium(self.medium, self.kgrid.k, self.elastic_code, self.axisymmetric)
+        user_medium_density_input = self.check_medium(self.medium, self.kgrid.k, simulation_type=opt.simulation_type)
 
         # select the reference sound speed used in the k-space operator
         self.c_ref, self.c_ref_compression, self.c_ref_shear \
-            = set_sound_speed_ref(self.medium, self.elastic_code, self.kspace_elastic_code)
+            = set_sound_speed_ref(self.medium, opt.simulation_type)
 
         self.check_source(k_dim)
         self.check_sensor(k_dim, k_Nt)
@@ -526,14 +513,20 @@ class kWaveSimulation(object):
         self.check_input_combinations(opt, user_medium_density_input, k_dim, pml_size, self.kgrid.N)
 
         # run subscript to display time step, max supported frequency etc.
-        display_simulation_params(self.kgrid, self.medium, self.elastic_code)
+        display_simulation_params(self.kgrid, self.medium, is_elastic_code)
 
         self.smooth_and_enlarge(self.source, k_dim, Vector(self.kgrid.N), opt)
         self.create_sensor_variables()
         self.create_absorption_vars()
         self.assign_pseudonyms(self.medium, self.kgrid)
         self.scale_source_terms(opt.scale_source_terms)
-        self.create_pml_indices(self.kgrid.dim, Vector(self.kgrid.N), pml_size, opt.pml_inside, self.axisymmetric)
+        self.create_pml_indices(
+            kgrid_dim=self.kgrid.dim,
+            kgrid_N=Vector(self.kgrid.N),
+            pml_size=pml_size,
+            pml_inside=opt.pml_inside,
+            is_axisymmetric=opt.simulation_type.is_axisymmetric()
+        )
 
     @staticmethod
     def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
@@ -558,7 +551,7 @@ class kWaveSimulation(object):
             assert kgrid_dim == 3, f'kgrid has the wrong dimensionality for {calling_func_name}.'
 
     @staticmethod
-    def print_start_status(is_elastic_code) -> None:
+    def print_start_status(is_elastic_code: bool) -> None:
         """
         Update command-line status with the start time
 
@@ -586,7 +579,7 @@ class kWaveSimulation(object):
         self.index_data_type = get_smallest_possible_type(total_grid_points, 'uint', default='double')
 
     @staticmethod
-    def check_medium(medium, kgrid_k, is_elastic, is_axisymmetric):
+    def check_medium(medium, kgrid_k, simulation_type: SimulationType) -> bool:
         """
         Check the properties of the medium structure for correctness and validity
 
@@ -601,7 +594,7 @@ class kWaveSimulation(object):
         """
 
         # if using the fluid code, allow the density field to be blank if the medium is homogeneous
-        if not is_elastic and medium.density is None and medium.sound_speed.size == 1:
+        if (not simulation_type.is_elastic_simulation()) and medium.density is None and medium.sound_speed.size == 1:
             user_medium_density_input = False
             medium.density = 1
         else:
@@ -610,7 +603,7 @@ class kWaveSimulation(object):
 
         # check medium absorption inputs for the fluid code
         is_absorbing = any(medium.is_defined('alpha_coeff', 'alpha_power'))
-        is_stokes = (is_axisymmetric or medium.alpha_mode == 'stokes')
+        is_stokes = (simulation_type.is_axisymmetric() or medium.alpha_mode == 'stokes')
         medium.set_absorbing(is_absorbing, is_stokes)
 
         if is_absorbing:
@@ -681,7 +674,7 @@ class kWaveSimulation(object):
                     pass
 
                 # check for time reversal inputs and set flgs
-                if not self.elastic_code and self.sensor.time_reversal_boundary_data is not None:
+                if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
 
                 # check for sensor.record and set usage flgs - if no flgs are
@@ -697,7 +690,7 @@ class kWaveSimulation(object):
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
 
                     # check the sensor record flgs
-                    self.record.set_flags_from_list(self.sensor.record, self.elastic_code)
+                    self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic_simulation())
 
                 # enforce the sensor.mask field unless just recording the max_all
                 # and _final variables
@@ -805,7 +798,7 @@ class kWaveSimulation(object):
                         # cartesian_interp = 'linear' then this is only used for
                         # display, if flgs.time_rev = true or cartesian_interp =
                         # 'nearest' this grid is used as the sensor.mask
-                        self.sensor.mask, self.order_index, self.reorder_index = cart2grid(self.kgrid, self.sensor.mask, self.axisymmetric)
+                        self.sensor.mask, self.order_index, self.reorder_index = cart2grid(self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric())
 
                         # if in time reversal mode, reorder the p0 input data in
                         # the order of the binary sensor_mask
@@ -1054,7 +1047,7 @@ class kWaveSimulation(object):
             self.kgrid.makeTime(self.medium.sound_speed, self.KSPACE_CFL)
 
         # check kgrid.t_array for stability given medium properties
-        if not self.elastic_code:
+        if not self.options.simulation_type.is_elastic_simulation():
 
             # calculate the largest timestep for which the model is stable
 
@@ -1140,11 +1133,12 @@ class kWaveSimulation(object):
             elif self.sensor.record is not None and self.sensor.record.ismember(self.record.flags[1:]).any():
                 raise ValueError('The optional input ''StreamToDisk'' is currently only compatible with sensor.record = {''p''} (the default).')
 
+        is_axisymmetric = self.options.simulation_type.is_axisymmetric()
         # make sure the PML size is smaller than the grid if PMLInside is true
         if opt.pml_inside and (
                 (k_dim == 1 and ((pml_size.x * 2 > self.kgrid.Nx))) or
-                (k_dim == 2 and ~self.axisymmetric and ((pml_size.x * 2 > kgrid_N[0]) or (pml_size.y * 2 > kgrid_N[1]))) or
-                (k_dim == 2 and self.axisymmetric and ((pml_size.x * 2 > kgrid_N[0]) or (pml_size.y > kgrid_N[1]))) or
+                (k_dim == 2 and not is_axisymmetric and ((pml_size.x * 2 > kgrid_N[0]) or (pml_size.y * 2 > kgrid_N[1]))) or
+                (k_dim == 2 and is_axisymmetric and ((pml_size.x * 2 > kgrid_N[0]) or (pml_size.y > kgrid_N[1]))) or
                 (k_dim == 3 and ((pml_size.x*2 > kgrid_N[0]) or (pml_size.x*2 > kgrid_N[1]) or (pml_size.z * 2 > kgrid_N[2]) ))):
             raise ValueError('The size of the PML must be smaller than the size of the grid.')
 
@@ -1163,7 +1157,7 @@ class kWaveSimulation(object):
             raise ValueError('sensor.record_start_index must be between 1 and the number of time steps.')
 
         # ensure 'WSWA' symmetry if using axisymmetric code with 'SaveToDisk'
-        if self.axisymmetric and self.options.radial_symmetry != 'WSWA' and isinstance(self.options.save_to_disk, str):
+        if is_axisymmetric and self.options.radial_symmetry != 'WSWA' and isinstance(self.options.save_to_disk, str):
 
             # display a warning only if using WSWS symmetry (not WSWA-FFT)
             if self.options.radial_symmetry.startswith('WSWS'):
@@ -1216,7 +1210,7 @@ class kWaveSimulation(object):
             # update command line status
             print('  smoothing p0 distribution...')
 
-            if self.axisymmetric:
+            if self.options.simulation_type.is_axisymmetric():
                 if self.options.radial_symmetry in ['WSWA-FFT', 'WSWA']:
                     # create a new kWave grid object with expanded radial grid
                     kgrid_exp = kWaveGrid([kgrid_N.x, kgrid_N.y * 4], [self.kgrid.dx, self.kgrid.dy])
@@ -1261,7 +1255,7 @@ class kWaveSimulation(object):
                     's_source_pos_index': self.s_source_pos_index,
                 }),
                 dotdict({
-                    'axisymmetric': self.axisymmetric,
+                    'axisymmetric': self.options.simulation_type.is_axisymmetric(),
                     'use_sensor': self.use_sensor,
                     'blank_sensor': self.blank_sensor,
                     'cuboid_corners': self.cuboid_corners,
@@ -1286,7 +1280,7 @@ class kWaveSimulation(object):
             self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, self.s_source_pos_index = expand_results
 
         # get maximum prime factors
-        if self.axisymmetric:
+        if self.options.simulation_type.is_axisymmetric():
             prime_facs = self.kgrid.highest_prime_factors(self.options.radial_symmetry[:4])
         else:
             prime_facs = self.kgrid.highest_prime_factors()
@@ -1377,7 +1371,7 @@ class kWaveSimulation(object):
                     'time_rev': self.time_rev,
                     'blank_sensor': self.blank_sensor,
                     'record_u_split_field': self.record_u_split_field,
-                    'axisymmetric': self.axisymmetric,
+                    'axisymmetric': self.options.simulation_type.is_axisymmetric(),
                     'reorder_data': self.reorder_data,
                 }),
                 dotdict({
@@ -1399,7 +1393,7 @@ class kWaveSimulation(object):
         Returns:
             None
         """
-        if not self.elastic_code and not self.options.save_to_disk:
+        if not self.options.simulation_type.is_elastic_simulation() and not self.options.save_to_disk:
             self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(self.kgrid, self.medium, self.equation_of_state)
 
     def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:
@@ -1489,7 +1483,7 @@ class kWaveSimulation(object):
         elif kgrid_dim == 2:
             self.x1 = pml_size.x + 1.0
             self.x2 = kgrid_N.x - pml_size.x
-            if self.axisymmetric:
+            if is_axisymmetric:
                 self.y1 = 1.0
             else:
                 self.y1 = pml_size.y + 1.0

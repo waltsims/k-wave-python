@@ -9,8 +9,6 @@ from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.utils.math import largest_prime_factor
 
 
-
-
 @dataclass
 class kWaveGrid(object):
     # default CFL number

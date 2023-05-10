@@ -11,6 +11,7 @@ from tempfile import gettempdir
 
 import h5py
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -106,25 +107,24 @@ def test_cpp_running_simulations():
     sensor_mask[:, :, Nz//2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
-    # set the input arguments
-    input_args = {
-        'pml_size': pml_size
-    }
-
     if example_number == 1:
         # save the input data to disk and then exit
-        kspaceFirstOrder3DC(**{
-            'medium': medium,
-            'kgrid': kgrid,
-            'source': source,
-            'sensor': sensor,
-            **input_args,
-            'save_to_disk': True,
-            'save_to_disk_exit': True,
-            'input_filename': input_filename,
-            'data_path': pathname
-            # 'data_path': input_file_full_path
-        })
+        simulation_options = SimulationOptions(
+            pml_size=pml_size,
+            save_to_disk=True,
+            input_filename=input_filename,
+            save_to_disk_exit=True,
+            data_path=pathname
+        )
+        # run the simulation
+        kspaceFirstOrder3DC(
+            medium=medium,
+            kgrid=kgrid,
+            source=source,
+            sensor=sensor,
+            simulation_options=simulation_options,
+            execution_options=SimulationExecutionOptions()
+        )
 
         # display the required syntax to run the C++ simulation
         print(f'Using a terminal window, navigate to the {os.path.sep}binaries folder of the k-Wave Toolbox')
@@ -149,23 +149,41 @@ def test_cpp_running_simulations():
         sensor.record = ['p_final', 'p_max']
 
         # run the C++ simulation using the wrapper function
-        sensor_data = kspaceFirstOrder3DC(**{
-            'kgrid': kgrid,
-            'medium': medium,
-            'source': source,
-            'sensor': sensor,
-            **input_args
-        })
+        simulation_options = SimulationOptions(
+            pml_size=pml_size,
+            save_to_disk=True,
+            input_filename=input_filename,
+            save_to_disk_exit=True,
+            data_path=pathname
+        )
+        # run the simulation
+        kspaceFirstOrder3DC(
+            medium=medium,
+            kgrid=kgrid,
+            source=source,
+            sensor=sensor,
+            simulation_options=simulation_options,
+            execution_options=SimulationExecutionOptions()
+        )
 
     elif example_number == 4:
         # define the field parameters to record
         sensor.record = ['p_final', 'p_max']
 
         # run the C++ simulation using the wrapper function
-        sensor_data = kspaceFirstOrder3DG(**{
-            'kgrid': kgrid,
-            'medium': medium,
-            'source': source,
-            'sensor': sensor,
-            **input_args
-        })
+        simulation_options = SimulationOptions(
+            pml_size=pml_size,
+            save_to_disk=True,
+            input_filename=input_filename,
+            save_to_disk_exit=True,
+            data_path=pathname
+        )
+        # run the simulation
+        kspaceFirstOrder3DC(
+            medium=medium,
+            kgrid=kgrid,
+            source=source,
+            sensor=sensor,
+            simulation_options=simulation_options,
+            execution_options=SimulationExecutionOptions()
+        )
