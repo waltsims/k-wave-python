@@ -171,35 +171,6 @@ class kWaveSimulation(object):
             return False
         return False
 
-    # @property
-    # def elastic_code(self):
-    #     """
-    #     Returns:
-    #         True if elastic simulation False if fluid simulation
-    #     """
-    #     return self.calling_func_name.startswith(('pstdElastic', 'kspaceElastic'))
-    #
-    # @property
-    # def kspace_elastic_code(self):
-    #     """
-    #     Returns:
-    #         True if elastic simulation with k-space correction False if ordinary
-    #
-    #     """
-    #     return self.calling_func_name.startswith('kspaceElastic')
-    #
-    # @property
-    # def axisymmetric(self):
-    #     """
-    #     Returns:
-    #         True if fluid axisymmetric simulation
-    #
-    #     """
-    #     if self.calling_func_name.startswith('kspaceFirstOrderAS'):
-    #         return True
-    #     else:
-    #         return self.userarg_axisymmetric
-
     @property
     def kelvin_voigt_model(self):
         """
