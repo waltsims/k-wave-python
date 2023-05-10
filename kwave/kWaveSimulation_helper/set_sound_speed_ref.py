@@ -1,25 +1,27 @@
 from kwave import kWaveMedium
 import numpy as np
 
+from kwave.options.simulation_options import SimulationType
 
-def set_sound_speed_ref(medium: kWaveMedium, elastic_code: bool, kspace_elastic_code: bool):
+
+def set_sound_speed_ref(medium: kWaveMedium, simulation_type: SimulationType):
     """
         select the reference sound speed used in the k-space operator
         based on the heterogeneous sound speed map
     Args:
-        medium:
-        elastic_code:
-        kspace_elastic_code:
-
+        medium: kWaveMedium object
+        simulation_type: Simulation type (fluid, axisymmetric, elastic, elastic with k-space correction)
     Returns:
 
     """
-    if not elastic_code:
+    if not simulation_type.is_elastic_simulation():
         return get_ordinary_sound_speed_ref(medium)
-    elif not kspace_elastic_code:  # pragma: no cover
+    elif simulation_type == SimulationType.ELASTIC:  # pragma: no cover
         return get_pstd_elastic_sound_speed_ref(medium)
-    else:  # pragma: no cover
+    elif simulation_type == SimulationType.ELASTIC_WITH_KSPACE_CORRECTION:  # pragma: no cover
         return get_kspace_elastic_sound_speed_ref(medium)
+    else:
+        raise NotImplementedError("Non-supported simulation type: " + str(simulation_type))
 
 
 def get_ordinary_sound_speed_ref(medium):

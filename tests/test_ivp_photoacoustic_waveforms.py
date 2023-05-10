@@ -11,6 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -94,20 +95,24 @@ def test_ivp_photoacoustic_waveforms():
     input_filename = f'example_ivp_pa_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'data_cast': 'single',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        data_cast='single',
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+
+    # run the simulation
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
+
     assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
         'Files do not match!'
 
@@ -129,19 +134,21 @@ def test_ivp_photoacoustic_waveforms():
     sensor.mask[Nx//2 - source_sensor_distance - 1, Nx//2 - 1, Nx//2 - 1] = 1
 
     # run the simulation
-    input_args = {
-        'data_cast': 'single',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        data_cast='single',
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
+    # run the simulation
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \
         'Files do not match!'

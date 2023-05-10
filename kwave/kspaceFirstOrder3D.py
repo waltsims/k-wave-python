@@ -1,17 +1,34 @@
+from typing import Union
+
 import numpy as np
+
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+
+from kwave.ksource import kSource
+from kwave.ktransducer import NotATransducer
+
+from kwave.kgrid import kWaveGrid
 
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import kspaceFirstOrderC, kspaceFirstOrderG
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate3d
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-@kspaceFirstOrderG
-def kspaceFirstOrder3DG(**kwargs):
+def kspaceFirstOrder3DG(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: Union[NotATransducer, kSensor],
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
         3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -48,12 +65,26 @@ def kspaceFirstOrder3DG(**kwargs):
     Returns:
 
     """
-    sensor_data = kspaceFirstOrder3DC(**kwargs)  # pass inputs to CPU version
+    assert execution_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    sensor_data = kspaceFirstOrder3DC(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options,
+        execution_options=execution_options
+    )  # pass inputs to CPU version
     return sensor_data
 
 
-@kspaceFirstOrderC()
-def kspaceFirstOrder3DC(**kwargs):
+def kspaceFirstOrder3DC(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: Union[NotATransducer, kSensor],
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
         3D time-domain simulation of wave propagation using C++ code.
 
@@ -92,11 +123,25 @@ def kspaceFirstOrder3DC(**kwargs):
 
     """
     # generate the input file and save to disk
-    sensor_data = kspaceFirstOrder3D(**kwargs)
+    sensor_data = kspaceFirstOrder3D(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options,
+        execution_options=execution_options
+    )
     return sensor_data
 
 
-def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
+def kspaceFirstOrder3D(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: Union[NotATransducer, kSensor],
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
     3D time-domain simulation of wave propagation.
 
@@ -254,7 +299,13 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(kgrid, medium, source, sensor, **kwargs)
+    k_sim = kWaveSimulation(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options
+    )
     k_sim.input_checking('kspaceFirstOrder3D')
 
     # =========================================================================
@@ -398,8 +449,8 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
 
                               'transducer_source': k_sim.transducer_source,
                               'nonuniform_grid': k_sim.nonuniform_grid,
-                              'elastic_code': k_sim.elastic_code,
-                              'axisymmetric': k_sim.axisymmetric,
+                              'elastic_code': k_sim.options.simulation_type.is_elastic_simulation(),
+                              'axisymmetric': k_sim.options.simulation_type.is_axisymmetric(),
                               'cuboid_corners': k_sim.cuboid_corners,
                           }))
 
@@ -411,6 +462,7 @@ def kspaceFirstOrder3D(kgrid, medium, source, sensor, **kwargs):
             return
 
         executor = Executor(device='gpu')
+        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
         sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
-                                              options='--p_raw')
+                                              options=executor_options)
         return k_sim.sensor.combine_sensor_data(sensor_data)

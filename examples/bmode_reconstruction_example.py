@@ -3,6 +3,7 @@ from tempfile import gettempdir
 
 import numpy as np
 import scipy.io
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 from example_utils import download_from_gdrive_if_does_not_exist
 from kwave.kgrid import kWaveGrid
@@ -164,28 +165,25 @@ if __name__ == '__main__':
         input_filename = f'example_input_{scan_line_index}.h5'
         input_file_full_path = os.path.join(pathname, input_filename)
         # set the input settings
-        input_args = {
-            'pml_inside': False,
-            'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-            'data_cast': DATA_CAST,
-            'data_recast': True,
-            'save_to_disk': True,
-            'input_filename': input_file_full_path,
-            'save_to_disk_exit': False,
-        }
-
+        simulation_options = SimulationOptions(
+            pml_inside=False,
+            pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+            data_cast=DATA_CAST,
+            data_recast=True,
+            save_to_disk=True,
+            input_filename=input_filename,
+            save_to_disk_exit=False
+        )
         # run the simulation
-
         if RUN_SIMULATION:
-            print(f'Computing scan line {scan_line_index} of {number_scan_lines}.')
-            sensor_data = kspaceFirstOrder3DC(**{
-                'medium': medium,
-                'kgrid': kgrid,
-                'source': not_transducer,
-                'sensor': not_transducer,
-                **input_args
-            })
-            simulation_data.append(sensor_data)
+            sensor_data = kspaceFirstOrder3DC(
+                medium=medium,
+                kgrid=kgrid,
+                source=not_transducer,
+                sensor=not_transducer,
+                simulation_options=simulation_options,
+                execution_options=SimulationExecutionOptions()
+            )
 
         # update medium position
         medium_position = medium_position + transducer.element_width
