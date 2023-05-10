@@ -6,7 +6,8 @@ import numpy as np
 
 class Vector(np.ndarray):
     def __new__(cls, elements: list):
-        elements = list(elements)[:3]  # Truncate the input list to have at most 3 elements
+        assert 1 <= len(elements) <= 3
+        elements = list(elements)
         obj = np.array(elements).view(cls)
         return obj
 
@@ -56,6 +57,8 @@ class FlexibleVector(object):
             - Its elements can be anything
             - The elements do not have to be same type,
                     e.g. this is valid: Array([<scalar>, <List>, <Tuple of Tuples>])
+
+        WARNING: The class will be deprecated once we refactor the kWaveGrid class to use the Vector class instead!
     """
     data: list
 
