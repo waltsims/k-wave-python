@@ -255,7 +255,7 @@
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">kWaveGrid</span><span class="p">,</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">NotATransducer</span>
-<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Vector</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.data</span> <span class="kn">import</span> <span class="n">get_smallest_possible_type</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.matlab</span> <span class="kn">import</span> <span class="n">matlab_find</span>
@@ -274,7 +274,7 @@
 
     <span class="c1"># retaining the values for kgrid time array</span>
     <span class="n">pml_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_z_size</span><span class="p">]</span>
-    <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">pml_size</span><span class="p">[:</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">])</span>
+    <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">pml_size</span><span class="p">[:</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">])</span>
 
     <span class="n">p_source_pos_index</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">p_source_pos_index</span>
     <span class="n">u_source_pos_index</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">u_source_pos_index</span>
@@ -287,7 +287,7 @@
     <span class="c1">#####################</span>
 
     <span class="c1"># expand the computational grid, replacing the original grid</span>
-    <span class="n">kgrid</span> <span class="o">=</span> <span class="n">expand_kgrid</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="n">pml_size</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="n">kgrid</span> <span class="o">=</span> <span class="n">expand_kgrid</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">)</span>
 
     <span class="n">expand_size</span> <span class="o">=</span> <span class="n">calculate_expand_size</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">)</span>
 
@@ -514,7 +514,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  computational grid size:&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">k_Nx</span><span class="p">),</span> <span class="s1">&#39;by&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">k_Ny</span><span class="p">),</span> <span class="s1">&#39;by&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">k_Nz</span><span class="p">),</span> <span class="s1">&#39;grid points&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="expand_cuboid_corner_list"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_cuboid_corner_list">[docs]</a><span class="k">def</span> <span class="nf">expand_cuboid_corner_list</span><span class="p">(</span><span class="n">is_cuboid_list</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
+<div class="viewcode-block" id="expand_cuboid_corner_list"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.expand_grid_matrices.html#kwave.kWaveSimulation_helper.expand_grid_matrices.expand_cuboid_corner_list">[docs]</a><span class="k">def</span> <span class="nf">expand_cuboid_corner_list</span><span class="p">(</span><span class="n">is_cuboid_list</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">:</span> <span class="n">Vector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        add the PML size to cuboid corner indices if using a cuboid sensor mask</span>
 <span class="sd">    Args:</span>

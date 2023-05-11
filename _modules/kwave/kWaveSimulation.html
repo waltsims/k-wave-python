@@ -257,7 +257,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Vector</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">display_simulation_params</span><span class="p">,</span> <span class="n">set_sound_speed_ref</span><span class="p">,</span> <span class="n">expand_grid_matrices</span><span class="p">,</span> \
     <span class="n">create_storage_variables</span><span class="p">,</span> <span class="n">create_absorption_variables</span><span class="p">,</span> <span class="n">scale_source_terms_func</span>
 <span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
@@ -748,7 +748,7 @@
 
         <span class="c1"># TODO(Walter): clean this up with getters in simulation options pml size</span>
         <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_z_size</span>
-        <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span><span class="p">])</span>
+        <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">([</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span><span class="p">])</span>
 
         <span class="n">is_elastic_code</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">print_start_status</span><span class="p">(</span><span class="n">is_elastic_code</span><span class="o">=</span><span class="n">is_elastic_code</span><span class="p">)</span>
@@ -769,14 +769,14 @@
         <span class="c1"># run subscript to display time step, max supported frequency etc.</span>
         <span class="n">display_simulation_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="n">is_elastic_code</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">smooth_and_enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">opt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smooth_and_enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">Vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">opt</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_sensor_variables</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_absorption_vars</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assign_pseudonyms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_source_terms</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">scale_source_terms</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_pml_indices</span><span class="p">(</span>
             <span class="n">kgrid_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
-            <span class="n">kgrid_N</span><span class="o">=</span><span class="n">Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span>
+            <span class="n">kgrid_N</span><span class="o">=</span><span class="n">Vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span>
             <span class="n">pml_size</span><span class="o">=</span><span class="n">pml_size</span><span class="p">,</span>
             <span class="n">pml_inside</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">,</span>
             <span class="n">is_axisymmetric</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">()</span>
@@ -1716,7 +1716,7 @@
             <span class="p">})</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="kWaveSimulation.create_pml_indices"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">[docs]</a>    <span class="k">def</span> <span class="nf">create_pml_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">pml_inside</span><span class="p">,</span> <span class="n">is_axisymmetric</span><span class="p">):</span>
+<div class="viewcode-block" id="kWaveSimulation.create_pml_indices"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.create_pml_indices">[docs]</a>    <span class="k">def</span> <span class="nf">create_pml_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="p">:</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">pml_inside</span><span class="p">,</span> <span class="n">is_axisymmetric</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define index variables to remove the PML from the display if the optional</span>
 <span class="sd">        input &#39;PlotPML&#39; is set to false</span>

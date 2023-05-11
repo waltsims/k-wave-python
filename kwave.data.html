@@ -264,8 +264,8 @@
           <section id="module-kwave.data">
 <span id="kwave-data-module"></span><h1>kwave.data module<a class="headerlink" href="#module-kwave.data" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="kwave.data.Array">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.data.</span></span><span class="sig-name descname"><span class="pre">Array</span></span><a class="reference internal" href="_modules/kwave/data.html#Array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.data.</span></span><span class="sig-name descname"><span class="pre">FlexibleVector</span></span><a class="reference internal" href="_modules/kwave/data.html#FlexibleVector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.FlexibleVector" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="simple">
 <dt>This class is very similar to Numpy.ndarray but there are differences:</dt><dd><ul class="simple">
@@ -279,9 +279,10 @@
 </ul>
 </dd>
 </dl>
+<p>WARNING: The class will be deprecated once we refactor the kWaveGrid class to use the Vector class instead!</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.data.Array.__init__" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kwave.data.FlexibleVector.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<em>list</em>) – </p>
@@ -293,38 +294,38 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.append" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#FlexibleVector.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.FlexibleVector.append" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.assign_dim">
-<span class="sig-name descname"><span class="pre">assign_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.assign_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.assign_dim" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.assign_dim">
+<span class="sig-name descname"><span class="pre">assign_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#FlexibleVector.assign_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.FlexibleVector.assign_dim" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="kwave.data.Array.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#kwave.data.Array.data" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#kwave.data.FlexibleVector.data" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kwave.data.Array.numpy">
-<span class="sig-name descname"><span class="pre">numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Array.numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Array.numpy" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.numpy">
+<span class="sig-name descname"><span class="pre">numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#FlexibleVector.numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.FlexibleVector.numpy" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.x">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.data.Array.x" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.x">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.data.FlexibleVector.x" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.y">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.data.Array.y" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.data.FlexibleVector.y" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="kwave.data.Array.z">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.data.Array.z" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.data.FlexibleVector.z">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.data.FlexibleVector.z" title="Permalink to this definition">#</a></dt>
 <dd><p>3rd dimension element. 0 if not defined</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -332,6 +333,55 @@
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kwave.data.Vector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kwave.data.</span></span><span class="sig-name descname"><span class="pre">Vector</span></span><a class="reference internal" href="_modules/kwave/data.html#Vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Vector" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.data.Vector.__new__">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Vector.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Vector.__new__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements</strong> (<em>list</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.data.Vector.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Vector.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Vector.append" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kwave.data.Vector.assign_dim">
+<span class="sig-name descname"><span class="pre">assign_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/data.html#Vector.assign_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.data.Vector.assign_dim" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>int</em>) – </p></li>
+<li><p><strong>val</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.data.Vector.x">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#kwave.data.Vector.x" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.data.Vector.y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#kwave.data.Vector.y" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kwave.data.Vector.z">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#kwave.data.Vector.z" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -393,15 +443,24 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">kwave.data module</a><ul>
-<li><a class="reference internal" href="#kwave.data.Array"><code class="docutils literal notranslate"><span class="pre">Array</span></code></a><ul>
-<li><a class="reference internal" href="#kwave.data.Array.__init__"><code class="docutils literal notranslate"><span class="pre">Array.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.append"><code class="docutils literal notranslate"><span class="pre">Array.append()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.assign_dim"><code class="docutils literal notranslate"><span class="pre">Array.assign_dim()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.data"><code class="docutils literal notranslate"><span class="pre">Array.data</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.numpy"><code class="docutils literal notranslate"><span class="pre">Array.numpy()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.x"><code class="docutils literal notranslate"><span class="pre">Array.x</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.y"><code class="docutils literal notranslate"><span class="pre">Array.y</span></code></a></li>
-<li><a class="reference internal" href="#kwave.data.Array.z"><code class="docutils literal notranslate"><span class="pre">Array.z</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector"><code class="docutils literal notranslate"><span class="pre">FlexibleVector</span></code></a><ul>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.__init__"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.append"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.append()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.assign_dim"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.assign_dim()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.data"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.data</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.numpy"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.numpy()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.x"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.x</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.y"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.y</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.FlexibleVector.z"><code class="docutils literal notranslate"><span class="pre">FlexibleVector.z</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kwave.data.Vector"><code class="docutils literal notranslate"><span class="pre">Vector</span></code></a><ul>
+<li><a class="reference internal" href="#kwave.data.Vector.__new__"><code class="docutils literal notranslate"><span class="pre">Vector.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.Vector.append"><code class="docutils literal notranslate"><span class="pre">Vector.append()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.Vector.assign_dim"><code class="docutils literal notranslate"><span class="pre">Vector.assign_dim()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.Vector.x"><code class="docutils literal notranslate"><span class="pre">Vector.x</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.Vector.y"><code class="docutils literal notranslate"><span class="pre">Vector.y</span></code></a></li>
+<li><a class="reference internal" href="#kwave.data.Vector.z"><code class="docutils literal notranslate"><span class="pre">Vector.z</span></code></a></li>
 </ul>
 </li>
 </ul>

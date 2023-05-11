@@ -256,8 +256,8 @@
 <span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span>
 
-<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span>
-<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Vector</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 
 
@@ -291,7 +291,7 @@
     <span class="n">create_normalized_wavenumber_vectors</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">flags</span><span class="o">.</span><span class="n">record_u_split_field</span><span class="p">)</span>
 
     <span class="n">pml_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_z_size</span><span class="p">]</span>
-    <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">pml_size</span><span class="p">[:</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">])</span>
+    <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">pml_size</span><span class="p">[:</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">])</span>
     <span class="n">all_vars_size</span> <span class="o">=</span> <span class="n">calculate_all_vars_size</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">)</span>
 
     <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">create_sensor_variables</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">,</span> <span class="n">num_sensor_points</span><span class="p">,</span> <span class="n">num_recorded_time_points</span><span class="p">,</span>
