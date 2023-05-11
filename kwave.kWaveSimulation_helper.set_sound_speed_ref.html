@@ -164,6 +164,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul class="current">
@@ -309,7 +310,7 @@ calculate the PML absorption, so just use the compressional wave speed</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref">
-<span class="sig-prename descclassname"><span class="pre">kwave.kWaveSimulation_helper.set_sound_speed_ref.</span></span><span class="sig-name descname"><span class="pre">set_sound_speed_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elastic_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kspace_elastic_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation_helper/set_sound_speed_ref.html#set_sound_speed_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.kWaveSimulation_helper.set_sound_speed_ref.</span></span><span class="sig-name descname"><span class="pre">set_sound_speed_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kWaveSimulation_helper/set_sound_speed_ref.html#set_sound_speed_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref" title="Permalink to this definition">#</a></dt>
 <dd><blockquote>
 <div><p>select the reference sound speed used in the k-space operator
 based on the heterogeneous sound speed map</p>
@@ -317,9 +318,8 @@ based on the heterogeneous sound speed map</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – </p></li>
-<li><p><strong>elastic_code</strong> (<em>bool</em>) – </p></li>
-<li><p><strong>kspace_elastic_code</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – kWaveMedium object</p></li>
+<li><p><strong>simulation_type</strong> (<em>SimulationType</em>) – Simulation type (fluid, axisymmetric, elastic, elastic with k-space correction)</p></li>
 </ul>
 </dd>
 </dl>

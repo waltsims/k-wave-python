@@ -163,6 +163,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul>
@@ -254,25 +255,27 @@
 <span></span><span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationType</span>
 
-<div class="viewcode-block" id="set_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">set_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">kspace_elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.set_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">set_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">simulation_type</span><span class="p">:</span> <span class="n">SimulationType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        select the reference sound speed used in the k-space operator</span>
 <span class="sd">        based on the heterogeneous sound speed map</span>
 <span class="sd">    Args:</span>
-<span class="sd">        medium:</span>
-<span class="sd">        elastic_code:</span>
-<span class="sd">        kspace_elastic_code:</span>
-
+<span class="sd">        medium: kWaveMedium object</span>
+<span class="sd">        simulation_type: Simulation type (fluid, axisymmetric, elastic, elastic with k-space correction)</span>
 <span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">elastic_code</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">get_ordinary_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">kspace_elastic_code</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">elif</span> <span class="n">simulation_type</span> <span class="o">==</span> <span class="n">SimulationType</span><span class="o">.</span><span class="n">ELASTIC</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="n">get_pstd_elastic_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-        <span class="k">return</span> <span class="n">get_kspace_elastic_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span></div>
+    <span class="k">elif</span> <span class="n">simulation_type</span> <span class="o">==</span> <span class="n">SimulationType</span><span class="o">.</span><span class="n">ELASTIC_WITH_KSPACE_CORRECTION</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="n">get_kspace_elastic_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Non-supported simulation type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">simulation_type</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_ordinary_sound_speed_ref"><a class="viewcode-back" href="../../../kwave.kWaveSimulation_helper.set_sound_speed_ref.html#kwave.kWaveSimulation_helper.set_sound_speed_ref.get_ordinary_sound_speed_ref">[docs]</a><span class="k">def</span> <span class="nf">get_ordinary_sound_speed_ref</span><span class="p">(</span><span class="n">medium</span><span class="p">):</span>

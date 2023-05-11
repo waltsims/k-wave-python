@@ -163,6 +163,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul>
@@ -253,22 +254,37 @@
           <h1>Source code for kwave.kspaceFirstOrder2D</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave.kmedium</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
+<span class="kn">from</span> <span class="nn">kwave.ksensor</span> <span class="kn">import</span> <span class="n">kSensor</span>
+
+<span class="kn">from</span> <span class="nn">kwave.ktransducer</span> <span class="kn">import</span> <span class="n">NotATransducer</span>
+
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span>
 
 <span class="kn">from</span> <span class="nn">kwave.executor</span> <span class="kn">import</span> <span class="n">Executor</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation</span> <span class="kn">import</span> <span class="n">kWaveSimulation</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
-<span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="n">kspaceFirstOrderC</span><span class="p">,</span> <span class="n">kspaceFirstOrderG</span>
+<span class="kn">from</span> <span class="nn">kwave.ksource</span> <span class="kn">import</span> <span class="n">kSource</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_execution_options</span> <span class="kn">import</span> <span class="n">SimulationExecutionOptions</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.interp</span> <span class="kn">import</span> <span class="n">interpolate2d</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.pml</span> <span class="kn">import</span> <span class="n">get_pml</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 
 
-<div class="viewcode-block" id="kspaceFirstOrder2DG"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG">[docs]</a><span class="nd">@kspaceFirstOrderG</span>
-<span class="k">def</span> <span class="nf">kspaceFirstOrder2DG</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="kspace_first_order_2d_gpu"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspace_first_order_2d_gpu">[docs]</a><span class="k">def</span> <span class="nf">kspace_first_order_2d_gpu</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="p">:</span> <span class="n">NotATransducer</span><span class="p">,</span>
+        <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="p">:</span> <span class="n">SimulationExecutionOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.</span>
 
@@ -298,12 +314,26 @@
 <span class="sd">    of kspaceFirstOrder3DC by replacing the binary name with the name of the</span>
 <span class="sd">    GPU binary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">kspaceFirstOrder2DC</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pass inputs to CPU version</span>
+    <span class="k">assert</span> <span class="n">execution_options</span><span class="o">.</span><span class="n">is_gpu_simulation</span><span class="p">,</span> <span class="s1">&#39;kspaceFirstOrder2DG can only be used for GPU simulations&#39;</span>
+    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">kspaceFirstOrder2DC</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span>
+        <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="o">=</span><span class="n">simulation_options</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="o">=</span><span class="n">execution_options</span>
+    <span class="p">)</span>  <span class="c1"># pass inputs to CPU version</span>
     <span class="k">return</span> <span class="n">sensor_data</span></div>
 
 
-<div class="viewcode-block" id="kspaceFirstOrder2DC"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">[docs]</a><span class="nd">@kspaceFirstOrderC</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">kspaceFirstOrder2DC</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="kspaceFirstOrder2DC"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrder2DC</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NotATransducer</span><span class="p">,</span> <span class="n">kSensor</span><span class="p">],</span>
+        <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="p">:</span> <span class="n">SimulationExecutionOptions</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2D time-domain simulation of wave propagation using C++ code.</span>
 
@@ -341,17 +371,36 @@
 <span class="sd">    GPU binary.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        kgrid: kWaveGrid instance</span>
+<span class="sd">        source: kWaveSource instance</span>
+<span class="sd">        sensor: NotATransducer or kSensor instance</span>
+<span class="sd">        medium: kWaveMedium instance</span>
+<span class="sd">        simulation_options: SimulationOptions instance</span>
+<span class="sd">        execution_options: SimulationExecutionOptions instance</span>
 
 <span class="sd">    Returns:</span>
-
+<span class="sd">        Sensor data as a numpy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># generate the input file and save to disk</span>
-    <span class="n">kspaceFirstOrder2D</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;save_to_disk&#39;</span><span class="p">]</span></div>
+    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">kspaceFirstOrder2D</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span>
+        <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="o">=</span><span class="n">simulation_options</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="o">=</span><span class="n">execution_options</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sensor_data</span></div>
 
 
-<div class="viewcode-block" id="kspaceFirstOrder2D"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrder2D</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="kspaceFirstOrder2D"><a class="viewcode-back" href="../../kwave.kspaceFirstOrder2D.html#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrder2D</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NotATransducer</span><span class="p">,</span> <span class="n">kSensor</span><span class="p">],</span>
+        <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="p">:</span> <span class="n">SimulationExecutionOptions</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2D time-domain simulation of wave propagation.</span>
 
@@ -500,7 +549,13 @@
     <span class="c1"># start the timer and store the start time</span>
     <span class="n">TicToc</span><span class="o">.</span><span class="n">tic</span><span class="p">()</span>
 
-    <span class="n">k_sim</span> <span class="o">=</span> <span class="n">kWaveSimulation</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">k_sim</span> <span class="o">=</span> <span class="n">kWaveSimulation</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span>
+        <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="o">=</span><span class="n">simulation_options</span>
+    <span class="p">)</span>
     <span class="n">k_sim</span><span class="o">.</span><span class="n">input_checking</span><span class="p">(</span><span class="s1">&#39;kspaceFirstOrder2D&#39;</span><span class="p">)</span>
 
     <span class="c1"># =========================================================================</span>
@@ -625,8 +680,8 @@
 
                             <span class="s1">&#39;transducer_source&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">transducer_source</span><span class="p">,</span>
                             <span class="s1">&#39;nonuniform_grid&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">,</span>
-                            <span class="s1">&#39;elastic_code&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span>
-                            <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
+                            <span class="s1">&#39;elastic_code&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">(),</span>
+                            <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">(),</span>
                             <span class="s1">&#39;cuboid_corners&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">cuboid_corners</span><span class="p">,</span>
                         <span class="p">}))</span>
 
@@ -641,7 +696,8 @@
         <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;output.h5&#39;</span><span class="p">)</span>
 
         <span class="n">executor</span> <span class="o">=</span> <span class="n">Executor</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s1">&#39;gpu&#39;</span><span class="p">)</span>
-        <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s1">&#39;--p_raw&#39;</span><span class="p">)</span>
+        <span class="n">executor_options</span> <span class="o">=</span> <span class="n">execution_options</span><span class="o">.</span><span class="n">get_options_string</span><span class="p">(</span><span class="n">sensor</span><span class="o">=</span><span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="p">)</span>
+        <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">executor_options</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">combine_sensor_data</span><span class="p">(</span><span class="n">sensor_data</span><span class="p">)</span></div>
 </pre></div>
         </article>

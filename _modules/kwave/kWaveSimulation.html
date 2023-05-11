@@ -163,6 +163,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul>
@@ -264,7 +265,7 @@
 <span class="kn">from</span> <span class="nn">kwave.ksensor</span> <span class="kn">import</span> <span class="n">kSensor</span>
 <span class="kn">from</span> <span class="nn">kwave.ksource</span> <span class="kn">import</span> <span class="n">kSource</span>
 <span class="kn">from</span> <span class="nn">kwave.ktransducer</span> <span class="kn">import</span> <span class="n">NotATransducer</span>
-<span class="kn">from</span> <span class="nn">kwave.options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">SimulationType</span>
 <span class="kn">from</span> <span class="nn">kwave.recorder</span> <span class="kn">import</span> <span class="n">Recorder</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.checks</span> <span class="kn">import</span> <span class="n">check_stability</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.colormap</span> <span class="kn">import</span> <span class="n">get_color_map</span>
@@ -281,28 +282,44 @@
 
 <div class="viewcode-block" id="kWaveSimulation.__init__"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+                 <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+                 <span class="n">sensor</span><span class="p">:</span> <span class="n">NotATransducer</span><span class="p">,</span>
                  <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
-                 <span class="n">source</span><span class="p">,</span>
-                 <span class="n">sensor</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span>
-                 <span class="p">):</span>
+                 <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span> <span class="o">=</span> <span class="n">kgrid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">medium</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="o">=</span> <span class="n">sensor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">simulation_options</span>
 
         <span class="c1"># =========================================================================</span>
         <span class="c1"># FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)</span>
         <span class="c1"># =========================================================================</span>
-        <span class="c1"># flags which control the type of simulation</span>
-        <span class="c1">#: Whether simulation type is axisymmetric</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">userarg_axisymmetric</span>      <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;axisymmetric&#39;</span><span class="p">]</span>
-
         <span class="c1"># flags which control the characteristics of the sensor</span>
         <span class="c1">#: Whether time reversal simulation is enabled</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">userarg_time_rev</span>          <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;time_rev&#39;</span><span class="p">]</span>
+
+        <span class="c1"># check if performing time reversal, and replace inputs to explicitly use a</span>
+        <span class="c1"># source with a dirichlet boundary condition</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># define a new source structure</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;p_mask&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">p_mask</span><span class="p">,</span>
+                <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="s1">&#39;p_mode&#39;</span><span class="p">:</span> <span class="s1">&#39;dirichlet&#39;</span>
+            <span class="p">}</span>
+
+            <span class="c1"># define a new sensor structure</span>
+            <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nz</span>
+            <span class="n">sensor</span> <span class="o">=</span> <span class="n">kSensor</span><span class="p">(</span>
+                <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nz</span><span class="p">))),</span>
+                <span class="n">record</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;p_final&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># set time reversal flag</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">userarg_time_rev</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># set time reversal flag</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">userarg_time_rev</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1">#: Whether sensor.mask should be re-ordered.</span>
         <span class="c1">#: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask</span>
@@ -312,8 +329,11 @@
         <span class="c1">#: Whether the sensor.mask is binary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">binary_sensor_mask</span>        <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1">#: If the sensor.mask is a list of cuboid corners</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">userarg_cuboid_corners</span>    <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cuboid_corners&#39;</span><span class="p">]</span>
+        <span class="c1"># check if the sensor mask is defined as a list of cuboid corners</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">userarg_cuboid_corners</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">userarg_cuboid_corners</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1">#: If tse sensor is an object of the kWaveTransducer class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transducer_sensor</span>         <span class="o">=</span> <span class="kc">False</span>
@@ -343,13 +363,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">STREAM_TO_DISK_FILENAME</span>         <span class="o">=</span> <span class="s1">&#39;temp_sensor_data.bin&#39;</span>   <span class="c1">#: default disk stream filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">LOG_NAME</span>                        <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;k-Wave-Log-&#39;</span><span class="p">,</span> <span class="n">get_date_string</span><span class="p">()]</span>  <span class="c1">#: default log filename</span>
 
-        <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;axisymmetric&#39;</span><span class="p">]</span>
-        <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cuboid_corners&#39;</span><span class="p">]</span>
-        <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;time_rev&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calling_func_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  start time: </span><span class="si">{</span><span class="n">get_date_string</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">c_ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_ref_compression</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_ref_shear</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transducer_input_signal</span> <span class="o">=</span> <span class="kc">None</span>
@@ -411,35 +426,6 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">elastic_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            True if elastic simulation False if fluid simulation</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calling_func_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;pstdElastic&#39;</span><span class="p">,</span> <span class="s1">&#39;kspaceElastic&#39;</span><span class="p">))</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">kspace_elastic_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            True if elastic simulation with k-space correction False if ordinary</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calling_func_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;kspaceElastic&#39;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">axisymmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            True if fluid axisymmetric simulation</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calling_func_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;kspaceFirstOrderAS&#39;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userarg_axisymmetric</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kelvin_voigt_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
@@ -465,7 +451,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">,</span> <span class="n">NotATransducer</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">()</span> <span class="ow">and</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userarg_time_rev</span>
@@ -756,21 +743,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_calling_func_name_and_dim</span><span class="p">(</span><span class="n">calling_func_name</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">)</span>
 
         <span class="c1"># run subscript to check optional inputs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">SimulationOptions</span><span class="o">.</span><span class="n">option_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">SimulationOptions</span><span class="o">.</span><span class="n">option_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
         <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span>
 
         <span class="c1"># TODO(Walter): clean this up with getters in simulation options pml size</span>
         <span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_y_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_z_size</span>
         <span class="n">pml_size</span> <span class="o">=</span> <span class="n">Array</span><span class="p">([</span><span class="n">pml_x_size</span><span class="p">,</span> <span class="n">pml_y_size</span><span class="p">,</span> <span class="n">pml_z_size</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">print_start_status</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">)</span>
+        <span class="n">is_elastic_code</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_start_status</span><span class="p">(</span><span class="n">is_elastic_code</span><span class="o">=</span><span class="n">is_elastic_code</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_index_data_type</span><span class="p">()</span>
 
-        <span class="n">user_medium_density_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_medium</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">)</span>
+        <span class="n">user_medium_density_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_medium</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">simulation_type</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="p">)</span>
 
         <span class="c1"># select the reference sound speed used in the k-space operator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">c_ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_ref_compression</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_ref_shear</span> \
-            <span class="o">=</span> <span class="n">set_sound_speed_ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kspace_elastic_code</span><span class="p">)</span>
+            <span class="o">=</span> <span class="n">set_sound_speed_ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">check_source</span><span class="p">(</span><span class="n">k_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_sensor</span><span class="p">(</span><span class="n">k_dim</span><span class="p">,</span> <span class="n">k_Nt</span><span class="p">)</span>
@@ -779,14 +767,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_input_combinations</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">user_medium_density_input</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
 
         <span class="c1"># run subscript to display time step, max supported frequency etc.</span>
-        <span class="n">display_simulation_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">)</span>
+        <span class="n">display_simulation_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="n">is_elastic_code</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">smooth_and_enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">k_dim</span><span class="p">,</span> <span class="n">Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">opt</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_sensor_variables</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_absorption_vars</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assign_pseudonyms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_source_terms</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">scale_source_terms</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">create_pml_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">pml_size</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_pml_indices</span><span class="p">(</span>
+            <span class="n">kgrid_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+            <span class="n">kgrid_N</span><span class="o">=</span><span class="n">Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">N</span><span class="p">),</span>
+            <span class="n">pml_size</span><span class="o">=</span><span class="n">pml_size</span><span class="p">,</span>
+            <span class="n">pml_inside</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span><span class="p">,</span>
+            <span class="n">is_axisymmetric</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">()</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_calling_func_name_and_dim"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_calling_func_name_and_dim">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_calling_func_name_and_dim</span><span class="p">(</span><span class="n">calling_func_name</span><span class="p">,</span> <span class="n">kgrid_dim</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -811,7 +805,7 @@
             <span class="k">assert</span> <span class="n">kgrid_dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;kgrid has the wrong dimensionality for </span><span class="si">{</span><span class="n">calling_func_name</span><span class="si">}</span><span class="s1">.&#39;</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.print_start_status"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.print_start_status">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">print_start_status</span><span class="p">(</span><span class="n">is_elastic_code</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">print_start_status</span><span class="p">(</span><span class="n">is_elastic_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update command-line status with the start time</span>
 
@@ -839,7 +833,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">index_data_type</span> <span class="o">=</span> <span class="n">get_smallest_possible_type</span><span class="p">(</span><span class="n">total_grid_points</span><span class="p">,</span> <span class="s1">&#39;uint&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.check_medium"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.check_medium">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_medium</span><span class="p">(</span><span class="n">medium</span><span class="p">,</span> <span class="n">kgrid_k</span><span class="p">,</span> <span class="n">is_elastic</span><span class="p">,</span> <span class="n">is_axisymmetric</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_medium</span><span class="p">(</span><span class="n">medium</span><span class="p">,</span> <span class="n">kgrid_k</span><span class="p">,</span> <span class="n">simulation_type</span><span class="p">:</span> <span class="n">SimulationType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the properties of the medium structure for correctness and validity</span>
 
@@ -854,7 +848,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># if using the fluid code, allow the density field to be blank if the medium is homogeneous</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_elastic</span> <span class="ow">and</span> <span class="n">medium</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">())</span> <span class="ow">and</span> <span class="n">medium</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">user_medium_density_input</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">medium</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
@@ -863,7 +857,7 @@
 
         <span class="c1"># check medium absorption inputs for the fluid code</span>
         <span class="n">is_absorbing</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">medium</span><span class="o">.</span><span class="n">is_defined</span><span class="p">(</span><span class="s1">&#39;alpha_coeff&#39;</span><span class="p">,</span> <span class="s1">&#39;alpha_power&#39;</span><span class="p">))</span>
-        <span class="n">is_stokes</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_axisymmetric</span> <span class="ow">or</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">==</span> <span class="s1">&#39;stokes&#39;</span><span class="p">)</span>
+        <span class="n">is_stokes</span> <span class="o">=</span> <span class="p">(</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">()</span> <span class="ow">or</span> <span class="n">medium</span><span class="o">.</span><span class="n">alpha_mode</span> <span class="o">==</span> <span class="s1">&#39;stokes&#39;</span><span class="p">)</span>
         <span class="n">medium</span><span class="o">.</span><span class="n">set_absorbing</span><span class="p">(</span><span class="n">is_absorbing</span><span class="p">,</span> <span class="n">is_stokes</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">is_absorbing</span><span class="p">:</span>
@@ -934,7 +928,7 @@
                     <span class="k">pass</span>
 
                 <span class="c1"># check for time reversal inputs and set flgs</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">time_reversal_boundary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="c1"># check for sensor.record and set usage flgs - if no flgs are</span>
@@ -950,7 +944,7 @@
                     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;sensor.record must be given as a list, e.g. [&quot;p&quot;, &quot;u&quot;]&#39;</span>
 
                     <span class="c1"># check the sensor record flgs</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">set_flags_from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">set_flags_from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">())</span>
 
                 <span class="c1"># enforce the sensor.mask field unless just recording the max_all</span>
                 <span class="c1"># and _final variables</span>
@@ -1058,7 +1052,7 @@
                         <span class="c1"># cartesian_interp = &#39;linear&#39; then this is only used for</span>
                         <span class="c1"># display, if flgs.time_rev = true or cartesian_interp =</span>
                         <span class="c1"># &#39;nearest&#39; this grid is used as the sensor.mask</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorder_index</span> <span class="o">=</span> <span class="n">cart2grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorder_index</span> <span class="o">=</span> <span class="n">cart2grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">())</span>
 
                         <span class="c1"># if in time reversal mode, reorder the p0 input data in</span>
                         <span class="c1"># the order of the binary sensor_mask</span>
@@ -1307,7 +1301,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">makeTime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">KSPACE_CFL</span><span class="p">)</span>
 
         <span class="c1"># check kgrid.t_array for stability given medium properties</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">():</span>
 
             <span class="c1"># calculate the largest timestep for which the model is stable</span>
 
@@ -1393,11 +1387,12 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The optional input &#39;&#39;StreamToDisk&#39;&#39; is currently only compatible with sensor.record = {&#39;&#39;p&#39;&#39;} (the default).&#39;</span><span class="p">)</span>
 
+        <span class="n">is_axisymmetric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">()</span>
         <span class="c1"># make sure the PML size is smaller than the grid if PMLInside is true</span>
         <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">pml_inside</span> <span class="ow">and</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">Nx</span><span class="p">)))</span> <span class="ow">or</span>
-                <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span> <span class="ow">or</span>
-                <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_axisymmetric</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">is_axisymmetric</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span> <span class="ow">or</span>
                 <span class="p">(</span><span class="n">k_dim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="p">((</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pml_size</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">kgrid_N</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">))):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The size of the PML must be smaller than the size of the grid.&#39;</span><span class="p">)</span>
 
@@ -1416,7 +1411,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sensor.record_start_index must be between 1 and the number of time steps.&#39;</span><span class="p">)</span>
 
         <span class="c1"># ensure &#39;WSWA&#39; symmetry if using axisymmetric code with &#39;SaveToDisk&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span> <span class="o">!=</span> <span class="s1">&#39;WSWA&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_axisymmetric</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span> <span class="o">!=</span> <span class="s1">&#39;WSWA&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 
             <span class="c1"># display a warning only if using WSWS symmetry (not WSWA-FFT)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;WSWS&#39;</span><span class="p">):</span>
@@ -1469,7 +1464,7 @@
             <span class="c1"># update command line status</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  smoothing p0 distribution...&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">():</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;WSWA-FFT&#39;</span><span class="p">,</span> <span class="s1">&#39;WSWA&#39;</span><span class="p">]:</span>
                     <span class="c1"># create a new kWave grid object with expanded radial grid</span>
                     <span class="n">kgrid_exp</span> <span class="o">=</span> <span class="n">kWaveGrid</span><span class="p">([</span><span class="n">kgrid_N</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">kgrid_N</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">dy</span><span class="p">])</span>
@@ -1514,7 +1509,7 @@
                     <span class="s1">&#39;s_source_pos_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_source_pos_index</span><span class="p">,</span>
                 <span class="p">}),</span>
                 <span class="n">dotdict</span><span class="p">({</span>
-                    <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
+                    <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">(),</span>
                     <span class="s1">&#39;use_sensor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sensor</span><span class="p">,</span>
                     <span class="s1">&#39;blank_sensor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blank_sensor</span><span class="p">,</span>
                     <span class="s1">&#39;cuboid_corners&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cuboid_corners</span><span class="p">,</span>
@@ -1539,7 +1534,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_data_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_source_pos_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_source_pos_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_source_pos_index</span> <span class="o">=</span> <span class="n">expand_results</span>
 
         <span class="c1"># get maximum prime factors</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">():</span>
             <span class="n">prime_facs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">highest_prime_factors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">radial_symmetry</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prime_facs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">highest_prime_factors</span><span class="p">()</span>
@@ -1630,7 +1625,7 @@
                     <span class="s1">&#39;time_rev&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_rev</span><span class="p">,</span>
                     <span class="s1">&#39;blank_sensor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blank_sensor</span><span class="p">,</span>
                     <span class="s1">&#39;record_u_split_field&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">record_u_split_field</span><span class="p">,</span>
-                    <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
+                    <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">(),</span>
                     <span class="s1">&#39;reorder_data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorder_data</span><span class="p">,</span>
                 <span class="p">}),</span>
                 <span class="n">dotdict</span><span class="p">({</span>
@@ -1652,7 +1647,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_code</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_nabla2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">absorb_eta</span> <span class="o">=</span> <span class="n">create_absorption_variables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">equation_of_state</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="kWaveSimulation.assign_pseudonyms"><a class="viewcode-back" href="../../kwave.kWaveSimulation.html#kwave.kWaveSimulation.kWaveSimulation.assign_pseudonyms">[docs]</a>    <span class="k">def</span> <span class="nf">assign_pseudonyms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span> <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1742,7 +1737,7 @@
         <span class="k">elif</span> <span class="n">kgrid_dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="n">pml_size</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x2</span> <span class="o">=</span> <span class="n">kgrid_N</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">pml_size</span><span class="o">.</span><span class="n">x</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_axisymmetric</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">y1</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">y1</span> <span class="o">=</span> <span class="n">pml_size</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="mf">1.0</span>

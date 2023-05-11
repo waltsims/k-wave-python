@@ -164,6 +164,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul class="current">
@@ -264,7 +265,7 @@
 <span id="kwave-kspacefirstorder2d-module"></span><h1>kwave.kspaceFirstOrder2D module<a class="headerlink" href="#module-kwave.kspaceFirstOrder2D" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrder2D.kspaceFirstOrder2D">
-<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrder2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspaceFirstOrder2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrder2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspaceFirstOrder2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D" title="Permalink to this definition">#</a></dt>
 <dd><p>2D time-domain simulation of wave propagation.</p>
 <p>kspaceFirstOrder2D simulates the time-domain propagation of
 compressional waves through a two-dimensional homogeneous or
@@ -392,11 +393,13 @@ input fields source.p0 and source.p removed or set to zero.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> – kWaveGrid instance</p></li>
-<li><p><strong>medium</strong> – kWaveMedium instance</p></li>
-<li><p><strong>source</strong> – kWaveSource instance</p></li>
-<li><p><strong>sensor</strong> – kWaveSensor instance</p></li>
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – kWaveGrid instance</p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – kWaveMedium instance</p></li>
+<li><p><strong>source</strong> (<a class="reference internal" href="kwave.ksource.html#kwave.ksource.kSource" title="kwave.ksource.kSource"><em>kSource</em></a>) – kWaveSource instance</p></li>
+<li><p><strong>sensor</strong> (<a class="reference internal" href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer" title="kwave.ktransducer.NotATransducer"><em>NotATransducer</em></a><em> | </em><a class="reference internal" href="kwave.ksensor.html#kwave.ksensor.kSensor" title="kwave.ksensor.kSensor"><em>kSensor</em></a>) – kWaveSensor instance</p></li>
 <li><p><strong>**kwargs</strong> – </p></li>
+<li><p><strong>simulation_options</strong> (<em>SimulationOptions</em>) – </p></li>
+<li><p><strong>execution_options</strong> (<em>SimulationExecutionOptions</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -405,7 +408,7 @@ input fields source.p0 and source.p removed or set to zero.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC">
-<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrder2DC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspaceFirstOrder2DC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrder2DC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspaceFirstOrder2DC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC" title="Permalink to this definition">#</a></dt>
 <dd><p>2D time-domain simulation of wave propagation using C++ code.</p>
 <p>kspaceFirstOrder2DC provides a blind interface to the C++ version of
 kspaceFirstOrder2D (called kspaceFirstOrder-OMP) in the same way as
@@ -440,15 +443,24 @@ of kspaceFirstOrder3DC by replacing the binary name with the name of the
 GPU binary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – kWaveGrid instance</p></li>
+<li><p><strong>source</strong> (<a class="reference internal" href="kwave.ksource.html#kwave.ksource.kSource" title="kwave.ksource.kSource"><em>kSource</em></a>) – kWaveSource instance</p></li>
+<li><p><strong>sensor</strong> (<a class="reference internal" href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer" title="kwave.ktransducer.NotATransducer"><em>NotATransducer</em></a><em> | </em><a class="reference internal" href="kwave.ksensor.html#kwave.ksensor.kSensor" title="kwave.ksensor.kSensor"><em>kSensor</em></a>) – NotATransducer or kSensor instance</p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – kWaveMedium instance</p></li>
+<li><p><strong>simulation_options</strong> (<em>SimulationOptions</em>) – SimulationOptions instance</p></li>
+<li><p><strong>execution_options</strong> (<em>SimulationExecutionOptions</em>) – SimulationExecutionOptions instance</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sensor data as a numpy array</p>
 </dd>
 </dl>
-<p>Returns:</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG">
-<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrder2DG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspaceFirstOrder2DG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kwave.kspaceFirstOrder2D.kspace_first_order_2d_gpu">
+<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrder2D.</span></span><span class="sig-name descname"><span class="pre">kspace_first_order_2d_gpu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrder2D.html#kspace_first_order_2d_gpu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrder2D.kspace_first_order_2d_gpu" title="Permalink to this definition">#</a></dt>
 <dd><p>2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.</p>
 <p>kspaceFirstOrder2DG provides a blind interface to the C++/CUDA
 version of kspaceFirstOrder2D (called kspaceFirstOrder-CUDA) in the
@@ -474,6 +486,21 @@ specified using the optional input parameters ‘BinaryName’ and
 <p>This function is essentially a wrapper and directly uses the capabilities
 of kspaceFirstOrder3DC by replacing the binary name with the name of the
 GPU binary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – </p></li>
+<li><p><strong>source</strong> (<a class="reference internal" href="kwave.ksource.html#kwave.ksource.kSource" title="kwave.ksource.kSource"><em>kSource</em></a>) – </p></li>
+<li><p><strong>sensor</strong> (<a class="reference internal" href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer" title="kwave.ktransducer.NotATransducer"><em>NotATransducer</em></a>) – </p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – </p></li>
+<li><p><strong>simulation_options</strong> (<em>SimulationOptions</em>) – </p></li>
+<li><p><strong>execution_options</strong> (<em>SimulationExecutionOptions</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -536,7 +563,7 @@ GPU binary.</p>
 <li><a class="reference internal" href="#">kwave.kspaceFirstOrder2D module</a><ul>
 <li><a class="reference internal" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2D"><code class="docutils literal notranslate"><span class="pre">kspaceFirstOrder2D()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DC"><code class="docutils literal notranslate"><span class="pre">kspaceFirstOrder2DC()</span></code></a></li>
-<li><a class="reference internal" href="#kwave.kspaceFirstOrder2D.kspaceFirstOrder2DG"><code class="docutils literal notranslate"><span class="pre">kspaceFirstOrder2DG()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.kspaceFirstOrder2D.kspace_first_order_2d_gpu"><code class="docutils literal notranslate"><span class="pre">kspace_first_order_2d_gpu()</span></code></a></li>
 </ul>
 </li>
 </ul>

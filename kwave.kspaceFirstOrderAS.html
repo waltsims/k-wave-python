@@ -164,6 +164,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul class="current">
@@ -264,7 +265,7 @@
 <span id="kwave-kspacefirstorderas-module"></span><h1>kwave.kspaceFirstOrderAS module<a class="headerlink" href="#module-kwave.kspaceFirstOrderAS" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">
-<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderAS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderAS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderAS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderAS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS" title="Permalink to this definition">#</a></dt>
 <dd><p>Axisymmetric time-domain simulation of wave propagation.</p>
 <p>kspaceFirstOrderAS simulates the time-domain propagation of
 compressional waves through an axisymmetric homogeneous or
@@ -314,11 +315,13 @@ outputs are not required, it is not necessary to specify medium.density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kgrid</strong> – kWaveGrid instance</p></li>
-<li><p><strong>medium</strong> – kWaveMedium instance</p></li>
-<li><p><strong>source</strong> – kWaveSource instance</p></li>
-<li><p><strong>sensor</strong> – kWaveSensor instance</p></li>
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – kWaveGrid instance</p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – kWaveMedium instance</p></li>
+<li><p><strong>source</strong> (<a class="reference internal" href="kwave.ksource.html#kwave.ksource.kSource" title="kwave.ksource.kSource"><em>kSource</em></a>) – kWaveSource instance</p></li>
+<li><p><strong>sensor</strong> (<a class="reference internal" href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer" title="kwave.ktransducer.NotATransducer"><em>NotATransducer</em></a><em> | </em><a class="reference internal" href="kwave.ksensor.html#kwave.ksensor.kSensor" title="kwave.ksensor.kSensor"><em>kSensor</em></a>) – kWaveSensor instance</p></li>
 <li><p><strong>**kwargs</strong> – </p></li>
+<li><p><strong>simulation_options</strong> (<em>SimulationOptions</em>) – </p></li>
+<li><p><strong>execution_options</strong> (<em>SimulationExecutionOptions</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -327,7 +330,7 @@ outputs are not required, it is not necessary to specify medium.density.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">
-<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderASC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderASC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.kspaceFirstOrderAS.</span></span><span class="sig-name descname"><span class="pre">kspaceFirstOrderASC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/kspaceFirstOrderAS.html#kspaceFirstOrderASC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC" title="Permalink to this definition">#</a></dt>
 <dd><p>Axisymmetric time-domain simulation of wave propagation using C++ code.</p>
 <p>kspaceFirstOrderASC provides a blind interface to the C++ version of
 kspaceFirstOrderAS (called kspaceFirstOrder-OMP) in the same way as
@@ -362,7 +365,15 @@ of kspaceFirstOrder3DC by replacing the binary name with the name of the
 GPU binary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>**kwargs</strong> – </p></li>
+<li><p><strong>kgrid</strong> (<a class="reference internal" href="kwave.kgrid.html#kwave.kgrid.kWaveGrid" title="kwave.kgrid.kWaveGrid"><em>kWaveGrid</em></a>) – </p></li>
+<li><p><strong>source</strong> (<a class="reference internal" href="kwave.ksource.html#kwave.ksource.kSource" title="kwave.ksource.kSource"><em>kSource</em></a>) – </p></li>
+<li><p><strong>sensor</strong> (<a class="reference internal" href="kwave.ktransducer.html#kwave.ktransducer.NotATransducer" title="kwave.ktransducer.NotATransducer"><em>NotATransducer</em></a><em> | </em><a class="reference internal" href="kwave.ksensor.html#kwave.ksensor.kSensor" title="kwave.ksensor.kSensor"><em>kSensor</em></a>) – </p></li>
+<li><p><strong>medium</strong> (<a class="reference internal" href="kwave.kmedium.html#kwave.kmedium.kWaveMedium" title="kwave.kmedium.kWaveMedium"><em>kWaveMedium</em></a>) – </p></li>
+<li><p><strong>simulation_options</strong> (<em>SimulationOptions</em>) – </p></li>
+<li><p><strong>execution_options</strong> (<em>SimulationExecutionOptions</em>) – </p></li>
+</ul>
 </dd>
 </dl>
 <p>Returns:</p>

@@ -163,6 +163,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul>
@@ -252,9 +253,10 @@
         <article role="main">
           <h1>Source code for kwave.kWaveSimulation_helper.create_storage_variables</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">kwave.kgrid</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span>
 
-<span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">kWaveGrid</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span>
 <span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 

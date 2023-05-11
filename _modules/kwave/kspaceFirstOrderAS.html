@@ -163,6 +163,7 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/development_environment.html#test-references">Test References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">kwave</span></p>
 <ul>
@@ -253,8 +254,14 @@
           <h1>Source code for kwave.kspaceFirstOrderAS</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">kwave.kmedium</span> <span class="kn">import</span> <span class="n">kWaveMedium</span>
+<span class="kn">from</span> <span class="nn">kwave.ksensor</span> <span class="kn">import</span> <span class="n">kSensor</span>
+
+<span class="kn">from</span> <span class="nn">kwave.ktransducer</span> <span class="kn">import</span> <span class="n">NotATransducer</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span>
 
 <span class="kn">from</span> <span class="nn">kwave</span> <span class="kn">import</span> <span class="n">kWaveGrid</span>
@@ -262,7 +269,9 @@
 <span class="kn">from</span> <span class="nn">kwave.executor</span> <span class="kn">import</span> <span class="n">Executor</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation</span> <span class="kn">import</span> <span class="n">kWaveSimulation</span>
 <span class="kn">from</span> <span class="nn">kwave.kWaveSimulation_helper</span> <span class="kn">import</span> <span class="n">retract_transducer_grid_size</span><span class="p">,</span> <span class="n">save_to_disk_func</span>
-<span class="kn">from</span> <span class="nn">kwave.kspaceFirstOrder</span> <span class="kn">import</span> <span class="n">kspaceFirstOrderC</span>
+<span class="kn">from</span> <span class="nn">kwave.ksource</span> <span class="kn">import</span> <span class="n">kSource</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_options</span> <span class="kn">import</span> <span class="n">SimulationOptions</span><span class="p">,</span> <span class="n">SimulationType</span>
+<span class="kn">from</span> <span class="nn">kwave.options.simulation_execution_options</span> <span class="kn">import</span> <span class="n">SimulationExecutionOptions</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.dotdictionary</span> <span class="kn">import</span> <span class="n">dotdict</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.interp</span> <span class="kn">import</span> <span class="n">interpolate2d</span>
 <span class="kn">from</span> <span class="nn">kwave.utils.math</span> <span class="kn">import</span> <span class="n">sinc</span>
@@ -271,8 +280,14 @@
 <span class="kn">from</span> <span class="nn">kwave.utils.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
 
 
-<div class="viewcode-block" id="kspaceFirstOrderASC"><a class="viewcode-back" href="../../kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">[docs]</a><span class="nd">@kspaceFirstOrderC</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">kspaceFirstOrderASC</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="kspaceFirstOrderASC"><a class="viewcode-back" href="../../kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderASC">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrderASC</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NotATransducer</span><span class="p">,</span> <span class="n">kSensor</span><span class="p">],</span>
+        <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="p">:</span> <span class="n">SimulationExecutionOptions</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Axisymmetric time-domain simulation of wave propagation using C++ code.</span>
 
@@ -318,11 +333,25 @@
 <span class="sd">    Returns:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># generate the input file and save to disk</span>
-    <span class="n">kspaceFirstOrderAS</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;save_to_disk&#39;</span><span class="p">]</span></div>
+    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">kspaceFirstOrderAS</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span>
+        <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="o">=</span><span class="n">simulation_options</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="o">=</span><span class="n">execution_options</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sensor_data</span></div>
 
 
-<div class="viewcode-block" id="kspaceFirstOrderAS"><a class="viewcode-back" href="../../kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrderAS</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="kspaceFirstOrderAS"><a class="viewcode-back" href="../../kwave.kspaceFirstOrderAS.html#kwave.kspaceFirstOrderAS.kspaceFirstOrderAS">[docs]</a><span class="k">def</span> <span class="nf">kspaceFirstOrderAS</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="p">:</span> <span class="n">kWaveGrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">kSource</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NotATransducer</span><span class="p">,</span> <span class="n">kSensor</span><span class="p">],</span>
+        <span class="n">medium</span><span class="p">:</span> <span class="n">kWaveMedium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="p">:</span> <span class="n">SimulationOptions</span><span class="p">,</span>
+        <span class="n">execution_options</span><span class="p">:</span> <span class="n">SimulationExecutionOptions</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Axisymmetric time-domain simulation of wave propagation.</span>
 
@@ -388,7 +417,18 @@
     <span class="c1"># start the timer and store the start time</span>
     <span class="n">TicToc</span><span class="o">.</span><span class="n">tic</span><span class="p">()</span>
 
-    <span class="n">k_sim</span> <span class="o">=</span> <span class="n">kWaveSimulation</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">medium</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">simulation_options</span><span class="o">.</span><span class="n">simulation_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">SimulationType</span><span class="o">.</span><span class="n">AXISYMMETRIC</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: simulation type is not set to axisymmetric while using kSapceFirstOrderAS. &quot;</span>
+              <span class="s2">&quot;Setting simulation type to axisymmetric.&quot;</span><span class="p">)</span>
+        <span class="n">simulation_options</span><span class="o">.</span><span class="n">simulation_type</span> <span class="o">=</span> <span class="n">SimulationType</span><span class="o">.</span><span class="n">AXISYMMETRIC</span>
+
+    <span class="n">k_sim</span> <span class="o">=</span> <span class="n">kWaveSimulation</span><span class="p">(</span>
+        <span class="n">kgrid</span><span class="o">=</span><span class="n">kgrid</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="n">sensor</span><span class="p">,</span>
+        <span class="n">medium</span><span class="o">=</span><span class="n">medium</span><span class="p">,</span>
+        <span class="n">simulation_options</span><span class="o">=</span><span class="n">simulation_options</span>
+    <span class="p">)</span>
     <span class="n">k_sim</span><span class="o">.</span><span class="n">input_checking</span><span class="p">(</span><span class="s1">&#39;kspaceFirstOrderAS&#39;</span><span class="p">)</span>
 
     <span class="c1"># =========================================================================</span>
@@ -463,7 +503,7 @@
             <span class="c1"># symmetries in WSWS</span>
             <span class="n">kgrid_exp</span> <span class="o">=</span> <span class="n">kWaveGrid</span><span class="p">([</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">])</span>
         <span class="c1"># define operators, rotating y-direction for use with bsxfun</span>
-        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k</span> <span class="o">=</span> <span class="n">ifftshift</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kgrid</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">k_sim</span><span class="o">.</span><span class="n">ddy_k</span> <span class="o">=</span> <span class="n">ifftshift</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">kgrid</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">k_sim</span><span class="o">.</span><span class="n">y_shift_pos</span> <span class="o">=</span> <span class="n">ifftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kgrid_exp</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="n">kgrid_exp</span><span class="o">.</span><span class="n">dy</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
         <span class="n">k_sim</span><span class="o">.</span><span class="n">y_shift_neg</span> <span class="o">=</span> <span class="n">ifftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kgrid_exp</span><span class="o">.</span><span class="n">k_vec</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="n">kgrid_exp</span><span class="o">.</span><span class="n">dy</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
 
@@ -567,8 +607,8 @@
 
                               <span class="s1">&#39;transducer_source&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">transducer_source</span><span class="p">,</span>
                               <span class="s1">&#39;nonuniform_grid&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">nonuniform_grid</span><span class="p">,</span>
-                              <span class="s1">&#39;elastic_code&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">elastic_code</span><span class="p">,</span>
-                              <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">axisymmetric</span><span class="p">,</span>
+                              <span class="s1">&#39;elastic_code&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_elastic_simulation</span><span class="p">(),</span>
+                              <span class="s1">&#39;axisymmetric&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">simulation_type</span><span class="o">.</span><span class="n">is_axisymmetric</span><span class="p">(),</span>
                               <span class="s1">&#39;cuboid_corners&#39;</span><span class="p">:</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">cuboid_corners</span><span class="p">,</span>
                           <span class="p">}))</span>
 
@@ -583,7 +623,8 @@
         <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;output.h5&#39;</span><span class="p">)</span>
 
         <span class="n">executor</span> <span class="o">=</span> <span class="n">Executor</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s1">&#39;gpu&#39;</span><span class="p">)</span>
-        <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s1">&#39;--p_raw&#39;</span><span class="p">)</span>
+        <span class="n">executor_options</span> <span class="o">=</span> <span class="n">execution_options</span><span class="o">.</span><span class="n">get_options_string</span><span class="p">(</span><span class="n">sensor</span><span class="o">=</span><span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="p">)</span>
+        <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">executor_options</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">k_sim</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">combine_sensor_data</span><span class="p">(</span><span class="n">sensor_data</span><span class="p">)</span></div>
 </pre></div>
         </article>
