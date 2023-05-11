@@ -62,7 +62,7 @@ found [here](https://waltersimson.com/k-wave-python/development/development_envi
 
 ## Documentation
 
-The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/))
+The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/).
 
 ## Contact
 
