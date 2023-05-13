@@ -1121,7 +1121,7 @@ def make_line(
     return line
 
 
-def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: float, diameter: float,
+def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: float,
              focus_pos: np.ndarray) -> np.ndarray:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
@@ -1234,7 +1234,7 @@ def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: float, diameter
     return arc
 
 
-def make_pixel_map_point(grid_size: np.ndarray, centre_pos: np.ndarray) -> np.ndarray:
+def make_pixel_map_point(grid_size: Vector, centre_pos: np.ndarray) -> np.ndarray:
     """
     Generates a map of the distance of each pixel from a given centre position.
 
@@ -1295,7 +1295,7 @@ def make_pixel_map_point(grid_size: np.ndarray, centre_pos: np.ndarray) -> np.nd
     return pixel_map
 
 
-def make_pixel_map_plane(grid_size: np.ndarray, normal: np.ndarray, point: np.ndarray) -> np.ndarray:
+def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarray) -> np.ndarray:
     """
     Generates a pixel map of a plane with given normal vector and point.
 
@@ -1425,7 +1425,7 @@ def make_bowl(grid_size: Tuple[int, int, int], bowl_pos: Tuple[int, int, int], r
     Nx = np.round(np.sqrt(2) * diameter).astype(int) + BOUNDING_BOX_EXP
     Ny = Nx
     Nz = Nx
-    grid_size_sm = np.array([Nx, Ny, Nz])
+    grid_size_sm = Vector([Nx, Ny, Nz])
 
     # set the bowl position to be the centre of the bounding box
     bx = np.ceil(Nx / 2).astype(int)
