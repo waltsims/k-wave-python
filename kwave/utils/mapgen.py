@@ -325,7 +325,7 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
     return ball
 
 
-def make_cart_sphere(radius: float, num_points: int, center_pos: Tuple[float, float, float] = (0, 0, 0),
+def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector([0, 0, 0]),
                      plot_sphere: bool = False) -> Union[
     List[Tuple[float, float, float]], Tuple[List[Tuple[float, float, float]], Any]]:
     """
@@ -356,9 +356,7 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Tuple[float, fl
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
 
     # offset if needed
-    sphere[0, :] = sphere[0, :] + cx
-    sphere[1, :] = sphere[1, :] + cy
-    sphere[2, :] = sphere[2, :] + cz
+    sphere[:] = sphere[:] + center_pos[:, None]
 
     # plot results
     if plot_sphere:
@@ -380,7 +378,7 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Tuple[float, fl
     return sphere.squeeze()
 
 
-def make_cart_circle(radius: float, num_points: int, center_pos: Tuple[float, float] = (0, 0),
+def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector([0, 0]),
                      arc_angle: float = 2 * np.pi, plot_circle: bool = False) -> np.ndarray:
     """
     Create a set of points in cartesian coordinates defining a circle or arc.
@@ -405,9 +403,6 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Tuple[float, fl
     else:
         full_circle = False
 
-    cx = center_pos[0]
-    cy = center_pos[1]
-
     n_steps = num_points if full_circle else num_points - 1
 
     # create angles
@@ -417,8 +412,7 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Tuple[float, fl
     circle = np.concatenate([radius * np.cos(angles[np.newaxis, :]), radius * np.sin(-angles[np.newaxis])])
 
     # offset if needed
-    circle[0, :] = circle[0, :] + cx
-    circle[1, :] = circle[1, :] + cy
+    circle = circle + center_pos[:, None]
 
     # plot results
     if plot_circle:
