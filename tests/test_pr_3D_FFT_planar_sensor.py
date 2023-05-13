@@ -10,6 +10,8 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -29,14 +31,13 @@ def test_pr_3D_FFT_planar_sensor():
     scale = 1
 
     # create the computational grid
-    PML_size = 10                   # size of the PML in grid points
-    Nx = 32 * scale - 2 * PML_size  # number of grid points in the x direction
-    Ny = 64 * scale - 2 * PML_size  # number of grid points in the y direction
-    Nz = 64 * scale - 2 * PML_size  # number of grid points in the z direction
-    dx = 0.2e-3 / scale             # grid point spacing in the x direction [m]
-    dy = 0.2e-3 / scale             # grid point spacing in the y direction [m]
-    dz = 0.2e-3 / scale             # grid point spacing in the z direction [m]
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    # size of the PML in grid points
+    pml_size = Vector([10])
+    # number of grid points in each direction
+    num_grid_points = scale * Vector([32, 64, 64]) - 2 * pml_size
+    # grid point spacing in each direction [m]
+    spacing_between_grid_points = 1e-3 * Vector([0.2, 0.2, 0.2]) / scale
+    kgrid = kWaveGrid(num_grid_points, spacing_between_grid_points)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
@@ -44,7 +45,7 @@ def test_pr_3D_FFT_planar_sensor():
     # create initial pressure distribution using make_ball
     ball_magnitude = 10         # [Pa]
     ball_radius = 3 * scale     # [grid points]
-    p0 = ball_magnitude * make_ball(Nx, Ny, Nz, Nx / 2, Ny / 2, Nz / 2, ball_radius)
+    p0 = ball_magnitude * make_ball(num_grid_points.x, num_grid_points.y, num_grid_points.z, num_grid_points.x / 2, num_grid_points.y / 2, num_grid_points.z / 2, ball_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
     source = kSource()
@@ -64,7 +65,7 @@ def test_pr_3D_FFT_planar_sensor():
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
         pml_inside=False,
-        pml_size=PML_size,
+        pml_size=pml_size,
         smooth_p0=False,
         save_to_disk=True,
         input_filename=input_filename,
