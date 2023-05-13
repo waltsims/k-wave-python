@@ -13,6 +13,7 @@ from .data import scale_SI
 from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
+from ..data import Vector
 
 
 def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
@@ -274,18 +275,14 @@ def water_non_linearity(temp: float) -> float:
 
 
 # TODO: refactor to take 3 dimensional arrays
-def make_ball(Nx: int, Ny: int, Nz: int, cx: int, cy: int, cz: int, radius: int, plot_ball: bool = False,
+def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False,
               binary: bool = False) -> np.ndarray:
     """
     Creates a binary map of a filled ball within a 3D grid.
 
     Args:
-        Nx: size of the 3D grid in x-dimension [grid points].
-        Ny: size of the 3D grid in y-dimension [grid points].
-        Nz: size of the 3D grid in z-dimension [grid points].
-        cx: centre of the ball in x-dimension [grid points].
-        cy: centre of the ball in y-dimension [grid points].
-        cz: centre of the ball in z-dimension [grid points].
+        grid_size: size of the 3D grid in [grid points].
+        ball_center: centre of the ball in [grid points]
         radius: ball radius [grid points].
         plot_ball: whether to plot the ball using voxelPlot (default = False).
         binary: whether to return the ball map as a double precision matrix (False) or a logical matrix (True) (default = False).
@@ -297,39 +294,30 @@ def make_ball(Nx: int, Ny: int, Nz: int, cx: int, cy: int, cz: int, radius: int,
 
     # define literals
     MAGNITUDE = 1
+    assert grid_size.shape == (3,), "grid_size must be a 3 element vector"
+    assert ball_center.shape == (3,), "ball_center must be a 3 element vector"
 
     # force integer values
-    Nx = int(round(Nx))
-    Ny = int(round(Ny))
-    Nz = int(round(Nz))
-    cx = int(round(cx))
-    cy = int(round(cy))
-    cz = int(round(cz))
+    grid_size = Vector(*grid_size.astype(int))
+    ball_center = Vector(*ball_center.astype(int))
 
     # check for zero values
-    if cx == 0:
-        cx = int(floor(Nx / 2)) + 1
-
-    if cy == 0:
-        cy = int(floor(Ny / 2)) + 1
-
-    if cz == 0:
-        cz = int(floor(Nz / 2)) + 1
+    for i in range(3):
+        if ball_center[i] == 0:
+            ball_center[i] = int(floor(grid_size[i] / 2)) + 1
 
     # create empty matrix
-    ball = np.zeros((Nx, Ny, Nz)).astype(np.bool if binary else np.float32)
+    ball = np.zeros(grid_size).astype(np.bool if binary else np.float32)
 
     # define np.pixel map
-    r = make_pixel_map(Nx, Ny, Nz, 'Shift', [0, 0, 0])
+    r = make_pixel_map(grid_size, 'Shift', [0, 0, 0])
 
     # create ball
     ball[r <= radius] = MAGNITUDE
 
     # shift centre
-    cx = cx - int(math.ceil(Nx / 2))
-    cy = cy - int(math.ceil(Ny / 2))
-    cz = cz - int(math.ceil(Nz / 2))
-    ball = np.roll(ball, (cx, cy, cz), axis=(0, 1, 2))
+    ball_center = ball_center - Vector(*np.ceil(grid_size / 2).astype(int))
+    ball = np.roll(ball, ball_center, axis=(0, 1, 2))
 
     # plot results
     if plot_ball:
@@ -615,7 +603,7 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
     return circle
 
 
-def make_pixel_map(Nx: int, Ny: int, Nz: Optional[int] = None, *args) -> np.ndarray:
+def make_pixel_map(grid_size: Vector, *args) -> np.ndarray:
     """
     Generates a matrix with values of the distance of each pixel from the center of a grid.
 
@@ -656,10 +644,17 @@ def make_pixel_map(Nx: int, Ny: int, Nz: Optional[int] = None, *args) -> np.ndar
          the final row and column.
 
     """
+    assert len(grid_size) == 2 or len(grid_size) == 3, 'Grid size must be a 2 or 3 element vector.'
 
     # define defaults
     origin_size = 'single'
     shift_def = 1
+
+    Nx = grid_size[0]
+    Ny = grid_size[1]
+    Nz = None
+    if len(grid_size) == 3:
+        Nz = grid_size[2]
 
     # detect whether the inputs are for two or three dimensions
     if Nz is None:
