@@ -489,7 +489,7 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     return disc
 
 
-def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Optional[float] = None,
+def make_circle(grid_size: Vector, center: Vector, radius: int, arc_angle: Optional[float] = None,
                 plot_circle: bool = False) -> np.ndarray:
     """
     Create a binary map of a circle within a 2D grid.
@@ -514,6 +514,9 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
 
     """
 
+    assert len(grid_size) == 2, "Grid size must be 2D"
+    assert len(center) == 2, "Center must be 2D"
+
     # define literals
     MAGNITUDE = 1
 
@@ -525,28 +528,24 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
         arc_angle = 0
 
     # force integer values
-    Nx = int(round(Nx))
-    Ny = int(round(Ny))
-    cx = int(round(cx))
-    cy = int(round(cy))
+    grid_size = grid_size.round().astype(int)
+    center = center.round().astype(int)
     radius = int(round(radius))
 
     # check for zero values
-    if cx == 0:
-        cx = int(floor(Nx / 2)) + 1
-
-    if cy == 0:
-        cy = int(floor(Ny / 2)) + 1
+    cx, cy = center
+    center.x = cx if cx != 0 else int(floor(grid_size.x / 2)) + 1
+    center.y = cy if cy != 0 else int(floor(grid_size.y / 2)) + 1
 
     # create empty matrix
-    circle = np.zeros((Nx, Ny), dtype=int)
+    circle = np.zeros(grid_size, dtype=int)
 
     # initialise loop variables
     x = 0
     y = radius
     d = 1 - radius
 
-    if (cx >= 1) and (cx <= Nx) and ((cy - y) >= 1) and ((cy - y) <= Ny):
+    if (cx >= 1) and (cx <= grid_size.x) and ((cy - y) >= 1) and ((cy - y) <= grid_size.y):
         circle[cx - 1, cy - y - 1] = MAGNITUDE
 
     # draw the remaining cardinal points
@@ -556,8 +555,8 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
         # check whether the point is within the arc made by arc_angle, and lies
         # within the grid
         if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
-            if (px_i >= 1) and (px_i <= Nx) and (py_i >= 1) and (
-                    py_i <= Ny):
+            if (px_i >= 1) and (px_i <= grid_size.x) and (py_i >= 1) and (
+                    py_i <= grid_size.y):
                 circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     # loop through the remaining points using the midpoint circle algorithm
@@ -581,7 +580,7 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
             # check whether the point is within the arc made by arc_angle, and
             # lies within the grid
             if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
-                if (px_i >= 1) and (px_i <= Nx) and (py_i >= 1) and (py_i <= Ny):
+                if (px_i >= 1) and (px_i <= grid_size.x) and (py_i >= 1) and (py_i <= grid_size.y):
                     circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     if plot_circle:
@@ -1189,7 +1188,7 @@ def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: fl
         c = np.array([cx, cy])
 
         # create circle
-        arc = make_circle(Nx, Ny, cx, cy, radius)
+        arc = make_circle(grid_size, Vector([cx, cy]), radius)
 
         # form vector from the geometric arc centre to the arc midpoint
         v1 = arc_pos - c
@@ -2142,7 +2141,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
         sphere: The sphere mask as a NumPy array.
     """
     # enforce a centered sphere
-    center = np.floor(grid_size / 2) + 1
+    center = np.floor(grid_size / 2).astype(int) + 1
 
     # preallocate the storage variable
     if binary:
@@ -2151,7 +2150,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
         sphere = np.zeros(grid_size)
 
     # create a guide circle from which the individal radii can be extracted
-    guide_circle = make_circle(grid_size.y, grid_size.x, center.y, center.x, radius)
+    guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
 
     # step through the guide circle points and create partially filled discs
     centerpoints = np.arange(center.x - radius, center.x + 1)
@@ -2168,7 +2167,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
         swept_radius = (row_index.max() - row_index[row_index != 0].min()) / 2
 
         # create a circle to add to the sphere
-        circle = make_circle(grid_size.y, grid_size.z, center.y, center.z, swept_radius)
+        circle = make_circle(grid_size[1:], center[1:], swept_radius)
 
         # make an empty fill matrix
         if binary:
@@ -2257,7 +2256,7 @@ def make_spherical_section(radius: float, height: float, width: float = None, pl
     Nx = 2 * radius + 1
 
     # create sphere
-    ss = make_sphere(Nx, Nx, Nx, radius, False, binary)
+    ss = make_sphere(Vector([Nx] * 3), radius, False, binary)
 
     # truncate to given height
     if use_spherical_sections:
