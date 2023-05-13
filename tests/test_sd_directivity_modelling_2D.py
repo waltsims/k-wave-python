@@ -11,6 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -87,22 +88,21 @@ def test_sd_directivity_modelling_2D():
         input_filename = f'example_input_{source_loop + 1}_input.h5'
         pathname = gettempdir()
         input_file_full_path = os.path.join(pathname, input_filename)
-        input_args = {
-            'save_to_disk': True,
-            'input_filename': input_filename,
-            'data_path': pathname,
-            'save_to_disk_exit': True
-        }
-
-
-            # run the simulation
-        kspaceFirstOrder2DC(**{
-            'medium': medium,
-            'kgrid': kgrid,
-            'source': deepcopy(source),
-            'sensor': sensor,
-            **input_args
-        })
+        simulation_options = SimulationOptions(
+            save_to_disk=True,
+            input_filename=input_filename,
+            data_path=pathname,
+            save_to_disk_exit=True
+        )
+        # run the simulation
+        kspaceFirstOrder2DC(
+            medium=medium,
+            kgrid=kgrid,
+            source=deepcopy(source),
+            sensor=deepcopy(sensor),
+            simulation_options=simulation_options,
+            execution_options=SimulationExecutionOptions()
+        )
 
         assert compare_against_ref(f'out_sd_directivity_modelling_2D/input_{source_loop + 1}', input_file_full_path), \
             'Files do not match!'

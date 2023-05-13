@@ -1,3 +1,4 @@
+import os
 import warnings
 from typing import Tuple, Optional
 
@@ -124,7 +125,10 @@ def beamform(channel_data: ChannelData) -> None:
     plt.ylabel('z[mm]', fontsize=12)
     plt.title(channel_data.description)
     plt.colorbar()
-    plt.show()
+
+    filename = f"example_bmode.png"
+    plt.savefig(os.path.join(os.getcwd(), filename))
+    print(f"Plot saved to {os.path.join(os.getcwd(), filename)}")
 
     pass
 

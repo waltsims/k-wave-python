@@ -11,6 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -71,22 +72,22 @@ def test_tvsp_3D_simulation():
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # input arguments
-    input_args = {
-        'data_cast': 'single',
-        'cart_interp': 'nearest',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    simulation_options = SimulationOptions(
+        data_cast='single',
+        cart_interp='nearest',
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
     # run the simulation
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_tvsp_3D_simulation', input_file_full_path), \
         'Files do not match!'
