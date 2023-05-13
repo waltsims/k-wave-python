@@ -11,6 +11,8 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -53,7 +55,7 @@ def test_sd_directivity_modelling_3D():
     # centre of the detector face
     radius = 20    # [grid points]
     points = 11
-    circle = make_cart_circle(radius * dx, points, [0, 0], np.pi)
+    circle = make_cart_circle(radius * dx, points, Vector([0, 0]), np.pi)
     circle = np.vstack([circle, np.zeros((1, points))])
 
     # find the binary sensor mask most closely corresponding to the cartesian

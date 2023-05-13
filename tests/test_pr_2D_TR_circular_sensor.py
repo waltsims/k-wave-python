@@ -10,6 +10,8 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -57,7 +59,7 @@ def test_pr_2d_tr_circular_sensor():
     # define a centered Cartesian circular sensor
     sensor_radius = 4.5e-3              # [m]
     sensor_angle = 3 * np.pi / 2        # [rad]
-    sensor_pos = [0, 0]                 # [m]
+    sensor_pos = Vector([0, 0])         # [m]
     num_sensor_points = 70
     cart_sensor_mask = make_cart_circle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
 

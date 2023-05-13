@@ -356,7 +356,7 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
 
     # offset if needed
-    sphere[:] = sphere[:] + center_pos[:, None]
+    sphere[:] = sphere[:] + center_pos[None, :]
 
     # plot results
     if plot_sphere:
