@@ -2036,7 +2036,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     return bowls, bowls_labelled
 
 
-def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
+def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
                    diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
     """
     Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.
@@ -2125,7 +2125,7 @@ def make_multi_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: Union[int
     return arcs, arcs_labelled
 
 
-def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = False,
+def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
                 binary: bool = False) -> np.ndarray:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.
@@ -2142,21 +2142,19 @@ def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = Fa
         sphere: The sphere mask as a NumPy array.
     """
     # enforce a centered sphere
-    cx = floor(Nx / 2) + 1
-    cy = floor(Ny / 2) + 1
-    cz = floor(Nz / 2) + 1
+    center = np.floor(grid_size / 2) + 1
 
     # preallocate the storage variable
     if binary:
-        sphere = np.zeros((Nx, Ny, Nz), dtype=bool)
+        sphere = np.zeros(grid_size, dtype=bool)
     else:
-        sphere = np.zeros((Nx, Ny, Nz))
+        sphere = np.zeros(grid_size)
 
     # create a guide circle from which the individal radii can be extracted
-    guide_circle = make_circle(Ny, Nx, cy, cx, radius)
+    guide_circle = make_circle(grid_size.y, grid_size.x, center.y, center.x, radius)
 
     # step through the guide circle points and create partially filled discs
-    centerpoints = np.arange(cx - radius, cx + 1)
+    centerpoints = np.arange(center.x - radius, center.x + 1)
     reflection_offset = np.arange(len(centerpoints), 1, -1)
     for centerpoint_index in range(len(centerpoints)):
 
@@ -2170,16 +2168,16 @@ def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = Fa
         swept_radius = (row_index.max() - row_index[row_index != 0].min()) / 2
 
         # create a circle to add to the sphere
-        circle = make_circle(Ny, Nz, cy, cz, swept_radius)
+        circle = make_circle(grid_size.y, grid_size.z, center.y, center.z, swept_radius)
 
         # make an empty fill matrix
         if binary:
-            circle_fill = np.zeros((Ny, Nz), dtype=bool)
+            circle_fill = np.zeros(grid_size[1:], dtype=bool)
         else:
-            circle_fill = np.zeros((Ny, Nz))
+            circle_fill = np.zeros(grid_size[1:])
 
         # fill in the circle line by line
-        fill_centerpoints = np.arange(cz - swept_radius, cz + swept_radius + 1).astype(int)
+        fill_centerpoints = np.arange(center.z - swept_radius, center.z + swept_radius + 1).astype(int)
         for fill_centerpoints_i in fill_centerpoints:
 
             # extract the first row
@@ -2214,7 +2212,7 @@ def make_sphere(Nx: int, Ny: int, Nz: int, radius: float, plot_sphere: bool = Fa
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[cx + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
+            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
                                                                           :]
 
     # plot results

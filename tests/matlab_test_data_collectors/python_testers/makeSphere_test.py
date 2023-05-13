@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_sphere
 
 from scipy.io import loadmat
@@ -20,7 +21,8 @@ def test_makeSphere():
         Nx, Ny, Nz, radius, plot_sphere, binary = int(Nx), int(Ny), int(Nz), int(radius), bool(plot_sphere), bool(binary)
         expected_sphere = recorded_data['sphere']
 
-        sphere = make_sphere(Nx, Ny, Nz, radius, plot_sphere, binary)
+        grid_size = Vector([Nx, Ny, Nz])
+        sphere = make_sphere(grid_size, radius, plot_sphere, binary)
 
         assert np.allclose(expected_sphere, sphere)
 
