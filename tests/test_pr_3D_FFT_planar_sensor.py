@@ -32,7 +32,7 @@ def test_pr_3D_FFT_planar_sensor():
 
     # create the computational grid
     # size of the PML in grid points
-    pml_size = Vector([10])
+    pml_size = Vector([10, 10, 10])
     # number of grid points in each direction
     num_grid_points = scale * Vector([32, 64, 64]) - 2 * pml_size
     # grid point spacing in each direction [m]

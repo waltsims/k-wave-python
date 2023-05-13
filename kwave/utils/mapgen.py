@@ -1,7 +1,7 @@
 import math
 import warnings
 from math import floor
-from typing import Tuple, Optional, Union, List, Any
+from typing import Tuple, Optional, Union, List, Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -297,8 +297,8 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
     assert ball_center.shape == (3,), "ball_center must be a 3 element vector"
 
     # force integer values
-    grid_size = Vector(*grid_size.astype(int))
-    ball_center = Vector(*ball_center.astype(int))
+    grid_size = cast(Vector, grid_size.astype(int))
+    ball_center = cast(Vector, ball_center.astype(int))
 
     # check for zero values
     for i in range(3):
@@ -309,13 +309,13 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
     ball = np.zeros(grid_size).astype(np.bool if binary else np.float32)
 
     # define np.pixel map
-    r = make_pixel_map(grid_size, 'Shift', [0, 0, 0])
+    r = make_pixel_map(grid_size, shift=[0, 0, 0])
 
     # create ball
     ball[r <= radius] = MAGNITUDE
 
     # shift centre
-    ball_center = ball_center - Vector(*np.ceil(grid_size / 2).astype(int))
+    ball_center = ball_center - np.ceil(grid_size / 2).astype(int)
     ball = np.roll(ball, ball_center, axis=(0, 1, 2))
 
     # plot results
@@ -482,7 +482,7 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
     disc = np.zeros((Nx, Ny))
 
     # define np.pixel map
-    r = make_pixel_map(Nx, Ny, None, 'Shift', [0, 0])
+    r = make_pixel_map(Vector([Nx, Ny]), shift=[0, 0])
 
     # create disc
     disc[r <= radius] = MAGNITUDE
@@ -602,7 +602,7 @@ def make_circle(Nx: int, Ny: int, cx: int, cy: int, radius: int, arc_angle: Opti
     return circle
 
 
-def make_pixel_map(grid_size: Vector, *args) -> np.ndarray:
+def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.ndarray:
     """
     Generates a matrix with values of the distance of each pixel from the center of a grid.
 
@@ -646,7 +646,6 @@ def make_pixel_map(grid_size: Vector, *args) -> np.ndarray:
     assert len(grid_size) == 2 or len(grid_size) == 3, 'Grid size must be a 2 or 3 element vector.'
 
     # define defaults
-    origin_size = 'single'
     shift_def = 1
 
     Nx = grid_size[0]
@@ -656,23 +655,9 @@ def make_pixel_map(grid_size: Vector, *args) -> np.ndarray:
         Nz = grid_size[2]
 
     # detect whether the inputs are for two or three dimensions
-    if Nz is None:
-        map_dimension = 2
-        shift = [shift_def, shift_def]
-    else:
-        map_dimension = 3
-        shift = [shift_def, shift_def, shift_def]
-
-    # replace with user defined values if provided
-    if len(args) > 0:
-        assert len(args) % 2 == 0, 'Optional inputs must be entered as param, value pairs.'
-        for input_index in range(0, len(args), 2):
-            if args[input_index] == 'Shift':
-                shift = args[input_index + 1]
-            elif args[input_index] == 'OriginSize':
-                origin_size = args[input_index + 1]
-            else:
-                raise ValueError('Unknown optional input.')
+    map_dimension = 2 if Nz is None else 3
+    if shift is None:
+        shift = [shift_def] * map_dimension
 
     # catch input errors
     assert origin_size in ['single', 'double'], 'Unknown setting for optional input Center.'
