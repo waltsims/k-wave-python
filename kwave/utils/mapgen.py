@@ -341,9 +341,6 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
         The points on the sphere.
 
     """
-
-    cx, cy, cz = center_pos
-
     # generate angle functions using the Golden Section Spiral method
     inc = np.pi * (3 - np.sqrt(5))
     off = 2 / num_points
@@ -356,7 +353,7 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
 
     # offset if needed
-    sphere[:] = sphere[:] + center_pos[None, :]
+    sphere = sphere + center_pos[:, None, None]
 
     # plot results
     if plot_sphere:
@@ -758,6 +755,7 @@ def make_line(
     Returns:
         line: A 2D array of the same size as the input parameters, with a value of 1 for pixels that are part of the line and 0 for pixels that are not.
     """
+    assert len(grid_size) == 2, 'Grid size must be a 2-element vector.'
 
     startpoint = np.array(startpoint, dtype=int)
     if endpoint is not None:
@@ -1230,8 +1228,8 @@ def make_arc(grid_size: np.ndarray, arc_pos: np.ndarray, radius: float, diameter
 
         # draw lines to create arc with infinite radius
         arc = np.logical_or(
-            make_line(Nx, Ny, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
-            make_line(Nx, Ny, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
+            make_line(grid_size, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
+            make_line(grid_size, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
         )
     return arc
 
