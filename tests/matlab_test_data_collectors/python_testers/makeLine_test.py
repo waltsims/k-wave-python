@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
+from kwave.data import Vector
 from kwave.utils.mapgen import make_line
 
 
@@ -22,11 +23,13 @@ def test_makeLine():
         if len(params) == 4:
             Nx, Ny, startpoint, endpoint = params
             Nx, Ny, startpoint, endpoint = int(Nx), int(Ny), startpoint[0], endpoint[0]
-            line = make_line(Nx, Ny, startpoint, endpoint)
+            grid_size = Vector([Nx, Ny])
+            line = make_line(grid_size, startpoint, endpoint)
         else:
             Nx, Ny, startpoint, angle, length = params
             Nx, Ny, startpoint, angle, length = int(Nx), int(Ny), startpoint[0], float(angle), int(length)
-            line = make_line(Nx, Ny, startpoint, endpoint=None, angle=angle, length=length)
+            grid_size = Vector([Nx, Ny])
+            line = make_line(grid_size, startpoint, endpoint=None, angle=angle, length=length)
 
         expected_line = recorded_data['line']
 

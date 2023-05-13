@@ -738,8 +738,7 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 
 
 def make_line(
-        Nx: int,
-        Ny: int,
+        grid_size: Vector,
         startpoint: Tuple[int, int],
         endpoint: Optional[Tuple[int, int]] = None,
         angle: Optional[float] = None,
@@ -767,8 +766,8 @@ def make_line(
     if len(startpoint) != 2:
         raise ValueError('startpoint should be a two-element vector.')
 
-    if np.any(startpoint < 1) or startpoint[0] > Nx or startpoint[1] > Ny:
-        ValueError('The starting point must lie within the grid, between [1 1] and [Nx Ny].')
+    if np.any(startpoint < 1) or startpoint[0] > grid_size.x or startpoint[1] > grid_size.y:
+        ValueError('The starting point must lie within the grid, between [1 1] and [grid_size.x grid_size.y].')
 
     # =========================================================================
     # LINE BETWEEN TWO POINTS OR ANGLED LINE?
@@ -802,7 +801,7 @@ def make_line(
         # a and b must be within the grid
         xx = np.array([a[0], b[0]], dtype=int)
         yy = np.array([a[1], b[1]], dtype=int)
-        if np.any(a < 0) or np.any(b < 0) or np.any(xx > Nx - 1) or np.any(yy > Ny - 1):
+        if np.any(a < 0) or np.any(b < 0) or np.any(xx > grid_size.x - 1) or np.any(yy > grid_size.y - 1):
             raise ValueError('Both the start and end points must lie within the grid.')
 
     if linetype == 'angled':
@@ -821,7 +820,7 @@ def make_line(
     if linetype == 'AtoB':
 
         # define an empty grid to hold the line
-        line = np.zeros((Nx, Ny))
+        line = np.zeros(grid_size)
 
         # find the equation of the line
         m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
@@ -918,7 +917,7 @@ def make_line(
     elif linetype == 'angled':
 
         # define an empty grid to hold the line
-        line = np.zeros((Nx, Ny))
+        line = np.zeros(grid_size)
 
         # start at the atart
         x, y = startpoint
@@ -937,7 +936,7 @@ def make_line(
                 y = y + 1
 
                 # stop the points incrementing at the edges
-                if y > Ny:
+                if y > grid_size.y:
                     break
 
                 # add the point to the line
@@ -968,7 +967,7 @@ def make_line(
                 y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
-                if (x < 0) or (y > Ny - 1):
+                if (x < 0) or (y > grid_size.y - 1):
                     break
 
                 # add the point to the line
@@ -1064,7 +1063,7 @@ def make_line(
                 y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
-                if (x > Nx) or (y < 1):
+                if (x > grid_size.x) or (y < 1):
                     break
 
                 # add the point to the line
@@ -1081,7 +1080,7 @@ def make_line(
                 x = x + 1
 
                 # stop the points incrementing at the edges
-                if x > Nx:
+                if x > grid_size.x:
                     break
 
                 # add the point to the line
@@ -1112,7 +1111,7 @@ def make_line(
                 y = poss_y[index[0] - 1]
 
                 # stop the points incrementing at the edges
-                if (x > Nx) or (y > Ny):
+                if (x > grid_size.x) or (y > grid_size.y):
                     break
 
                 # add the point to the line
