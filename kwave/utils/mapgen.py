@@ -274,7 +274,6 @@ def water_non_linearity(temp: float) -> float:
     return BonA
 
 
-# TODO: refactor to take 3 dimensional arrays
 def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False,
               binary: bool = False) -> np.ndarray:
     """
