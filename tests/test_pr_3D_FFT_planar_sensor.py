@@ -52,7 +52,7 @@ def test_pr_3D_FFT_planar_sensor():
     source.p0 = smooth(p0, True)
 
     # define a binary planar sensor
-    sensor_mask = np.zeros((kgrid.Nx, kgrid.Ny, kgrid.Nz))
+    sensor_mask = np.zeros(kgrid.N)
     sensor_mask[0, :, :] = 1
     sensor = kSensor(sensor_mask)
 
