@@ -45,7 +45,7 @@ def test_pr_3D_FFT_planar_sensor():
     # create initial pressure distribution using make_ball
     ball_magnitude = 10         # [Pa]
     ball_radius = 3 * scale     # [grid points]
-    p0 = ball_magnitude * make_ball(num_grid_points.x, num_grid_points.y, num_grid_points.z, num_grid_points.x / 2, num_grid_points.y / 2, num_grid_points.z / 2, ball_radius)
+    p0 = ball_magnitude * make_ball(num_grid_points, num_grid_points / 2, ball_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
     source = kSource()
