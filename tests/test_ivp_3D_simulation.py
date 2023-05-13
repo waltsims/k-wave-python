@@ -49,9 +49,7 @@ def test_ivp_3D_simulation():
     ball_1 = ball_magnitude * make_ball(grid_size, ball_location, ball_radius)
 
     ball_magnitude = 10    # [Pa]
-    ball_x_pos = 20        # [grid points]
-    ball_y_pos = 20        # [grid points]
-    ball_z_pos = 20        # [grid points]
+    ball_location = Vector([20, 20, 20])  # [grid points]
     ball_radius = 3        # [grid points]
     ball_2 = ball_magnitude * make_ball(grid_size, ball_location, ball_radius)
 

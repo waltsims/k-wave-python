@@ -138,7 +138,7 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
     # define a large image size to move across
     number_scan_lines = 96
-    N_tot = grid_size_points
+    N_tot = grid_size_points.copy()
     N_tot.y = N_tot.y + number_scan_lines * transducer.element_width
 
     # define a random distribution of scatterers for the medium
