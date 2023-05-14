@@ -9,8 +9,7 @@ from kwave.utils.mapgen import make_circle
 
 
 def test_makeCircle():
-    # collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCircle')
-    collected_values_folder = '/Users/farid/workspace/black_box_testing/collectedValues/makeCircle'
+    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCircle')
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
