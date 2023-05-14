@@ -10,6 +10,8 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -44,7 +46,7 @@ def test_ivp_axisymmetric_simulation():
     # generated on a 2D grid that is doubled in size in the radial (y)
     # direction, and then trimmed so that only half the disc is retained
     source = kSource()
-    source.p0 = 10 * make_disc(Nx, 2 * Ny, Nx // 4 + 8, Ny + 1, 5)
+    source.p0 = 10 * make_disc(Vector([Nx, 2 * Ny]), Vector([Nx // 4 + 8, Ny + 1]), 5)
     source.p0 = source.p0[:, Ny:]
 
     # define a Cartesian sensor mask with points in the shape of a circle

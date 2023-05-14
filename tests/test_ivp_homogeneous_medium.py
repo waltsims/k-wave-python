@@ -10,6 +10,7 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -25,27 +26,23 @@ from tests.diff_utils import compare_against_ref
 
 def test_ivp_homogeneous_medium():
     # create the computational grid
-    Nx = 128  # number of grid points in the x (row) direction
-    Ny = 128  # number of grid points in the y (column) direction
-    dx = 0.1e-3  # grid point spacing in the x direction [m]
-    dy = 0.1e-3  # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size = Vector([128, 128])  # [grid points]
+    grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=1.5)
 
     # create initial pressure distribution using make_disc
     disc_magnitude = 5  # [Pa]
-    disc_x_pos = 50  # [grid points]
-    disc_y_pos = 50  # [grid points]
+    disc_pos = Vector([50, 50])  # [grid points]
     disc_radius = 8  # [grid points]
-    disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_magnitude = 3  # [Pa]
-    disc_x_pos = 80  # [grid points]
-    disc_y_pos = 60  # [grid points]
+    disc_pos = Vector([50, 50])  # [grid points]
     disc_radius = 5  # [grid points]
-    disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     source = kSource()
     source.p0 = disc_1 + disc_2

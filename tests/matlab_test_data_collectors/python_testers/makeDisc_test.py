@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_disc
 
 from scipy.io import loadmat
@@ -19,7 +20,9 @@ def test_makeDisc():
         Nx, Ny, cx, cy, radius, plot_disc = int(Nx), int(Ny), int(cx), int(cy), int(radius), bool(plot_disc)
         expected_disc = recorded_data['disc']
 
-        disc = make_disc(Nx, Ny, cx, cy, radius, plot_disc)
+        grid_size = Vector([Nx, Ny])
+        center = Vector([cx, cy])
+        disc = make_disc(grid_size, center, radius, plot_disc)
 
         assert np.allclose(expected_disc, disc)
 

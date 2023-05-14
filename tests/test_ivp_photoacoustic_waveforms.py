@@ -79,18 +79,20 @@ def test_ivp_photoacoustic_waveforms():
     # =========================================================================
 
     # create the computational grid
-    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+    grid_size = Vector(2 * [Nx])
+    grid_spacing = Vector(2 * [dx])
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
     # create initial pressure distribution
     source = kSource()
-    source.p0 = make_disc(Nx, Nx, Nx / 2, Nx / 2, source_radius)
+    source.p0 = make_disc(grid_size, grid_size / 2, source_radius)
 
     # define a single sensor point
-    sensor_mask = np.zeros((Nx, Nx))
-    sensor_mask[Nx//2 - source_sensor_distance - 1, Nx//2 - 1] = 1
+    sensor_mask = np.zeros(grid_size)
+    sensor_mask[grid_size.x//2 - source_sensor_distance - 1, grid_size.y//2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
     # run the simulation

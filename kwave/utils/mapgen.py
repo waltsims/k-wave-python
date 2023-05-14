@@ -427,7 +427,7 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector
     return np.squeeze(circle)
 
 
-def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
+def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     """
     Create a binary map of a filled disc within a 2D grid.
 
@@ -450,38 +450,35 @@ def make_disc(Nx, Ny, cx, cy, radius, plot_disc=False):
 
     """
 
+    assert len(grid_size) == 2, 'Grid size must be 2D.'
+    assert len(center) == 2, 'Center must be 2D.'
+
     # define literals
     MAGNITUDE = 1
 
     # force integer values
-    Nx = int(round(Nx))
-    Ny = int(round(Ny))
-    cx = int(round(cx))
-    cy = int(round(cy))
+    grid_size =  grid_size.round().astype(int)
+    center = center.round().astype(int)
 
     # check for zero values
-    if cx == 0:
-        cx = int(floor(Nx / 2)) + 1
-
-    if cy == 0:
-        cy = int(floor(Ny / 2)) + 1
+    center.x = center.x if center.x != 0 else np.floor(grid_size.x / 2).astype(int) + 1
+    center.y = center.y if center.y != 0 else np.floor(grid_size.y / 2).astype(int) + 1
 
     # check the inputs
-    assert (0 <= cx < Nx) and (0 <= cy < Ny), 'Disc center must be within grid.'
+    assert np.all(0 < center) and np.all(center <= grid_size), 'Disc center must be within grid.'
 
     # create empty matrix
-    disc = np.zeros((Nx, Ny))
+    disc = np.zeros(grid_size)
 
     # define np.pixel map
-    r = make_pixel_map(Vector([Nx, Ny]), shift=[0, 0])
+    r = make_pixel_map(grid_size, shift=[0, 0])
 
     # create disc
     disc[r <= radius] = MAGNITUDE
 
     # shift centre
-    cx = cx - int(math.ceil(Nx / 2))
-    cy = cy - int(math.ceil(Ny / 2))
-    disc = np.roll(disc, (cx, cy), axis=(0, 1))
+    center = center - np.ceil(grid_size / 2).astype(int)
+    disc = np.roll(disc, center, axis=(0, 1))
 
     # create the figure
     if plot_disc:
