@@ -212,8 +212,7 @@ class SimulationOptions(object):
 
         STREAM_TO_DISK_STEPS_DEF = 200  # number of steps before streaming to disk
 
-        if options.pml_size is not None or not isinstance(options.pml_size, bool):
-            options.pml_size = np.atleast_1d(options.pml_size)
+        if options.pml_size is not None and not isinstance(options.pml_size, bool):
             if len(options.pml_size) > kgrid.dim:
                 if kgrid.dim > 1:
                     raise ValueError(
@@ -236,7 +235,7 @@ class SimulationOptions(object):
                 options.pml_y_size = options.pml_x_size
             options.plot_scale = [-1, 1]
         elif kgrid.dim == 3:
-            if len(options.pml_size) == kgrid.dim:
+            if options.pml_size is not None and len(options.pml_size) == kgrid.dim:
                 options.pml_x_size, options.pml_y_size, options.pml_z_size = options.pml_size.ravel()
             else:
                 options.pml_x_alpha = 2
