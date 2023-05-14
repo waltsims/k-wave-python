@@ -1347,8 +1347,8 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
     return pixel_map
 
 
-def make_bowl(grid_size: Tuple[int, int, int], bowl_pos: Tuple[int, int, int], radius: int, diameter: int,
-              focus_pos: Tuple[int, int, int], binary: bool = False, remove_overlap: bool = False) -> np.ndarray:
+def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
+              focus_pos: Vector, binary: bool = False, remove_overlap: bool = False) -> np.ndarray:
     """
     Generate a matrix representing a bowl-shaped object in 3D space.
 
@@ -1371,6 +1371,10 @@ def make_bowl(grid_size: Tuple[int, int, int], bowl_pos: Tuple[int, int, int], r
     Raises:
         ValueError: if any of the input arguments are outside the valid range
     """
+    assert len(grid_size) == 3, 'Grid size must be 3D.'
+    assert len(bowl_pos) == 3, 'Bowl position must be 3D.'
+    assert len(focus_pos) == 3, 'Focus position must be 3D.'
+
     # =========================================================================
     # DEFINE LITERALS
     # =========================================================================
@@ -2123,9 +2127,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.
 
     Args:
-        Nx: The number of grid points in the x-dimension.
-        Ny: The number of grid points in the y-dimension.
-        Nz: The number of grid points in the z-dimension.
+        grid_size: The size of the grid (assumed to be cubic).
         radius: The radius of the sphere.
         plot_sphere: Whether to plot the sphere (default: False).
         binary: Whether to return a binary mask (default: False).
@@ -2133,6 +2135,8 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     Returns:
         sphere: The sphere mask as a NumPy array.
     """
+    assert len(grid_size) == 3, 'grid_size must be a 3D vector'
+
     # enforce a centered sphere
     center = np.floor(grid_size / 2).astype(int) + 1
 
