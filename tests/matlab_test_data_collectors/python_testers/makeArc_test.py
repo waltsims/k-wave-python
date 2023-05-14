@@ -25,6 +25,8 @@ def test_makeArc():
         expected_arc = recorded_data['arc']
 
         grid_size = Vector(grid_size)
+        arc_pos = Vector(arc_pos)
+        focus_pos = Vector(focus_pos)
         arc = make_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_arc, arc)

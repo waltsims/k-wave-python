@@ -438,10 +438,8 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     side.
 
     Args:
-        Nx: The number of grid points along the x-axis.
-        Ny: The number of grid points along the y-axis.
-        cx: The x-coordinate of the disc centre.
-        cy: The y-coordinate of the disc centre.
+        grid_size: A 2D vector of the grid size in grid points.
+        center: A 2D vector of the disc centre in grid points.
         radius: The radius of the disc.
         plot_disc: If set to True, the disc will be plotted using Matplotlib.
 
@@ -498,10 +496,8 @@ def make_circle(grid_size: Vector, center: Vector, radius: int, arc_angle: Optio
     of the circle intersects the grid.
 
     Args:
-        Nx: The number of grid points along the x-axis.
-        Ny: The number of grid points along the y-axis.
-        cx: The x-coordinate of the circle centre.
-        cy: The y-coordinate of the circle centre.
+        grid_size: A 2D vector of the grid size in grid points.
+        center: A 2D vector of the circle centre in grid points.
         radius: The radius of the circle.
         arc_angle: The angle of the circular arc in degrees. If set to None, a full circle will be created.
         plot_circle: If set to True, the circle will be plotted using Matplotlib.
@@ -599,9 +595,7 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
     control the location of the center point.
 
     Args:
-        Nx: number of pixels in the x-dimension
-        Ny: number of pixels in the y-dimension
-        Nz: number of pixels in the z-dimension
+        grid_size: A 2D or 3D vector of the grid size in grid points.
         *args: additional optional arguments
 
     Returns:
@@ -741,8 +735,7 @@ def make_line(
     Generate a line shape with a given start and end point, angle, or length.
 
     Args:
-        Nx: The number of pixels in the x-dimension.
-        Ny: The number of pixels in the y-dimension.
+        grid_size: The size of the grid in pixels.
         startpoint: The start point of the line, given as a tuple of x and y coordinates.
         endpoint: The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.
         angle: The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.
@@ -1117,8 +1110,7 @@ def make_line(
     return line
 
 
-def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: float,
-             focus_pos: np.ndarray) -> np.ndarray:
+def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: float, focus_pos: Vector) -> np.ndarray:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
 
@@ -1132,6 +1124,10 @@ def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: fl
     Returns:
         np.ndarray: A 2D array with the arc shape.
     """
+    assert len(grid_size) == 2, 'The grid size must be a 2D vector.'
+    assert len(arc_pos) == 2, 'The arc position must be a 2D vector.'
+    assert len(focus_pos) == 2, 'The focus position must be a 2D vector.'
+
     # force integer input values
     grid_size = grid_size.round().astype(int)
     arc_pos = arc_pos.round().astype(int)
@@ -2101,7 +2097,7 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
             focus_pos_k = focus_pos
 
         # create new arc
-        new_arc = make_arc(grid_size, arc_pos_k, radius_k, diameter_k, focus_pos_k)
+        new_arc = make_arc(grid_size, arc_pos_k, radius_k, diameter_k, Vector(focus_pos_k))
 
         # add arc to arc matrix
         arcs = arcs + new_arc
