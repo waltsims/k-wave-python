@@ -530,9 +530,9 @@ def make_circle(grid_size: Vector, center: Vector, radius: int, arc_angle: Optio
     radius = int(round(radius))
 
     # check for zero values
+    center.x = center.x if center.x != 0 else int(floor(grid_size.x / 2)) + 1
+    center.y = center.y if center.y != 0 else int(floor(grid_size.y / 2)) + 1
     cx, cy = center
-    center.x = cx if cx != 0 else int(floor(grid_size.x / 2)) + 1
-    center.y = cy if cy != 0 else int(floor(grid_size.y / 2)) + 1
 
     # create empty matrix
     circle = np.zeros(grid_size, dtype=int)

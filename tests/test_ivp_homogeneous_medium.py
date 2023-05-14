@@ -40,7 +40,7 @@ def test_ivp_homogeneous_medium():
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_magnitude = 3  # [Pa]
-    disc_pos = Vector([50, 50])  # [grid points]
+    disc_pos = Vector([80, 60])  # [grid points]
     disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
