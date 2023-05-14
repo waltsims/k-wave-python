@@ -28,7 +28,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_sd_focussed_detector_2d():
     # create the computational grid
-    grid_size = Vector([128, 128])  # [grid points]
+    grid_size = Vector([180, 180])  # [grid points]
     grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
     kgrid = kWaveGrid(grid_size, grid_spacing)
 

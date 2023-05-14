@@ -228,8 +228,12 @@ class SimulationOptions(object):
         elif kgrid.dim == 2:
             options.pml_x_alpha = 2
             options.pml_y_alpha = options.pml_x_alpha
-            options.pml_x_size = options.pml_size if options.pml_size else 20
-            options.pml_y_size = options.pml_x_size
+            if options.pml_size is None:
+                options.pml_x_size = 20
+                options.pml_y_size = 20
+            else:
+                options.pml_x_size = options.pml_size[0]
+                options.pml_y_size = options.pml_x_size
             options.plot_scale = [-1, 1]
         elif kgrid.dim == 3:
             if len(options.pml_size) == kgrid.dim:
@@ -238,9 +242,14 @@ class SimulationOptions(object):
                 options.pml_x_alpha = 2
                 options.pml_y_alpha = options.pml_x_alpha
                 options.pml_z_alpha = options.pml_x_alpha
-                options.pml_x_size = options.pml_size if isinstance(options.pml_size, numbers.Number) else 10
-                options.pml_y_size = options.pml_x_size
-                options.pml_z_size = options.pml_x_size
+                if options.pml_size is None:
+                    options.pml_x_size = 10
+                    options.pml_y_size = 10
+                    options.pml_z_size = 10
+                else:
+                    options.pml_x_size = options.pml_size[0]
+                    options.pml_y_size = options.pml_x_size
+                    options.pml_z_size = options.pml_x_size
                 options.plot_scale = [-1, 1]
 
         # replace defaults with user defined values if provided and check inputs
