@@ -44,7 +44,7 @@ def test_ivp_axisymmetric_simulation():
     # generated on a 2D grid that is doubled in size in the radial (y)
     # direction, and then trimmed so that only half the disc is retained
     source = kSource()
-    source.p0 = 10 * make_disc(Vector([grid_size.x, 2 * grid_size.x]), Vector([grid_size.y // 4 + 8, grid_size.y + 1]), 5)
+    source.p0 = 10 * make_disc(Vector([grid_size.x, 2 * grid_size.y]), Vector([grid_size.x // 4 + 8, grid_size.y + 1]), 5)
     source.p0 = source.p0[:, grid_size.y:]
 
     # define a Cartesian sensor mask with points in the shape of a circle
