@@ -21,8 +21,7 @@ if platform.startswith('linux'):
 elif platform.startswith(('win', 'cygwin')):
     system = 'windows'
 elif platform.startswith('darwin'):
-    system = 'darwin'
-    raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
+    system = 'macos'
 
 binary_path = os.path.join(Path(__file__).parent, 'bin', system)
 environ['KWAVE_BINARY_PATH'] = binary_path
@@ -51,10 +50,9 @@ def binaries_present() -> bool:
             "kspaceFirstOrder-OMP",
             "kspaceFirstOrder-CUDA"
         ],
-        "darwin": [
+        "macos": [
             # "acousticFieldPropagator-OMP",
             "kspaceFirstOrder-OMP",
-            "kspaceFirstOrder-CUDA"
         ],
         "windows": specific_omp_filenames + specific_cuda_filenames + common_filenames
     }
