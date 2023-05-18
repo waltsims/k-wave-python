@@ -2392,6 +2392,133 @@ def make_spherical_section(radius: float, height: float, width: float = None, pl
     return ss, dist_map
 
 
+def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
+    """
+    Create evenly distributed Cartesian points covering a rectangle.
+
+    Args:
+    rect_pos : List. Cartesian position of the centre of the rectangle.
+    Lx : Float. Height of the rectangle (along the x-coordinate before rotation).
+    Ly : Float. Width of the rectangle (along the y-coordinate before rotation).
+    theta : Float or List (Optional). Specifies the orientation of the rectangle.
+    num_points : int (Optional). Approximate number of points on the rectangle.
+    plot_rect : bool (Optional). Boolean controlling whether the Cartesian points are plotted.
+
+    Returns:
+    np.array. 2 x num_points* or 3 x num_points* array of Cartesian coordinates.
+    """
+
+    # Check for theta input
+    if theta is None:
+        theta = []
+
+    # Find number of points in along each axis
+    npts_x = math.ceil(np.sqrt(num_points * Lx / Ly))
+    npts_y = math.ceil(num_points / npts_x)
+
+    # Recalculate the true number of points
+    num_points = npts_x * npts_y
+
+    # Distance between points in each dimension
+    d_x = 2 / npts_x
+    d_y = 2 / npts_y
+
+    # Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)
+    p_x = np.linspace(-1 + d_x/2, 1 - d_x/2, npts_x)
+    p_y = np.linspace(-1 + d_y/2, 1 - d_y/2, npts_y)
+    P_x, P_y = np.meshgrid(p_x, p_y, indexing='ij')
+    p0 = np.stack((P_x.flatten(), P_y.flatten()), axis=0)
+
+    # Add z-dimension points if in 3D
+    if len(rect_pos) == 3:
+        p0 = np.vstack((p0, np.zeros(num_points)))
+
+    # Transform the canonical rectangle points to give the specified rectangle
+    if len(rect_pos) == 2:
+
+        # Scaling transformation
+        S = np.array([[Lx, 0], [0, Ly]]) / 2
+
+        # Rotation
+        if len(theta) == 0:
+            R = np.eye(2)
+        else:
+            R = np.array([[math.cos(math.radians(theta)), -math.sin(math.radians(theta))],
+                          [math.sin(math.radians(theta)), math.cos(math.radians(theta))]])
+
+    else:
+
+        # Scaling transformation
+        S = np.array([[Lx, 0, 0], [0, Ly, 0], [0, 0, 2]]) / 2
+
+        # Rotation
+        if len(theta) == 0:
+            # No rotation
+            R = np.eye(3)
+        else:
+            # Using intrinsic rotations chain from right to left (z-y'-z'' rotations)
+            R = np.dot(Rz(theta[2]), np.dot(Ry(theta[1]), Rx(theta[0])))
+
+    # Combine scaling and rotation matrices
+    A = np.dot(R, S)
+
+    # Apply this transformation to the canonical points
+    p0 = np.dot(A, p0)
+
+    # Shift the rectangle to the appropriate centre
+    rect = p0 + np.expand_dims(np.array(rect_pos), axis=1)
+
+    return rect
+
+def Rx(theta):
+    """
+    3D rotation matrix for rotation about x-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    theta = np.radians(theta) # Convert to radians
+    R = np.array([[1, 0, 0],
+                  [0, np.cos(theta), -np.sin(theta)],
+                  [0, np.sin(theta), np.cos(theta)]])
+    return R
+
+def Ry(theta):
+    """
+    3D rotation matrix for rotation about y-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    theta = np.radians(theta) # Convert to radians
+    R = np.array([[np.cos(theta), 0, np.sin(theta)],
+                  [0, 1, 0],
+                  [-np.sin(theta), 0, np.cos(theta)]])
+    return R
+
+def Rz(theta):
+    """
+    3D rotation matrix for rotation about z-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    theta = np.radians(theta) # Convert to radians
+    R = np.array([[np.cos(theta), -np.sin(theta), 0],
+                  [np.sin(theta), np.cos(theta), 0],
+                  [0, 0, 1]])
+    return R
+
+
 def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequency: float, sound_speed: float,
                        density: float, axial_positions: Union[np.ndarray, float, list] = None,
                        lateral_positions: Union[np.ndarray, float, list] = None) -> [float, float]:
