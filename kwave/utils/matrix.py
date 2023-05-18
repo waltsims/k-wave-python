@@ -8,7 +8,7 @@ from .data import scale_time
 from .tictoc import TicToc
 
 
-def trim_zeros(data: np.ndarray) -> tuple[np.ndarray, list[tuple[int, int]]]:
+def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
     """
     Create a tight bounding box by removing zeros.
 
