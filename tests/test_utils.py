@@ -306,6 +306,25 @@ def test_trim_zeros():
     assert np.all(mat_trimmed == np.ones([5, 5, 5])), "trim_zeros did not pass the 3D test."
     assert ind == [(3, 8), (3, 8), (3, 8)], "trim_zeros did not return the correct indices for the 3D case."
 
+    # Harder 2D test case
+
+    data = np.array([[0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 3, 0, 0],
+                     [0, 0, 1, 3, 4, 0],
+                     [0, 0, 1, 3, 4, 0],
+                     [0, 0, 1, 3, 0, 0],
+                     [0, 0, 0, 0, 0, 0]])
+
+    correct_trimmed = np.array([[0, 3, 0],
+                                [1, 3, 4],
+                                [1, 3, 4],
+                                [1, 3, 0]])
+
+    data_trimmed, ind = trim_zeros(data)
+
+    # assert correctness
+    assert np.all(data_trimmed == correct_trimmed), "trim_zeros did not pass the hard 2D test."
+
     # Higher dimensional case (4D)
     mat = np.zeros([10, 10, 10, 10])
     mat[3:8, 3:8, 3:8, 3:8] = 1
