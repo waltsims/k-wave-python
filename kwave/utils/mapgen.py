@@ -10,6 +10,7 @@ from scipy import optimize
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
+from .math import cosd, sind, Rz, Ry, Rx
 from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
@@ -2408,10 +2409,6 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     np.array. 2 x num_points* or 3 x num_points* array of Cartesian coordinates.
     """
 
-    # Check for theta input
-    if theta is None:
-        theta = []
-
     # Find number of points in along each axis
     npts_x = math.ceil(np.sqrt(num_points * Lx / Ly))
     npts_y = math.ceil(num_points / npts_x)
@@ -2440,11 +2437,11 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
         S = np.array([[Lx, 0], [0, Ly]]) / 2
 
         # Rotation
-        if len(theta) == 0:
+        if theta is None:
             R = np.eye(2)
         else:
-            R = np.array([[math.cos(math.radians(theta)), -math.sin(math.radians(theta))],
-                          [math.sin(math.radians(theta)), math.cos(math.radians(theta))]])
+            R = np.array([[cosd(theta), -sind(theta)],
+                          [sind(theta), cosd(theta)]])
 
     else:
 
@@ -2452,7 +2449,7 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
         S = np.array([[Lx, 0, 0], [0, Ly, 0], [0, 0, 2]]) / 2
 
         # Rotation
-        if len(theta) == 0:
+        if theta is None:
             # No rotation
             R = np.eye(3)
         else:
@@ -2469,54 +2466,6 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     rect = p0 + np.expand_dims(np.array(rect_pos), axis=1)
 
     return rect
-
-def Rx(theta):
-    """
-    3D rotation matrix for rotation about x-axis
-
-    Args:
-    theta : float. Angle of rotation (in degrees)
-
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    theta = np.radians(theta) # Convert to radians
-    R = np.array([[1, 0, 0],
-                  [0, np.cos(theta), -np.sin(theta)],
-                  [0, np.sin(theta), np.cos(theta)]])
-    return R
-
-def Ry(theta):
-    """
-    3D rotation matrix for rotation about y-axis
-
-    Args:
-    theta : float. Angle of rotation (in degrees)
-
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    theta = np.radians(theta) # Convert to radians
-    R = np.array([[np.cos(theta), 0, np.sin(theta)],
-                  [0, 1, 0],
-                  [-np.sin(theta), 0, np.cos(theta)]])
-    return R
-
-def Rz(theta):
-    """
-    3D rotation matrix for rotation about z-axis
-
-    Args:
-    theta : float. Angle of rotation (in degrees)
-
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    theta = np.radians(theta) # Convert to radians
-    R = np.array([[np.cos(theta), -np.sin(theta), 0],
-                  [np.sin(theta), np.cos(theta), 0],
-                  [0, 0, 1]])
-    return R
 
 
 def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequency: float, sound_speed: float,
