@@ -273,7 +273,7 @@ def angular_spectrum(
                 k = 2 * np.pi * f_vec[f_index] / c0
 
                 # Compute wavenumber grid
-                kz = np.sqrt(k ** 2 - ((kx ** 2) + (ky ** 2)).astype(np.complex))
+                kz = np.sqrt(k ** 2 - ((kx ** 2) + (ky ** 2)).astype(complex))
 
                 # Compute spectral propagator (Eq. 6)
                 H = np.conj(np.exp(1j * z * kz))
