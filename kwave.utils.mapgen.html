@@ -834,6 +834,25 @@ with the frequency in rad/s. The variation is given about the sound speed <cite>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.trim_cart_points">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">trim_cart_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#trim_cart_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.trim_cart_points" title="Permalink to this definition">#</a></dt>
+<dd><p>trim_cart_points filters a dim x num_points array of Cartesian points
+so that only those within the bounds of a given kgrid remain.
+:param kgrid: Object of the kWaveGrid class defining the Cartesian</p>
+<blockquote>
+<div><p>and k-space grid fields.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<em>ndarray</em>) – dim x num_points array of Cartesian coordinates to trim [m].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dim x num_points array of Cartesian coordinates that lie within the grid defined by kgrid [m].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.water_absorption">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">water_absorption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#water_absorption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.water_absorption" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculates the ultrasonic absorption in distilled
@@ -1022,6 +1041,7 @@ Acoust. Soc. Am., 32(6), 719-721.</p>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_spherical_section"><code class="docutils literal notranslate"><span class="pre">make_spherical_section()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.ndgrid"><code class="docutils literal notranslate"><span class="pre">ndgrid()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.power_law_kramers_kronig"><code class="docutils literal notranslate"><span class="pre">power_law_kramers_kronig()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.trim_cart_points"><code class="docutils literal notranslate"><span class="pre">trim_cart_points()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_absorption"><code class="docutils literal notranslate"><span class="pre">water_absorption()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_density"><code class="docutils literal notranslate"><span class="pre">water_density()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.water_non_linearity"><code class="docutils literal notranslate"><span class="pre">water_non_linearity()</span></code></a></li>
