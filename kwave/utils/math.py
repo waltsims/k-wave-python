@@ -289,3 +289,64 @@ def gaussian(
         magnitude = np.sqrt(2 * np.pi * variance)
     return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
     """
+
+
+def cosd(angle_in_degrees):
+    # Note:
+    #   Using numpy.radians instead math.radians
+    #   does not yield the same results as matlab
+    angle_in_radians = math.radians(angle_in_degrees)
+    return math.cos(angle_in_radians)
+
+def sind(angle_in_degrees):
+    # Note:
+    #   Using numpy.radians instead math.radians
+    #   does not yield the same results as matlab
+    angle_in_radians = math.radians(angle_in_degrees)
+    return math.sin(angle_in_radians)
+
+
+def Rx(theta):
+    """
+    3D rotation matrix for rotation about x-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    R = np.array([[1, 0, 0],
+                  [0, cosd(theta), -sind(theta)],
+                  [0, sind(theta), cosd(theta)]])
+    return R
+
+def Ry(theta):
+    """
+    3D rotation matrix for rotation about y-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    R = np.array([[cosd(theta), 0, sind(theta)],
+                  [0, 1, 0],
+                  [-sind(theta), 0, cosd(theta)]])
+    return R
+
+def Rz(theta):
+    """
+    3D rotation matrix for rotation about z-axis
+
+    Args:
+    theta : float. Angle of rotation (in degrees)
+
+    Returns:
+    np.array. 3D rotation matrix
+    """
+    R = np.array([[cosd(theta), -sind(theta), 0],
+                  [sind(theta), cosd(theta), 0],
+                  [0, 0, 1]])
+    return R
