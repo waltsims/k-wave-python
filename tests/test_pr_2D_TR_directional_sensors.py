@@ -12,6 +12,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -27,27 +30,23 @@ from tests.diff_utils import compare_against_ref
 def test_pr_2D_TR_directional_sensors():
 
     # create the computational grid
-    PML_size = 20              # size of the PML in grid points
-    Nx = 128 - 2 * PML_size    # number of grid points in the x direction
-    Ny = 256 - 2 * PML_size    # number of grid points in the y direction
-    dx = 0.1e-3                # grid point spacing in the x direction [m]
-    dy = 0.1e-3                # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    pml_size = Vector([20, 20])  # size of the PML in grid points
+    grid_size = Vector([128, 256]) - 2 * pml_size  # [grid points]
+    grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
     # create initial pressure distribution using make_disc
     disc_magnitude = 5         # [Pa]
-    disc_x_pos = 60            # [grid points]
-    disc_y_pos = 140           # [grid points]
+    disc_pos = Vector([60, 140])  # [grid points]
     disc_radius = 5            # [grid points]
-    disc_2 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
-    disc_x_pos = 30            # [grid points]
-    disc_y_pos = 110           # [grid points]
+    disc_pos = Vector([30, 110])  # [grid points]
     disc_radius = 8            # [grid points]
-    disc_1 = disc_magnitude * make_disc(Nx, Ny, disc_x_pos, disc_y_pos, disc_radius)
+    disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
     p0 = smooth(disc_1 + disc_2, True)
@@ -71,24 +70,24 @@ def test_pr_2D_TR_directional_sensors():
     input_filename = f'example_tr_dir_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_inside': False,
-        'pml_size': PML_size,
-        'smooth_p0': False,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
-    # run the simulation for omnidirectional detector elements
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': deepcopy(sensor),
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        pml_inside=False,
+        pml_size=pml_size,
+        smooth_p0=False,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    # run the simulation
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=deepcopy(sensor),
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
 
     # define the directionality of the sensor elements
@@ -105,11 +104,12 @@ def test_pr_2D_TR_directional_sensors():
     sensor.directivity = directivity
 
     # run the simulation with directional elements
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': source,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=deepcopy(sensor),
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'

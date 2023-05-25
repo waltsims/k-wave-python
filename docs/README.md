@@ -30,6 +30,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
+git checkout v0.2.1
 pip install '.[example]' 
 python3 examples/bmode_reconstruction_example.py
 ```
@@ -62,7 +63,7 @@ found [here](https://waltersimson.com/k-wave-python/development/development_envi
 
 ## Documentation
 
-The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/)
+The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/).
 
 ## Contact
 

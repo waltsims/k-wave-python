@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_cart_circle
 
 from scipy.io import loadmat
@@ -16,7 +17,7 @@ def test_makeCartCircle():
         recorded_data = loadmat(filepath)
 
         radius, num_points, center, arc_angle = recorded_data['params'][0]
-        center = center[0]
+        center = Vector(center[0])
         num_points = num_points[0][0]
         radius = radius[0][0]
         arc_angle = arc_angle[0][0]

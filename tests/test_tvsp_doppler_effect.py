@@ -12,6 +12,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -25,12 +28,11 @@ from tests.diff_utils import compare_against_ref
 
 def test_tvsp_doppler_effect():
     # create the computational grid
-    Nx = 64            # number of grid points in the x (row) direction
-    Ny = Nx*2          # number of grid points in the y (column) direction
-    dy = 20e-3/Ny    	# grid point spacing in the y direction [m]
-    dx = dy            # grid point spacing in the x direction [m]
-    pml_size = 20      # [grid points]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    pml_size = Vector([20, 20])  # [grid points]
+    grid_size_points = Vector([64, 128])  # [grid points]
+    grid_size_meters = Vector([10e-3, 20e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=1.5)
@@ -57,8 +59,8 @@ def test_tvsp_doppler_effect():
     # define a line of source points
     source = kSource()
     source_x_pos = 5               # [grid points]
-    source.p_mask = np.zeros((Nx, Ny))
-    source.p_mask[-pml_size-source_x_pos - 1, pml_size:-pml_size] = 1
+    source.p_mask = np.zeros(grid_size_points)
+    source.p_mask[-pml_size.x-source_x_pos - 1, pml_size.y:-pml_size.y] = 1
 
     # preallocate an empty pressure source matrix
     num_source_positions = int(source.p_mask.sum())
@@ -70,14 +72,14 @@ def test_tvsp_doppler_effect():
     while t_index < kgrid.t_array.size and sensor_index < num_source_positions - 1:
 
         # check if the source has moved to the next pair of grid points
-        if kgrid.t_array[0, t_index] > (sensor_index*dy/source_vel):
+        if kgrid.t_array[0, t_index] > (sensor_index*grid_spacing_meters.y/source_vel):
             sensor_index = sensor_index + 1
 
         # calculate the position of source in between the two current grid
         # points
         exact_pos = source_vel * kgrid.t_array[0, t_index]
-        discrete_pos = sensor_index * dy
-        pos_ratio = (discrete_pos - exact_pos) / dy
+        discrete_pos = sensor_index * grid_spacing_meters.y
+        pos_ratio = (discrete_pos - exact_pos) / grid_spacing_meters.y
 
         # update the pressure at the two current grid points using linear interpolation
         source.p[sensor_index - 1, t_index] = pos_ratio * source_pressure[0, t_index]
@@ -87,28 +89,28 @@ def test_tvsp_doppler_effect():
         t_index = t_index + 1
 
     # define a single sensor point
-    sensor_mask = np.zeros((Nx, Ny))
-    sensor_mask[-pml_size-source_x_pos-source_sensor_x_distance-1, Ny//2 - 1] = 1
+    sensor_mask = np.zeros(grid_size_points)
+    sensor_mask[-pml_size-source_x_pos-source_sensor_x_distance-1, grid_size_points.y//2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
     # run the simulation
     input_filename = f'example_doppler_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    simulation_options = SimulationOptions(
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
     # run the simulation
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_tvsp_doppler_effect', input_file_full_path), \
         'Files do not match!'

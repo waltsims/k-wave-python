@@ -12,6 +12,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -31,16 +34,14 @@ def test_ivp_loading_external_image():
     p0 = p0_magnitude * load_image('tests/EXAMPLE_source_one.png', True)
 
     # create the computational grid
-    Nx = 128           # number of grid points in the x (row) direction
-    Ny = 128           # number of grid points in the y (column) direction
-    dx = 0.1e-3        # grid point spacing in the x direction  [m]
-    dy = 0.1e-3        # grid point spacing in the y direction  [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size = Vector([128, 128])  # [grid points]
+    grid_spacing = 0.1e-3 * Vector([1, 1])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # resize the image to match the size of the computational grid and assign
     # to the source input structure
     source = kSource()
-    source.p0 = np.reshape(p0, [Nx, Ny])
+    source.p0 = np.reshape(p0, grid_size)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=1.5)
@@ -55,21 +56,22 @@ def test_ivp_loading_external_image():
     input_filename = f'example_ivp_ext_img_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
+    simulation_options = SimulationOptions(
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
 
     # run the simulation
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
 
     assert compare_against_ref(f'out_ivp_loading_external_image', input_file_full_path), \
         'Files do not match!'

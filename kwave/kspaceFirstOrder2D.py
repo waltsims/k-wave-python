@@ -1,21 +1,36 @@
 import os
 import tempfile
+from typing import Union
 
 import numpy as np
+
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+
+from kwave.ktransducer import NotATransducer
+
+from kwave.kgrid import kWaveGrid
 from numpy.fft import ifftshift
 
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.kspaceFirstOrder import kspaceFirstOrderC, kspaceFirstOrderG
+from kwave.ksource import kSource
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
-@kspaceFirstOrderG
-def kspaceFirstOrder2DG(**kwargs):
+def kspace_first_order_2d_gpu(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: NotATransducer,
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions) -> np.ndarray:
     """
     2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -45,12 +60,26 @@ def kspaceFirstOrder2DG(**kwargs):
     of kspaceFirstOrder3DC by replacing the binary name with the name of the
     GPU binary.
     """
-    sensor_data = kspaceFirstOrder2DC(**kwargs)  # pass inputs to CPU version
+    assert execution_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    sensor_data = kspaceFirstOrder2DC(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options,
+        execution_options=execution_options
+    )  # pass inputs to CPU version
     return sensor_data
 
 
-@kspaceFirstOrderC()
-def kspaceFirstOrder2DC(**kwargs):
+def kspaceFirstOrder2DC(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: Union[NotATransducer, kSensor],
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
     2D time-domain simulation of wave propagation using C++ code.
 
@@ -88,17 +117,36 @@ def kspaceFirstOrder2DC(**kwargs):
     GPU binary.
 
     Args:
-        **kwargs:
+        kgrid: kWaveGrid instance
+        source: kWaveSource instance
+        sensor: NotATransducer or kSensor instance
+        medium: kWaveMedium instance
+        simulation_options: SimulationOptions instance
+        execution_options: SimulationExecutionOptions instance
 
     Returns:
-
+        Sensor data as a numpy array
     """
     # generate the input file and save to disk
-    kspaceFirstOrder2D(**kwargs)
-    return kwargs['save_to_disk']
+    sensor_data = kspaceFirstOrder2D(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options,
+        execution_options=execution_options
+    )
+    return sensor_data
 
 
-def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
+def kspaceFirstOrder2D(
+        kgrid: kWaveGrid,
+        source: kSource,
+        sensor: Union[NotATransducer, kSensor],
+        medium: kWaveMedium,
+        simulation_options: SimulationOptions,
+        execution_options: SimulationExecutionOptions
+):
     """
     2D time-domain simulation of wave propagation.
 
@@ -247,7 +295,13 @@ def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(kgrid, medium, source, sensor, **kwargs)
+    k_sim = kWaveSimulation(
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        medium=medium,
+        simulation_options=simulation_options
+    )
     k_sim.input_checking('kspaceFirstOrder2D')
 
     # =========================================================================
@@ -372,8 +426,8 @@ def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
 
                             'transducer_source': k_sim.transducer_source,
                             'nonuniform_grid': k_sim.nonuniform_grid,
-                            'elastic_code': k_sim.elastic_code,
-                            'axisymmetric': k_sim.axisymmetric,
+                            'elastic_code': k_sim.options.simulation_type.is_elastic_simulation(),
+                            'axisymmetric': k_sim.options.simulation_type.is_axisymmetric(),
                             'cuboid_corners': k_sim.cuboid_corners,
                         }))
 
@@ -388,5 +442,6 @@ def kspaceFirstOrder2D(kgrid, medium, source, sensor, **kwargs):
         output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
 
         executor = Executor(device='gpu')
-        sensor_data = executor.run_simulation(input_filename, output_filename, options='--p_raw')
+        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
+        sensor_data = executor.run_simulation(input_filename, output_filename, options=executor_options)
         return k_sim.sensor.combine_sensor_data(sensor_data)

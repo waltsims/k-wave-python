@@ -7,9 +7,13 @@
     Simulating Ultrasound Beam Patterns examples.
 """
 import os
+from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
 import setup_test
@@ -26,11 +30,9 @@ from tests.diff_utils import compare_against_ref
 
 def test_sd_directional_array_elements():
     # create the computational grid
-    Nx = 180  # number of grid points in the x (row) direction
-    Ny = 180  # number of grid points in the y (column) direction
-    dx = 0.1e-3  # grid point spacing in the x direction [m]
-    dy = 0.1e-3  # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size = Vector([180, 180]) # [grid points]
+    grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
@@ -45,7 +47,7 @@ def test_sd_directional_array_elements():
 
     # define a semicircular sensor centred on the grid
     semicircle_radius = 65  # [grid points]
-    arc = make_circle(Nx, Ny, Nx // 2, Ny // 2, semicircle_radius, np.pi)
+    arc = make_circle(grid_size, grid_size // 2, semicircle_radius, np.pi)
 
     # find total number and indices of the grid points constituting the semicircle
     arc_indices = matlab_find(arc, val=1, mode='eq')
@@ -61,7 +63,7 @@ def test_sd_directional_array_elements():
 
     # divide the semicircle into Ne separate sensor elements
     Ne = 13
-    sensor_mask = np.zeros((Nx, Ny))
+    sensor_mask = np.zeros(grid_size)
     for loop in range(1, Ne + 1):
         # get the indices of the grid points belonging to the current element
         # (there is a two grid point gap between the elements)
@@ -77,7 +79,7 @@ def test_sd_directional_array_elements():
 
     # define an infinitely wide plane wave source (this is achieved by turning off the PML)
     source = kSource()
-    source.p_mask = np.zeros((Nx, Ny))
+    source.p_mask = np.zeros(grid_size)
     source.p_mask[139, :] = 1
 
     # define a time varying sinusoidal source
@@ -93,20 +95,22 @@ def test_sd_directional_array_elements():
     input_filename = f'example_sd_direct_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_alpha': np.array([2, 0]),
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'save_to_disk_exit': True
-    }
-
+    simulation_options = SimulationOptions(
+        pml_alpha=np.array([2, 0]),
+        smooth_p0=False,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
     # run the simulation
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': source,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=deepcopy(sensor),
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
 
     assert compare_against_ref(f'out_sd_directional_array_elements', input_file_full_path), 'Files do not match!'

@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_multi_arc
 
 from scipy.io import loadmat
@@ -21,6 +22,7 @@ def test_makeMultiArc():
         grid_size, radius, diameter, focus_pos = grid_size[0], radius[0], diameter[0], focus_pos
         expected_multi_arc = recorded_data['multi_arc']
 
+        grid_size = Vector(grid_size)
         multi_arc, _ = make_multi_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_multi_arc, multi_arc)

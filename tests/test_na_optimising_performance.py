@@ -10,6 +10,9 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -29,19 +32,16 @@ def test_na_optimising_performance():
     scale = 1
 
     # assign the grid size and create the computational grid
-    Nx = 256 * scale           # number of grid points in the x direction
-    Ny = 256 * scale           # number of grid points in the y direction
-    x = 10e-3                  # grid size in the x direction [m]
-    y = 10e-3                  # grid size in the y direction [m]
-    dx = x / Nx                # grid point spacing in the x direction [m]
-    dy = y / Ny                # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size_points = Vector([256, 256])  # [grid points]
+    grid_size_meters = Vector([10e-3, 10e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # load the initial pressure distribution from an image and scale
     source = kSource()
     p0_magnitude = 2           # [Pa]
     source.p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
-    source.p0 = resize(source.p0, (Nx, Ny))
+    source.p0 = resize(source.p0, grid_size_points)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
@@ -61,56 +61,59 @@ def test_na_optimising_performance():
     input_filename = f'example_opt_perf_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': deepcopy(sensor),
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=deepcopy(sensor),
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_optimising_performance/input_1', input_file_full_path), \
         'Files do not match!'
 
     # 2: nearest neighbour Cartesian interpolation and plotting switched off
-    input_args = {
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
+    simulation_options = SimulationOptions(
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
     # convert Cartesian sensor mask to binary mask
     sensor.mask, _, _ = cart2grid(kgrid, sensor.mask)
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_optimising_performance/input_2', input_file_full_path), \
         'Files do not match!'
 
     # 3: as above with 'data_cast' set to 'single'
     # set input arguments
-    input_args = {
-        'data_cast': 'single',
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': deepcopy(source),
-        'sensor': sensor,
-        **input_args
-    })
+    simulation_options = SimulationOptions(
+        data_cast='single',
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=deepcopy(source),
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_na_optimising_performance/input_3', input_file_full_path), \
         'Files do not match!'

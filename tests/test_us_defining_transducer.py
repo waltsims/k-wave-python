@@ -11,6 +11,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -45,25 +48,19 @@ def test_us_defining_transducer():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20            # [grid points]
-    PML_Y_SIZE = 10            # [grid points]
-    PML_Z_SIZE = 10            # [grid points]
+    pml_size = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 128 - 2*PML_X_SIZE    # [grid points]
-    Ny = 128 - 2*PML_Y_SIZE    # [grid points]
-    Nz = 64 - 2*PML_Z_SIZE     # [grid points]
+    grid_size_points = Vector([128, 128, 64]) - 2 * pml_size  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3                  # [m]
+    grid_size_meters = 40e-3                  # [m]
 
     # calculate the spacing between the grid points
-    dx = x/Nx                  # [m]
-    dy = dx                    # [m]
-    dz = dx                    # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -108,7 +105,7 @@ def test_us_defining_transducer():
     transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny/2 - transducer_width/2, Nz/2 - transducer.element_length/2])
+    transducer.position = np.round([1, grid_size_points.y/2 - transducer_width/2, grid_size_points.z/2 - transducer.element_length/2])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
@@ -140,33 +137,33 @@ def test_us_defining_transducer():
     # =========================================================================
 
     # create a binary sensor mask with four detection positions
-    sensor_mask = np.zeros((Nx, Ny, Nz))
-    x_locs = (np.array([1/4, 2/4, 3/4]) * Nx).astype(int)
-    sensor_mask[x_locs - 1, Ny // 2 - 1, Nz // 2 - 1] = 1  # -1 compatibility
+    sensor_mask = np.zeros(grid_size_points)
+    x_locs = (np.array([1/4, 2/4, 3/4]) * grid_size_points.x).astype(int)
+    sensor_mask[x_locs - 1, grid_size_points.y // 2 - 1, grid_size_points.z // 2 - 1] = 1  # -1 compatibility
     sensor = kSensor(sensor_mask)
 
     # set the input settings
     input_filename = f'example_def_tran_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_inside': False,
-        'pml_size': np.array([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
-        'data_cast': DATA_CAST,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    simulation_options = SimulationOptions(
+        pml_inside=False,
+        pml_size=np.array(pml_size),
+        data_cast=DATA_CAST,
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
     # run the simulation
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': not_transducer,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=not_transducer,
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
 
     # display the required syntax to run the C++ simulation
     print(f'Using a terminal window, navigate to the {os.path.sep}binaries folder of the k-Wave Toolbox')

@@ -12,6 +12,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -37,26 +40,20 @@ def test_us_bmode_phased_array():
     RUN_SIMULATION = True
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 15  # [grid points]
-    PML_Y_SIZE = 10  # [grid points]
-    PML_Z_SIZE = 10  # [grid points]
+    pml_size = Vector([15, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
     sc = 1
-    Nx = 256 // sc - 2 * PML_X_SIZE  # [grid points]
-    Ny = 256 // sc - 2 * PML_Y_SIZE  # [grid points]
-    Nz = 128 // sc - 2 * PML_Z_SIZE  # [grid points]
+    grid_size_points = Vector([256, 256, 128]) // sc - 2 * pml_size  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 50e-3  # [m]
+    grid_size_meters = 50e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x / Nx  # [m]
-    dy = dx  # [m]
-    dz = dx  # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -69,7 +66,7 @@ def test_us_bmode_phased_array():
     medium = kWaveMedium(alpha_coeff=0.75, alpha_power=1.5, BonA=6, sound_speed=c0)
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0  # [s]
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -105,7 +102,7 @@ def test_us_bmode_phased_array():
                 transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
+    transducer.position = np.round([1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
@@ -136,19 +133,18 @@ def test_us_bmode_phased_array():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones(
-        [Nx, Ny, Nz])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
-    scattering_map = np.ones([Nx, Ny, Nz])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    scattering_map = np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
     scattering_c0 = c0 + 25 + 75 * scattering_map
     scattering_c0[scattering_c0 > 1600] = 1600
     scattering_c0[scattering_c0 < 1400] = 1400
     scattering_rho0 = scattering_c0 / 1.5
 
     # define properties
-    sound_speed_map = c0 * np.ones((Nx, Ny, Nz)) * background_map
-    density_map = rho0 * np.ones((Nx, Ny, Nz)) * background_map
+    sound_speed_map = c0 * np.ones(grid_size_points) * background_map
+    density_map = rho0 * np.ones(grid_size_points) * background_map
 
     # when the division result is in the half-way (x.5), numpy will round it to the nearest multiple of 2.
     # This behaviour results in different results compared to Matlab.
@@ -158,9 +154,9 @@ def test_us_bmode_phased_array():
     # define a sphere for a highly scattering region
     radius = 8e-3  # [m]
     x_pos = 32e-3  # [m]
-    y_pos = dy * (Ny / 2)  # [m]
-    scattering_region1 = make_ball(Nx, Ny, Nz, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps),
-                                   Nz / 2, round(radius / dx + rounding_eps))
+    y_pos = grid_spacing_meters.y * (grid_size_points.y / 2)  # [m]
+    ball_location = Vector([round(x_pos / grid_spacing_meters.x + rounding_eps), round(y_pos / grid_spacing_meters.x + rounding_eps), grid_size_points.z / 2])
+    scattering_region1 = make_ball(grid_size_points, ball_location, round(radius / grid_spacing_meters.x + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -198,25 +194,25 @@ def test_us_bmode_phased_array():
             input_filename = f'example_input_{angle_index}_input.h5'
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)  # set the input settings
-            input_args = {
-                'pml_inside': False,
-                'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-                'data_cast': DATA_CAST,
-                'data_recast': True,
-                'save_to_disk': True,
-                'input_filename': input_filename,
-                'data_path': pathname,
-                'save_to_disk_exit': True
-            }
-
+            simulation_options = SimulationOptions(
+                pml_inside=False,
+                pml_size=pml_size,
+                data_cast=DATA_CAST,
+                data_recast=True,
+                save_to_disk=True,
+                input_filename=input_filename,
+                save_to_disk_exit=True,
+                data_path=pathname
+            )
             # run the simulation
-            kspaceFirstOrder3DC(**{
-                'medium': deepcopy(medium),
-                'kgrid': kgrid,
-                'source': not_transducer,
-                'sensor': not_transducer,
-                **input_args
-            })
+            kspaceFirstOrder3DC(
+                medium=medium,
+                kgrid=kgrid,
+                source=not_transducer,
+                sensor=not_transducer,
+                simulation_options=simulation_options,
+                execution_options=SimulationExecutionOptions()
+            )
 
             assert compare_against_ref(f'out_us_bmode_phased_array/input_{angle_index}', input_file_full_path,
                                        precision=6), \

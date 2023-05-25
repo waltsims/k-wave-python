@@ -11,6 +11,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -31,17 +34,14 @@ def test_pr_2d_tr_circular_sensor():
     p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
 
     # assign the grid size and create the computational grid
-    PML_size = 20  # size of the PML in grid points
-    Nx = 256 - 2 * PML_size  # number of grid points in the x direction
-    Ny = 256 - 2 * PML_size  # number of grid points in the y direction
-    x = 10e-3  # total grid size [m]
-    y = 10e-3  # total grid size [m]
-    dx = x / Nx                # grid point spacing in the x direction [m]
-    dy = y / Ny                # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    pml_size = Vector([20, 20])  # [grid points]
+    grid_size_points = Vector([256, 256]) - 2 * pml_size  # [grid points]
+    grid_size_meters = Vector([10e-3, 10e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # resize the input image to the desired number of grid points
-    p0 = resize(p0, [Nx, Ny])
+    p0 = resize(p0, grid_size_points)
 
     # smooth the initial pressure distribution and restore the magnitude
     p0 = smooth(p0, True)
@@ -56,7 +56,7 @@ def test_pr_2d_tr_circular_sensor():
     # define a centered Cartesian circular sensor
     sensor_radius = 4.5e-3              # [m]
     sensor_angle = 3 * np.pi / 2        # [rad]
-    sensor_pos = [0, 0]                 # [m]
+    sensor_pos = Vector([0, 0])         # [m]
     num_sensor_points = 70
     cart_sensor_mask = make_cart_circle(sensor_radius, num_sensor_points, sensor_pos, sensor_angle)
 
@@ -71,21 +71,21 @@ def test_pr_2d_tr_circular_sensor():
     input_filename = f'example_tr_circ_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_inside': False,
-        'smooth_p0': False,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
-
+    simulation_options = SimulationOptions(
+        pml_inside=False,
+        smooth_p0=False,
+        save_to_disk=True,
+        input_filename=input_filename,
+        data_path=pathname,
+        save_to_disk_exit=True
+    )
     # run the simulation
-    kspaceFirstOrder2DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': source,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder2DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=source,
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_pr_2D_TR_circular_sensor', input_file_full_path), 'Files do not match!'

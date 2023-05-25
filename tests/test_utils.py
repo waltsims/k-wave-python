@@ -8,7 +8,7 @@ from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import extract_amp_phase, spect, apply_filter
 from kwave.utils.interp import get_bli
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
-from kwave.utils.matrix import gradient_fd, resize, num_dim
+from kwave.utils.matrix import gradient_fd, resize, num_dim, trim_zeros
 from kwave.utils.signals import tone_burst, add_noise, gradient_spect
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
@@ -282,3 +282,53 @@ def test_resize_2D_nearest_smaller():
     p1 = resize(p0, new_size, interp_mode='nearest')
     assert p1.shape == tuple(new_size)
     assert np.all(p1.T == [0., 1.])
+
+
+def test_trim_zeros():
+    # 1D case
+    vec = np.zeros([10])
+    vec[3:8] = 1
+    vec_trimmed, ind = trim_zeros(vec)
+    assert np.all(vec_trimmed == np.ones([5])), "trim_zeros did not pass the 1D test."
+    assert ind == [(3, 8)], "trim_zeros did not return the correct indices for the 1D case."
+
+    # 2D case
+    mat = np.zeros([10, 10])
+    mat[3:8, 3:8] = 1
+    mat_trimmed, ind = trim_zeros(mat)
+    assert np.all(mat_trimmed == np.ones([5, 5])), "trim_zeros did not pass the 2D test."
+    assert ind == [(3, 8), (3, 8)], "trim_zeros did not return the correct indices for the 2D case."
+
+    # 3D case
+    mat = np.zeros([10, 10, 10])
+    mat[3:8, 3:8, 3:8] = 1
+    mat_trimmed, ind = trim_zeros(mat)
+    assert np.all(mat_trimmed == np.ones([5, 5, 5])), "trim_zeros did not pass the 3D test."
+    assert ind == [(3, 8), (3, 8), (3, 8)], "trim_zeros did not return the correct indices for the 3D case."
+
+    # Harder 2D test case
+
+    data = np.array([[0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 3, 0, 0],
+                     [0, 0, 1, 3, 4, 0],
+                     [0, 0, 1, 3, 4, 0],
+                     [0, 0, 1, 3, 0, 0],
+                     [0, 0, 0, 0, 0, 0]])
+
+    correct_trimmed = np.array([[0, 3, 0],
+                                [1, 3, 4],
+                                [1, 3, 4],
+                                [1, 3, 0]])
+
+    data_trimmed, ind = trim_zeros(data)
+
+    # assert correctness
+    assert np.all(data_trimmed == correct_trimmed), "trim_zeros did not pass the hard 2D test."
+
+    # Higher dimensional case (4D)
+    mat = np.zeros([10, 10, 10, 10])
+    mat[3:8, 3:8, 3:8, 3:8] = 1
+    with pytest.raises(ValueError):
+        mat_trimmed, ind = trim_zeros(mat)
+
+    # TODO: generalize to N-D case

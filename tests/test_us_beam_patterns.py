@@ -11,6 +11,9 @@ from tempfile import gettempdir
 
 import numpy as np
 
+from kwave.data import Vector
+from kwave.options import SimulationOptions, SimulationExecutionOptions
+
 # noinspection PyUnresolvedReferences
 import setup_test
 from kwave.kgrid import kWaveGrid
@@ -34,25 +37,19 @@ def test_us_beam_patterns():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20            # [grid points]
-    PML_Y_SIZE = 10            # [grid points]
-    PML_Z_SIZE = 10            # [grid points]
+    pml_size_points = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 128 - 2*PML_X_SIZE    # [grid points]
-    Ny = 64 - 2*PML_Y_SIZE     # [grid points]
-    Nz = 64 - 2*PML_Z_SIZE     # [grid points]
+    grid_size_points = Vector([128, 64, 64]) - 2 * pml_size_points  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3                  # [m]
+    grid_size_meters = 40e-3                  # [m]
 
     # calculate the spacing between the grid points
-    dx = x/Nx                  # [m]
-    dy = dx                    # [m]
-    dz = dx                    # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -97,7 +94,7 @@ def test_us_beam_patterns():
     transducer_width = transducer_spec.number_elements * transducer_spec.element_width + (transducer_spec.number_elements - 1) * transducer_spec.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer_spec.position = np.array([1, Ny//2 - transducer_width//2, Nz//2 - transducer_spec.element_length//2])
+    transducer_spec.position = np.array([1, grid_size_points.y//2 - transducer_width//2, grid_size_points.z//2 - transducer_spec.element_length//2])
 
     # properties used to derive the beamforming delays
     not_transducer_spec = dotdict()
@@ -129,23 +126,23 @@ def test_us_beam_patterns():
 
     # define a sensor mask through the central plane
     sensor = kSensor()
-    sensor.mask = np.zeros((Nx, Ny, Nz))
+    sensor.mask = np.zeros(grid_size_points)
 
     if MASK_PLANE == 'xy':
         # define mask
-        sensor.mask[:, :, Nz//2 - 1] = 1
+        sensor.mask[:, :, grid_size_points.z//2 - 1] = 1
 
         # store y axis properties
-        Nj = Ny
+        Nj = grid_size_points.y
         j_vec = kgrid.y_vec
         j_label = 'y'
 
     if MASK_PLANE == 'xz':
         # define mask
-        sensor.mask[:, Ny//2 - 1, :] = 1
+        sensor.mask[:, grid_size_points.y//2 - 1, :] = 1
 
         # store z axis properties
-        Nj = Nz
+        Nj = grid_size_points.z
         j_vec = kgrid.z_vec
         j_label = 'z'
 
@@ -161,28 +158,29 @@ def test_us_beam_patterns():
     input_filename = f'example_beam_pat_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    input_args = {
-        'pml_inside': False,
-        'pml_size': [PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
-        'data_cast': DATA_CAST,
-        'data_recast': True,
-        'save_to_disk': True,
-        'input_filename': input_filename,
-        'data_path': pathname,
-        'save_to_disk_exit': True
-    }
+    simulation_options = SimulationOptions(
+        pml_inside=False,
+        pml_size=pml_size_points,
+        data_cast=DATA_CAST,
+        data_recast=True,
+        save_to_disk=True,
+        input_filename=input_filename,
+        save_to_disk_exit=True,
+        data_path=pathname
+    )
 
     # stream the data to disk in blocks of 100 if storing the complete time history
     if not USE_STATISTICS:
-        input_args['stream_to_disk'] = 100
+        simulation_options.stream_to_disk = 100
 
     # run the simulation
-    kspaceFirstOrder3DC(**{
-        'medium': medium,
-        'kgrid': kgrid,
-        'source': not_transducer,
-        'sensor': sensor,
-        **input_args
-    })
+    kspaceFirstOrder3DC(
+        medium=medium,
+        kgrid=kgrid,
+        source=not_transducer,
+        sensor=sensor,
+        simulation_options=simulation_options,
+        execution_options=SimulationExecutionOptions()
+    )
     assert compare_against_ref(f'out_us_beam_patterns', input_file_full_path), \
         'Files do not match!'
