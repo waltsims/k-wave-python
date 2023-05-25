@@ -543,6 +543,67 @@
 <span class="sd">        magnitude = np.sqrt(2 * np.pi * variance)</span>
 <span class="sd">    return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="cosd"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.cosd">[docs]</a><span class="k">def</span> <span class="nf">cosd</span><span class="p">(</span><span class="n">angle_in_degrees</span><span class="p">):</span>
+    <span class="c1"># Note:</span>
+    <span class="c1">#   Using numpy.radians instead math.radians</span>
+    <span class="c1">#   does not yield the same results as matlab</span>
+    <span class="n">angle_in_radians</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle_in_degrees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle_in_radians</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sind"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.sind">[docs]</a><span class="k">def</span> <span class="nf">sind</span><span class="p">(</span><span class="n">angle_in_degrees</span><span class="p">):</span>
+    <span class="c1"># Note:</span>
+    <span class="c1">#   Using numpy.radians instead math.radians</span>
+    <span class="c1">#   does not yield the same results as matlab</span>
+    <span class="n">angle_in_radians</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle_in_degrees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_in_radians</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Rx"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.Rx">[docs]</a><span class="k">def</span> <span class="nf">Rx</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    3D rotation matrix for rotation about x-axis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    theta : float. Angle of rotation (in degrees)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    np.array. 3D rotation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">)]])</span>
+    <span class="k">return</span> <span class="n">R</span></div>
+
+<div class="viewcode-block" id="Ry"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.Ry">[docs]</a><span class="k">def</span> <span class="nf">Ry</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    3D rotation matrix for rotation about y-axis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    theta : float. Angle of rotation (in degrees)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    np.array. 3D rotation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">)]])</span>
+    <span class="k">return</span> <span class="n">R</span></div>
+
+<div class="viewcode-block" id="Rz"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.Rz">[docs]</a><span class="k">def</span> <span class="nf">Rz</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    3D rotation matrix for rotation about z-axis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    theta : float. Angle of rotation (in degrees)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    np.array. 3D rotation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">R</span></div>
 </pre></div>
         </article>
       </div>

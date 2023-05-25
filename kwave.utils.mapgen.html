@@ -494,6 +494,21 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_rect">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_rect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rect_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ly</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_rect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_rect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_rect" title="Permalink to this definition">#</a></dt>
+<dd><p>Create evenly distributed Cartesian points covering a rectangle.</p>
+<p>Args:
+rect_pos : List. Cartesian position of the centre of the rectangle.
+Lx : Float. Height of the rectangle (along the x-coordinate before rotation).
+Ly : Float. Width of the rectangle (along the y-coordinate before rotation).
+theta : Float or List (Optional). Specifies the orientation of the rectangle.
+num_points : int (Optional). Approximate number of points on the rectangle.
+plot_rect : bool (Optional). Boolean controlling whether the Cartesian points are plotted.</p>
+<p>Returns:
+np.array. 2 x num_points* or 3 x num_points* array of Cartesian coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_sphere">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Vector([0,</span> <span class="pre">0,</span> <span class="pre">0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_sphere" title="Permalink to this definition">#</a></dt>
 <dd><p>Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.</p>
@@ -993,6 +1008,7 @@ Acoust. Soc. Am., 32(6), 719-721.</p>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_ball"><code class="docutils literal notranslate"><span class="pre">make_ball()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_bowl"><code class="docutils literal notranslate"><span class="pre">make_bowl()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_cart_circle"><code class="docutils literal notranslate"><span class="pre">make_cart_circle()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.mapgen.make_cart_rect"><code class="docutils literal notranslate"><span class="pre">make_cart_rect()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_cart_sphere"><code class="docutils literal notranslate"><span class="pre">make_cart_sphere()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_circle"><code class="docutils literal notranslate"><span class="pre">make_circle()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.mapgen.make_disc"><code class="docutils literal notranslate"><span class="pre">make_disc()</span></code></a></li>

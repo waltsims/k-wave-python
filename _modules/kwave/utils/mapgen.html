@@ -264,6 +264,7 @@
 
 <span class="kn">from</span> <span class="nn">.conversion</span> <span class="kn">import</span> <span class="n">db2neper</span><span class="p">,</span> <span class="n">neper2db</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">scale_SI</span>
+<span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span><span class="p">,</span> <span class="n">Rz</span><span class="p">,</span> <span class="n">Ry</span><span class="p">,</span> <span class="n">Rx</span>
 <span class="kn">from</span> <span class="nn">.matlab</span> <span class="kn">import</span> <span class="n">matlab_assign</span><span class="p">,</span> <span class="n">matlab_find</span><span class="p">,</span> <span class="n">ind2sub</span><span class="p">,</span> <span class="n">sub2ind</span>
 <span class="kn">from</span> <span class="nn">.matrix</span> <span class="kn">import</span> <span class="n">max_nd</span>
 <span class="kn">from</span> <span class="nn">.tictoc</span> <span class="kn">import</span> <span class="n">TicToc</span>
@@ -2608,6 +2609,81 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">return</span> <span class="n">ss</span><span class="p">,</span> <span class="n">dist_map</span></div>
+
+
+<div class="viewcode-block" id="make_cart_rect"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.make_cart_rect">[docs]</a><span class="k">def</span> <span class="nf">make_cart_rect</span><span class="p">(</span><span class="n">rect_pos</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">plot_rect</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create evenly distributed Cartesian points covering a rectangle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    rect_pos : List. Cartesian position of the centre of the rectangle.</span>
+<span class="sd">    Lx : Float. Height of the rectangle (along the x-coordinate before rotation).</span>
+<span class="sd">    Ly : Float. Width of the rectangle (along the y-coordinate before rotation).</span>
+<span class="sd">    theta : Float or List (Optional). Specifies the orientation of the rectangle.</span>
+<span class="sd">    num_points : int (Optional). Approximate number of points on the rectangle.</span>
+<span class="sd">    plot_rect : bool (Optional). Boolean controlling whether the Cartesian points are plotted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    np.array. 2 x num_points* or 3 x num_points* array of Cartesian coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Find number of points in along each axis</span>
+    <span class="n">npts_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_points</span> <span class="o">*</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Ly</span><span class="p">))</span>
+    <span class="n">npts_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_points</span> <span class="o">/</span> <span class="n">npts_x</span><span class="p">)</span>
+
+    <span class="c1"># Recalculate the true number of points</span>
+    <span class="n">num_points</span> <span class="o">=</span> <span class="n">npts_x</span> <span class="o">*</span> <span class="n">npts_y</span>
+
+    <span class="c1"># Distance between points in each dimension</span>
+    <span class="n">d_x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">npts_x</span>
+    <span class="n">d_y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">npts_y</span>
+
+    <span class="c1"># Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)</span>
+    <span class="n">p_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">d_x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">npts_x</span><span class="p">)</span>
+    <span class="n">p_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d_y</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">d_y</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">npts_y</span><span class="p">)</span>
+    <span class="n">P_x</span><span class="p">,</span> <span class="n">P_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">p_x</span><span class="p">,</span> <span class="n">p_y</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">P_x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">P_y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Add z-dimension points if in 3D</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rect_pos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">p0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_points</span><span class="p">)))</span>
+
+    <span class="c1"># Transform the canonical rectangle points to give the specified rectangle</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rect_pos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+        <span class="c1"># Scaling transformation</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Lx</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Ly</span><span class="p">]])</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1"># Rotation</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+                          <span class="p">[</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">)]])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="c1"># Scaling transformation</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Lx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1"># Rotation</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># No rotation</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Using intrinsic rotations chain from right to left (z-y&#39;-z&#39;&#39; rotations)</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Rz</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ry</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Rx</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+
+    <span class="c1"># Combine scaling and rotation matrices</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+
+    <span class="c1"># Apply this transformation to the canonical points</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">p0</span><span class="p">)</span>
+
+    <span class="c1"># Shift the rectangle to the appropriate centre</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">p0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rect_pos</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rect</span></div>
 
 
 <div class="viewcode-block" id="focused_bowl_oneil"><a class="viewcode-back" href="../../../kwave.utils.mapgen.html#kwave.utils.mapgen.focused_bowl_oneil">[docs]</a><span class="k">def</span> <span class="nf">focused_bowl_oneil</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sound_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
