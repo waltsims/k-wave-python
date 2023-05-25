@@ -179,7 +179,7 @@ def angular_spectrum_cw(
 
     # create wavenumber grids
     ky, kx = np.meshgrid(k_vec, k_vec, indexing='ij')
-    kz = np.sqrt(k**2 - (kx**2 + ky**2).astype(np.complex))
+    kz = np.sqrt(k**2 - (kx**2 + ky**2).astype(complex))
 
     # precompute term for angular restriction
     sqrt_kx2_ky2 = np.sqrt(kx ** 2 + ky ** 2)

@@ -296,7 +296,7 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarr
     num_discarded_points = cart_data.shape[1] - np.sum(grid_data)
     if num_discarded_points != 0:
         print(f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
-    return grid_data.astype(np.int), order_index, reorder_index
+    return grid_data.astype(int), order_index, reorder_index
 
 
 def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
