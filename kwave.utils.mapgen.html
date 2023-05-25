@@ -399,11 +399,11 @@ points, <cite>start</cite> must be &gt; 0. If <cite>n</cite> &lt; 2, <cite>stop<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
 <li><p><strong>arc_pos</strong> (<em>ndarray</em>) – The position of the arc, given as a 1D array with the coordinates in each dimension.</p></li>
 <li><p><strong>radius</strong> (<em>float</em>) – The radius of the arc.</p></li>
 <li><p><strong>diameter</strong> (<em>float</em>) – The diameter of the arc.</p></li>
-<li><p><strong>focus_pos</strong> (<em>ndarray</em>) – The position of the focus, given as a 1D array with the coordinates in each dimension.</p></li>
+<li><p><strong>focus_pos</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The position of the focus, given as a 1D array with the coordinates in each dimension.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -417,17 +417,13 @@ points, <cite>start</cite> must be &gt; 0. If <cite>n</cite> &lt; 2, <cite>stop<
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_ball">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ball</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_ball" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ball_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ball</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_ball" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a binary map of a filled ball within a 3D grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – size of the 3D grid in x-dimension [grid points].</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – size of the 3D grid in y-dimension [grid points].</p></li>
-<li><p><strong>Nz</strong> (<em>int</em>) – size of the 3D grid in z-dimension [grid points].</p></li>
-<li><p><strong>cx</strong> (<em>int</em>) – centre of the ball in x-dimension [grid points].</p></li>
-<li><p><strong>cy</strong> (<em>int</em>) – centre of the ball in y-dimension [grid points].</p></li>
-<li><p><strong>cz</strong> (<em>int</em>) – centre of the ball in z-dimension [grid points].</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – size of the 3D grid in [grid points].</p></li>
+<li><p><strong>ball_center</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – centre of the ball in [grid points]</p></li>
 <li><p><strong>radius</strong> (<em>int</em>) – ball radius [grid points].</p></li>
 <li><p><strong>plot_ball</strong> (<em>bool</em>) – whether to plot the ball using voxelPlot (default = False).</p></li>
 <li><p><strong>binary</strong> (<em>bool</em>) – whether to return the ball map as a double precision matrix (False) or a logical matrix (True) (default = False).</p></li>
@@ -452,11 +448,11 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – size of the grid in each dimension</p></li>
-<li><p><strong>bowl_pos</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – position of the bowl in the grid</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – size of the grid in each dimension</p></li>
+<li><p><strong>bowl_pos</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – position of the bowl in the grid</p></li>
 <li><p><strong>radius</strong> (<em>int</em>) – radius of the bowl</p></li>
 <li><p><strong>diameter</strong> (<em>int</em>) – diameter of the bowl</p></li>
-<li><p><strong>focus_pos</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>) – position of the focus point in the grid</p></li>
+<li><p><strong>focus_pos</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – position of the focus point in the grid</p></li>
 <li><p><strong>binary</strong> (<em>bool</em>) – whether to return a binary matrix</p></li>
 <li><p><strong>remove_overlap</strong> (<em>bool</em>) – whether to remove overlap with the surrounding grid</p></li>
 </ul>
@@ -475,7 +471,7 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_circle">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.283185307179586</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_circle" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Vector([0,</span> <span class="pre">0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.283185307179586</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_circle" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a set of points in cartesian coordinates defining a circle or arc.</p>
 <p>This function creates a set of points in cartesian coordinates defining a circle or arc.</p>
 <dl class="field-list simple">
@@ -483,7 +479,7 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>radius</strong> (<em>float</em>) – radius of the circle or arc</p></li>
 <li><p><strong>num_points</strong> (<em>int</em>) – number of points to generate</p></li>
-<li><p><strong>center_pos</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – center position of the circle or arc</p></li>
+<li><p><strong>center_pos</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – center position of the circle or arc</p></li>
 <li><p><strong>arc_angle</strong> (<em>float</em>) – arc angle in radians</p></li>
 <li><p><strong>plot_circle</strong> (<em>bool</em>) – whether to plot the circle or arc</p></li>
 </ul>
@@ -499,14 +495,14 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_cart_sphere">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_sphere" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_cart_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Vector([0,</span> <span class="pre">0,</span> <span class="pre">0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_cart_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_cart_sphere" title="Permalink to this definition">#</a></dt>
 <dd><p>Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>radius</strong> (<em>float</em>) – the radius of the sphere.</p></li>
 <li><p><strong>num_points</strong> (<em>int</em>) – the number of points to be generated.</p></li>
-<li><p><strong>center_pos</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em>) – the coordinates of the center of the sphere. Defaults to (0, 0, 0).</p></li>
+<li><p><strong>center_pos</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – the coordinates of the center of the sphere. Defaults to (0, 0, 0).</p></li>
 <li><p><strong>plot_sphere</strong> (<em>bool</em>) – whether to plot the sphere. Defaults to False.</p></li>
 </ul>
 </dd>
@@ -521,7 +517,7 @@ continuous values. The optional parameter ‘remove_overlap’ can be used to re
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_circle">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_circle" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arc_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_circle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_circle" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a binary map of a circle within a 2D grid.</p>
 <p>This function creates a binary map of a circle (or arc) using the midpoint circle algorithm within a two-dimensional grid.
 The circle position is denoted by 1’s in the matrix with 0’s elsewhere. A single grid point is taken as the circle
@@ -531,10 +527,8 @@ of the circle intersects the grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points along the x-axis.</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points along the y-axis.</p></li>
-<li><p><strong>cx</strong> (<em>int</em>) – The x-coordinate of the circle centre.</p></li>
-<li><p><strong>cy</strong> (<em>int</em>) – The y-coordinate of the circle centre.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – A 2D vector of the grid size in grid points.</p></li>
+<li><p><strong>center</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – A 2D vector of the circle centre in grid points.</p></li>
 <li><p><strong>radius</strong> (<em>int</em>) – The radius of the circle.</p></li>
 <li><p><strong>arc_angle</strong> (<em>float</em><em> | </em><em>None</em>) – The angle of the circular arc in degrees. If set to None, a full circle will be created.</p></li>
 <li><p><strong>plot_circle</strong> (<em>bool</em>) – If set to True, the circle will be plotted using Matplotlib.</p></li>
@@ -551,7 +545,7 @@ of the circle intersects the grid.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_disc">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_disc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_disc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_disc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_disc" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_disc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_disc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_disc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_disc" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a binary map of a filled disc within a 2D grid.</p>
 <p>This function creates a binary map of a filled disc within a two-dimensional grid. The disc position is denoted by 1’s
 in the matrix with 0’s elsewhere. A single grid point is taken as the disc centre, so the total diameter of the disc
@@ -561,10 +555,8 @@ side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> – The number of grid points along the x-axis.</p></li>
-<li><p><strong>Ny</strong> – The number of grid points along the y-axis.</p></li>
-<li><p><strong>cx</strong> – The x-coordinate of the disc centre.</p></li>
-<li><p><strong>cy</strong> – The y-coordinate of the disc centre.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – A 2D vector of the grid size in grid points.</p></li>
+<li><p><strong>center</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – A 2D vector of the disc centre in grid points.</p></li>
 <li><p><strong>radius</strong> – The radius of the disc.</p></li>
 <li><p><strong>plot_disc</strong> – If set to True, the disc will be plotted using Matplotlib.</p></li>
 </ul>
@@ -577,13 +569,12 @@ side.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_line">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_line" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_line" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a line shape with a given start and end point, angle, or length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – The number of pixels in the x-dimension.</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – The number of pixels in the y-dimension.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid in pixels.</p></li>
 <li><p><strong>startpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The start point of the line, given as a tuple of x and y coordinates.</p></li>
 <li><p><strong>endpoint</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>] </em><em>| </em><em>None</em>) – The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.</p></li>
 <li><p><strong>angle</strong> (<em>float</em><em> | </em><em>None</em>) – The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.</p></li>
@@ -606,7 +597,7 @@ side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid (assumed to be square).</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid (assumed to be square).</p></li>
 <li><p><strong>arc_pos</strong> (<em>ndarray</em>) – An array containing the (x, y) coordinates of the center of each arc.</p></li>
 <li><p><strong>radius</strong> (<em>int</em><em> | </em><em>ndarray</em>) – The radius of each arc. Can be a single value or an array with one value for each arc.</p></li>
 <li><p><strong>diameter</strong> (<em>int</em><em> | </em><em>ndarray</em>) – The diameter of the arcs. Can be a single value or an array with one value for each arc.</p></li>
@@ -653,7 +644,7 @@ arcs_labelled: A labelled mask of the arcs.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_pixel_map">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_pixel_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_pixel_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_pixel_map" title="Permalink to this definition">#</a></dt>
 <dd><p>Generates a matrix with values of the distance of each pixel from the center of a grid.</p>
 <p>This function generates a matrix populated with values of how far each pixel in a grid is from the center. The center
 can be a single pixel or a double pixel, and the optional input parameter ‘OriginSize’ controls this. For grids where
@@ -662,9 +653,7 @@ control the location of the center point.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – number of pixels in the x-dimension</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – number of pixels in the y-dimension</p></li>
-<li><p><strong>Nz</strong> (<em>int</em><em> | </em><em>None</em>) – number of pixels in the z-dimension</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – A 2D or 3D vector of the grid size in grid points.</p></li>
 <li><p><strong>*args</strong> – additional optional arguments</p></li>
 </ul>
 </dd>
@@ -706,7 +695,7 @@ the final row and column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid as a NumPy array [Nx, Ny, Nz].</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid as a NumPy array [Nx, Ny, Nz].</p></li>
 <li><p><strong>normal</strong> (<em>ndarray</em>) – The normal vector of the plane as a NumPy array [nx, ny, nz].</p></li>
 <li><p><strong>point</strong> (<em>ndarray</em>) – A point on the plane as a NumPy array [px, py, pz].</p></li>
 </ul>
@@ -730,7 +719,7 @@ the final row and column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_size</strong> (<em>ndarray</em>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid, given as a 1D array with the number of pixels in each dimension.</p></li>
 <li><p><strong>centre_pos</strong> (<em>ndarray</em>) – The position of the centre, given as a 1D array with the coordinates in each dimension.</p></li>
 </ul>
 </dd>
@@ -748,14 +737,12 @@ the final row and column.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.mapgen.make_sphere">
-<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_sphere" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.mapgen.</span></span><span class="sig-name descname"><span class="pre">make_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/mapgen.html#make_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.mapgen.make_sphere" title="Permalink to this definition">#</a></dt>
 <dd><p>Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Nx</strong> (<em>int</em>) – The number of grid points in the x-dimension.</p></li>
-<li><p><strong>Ny</strong> (<em>int</em>) – The number of grid points in the y-dimension.</p></li>
-<li><p><strong>Nz</strong> (<em>int</em>) – The number of grid points in the z-dimension.</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – The size of the grid (assumed to be cubic).</p></li>
 <li><p><strong>radius</strong> (<em>float</em>) – The radius of the sphere.</p></li>
 <li><p><strong>plot_sphere</strong> (<em>bool</em>) – Whether to plot the sphere (default: False).</p></li>
 <li><p><strong>binary</strong> (<em>bool</em>) – Whether to return a binary mask (default: False).</p></li>
