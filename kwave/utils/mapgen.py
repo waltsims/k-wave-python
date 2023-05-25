@@ -2522,3 +2522,36 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
 def ndgrid(*args):
     return np.array(np.meshgrid(*args, indexing='ij'))
+
+
+def trim_cart_points(kgrid, points: np.ndarray):
+    """
+        trim_cart_points filters a dim x num_points array of Cartesian points
+        so that only those within the bounds of a given kgrid remain.
+        :param kgrid: Object of the kWaveGrid class defining the Cartesian
+                      and k-space grid fields.
+        :param points: dim x num_points array of Cartesian coordinates to trim [m].
+        :return: dim x num_points array of Cartesian coordinates that lie within the grid defined by kgrid [m].
+        """
+
+    # find indices for points within the simulation domain
+    ind_x = (points[0, :] >= kgrid.x_vec[0]) & (points[0, :] <= kgrid.x_vec[-1])
+
+    if kgrid['dim'] > 1:
+        ind_y = (points[1, :] >= kgrid.y_vec[0]) & (points[1, :] <= kgrid.y_vec[-1])
+
+    if kgrid['dim'] > 2:
+        ind_z = (points[2, :] >= kgrid.z_vec[0]) & (points[2, :] <= kgrid.z_vec[-1])
+
+    # combine indices
+    if kgrid.dim == 1:
+        ind = ind_x
+    elif kgrid.dim == 2:
+        ind = ind_x & ind_y
+    elif kgrid.dim == 3:
+        ind = ind_x & ind_y & ind_z
+
+    # output only valid points
+    points = points[:, ind]
+
+    return points
