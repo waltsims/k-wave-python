@@ -212,8 +212,7 @@ class SimulationOptions(object):
 
         STREAM_TO_DISK_STEPS_DEF = 200  # number of steps before streaming to disk
 
-        if options.pml_size is not None or not isinstance(options.pml_size, bool):
-            options.pml_size = np.atleast_1d(options.pml_size)
+        if options.pml_size is not None and not isinstance(options.pml_size, bool):
             if len(options.pml_size) > kgrid.dim:
                 if kgrid.dim > 1:
                     raise ValueError(
@@ -228,19 +227,28 @@ class SimulationOptions(object):
         elif kgrid.dim == 2:
             options.pml_x_alpha = 2
             options.pml_y_alpha = options.pml_x_alpha
-            options.pml_x_size = options.pml_size if options.pml_size else 20
-            options.pml_y_size = options.pml_x_size
+            if options.pml_size is None:
+                options.pml_x_size = 20
+                options.pml_y_size = 20
+            else:
+                options.pml_x_size = options.pml_size[0]
+                options.pml_y_size = options.pml_x_size
             options.plot_scale = [-1, 1]
         elif kgrid.dim == 3:
-            if len(options.pml_size) == kgrid.dim:
+            if options.pml_size is not None and len(options.pml_size) == kgrid.dim:
                 options.pml_x_size, options.pml_y_size, options.pml_z_size = options.pml_size.ravel()
             else:
                 options.pml_x_alpha = 2
                 options.pml_y_alpha = options.pml_x_alpha
                 options.pml_z_alpha = options.pml_x_alpha
-                options.pml_x_size = options.pml_size if isinstance(options.pml_size, numbers.Number) else 10
-                options.pml_y_size = options.pml_x_size
-                options.pml_z_size = options.pml_x_size
+                if options.pml_size is None:
+                    options.pml_x_size = 10
+                    options.pml_y_size = 10
+                    options.pml_z_size = 10
+                else:
+                    options.pml_x_size = options.pml_size[0]
+                    options.pml_y_size = options.pml_x_size
+                    options.pml_z_size = options.pml_x_size
                 options.plot_scale = [-1, 1]
 
         # replace defaults with user defined values if provided and check inputs

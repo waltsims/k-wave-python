@@ -11,6 +11,8 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -26,21 +28,17 @@ from tests.diff_utils import compare_against_ref
 
 def test_tvsp_3D_simulation():
     # create the computational grid
-    Nx = 64  # number of grid points in the x direction
-    Ny = 64  # number of grid points in the y direction
-    Nz = 64  # number of grid points in the z direction
-    dx = 0.1e-3  # grid point spacing in the x direction [m]
-    dy = 0.1e-3        # grid point spacing in the y direction [m]
-    dz = 0.1e-3        # grid point spacing in the z direction [m]
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    grid_size = Vector([64, 64, 64])  # [grid points]
+    grid_spacing = 1e-4 * Vector([1, 1, 1])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(
-        sound_speed=1500 * np.ones((Nx, Ny, Nz)),
-        density=1000 * np.ones((Nx, Ny, Nz))
+        sound_speed=1500 * np.ones(grid_size),
+        density=1000 * np.ones(grid_size)
     )
-    medium.sound_speed[0:Nx//2, :, :] = 1800            # [m/s]
-    medium.density[:, Ny//4-1:, :] = 1200               # [kg/m^3]
+    medium.sound_speed[0:grid_size.x//2, :, :] = 1800            # [m/s]
+    medium.density[:, grid_size.y//4-1:, :] = 1200               # [kg/m^3]
 
     # create the time array
     kgrid.makeTime(medium.sound_speed)
@@ -48,8 +46,8 @@ def test_tvsp_3D_simulation():
     # define a square source element
     source = kSource()
     source_radius = 5  # [grid points]
-    source.p_mask = np.zeros((Nx, Ny, Nz))
-    source.p_mask[Nx//4 - 1, Ny//2 - source_radius - 1:Ny//2 + source_radius, Nz//2 - source_radius - 1:Nz//2 + source_radius] = 1
+    source.p_mask = np.zeros(grid_size)
+    source.p_mask[grid_size.x//4 - 1, grid_size.y//2 - source_radius - 1:grid_size.y//2 + source_radius, grid_size.z//2 - source_radius - 1:grid_size.z//2 + source_radius] = 1
 
     # define a time varying sinusoidal source
     source_freq = 2e6  # [Hz]
@@ -60,9 +58,9 @@ def test_tvsp_3D_simulation():
     source.p = filter_time_series(kgrid, medium, source.p)
 
     # define a series of Cartesian points to collect the data
-    y = np.arange(-20, 21, 2) * dy            # [m]
-    z = np.arange(-20, 21, 2) * dz            # [m]
-    x = 20 * dx * np.ones(z.shape)    # [m]
+    y = np.arange(-20, 21, 2) * grid_spacing.y            # [m]
+    z = np.arange(-20, 21, 2) * grid_spacing.z            # [m]
+    x = 20 * grid_spacing.x * np.ones(z.shape)    # [m]
     sensor_mask = np.array([x, y, z])
     sensor = kSensor(sensor_mask)
 

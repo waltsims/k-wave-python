@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_arc
 
 from scipy.io import loadmat
@@ -23,6 +24,9 @@ def test_makeArc():
             radius = float(radius)
         expected_arc = recorded_data['arc']
 
+        grid_size = Vector(grid_size)
+        arc_pos = Vector(arc_pos)
+        focus_pos = Vector(focus_pos)
         arc = make_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_arc, arc)
