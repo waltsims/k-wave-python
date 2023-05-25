@@ -307,7 +307,7 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
             ball_center[i] = int(floor(grid_size[i] / 2)) + 1
 
     # create empty matrix
-    ball = np.zeros(grid_size).astype(np.bool if binary else np.float32)
+    ball = np.zeros(grid_size).astype(bool if binary else float)
 
     # define np.pixel map
     r = make_pixel_map(grid_size, shift=[0, 0, 0])
