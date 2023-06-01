@@ -5,6 +5,8 @@ from typing import Optional, Tuple, Union, List
 import numpy as np
 from numpy.fft import ifftshift, fft, ifft
 
+from kwave.data import Vector
+
 
 def largest_prime_factor(n: int) -> int:
     """
@@ -350,3 +352,89 @@ def Rz(theta):
                   [sind(theta), cosd(theta), 0],
                   [0, 0, 1]])
     return R
+
+
+def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarray, Vector]):
+    # Check dimensions
+    if len(translation) == 2 and isinstance(rotation, (int, float)):
+
+        # Assign the inputs
+        dx = translation[0]
+        dy = translation[1]
+        th = rotation
+
+        # Build affine matrix (counter-clockwise)
+        affine = np.array([
+            [cosd(th), -sind(th), dx],
+            [sind(th), cosd(th), dy],
+            [0, 0, 1]
+        ])
+
+    elif len(translation) == 3 and isinstance(rotation, (np.ndarray, Vector)) and len(rotation) == 3:
+
+        # Assign the inputs
+        dx, dy, dz = translation
+        x_th, y_th, z_th = rotation
+
+        # Build the rotation matrices
+        x_th_matrix = np.array([
+            [1, 0, 0],
+            [0, cosd(x_th), -sind(x_th)],
+            [0, sind(x_th), cosd(x_th)]
+        ])
+
+        y_th_matrix = np.array([
+            [cosd(y_th), 0, sind(y_th)],
+            [0, 1, 0],
+            [-sind(y_th), 0, cosd(y_th)]
+        ])
+
+        z_th_matrix = np.array([
+            [cosd(z_th), -sind(z_th), 0],
+            [sind(z_th), cosd(z_th), 0],
+            [0, 0, 1]
+        ])
+
+        # Build affine matrix
+        affine = np.zeros((4, 4))
+        affine[0:3, 0:3] = np.dot(z_th_matrix, np.dot(y_th_matrix, x_th_matrix))
+        affine[:, 3] = [dx, dy, dz, 1]
+
+    else:
+        raise ValueError('Incorrect size for translation and rotation inputs.')
+
+    return affine
+
+
+def compute_linear_transform(pos1, pos2, offset=None):
+    # Compute vector pointing from pos1 to pos2
+    beam_vec = pos2 - pos1
+
+    # Normalise to give unit beam vector
+    beam_vec = beam_vec / np.linalg.norm(beam_vec)
+
+    # Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])
+    beam_vec0 = np.array([0, 0, -1])
+
+    # Find the rotation matrix for the bowl
+    u = np.cross(beam_vec0, beam_vec)
+
+    # Normalise the rotation matrix if not zero
+    if any(u != 0):
+        u = u / np.linalg.norm(u)
+
+    # Find the axis-angle transformation between beam_vec and e1
+    theta = np.arccos(np.dot(beam_vec0, beam_vec))
+
+    # Convert axis-angle transformation to a rotation matrix
+    A = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+    rotMat = np.cos(theta) * np.eye(3) + np.sin(theta) * A + (1 - np.cos(theta)) * np.outer(u, u)
+
+    # Compute an offset for the bowl, where bowl_centre = move from pos1
+    # towards focus by radius
+    if offset is not None:
+        offsetPos = pos1 + offset * beam_vec
+    else:
+        offsetPos = 0
+
+    return rotMat, offsetPos
