@@ -1,5 +1,6 @@
 import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
@@ -16,25 +17,19 @@ def test_check_stability():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20  # [grid points]
-    PML_Y_SIZE = 10  # [grid points]
-    PML_Z_SIZE = 10  # [grid points]
+    pml_size = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 128 - 2 * PML_X_SIZE  # [grid points]
-    Ny = 128 - 2 * PML_Y_SIZE  # [grid points]
-    Nz = 64 - 2 * PML_Z_SIZE  # [grid points]
+    grid_size_points = Vector([128, 64, 64]) - 2 * pml_size  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3  # [m]
+    grid_size_meters = 40e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x / Nx  # [m]
-    dy = dx  # [m]
-    dz = dx  # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -79,7 +74,9 @@ def test_get_alpha_filters_2d():
     # =========================================================================
 
     # create the computational grid
-    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+    grid_size = Vector([Nx, Nx])
+    grid_spacing = Vector([dx, dx])
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
@@ -129,7 +126,9 @@ def test_get_alpha_filters_1D():
     # =========================================================================
 
     # create the computational grid
-    kgrid = kWaveGrid(Nx, dx)
+    grid_size = Vector([Nx])
+    grid_spacing = Vector([dx])
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
@@ -147,25 +146,19 @@ def test_focus():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20  # [grid points]
-    PML_Y_SIZE = 10  # [grid points]
-    PML_Z_SIZE = 10  # [grid points]
+    pml_size_points = Vector([20, 10, 10]) # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 256 - 2 * PML_X_SIZE  # [grid points]
-    Ny = 128 - 2 * PML_Y_SIZE  # [grid points]
-    Nz = 128 - 2 * PML_Z_SIZE  # [grid points]
+    grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3  # [m]
+    grid_size_meters = 40e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x / Nx  # [m]
-    dy = dx  # [m]
-    dz = dx  # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -183,7 +176,7 @@ def test_focus():
     )
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0  # [s]
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -219,7 +212,7 @@ def test_focus():
             transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
+    transducer.position = np.round([1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2])
 
     transducer = kWaveTransducerSimple(kgrid, **transducer)
     imaging_system = NotATransducer(transducer, kgrid)

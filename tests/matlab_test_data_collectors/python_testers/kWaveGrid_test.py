@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
+from kwave.data import Vector
 from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.kgrid import kWaveGrid
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
@@ -13,21 +14,12 @@ def test_kwave_grid():
     test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveGrid.mat')
     reader = TestRecordReader(test_record_path)
 
-    Nx = 10
-    dx = 0.1
-    Ny = 14
-    dy = 0.05
-    Nz = 9
-    dz = 0.13
+    grid_size = Vector([10, 14, 9])
+    grid_spacing = Vector([0.1, 0.05, 0.13])
 
     for dim in range(1, 4):
         print('Dim:', dim)
-        if dim == 1:
-            kgrid = kWaveGrid(Nx, dx)
-        elif dim == 2:
-            kgrid = kWaveGrid([Nx, Ny], [dx, dy])
-        else:
-            kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+        kgrid = kWaveGrid(grid_size[:dim], grid_spacing[:dim])
 
         check_kgrid_equality(kgrid, reader.expected_value_of('kgrid'))
         reader.increment()

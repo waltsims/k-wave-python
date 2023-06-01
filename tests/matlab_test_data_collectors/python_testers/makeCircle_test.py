@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
+from kwave.data import Vector
 from kwave.utils.mapgen import make_circle
 
 
@@ -24,7 +25,9 @@ def test_makeCircle():
         arc_angle = float(recorded_data['arc_angle'])
         expected_circle = recorded_data['circle']
 
-        circle = make_circle(Nx, Ny, cx, cy, radius, arc_angle)
+        grid_size = Vector([Nx, Ny])
+        center = Vector([cx, cy])
+        circle = make_circle(grid_size, center, radius, arc_angle)
 
         assert np.allclose(expected_circle, circle)
 

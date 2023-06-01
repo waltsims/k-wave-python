@@ -139,7 +139,7 @@ class kWaveGrid(object):
         Returns: None
         """
         # check the value for Nt
-        assert (isinstance(Nt, int) or np.issubdtype(Nt, np.int)) and Nt > 0, 'Nt must be a positive integer.'
+        assert (isinstance(Nt, int) or np.issubdtype(Nt, np.int64) or np.issubdtype(Nt, np.int32)) and Nt > 0, 'Nt must be a positive integer.'
 
         # check the value for dt
         assert dt > 0, 'dt must be positive.'

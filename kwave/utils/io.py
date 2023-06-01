@@ -163,9 +163,9 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         matrix = np.transpose(matrix, (1, 0, 2, 3))
 
         # update the matrix size
-        Nx = Nx * (2 - np.array(Nx == 1).astype(np.float))
-        Ny = Ny * (2 - np.array(Ny == 1).astype(np.float))
-        Nz = Nz * (2 - np.array(Nz == 1).astype(np.float))
+        Nx = Nx * (2 - np.array(Nx == 1).astype(float))
+        Ny = Ny * (2 - np.array(Ny == 1).astype(float))
+        Nz = Nz * (2 - np.array(Nz == 1).astype(float))
 
         # double store in x-direction if a complex scalar
         if Nx == 1 and Ny == 1 and Nz == 1:

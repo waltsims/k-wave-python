@@ -3,6 +3,8 @@ from tempfile import gettempdir
 
 import numpy as np
 import scipy.io
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 from example_utils import download_from_gdrive_if_does_not_exist
@@ -29,25 +31,19 @@ if __name__ == '__main__':
     print("Setting up the k-wave grid...")
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20  # [grid points]
-    PML_Y_SIZE = 10  # [grid points]
-    PML_Z_SIZE = 10  # [grid points]
+    pml_size_points = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 256 - 2 * PML_X_SIZE  # [grid points]
-    Ny = 128 - 2 * PML_Y_SIZE  # [grid points]
-    Nz = 128 - 2 * PML_Z_SIZE  # [grid points]
+    grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3  # [m]
+    grid_size_meters = 40e-3  # [m]
 
     # calculate the spacing between the grid points
-    dx = x / Nx  # [m]
-    dy = dx  # [m]
-    dz = dx  # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -64,7 +60,7 @@ if __name__ == '__main__':
     )
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0  # [s]
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -102,7 +98,7 @@ if __name__ == '__main__':
                 transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
+    transducer.position = np.round([1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
@@ -158,8 +154,8 @@ if __name__ == '__main__':
         # update the command line status
 
         # load the current section of the medium
-        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
-        medium.density = density_map[:, medium_position:medium_position + Ny, :]
+        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
+        medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
 
         # set the input settings
         input_filename = f'example_input_{scan_line_index}.h5'
@@ -167,7 +163,7 @@ if __name__ == '__main__':
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
-            pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+            pml_size=pml_size_points,
             data_cast=DATA_CAST,
             data_recast=True,
             save_to_disk=True,
