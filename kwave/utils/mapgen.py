@@ -3,7 +3,6 @@ import warnings
 from math import floor
 from typing import Tuple, Optional, Union, List, Any, cast
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
@@ -456,7 +455,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     MAGNITUDE = 1
 
     # force integer values
-    grid_size =  grid_size.round().astype(int)
+    grid_size = grid_size.round().astype(int)
     center = center.round().astype(int)
 
     # check for zero values
@@ -2209,8 +2208,9 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
-                                                                          :]
+            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[
+                                                                                centerpoints[centerpoint_index] - 1, :,
+                                                                                :]
 
     # plot results
     if plot_sphere:
@@ -2385,8 +2385,8 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     d_y = 2 / npts_y
 
     # Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)
-    p_x = np.linspace(-1 + d_x/2, 1 - d_x/2, npts_x)
-    p_y = np.linspace(-1 + d_y/2, 1 - d_y/2, npts_y)
+    p_x = np.linspace(-1 + d_x / 2, 1 - d_x / 2, npts_x)
+    p_y = np.linspace(-1 + d_y / 2, 1 - d_y / 2, npts_y)
     P_x, P_y = np.meshgrid(p_x, p_y, indexing='ij')
     p0 = np.stack((P_x.flatten(), P_y.flatten()), axis=0)
 
@@ -2555,3 +2555,119 @@ def trim_cart_points(kgrid, points: np.ndarray):
     points = points[:, ind]
 
     return points
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
+                  plot_arc: bool = False) -> np.ndarray:
+    """
+    make_cart_arc creates a 2 x num_points array of the Cartesian
+    coordinates of points evenly distributed over an arc. The midpoint of
+    the arc is set by arc_pos. The orientation of the arc is set by
+    focus_pos, which corresponds to any point on the axis of the arc
+    (note, this must not be equal to arc_pos). It is assumed that the arc
+    angle is equal to or less than pi radians. If the radius is set to
+    inf, a line is generated.
+
+    Note, the first and last points do not lie on the end-points of the
+    underlying canonical arc, but are offset by half the angular spacing
+    between the points.
+
+    Args:
+        arc_pos: center of the rear surface (midpoint) of the arc given as a two element vector [bx, by] [m].
+        radius: radius of curvature of the arc [m].
+        diameter: diameter of the opening of the arc (length of line connecting arc endpoints) [m].
+        focus_pos: Any point on the beam axis of the arc given as a two element vector [fx, fy] [m].
+        num_points: number of points to generate along the arc.
+        plot_arc: boolean flag to plot the arc.
+
+    Returns:
+        2 x num_points array of Cartesian coordinates of points along the arc [m].
+
+    """
+
+    # Check input values
+    if radius <= 0:
+        raise ValueError("The radius must be positive.")
+    if diameter <= 0:
+        raise ValueError("The diameter must be positive.")
+    if diameter > 2 * radius:
+        raise ValueError("The diameter of the arc must be less than twice the radius of curvature.")
+    if np.all(arc_pos == focus_pos):
+        raise ValueError("The focus_pos must be different from the arc_pos.")
+
+    # Check for infinite radius of curvature, and make a large finite number
+    if np.isinf(radius):
+        radius = 1e10 * diameter
+
+    # Compute arc angle from chord
+    varphi_max = np.arcsin(diameter / (2 * radius))
+
+    # Angle between points
+    dvarphi = 2 * varphi_max / num_points
+
+    # Compute canonical arc points where arc is centered on the origin, and its
+    # back is placed at a distance of radius along the positive y-axis
+    t = np.linspace(-varphi_max + dvarphi / 2, varphi_max - dvarphi / 2, num_points)
+    p0 = radius * np.array([np.sin(t), np.cos(t)])
+
+    # Linearly transform canonical points to give arc in correct orientation
+    R, b = compute_linear_transform2D(arc_pos, radius, focus_pos)
+    arc = np.dot(R, p0) + b
+
+    # Plot results
+    if plot_arc:
+        # Select suitable axis scaling factor
+        _, scale, prefix, _ = scale_SI(np.max(np.abs(arc)))
+
+        # Create the figure
+        plt.figure()
+        plt.plot(arc[1, :] * scale, arc[0, :] * scale, 'b.')
+        plt.gca().invert_yaxis()
+        plt.xlabel(f"y-position [{prefix}m]")
+        plt.ylabel(f"x-position [{prefix}m]")
+        plt.axis("equal")
+        plt.show()
+
+    return arc
+
+
+def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector) -> Tuple[np.ndarray, np.ndarray]:
+    """
+
+    Compute a rotation matrix to transform the computed arc points to the orientation
+    specified by the arc and focus positions
+
+    Args:
+        arc_pos:
+        radius:
+        focus_pos:
+
+    Returns:
+        The rotation matrix R and an offset b
+
+    """
+
+    # Vector pointing from arc_pos to focus_pos
+    beam_vec = focus_pos - arc_pos
+
+    # Normalize to give unit beam vector
+    beam_vec = beam_vec / np.linalg.norm(beam_vec)
+
+    # Canonical normalized beam_vec (canonical arc_pos is [0, 1])
+    beam_vec0 = np.array([0, -1])
+
+    # Find the angle between canonical and specified beam_vec
+    theta = np.arctan2(beam_vec[1], beam_vec[0]) - np.arctan2(beam_vec0[1], beam_vec0[0])
+
+    # Convert to a rotation matrix
+    R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+
+    # Compute an offset for the arc, where arc_centre = move from arc_pos
+    # towards focus by radius
+    b = arc_pos.reshape(-1, 1) + radius * beam_vec.reshape(-1, 1)
+
+    return R, b
