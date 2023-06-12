@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
+from tqdm import tqdm
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -2555,3 +2556,134 @@ def trim_cart_points(kgrid, points: np.ndarray):
     points = points[:, ind]
 
     return points
+
+
+def off_grid_points(kgrid: 'kWaveGrid', points: List[Vector], scale: Union[float, np.ndarray] = None,
+                    bli_tolerance: float = 0.1, bli_type: str = 'sinc', mask_only: bool = False,
+                    single_precision: bool = False) -> np.ndarray:
+    """
+    Create a non-binary source mask from Cartesian points.
+
+    Args:
+         kgrid:                 Object of the kWaveGrid class defining the Cartesian and k-space grid fields.
+         points:                List of Cartesian points defined by a matrix with dimensions num_dims x num_points.
+         scale:                 Scaling factor accounting for density of source points relative to the density of kgrid nodes.
+         bli_tolerance:         Scalar value controlling where the spatial extent of the BLI at each point is truncated
+                                as a portion of the maximum value (default = 0.1).
+         bli_type:              String controlling the BLI expression that is used for each point source, either 'sinc' or 'exact'
+                                (default = 'sinc'). bli_tollerance is ignored if 'exact' is specified.
+         mask_only:             Boolean controlling whether a logical mask is returned instead of the non-binary source mask, where
+                                the mask contains the extent of the off-grid source (default = False).
+         single_precision:      Boolean controlling whether the mask is returned in single precision. If 'bli_tolerance' > 0,
+                                then calculations are also performed in single precision to improve
+                                performance (default = False).
+
+    Returns:
+        Non-binary source mask.
+    """
+
+    # check dimensions of points input
+    if points.shape[0] != kgrid.dim:
+        raise ValueError("Input points must be given as matrix with dimensions num_dims x num_points.")
+
+    # get the number of off-grid points
+    num_points = len(points)
+
+    # check for scale input
+    if scale is None or scale == []:
+        scale = 1
+
+    # expand scale value if scalar
+    if isinstance(scale, (int, float)):
+        scale = scale * Vector(np.ones(num_points))
+    elif len(scale) != num_points:
+        raise ValueError("Input scale must be scalar or the same length as points.")
+
+    # preallocate some variables for speed
+    if bli_tolerance == 0:
+        pi_on_dx = np.pi / kgrid.dx
+        pi_on_dy = np.pi / kgrid.dy
+        pi_on_dz = np.pi / kgrid.dz
+    else:
+        scalar_dxyz = True
+        pi_on_dxyz = np.pi / kgrid.dx
+        if kgrid.dim == 2:
+            if kgrid.dx != kgrid.dy:
+                scalar_dxyz = False
+                pi_on_dxyz = np.pi / [kgrid.dx, kgrid.dy]
+        elif kgrid.dim == 3:
+            if kgrid.dx != kgrid.dy or kgrid.dx != kgrid.dz:
+                scalar_dxyz = False
+                pi_on_dxyz = np.pi / [kgrid.dx, kgrid.dy, kgrid.dz]
+
+    # initialise the source mask
+    if mask_only:
+        mask_type = bool
+    elif single_precision:
+        mask_type = np.float32
+    else:
+        mask_type = np.float64
+    mask = np.zeros((kgrid.Nx, kgrid.Ny, kgrid.Nz), dtype=mask_type)
+
+    # create tqdm progress bar
+    progress_bar = tqdm(total=num_points, desc="Creating mask")
+
+    # mask for each off-grid point
+    for p in range(num_points):
+
+        # calculate the point in grid coordinates
+        point_grid = kgrid.find_point(points[:, p])
+
+        # calculate the point in grid coordinates
+        if scalar_dxyz:
+            kgrid_x = kgrid.x_vec[point_grid[0]]
+            kgrid_y = kgrid.y_vec[point_grid[1]]
+            kgrid_z = kgrid.z_vec[point_grid[2]]
+        else:
+            kgrid_x = kgrid.x_vec[point_grid[0]]
+            kgrid_y = kgrid.y_vec[point_grid[1]]
+            kgrid_z = kgrid.z_vec[point_grid[2]]
+
+        # calculate the spatial extent of the source in grid points
+        if bli_tolerance > 0:
+            if bli_type == 'sinc':
+                extent_x = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[0] * bli_tolerance)))
+                extent_y = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[1] * bli_tolerance)))
+                extent_z = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[2] * bli_tolerance)))
+            elif bli_type == 'exact':
+                extent_x = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[0])))
+                extent_y = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[1])))
+                extent_z = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[2])))
+            else:
+                raise ValueError("Input bli_type must be either 'sinc' or 'exact'.")
+        else:
+            extent_x = int(np.ceil(scale[p] * np.pi / pi_on_dx))
+            extent_y = int(np.ceil(scale[p] * np.pi / pi_on_dy))
+            extent_z = int(np.ceil(scale[p] * np.pi / pi_on_dz))
+
+        # define the points within the extent
+        if kgrid.dim == 2:
+            [x, y] = np.meshgrid(range(-extent_x, extent_x + 1), range(-extent_y, extent_y + 1))
+            points_inside_extent = np.column_stack((x.ravel(), y.ravel()))
+        elif kgrid.dim == 3:
+            [x, y, z] = np.meshgrid(range(-extent_x, extent_x + 1), range(-extent_y, extent_y + 1),
+                                    range(-extent_z, extent_z + 1))
+            points_inside_extent = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
+
+        # check points_inside_extent are valid
+        points_inside_extent = points_inside_extent + point_grid[:, None]
+        valid_indices = np.where((0 <= points_inside_extent[:, 0]) & (points_inside_extent[:, 0] < kgrid.Nx) &
+                                 (0 <= points_inside_extent[:, 1]) & (points_inside_extent[:, 1] < kgrid.Ny) &
+                                 (0 <= points_inside_extent[:, 2]) & (points_inside_extent[:, 2] < kgrid.Nz))[0]
+        points_inside_extent = points_inside_extent[valid_indices, :]
+
+        # update the mask
+        mask[points_inside_extent[:, 0], points_inside_extent[:, 1], points_inside_extent[:, 2]] = 1
+
+        # update progress bar
+        progress_bar.update(1)
+
+    # close progress bar
+    progress_bar.close()
+
+    return mask
