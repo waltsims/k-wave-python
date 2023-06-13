@@ -13,4 +13,4 @@ python:
       extra_requirements:
         - docs
     - method: pip
-      path: package
+      path: k-wave-python
