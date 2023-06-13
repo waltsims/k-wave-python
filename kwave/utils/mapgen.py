@@ -2449,8 +2449,9 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         lateral_positions: The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.
 
     Returns:
-       p-axial: The axial pressure amplitude.
-       p-lateral: The lateral pressure amplitude.
+       p_axial:          pressure amplitude at the positions specified by axial_position [Pa]
+       p_lateral:        pressure amplitude at the positions specified by lateral_position [Pa]
+       p_axial_complex:  complex pressure amplitude at the positions specified by axial_position [Pa]
 
     Example:
         # define transducer parameters
@@ -2466,7 +2467,7 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         lateral_position = np.arange(-15e-3, 15e-3 + 1e-4, 1e-4)  # [m]
 
         # evaluate pressure
-        [p_axial, p_lateral] = focused_bowl_oneil(radius, diameter,
+        [p_axial, p_lateral, p_axial_complex] = focused_bowl_oneil(radius, diameter,
                                                   velocity, frequency, sound_speed, density,
                                                   axial_position, lateral_position)
 
@@ -2481,6 +2482,7 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
         d = B - axial_positions
         E = 2 / (1 - axial_positions / radius)
+        M = (B + axial_positions) / 2
 
         # compute pressure
         P = E * np.sin(k * d / 2)
@@ -2488,9 +2490,12 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         # replace values where axial_position is equal to the radius with limit
         P[np.abs(axial_positions - radius) < float_eps] = k * h
 
-        # calculate magnitude of the on - axis pressure
+        # calculate magnitude of the on - axis pressure  (Eq. 3.0)
         axial_pressure = density * sound_speed * velocity * np.abs(P)
-        return axial_pressure
+        # calculate complex magnitude of the on - axis pressure assuming t = 0 (Eq. 3.0)
+        complex_axial_pressure = density * sound_speed * velocity * P * 1j * np.exp(-1j * k * M)
+
+        return axial_pressure, complex_axial_pressure
 
     def calculate_lateral_pressure() -> float:
         # calculate magnitude of the lateral pressure at the geometric focus
@@ -2509,15 +2514,13 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
     p_axial = None
     p_lateral = None
+    p_axial_complex = None
 
     if lateral_positions is not None:
         p_lateral = calculate_lateral_pressure()
     if axial_positions is not None:
-        p_axial = calculate_axial_pressure()
-
-    return p_axial, p_lateral
-
-    return [p_axial, p_lateral]
+        p_axial, p_axial_complex = calculate_axial_pressure()
+    return p_axial, p_lateral, p_axial_complex
 
 
 def ndgrid(*args):
