@@ -259,6 +259,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">ifftshift</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span>
 
+<span class="kn">from</span> <span class="nn">kwave.data</span> <span class="kn">import</span> <span class="n">Vector</span>
+
 
 <div class="viewcode-block" id="largest_prime_factor"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.largest_prime_factor">[docs]</a><span class="k">def</span> <span class="nf">largest_prime_factor</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -604,6 +606,92 @@
                   <span class="p">[</span><span class="n">sind</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
     <span class="k">return</span> <span class="n">R</span></div>
+
+
+<div class="viewcode-block" id="get_affine_matrix"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.get_affine_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_affine_matrix</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Vector</span><span class="p">]):</span>
+    <span class="c1"># Check dimensions</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">translation</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rotation</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+
+        <span class="c1"># Assign the inputs</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">translation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">translation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">th</span> <span class="o">=</span> <span class="n">rotation</span>
+
+        <span class="c1"># Build affine matrix (counter-clockwise)</span>
+        <span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="n">cosd</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="n">dx</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">sind</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="n">dy</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">])</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">translation</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rotation</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Vector</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+        <span class="c1"># Assign the inputs</span>
+        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">translation</span>
+        <span class="n">x_th</span><span class="p">,</span> <span class="n">y_th</span><span class="p">,</span> <span class="n">z_th</span> <span class="o">=</span> <span class="n">rotation</span>
+
+        <span class="c1"># Build the rotation matrices</span>
+        <span class="n">x_th_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cosd</span><span class="p">(</span><span class="n">x_th</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">x_th</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sind</span><span class="p">(</span><span class="n">x_th</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">x_th</span><span class="p">)]</span>
+        <span class="p">])</span>
+
+        <span class="n">y_th_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="n">cosd</span><span class="p">(</span><span class="n">y_th</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sind</span><span class="p">(</span><span class="n">y_th</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">y_th</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cosd</span><span class="p">(</span><span class="n">y_th</span><span class="p">)]</span>
+        <span class="p">])</span>
+
+        <span class="n">z_th_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="n">cosd</span><span class="p">(</span><span class="n">z_th</span><span class="p">),</span> <span class="o">-</span><span class="n">sind</span><span class="p">(</span><span class="n">z_th</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">sind</span><span class="p">(</span><span class="n">z_th</span><span class="p">),</span> <span class="n">cosd</span><span class="p">(</span><span class="n">z_th</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">])</span>
+
+        <span class="c1"># Build affine matrix</span>
+        <span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">affine</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_th_matrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_th_matrix</span><span class="p">,</span> <span class="n">x_th_matrix</span><span class="p">))</span>
+        <span class="n">affine</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incorrect size for translation and rotation inputs.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">affine</span></div>
+
+
+<div class="viewcode-block" id="compute_linear_transform"><a class="viewcode-back" href="../../../kwave.utils.math.html#kwave.utils.math.compute_linear_transform">[docs]</a><span class="k">def</span> <span class="nf">compute_linear_transform</span><span class="p">(</span><span class="n">pos1</span><span class="p">,</span> <span class="n">pos2</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># Compute vector pointing from pos1 to pos2</span>
+    <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">pos2</span> <span class="o">-</span> <span class="n">pos1</span>
+
+    <span class="c1"># Normalise to give unit beam vector</span>
+    <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam_vec</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">)</span>
+
+    <span class="c1"># Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])</span>
+    <span class="n">beam_vec0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Find the rotation matrix for the bowl</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">beam_vec0</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">)</span>
+
+    <span class="c1"># Normalise the rotation matrix if not zero</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">u</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">u</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+    <span class="c1"># Find the axis-angle transformation between beam_vec and e1</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beam_vec0</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">))</span>
+
+    <span class="c1"># Convert axis-angle transformation to a rotation matrix</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="o">-</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">rotMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+
+    <span class="c1"># Compute an offset for the bowl, where bowl_centre = move from pos1</span>
+    <span class="c1"># towards focus by radius</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">offsetPos</span> <span class="o">=</span> <span class="n">pos1</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">beam_vec</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">offsetPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">rotMat</span><span class="p">,</span> <span class="n">offsetPos</span></div>
 </pre></div>
         </article>
       </div>

@@ -294,6 +294,11 @@ np.array. 3D rotation matrix</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.math.compute_linear_transform">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">compute_linear_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#compute_linear_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.compute_linear_transform" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kwave.utils.math.cosd">
 <span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">cosd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle_in_degrees</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#cosd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.cosd" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -370,6 +375,19 @@ plt.plot(x, gaussian(x))</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int | float | <em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kwave.utils.math.get_affine_matrix">
+<span class="sig-prename descclassname"><span class="pre">kwave.utils.math.</span></span><span class="sig-name descname"><span class="pre">get_affine_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kwave/utils/math.html#get_affine_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kwave.utils.math.get_affine_matrix" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>translation</strong> (<a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – </p></li>
+<li><p><strong>rotation</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>ndarray</em><em> | </em><a class="reference internal" href="kwave.data.html#kwave.data.Vector" title="kwave.data.Vector"><em>Vector</em></a>) – </p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -572,10 +590,12 @@ than or equal to <cite>n</cite>.</p>
 <li><a class="reference internal" href="#kwave.utils.math.Rx"><code class="docutils literal notranslate"><span class="pre">Rx()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.Ry"><code class="docutils literal notranslate"><span class="pre">Ry()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.Rz"><code class="docutils literal notranslate"><span class="pre">Rz()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.math.compute_linear_transform"><code class="docutils literal notranslate"><span class="pre">compute_linear_transform()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.cosd"><code class="docutils literal notranslate"><span class="pre">cosd()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.find_closest"><code class="docutils literal notranslate"><span class="pre">find_closest()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.fourier_shift"><code class="docutils literal notranslate"><span class="pre">fourier_shift()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.gaussian"><code class="docutils literal notranslate"><span class="pre">gaussian()</span></code></a></li>
+<li><a class="reference internal" href="#kwave.utils.math.get_affine_matrix"><code class="docutils literal notranslate"><span class="pre">get_affine_matrix()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.largest_prime_factor"><code class="docutils literal notranslate"><span class="pre">largest_prime_factor()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.next_pow2"><code class="docutils literal notranslate"><span class="pre">next_pow2()</span></code></a></li>
 <li><a class="reference internal" href="#kwave.utils.math.norm_var"><code class="docutils literal notranslate"><span class="pre">norm_var()</span></code></a></li>
