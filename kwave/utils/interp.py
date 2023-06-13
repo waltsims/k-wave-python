@@ -7,6 +7,7 @@ from scipy.signal import resample
 
 from .conversion import grid2cart
 from .data import scale_time
+from .math import find_closest
 from .matrix import sort_rows
 from .tictoc import TicToc
 
@@ -336,3 +337,177 @@ def interpftn(x, sz: tuple, win=None):
             y = resample(y, p, axis=p_idx, window=win)
 
     return y
+
+
+def tol_star(tolerance: float, kgrid: 'kWaveGrid', point: 'Vector', debug=True) -> Tuple[
+    List[int], List[int], List[int], List[int]]:
+    """
+       tolStar computes a set of subscripts corresponding to locations where
+       the magnitude of a multidimensional sinc function has not yet decayed
+       below a specified tolerance. These subscripts are relative to the
+       nearest grid node to a given Cartesian point. Note, a sinc
+       approximation is used for the band-limited interpolant (BLI).
+
+       Example:
+           lin_ind, x_ind = tol_star(tolerance, kgrid, point)
+           lin_ind, x_ind, y_ind = tol_star(tolerance, kgrid, point)
+
+       Args:
+           tolerance: Scalar value controlling where the spatial extent of the BLI at each point
+                      is truncated as a portion of the maximum value.
+           kgrid: Object of the kWaveGrid class defining the Cartesian and k-space grid fields.
+           point: Cartesian coordinates defining location of the BLI.
+           debug:
+
+       Returns:
+           x_ind, y_ind, z_ind: Grid indices (y and z only returned in 2D and 3D).
+       """
+
+    # tolerance value to decide if a specified point is on grid or not as a
+    # proportion of kgrid.dx (within a thousandth)
+    ongrid_threshold = kgrid.dx * 1e-3
+
+    # store a canonical star for use whenever tol remains unchanged
+    global tol, subs0
+
+    # compute a new canonical star if the tolerance changes, where the star
+    # gives indices relative to [0 0 0]
+    if tol is None or tolerance != tol or len(subs0) != kgrid.dim:
+        # (no subs yet) || (new tolerance) || (new dimensionality)
+
+        # assign tolerance value
+        tol = tolerance
+
+        # the on-axis decay of the BLI is given by dx/(pi*x), thus the grid
+        # point at which the BLI has decayed to the tolerance value can be
+        # calculated by 1/(pi*tolerance)
+        decay_subs = np.ceil(1 / (np.pi * tol))
+
+        # compute grid indices along axes
+        lin_ind = np.arange(-decay_subs, decay_subs + 1)
+
+        # replicate grid vectors
+        if kgrid.dim == 1:
+            is0 = lin_ind
+        elif kgrid.dim == 2:
+            is0, js0 = np.meshgrid(lin_ind, lin_ind)
+        elif kgrid.dim == 3:
+            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind)
+
+        # only keep grid indices where the BLI is above the tolerance value
+        # (i.e., within the star)
+        if kgrid.dim == 1:
+            subs0 = [is0]
+        elif kgrid.dim == 2:
+            instar = np.abs(is0 * js0) <= decay_subs
+            is0 = is0[instar]
+            js0 = js0[instar]
+            subs0 = [is0, js0]
+        elif kgrid.dim == 3:
+            instar = np.abs(is0 * js0 * ks0) <= decay_subs
+            is0 = is0[instar]
+            js0 = js0[instar]
+            ks0 = ks0[instar]
+            subs0 = [is0, js0, ks0]
+
+        # plot in debug mode
+        if debug and kgrid.dim == 2:
+            import matplotlib.pyplot as plt
+            plt.figure()
+            plt.imshow(instar, extent=(np.min(lin_ind), np.max(lin_ind), np.min(lin_ind), np.max(lin_ind)))
+            plt.title('Canonical Star')
+            plt.xlabel('Grid points')
+            plt.ylabel('Grid points')
+            plt.axis('image')
+
+    # assign canonical star
+    is_ = subs0[0].copy()
+    if kgrid.dim > 1:
+        js_ = subs0[1].copy()
+    else:
+        js_ = np.array([])
+    if kgrid.dim > 2:
+        ks_ = subs0[2].copy()
+    else:
+        ks_ = np.array([])
+
+    # if the point lies on the grid, then truncate the canonical star as the
+    # BLI will evaluate to zero for all grid points in that direction
+    x_closest, x_closest_ind = find_closest(kgrid.x_vec, point[0])
+    if np.abs(x_closest - point[0]) < ongrid_threshold:
+        if kgrid.dim == 1:
+            is_ = is_[is_ != 0]
+        elif kgrid.dim == 2:
+            js_ = js_[is_ != 0]
+            is_ = is_[is_ != 0]
+        elif kgrid.dim == 3:
+            ks_ = ks_[is_ != 0]
+            js_ = js_[is_ != 0]
+            is_ = is_[is_ != 0]
+
+    if kgrid.dim > 1:
+        y_closest, y_closest_ind = find_closest(kgrid.y_vec, point[1])
+        if np.abs(y_closest - point[1]) < ongrid_threshold:
+            if kgrid.dim == 2:
+                is_ = is_[js_ != 0]
+                js_ = js_[js_ != 0]
+            elif kgrid.dim == 3:
+                ks_ = ks_[js_ != 0]
+                is_ = is_[js_ != 0]
+                js_ = js_[js_ != 0]
+
+    if kgrid.dim > 2:
+        z_closest, z_closest_ind = find_closest(kgrid.z_vec, point[2])
+        if np.abs(z_closest - point[2]) < ongrid_threshold:
+            js_ = js_[ks_ != 0]
+            is_ = is_[ks_ != 0]
+            ks_ = ks_[ks_ != 0]
+
+    # get nearest subs to given point and shift canonical subs by this amount
+    is_ = is_ + x_closest_ind
+    if kgrid.dim > 1:
+        js_ = js_ + y_closest_ind
+    if kgrid.dim > 2:
+        ks_ = ks_ + z_closest_ind
+
+    # plot in debug mode
+    if debug and kgrid.dim == 2:
+        plt.figure()
+        tolstar_on_grid = np.zeros((kgrid.Nx, kgrid.Ny))
+        tolstar_on_grid[is_, js_] = 1
+        plt.imshow(tolstar_on_grid, extent=(0, kgrid.Nx, 0, kgrid.Ny))
+        plt.title('Tol Star (truncated BLI) on grid')
+        plt.xlabel('Grid points')
+        plt.ylabel('Grid points')
+        plt.axis('image')
+
+    # check all points are within the simulation grid - if any are found,
+    # remove them
+    if kgrid.dim == 1:
+        if np.min(is_) < 1 or np.max(is_) > kgrid.Nx:
+            inbounds = (is_ >= 1) & (is_ <= kgrid.Nx)
+            is_ = is_[inbounds]
+    elif kgrid.dim == 2:
+        if np.min(is_) < 1 or np.max(is_) > kgrid.Nx or \
+                np.min(js_) < 1 or np.max(js_) > kgrid.Ny:
+            inbounds = (is_ >= 1) & (is_ <= kgrid.Nx) & (js_ >= 1) & (js_ <= kgrid.Ny)
+            is_ = is_[inbounds]
+            js_ = js_[inbounds]
+    elif kgrid.dim == 3:
+        if np.min(is_) < 1 or np.max(is_) > kgrid.Nx or \
+                np.min(js_) < 1 or np.max(js_) > kgrid.Ny or \
+                np.min(ks_) < 1 or np.max(ks_) > kgrid.Nz:
+            inbounds = (is_ >= 1) & (is_ <= kgrid.Nx) & (js_ >= 1) & (js_ <= kgrid.Ny) & (ks_ >= 1) & (ks_ <= kgrid.Nz)
+            is_ = is_[inbounds]
+            js_ = js_[inbounds]
+            ks_ = ks_[inbounds]
+
+    # convert to indices
+    if kgrid.dim == 1:
+        lin_ind = is_
+    elif kgrid.dim == 2:
+        lin_ind = kgrid.Nx * (js_ - 1) + is_
+    elif kgrid.dim == 3:
+        lin_ind = kgrid.Nx * kgrid.Ny * (ks_ - 1) + kgrid.Nx * (js_ - 1) + is_
+
+    return lin_ind, is_, js_, ks_
