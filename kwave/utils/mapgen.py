@@ -457,7 +457,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     MAGNITUDE = 1
 
     # force integer values
-    grid_size =  grid_size.round().astype(int)
+    grid_size = grid_size.round().astype(int)
     center = center.round().astype(int)
 
     # check for zero values
@@ -2210,8 +2210,9 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
-                                                                          :]
+            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[
+                                                                                centerpoints[centerpoint_index] - 1, :,
+                                                                                :]
 
     # plot results
     if plot_sphere:
@@ -2386,8 +2387,8 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     d_y = 2 / npts_y
 
     # Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)
-    p_x = np.linspace(-1 + d_x/2, 1 - d_x/2, npts_x)
-    p_y = np.linspace(-1 + d_y/2, 1 - d_y/2, npts_y)
+    p_x = np.linspace(-1 + d_x / 2, 1 - d_x / 2, npts_x)
+    p_y = np.linspace(-1 + d_y / 2, 1 - d_y / 2, npts_y)
     P_x, P_y = np.meshgrid(p_x, p_y, indexing='ij')
     p0 = np.stack((P_x.flatten(), P_y.flatten()), axis=0)
 
@@ -2595,9 +2596,17 @@ def off_grid_points(kgrid: 'kWaveGrid', points: List[Vector], scale: Union[float
 
     # expand scale value if scalar
     if isinstance(scale, (int, float)):
-        scale = scale * Vector(np.ones(num_points))
+        scale = scale * np.ones(num_points)
     elif len(scale) != num_points:
         raise ValueError("Input scale must be scalar or the same length as points.")
+
+    assert 1 >= bli_tolerance >= 0, "bli_tolerance must be between 0 and 1."
+    assert bli_type in ['sinc', 'exact'], "bli_type must be either 'sinc' or 'exact'."
+    assert isinstance(mask_only, bool), "mask_only must be boolean."
+    assert isinstance(single_precision, bool), "single_precision must be boolean."
+
+    if bli_type == 'exact':
+        bli_tolerance = 0
 
     # preallocate some variables for speed
     if bli_tolerance == 0:
@@ -2629,10 +2638,14 @@ def off_grid_points(kgrid: 'kWaveGrid', points: List[Vector], scale: Union[float
     progress_bar = tqdm(total=num_points, desc="Creating mask")
 
     # mask for each off-grid point
-    for p in range(num_points):
+    for point_idx, point in enumerate(points):
 
-        # calculate the point in grid coordinates
-        point_grid = kgrid.find_point(points[:, p])
+        # missing this method in public repo?
+        # %convert to the computational coordinate if the physical coordinate is
+        # %sampled nonuniformly
+        # if kgrid.nonuniform
+        #     [point, BLIscale] = mapPoint(kgrid, point);
+        # end
 
         # calculate the point in grid coordinates
         if scalar_dxyz:
@@ -2647,19 +2660,19 @@ def off_grid_points(kgrid: 'kWaveGrid', points: List[Vector], scale: Union[float
         # calculate the spatial extent of the source in grid points
         if bli_tolerance > 0:
             if bli_type == 'sinc':
-                extent_x = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[0] * bli_tolerance)))
-                extent_y = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[1] * bli_tolerance)))
-                extent_z = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[2] * bli_tolerance)))
+                extent_x = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[0] * bli_tolerance)))
+                extent_y = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[1] * bli_tolerance)))
+                extent_z = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[2] * bli_tolerance)))
             elif bli_type == 'exact':
-                extent_x = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[0])))
-                extent_y = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[1])))
-                extent_z = int(np.ceil((scale[p] * np.pi) / (pi_on_dxyz[2])))
+                extent_x = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[0])))
+                extent_y = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[1])))
+                extent_z = int(np.ceil((scale[point_idx] * np.pi) / (pi_on_dxyz[2])))
             else:
                 raise ValueError("Input bli_type must be either 'sinc' or 'exact'.")
         else:
-            extent_x = int(np.ceil(scale[p] * np.pi / pi_on_dx))
-            extent_y = int(np.ceil(scale[p] * np.pi / pi_on_dy))
-            extent_z = int(np.ceil(scale[p] * np.pi / pi_on_dz))
+            extent_x = int(np.ceil(scale[point_idx] * np.pi / pi_on_dx))
+            extent_y = int(np.ceil(scale[point_idx] * np.pi / pi_on_dy))
+            extent_z = int(np.ceil(scale[point_idx] * np.pi / pi_on_dz))
 
         # define the points within the extent
         if kgrid.dim == 2:
