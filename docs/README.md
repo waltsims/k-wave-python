@@ -1,14 +1,15 @@
 # k-Wave-python
+[![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 
 This project is a Python implementation of most of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
 ## Mission
 
-With this project, we hope to increase accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
-for medical imaging, algorithmic prototyping and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
+With this project, we hope to increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
+for medical imaging, algorithmic prototyping, and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
 be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
-in order to leverage pythonic practices.
+to leverage pythonic practices.
 
 ## Installation
 
@@ -18,7 +19,7 @@ To install the most recent build of k-Wave-python from PyPI, run:
 pip install k-wave-python
 ```
 
-After installing the python package, the required binaries will be downloaded and installed the first time you run a
+After installing the Python package, the required binaries will be downloaded and installed the first time you run a
 simulation.
 
 ## Getting started
@@ -46,12 +47,12 @@ This example expects an NVIDIA GPU by default to simulate with k-Wave.
 
 To test the reconstruction on a machine with a GPU,
 set `RUN_SIMULATION` [on line 14 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L18)
-to `True` and the example will run without the pre-computed data.
+to `True`, and the example will run without the pre-computed data.
 
 ## Development
 
 If you're enjoying k-Wave-python and want to contribute, development instructions can be
-found [here](https://waltersimson.com/k-wave-python/development/development_environment.html).
+found [here](https://k-wave-python.readthedocs.io/en/latest/development/development_environment.html).
 
 ## Related Projects
 
@@ -63,7 +64,7 @@ found [here](https://waltersimson.com/k-wave-python/development/development_envi
 
 ## Documentation
 
-The documentation for k-wave-python can be found [here](http://waltersimson.com/k-wave-python/).
+The documentation for k-wave-python can be found [here](https://k-wave-python.readthedocs.io/en/latest/).
 
 ## Contact
 
