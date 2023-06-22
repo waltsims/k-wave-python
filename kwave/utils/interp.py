@@ -366,10 +366,10 @@ def get_delta_bli(Nx: int, dx: float, x: np.ndarray, x0: float, include_imag: bo
         include_imag = False
 
     # check whether the grid has even or odd samples per period
-    iseven = (Nx % 2 == 0)
+    is_even = (Nx % 2 == 0)
 
     # compute BLI
-    if iseven:
+    if is_even:
         # compute periodic sinc function
         f = np.sin(np.pi * (x - x0) / dx) / (Nx * np.tan(np.pi * (x - x0) / (Nx * dx)))
 

@@ -7,7 +7,7 @@ from kwave.utils.interp import get_delta_bli
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_make_cart_rect():
+def test_get_delta_bli():
     test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/getDeltaBLI.mat')
     reader = TestRecordReader(test_record_path)
 
