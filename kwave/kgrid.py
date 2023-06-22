@@ -33,6 +33,7 @@ class kWaveGrid(object):
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
         assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
         self.machine_precision = 100 * sys.float_info.epsilon
+        self.cfl_default = 0.3
         
         self.N = N.astype(int)              #: grid size in each dimension [grid points]
         self.spacing = spacing              #: grid point spacing in each direction [m]
