@@ -274,7 +274,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             perc = cart_sensor_data_ro[2, new_col_pos] / (
                     cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
             binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + \
-                                                    (1 - perc) * cart_sensor_data_ro[2, :]
+                                                 (1 - perc) * cart_sensor_data_ro[2, :]
 
         else:
             raise ValueError('Unknown interpolation option.')
@@ -336,3 +336,55 @@ def interpftn(x, sz: tuple, win=None):
             y = resample(y, p, axis=p_idx, window=win)
 
     return y
+
+
+def get_delta_bli(Nx: int, dx: float, x: np.ndarray, x0: float, include_imag: bool = False) -> np.ndarray:
+    """
+    Exact BLI of an arbitrarily positioned delta function.
+
+    Calculates the exact Band-Limited Interpolation (BLI) of an arbitrarily positioned delta function.
+    For grid dimensions with an evenly-sampled periodicity, a small Nyquist frequency sinusoid is added.
+    This sinusoid is invisible on grid samples and has zero amplitude when the delta function lies on a grid node.
+    It is important when the evaluation points aren't grid nodes, and when the delta function is off-grid.
+    It serves to ensure conjugate symmetry in the BLI's Fourier transform.
+
+    Args:
+        Nx: Number of grid points in the relevant Cartesian direction.
+        dx: Grid point spacing [m].
+        x: Coordinates at which the BLI is evaluated [m].
+        x0: Coordinate at which the BLI is centered [m].
+        include_imag: Whether to include the imaginary component of the off-grid delta function.
+                      Defaults to False.
+
+    Returns:
+        f: Value of the BLI at the specified coordinates.
+
+    """
+
+    # ignore imaginary component of even function by default
+    if include_imag is None:
+        include_imag = False
+
+    # check whether the grid has even or odd samples per period
+    is_even = (Nx % 2 == 0)
+
+    # compute BLI
+    if is_even:
+        # compute periodic sinc function
+        f = np.sin(np.pi * (x - x0) / dx) / (Nx * np.tan(np.pi * (x - x0) / (Nx * dx)))
+
+        # correct indeterminate points
+        f[(x - x0) == 0] = 1
+
+        # add Nyquist sinusoid to ensure conjugate symmetry
+        f = f - np.sin(np.pi * x0 / dx) / Nx * np.sin(np.pi * x / dx)
+        if include_imag:
+            f = f + 1j * np.cos(np.pi * x0 / dx) / Nx * np.sin(np.pi * x / dx)
+    else:
+        # compute periodic sinc function
+        f = np.sin(np.pi * (x - x0) / dx) / (Nx * np.sin(np.pi * (x - x0) / (Nx * dx)))
+
+        # correct indeterminate points
+        f[(x - x0) == 0] = 1
+
+    return f
