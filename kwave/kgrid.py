@@ -32,7 +32,6 @@ class kWaveGrid(object):
         assert N.ndim == 1 and spacing.ndim == 1  # ensure no multidimensional lists
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
         assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
-        self.cfl_default = 0.3
         self.machine_precision = 100 * sys.float_info.epsilon
         
         self.N = N.astype(int)              #: grid size in each dimension [grid points]
@@ -440,7 +439,7 @@ class kWaveGrid(object):
                           largest_prime_factor(self.Nz)]
         return np.array(prime_facs)
 
-    def makeTime(self, c, cfl=self.cfl_default, t_end=None):
+    def makeTime(self, c, cfl=0.3, t_end=None):
         """
             Compute Nt and dt based on the cfl number and grid size, where
             the number of time-steps is chosen based on the time it takes to
