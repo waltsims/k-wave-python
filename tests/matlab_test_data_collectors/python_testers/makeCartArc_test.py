@@ -2,30 +2,28 @@ import os
 from pathlib import Path
 
 import numpy as np
-from scipy.io import loadmat
 
 from kwave.data import Vector
 from kwave.utils.mapgen import make_cart_arc
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_makeCartArc():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCartArc')
-    num_collected_values = len(os.listdir(collected_values_folder))
+    collected_values_file = os.path.join(Path(__file__).parent, 'collectedValues/make_cart_arc.mat')
 
-    for i in range(num_collected_values):
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
+    record_reader = TestRecordReader(collected_values_file)
 
-        arc_pos, radius, diameter, focus_pos, num_points = recorded_data['params'][0]
-        arc_pos = Vector(arc_pos[0])
-        radius = radius[0][0]
-        diameter = diameter[0][0]
-        focus_pos = Vector(np.asfarray(focus_pos[0]))
-        num_points = num_points[0][0]
-        expected_value = recorded_data['cart_arc']
+    for i in range(len(record_reader)):
+        params = record_reader.expected_value_of('params')
+
+        arc_pos, radius, diameter, focus_pos, num_points = params
+        arc_pos = Vector(arc_pos.astype(float))
+        focus_pos = Vector(focus_pos.astype(float))
+        expected_value = record_reader.expected_value_of('cart_arc')
 
         cart_arc = make_cart_arc(arc_pos, radius, diameter, focus_pos, num_points)
+        record_reader.increment()
 
-        assert np.allclose(expected_value, cart_arc), "File {} failed!".format(filepath)
+        assert np.allclose(expected_value, cart_arc), "Step {} of {} failed!".format(i, collected_values_file)
 
     print('makeCartArc(..) works as expected!')

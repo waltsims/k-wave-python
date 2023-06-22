@@ -2616,7 +2616,7 @@ def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Ve
 
     # Linearly transform canonical points to give arc in correct orientation
     R, b = compute_linear_transform2D(arc_pos, radius, focus_pos)
-    arc = np.dot(R, p0) + b
+    arc = np.asarray(np.dot(R, p0) + b)
 
     # Plot results
     if plot_arc:
