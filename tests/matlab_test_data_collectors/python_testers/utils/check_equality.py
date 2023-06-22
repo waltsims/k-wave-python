@@ -16,6 +16,8 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
     for key, expected_value in expected_kgrid_dict.items():
 
         matlab_to_python_mapping = {
+            "MACHINE_PRECISION": "machine_precision",
+            "CFL_DEFAULT": "cfl_default",
             "kx_vec": "k_vec.x",
             "ky_vec": "k_vec.y",
             "kz_vec": "k_vec.z",
