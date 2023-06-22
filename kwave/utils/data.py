@@ -110,7 +110,7 @@ def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
         x: The number to scale.
 
     Returns:
-        A tuple containing a sting of the scaled number, a numeric scaling factor, the prefix, and the unit.
+        A tuple containing a string of the scaled number, a numeric scaling factor, the prefix, and the unit.
 
     """
 
