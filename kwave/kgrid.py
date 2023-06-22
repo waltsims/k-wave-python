@@ -11,25 +11,19 @@ from kwave.utils.math import largest_prime_factor
 
 @dataclass
 class kWaveGrid(object):
-    # default CFL number
-    CFL_DEFAULT = 0.3
-
-    # machine precision
-    MACHINE_PRECISION = 100 * sys.float_info.epsilon
-
     """
-        kWaveGrid is the grid class used across the k-Wave Toolbox. An object
-        of the kWaveGrid class contains the grid coordinates and wavenumber
-        matrices used within the simulation and reconstruction functions in
-        k-Wave. The grid matrices are indexed as: (x, 1) in 1D; (x, y) in
-        2D; and (x, y, z) in 3D. The grid is assumed to be a regularly spaced
-        Cartesian grid, with grid spacing given by dx, dy, dz (typically the
-        grid spacing in each direction is constant).
+    kWaveGrid is the grid class used across the k-Wave Toolbox. An object
+    of the kWaveGrid class contains the grid coordinates and wavenumber
+    matrices used within the simulation and reconstruction functions in
+    k-Wave. The grid matrices are indexed as: (x, 1) in 1D; (x, y) in
+    2D; and (x, y, z) in 3D. The grid is assumed to be a regularly spaced
+    Cartesian grid, with grid spacing given by dx, dy, dz (typically the
+    grid spacing in each direction is constant).
     """
+    
 
     def __init__(self, N, spacing):
         """
-
         Args:
             N: grid size in each dimension [grid points]
             spacing: grid point spacing in each direction [m]
@@ -38,7 +32,9 @@ class kWaveGrid(object):
         assert N.ndim == 1 and spacing.ndim == 1  # ensure no multidimensional lists
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
         assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
-
+        self.cfl_default = 0.3
+        self.machine_precision = 100 * sys.float_info.epsilon
+        
         self.N = N.astype(int)              #: grid size in each dimension [grid points]
         self.spacing = spacing              #: grid point spacing in each direction [m]
         self.dim = self.N.size              #: Number of dimensions (1, 2 or 3)
@@ -118,7 +114,7 @@ class kWaveGrid(object):
             assert t_array[0] == 0, 't_array must begin at zero.'
 
             # check the time array is evenly spaced
-            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.MACHINE_PRECISION, \
+            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.machine_precision, \
                 't_array must be evenly spaced.'
 
             # check the time steps are increasing
@@ -444,7 +440,7 @@ class kWaveGrid(object):
                           largest_prime_factor(self.Nz)]
         return np.array(prime_facs)
 
-    def makeTime(self, c, cfl=CFL_DEFAULT, t_end=None):
+    def makeTime(self, c, cfl=self.cfl_default, t_end=None):
         """
             Compute Nt and dt based on the cfl number and grid size, where
             the number of time-steps is chosen based on the time it takes to
