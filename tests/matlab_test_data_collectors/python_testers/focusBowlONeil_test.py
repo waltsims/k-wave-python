@@ -28,14 +28,14 @@ def test_focused_bowl_oneil():
     assert np.allclose(p_lateral, reader.expected_value_of('p_lateral'))
     assert np.allclose(p_axial_complex, reader.expected_value_of('p_axial_complex'))
 
-    [_, p_lateral, _] = focused_bowl_oneil(radius, diameter,
-                                           velocity, frequency, sound_speed, density,
-                                           axial_positions=axial_positions)
+    _, p_lateral, _ = focused_bowl_oneil(radius, diameter,
+                                         velocity, frequency, sound_speed, density,
+                                         axial_positions=axial_positions)
 
     assert p_lateral is None
 
-    [p_axial, _, p_axial_complex] = focused_bowl_oneil(radius, diameter, velocity, frequency, sound_speed, density,
-                                                       lateral_positions=lateral_positions)
+    p_axial, _, p_axial_complex = focused_bowl_oneil(radius, diameter, velocity, frequency, sound_speed, density,
+                                                     lateral_positions=lateral_positions)
 
     assert p_axial is None
     assert p_axial_complex is None

@@ -2467,7 +2467,7 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         lateral_position = np.arange(-15e-3, 15e-3 + 1e-4, 1e-4)  # [m]
 
         # evaluate pressure
-        [p_axial, p_lateral, p_axial_complex] = focused_bowl_oneil(radius, diameter,
+        p_axial, p_lateral, p_axial_complex = focused_bowl_oneil(radius, diameter,
                                                   velocity, frequency, sound_speed, density,
                                                   axial_position, lateral_position)
 
