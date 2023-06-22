@@ -3,6 +3,7 @@ import warnings
 from math import floor
 from typing import Tuple, Optional, Union, List, Any, cast
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
@@ -2557,8 +2558,6 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
