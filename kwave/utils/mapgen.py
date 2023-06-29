@@ -10,12 +10,74 @@ from scipy import optimize
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
-from .math import cosd, sind, Rz, Ry, Rx
+from .math import cosd, sind, Rz, Ry, Rx, compute_linear_transform
 from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
 
+
+def make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl=False):
+    # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
+    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
+    
+    # check for plot_bowl input
+    if not plot_bowl:
+        plot_bowl = False
+
+    # check input values
+    if radius <= 0:
+        raise ValueError("The radius must be positive.")
+    if diameter <= 0:
+        raise ValueError("The diameter must be positive.")
+    if diameter > 2 * radius:
+        raise ValueError("The diameter of the bowl must be equal or less than twice the radius of curvature.")
+    if np.all(bowl_pos == focus_pos):
+        raise ValueError("The focus_pos must be different from the bowl_pos.")
+
+    # check for infinite radius of curvature, and call makeCartDisc instead
+    if np.isinf(radius):
+        # bowl = make_cart_disc(bowl_pos, diameter / 2, focus_pos, num_points, plot_bowl)
+        # return bowl
+        raise NotImplemented("make_cart_disc")
+
+    # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
+    varphi_max = np.arcsin(diameter / (2 * radius))
+
+    # compute spiral parameters
+    theta = lambda t: GOLDEN_ANGLE * t
+    C = 2 * np.pi * (1 - np.cos(varphi_max)) / (num_points - 1)
+    varphi = lambda t: np.arccos(1 - C * t / (2 * np.pi))
+
+    # compute canonical spiral points
+    t = np.linspace(0, num_points - 1, num_points)
+    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)),
+                   np.sin(theta(t)) * np.sin(varphi(t)),
+                   np.cos(varphi(t))])
+    p0 = radius * p0
+
+    # linearly transform the canonical spiral points to give bowl in correct orientation
+    R, b = compute_linear_transform(bowl_pos, focus_pos, radius)
+    b=np.expand_dims(b, axis=-1) #todo: walter clean up
+    bowl = R @ p0 + b
+
+    # plot results
+    if plot_bowl:
+        # select suitable axis scaling factor
+        _, scale, prefix = scale_SI(np.max(bowl))
+
+        # create the figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale)
+        ax.set_xlabel('[' + prefix + 'm]')
+        ax.set_ylabel('[' + prefix + 'm]')
+        ax.set_zlabel('[' + prefix + 'm]')
+        ax.set_box_aspect([1, 1, 1])
+        plt.grid(True)
+        plt.show()
+
+    return bowl
 
 def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
     """
