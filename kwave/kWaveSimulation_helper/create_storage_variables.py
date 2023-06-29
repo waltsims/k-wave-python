@@ -1,5 +1,4 @@
 import numpy as np
-from kwave.kgrid import kWaveGrid
 from numpy.fft import ifftshift
 
 from kwave import SimulationOptions, kWaveGrid
@@ -97,11 +96,11 @@ def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, se
 
 def get_num_recorded_time_points(kgrid_dim, Nt, stream_to_disk, record_start_index):
     """
-        calculate the number of time points that are stored
-        - if streaming data to disk, reduce to the size of the
-            sensor_data matrix based on the value of self.options.stream_to_disk
-        - if a user input for sensor.record_start_index is given, reduce
-            the size of the sensor_data matrix based on the value given
+    calculate the number of time points that are stored
+    - if streaming data to disk, reduce to the size of the
+        sensor_data matrix based on the value of self.options.stream_to_disk
+    - if a user input for sensor.record_start_index is given, reduce
+        the size of the sensor_data matrix based on the value given
     Args:
         kgrid_dim:
         Nt:

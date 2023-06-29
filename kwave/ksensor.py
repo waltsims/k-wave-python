@@ -22,7 +22,7 @@ class kSensor(object):
     @property
     def mask(self):
         """
-           Binary matrix or a set of Cartesian points where the pressure is recorded at each time-step
+        Binary matrix or a set of Cartesian points where the pressure is recorded at each time-step
         """
         return self._mask
 
@@ -32,8 +32,8 @@ class kSensor(object):
 
     def expand_grid(self, expand_size) -> None:
         """
-            Enlarge the sensor mask (for Cartesian sensor masks and cuboid corners,
-            this has already been converted to a binary mask for display in inputChecking)
+        Enlarge the sensor mask (for Cartesian sensor masks and cuboid corners,
+        this has already been converted to a binary mask for display in inputChecking)
 
         Args:
             expand_size: the number of elements to add in each dimension
@@ -46,7 +46,7 @@ class kSensor(object):
     @property
     def record_start_index(self):
         """
-            Time index to start recording if transducer is used as a sensor
+        Time index to start recording if transducer is used as a sensor
         """
         return self._record_start_index
 
@@ -81,7 +81,7 @@ class kSensorDirectivity(object):
 
     def set_default_size(self, kgrid) -> None:
         """
-            Set the element size based on the kGrid
+        Set the element size based on the kGrid
 
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
@@ -94,7 +94,7 @@ class kSensorDirectivity(object):
 
     def set_unique_angles(self, sensor_mask) -> None:
         """
-            Assign unique_angles from sensor_mask
+        Assign unique_angles from sensor_mask
 
         Args:
             sensor_mask:
@@ -106,7 +106,7 @@ class kSensorDirectivity(object):
 
     def set_wavenumbers(self, kgrid) -> None:
         """
-            Assign the wavenumber vectors
+        Assign the wavenumber vectors
 
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
