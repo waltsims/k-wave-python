@@ -148,49 +148,49 @@ class kWaveGrid(object):
     @property
     def Nx(self):
         """
-            grid size in x-direction [grid points]
+        grid size in x-direction [grid points]
         """
         return self.N[0]
 
     @property
     def Ny(self):
         """
-           grid size in y-direction [grid points]
+        grid size in y-direction [grid points]
         """
         return self.N[1] if self.N.size >= 2 else 0
 
     @property
     def Nz(self):
         """
-           grid size in z-direction [grid points]
+        grid size in z-direction [grid points]
         """
         return self.N[2] if self.N.size == 3 else 0
 
     @property
     def dx(self):
         """
-            grid point spacing in x-direction [m]
+        grid point spacing in x-direction [m]
         """
         return self.spacing[0]
 
     @property
     def dy(self):
         """
-            grid point spacing in y-direction [m]
+        grid point spacing in y-direction [m]
         """
         return self.spacing[1] if self.spacing.size >= 2 else 0
 
     @property
     def dz(self):
         """
-            grid point spacing in z-direction [m]
+        grid point spacing in z-direction [m]
         """
         return self.spacing[2] if self.spacing.size == 3 else 0
 
     @property
     def x_vec(self):
         """
-           Nx x 1 vector of the grid coordinates in the x-direction [m]
+        Nx x 1 vector of the grid coordinates in the x-direction [m]
         """
         # calculate x_vec based on kx_vec
         return self.size[0] * self.k_vec.x * self.dx / (2 * np.pi)
@@ -198,7 +198,7 @@ class kWaveGrid(object):
     @property
     def y_vec(self):
         """
-           Ny x 1 vector of the grid coordinates in the y-direction [m]
+        Ny x 1 vector of the grid coordinates in the y-direction [m]
         """
         # calculate y_vec based on ky_vec
         if self.dim < 2:
@@ -208,7 +208,7 @@ class kWaveGrid(object):
     @property
     def z_vec(self):
         """
-            Nz x 1 vector of the grid coordinates in the z-direction [m]
+        Nz x 1 vector of the grid coordinates in the z-direction [m]
         """
         # calculate z_vec based on kz_vec
         if self.dim < 3:
@@ -218,14 +218,14 @@ class kWaveGrid(object):
     @property
     def x(self):
         """
-            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]
+        Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the x-direction [m]
         """
         return self.size[0] * self.kx * self.dx / (2 * math.pi)
 
     @property
     def y(self):
         """
-            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
+        Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the y-direction [m]
         """
         if self.dim < 2:
             return 0
@@ -234,7 +234,7 @@ class kWaveGrid(object):
     @property
     def z(self):
         """
-            Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
+        Nx x Ny x Nz grid containing repeated copies of the grid coordinates in the z-direction [m]
         """
         if self.dim < 3:
             return 0
@@ -243,7 +243,7 @@ class kWaveGrid(object):
     @property
     def xn(self):
         """
-            3D plaid non-uniform spatial grids
+        3D plaid non-uniform spatial grids
 
         Returns:
             plaid xn matrix
@@ -258,7 +258,7 @@ class kWaveGrid(object):
     @property
     def yn(self):
         """
-            3D plaid non-uniform spatial grids
+        3D plaid non-uniform spatial grids
 
         Returns:
             plaid yn matrix
@@ -276,7 +276,7 @@ class kWaveGrid(object):
     @property
     def zn(self):
         """
-            3D plaid non-uniform spatial grids
+        3D plaid non-uniform spatial grids
         Returns:
             plaid zn matrix
         """
@@ -288,21 +288,21 @@ class kWaveGrid(object):
     @property
     def size(self):
         """
-            Size of grid in the all directions [m]
+        Size of grid in the all directions [m]
         """
         return Vector(self.N * self.spacing)
 
     @property
     def total_grid_points(self) -> np.ndarray:
         """
-            Total number of grid points (equal to Nx * Ny * Nz)
+        Total number of grid points (equal to Nx * Ny * Nz)
         """
         return np.prod(self.N)
 
     @property
     def kx(self):
         """
-            Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]
+        Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the x-direction [rad/m]
 
         Returns:
             plaid xn matrix
@@ -317,7 +317,7 @@ class kWaveGrid(object):
     @property
     def ky(self):
         """
-            Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]
+        Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the y-direction [rad/m]
 
         Returns:
             plaid yn matrix
@@ -331,7 +331,7 @@ class kWaveGrid(object):
     @property
     def kz(self):
         """
-            # Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]
+        Nx x Ny x Nz grid containing repeated copies of the wavenumber components in the z-direction [rad/m]
 
         Returns:
             plaid zn matrix
@@ -344,21 +344,21 @@ class kWaveGrid(object):
     @property
     def y_size(self):
         """
-            Size of grid in the y-direction [m]
+        Size of grid in the y-direction [m]
         """
         return self.Ny * self.dy
 
     @property
     def z_size(self):
         """
-            Size of grid in the z-direction [m]
+        Size of grid in the z-direction [m]
         """
         return self.Nz * self.dz
 
     @property
     def k_max(self):  # added by us, not the same as kWave k_max (see k_max_all for KwaveGrid.k_max)
         """
-            Maximum supported spatial frequency in the 3 directions [rad/m]
+        Maximum supported spatial frequency in the 3 directions [rad/m]
 
         Returns:
             Vector of 3 elements each in [rad/m]. Value for higher dimensions set to NaN
@@ -372,8 +372,8 @@ class kWaveGrid(object):
     @property
     def k_max_all(self):
         """
-            Maximum supported spatial frequency in all directions [rad/m]
-            Originally k_max in kWave.kWaveGrid!
+        Maximum supported spatial frequency in all directions [rad/m]
+        Originally k_max in kWave.kWaveGrid!
 
         Returns:
             Scalar in [rad/m]
@@ -387,7 +387,7 @@ class kWaveGrid(object):
     @staticmethod
     def makeDim(num_points, spacing):
         """
-            Create the grid parameters for a single spatial direction
+        Create the grid parameters for a single spatial direction
 
         Args:
             num_points:
@@ -415,7 +415,7 @@ class kWaveGrid(object):
 
     def highest_prime_factors(self, axisymmetric=None) -> np.ndarray:
         """
-            calculate highest prime factors
+        calculate highest prime factors
 
         Args:
             axisymmetric: Axisymmetric code or None
@@ -631,18 +631,18 @@ class kWaveGrid(object):
 
     def k_dtt(self, dtt_type):  # Not tested for correctness!
         """
-       compute the individual wavenumber vectors, where dtt_type is the
-       type of discrete trigonometric transform, which corresponds to
-       the assumed input symmetry of the input function, where:
+        compute the individual wavenumber vectors, where dtt_type is the
+        type of discrete trigonometric transform, which corresponds to
+        the assumed input symmetry of the input function, where:
 
-           1. DCT-I    WSWS
-           2. DCT-II   HSHS
-           3. DCT-III  WSWA
-           4. DCT-IV   HSHA
-           5. DST-I    WAWA
-           6. DST-II   HAHA
-           7. DST-III  WAWS
-           8. DST-IV   HAHS
+            1. DCT-I    WSWS
+            2. DCT-II   HSHS
+            3. DCT-III  WSWA
+            4. DCT-IV   HSHA
+            5. DST-I    WAWA
+            6. DST-II   HAHA
+            7. DST-III  WAWS
+            8. DST-IV   HAHS
 
         Args:
             dtt_type:
