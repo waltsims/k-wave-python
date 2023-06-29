@@ -87,11 +87,10 @@ class kWaveGrid(object):
             self.k = np.reshape(self.k_vec.z, (1, 1, -1)) ** 2 + self.k
             self.k = np.sqrt(self.k)  #: scalar wavenumber
 
-
     @property
     def t_array(self):
         """
-            time array [s]
+        time array [s]
         """
         if self.Nt == 'auto' or self.dt == 'auto':
             return 'auto'
@@ -128,7 +127,7 @@ class kWaveGrid(object):
 
     def setTime(self, Nt, dt) -> None:
         """
-            Set Nt and dt based on user input
+        Set Nt and dt based on user input
 
         Args:
             Nt:
@@ -444,12 +443,12 @@ class kWaveGrid(object):
 
     def makeTime(self, c, cfl=CFL_DEFAULT, t_end=None):
         """
-            Compute Nt and dt based on the cfl number and grid size, where
-            the number of time-steps is chosen based on the time it takes to
-            travel from one corner of the grid to the geometrically opposite
-            corner. Note, if c is given as a matrix, the calculation for dt
-            is based on the maximum value, and the calculation for t_end
-            based on the minimum value.
+        Compute Nt and dt based on the cfl number and grid size, where
+        the number of time-steps is chosen based on the time it takes to
+        travel from one corner of the grid to the geometrically opposite
+        corner. Note, if c is given as a matrix, the calculation for dt
+        is based on the maximum value, and the calculation for t_end
+        based on the minimum value.
 
         Args:
             c:
@@ -491,7 +490,7 @@ class kWaveGrid(object):
     ##################################################
     def kx_vec_dtt(self, dtt_type):
         """
-            Compute the DTT wavenumber vector in the x-direction
+        Compute the DTT wavenumber vector in the x-direction
 
         Args:
             dtt_type:
@@ -504,7 +503,7 @@ class kWaveGrid(object):
 
     def ky_vec_dtt(self, dtt_type):
         """
-            Compute the DTT wavenumber vector in the y-direction
+        Compute the DTT wavenumber vector in the y-direction
 
         Args:
             dtt_type:
@@ -517,7 +516,7 @@ class kWaveGrid(object):
 
     def kz_vec_dtt(self, dtt_type):
         """
-            Compute the DTT wavenumber vector in the z-direction
+        Compute the DTT wavenumber vector in the z-direction
 
         Args:
             dtt_type:
@@ -632,9 +631,9 @@ class kWaveGrid(object):
 
     def k_dtt(self, dtt_type):  # Not tested for correctness!
         """
-           compute the individual wavenumber vectors, where dtt_type is the
-           type of discrete trigonometric transform, which corresponds to
-           the assumed input symmetry of the input function, where:
+       compute the individual wavenumber vectors, where dtt_type is the
+       type of discrete trigonometric transform, which corresponds to
+       the assumed input symmetry of the input function, where:
 
            1. DCT-I    WSWS
            2. DCT-II   HSHS
