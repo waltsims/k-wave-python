@@ -52,13 +52,13 @@ class Vector(np.ndarray):
 @dataclass
 class FlexibleVector(object):
     """
-        This class is very similar to Numpy.ndarray but there are differences:
-            - It can have 3 elements at max
-            - Its elements can be anything
-            - The elements do not have to be same type,
-                    e.g. this is valid: Array([<scalar>, <List>, <Tuple of Tuples>])
+    This class is very similar to Numpy.ndarray but there are differences:
+        - It can have 3 elements at max
+        - Its elements can be anything
+        - The elements do not have to be same type,
+                e.g. this is valid: Array([<scalar>, <List>, <Tuple of Tuples>])
 
-        WARNING: The class will be deprecated once we refactor the kWaveGrid class to use the Vector class instead!
+    WARNING: The class will be deprecated once we refactor the kWaveGrid class to use the Vector class instead!
     """
     data: list
 

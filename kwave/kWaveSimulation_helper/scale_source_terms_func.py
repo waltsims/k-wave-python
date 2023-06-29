@@ -60,7 +60,7 @@ def scale_source_terms_func(
 
 def check_conditions(is_nonuniform_grid, is_source_uy, is_source_uz, is_transducer_source):
     """
-        check for non-uniform grid and give error for source terms that haven't yet been implemented
+    check for non-uniform grid and give error for source terms that haven't yet been implemented
     Returns:
 
     """
@@ -72,7 +72,7 @@ def check_conditions(is_nonuniform_grid, is_source_uy, is_source_uz, is_transduc
 
 def apply_pressure_source_correction(is_source_p, use_w_source_correction_p, source, dt):
     """
-        apply k-space source correction expressed as a function of w
+    apply k-space source correction expressed as a function of w
     Args:
         is_source_p:
         use_w_source_correction_p:
@@ -88,10 +88,10 @@ def apply_pressure_source_correction(is_source_p, use_w_source_correction_p, sou
 
 def scale_pressure_source(is_source_p, source, kgrid, N, c0, dx, dt, p_source_pos_index, is_nonuniform_grid):
     """
-        scale the input pressure by 1/c0^2 (to convert to units of density), then
-        by 1/N (to split the input across the split density field). If the
-        pressure is injected as a mass source, also scale the pressure by
-        2*dt*c0/dx to account for the time step and convert to units of [kg/(m^3 s)]
+    scale the input pressure by 1/c0^2 (to convert to units of density), then
+    by 1/N (to split the input across the split density field). If the
+    pressure is injected as a mass source, also scale the pressure by
+    2*dt*c0/dx to account for the time step and convert to units of [kg/(m^3 s)]
     Args:
         is_source_p:
         source:
@@ -187,10 +187,10 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
 
 def scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index):
     """
-        scale the stress source by 1/N to divide amoungst the split field
-        components, and if source.s_mode is not set to 'dirichlet', also scale by
-        2*dt*c0/dx to account for the time step and convert to units of
-        [kg/(m^3 s)] (note dx is used in all dimensions)
+    scale the stress source by 1/N to divide amoungst the split field
+    components, and if source.s_mode is not set to 'dirichlet', also scale by
+    2*dt*c0/dx to account for the time step and convert to units of
+    [kg/(m^3 s)] (note dx is used in all dimensions)
     Args:
         source:
         c0:
@@ -236,7 +236,7 @@ def apply_velocity_source_corrections(
         source: kSource, dt: float
 ):
     """
-        apply k-space source correction expressed as a function of w
+    apply k-space source correction expressed as a function of w
     Args:
         use_w_source_correction_u:
         is_ux_exists:
@@ -273,9 +273,9 @@ def scale_velocity_sources(flags, source, kgrid, c0, dt, dx, dy, dz, u_source_po
 
 def scale_velocity_source_x(is_source_ux, source_u_mode, source_val, kgrid, c0, dt, dx, u_source_pos_index, is_nonuniform_grid):
     """
-        if source.u_mode is not set to 'dirichlet', scale the x-direction
-        velocity source terms by 2*dt*c0/dx to account for the time step and
-        convert to units of [m/s^2]
+    if source.u_mode is not set to 'dirichlet', scale the x-direction
+    velocity source terms by 2*dt*c0/dx to account for the time step and
+    convert to units of [m/s^2]
     Returns:
 
     """
@@ -292,9 +292,9 @@ def scale_velocity_source_x(is_source_ux, source_u_mode, source_val, kgrid, c0, 
 
 def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source_pos_index, d_direction):
     """
-        if source.u_mode is not set to 'dirichlet', scale the d_direction
-        velocity source terms by 2*dt*c0/dz to account for the time step and
-        convert to units of [m/s^2]
+    if source.u_mode is not set to 'dirichlet', scale the d_direction
+    velocity source terms by 2*dt*c0/dz to account for the time step and
+    convert to units of [m/s^2]
     Args:
         is_source:
         source_u_mode:
@@ -323,9 +323,9 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
 
 def scale_velocity_source_nonuniform(is_source, source_u_mode, kgrid, source_val, c0, dt, u_source_pos_index):
     """
-        if source.u_mode is not set to 'dirichlet', scale the d_direction
-        velocity source terms by 2*dt*c0/dz to account for the time step and
-        convert to units of [m/s^2]
+    if source.u_mode is not set to 'dirichlet', scale the d_direction
+    velocity source terms by 2*dt*c0/dz to account for the time step and
+    convert to units of [m/s^2]
     Args:
         is_source:
         source_u_mode:
@@ -366,8 +366,8 @@ def scale_velocity_source_nonuniform(is_source, source_u_mode, kgrid, source_val
 
 def scale_transducer_source(is_transducer_source, transducer_input_signal, c0, dt, dx, u_source_pos_index):
     """
-        scale the transducer source term by 2*dt*c0/dx to account for the time
-        step and convert to units of [m/s^2]
+    scale the transducer source term by 2*dt*c0/dx to account for the time
+    step and convert to units of [m/s^2]
     Args:
         is_transducer_source:
         transducer_input_signal:

@@ -3,6 +3,7 @@ from typing import List
 from warnings import warn
 
 import numpy as np
+
 import kwave.utils.checks
 
 
@@ -33,7 +34,7 @@ class kWaveMedium(object):
 
     def check_fields(self, kgrid_shape: np.ndarray) -> None:
         """
-            Check whether the given properties are valid
+        Check whether the given properties are valid
 
         Args:
             kgrid_shape: Shape of the kWaveGrid
@@ -60,7 +61,7 @@ class kWaveMedium(object):
 
     def is_defined(self, *fields) -> List[bool]:
         """
-            Check if the field(s) are defined or None
+        Check if the field(s) are defined or None
 
         Args:
             *fields: String list of the fields
@@ -75,7 +76,7 @@ class kWaveMedium(object):
 
     def ensure_defined(self, *fields) -> None:
         """
-            Assert that the field(s) are defined (not None)
+        Assert that the field(s) are defined (not None)
 
         Args:
             *fields: String list of the fields
@@ -88,7 +89,7 @@ class kWaveMedium(object):
 
     def is_nonlinear(self) -> bool:
         """
-            Check if the medium is nonlinear
+        Check if the medium is nonlinear
 
         Returns:
             whether the fluid simulation is nonlinear
@@ -97,7 +98,7 @@ class kWaveMedium(object):
 
     def set_absorbing(self, is_absorbing, is_stokes=False) -> None:
         """
-            Change medium's absorbing and stokes properties
+        Change medium's absorbing and stokes properties
 
         Args:
             is_absorbing: Is the medium absorbing
@@ -115,7 +116,7 @@ class kWaveMedium(object):
 
     def _check_absorbing_without_stokes(self) -> None:
         """
-            Check if the medium properties are set correctly for absorbing simulation without stokes
+        Check if the medium properties are set correctly for absorbing simulation without stokes
 
         Returns:
             None
@@ -140,7 +141,7 @@ class kWaveMedium(object):
 
     def _check_absorbing_with_stokes(self):
         """
-            Check if the medium properties are set correctly for absorbing simulation with stokes
+        Check if the medium properties are set correctly for absorbing simulation with stokes
 
         Returns:
             None
@@ -173,41 +174,41 @@ class kWaveMedium(object):
     @property
     def sound_speed_shear(self):  # pragma: no cover
         """
-            Shear sound speed (used in elastic simulations | not supported currently!)
+        Shear sound speed (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_ref_shear(self):  # pragma: no cover
         """
-            Shear sound speed reference (used in elastic simulations | not supported currently!)
+        Shear sound speed reference (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_compression(self):  # pragma: no cover
         """
-            Compression sound speed (used in elastic simulations | not supported currently!)
+        Compression sound speed (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def sound_speed_ref_compression(self):  # pragma: no cover
         """
-            Compression sound speed reference (used in elastic simulations | not supported currently!)
+        Compression sound speed reference (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def alpha_coeff_compression(self):  # pragma: no cover
         """
-            Compression alpha coefficient (used in elastic simulations | not supported currently!)
+        Compression alpha coefficient (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
 
     @property
     def alpha_coeff_shear(self):  # pragma: no cover
         """
-            Shear alpha coefficient (used in elastic simulations | not supported currently!)
+        Shear alpha coefficient (used in elastic simulations | not supported currently!)
         """
         raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
