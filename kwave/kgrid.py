@@ -415,7 +415,7 @@ class kWaveGrid(object):
 
     def highest_prime_factors(self, axisymmetric=None) -> np.ndarray:
         """
-        calculate highest prime factors
+        calculate the highest prime factors
 
         Args:
             axisymmetric: Axisymmetric code or None
@@ -530,7 +530,7 @@ class kWaveGrid(object):
     @staticmethod
     def makeDTTDim(Nx, dx, dtt_type):
         """
-            Create the DTT grid parameters for a single spatial direction
+        Create the DTT grid parameters for a single spatial direction
 
         Args:
             Nx:
@@ -589,7 +589,7 @@ class kWaveGrid(object):
     ########################################
     def setNUGrid(self, dim, n_vec, dudn, n_vec_sg, dudn_sg):
         """
-            Function to set non-uniform grid parameters in specified dimension
+        Function to set non-uniform grid parameters in specified dimension
 
         Args:
             dim:
@@ -635,14 +635,14 @@ class kWaveGrid(object):
         type of discrete trigonometric transform, which corresponds to
         the assumed input symmetry of the input function, where:
 
-            1. DCT-I    WSWS
-            2. DCT-II   HSHS
-            3. DCT-III  WSWA
-            4. DCT-IV   HSHA
-            5. DST-I    WAWA
-            6. DST-II   HAHA
-            7. DST-III  WAWS
-            8. DST-IV   HAHS
+        1. DCT-I    WSWS
+        2. DCT-II   HSHS
+        3. DCT-III  WSWA
+        4. DCT-IV   HSHA
+        5. DST-I    WAWA
+        6. DST-II   HAHA
+        7. DST-III  WAWS
+        8. DST-IV   HAHS
 
         Args:
             dtt_type:
