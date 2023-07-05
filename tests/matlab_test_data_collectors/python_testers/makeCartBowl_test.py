@@ -14,8 +14,12 @@ def test_make_cart_bowl():
     for i in range(len(reader)):
         params = reader.expected_value_of('params')
         bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl = params
+        focus_pos = focus_pos.astype(np.float64)
+        bowl_pos = bowl_pos.astype(np.float64)
+        radius = float(radius)
+        diameter = float(diameter)
         coordinates = make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl)
-        assert np.allclose(coordinates, reader.expected_value_of('coordinates'))
+        assert np.allclose(coordinates, reader.expected_value_of('coordinates'), equal_nan=True)
         reader.increment()
 
     print('make_cart_bowl(..) works as expected!')

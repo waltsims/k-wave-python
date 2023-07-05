@@ -20,7 +20,7 @@ from ..data import Vector
 def make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl=False):
     # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
     GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
-    
+
     # check for plot_bowl input
     if not plot_bowl:
         plot_bowl = False
@@ -58,7 +58,10 @@ def make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl=
 
     # linearly transform the canonical spiral points to give bowl in correct orientation
     R, b = compute_linear_transform(bowl_pos, focus_pos, radius)
-    b=np.expand_dims(b, axis=-1) #todo: walter clean up
+
+    if b.ndim == 1:
+        b = np.expand_dims(b, axis=-1)  # expand dims for broadcasting
+
     bowl = R @ p0 + b
 
     # plot results
@@ -78,6 +81,7 @@ def make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl=
         plt.show()
 
     return bowl
+
 
 def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
     """
@@ -518,7 +522,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     MAGNITUDE = 1
 
     # force integer values
-    grid_size =  grid_size.round().astype(int)
+    grid_size = grid_size.round().astype(int)
     center = center.round().astype(int)
 
     # check for zero values
@@ -2271,8 +2275,9 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :,
-                                                                          :]
+            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[
+                                                                                centerpoints[centerpoint_index] - 1, :,
+                                                                                :]
 
     # plot results
     if plot_sphere:
@@ -2447,8 +2452,8 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     d_y = 2 / npts_y
 
     # Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)
-    p_x = np.linspace(-1 + d_x/2, 1 - d_x/2, npts_x)
-    p_y = np.linspace(-1 + d_y/2, 1 - d_y/2, npts_y)
+    p_x = np.linspace(-1 + d_x / 2, 1 - d_x / 2, npts_x)
+    p_y = np.linspace(-1 + d_y / 2, 1 - d_y / 2, npts_y)
     P_x, P_y = np.meshgrid(p_x, p_y, indexing='ij')
     p0 = np.stack((P_x.flatten(), P_y.flatten()), axis=0)
 
