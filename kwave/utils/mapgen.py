@@ -86,15 +86,15 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     # plot results
     if plot_bowl:
         # select suitable axis scaling factor
-        _, scale, prefix = scale_SI(np.max(bowl))
+        _, scale, prefix, unit = scale_SI(np.max(bowl))
 
         # create the figure
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale)
-        ax.set_xlabel('[' + prefix + 'm]')
-        ax.set_ylabel('[' + prefix + 'm]')
-        ax.set_zlabel('[' + prefix + 'm]')
+        ax.set_xlabel('[' + prefix + unit + ']')
+        ax.set_ylabel('[' + prefix + unit + ']')
+        ax.set_zlabel('[' + prefix + unit + ']')
         ax.set_box_aspect([1, 1, 1])
         plt.grid(True)
         plt.show()
