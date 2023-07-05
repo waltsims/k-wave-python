@@ -44,8 +44,7 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     if radius <= 0:
         raise ValueError("The radius must be positive.")
 
-    # compute Cartesian points using spiral sampling
-    if use_spiral:
+    def make_spiral_circle_points(num_points: int, radius: float) -> np.ndarray:
         # compute spiral parameters
         theta = lambda t: GOLDEN_ANGLE * t
         C = np.pi * radius ** 2 / (num_points - 1)
@@ -54,16 +53,14 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         # compute canonical spiral points
         t = np.linspace(0, num_points - 1, num_points)
         p0 = np.multiply(np.vstack((np.cos(theta(t)), np.sin(theta(t)))), r(t))
-    else:
-        # otherwise use concentric circles (note that the num_points is increased
-        # to ensure a full set of concentric rings)
+        return p0
 
+    def make_concentric_circle_points(num_points: int, radius: float) -> Tuple[np.ndarray, int]:
         num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
         try:
             d_radial = radius / (num_radial - 1)
         except ZeroDivisionError:
-            if num_radial == 1:
-                d_radial = float('inf')
+            d_radial = float('inf')
 
         r = np.arange(num_radial) * (radius - d_radial / 2) / (num_radial - 1)
 
@@ -74,16 +71,27 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
             num_points += num_theta
 
         # compute canonical concentric circle points
-        p0 = np.full((2, num_points), np.nan)
-        p0[:, 0] = [0, 0]
+        points = np.full((2, num_points), np.nan)
+        points[:, 0] = [0, 0]
         i_left = 1
         for k in range(2, num_radial + 1):
             num_theta = round((k - 1) * PACKING_NUMBER)
             thetas = np.arange(num_theta) * 2 * np.pi / num_theta
             p = r[k - 1] * np.vstack((np.cos(thetas), np.sin(thetas)))
             i_right = i_left + num_theta
-            p0[:, i_left:i_right] = p
+            points[:, i_left:i_right] = p
             i_left = i_right
+        return points, num_points
+
+    if use_spiral:
+
+        p0 = make_spiral_circle_points(num_points, radius)
+
+    else:
+        # otherwise use concentric circles (note that the num_points is increased
+        # to ensure a full set of concentric rings)
+
+        p0, num_points = make_concentric_circle_points(num_points, radius)
 
     # add z-dimension points if in 3D
     if len(disc_pos) == 3:
@@ -100,32 +108,32 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         R, _ = compute_linear_transform(disc_pos, focus_pos)
         p0 = np.dot(R, p0)
 
-        # shift the disc to the appropriate center
-        disc = p0 + np.array(disc_pos).reshape(-1, 1)
+    # shift the disc to the appropriate center
+    disc = p0 + np.array(disc_pos).reshape(-1, 1)
 
-        # plot results
-        if plot_disc:
-            # select suitable axis scaling factor
-            _, scale, prefix, unit = scale_SI(np.max(disc))
+    # plot results
+    if plot_disc:
+        # select suitable axis scaling factor
+        _, scale, prefix, unit = scale_SI(np.max(disc))
 
-            # create the figure
-            if len(disc_pos) == 2:
-                plt.figure()
-                plt.plot(disc[1, :] * scale, disc[0, :] * scale, '.')
-                plt.gca().invert_yaxis()
-                plt.xlabel(f"y-position [{prefix}m]")
-                plt.ylabel(f"x-position [{prefix}m]")
-                plt.axis("equal")
-            else:
-                fig = plt.figure()
-                ax = fig.add_subplot(111, projection="3d")
-                ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, ".")
-                ax.set_xlabel(f"[{prefix}m]")
-                ax.set_ylabel(f"[{prefix}m]")
-                ax.set_zlabel(f"[{prefix}m]")
-                ax.axis("equal")
-                ax.grid(True)
-                ax.box(True)
+        # create the figure
+        if len(disc_pos) == 2:
+            plt.figure()
+            plt.plot(disc[1, :] * scale, disc[0, :] * scale, '.')
+            plt.gca().invert_yaxis()
+            plt.xlabel(f"y-position [{prefix}m]")
+            plt.ylabel(f"x-position [{prefix}m]")
+            plt.axis("equal")
+        else:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection="3d")
+            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, ".")
+            ax.set_xlabel(f"[{prefix}m]")
+            ax.set_ylabel(f"[{prefix}m]")
+            ax.set_zlabel(f"[{prefix}m]")
+            ax.axis("equal")
+            ax.grid(True)
+            ax.box(True)
 
     return np.squeeze(disc)
 
