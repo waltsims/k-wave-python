@@ -10,11 +10,124 @@ from scipy import optimize
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
-from .math import cosd, sind, Rz, Ry, Rx
+from .math import cosd, sind, Rz, Ry, Rx, compute_linear_transform
 from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
+
+
+def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
+                   use_spiral: bool = False) -> np.ndarray:
+    """
+    Create evenly distributed Cartesian points covering a disc.
+
+    Args:
+        disc_pos:       Cartesian position of the center of the disc given as a
+                        two (2D) or three (3D) element tuple [m].
+        radius:         Radius of the disc [m].
+        focus_pos:      Any point on the beam axis of the disc given as a three
+                        element tuple [fx, fy, fz] [m]. Can be set to None to define a disc in the x-y plane.
+        num_points:     Number of points on the disc.
+        plot_disc:      Boolean controlling whether the Cartesian points are plotted (default = False).
+        use_spiral:     Boolean controlling whether the Cartesian points are chosen using a spiral sampling pattern.
+                        Concentric sampling is used by default.
+
+    Returns:
+        disc: 2 x num_points or 3 x num_points array of Cartesian coordinates.
+    """
+    # define literals
+    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
+    PACKING_NUMBER = 7  # 2*pi
+
+    # check input values
+    if radius <= 0:
+        raise ValueError("The radius must be positive.")
+
+    # compute Cartesian points using spiral sampling
+    if use_spiral:
+        # compute spiral parameters
+        theta = lambda t: GOLDEN_ANGLE * t
+        C = np.pi * radius ** 2 / (num_points - 1)
+        r = lambda t: np.sqrt(C * t / np.pi)
+
+        # compute canonical spiral points
+        t = np.linspace(0, num_points - 1, num_points)
+        p0 = np.multiply(np.vstack((np.cos(theta(t)), np.sin(theta(t)))), r(t))
+    else:
+        # otherwise use concentric circles (note that the num_points is increased
+        # to ensure a full set of concentric rings)
+
+        num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
+        try:
+            d_radial = radius / (num_radial - 1)
+        except ZeroDivisionError:
+            if num_radial == 1:
+                d_radial = float('inf')
+
+        r = np.arange(num_radial) * (radius - d_radial / 2) / (num_radial - 1)
+
+        # recompute the number of points that will be created below
+        num_points = 1
+        for k in range(2, num_radial + 1):
+            num_theta = round((k - 1) * PACKING_NUMBER)
+            num_points += num_theta
+
+        # compute canonical concentric circle points
+        p0 = np.full((2, num_points), np.nan)
+        p0[:, 0] = [0, 0]
+        i_left = 1
+        for k in range(2, num_radial + 1):
+            num_theta = round((k - 1) * PACKING_NUMBER)
+            thetas = np.arange(num_theta) * 2 * np.pi / num_theta
+            p = r[k - 1] * np.vstack((np.cos(thetas), np.sin(thetas)))
+            i_right = i_left + num_theta
+            p0[:, i_left:i_right] = p
+            i_left = i_right
+
+    # add z-dimension points if in 3D
+    if len(disc_pos) == 3:
+        p0 = np.vstack((p0, np.zeros((1, num_points))))
+
+    # if 3D and focus_pos is defined, rotate the canonical points to give the
+    # specified disc
+    if len(disc_pos) == 3:
+        # check the focus position isn't coincident with the disc position
+        if all(disc_pos == focus_pos):
+            raise ValueError("The focus_pos must be different from the disc_pos.")
+
+        # compute rotation matrix and apply
+        R, _ = compute_linear_transform(disc_pos, focus_pos)
+        p0 = np.dot(R, p0)
+
+        # shift the disc to the appropriate center
+        disc = p0 + np.array(disc_pos).reshape(-1, 1)
+
+        # plot results
+        if plot_disc:
+            # select suitable axis scaling factor
+            _, scale, prefix, unit = scale_SI(np.max(disc))
+
+            # create the figure
+            if len(disc_pos) == 2:
+                plt.figure()
+                plt.plot(disc[1, :] * scale, disc[0, :] * scale, '.')
+                plt.gca().invert_yaxis()
+                plt.xlabel(f"y-position [{prefix}m]")
+                plt.ylabel(f"x-position [{prefix}m]")
+                plt.axis("equal")
+            else:
+                fig = plt.figure()
+                ax = fig.add_subplot(111, projection="3d")
+                ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, ".")
+                ax.set_xlabel(f"[{prefix}m]")
+                ax.set_ylabel(f"[{prefix}m]")
+                ax.set_zlabel(f"[{prefix}m]")
+                ax.axis("equal")
+                ax.grid(True)
+                ax.box(True)
+
+    return np.squeeze(disc)
 
 
 def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
@@ -2559,8 +2672,6 @@ def trim_cart_points(kgrid, points: np.ndarray):
     points = points[:, ind]
 
     return points
-
-
 
 
 def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
