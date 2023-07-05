@@ -17,13 +17,32 @@ from .tictoc import TicToc
 from ..data import Vector
 
 
-def make_cart_bowl(bowl_pos, radius, diameter, focus_pos, num_points, plot_bowl=False):
+def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int,
+                   plot_bowl: Optional[bool] = False) -> np.ndarray:
+    """
+    Create evenly distributed Cartesian points covering a bowl.
+
+    Args:
+        bowl_pos:       Cartesian position of the centre of the rear surface of
+                        the bowl given as a three element vector [bx, by, bz] [m].
+        radius:         Radius of curvature of the bowl [m].
+        diameter:       Diameter of the opening of the bowl [m].
+        focus_pos:      Any point on the beam axis of the bowl given as a three
+                        element vector [fx, fy, fz] [m].
+        num_points:     Number of points on the bowl.
+        plot_bowl:      Boolean controlling whether the Cartesian points are
+                        plotted.
+
+    Returns:
+        3 x num_points array of Cartesian coordinates.
+
+    Examples:
+        bowl = makeCartBowl([0, 0, 0], 1, 2, [0, 0, 1], 100)
+        bowl = makeCartBowl([0, 0, 0], 1, 2, [0, 0, 1], 100, True)
+    """
+
     # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
     GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
-
-    # check for plot_bowl input
-    if not plot_bowl:
-        plot_bowl = False
 
     # check input values
     if radius <= 0:
