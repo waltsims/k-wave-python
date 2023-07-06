@@ -2541,10 +2541,10 @@ def trim_cart_points(kgrid, points: np.ndarray):
     # find indices for points within the simulation domain
     ind_x = (points[0, :] >= kgrid.x_vec[0]) & (points[0, :] <= kgrid.x_vec[-1])
 
-    if kgrid['dim'] > 1:
+    if kgrid.dim > 1:
         ind_y = (points[1, :] >= kgrid.y_vec[0]) & (points[1, :] <= kgrid.y_vec[-1])
 
-    if kgrid['dim'] > 2:
+    if kgrid.dim > 2:
         ind_z = (points[2, :] >= kgrid.z_vec[0]) & (points[2, :] <= kgrid.z_vec[-1])
 
     # combine indices

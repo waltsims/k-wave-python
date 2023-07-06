@@ -358,3 +358,104 @@ def hounsfield2density(ct_data: np.ndarray, plot_fitting: bool = False) -> np.nd
         raise NotImplementedError("Plotting function not implemented in Python")
 
     return density
+
+
+tol = None
+subs0 = None
+
+
+def tol_star(tolerance, kgrid, point, debug):
+    global tol, subs0
+
+    ongrid_threshold = kgrid.dx * 1e-3
+
+    kgrid_dim = kgrid.dim
+    if tol is None or tolerance != tol or len(subs0) != kgrid_dim:
+        tol = tolerance
+
+        decay_subs = np.ceil(1/(np.pi * tol))
+
+        lin_ind = np.arange(-decay_subs, decay_subs + 1)
+
+        if kgrid_dim == 1:
+            is0 = lin_ind
+        elif kgrid_dim == 2:
+            is0, js0 = np.meshgrid(lin_ind, lin_ind)
+        elif kgrid_dim == 3:
+            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind)
+
+        if kgrid_dim == 1:
+            subs0 = [is0]
+        elif kgrid_dim == 2:
+            instar = np.abs(is0 * js0) <= decay_subs
+            is0 = is0[instar]
+            js0 = js0[instar]
+            subs0 = [is0, js0]
+        elif kgrid_dim == 3:
+            instar = np.abs(is0 * js0 * ks0) <= decay_subs
+            is0 = is0[instar]
+            js0 = js0[instar]
+            ks0 = ks0[instar]
+            subs0 = [is0, js0, ks0]
+
+    is_ = subs0[0].copy()
+    js = subs0[1].copy() if kgrid_dim > 1 else []
+    ks = subs0[2].copy() if kgrid_dim > 2 else []
+
+    x_closest, x_closest_ind = find_closest(kgrid.x_vec, point[0])
+
+    if np.abs(x_closest - point[0]) < ongrid_threshold:
+        is_ = is_[is_ == 0]
+        if kgrid_dim > 1:
+            js = js[is_ == 0]
+            if kgrid_dim > 2:
+                ks = ks[is_ == 0]
+
+    if kgrid_dim > 1:
+        y_closest, y_closest_ind = find_closest(kgrid.y_vec, point[1])
+        if np.abs(y_closest - point[1]) < ongrid_threshold:
+            is_ = is_[js == 0]
+            js = js[js == 0]
+            if kgrid_dim > 2:
+                ks = ks[js == 0]
+
+    if kgrid_dim > 2:
+        z_closest, z_closest_ind = find_closest(kgrid.z_vec, point[2])
+        if np.abs(z_closest - point[2]) < ongrid_threshold:
+            is_ = is_[ks == 0]
+            js = js[ks == 0]
+            ks = ks[ks == 0]
+
+    is_ += x_closest_ind
+    if kgrid_dim > 1:
+        js += y_closest_ind
+    if kgrid_dim > 2:
+        ks += z_closest_ind
+
+    inbounds = (1 <= is_) & (is_ <= kgrid.Nx)
+    is_ = is_[inbounds]
+    if kgrid_dim > 1:
+        inbounds = (1 <= js) & (js <= kgrid.Ny)
+        is_ = is_[inbounds]
+        js = js[inbounds]
+    if kgrid_dim > 2:
+        inbounds = (1 <= ks) & (ks <= kgrid.Nz)
+        is_ = is_[inbounds]
+        js = js[inbounds]
+        ks = ks[inbounds]
+
+    if kgrid_dim == 1:
+        lin_ind = is_
+    elif kgrid_dim == 2:
+        lin_ind = kgrid.Nx * (js - 1) + is_
+    elif kgrid_dim == 3:
+        lin_ind = kgrid.Nx * kgrid.Ny * (ks - 1) + kgrid.Nx * (js - 1) + is_
+
+    return lin_ind, is_, js, ks
+
+
+def find_closest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx], idx
+

@@ -2,7 +2,7 @@ import functools
 
 import numpy as np
 
-from kwave.kgrid import kWaveGrid
+from kwave.utils.kwave_array import kWaveArray, Element
 
 
 def recursive_getattr(obj, attr, *args):
@@ -11,7 +11,7 @@ def recursive_getattr(obj, attr, *args):
     return functools.reduce(_getattr, [obj] + attr.split('.'))
 
 
-def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
+def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
     are_totally_equal = True
     for key, expected_value in expected_kgrid_dict.items():
 
@@ -61,6 +61,56 @@ def check_kgrid_equality(kgrid_object: kWaveGrid, expected_kgrid_dict: dict):
             are_equal = np.allclose(actual_value, expected_value)
         else:
             are_equal = (actual_value == expected_value)
+
+        if not are_equal:
+            print('Following property does not match:')
+            print(f'\tkey: {key}, mapped_key: {mapped_key}')
+            print(f'\t\texpected: {expected_value}')
+            print(f'\t\tactual: {actual_value}')
+            are_totally_equal = False
+
+    assert are_totally_equal
+
+
+def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_array_dict: dict):
+    are_totally_equal = True
+
+    for key, expected_value in expected_kwave_array_dict.items():
+
+        matlab_to_python_mapping = {
+        }
+
+        mapped_key = matlab_to_python_mapping.get(key, key)
+        if mapped_key in []:
+            ignore_if_nan = True
+        else:
+            ignore_if_nan = False
+
+        actual_value = recursive_getattr(kwave_array_object, mapped_key, None)
+
+        if key == 'elements':
+            if isinstance(expected_value, dict):
+                expected_value = [Element(**expected_value)]
+            elif isinstance(expected_value, np.ndarray):
+                expected_value = expected_value.tolist()
+            elif isinstance(expected_value, list):
+                expected_value = [Element(**val) for val in expected_value]
+            # Hacky way to compare but works the best for now
+            are_equal = str(actual_value) == str(expected_value)
+        else:
+            actual_value = np.squeeze(actual_value)
+            expected_value = np.array(expected_value)
+
+            if ignore_if_nan and expected_value.size == 1 and (np.isnan(actual_value)) and (expected_value == 0):
+                are_equal = True
+            elif (actual_value is None) and (expected_value is not None):
+                are_equal = False
+            elif np.size(actual_value) >= 2 or np.size(expected_value) >= 2:
+                are_equal = np.allclose(actual_value, expected_value)
+            elif np.size(actual_value) == np.size(expected_value) == 0:
+                are_equal = True
+            else:
+                are_equal = (actual_value == expected_value)
 
         if not are_equal:
             print('Following property does not match:')

@@ -38,8 +38,13 @@ kwave_array.addBowlElement([0, 0, 0], 5, 4.3, [1, 5, -3]);
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
-% Useful for testing addRectElement in 2D
+% Useful for testing addRectElement in 3D
 kwave_array.addRectElement([12, -8, 0.3], 3, 4, [2, 4, 5]);
+recorder.recordObject('kwave_array', kwave_array);
+recorder.increment();
+
+% Useful for testing addDiscElement in 3D
+kwave_array.addDiscElement([0, 0.3, 12], 5, [1, 5, 8]);
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
@@ -51,8 +56,8 @@ kwave_array.addArcElement([0, 0.3], 5, 4.3, [1, 5]);
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
-% Useful for testing addDiscElement
-kwave_array.addDiscElement([0, 0.3], 5, [1, 5]);
+% Useful for testing addDiscElement in 2D
+kwave_array.addDiscElement([0, 0.3], 5);
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
