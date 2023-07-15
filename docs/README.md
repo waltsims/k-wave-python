@@ -46,7 +46,7 @@ This example file steps through the process of:
 This example expects an NVIDIA GPU by default to simulate with k-Wave.
 
 To test the reconstruction on a machine with a GPU,
-set `RUN_SIMULATION` [on line 14 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L18)
+set `RUN_SIMULATION` [on line 26 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L26)
 to `True`, and the example will run without the pre-computed data.
 
 ## Development
