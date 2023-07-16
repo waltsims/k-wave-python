@@ -75,7 +75,7 @@ class Element:
                 self.end_point = [self.end_point]
             self.end_point = np.array(self.end_point, dtype=float)
 
-        self.measure = float(self.measure)
+        self.measure = round(float(self.measure), 8)
 
 
 class kWaveArray(object):
