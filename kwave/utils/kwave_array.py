@@ -719,7 +719,7 @@ def off_grid_points(kgrid, points,
 
     # initialise the source mask
     if mask_only:
-        mask_type = np.bool
+        mask_type = bool
     elif single_precision:
         mask_type = np.float32
     else:
