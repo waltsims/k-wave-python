@@ -93,14 +93,9 @@ def test_kwave_array():
 
     kgrid = kWaveGrid([100, 200, 150], [0.1, 0.3, 0.4])
     grid_weights = kwave_array.get_element_grid_weights(kgrid, 0)
-    print(grid_weights.shape)
+    assert np.allclose(grid_weights, reader.expected_value_of('grid_weights'))
 
 
-
-    # # Useful for testing getElementGridWeights
-    # kgrid = kWaveGrid(100, 0.1, 200, 0.3, 150, 0.4);
-    # grid_weights = kwave_array.getElementGridWeights(kgrid, 1);
-    # recorder.recordVariable('grid_weights', grid_weights);
     #
     # # Useful for testing getElementBinaryMask
     # mask = kwave_array.getElementBinaryMask(kgrid, 1);

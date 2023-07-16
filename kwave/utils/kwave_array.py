@@ -633,10 +633,8 @@ def off_grid_points(kgrid, points,
         tqdm.tqdm(total=100, desc="Computing off-grid source mask...")
 
     # add to the overall mask using contributions from each source point
-    import scipy
-    from scipy import signal
-
     for point_ind in range(num_points):
+        print(point_ind, num_points)
         # extract a single point
         point = points[:, point_ind]
 
@@ -689,13 +687,13 @@ def off_grid_points(kgrid, points,
                 ind, is_, js = tol_star(bli_tolerance, kgrid, point, debug)
                 xs = x_vec[is_]
                 ys = y_vec[js]
-                xyz = [xs, ys]
+                xyz = np.array([xs, ys]).T
             elif kgrid.dim == 3:
                 ind, is_, js, ks = tol_star(bli_tolerance, kgrid, point, debug)
-                xs = x_vec[is_.astype(int)]
-                ys = y_vec[js.astype(int)]
-                zs = z_vec[ks.astype(int)]
-                xyz = [xs, ys, zs]
+                xs = x_vec[is_.astype(int)].squeeze(axis=-1)
+                ys = y_vec[js.astype(int)].squeeze(axis=-1)
+                zs = z_vec[ks.astype(int)].squeeze(axis=-1)
+                xyz = np.array([xs, ys, zs]).T
 
             if mask_only:
                 # add current points to the mask
@@ -704,14 +702,14 @@ def off_grid_points(kgrid, points,
                 # evaluate a BLI centered on point at grid nodes XYZ
                 if scalar_dxyz:
                     if single_precision:
-                        mask_t = sinc(np.pi * pi_on_dxyz * (xyz - point.T))
+                        mask_t = sinc(pi_on_dxyz * (xyz - point.T))
                     else:
-                        mask_t = sinc(np.pi * pi_on_dxyz * (xyz - point.T))
+                        mask_t = sinc(pi_on_dxyz * (xyz - point.T))
                 else:
                     if single_precision:
-                        mask_t = sinc(np.pi * pi_on_dxyz * (xyz - point.T))
+                        mask_t = sinc(pi_on_dxyz * (xyz - point.T))
                     else:
-                        mask_t = sinc(np.pi * pi_on_dxyz * (xyz - point.T))
+                        mask_t = sinc(pi_on_dxyz * (xyz - point.T))
                 mask_t = np.prod(mask_t, axis=1)
 
                 # apply scaling for non-uniform grid
@@ -719,11 +717,23 @@ def off_grid_points(kgrid, points,
                     mask_t = mask_t * BLIscale
 
                 # add this contribution to the overall source mask
+                from scipy.io import loadmat
+                data = loadmat('/tmp/saved.mat', simplify_cells=True)
+
                 ind = ind.astype(int)
-                # matlab_assign(matlab_mask(mask, ind), matlab_mask(mask, ind) + scale[point_ind] * mask_t)
-                mask[ind] = mask[ind] + scale[point_ind] * mask_t
+                aa = matlab_mask(mask, ind - 1).squeeze(axis=-1) + scale[point_ind] * mask_t
+                mask = matlab_assign(mask, ind - 1, aa)
+
+                # aa_expected = data['aa']
+                # assert np.allclose(aa, aa_expected)
+                #
+                # mask_expected = data['mask']
+                # assert np.allclose(mask, mask_expected)
+
+                print(mask.shape)
+                # mask[ind] = mask[ind] + scale[point_ind] * mask_t
 
         # update the waitbar
         if display_wait_bar and (point_ind % wait_bar_update_freq == 0):
             tqdm.update(wait_bar_update_freq)
-
+    return mask

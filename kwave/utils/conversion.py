@@ -5,8 +5,8 @@ import numpy as np
 from numpy import ndarray
 
 from kwave.kgrid import kWaveGrid
+from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
-
 
 def db2neper(alpha: float, y: int = 1) -> float:
     """
@@ -382,7 +382,7 @@ def tol_star(tolerance, kgrid, point, debug):
         elif kgrid_dim == 2:
             is0, js0 = np.meshgrid(lin_ind, lin_ind)
         elif kgrid_dim == 3:
-            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind)
+            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind, indexing='ij')
 
         if kgrid_dim == 1:
             subs0 = [is0]
@@ -393,10 +393,11 @@ def tol_star(tolerance, kgrid, point, debug):
             subs0 = [is0, js0]
         elif kgrid_dim == 3:
             instar = np.abs(is0 * js0 * ks0) <= decay_subs
-            is0 = is0[instar]
-            js0 = js0[instar]
-            ks0 = ks0[instar]
+            is0 = matlab_mask(is0, instar).T
+            js0 = matlab_mask(js0, instar).T
+            ks0 = matlab_mask(ks0, instar).T
             subs0 = [is0, js0, ks0]
+
 
     is_ = subs0[0].copy()
     js = subs0[1].copy() if kgrid_dim > 1 else []
@@ -405,11 +406,11 @@ def tol_star(tolerance, kgrid, point, debug):
     x_closest, x_closest_ind = find_closest(kgrid.x_vec, point[0])
 
     if np.abs(x_closest - point[0]) < ongrid_threshold:
-        is_ = is_[is_ == 0]
         if kgrid_dim > 1:
             js = js[is_ == 0]
             if kgrid_dim > 2:
                 ks = ks[is_ == 0]
+        is_ = is_[is_ == 0]
 
     if kgrid_dim > 1:
         y_closest, y_closest_ind = find_closest(kgrid.y_vec, point[1])
@@ -426,20 +427,21 @@ def tol_star(tolerance, kgrid, point, debug):
             js = js[ks == 0]
             ks = ks[ks == 0]
 
-    is_ += x_closest_ind
+    is_ += x_closest_ind + 1
     if kgrid_dim > 1:
-        js += y_closest_ind
+        js += y_closest_ind + 1
     if kgrid_dim > 2:
-        ks += z_closest_ind
+        ks += z_closest_ind + 1
 
-    inbounds = (1 <= is_) & (is_ <= kgrid.Nx)
-    is_ = is_[inbounds]
-    if kgrid_dim > 1:
-        inbounds = (1 <= js) & (js <= kgrid.Ny)
+    if kgrid_dim == 1:
+        inbounds = (1 <= is_) & (is_ <= kgrid.Nx)
+        is_ = is_[inbounds]
+    elif kgrid_dim == 2:
+        inbounds = (1 <= is_) & (is_ <= kgrid.Nx) & (1 <= js) & (js <= kgrid.Ny)
         is_ = is_[inbounds]
         js = js[inbounds]
-    if kgrid_dim > 2:
-        inbounds = (1 <= ks) & (ks <= kgrid.Nz)
+    if kgrid_dim == 3:
+        inbounds = (1 <= is_) & (is_ <= kgrid.Nx) & (1 <= js) & (js <= kgrid.Ny) & (1 <= ks) & (ks <= kgrid.Nz)
         is_ = is_[inbounds]
         js = js[inbounds]
         ks = ks[inbounds]
@@ -451,7 +453,7 @@ def tol_star(tolerance, kgrid, point, debug):
     elif kgrid_dim == 3:
         lin_ind = kgrid.Nx * kgrid.Ny * (ks - 1) + kgrid.Nx * (js - 1) + is_
 
-    return lin_ind, is_, js, ks
+    return lin_ind, is_ - 1, js - 1, ks - 1  # -1 for mapping from Matlab indexing to Python indexing
 
 
 def find_closest(array, value):
