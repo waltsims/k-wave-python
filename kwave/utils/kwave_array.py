@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from typing import Optional
 
@@ -10,8 +11,8 @@ from math import ceil
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
 from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc
-from kwave.utils.math import sinc
-from kwave.utils.matlab import matlab_assign, matlab_mask
+from kwave.utils.math import sinc, get_affine_matrix
+from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
 
 
 @dataclass
@@ -401,7 +402,7 @@ class kWaveArray(object):
 
     def affine(self, vec):
 
-        if self.array_transformation is None:
+        if len(self.array_transformation) == 0:
             return vec
 
         # check vector is the correct length
@@ -411,6 +412,7 @@ class kWaveArray(object):
         # apply transformation
         vec = np.append(vec, [1])
         vec = np.matmul(self.array_transformation, vec)
+        return vec
 
     def get_off_grid_points(self, kgrid, element_num, mask_only):
 
@@ -548,6 +550,109 @@ class kWaveArray(object):
 
         return grid_weights
 
+    def get_distributed_source_signal(self, kgrid, source_signal):
+        start_time = time.time()
+
+        self.check_for_elements()
+
+        mask = self.get_array_binary_mask(kgrid)
+        mask_ind = matlab_find(mask).squeeze(axis=-1)
+        num_source_points = np.sum(mask)
+
+        Nt = np.shape(source_signal)[1]
+
+        if self.single_precision:
+            data_type = 'float32'
+            sz_bytes = num_source_points * Nt * 4
+        else:
+            data_type = 'float64'
+            sz_bytes = num_source_points * Nt * 8
+
+        sz_ind = 0
+        while sz_bytes > 1024:
+            sz_bytes = sz_bytes / 1024
+            sz_ind += 1
+
+        prefixes = ['', 'K', 'M', 'G', 'T']
+        sz_bytes = round(sz_bytes, 2)
+        print(f'approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)')
+
+        source_signal = source_signal.astype(data_type)
+
+        distributed_source_signal = np.zeros((num_source_points, Nt), dtype=data_type)
+
+        for ind in range(self.number_elements):
+            source_weights = self.get_element_grid_weights(kgrid, ind)
+
+            element_mask_ind = matlab_find(np.array(source_weights), val=0, mode='neq').squeeze(axis=-1)
+
+            local_ind = np.isin(mask_ind, element_mask_ind)
+
+            distributed_source_signal[local_ind] += (
+                    matlab_mask(source_weights, element_mask_ind - 1) * source_signal[ind, :][None, :]
+            )
+
+        end_time = time.time()
+        print(f'total computation time : {end_time - start_time:.2f} s')
+
+        return distributed_source_signal
+
+    def combine_sensor_data(self, kgrid, sensor_data):
+        self.check_for_elements()
+
+        mask = self.get_array_binary_mask(kgrid)
+        mask_ind = matlab_find(mask).squeeze(axis=-1)
+
+        Nt = np.shape(sensor_data)[1]
+
+        combined_sensor_data = np.zeros((self.number_elements, Nt))
+
+        for element_num in range(self.number_elements):
+            source_weights = self.get_element_grid_weights(kgrid, element_num)
+
+            element_mask_ind = matlab_find(np.array(source_weights), val=0, mode='neq').squeeze(axis=-1)
+
+            local_ind = np.isin(mask_ind, element_mask_ind)
+
+            combined_sensor_data[element_num, :] = np.sum(sensor_data[local_ind] * matlab_mask(source_weights, element_mask_ind - 1),
+                                                          axis=0)
+
+            m_grid = self.elements[element_num].measure / (kgrid.dx) ** (self.elements[element_num].dim)
+
+            combined_sensor_data[element_num, :] = combined_sensor_data[element_num, :] / m_grid
+
+        return combined_sensor_data
+
+    def set_array_position(self, translation, rotation):
+
+        # get affine matrix and store
+        self.array_transformation = get_affine_matrix(translation, rotation)
+
+    def set_affine_transform(self, affine_transform):
+
+        # check array has elements
+        if self.number_elements == 0:
+            raise ValueError('Array must have at least one element before a transformation can be defined.')
+
+        # check the input is the correct size
+        sx, sy = affine_transform.shape
+        if (self.dim == 2 and (sx != 3 or sy != 3)) or (self.dim == 3 and (sx != 4 or sy != 4)):
+            raise ValueError('Affine transform must be a 3x3 matrix for arrays in 2D, and 4x4 for arrays in 3D.')
+
+            # assign the transform
+        self.array_transformation = affine_transform
+
+    def get_element_positions(self):
+
+        # initialise output
+        element_pos = np.zeros((self.dim, self.number_elements))
+
+        # loop through the elements and assign transformed position
+        for i, element in enumerate(self.elements):
+            element_pos[:, i] = self.affine(element.position)
+
+        return element_pos
+
 
 def off_grid_points(kgrid, points,
                     scale=1,
@@ -634,7 +739,6 @@ def off_grid_points(kgrid, points,
 
     # add to the overall mask using contributions from each source point
     for point_ind in range(num_points):
-        print(point_ind, num_points)
         # extract a single point
         point = points[:, point_ind]
 
@@ -695,9 +799,11 @@ def off_grid_points(kgrid, points,
                 zs = z_vec[ks.astype(int)].squeeze(axis=-1)
                 xyz = np.array([xs, ys, zs]).T
 
+            ind = ind.astype(int)
+
             if mask_only:
                 # add current points to the mask
-                mask[ind] = True
+                mask = matlab_assign(mask, ind - 1, True)
             else:
                 # evaluate a BLI centered on point at grid nodes XYZ
                 if scalar_dxyz:
@@ -717,21 +823,9 @@ def off_grid_points(kgrid, points,
                     mask_t = mask_t * BLIscale
 
                 # add this contribution to the overall source mask
-                from scipy.io import loadmat
-                data = loadmat('/tmp/saved.mat', simplify_cells=True)
-
-                ind = ind.astype(int)
-                aa = matlab_mask(mask, ind - 1).squeeze(axis=-1) + scale[point_ind] * mask_t
-                mask = matlab_assign(mask, ind - 1, aa)
-
-                # aa_expected = data['aa']
-                # assert np.allclose(aa, aa_expected)
-                #
-                # mask_expected = data['mask']
-                # assert np.allclose(mask, mask_expected)
-
-                print(mask.shape)
-                # mask[ind] = mask[ind] + scale[point_ind] * mask_t
+                mask = matlab_assign(mask,
+                                     ind - 1,
+                                     matlab_mask(mask, ind - 1).squeeze(axis=-1) + scale[point_ind] * mask_t)
 
         # update the waitbar
         if display_wait_bar and (point_ind % wait_bar_update_freq == 0):

@@ -115,7 +115,7 @@ recorder.recordVariable('mask', mask);
 recorder.increment();
 
 % Useful for testing getDistributedSourceSignal
-% source_signal = rand(12, 20);
+source_signal = rand(12, 20);
 distributed_source_signal = kwave_array.getDistributedSourceSignal(kgrid, source_signal);
 recorder.recordVariable('source_signal', source_signal);
 recorder.recordVariable('distributed_source_signal', distributed_source_signal);
@@ -123,7 +123,7 @@ recorder.increment();
 
 % Useful for testing combineSensorData
 kgrid = kWaveGrid(10, 0.1, 100, 0.1, 100, 0.1);
-% sensor_data = rand(1823, 20);
+sensor_data = rand(1823, 20);
 combined_sensor_data = kwave_array.combineSensorData(kgrid, sensor_data);
 recorder.recordVariable('sensor_data', sensor_data);
 recorder.recordVariable('combined_sensor_data', combined_sensor_data);
@@ -139,7 +139,7 @@ recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
 % Useful for testing setAffineTransform
-% affine_transform = rand(4, 4);
+affine_transform = rand(4, 4);
 kwave_array.setAffineTransform(affine_transform);
 recorder.recordVariable('affine_transform', affine_transform);
 recorder.recordObject('kwave_array', kwave_array);

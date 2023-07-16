@@ -15,7 +15,6 @@ VERSION = '0.2.1'
 # is refactored
 
 platform = sys.platform
-platform = 'linux'
 
 if platform.startswith('linux'):
     system = 'linux'

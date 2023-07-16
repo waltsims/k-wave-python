@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 from kwave.kgrid import kWaveGrid
@@ -9,8 +10,7 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_kwave_array():
-    # test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveArray.mat')
-    test_record_path = os.path.join('/Users/farid/PycharmProjects/k-wave-python/tests/matlab_test_data_collectors/matlab_collectors', 'collectedValues/kWaveArray.mat')
+    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/kWaveArray.mat')
     reader = TestRecordReader(test_record_path)
 
     kwave_array = kWaveArray()
@@ -95,57 +95,41 @@ def test_kwave_array():
     grid_weights = kwave_array.get_element_grid_weights(kgrid, 0)
     assert np.allclose(grid_weights, reader.expected_value_of('grid_weights'))
 
+    mask = kwave_array.get_element_binary_mask(kgrid, 0)
+    assert np.allclose(mask, reader.expected_value_of('mask'))
+    reader.increment()
 
-    #
-    # # Useful for testing getElementBinaryMask
-    # mask = kwave_array.getElementBinaryMask(kgrid, 1);
-    # recorder.recordVariable('mask', mask);
-    # recorder.increment();
-    #
-    # # Useful for testing getArrayGridWeights
-    # grid_weights = kwave_array.getArrayGridWeights(kgrid);
-    # recorder.recordVariable('grid_weights', grid_weights);
-    #
-    # # Useful for testing getArrayBinaryMask+
+    grid_weights = kwave_array.get_array_grid_weights(kgrid)
+    assert np.allclose(grid_weights, reader.expected_value_of('grid_weights'))
 
-    # mask = kwave_array.getArrayBinaryMask(kgrid);
-    # recorder.recordVariable('mask', mask);
-    # recorder.increment();
-    #
-    # # Useful for testing getDistributedSourceSignal
-    # source_signal = rand(12, 20);
-    # distributed_source_signal = kwave_array.getDistributedSourceSignal(kgrid, source_signal);
-    # recorder.recordVariable('source_signal', source_signal);
-    # recorder.recordVariable('distributed_source_signal', distributed_source_signal);
-    # recorder.increment();
-    #
-    # # Useful for testing combineSensorData
-    # kgrid = kWaveGrid(10, 0.1, 100, 0.1, 100, 0.1);
-    # sensor_data = rand(1823, 20);
-    # combined_sensor_data = kwave_array.combineSensorData(kgrid, sensor_data);
-    # recorder.recordVariable('sensor_data', sensor_data);
-    # recorder.recordVariable('combined_sensor_data', combined_sensor_data);
-    # recorder.increment();
-    #
-    # # Useful for testing setArrayPosition
-    # translation = [5, 2, -1];
-    # rotation = [20, 30, 15];
-    # kwave_array.setArrayPosition(translation, rotation);
-    # recorder.recordVariable('translation', translation);
-    # recorder.recordVariable('rotation', rotation);
-    # recorder.recordObject('kwave_array', kwave_array);
-    # recorder.increment();
-    #
-    # # Useful for testing setAffineTransform
-    # affine_transform = rand(4, 4);
-    # kwave_array.setAffineTransform(affine_transform);
-    # recorder.recordVariable('affine_transform', affine_transform);
-    # recorder.recordObject('kwave_array', kwave_array);
-    # recorder.increment();
-    #
-    # # Useful for testing addAnnularArray
-    # kwave_array = kWaveArray();
-    # kwave_array.addAnnularArray([3, 5, 10], 5, [1.2; 0.5], [12, 21, 3]);
-    # element_pos = kwave_array.getElementPositions();
-    # recorder.recordVariable('element_pos', element_pos);
-    # recorder.increment();
+    mask = kwave_array.get_array_binary_mask(kgrid)
+    assert np.allclose(mask, reader.expected_value_of('mask'))
+    reader.increment()
+
+    source_signal = reader.expected_value_of('source_signal')
+    distributed_source_signal = kwave_array.get_distributed_source_signal(kgrid, source_signal)
+    assert np.allclose(distributed_source_signal, reader.expected_value_of('distributed_source_signal'))
+    reader.increment()
+
+    kgrid = kWaveGrid([10, 100, 100], [0.1, 0.1, 0.1])
+    sensor_data = reader.expected_value_of('sensor_data')
+    combined_sensor_data = kwave_array.combine_sensor_data(kgrid, sensor_data)
+    assert np.allclose(combined_sensor_data, reader.expected_value_of('combined_sensor_data'))
+    reader.increment()
+
+    translation = reader.expected_value_of('translation')
+    rotation = reader.expected_value_of('rotation')
+    kwave_array.set_array_position(translation, rotation)
+    check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
+    reader.increment()
+
+    affine_transform = reader.expected_value_of('affine_transform')
+    kwave_array.set_affine_transform(affine_transform)
+    check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
+    reader.increment()
+
+    kwave_array = kWaveArray()
+    kwave_array.add_annular_array([3, 5, 10], 5, [[1.2, 0.5]], [12, 21, 3])
+    element_pos = kwave_array.get_element_positions()
+    assert np.allclose(element_pos.squeeze(axis=-1), reader.expected_value_of('element_pos'))
+    reader.increment()
