@@ -110,7 +110,12 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
             elif np.size(actual_value) == np.size(expected_value) == 0:
                 are_equal = True
             else:
-                are_equal = np.abs(actual_value - expected_value) < 1e-10
+                # check if both are float (either native or numpy), if so, check if they are close
+                if isinstance(actual_value, float) and isinstance(expected_value, float):
+                    are_equal = np.isclose(actual_value, expected_value)
+                else:
+                    are_equal = (actual_value == expected_value)
+
 
         if not are_equal:
             print('Following property does not match:')
