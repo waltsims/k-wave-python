@@ -416,9 +416,9 @@ def tol_star(tolerance, kgrid, point, debug):
         y_closest, y_closest_ind = find_closest(kgrid.y_vec, point[1])
         if np.abs(y_closest - point[1]) < ongrid_threshold:
             is_ = is_[js == 0]
-            js = js[js == 0]
             if kgrid_dim > 2:
                 ks = ks[js == 0]
+            js = js[js == 0]
 
     if kgrid_dim > 2:
         z_closest, z_closest_ind = find_closest(kgrid.z_vec, point[2])
@@ -426,6 +426,7 @@ def tol_star(tolerance, kgrid, point, debug):
             is_ = is_[ks == 0]
             js = js[ks == 0]
             ks = ks[ks == 0]
+            
 
     is_ += x_closest_ind + 1
     if kgrid_dim > 1:
