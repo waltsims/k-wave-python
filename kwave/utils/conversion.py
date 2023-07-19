@@ -8,6 +8,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
 
+
 def db2neper(alpha: float, y: int = 1) -> float:
     """
     Convert decibels to nepers.
@@ -373,7 +374,7 @@ def tol_star(tolerance, kgrid, point, debug):
     if tol is None or tolerance != tol or len(subs0) != kgrid_dim:
         tol = tolerance
 
-        decay_subs = np.ceil(1/(np.pi * tol))
+        decay_subs = np.ceil(1 / (np.pi * tol))
 
         lin_ind = np.arange(-decay_subs, decay_subs + 1)
 
@@ -398,7 +399,6 @@ def tol_star(tolerance, kgrid, point, debug):
             ks0 = matlab_mask(ks0, instar).T
             subs0 = [is0, js0, ks0]
 
-
     is_ = subs0[0].copy()
     js = subs0[1].copy() if kgrid_dim > 1 else []
     ks = subs0[2].copy() if kgrid_dim > 2 else []
@@ -416,9 +416,9 @@ def tol_star(tolerance, kgrid, point, debug):
         y_closest, y_closest_ind = find_closest(kgrid.y_vec, point[1])
         if np.abs(y_closest - point[1]) < ongrid_threshold:
             is_ = is_[js == 0]
-            js = js[js == 0]
             if kgrid_dim > 2:
                 ks = ks[js == 0]
+            js = js[js == 0]
 
     if kgrid_dim > 2:
         z_closest, z_closest_ind = find_closest(kgrid.z_vec, point[2])
@@ -460,4 +460,3 @@ def find_closest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
-
