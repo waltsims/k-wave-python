@@ -1,5 +1,5 @@
 from __future__ import annotations
-import numbers
+
 import os
 from dataclasses import dataclass, field
 from enum import Enum
@@ -292,7 +292,10 @@ class SimulationOptions(object):
                 "Optional input ''use_fd'' only supported in 1D."
         # get optimal pml size
         if options.simulation_type.is_axisymmetric() or options.pml_auto:
-            pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+            if options.simulation_type.is_axisymmetric():
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+            else:
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range)
 
             # assign to individual variables
             if kgrid.dim == 1:

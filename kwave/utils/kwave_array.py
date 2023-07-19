@@ -1,13 +1,14 @@
 import time
 from dataclasses import dataclass
+from math import ceil
 from typing import Optional
 
 import numpy as np
-from kwave.kgrid import kWaveGrid
 from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
-from math import ceil
 
+import kwave
+from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
 from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc
@@ -231,7 +232,8 @@ class kWaveArray(object):
                 "Input position for rectangular element must be specified as a 2 (2D) or 3 (3D) element array.")
 
         if coord_dim == 3:
-            assert isinstance(theta, (list, tuple)) and len(theta) == 3, "'theta' must be a list or tuple of length 3"
+            assert isinstance(theta, (kwave.data.Vector, list, tuple)) and len(
+                theta) == 3, "'theta' must be a list or tuple of length 3"
         else:
             assert isinstance(theta, (int, float)), "'theta' must be an integer or float"
 
@@ -412,7 +414,7 @@ class kWaveArray(object):
         # apply transformation
         vec = np.append(vec, [1])
         vec = np.matmul(self.array_transformation, vec)
-        return vec
+        return vec[:-1]
 
     def get_off_grid_points(self, kgrid, element_num, mask_only):
 
