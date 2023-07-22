@@ -15,3 +15,7 @@ kwave/bin/linux
 examples/__pycache__/
 src/
 *.h5
+*.tar.gz
+*.whl
+*.png
+
