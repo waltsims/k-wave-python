@@ -7,7 +7,7 @@ def rem(x, y, rtol=1e-05, atol=1e-08):
     """
     Returns the remainder after division of x by y, taking into account the floating point precision.
     x and y must be real and have compatible sizes.
-    This function is equivalent to the MATLAB rem function.
+    This function should be equivalent to the MATLAB rem function.
 
     Args:
         x (float, list, or ndarray): The dividend(s).
