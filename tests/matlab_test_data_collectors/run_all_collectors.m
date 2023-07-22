@@ -14,6 +14,16 @@ for idx=1:length(files)
         run(fullfile(directory, files{idx}));
 end
 
+updateCollectedValues(directory);
+
+function updateCollectedValues(directory)
+    target = pwd + "/python_testers/collectedValues";
+    if exist(target, 'dir')
+        rmdir(target, 's')
+    end
+    movefile(directory + "/collectedValues", target)
+end
+
 function files = getListOfFiles(directory)
     list    = dir(fullfile(directory, '*.m'));
     files = {list.name};
