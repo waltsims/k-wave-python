@@ -6,6 +6,7 @@ import numpy as np
 
 from kwave.data import Vector, FlexibleVector
 from kwave.enums import DiscreteCosine, DiscreteSine
+from kwave.utils import matlab
 from kwave.utils.math import largest_prime_factor
 
 
@@ -342,6 +343,13 @@ class kWaveGrid(object):
             return np.nan
 
     @property
+    def x_size(self):
+        """
+        Size of grid in the x-direction [m]
+        """
+        return self.Nx * self.dx
+
+    @property
     def y_size(self):
         """
         Size of grid in the y-direction [m]
@@ -451,16 +459,16 @@ class kWaveGrid(object):
         based on the minimum value.
 
         Args:
-            c:
-            cfl:
-            t_end:
+            c: sound speed
+            cfl: convergence condition by Courant–Friedrichs–Lewy
+            t_end: final time step
 
         Returns:
             Nothing
         """
         # if c is a matrix, find the minimum and maximum values
         c = np.array(c)
-        c_min, c_max = c.min(), c.max()
+        c_min, c_max = np.min(c), np.max(c)
 
         # check for user define t_end, otherwise set the simulation
         # length based on the size of the grid diagonal and the maximum
@@ -469,16 +477,16 @@ class kWaveGrid(object):
             t_end = np.linalg.norm(self.size, ord=2) / c_min
 
         # extract the smallest grid spacing
-        min_grid_dim = self.spacing.min()
+        min_grid_dim = np.min(self.spacing)
 
         # assign time step based on CFL stability criterion
         self.dt = cfl * min_grid_dim / c_max
 
         # assign number of time steps based on t_end
-        self.Nt = int(t_end / self.dt) + 1
+        self.Nt = np.floor(t_end / self.dt) + 1
 
-        # catch case were dt is a recurring number
-        if (int(t_end / self.dt) != math.ceil(t_end / self.dt)) and (t_end % self.dt == 0):
+        # catch case where dt is a recurring number
+        if (np.floor(t_end / self.dt) != np.ceil(t_end / self.dt)) and (matlab.rem(t_end, self.dt) == 0):
             self.Nt = self.Nt + 1
 
         return self.t_array, self.dt

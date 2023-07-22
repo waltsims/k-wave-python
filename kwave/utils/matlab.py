@@ -3,6 +3,35 @@ from typing import Tuple, Union, Optional, List
 import numpy as np
 
 
+def rem(x, y, rtol=1e-05, atol=1e-08):
+    """
+    Returns the remainder after division of x by y, taking into account the floating point precision.
+    x and y must be real and have compatible sizes.
+    This function is equivalent to the MATLAB rem function.
+
+    Args:
+        x (float, list, or ndarray): The dividend(s).
+        y (float, list, or ndarray): The divisor(s).
+        rtol (float): The relative tolerance parameter (see numpy.isclose).
+        atol (float): The absolute tolerance parameter (see numpy.isclose).
+
+    Returns:
+        float or ndarray: The remainder after division.
+    """
+    if np.any(y == 0):
+        return np.nan
+
+    quotient = x / y
+    closest_int = np.round(quotient)
+
+    # check if quotient is close to an integer value
+    if np.isclose(quotient, closest_int, rtol=rtol, atol=atol).all():
+        return np.zeros_like(x)
+
+    remainder = x - np.fix(quotient) * y
+
+    return remainder
+
 def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
                   values: Union[int, float, np.ndarray]) -> np.ndarray:
     """
