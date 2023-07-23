@@ -415,8 +415,8 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     if isinstance(tone_index, np.int64):
         tone_index = [tone_index]
 
-    for offset_index in tone_index:
-        signal[:, offset_index:offset_index + len(tone_burst)] = tone_burst.T
+    for offset, tone_idx in enumerate(tone_index):
+        signal[offset, tone_idx:tone_idx + len(tone_burst)] = tone_burst.T
 
     # plot the signal if required
     if plot_signal:
