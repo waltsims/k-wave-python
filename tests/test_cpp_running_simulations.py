@@ -12,16 +12,16 @@ from tempfile import gettempdir
 import h5py
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_ball

@@ -483,7 +483,7 @@ class kWaveGrid(object):
         self.dt = cfl * min_grid_dim / c_max
 
         # assign number of time steps based on t_end
-        self.Nt = np.floor(t_end / self.dt) + 1
+        self.Nt = int(np.floor(t_end / self.dt) + 1)
 
         # catch case where dt is a recurring number
         if (np.floor(t_end / self.dt) != np.ceil(t_end / self.dt)) and (matlab.rem(t_end, self.dt) == 0):

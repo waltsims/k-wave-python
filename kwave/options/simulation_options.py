@@ -82,7 +82,7 @@ class SimulationOptions(object):
     pml_inside: bool = True
     pml_alpha: float = 2.0
     save_to_disk: bool = False
-    save_to_disk_exit: bool = True
+    save_to_disk_exit: bool = False
     scale_source_terms: bool = True
     smooth_c0: bool = False
     smooth_rho0: bool = False

@@ -12,23 +12,22 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensorDirectivity, kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 from tests.diff_utils import compare_against_ref
 
 
 def test_pr_2D_TR_directional_sensors():
-
     # create the computational grid
     pml_size = Vector([20, 20])  # size of the PML in grid points
     grid_size = Vector([128, 256]) - 2 * pml_size  # [grid points]

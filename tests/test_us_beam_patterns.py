@@ -11,16 +11,16 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 from tests.diff_utils import compare_against_ref
@@ -28,9 +28,9 @@ from tests.diff_utils import compare_against_ref
 
 def test_us_beam_patterns():
     # simulation settings
-    DATA_CAST = 'single'       # set to 'single' or 'gpuArray-single' to speed up computations
-    MASK_PLANE = 'xy'          # set to 'xy' or 'xz' to generate the beam pattern in different planes
-    USE_STATISTICS = True      # set to true to compute the rms or peak beam patterns, set to false to compute the harmonic beam patterns
+    DATA_CAST = 'single'  # set to 'single' or 'gpuArray-single' to speed up computations
+    MASK_PLANE = 'xy'  # set to 'xy' or 'xz' to generate the beam pattern in different planes
+    USE_STATISTICS = True  # set to true to compute the rms or peak beam patterns, set to false to compute the harmonic beam patterns
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID

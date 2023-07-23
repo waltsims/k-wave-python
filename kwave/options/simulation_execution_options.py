@@ -1,8 +1,6 @@
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Union
-from warnings import warn
 
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
@@ -51,6 +49,7 @@ class SimulationExecutionOptions:
             assert self.num_threads > 0 and self.num_threads != float('inf')
         else:
             assert self.num_threads == 'all'
+            self.num_threads = None
 
         assert isinstance(self.verbose_level, int) and 0 <= self.verbose_level <= 2
 

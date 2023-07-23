@@ -11,16 +11,16 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.mapgen import make_ball
 from kwave.utils.signals import tone_burst
@@ -29,7 +29,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_us_transducer_as_sensor():
     # input and output filenames (these must have the .h5 extension)
-    input_filename  = 'example_input.h5'
+    input_filename = 'example_input.h5'
     output_filename = 'example_output.h5'
 
     # pathname for the input and output files

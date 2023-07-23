@@ -4,14 +4,14 @@ from tempfile import gettempdir
 import numpy as np
 import scipy.io
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 from example_utils import download_from_gdrive_if_does_not_exist
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.reconstruction.beamform import beamform
 from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = False
+    RUN_SIMULATION = True
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID

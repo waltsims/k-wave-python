@@ -19,7 +19,8 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kSensor
-from kwave.options import SimulationExecutionOptions, SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.mapgen import make_ball
 from tests.diff_utils import compare_against_ref
 

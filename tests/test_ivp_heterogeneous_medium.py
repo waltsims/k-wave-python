@@ -12,24 +12,24 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.mapgen import make_disc, make_cart_circle
 from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_heterogeneous_medium():
     # create the computational grid
-    grid_size = Vector([128, 128]) # [grid points]
-    grid_spacing = Vector([0.1e-3, 0.1e-3]) # [m]
+    grid_size = Vector([128, 128])  # [grid points]
+    grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
     kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
@@ -37,8 +37,8 @@ def test_ivp_heterogeneous_medium():
         sound_speed=1500 * np.ones(grid_size),
         density=1000 * np.ones(grid_size)
     )
-    medium.sound_speed[0:grid_size.x//2, :] = 1800         # [m/s]
-    medium.density[:, grid_size.y//4-1:grid_size.y] = 1200          # [kg/m^3]
+    medium.sound_speed[0:grid_size.x // 2, :] = 1800  # [m/s]
+    medium.density[:, grid_size.y // 4 - 1:grid_size.y] = 1200  # [kg/m^3]
 
     # create initial pressure distribution using make_disc
     disc_magnitude = 5 # [Pa]

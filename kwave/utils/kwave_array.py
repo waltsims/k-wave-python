@@ -570,13 +570,13 @@ class kWaveArray(object):
             data_type = 'float64'
             sz_bytes = num_source_points * Nt * 8
 
-        sz_ind = 0
+        sz_ind = 1
         while sz_bytes > 1024:
             sz_bytes = sz_bytes / 1024
             sz_ind += 1
 
         prefixes = ['', 'K', 'M', 'G', 'T']
-        sz_bytes = round(sz_bytes, 2)
+        sz_bytes = np.round(sz_bytes, 2)  # TODO: should round to significant to map matlab functionality
         print(f'approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)')
 
         source_signal = source_signal.astype(data_type)
