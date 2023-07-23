@@ -14,9 +14,16 @@ for idx=1:length(files)
         run(fullfile(directory, files{idx}));
 end
 
-updateCollectedValues(directory);
+if ~isRunningInCI()
+    updatePythonCollectedValues(directory);
+end
 
-function updateCollectedValues(directory)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function is_running_in_ci = isRunningInCI()
+    is_running_in_ci = ~isempty(getenv('CI'));
+end
+
+function updatePythonCollectedValues(directory)
     target = pwd + "/python_testers/collectedValues";
     if exist(target, 'dir')
         rmdir(target, 's')
