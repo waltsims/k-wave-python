@@ -412,12 +412,14 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     signal = np.zeros((tone_index.size, signal_length))
 
     # Add the tone burst to the signal array
-    if isinstance(tone_index, np.int64):
-        tone_index = [tone_index]
+    # Add the tone burst to the signal array
+    tone_index = np.atleast_1d(tone_index)
 
-    for offset, tone_idx in enumerate(tone_index):
-        signal[offset, tone_idx:tone_idx + len(tone_burst)] = tone_burst.T
-
+    if tone_index.size == 1:
+        signal[:, int(tone_index):int(tone_index) + len(tone_burst)] = tone_burst.T
+    else:
+        for offset, tone_idx in enumerate(tone_index):
+            signal[offset, int(tone_idx):int(tone_idx) + len(tone_burst)] = tone_burst.T
     # plot the signal if required
     if plot_signal:
         raise NotImplementedError
