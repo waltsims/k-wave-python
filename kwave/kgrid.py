@@ -486,9 +486,7 @@ class kWaveGrid(object):
         self.Nt = int(np.floor(t_end / self.dt) + 1)
 
         # catch case where dt is a recurring number
-        # TODO: this line is more correct but breaks linear transducer comparison test. Compare with kWave Matlab
-        # if (np.floor(t_end / self.dt) != np.ceil(t_end / self.dt)) and (matlab.rem(t_end, self.dt) == 0):
-        if (int(t_end / self.dt) != math.ceil(t_end / self.dt)) and (t_end % self.dt == 0):
+        if (np.floor(t_end / self.dt) != np.ceil(t_end / self.dt)) and (matlab.rem(t_end, self.dt) == 0):
             self.Nt = self.Nt + 1
 
         return self.t_array, self.dt

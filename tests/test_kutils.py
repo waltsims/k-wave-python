@@ -136,6 +136,32 @@ def test_get_alpha_filters_1D():
     get_alpha_filter(kgrid, medium, ['max'])
 
 
+def test_make_time():
+    """This test case checks the makeTime function where dt is a recurring number."""
+
+    # set the size of the perfectly matched layer (PML)
+    pml_size = Vector([20, 10, 10])  # [grid points]
+
+    # set total number of grid points not including the PML
+    grid_size_points = Vector([256, 128, 128]) - 2 * pml_size  # [grid points]
+
+    # set desired grid size in the x-direction not including the PML
+    grid_size_meters = 40e-3  # [m]
+
+    # calculate the spacing between the grid points
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
+
+    # create the k-space grid
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
+
+    c0 = 1540
+    # create the time array
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
+    kgrid.makeTime(c0, t_end=t_end)
+
+    assert kgrid.Nt == 1586, f'Time array length of {kgrid.Nt} is not correct. Expected 1586.'
+
+
 def test_focus():
     # simulation settings
     DATA_CAST = 'single'
