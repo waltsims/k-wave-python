@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = True
+    RUN_SIMULATION = False
 
     pml_size_points = Vector([20, 10, 10])  # [grid points]
     grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
