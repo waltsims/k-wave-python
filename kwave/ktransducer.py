@@ -466,7 +466,7 @@ class NotATransducer(kSensor):
 
     @property
     def number_active_elements(self):
-        return self.active_elements.sum()
+        return int(self.active_elements.sum())
 
     @property
     def appended_zeros(self):

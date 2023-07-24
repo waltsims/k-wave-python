@@ -332,7 +332,8 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         created tone burst
 
     """
-    # assert isinstance(signal_offset, int), "signal_offset must be integer"
+    assert isinstance(signal_offset, int) or isinstance(signal_offset,
+                                                        np.ndarray), "signal_offset must be integer or array of integers"
     assert isinstance(signal_length, int), "signal_length must be integer"
 
     # calculate the temporal spacing
