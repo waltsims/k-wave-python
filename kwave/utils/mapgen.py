@@ -16,6 +16,9 @@ from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
 
+# GLOBALS
+GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
+PACKING_NUMBER = 7  # 2*pi
 
 def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
                    use_spiral: bool = False) -> np.ndarray:
@@ -36,9 +39,7 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     Returns:
         disc: 2 x num_points or 3 x num_points array of Cartesian coordinates.
     """
-    # define literals
-    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
-    PACKING_NUMBER = 7  # 2*pi
+
 
     # check input values
     if radius <= 0:
