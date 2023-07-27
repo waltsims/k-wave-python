@@ -20,4 +20,4 @@ def test_make_cart_spherical_segments():
         assert np.allclose(coordinates, reader.expected_value_of('coordinates'), equal_nan=True)
         reader.increment()
 
-    print('make_cart_bowl(..) works as expected!')
+    print('make_cart_spherical_segment(..) works as expected!')
