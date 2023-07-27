@@ -22,6 +22,3 @@ def test_make_cart_disc():
         reader.increment()
 
     print('make_cart_disc(..) works as expected!')
-
-
-test_make_cart_disc()
