@@ -23,6 +23,3 @@ def test_make_cart_bowl():
         reader.increment()
 
     print('make_cart_bowl(..) works as expected!')
-
-
-test_make_cart_bowl()
