@@ -2646,8 +2646,6 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-
-
 def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
                   plot_arc: bool = False) -> np.ndarray:
     """
@@ -2758,3 +2756,98 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
     b = arc_pos.reshape(-1, 1) + radius * beam_vec.reshape(-1, 1)
 
     return R, b
+
+
+def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diameter: float, outer_diameter: float,
+                                focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False,
+                                num_points_inner: int = 0) -> np.ndarray:
+    """
+    Create evenly distributed Cartesian points covering a spherical segment.
+
+    Args:
+        bowl_pos:           Cartesian position of the centre of the rear surface
+                            of the underlying bowl on which the spherical segment lies given as a
+                            three element vector [bx, by, bz] [m].
+        radius:             Radius of curvature of the underlying bowl [m].
+        inner_diameter:     Inner aperture diameter of the spherical segment [m].
+        outer_diameter:     Outer aperture diameter of the spherical segment [m].
+        focus_pos:          Any point on the beam axis of the underlying bowl
+                            given as a three element vector [fx, fy, fz] [m].
+        num_points:         Number of points on the spherical segment.
+        plot_bowl:          Boolean controlling whether the Cartesian points are plotted.
+        num_points_inner:   If constructing an annular array with contiguous
+                            elements (no kerf), the positions of the points will not exactly match
+                            makeCartBowl, as each element has no knowledge of the number of points on
+                            the internal elements. To force the points to match, specify the total number
+                            of points used on all annular segments internal to the current one.
+
+    Returns:
+        numpy.ndarray: 3 x num_points array of Cartesian coordinates.
+    """
+    # define literals
+    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
+
+    # check input values
+    if radius <= 0:
+        raise ValueError("The radius must be positive.")
+    if inner_diameter < 0:
+        raise ValueError("The inner diameter must be positive.")
+    if inner_diameter >= outer_diameter:
+        raise ValueError("The inner diameter must be less than the outer diameter.")
+    if outer_diameter <= 0:
+        raise ValueError("The outer diameter must be positive.")
+    if outer_diameter > 2 * radius:
+        raise ValueError("The outer diameter of the bowl must be equal or less than twice the radius of curvature.")
+    if np.all(bowl_pos == focus_pos):
+        raise ValueError("The focus_pos must be different from the bowl_pos.")
+
+    # check for infinite radius of curvature
+    if np.isinf(radius):
+        raise ValueError("Annular disc (infinite radius) not yet supported.")
+
+    # compute arc angle from chord
+    varphi_min = np.arcsin(inner_diameter / (2 * radius))
+    varphi_max = np.arcsin(outer_diameter / (2 * radius))
+
+    # compute spiral parameters over annulus
+    theta = lambda t: GOLDEN_ANGLE * t
+    if num_points_inner > 0:
+        C = (1 - np.cos(varphi_max)) / (num_points + num_points_inner - 1)
+        varphi = lambda t: np.arccos(1 - C * t)
+        t_start = int(np.ceil((1 - np.cos(varphi_min)) / C))
+        t = np.linspace(t_start, num_points_inner + num_points - 1, num_points)
+    else:
+        C = (1 - np.cos(varphi_max)) / (num_points - 1)
+        varphi = lambda t: np.arccos(1 - C * t)
+        t_start = int(np.ceil((1 - np.cos(varphi_min)) / C))
+        t = np.linspace(t_start, num_points - 1, num_points)
+
+    # compute canonical spiral points
+    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)),
+                   np.sin(theta(t)) * np.sin(varphi(t)),
+                   np.cos(varphi(t))])
+    p0 = radius * p0
+
+    # linearly transform the canonical spiral points to give bowl in correct orientation
+    R, b = compute_linear_transform(bowl_pos, focus_pos, radius)
+    if np.shape(b) == (3,):
+        b = np.expand_dims(b, axis=1)  # expand dims for broadcasting
+
+    segment = R @ p0 + b
+
+    # plot results
+    if plot_bowl:
+        _, scale, prefix, unit = scale_SI(np.max(segment))
+
+        # create the figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(segment[0] * scale, segment[1] * scale, segment[2] * scale)
+        ax.set_xlabel('[' + prefix + 'm]')
+        ax.set_ylabel('[' + prefix + 'm]')
+        ax.set_zlabel('[' + prefix + 'm]')
+        ax.set_box_aspect([1, 1, 1])
+        plt.grid(True)
+        plt.show()
+
+    return segment
