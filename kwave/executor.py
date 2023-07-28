@@ -34,8 +34,8 @@ class Executor:
         elif self._is_windows:
             binary_folder = 'windows'
             binary_name += '.exe'
-        # elif self._is_darwin:
-        #     raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
+        elif self._is_darwin:
+            raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 
         path_of_this_file = Path(__file__).parent.resolve()
         self.binary_path = path_of_this_file / 'bin' / binary_folder / binary_name
