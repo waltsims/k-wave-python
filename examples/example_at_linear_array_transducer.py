@@ -79,7 +79,7 @@ simulation_options = SimulationOptions(
     data_cast='single',
 )
 
-execution_options = SimulationExecutionOptions()
+execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
 sensor_data = kspaceFirstOrder3DC(kgrid=kgrid, medium=medium, source=source, sensor=sensor,
                                   simulation_options=simulation_options, execution_options=execution_options)

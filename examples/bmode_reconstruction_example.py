@@ -65,7 +65,8 @@ if __name__ == '__main__':
 
     # use this to position the transducer in the middle of the computational grid
     transducer.position = np.round(
-        [1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2])
+        [1, grid_size_points.y / 2 - transducer_width / 2,
+         grid_size_points.z / 2 - transducer.element_length / 2])
 
     transducer = kWaveTransducerSimple(kgrid, **transducer)
 
@@ -100,7 +101,8 @@ if __name__ == '__main__':
     for scan_line_index in range(0, number_scan_lines):
 
         # load the current section of the medium
-        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
+        medium.sound_speed = \
+            sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
         medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
 
         # set the input settings
@@ -124,7 +126,7 @@ if __name__ == '__main__':
                 source=not_transducer,
                 sensor=not_transducer,
                 simulation_options=simulation_options,
-                execution_options=SimulationExecutionOptions()
+                execution_options=SimulationExecutionOptions(is_gpu_simulation=True)
             )
 
             scan_lines[scan_line_index, :] = not_transducer.combine_sensor_data(sensor_data['p'].T)

@@ -1,9 +1,7 @@
 import logging
 import os
 import stat
-import sys
 import unittest.mock
-from pathlib import Path
 
 import h5py
 
@@ -13,48 +11,19 @@ from kwave.utils.dotdictionary import dotdict
 
 class Executor:
 
-    def __init__(self, device, execution_options, simulation_options):
+    def __init__(self, execution_options, simulation_options):
 
-        binary_name = 'kspaceFirstOrder'
         self.execution_options = execution_options
         self.simulation_options = simulation_options
-        if device == 'gpu':
-            binary_name += '-CUDA'
-        elif device == 'cpu':
-            binary_name += '-OMP'
-        else:
-            raise ValueError("Unrecognized value passed as target device. Options are 'gpu' or 'cpu'.")
-
-        self._is_linux = sys.platform.startswith('linux')
-        self._is_windows = sys.platform.startswith(('win', 'cygwin'))
-        self._is_darwin = sys.platform.startswith('darwin')
-
-        if self._is_linux:
-            binary_folder = 'linux'
-        elif self._is_windows:
-            binary_folder = 'windows'
-            binary_name += '.exe'
-        elif self._is_darwin:
-            raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
-
-        path_of_this_file = Path(__file__).parent.resolve()
-        self.binary_path = path_of_this_file / 'bin' / binary_folder / binary_name
 
         self._make_binary_executable()
 
     def _make_binary_executable(self):
-        self.binary_path.chmod(self.binary_path.stat().st_mode | stat.S_IEXEC)
+        self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
-        env_variables = {
-            # 'LD_LIBRARY_PATH': '', # TODO(walter): I'm not sure why we overwrite the system LD_LIBRARY_PATH... Commenting out for now to run on machines with non-standard LD_LIBRARY_PATH.
-            'OMP_PLACES': 'cores',
-            'OMP_PROC_BIND': 'SPREAD',
-        }
-        os.environ.update(env_variables)
 
-        command = f'{self.binary_path} -i {input_filename} -o {output_filename} {options}'
-
+        command = f'{self.execution_options.system_string} {self.execution_options.binary_path} -i {input_filename} -o {output_filename} {options}'
         return_code = os.system(command)
 
         try:

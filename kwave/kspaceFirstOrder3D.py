@@ -458,7 +458,7 @@ def kspaceFirstOrder3D(
         if options.save_to_disk_exit:
             return
 
-        executor = Executor(device='gpu', simulation_options=simulation_options, execution_options=execution_options)
+        executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
         executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
         sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
                                               options=executor_options)

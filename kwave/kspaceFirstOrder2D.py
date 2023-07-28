@@ -3,21 +3,18 @@ import tempfile
 from typing import Union
 
 import numpy as np
-
-from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensor
-
-from kwave.ktransducer import NotATransducer
-
-from kwave.kgrid import kWaveGrid
 from numpy.fft import ifftshift
 
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.options.simulation_options import SimulationOptions
+from kwave.ktransducer import NotATransducer
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.pml import get_pml
@@ -441,7 +438,7 @@ def kspaceFirstOrder2D(
         input_filename = k_sim.options.save_to_disk
         output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
 
-        executor = Executor(device='gpu')
         executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
-        sensor_data = executor.run_simulation(input_filename, output_filename, options=executor_options)
+        executor = Executor(simulation_options, execution_options)
+        sensor_data = executor.run_simulation(input_filename, output_filename)
         return k_sim.sensor.combine_sensor_data(sensor_data)

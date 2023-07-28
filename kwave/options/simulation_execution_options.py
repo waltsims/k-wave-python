@@ -1,5 +1,7 @@
 import os
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Union
 
 from kwave.ksensor import kSensor
@@ -35,14 +37,26 @@ class SimulationExecutionOptions:
     def __post_init__(self):
         self.validate()
 
-        if (self.binary_path is not None) and (not self.binary_path.endswith(os.path.sep)):
-            self.binary_path = self.binary_path + os.path.sep
-
         if self.binary_name is None:
             if self.is_gpu_simulation:
                 self.binary_name = 'kspaceFirstOrder-CUDA' if is_unix() else 'kspaceFirstOrder-CUDA.exe'
             else:
                 self.binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
+
+        self._is_linux = True  # sys.platform.startswith('linux')
+        self._is_windows = sys.platform.startswith(('win', 'cygwin'))
+        self._is_darwin = sys.platform.startswith('darwin')
+
+        if self._is_linux:
+            binary_folder = 'linux'
+        elif self._is_windows:
+            binary_folder = 'windows'
+            self.binary_name += '.exe'
+        elif self._is_darwin:
+            raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
+
+        path_to_kwave = Path(__file__).parent.parent.resolve()
+        self.binary_path = path_to_kwave / 'bin' / binary_folder / self.binary_name
 
     def validate(self):
         if isinstance(self.num_threads, int):
