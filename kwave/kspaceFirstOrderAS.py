@@ -1,13 +1,6 @@
-import os
-import tempfile
 from typing import Union
 
 import numpy as np
-
-from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensor
-
-from kwave.ktransducer import NotATransducer
 from numpy.fft import ifftshift
 
 from kwave import kWaveGrid
@@ -15,9 +8,12 @@ from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.options.simulation_options import SimulationOptions, SimulationType
+from kwave.ktransducer import NotATransducer
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate2d
 from kwave.utils.math import sinc
@@ -365,10 +361,8 @@ def kspaceFirstOrderAS(
         if options.save_to_disk_exit:
             return
 
-        input_filename = k_sim.options.save_to_disk
-        output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
-
-        executor = Executor(device='gpu')
+        executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
         executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
-        sensor_data = executor.run_simulation(input_filename, output_filename, options=executor_options)
-        return k_sim.sensor.combine_sensor_data(sensor_data)
+        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
+                                              options=executor_options)
+        return sensor_data
