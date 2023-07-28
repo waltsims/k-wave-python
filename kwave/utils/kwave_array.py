@@ -11,7 +11,8 @@ import kwave
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
-from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc
+from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, make_cart_disc, \
+    make_cart_spherical_segment
 from kwave.utils.math import sinc, get_affine_matrix
 from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
 
