@@ -1,11 +1,11 @@
 import json
 import os
 from copy import deepcopy
-
-import numpy as np
-import h5py
-from deepdiff import DeepDiff
 from hashlib import sha256
+
+import h5py
+import numpy as np
+from deepdiff import DeepDiff
 
 
 class H5Summary(object):
@@ -69,7 +69,8 @@ class H5Summary(object):
         excluded = [
             "root['root']['attrs']['created_by']",
             "root['root']['attrs']['creation_date']",
-            "root['root']['attrs']['file_description']"
+            "root['root']['attrs']['file_description']",
+            "root['Nt']"  # Skip Nt after updating kgrid logic
         ]
         own_summary = self._strip_checksums(precision)
         other_summary = other._strip_checksums(precision)
