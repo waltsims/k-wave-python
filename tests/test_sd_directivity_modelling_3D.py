@@ -11,6 +11,8 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -29,13 +31,11 @@ from tests.diff_utils import compare_against_ref
 
 def test_sd_directivity_modelling_3D():
     # create the computational grid
-    Nx = 64            # number of grid points in the x direction
-    Ny = 64            # number of grid points in the y direction
-    Nz = 64            # number of grid points in the z direction
-    dx = 100e-3/Nx     # grid point spacing in the x direction [m]
-    dy = dx            # grid point spacing in the y direction [m]
-    dz = dx            # grid point spacing in the z direction [m]
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    pml_size = Vector([10, 10, 10])  # [grid points]
+    grid_size_points = Vector([64, 64, 64])  # [grid points]
+    grid_size_meters = Vector([100e-3, 100e-3, 100e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
@@ -45,15 +45,15 @@ def test_sd_directivity_modelling_3D():
 
     # define a large area detector
     sz = 16        # [grid points]
-    sensor_mask = np.zeros((Nx, Ny, Nz))
-    sensor_mask[Nx//2, (Ny//2 - sz//2):(Ny//2 + sz//2 + 1), (Nz//2 - sz//2):(Nz//2 + sz//2 + 1)] = 1
+    sensor_mask = np.zeros(grid_size_points)
+    sensor_mask[grid_size_points.x//2, (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1), (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)] = 1
     sensor = kSensor(sensor_mask)
 
     # define equally spaced point sources lying on a circle centred at the
     # centre of the detector face
     radius = 20    # [grid points]
     points = 11
-    circle = make_cart_circle(radius * dx, points, [0, 0], np.pi)
+    circle = make_cart_circle(radius * grid_spacing_meters.x, points, Vector([0, 0]), np.pi)
     circle = np.vstack([circle, np.zeros((1, points))])
 
     # find the binary sensor mask most closely corresponding to the cartesian
@@ -79,7 +79,7 @@ def test_sd_directivity_modelling_3D():
     # angle from the detector has on the measured signal
     for source_loop in range(points):
         # select a point source
-        source.p_mask = np.zeros((Nx, Ny, Nz))
+        source.p_mask = np.zeros(grid_size_points)
         source.p_mask[unflatten_matlab_mask(source.p_mask, source_positions[source_loop] - 1)] = 1
 
         # run the simulation
@@ -87,7 +87,7 @@ def test_sd_directivity_modelling_3D():
         pathname = gettempdir()
         input_file_full_path = os.path.join(pathname, input_filename)
         simulation_options = SimulationOptions(
-            pml_size=10,
+            pml_size=pml_size,
             save_to_disk=True,
             input_filename=input_filename,
             save_to_disk_exit=True,

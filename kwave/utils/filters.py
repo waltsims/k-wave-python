@@ -336,7 +336,7 @@ def fwhm(f, x):
         x:        x
 
     Returns:
-        FWHM of f(x)
+        FWHM of f(x) along with the position of the leading and trailing edges as a tuple
 
     """
 
@@ -359,7 +359,7 @@ def fwhm(f, x):
     hmx = half_max_x(x, f)
     fwhm_val = hmx[1] - hmx[0]
 
-    return fwhm_val
+    return fwhm_val, tuple(hmx)
 
 
 def gaussian_filter(signal: Union[np.ndarray, List[float]],

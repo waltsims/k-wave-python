@@ -1,9 +1,11 @@
-from kwave.utils.mapgen import make_cart_circle
-
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.data import Vector
+from kwave.utils.mapgen import make_cart_circle
 
 
 def test_makeCartCircle():
@@ -11,12 +13,11 @@ def test_makeCartCircle():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        print(i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
         radius, num_points, center, arc_angle = recorded_data['params'][0]
-        center = center[0]
+        center = Vector(center[0])
         num_points = num_points[0][0]
         radius = radius[0][0]
         arc_angle = arc_angle[0][0]

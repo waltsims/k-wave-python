@@ -45,14 +45,14 @@ class kSource(object):
 
     def is_p0_empty(self) -> bool:
         """
-            Check if the `p0` field is set and not empty
+        Check if the `p0` field is set and not empty
         """
         return self.p0 is None or len(self.p0) == 0 or (np.sum(self.p0 != 0) == 0)
 
     @property
     def p0(self):
         """
-            Initial pressure within the acoustic medium
+        Initial pressure within the acoustic medium
         """
         return self._p0
 
@@ -67,7 +67,7 @@ class kSource(object):
 
     def validate(self, kgrid: kWaveGrid) -> None:
         """
-            Validate the object fields for correctness
+        Validate the object fields for correctness
 
         Args:
             kgrid: Instance of `~kwave.kgrid.kWaveGrid` class
@@ -338,8 +338,8 @@ class kSource(object):
     @property
     def flag_ux(self):
         """
-            Get the length of the sources in X-direction, this allows the
-            inputs to be defined independently and be of any length
+        Get the length of the sources in X-direction, this allows the
+        inputs to be defined independently and be of any length
 
         Returns:
             Length of the sources
@@ -349,8 +349,8 @@ class kSource(object):
     @property
     def flag_uy(self):
         """
-            Get the length of the sources in X-direction, this allows the
-            inputs to be defined independently and be of any length
+        Get the length of the sources in X-direction, this allows the
+        inputs to be defined independently and be of any length
 
         Returns:
             Length of the sources
@@ -360,8 +360,8 @@ class kSource(object):
     @property
     def flag_uz(self):
         """
-            Get the length of the sources in X-direction, this allows the
-            inputs to be defined independently and be of any length
+        Get the length of the sources in X-direction, this allows the
+        inputs to be defined independently and be of any length
 
         Returns:
             Length of the sources

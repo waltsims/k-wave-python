@@ -11,6 +11,8 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -26,11 +28,10 @@ from tests.diff_utils import compare_against_ref
 
 def test_tvsp_homogeneous_medium_dipole():
     # create the computational grid
-    Nx = 128  # number of grid points in the x (row) direction
-    Ny = 128  # number of grid points in the y (column) direction
-    dx = 50e-3 / Nx  # grid point spacing in the x direction [m]
-    dy = dx  # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size_points = Vector([128, 128])  # [grid points]
+    grid_size_meters = Vector([50e-3, 50e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500, density=1000, alpha_coeff=0.75, alpha_power=1.5)
@@ -40,8 +41,8 @@ def test_tvsp_homogeneous_medium_dipole():
 
     # define a single source point
     source = kSource()
-    source.u_mask = np.zeros((Nx, Ny))
-    source.u_mask[-Nx//4 - 1, Ny//2 - 1] = 1
+    source.u_mask = np.zeros(grid_size_points)
+    source.u_mask[-grid_size_points.x//4 - 1, grid_size_points.y//2 - 1] = 1
 
     # define a time varying sinusoidal  velocity source in the x-direction
     source_freq = 0.25e6   # [Hz]
@@ -52,8 +53,8 @@ def test_tvsp_homogeneous_medium_dipole():
     source.ux = filter_time_series(kgrid, medium, source.ux)
 
     # define a single sensor point
-    sensor_mask = np.zeros((Nx, Ny))
-    sensor_mask[Nx//4 - 1, Ny//2 - 1] = 1
+    sensor_mask = np.zeros(grid_size_points)
+    sensor_mask[grid_size_points.x//4 - 1, grid_size_points.y//2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
     # define the acoustic parameters to record

@@ -10,6 +10,7 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -31,19 +32,16 @@ def test_na_optimising_performance():
     scale = 1
 
     # assign the grid size and create the computational grid
-    Nx = 256 * scale           # number of grid points in the x direction
-    Ny = 256 * scale           # number of grid points in the y direction
-    x = 10e-3                  # grid size in the x direction [m]
-    y = 10e-3                  # grid size in the y direction [m]
-    dx = x / Nx                # grid point spacing in the x direction [m]
-    dy = y / Ny                # grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size_points = Vector([256, 256])  # [grid points]
+    grid_size_meters = Vector([10e-3, 10e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # load the initial pressure distribution from an image and scale
     source = kSource()
     p0_magnitude = 2           # [Pa]
     source.p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
-    source.p0 = resize(source.p0, (Nx, Ny))
+    source.p0 = resize(source.p0, grid_size_points)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)

@@ -1,13 +1,13 @@
-from kwave.kmedium import kWaveMedium
 import numpy as np
 
+from kwave.kmedium import kWaveMedium
 from kwave.options.simulation_options import SimulationType
 
 
 def set_sound_speed_ref(medium: kWaveMedium, simulation_type: SimulationType):
     """
-        select the reference sound speed used in the k-space operator
-        based on the heterogeneous sound speed map
+    select the reference sound speed used in the k-space operator
+    based on the heterogeneous sound speed map
     Args:
         medium: kWaveMedium object
         simulation_type: Simulation type (fluid, axisymmetric, elastic, elastic with k-space correction)
@@ -26,8 +26,8 @@ def set_sound_speed_ref(medium: kWaveMedium, simulation_type: SimulationType):
 
 def get_ordinary_sound_speed_ref(medium):
     """
-        calculate the reference sound speed for the fluid code, using the
-        maximum by default which ensures the model is unconditionally stable
+    calculate the reference sound speed for the fluid code, using the
+    maximum by default which ensures the model is unconditionally stable
     Args:
         medium:
 
@@ -41,8 +41,8 @@ def get_ordinary_sound_speed_ref(medium):
 
 def get_pstd_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
     """
-        in the pstd elastic case, the reference sound speed is only used to
-        calculate the PML absorption, so just use the compressional wave speed
+    in the pstd elastic case, the reference sound speed is only used to
+    calculate the PML absorption, so just use the compressional wave speed
     Args:
         medium:
 
@@ -56,8 +56,8 @@ def get_pstd_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
 
 def get_kspace_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
     """
-        in the k-space elastic case, there are two reference sound speeds for
-        the compressional and shear waves, so compute them seperately
+    in the k-space elastic case, there are two reference sound speeds for
+    the compressional and shear waves, so compute them seperately
     Args:
         medium:
 

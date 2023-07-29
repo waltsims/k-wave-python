@@ -14,4 +14,7 @@ kwave/bin/linux
 *.mat
 examples/__pycache__/
 src/
+.vscode/
+*.asv
 *.h5
+*.pyc

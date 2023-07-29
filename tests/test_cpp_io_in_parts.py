@@ -11,6 +11,7 @@ import numpy as np
 
 # noinspection PyUnresolvedReferences
 import setup_test  # noqa: F401
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import cast_to_type
 from kwave.utils.interp import interpolate3d
@@ -47,28 +48,18 @@ def test_cpp_io_in_parts():
     # =========================================================================
 
     # set the properties of the computational grid
-    Nx = 256                   # number of grid points in the x direction
-    Ny = 128                   # number of grid points in the y direction
-    Nz = 64                    # number of grid points in the z direction
-    dx = 0.1e-3                # grid point spacing in the x direction [m]
-    dy = 0.1e-3                # grid point spacing in the y direction [m]
-    dz = 0.1e-3                # grid point spacing in the z direction [m]
+    grid_size = Vector([256, 128, 64])  # [grid points]
+    grid_spacing = 1e-4 * Vector([1, 1, 1])  # [m]
     Nt = 1200                  # number of time steps
     dt = 15e-9                 # time step [s]
 
     # set the properties of the perfectly matched layer
-    pml_x_size  = 10           # [grid points]
-    pml_y_size  = 10           # [grid points]
-    pml_z_size  = 10           # [grid points]
-    pml_x_alpha = 2            # [Nepers/grid point]
-    pml_y_alpha = 2            # [Nepers/grid point]
-    pml_z_alpha = 2            # [Nepers/grid point]
+    pml_size = Vector([10, 10, 10])  # [grid points]
+    pml_alpha = Vector([2, 2, 2])  # [Nepers/grid point]
 
     # define a scattering ball
     ball_radius = 20           # [grid points]
-    ball_x      = Nx/2 + 40    # [grid points]
-    ball_y      = Ny/2         # [grid points]
-    ball_z      = Nz/2         # [grid points]
+    ball_location = grid_size / 2 + Vector([40, 0, 0])  # [grid points]
 
     # define the properties of the medium
     c0_background   = 1500     # [kg/m^3]
@@ -101,9 +92,9 @@ def test_cpp_io_in_parts():
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
         # create the scattering ball and density matrix
-        ball       = make_ball(float(Nx), float(Ny), float(Nz), float(ball_x), float(ball_y), float(ball_z), float(ball_radius), False, True)
+        ball       = make_ball(grid_size, ball_location, ball_radius, False, True)
         ball       = np.array(ball)
-        rho0       = rho0_background * np.ones((Nx, Ny, Nz), dtype=np.float32)
+        rho0       = rho0_background * np.ones(grid_size, dtype=np.float32)
         rho0[ball] = rho0_ball
 
         # make sure the input is in the correct data format
@@ -113,7 +104,7 @@ def test_cpp_io_in_parts():
         write_matrix(input_file_full_path, rho0, 'rho0')
 
         # create grid (variables are used for interpolation)
-        kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+        kgrid = kWaveGrid(grid_size, grid_spacing)
 
         # interpolate onto staggered grid in x direction and save
         rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x + kgrid.dx / 2, kgrid.y, kgrid.z])
@@ -135,7 +126,7 @@ def test_cpp_io_in_parts():
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
         # create the sound speed matrix
-        c0       = c0_background * np.ones((Nx, Ny, Nz), dtype=np.float32)
+        c0       = c0_background * np.ones(grid_size, dtype=np.float32)
         c0[ball] = c0_ball
 
         # set the reference sound speed to the maximum in the medium
@@ -178,8 +169,8 @@ def test_cpp_io_in_parts():
 
         # define a square source mask facing in the x-direction using the
         # normal k-Wave syntax
-        p_mask = np.zeros((Nx, Ny, Nz)).astype(bool)
-        p_mask[pml_x_size, Ny//2 - source_y_size//2-1:Ny//2 + source_y_size//2, Nz//2 - source_z_size//2-1:Nz//2 + source_z_size//2] = 1
+        p_mask = np.zeros(grid_size).astype(bool)
+        p_mask[pml_size.x, grid_size.y//2 - source_y_size//2-1:grid_size.y//2 + source_y_size//2, grid_size.z//2 - source_z_size//2-1:grid_size.z//2 + source_z_size//2] = 1
 
         # find linear source indices
         p_source_index = np.where(p_mask.flatten(order='F') == 1)[0] + 1  # +1 due to Matlab indexing
@@ -205,7 +196,7 @@ def test_cpp_io_in_parts():
         p_source_input[0:ramp_length] = p_source_input[0:ramp_length] * (-np.cos(np.arange(0, ramp_length) * np.pi / ramp_length) + 1)/2
 
         # scale the source magnitude to be in the correct units for the code
-        p_source_input = p_source_input * (2 * dt / (3 * c_source * dx))
+        p_source_input = p_source_input * (2 * dt / (3 * c_source * grid_spacing.x))
 
         # cast matrix to single precision
         p_source_input = p_source_input[None, :]
@@ -226,8 +217,8 @@ def test_cpp_io_in_parts():
         print('Writing sensor parameters... ')
 
         # define a sensor mask through the central plane
-        sensor_mask = np.zeros((Nx, Ny, Nz), dtype=bool)
-        sensor_mask[:, :, Nz//2 - 1] = 1
+        sensor_mask = np.zeros(grid_size, dtype=bool)
+        sensor_mask[:, :, grid_size.z//2 - 1] = 1
 
         # extract the indices of the active sensor mask elements
         sensor_mask_index = matlab_find(sensor_mask)
@@ -252,7 +243,7 @@ def test_cpp_io_in_parts():
         print('Writing grid parameters and attributes... ')
 
         # write grid parameters
-        write_grid(input_file_full_path, [Nx, Ny, Nz], [dx, dy, dz], [pml_x_size, pml_y_size, pml_z_size], [pml_x_alpha, pml_y_alpha, pml_z_alpha], Nt, dt, c_ref)
+        write_grid(input_file_full_path, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c_ref)
 
         # write flags
         write_flags(input_file_full_path)

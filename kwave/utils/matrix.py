@@ -8,6 +8,84 @@ from .data import scale_time
 from .tictoc import TicToc
 
 
+def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
+    """
+    Create a tight bounding box by removing zeros.
+
+    Args:
+        data: Matrix to trim.
+
+    Returns:
+        Tuple containing the trimmed matrix and indices used to trim the matrix.
+
+    Raises:
+        ValueError: If the input data is not 1D, 2D, or 3D.
+
+    Example:
+        data = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 3, 0, 0],
+                         [0, 0, 1, 3, 4, 0],
+                         [0, 0, 1, 3, 4, 0],
+                         [0, 0, 1, 3, 0, 0],
+                         [0, 0, 0, 0, 0, 0]])
+
+        trimmed_data, indices = trim_zeros(data)
+
+        # Output:
+        # trimmed_data:
+        # [[0 3 0]
+        #  [1 3 4]
+        #  [1 3 4]
+        #  [1 3 0]]
+        #
+        # indices:
+        # [(1, 4), (2, 5), (3, 5)]
+
+    """
+    data = np.squeeze(data)
+
+    # only allow 1D, 2D, and 3D
+    if data.ndim > 3:
+        raise ValueError("Input data must be 1D, 2D, or 3D.")
+
+    # set collapse directions for each dimension
+    collapse = {2: [1, 0], 3: [(1, 2), (0, 2), (0, 1)]}
+
+    # preallocate output to store indices
+    ind = []
+
+    # loop through dimensions
+    for dim_index in range(data.ndim):
+
+        # collapse to 1D vector
+        if data.ndim == 1:
+            summed_values = data
+        else:
+            summed_values = np.sum(np.abs(data), axis=collapse[data.ndim][dim_index])
+
+        # find the first and last non-empty values
+        non_zeros = np.where(summed_values > 0)[0]
+        ind_first = non_zeros[0]
+        ind_last = non_zeros[-1] + 1
+
+        # trim data
+        if data.ndim == 1:
+            data = data[ind_first:ind_last]
+            ind.append((ind_first, ind_last))
+        else:
+            if dim_index == 0:
+                data = data[ind_first:ind_last, ...]
+                ind.append((ind_first, ind_last))
+            elif dim_index == 1:
+                data = data[:, ind_first:ind_last, ...]
+                ind.append((ind_first, ind_last))
+            elif dim_index == 2:
+                data = data[..., ind_first:ind_last]
+                ind.append((ind_first, ind_last))
+
+    return data, ind
+
+
 def expand_matrix(matrix, exp_coeff, edge_val=None):
     """
     Enlarge a matrix by extending the edge values.

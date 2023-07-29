@@ -11,6 +11,8 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -25,11 +27,10 @@ from tests.diff_utils import compare_against_ref
 
 def test_sd_sensor_directivity_2D():
     # create the computational grid
-    Nx = 64         # number of grid points in the x (row) direction
-    Ny = 64         # number of grid points in the y (column) direction
-    dx = 1e-3/Nx    # grid point spacing in the x direction [m]
-    dy = dx     	# grid point spacing in the y direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size_points = Vector([64, 64])  # [grid points]
+    grid_size_meters = Vector([1e-3, 1e-3])  # [m]
+    grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
@@ -43,7 +44,7 @@ def test_sd_sensor_directivity_2D():
     # =========================================================================
 
     # define a line of sensor points
-    sensor_mask = np.zeros((Nx, Ny))
+    sensor_mask = np.zeros(grid_size_points)
     sensor_mask[23, 1:62:2] = 1
     sensor = kSensor(sensor_mask)
 
@@ -54,7 +55,7 @@ def test_sd_sensor_directivity_2D():
 
     # assign to the directivity mask
     directivity = kSensorDirectivity()
-    directivity.angle = np.zeros((Nx, Ny))
+    directivity.angle = np.zeros(grid_size_points)
     directivity.angle[sensor.mask == 1] = np.squeeze(dir_angles)
 
     # define the directivity pattern
@@ -71,7 +72,7 @@ def test_sd_sensor_directivity_2D():
 
     # define the initial pressure distribution
     source = kSource()
-    source_p0 = np.zeros((Nx, Ny))
+    source_p0 = np.zeros(grid_size_points)
     source_p0[38:41, :] = 2
     source.p0 = source_p0
 

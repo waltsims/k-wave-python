@@ -27,4 +27,7 @@ def test_fwhm():
     # Get the y values for the peak centered at x=10
     y = peak(x, 10)
     # Assert that the full width at half maximum (fwhm) of the peak is approximately 6.691
-    assert np.isclose(fwhm(y, x), 6.691, rtol=1e-3)
+    val, positions = fwhm(y, x)
+
+    assert np.isclose(val, 6.691, rtol=1e-3)
+    assert np.isclose((positions[1] - positions[0]) / 2 + positions[0], 10, rtol=1e-3)

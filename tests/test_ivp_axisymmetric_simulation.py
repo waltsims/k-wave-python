@@ -10,6 +10,8 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -26,31 +28,29 @@ from tests.diff_utils import compare_against_ref
 def test_ivp_axisymmetric_simulation():
 
     # create the computational grid
-    Nx = 128            # number of grid points in the axial (x) direction
-    Ny = 64             # number of grid points in the radial (y) direction
-    dx = 0.1e-3         # grid point spacing in the axial (x) direction [m]
-    dy = 0.1e-3         # grid point spacing in the radial (y) direction [m]
-    kgrid = kWaveGrid([Nx, Ny], [dx, dy])
+    grid_size = Vector([128, 64])  # [grid points]
+    grid_spacing = 0.1e-3 * Vector([1, 1])  # [m]
+    kgrid = kWaveGrid(grid_size, grid_spacing)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(
-        sound_speed=1500 * np.ones((Nx, Ny)),   # [m/s]
-        density=1000 * np.ones((Nx, Ny))        # [kg/m^3]
+        sound_speed=1500 * np.ones(grid_size),   # [m/s]
+        density=1000 * np.ones(grid_size)        # [kg/m^3]
     )
-    medium.sound_speed[Nx//2-1:, :] = 1800      # [m/s]
-    medium.density[Nx//2-1:, :]     = 1200      # [kg/m^3]
+    medium.sound_speed[grid_size.x//2-1:, :] = 1800      # [m/s]
+    medium.density[grid_size.x//2-1:, :]     = 1200      # [kg/m^3]
 
     # create initial pressure distribution in the shape of a disc - this is
     # generated on a 2D grid that is doubled in size in the radial (y)
     # direction, and then trimmed so that only half the disc is retained
     source = kSource()
-    source.p0 = 10 * make_disc(Nx, 2 * Ny, Nx // 4 + 8, Ny + 1, 5)
-    source.p0 = source.p0[:, Ny:]
+    source.p0 = 10 * make_disc(Vector([grid_size.x, 2 * grid_size.y]), Vector([grid_size.x // 4 + 8, grid_size.y + 1]), 5)
+    source.p0 = source.p0[:, grid_size.y:]
 
     # define a Cartesian sensor mask with points in the shape of a circle
     # REPLACED BY FARID cartesian mask with binary. Otherwise, SaveToDisk doesn't work.
     # sensor.mask = makeCartCircle(40 * dx, 50);
-    sensor_mask = np.zeros((Nx, Ny))
+    sensor_mask = np.zeros(grid_size)
     sensor_mask[0, :] = 1
     sensor = kSensor(sensor_mask)
 

@@ -10,6 +10,8 @@ import os
 from tempfile import gettempdir
 
 import numpy as np
+
+from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
@@ -42,25 +44,19 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    PML_X_SIZE = 20            # [grid points]
-    PML_Y_SIZE = 10            # [grid points]
-    PML_Z_SIZE = 10            # [grid points]
+    pml_size = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
-    Nx = 256 - 2*PML_X_SIZE    # [grid points]
-    Ny = 128 - 2*PML_Y_SIZE    # [grid points]
-    Nz = 128 - 2*PML_Z_SIZE     # [grid points]
+    grid_size_points = Vector([256, 128, 128]) - 2 * pml_size  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    x = 40e-3                  # [m]
+    grid_size_meters = 40e-3                  # [m]
 
     # calculate the spacing between the grid points
-    dx = x/Nx                  # [m]
-    dy = dx                    # [m]
-    dz = dx                    # [m]
+    grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
 
     # create the k-space grid
-    kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
+    kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
     # =========================================================================
     # DEFINE THE MEDIUM PARAMETERS
@@ -78,7 +74,7 @@ def test_us_bmode_linear_transducer():
     )
 
     # create the time array
-    t_end = (Nx * dx) * 2.2 / c0   # [s]
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0   # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -113,7 +109,7 @@ def test_us_bmode_linear_transducer():
     transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, Ny/2 - transducer_width/2, Nz/2 - transducer.element_length/2])
+    transducer.position = np.round([1, grid_size_points.y/2 - transducer_width/2, grid_size_points.z/2 - transducer.element_length/2])
 
 
     # properties used to derive the beamforming delays
@@ -142,36 +138,37 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
     # define a large image size to move across
     number_scan_lines = 96
-    Nx_tot = Nx
-    Ny_tot = Ny + number_scan_lines * transducer.element_width
-    Nz_tot = Nz
+    N_tot = grid_size_points.copy()
+    N_tot.y = N_tot.y + number_scan_lines * transducer.element_width
 
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones([Nx_tot, Ny_tot, Nz_tot])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
-    scattering_map = np.ones([Nx_tot, Ny_tot, Nz_tot])  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    scattering_map = np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
     scattering_c0 = c0 + 25 + 75 * scattering_map
     scattering_c0[scattering_c0 > 1600] = 1600
     scattering_c0[scattering_c0 < 1400] = 1400
     scattering_rho0 = scattering_c0 / 1.5
 
     # define properties
-    sound_speed_map = c0 * np.ones((Nx_tot, Ny_tot, Nz_tot)) * background_map
-    density_map = rho0 * np.ones((Nx_tot, Ny_tot, Nz_tot)) * background_map
+    sound_speed_map = c0 * np.ones(N_tot) * background_map
+    density_map = rho0 * np.ones(N_tot) * background_map
 
     # when the division result is in the half-way (x.5), numpy will round it to the nearest multiple of 2.
     # This behaviour results in different results compared to Matlab.
     # To ensure similar results, we add epsilon to the division results
     rounding_eps = 1e-12
+    dx = grid_spacing_meters.x
 
     # define a sphere for a highly scattering region
     radius = 6e-3       # [m]
     x_pos = 27.5e-3     # [m]
     y_pos = 20.5e-3     # [m]
-    scattering_region1 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
+    ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
+    scattering_region1 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -181,7 +178,8 @@ def test_us_bmode_linear_transducer():
     radius = 5e-3       # [m]
     x_pos = 30.5e-3     # [m]
     y_pos = 37e-3       # [m]
-    scattering_region2 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
+    ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
+    scattering_region2 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region2 == 1] = scattering_c0[scattering_region2 == 1]
@@ -191,7 +189,8 @@ def test_us_bmode_linear_transducer():
     radius = 4.5e-3     # [m]
     x_pos = 15.5e-3     # [m]
     y_pos = 30.5e-3     # [m]
-    scattering_region3 = make_ball(Nx_tot, Ny_tot, Nz_tot, round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), Nz_tot / 2, round(radius / dx + rounding_eps))
+    ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
+    scattering_region3 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region3 == 1] = scattering_c0[scattering_region3 == 1]
@@ -218,8 +217,8 @@ def test_us_bmode_linear_transducer():
             print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
 
             # load the current section of the medium
-            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + Ny, :]
-            medium.density = density_map[:, medium_position:medium_position + Ny, :]
+            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
+            medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
 
             # set the input settings
             input_filename = 'example_lin_tran_input.h5'
@@ -227,7 +226,7 @@ def test_us_bmode_linear_transducer():
             input_file_full_path = os.path.join(pathname, input_filename)
             simulation_options = SimulationOptions(
                 pml_inside=False,
-                pml_size=[PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE],
+                pml_size=pml_size,
                 data_cast=DATA_CAST,
                 data_recast=True,
                 save_to_disk=True,

@@ -2,19 +2,16 @@ from typing import Union
 
 import numpy as np
 
-from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensor
-
-from kwave.ksource import kSource
-from kwave.ktransducer import NotATransducer
-
-from kwave.kgrid import kWaveGrid
-
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+from kwave.ksource import kSource
+from kwave.ktransducer import NotATransducer
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate3d
 from kwave.utils.pml import get_pml
@@ -30,34 +27,34 @@ def kspaceFirstOrder3DG(
         execution_options: SimulationExecutionOptions
 ):
     """
-        3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
+    3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
-        kspaceFirstOrder3DG provides a blind interface to the C++/CUDA
-        version of kspaceFirstOrder3D (called kspaceFirstOrder-CUDA) in the
-        same way as kspaceFirstOrder3DC. Note, the C++ code does not support
-        all input options, and all display options are ignored (only command
-        line outputs are given). See the k-Wave user manual for more
-        information.
+    kspaceFirstOrder3DG provides a blind interface to the C++/CUDA
+    version of kspaceFirstOrder3D (called kspaceFirstOrder-CUDA) in the
+    same way as kspaceFirstOrder3DC. Note, the C++ code does not support
+    all input options, and all display options are ignored (only command
+    line outputs are given). See the k-Wave user manual for more
+    information.
 
-        The function works by appending the optional input 'save_to_disk' to
-        the user inputs and then calling kspaceFirstOrder3D to save the input
-        files to disk. The contents of sensor.record (if set) are parsed as
-        input flags, and the C++ code is run using the system command. The
-        output files are then automatically loaded from disk and returned in
-        the same fashion as kspaceFirstOrder3D. The input and output files
-        are saved to the temporary directory native to the operating system,
-        and are deleted after the function runs.
+    The function works by appending the optional input 'save_to_disk' to
+    the user inputs and then calling kspaceFirstOrder3D to save the input
+    files to disk. The contents of sensor.record (if set) are parsed as
+    input flags, and the C++ code is run using the system command. The
+    output files are then automatically loaded from disk and returned in
+    the same fashion as kspaceFirstOrder3D. The input and output files
+    are saved to the temporary directory native to the operating system,
+    and are deleted after the function runs.
 
-        This function requires the C++ binary/executable of
-        kspaceFirstOrder-CUDA to be downloaded from
-        http://www.k-wave.org/download.php and placed in the "binaries"
-        directory of the k-Wave toolbox. Alternatively, the name and location
-        of the binary can be specified using the optional input parameters
-        'BinaryName' and 'BinariesPath'.
+    This function requires the C++ binary/executable of
+    kspaceFirstOrder-CUDA to be downloaded from
+    http://www.k-wave.org/download.php and placed in the "binaries"
+    directory of the k-Wave toolbox. Alternatively, the name and location
+    of the binary can be specified using the optional input parameters
+    'BinaryName' and 'BinariesPath'.
 
-        This function is essentially a wrapper and directly uses the capabilities
-        of kspaceFirstOrder3DC by replacing the binary name with the name of the
-        GPU binary.
+    This function is essentially a wrapper and directly uses the capabilities
+    of kspaceFirstOrder3DC by replacing the binary name with the name of the
+    GPU binary.
 
     Args:
         **kwargs:
@@ -86,35 +83,35 @@ def kspaceFirstOrder3DC(
         execution_options: SimulationExecutionOptions
 ):
     """
-        3D time-domain simulation of wave propagation using C++ code.
+    3D time-domain simulation of wave propagation using C++ code.
 
-        kspaceFirstOrder3DC provides a blind interface to the C++ version of
-        kspaceFirstOrder3D (called kspaceFirstOrder-OMP). Note, the C++ code
-        does not support all input options, and all display options are
-        ignored (only command line outputs are given). See the k-Wave user
-        manual for more information.
+    kspaceFirstOrder3DC provides a blind interface to the C++ version of
+    kspaceFirstOrder3D (called kspaceFirstOrder-OMP). Note, the C++ code
+    does not support all input options, and all display options are
+    ignored (only command line outputs are given). See the k-Wave user
+    manual for more information.
 
-        The function works by appending the optional input 'save_to_disk' to
-        the user inputs and then calling kspaceFirstOrder3D to save the input
-        files to disk. The contents of sensor.record (if set) are parsed as
-        input flags, and the C++ code is run using the system command. The
-        output files are then automatically loaded from disk and returned in
-        the same fashion as kspaceFirstOrder3D. The input and output files
-        are saved to the temporary directory native to the operating system,
-        and are deleted after the function runs.
+    The function works by appending the optional input 'save_to_disk' to
+    the user inputs and then calling kspaceFirstOrder3D to save the input
+    files to disk. The contents of sensor.record (if set) are parsed as
+    input flags, and the C++ code is run using the system command. The
+    output files are then automatically loaded from disk and returned in
+    the same fashion as kspaceFirstOrder3D. The input and output files
+    are saved to the temporary directory native to the operating system,
+    and are deleted after the function runs.
 
-        This function is not recommended for large simulations, as the input
-        variables will reside twice in main memory (once in MATLAB, and once
-        in C++). For large simulations, the C++ code should be called outside
-        of MATLAB. See the k-Wave manual for more information.
+    This function is not recommended for large simulations, as the input
+    variables will reside twice in main memory (once in MATLAB, and once
+    in C++). For large simulations, the C++ code should be called outside
+    of MATLAB. See the k-Wave manual for more information.
 
-        This function requires the C++ binary/executable of
-        kspaceFirstOrder-OMP to be downloaded from
-        http://www.k-wave.org/download.php and placed in the "binaries"
-        directory of the k-Wave toolbox (the same binary is used for
-        simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,
-        the name and  location of the binary can be specified using the
-        optional input parameters 'BinaryName' and 'BinariesPath'.
+    This function requires the C++ binary/executable of
+    kspaceFirstOrder-OMP to be downloaded from
+    http://www.k-wave.org/download.php and placed in the "binaries"
+    directory of the k-Wave toolbox (the same binary is used for
+    simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,
+    the name and  location of the binary can be specified using the
+    optional input parameters 'BinaryName' and 'BinariesPath'.
 
     Args:
         **kwargs:
