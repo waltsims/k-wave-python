@@ -46,7 +46,11 @@ def test_sd_directivity_modelling_3D():
     # define a large area detector
     sz = 16        # [grid points]
     sensor_mask = np.zeros(grid_size_points)
-    sensor_mask[grid_size_points.x//2, (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1), (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)] = 1
+    sensor_mask[
+        grid_size_points.x//2,
+        (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1),
+        (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)
+    ] = 1
     sensor = kSensor(sensor_mask)
 
     # define equally spaced point sources lying on a circle centred at the

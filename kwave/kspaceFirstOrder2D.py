@@ -372,7 +372,8 @@ def kspaceFirstOrder2D(
     if options.use_kspace:
         k = k_sim.kgrid.k
         k_sim.kappa = np.fft.ifftshift(np.sinc(c_ref * k * dt / 2))
-        if (k_sim.source_p and k_sim.source.p_mode == 'additive') or ((k_sim.source_ux or k_sim.source_uy or k_sim.source_uz) and k_sim.source.u_mode == 'additive'):
+        if (k_sim.source_p and k_sim.source.p_mode == 'additive') or \
+                ((k_sim.source_ux or k_sim.source_uy or k_sim.source_uz) and k_sim.source.u_mode == 'additive'):
             k_sim.source_kappa = np.fft.ifftshift(np.cos(c_ref * k * dt / 2))
     else:
         k_sim.kappa          = 1

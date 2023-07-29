@@ -794,7 +794,8 @@ class kWaveSimulation(object):
                         # cartesian_interp = 'linear' then this is only used for
                         # display, if flgs.time_rev = true or cartesian_interp =
                         # 'nearest' this grid is used as the sensor.mask
-                        self.sensor.mask, self.order_index, self.reorder_index = cart2grid(self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric())
+                        self.sensor.mask, self.order_index, self.reorder_index = \
+                            cart2grid(self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric())
 
                         # if in time reversal mode, reorder the p0 input data in
                         # the order of the binary sensor_mask
@@ -1390,7 +1391,8 @@ class kWaveSimulation(object):
             None
         """
         if not self.options.simulation_type.is_elastic_simulation() and not self.options.save_to_disk:
-            self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(self.kgrid, self.medium, self.equation_of_state)
+            self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = \
+                create_absorption_variables(self.kgrid, self.medium, self.equation_of_state)
 
     def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:
         """

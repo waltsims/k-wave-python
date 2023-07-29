@@ -87,7 +87,11 @@ def test_cpp_running_simulations():
     source_z_size = 30         # [grid points]
     source = kSource()
     source.p_mask = np.zeros(grid_size)
-    source.p_mask[pml_size, grid_size.y//2 - source_y_size//2 - 1:grid_size.y//2 + source_y_size//2, grid_size.z//2 - source_z_size//2 - 1:grid_size.z//2 + source_z_size//2] = 1  # ???
+    source.p_mask[
+        pml_size,
+        grid_size.y//2 - source_y_size//2 - 1:grid_size.y//2 + source_y_size//2,
+        grid_size.z//2 - source_z_size//2 - 1:grid_size.z//2 + source_z_size//2
+    ] = 1  # ???
 
     # define a time varying sinusoidal source
     source_freq     = 2e6      # [Hz]

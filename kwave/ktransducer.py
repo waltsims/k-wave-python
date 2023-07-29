@@ -650,7 +650,12 @@ class NotATransducer(kSensor):
             element_index = np.arange(-(self.transducer.element_length - 1) / 2, (self.transducer.element_length + 1) / 2)
 
             # calculate time delays for a focussed beam
-            delay_times = (self.elevation_focus_distance - np.sqrt((element_index * self.transducer.grid_spacing[2]) ** 2 + self.elevation_focus_distance ** 2)) / self.sound_speed
+            delay_times = self.elevation_focus_distance - \
+                          np.sqrt(
+                              (element_index * self.transducer.grid_spacing[2]) ** 2
+                              + self.elevation_focus_distance ** 2
+                          )
+            delay_times /= self.sound_speed
 
             # convert the delays to be in units of time points and then reverse
             delay_times = -np.round(delay_times / self.dt).astype(np.int32)
@@ -673,11 +678,17 @@ class NotATransducer(kSensor):
     #     for element_index in np.arange(0, obj.number_active_elements):
     #         if delays(element_index) > 0:
     #             # shift element data forwards
-    #             sensor_data[element_index, :] = apodization[element_index] *[sensor_data(element_index, 1 + delays(element_index):end), zeros(1, delays(element_index))];
+    #             sensor_data[element_index, :] = apodization[element_index] * [
+    #                       sensor_data(element_index, 1 + delays(element_index):end),
+    #                       zeros(1, delays(element_index))
+    #             ];
     #
     #         elif delays(element_index) < 0
     #             # shift element data backwards
-    #             sensor_data[element_index, :] = apodization[element_index] *[zeros(1, -delays(element_index)), sensor_data(element_index, 1:end + delays(element_index))];
+    #             sensor_data[element_index, :] = apodization[element_index] *[
+    #                   zeros(1, -delays(element_index)),
+    #                   sensor_data(element_index, 1:end + delays(element_index))
+    #             ];
     #
     #     # form the a-line summing across the elements
     #     line = sum(sensor_data)
@@ -686,7 +697,8 @@ class NotATransducer(kSensor):
     def combine_sensor_data(self, sensor_data):
         # check the data is the correct size
         if sensor_data.shape[0] != (self.number_active_elements * self.transducer.element_width * self.transducer.element_length):
-            raise ValueError('The number of time series in the input sensor_data must match the number of grid points in the active tranducer elements.')
+            raise ValueError('The number of time series in the input sensor_data must '
+                             'match the number of grid points in the active tranducer elements.')
 
         # get index of which element each time series belongs to
         # Tricky things going on here

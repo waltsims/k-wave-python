@@ -170,7 +170,11 @@ def test_cpp_io_in_parts():
         # define a square source mask facing in the x-direction using the
         # normal k-Wave syntax
         p_mask = np.zeros(grid_size).astype(bool)
-        p_mask[pml_size.x, grid_size.y//2 - source_y_size//2-1:grid_size.y//2 + source_y_size//2, grid_size.z//2 - source_z_size//2-1:grid_size.z//2 + source_z_size//2] = 1
+        p_mask[
+            pml_size.x,
+            grid_size.y//2 - source_y_size//2-1:grid_size.y//2 + source_y_size//2,
+            grid_size.z//2 - source_z_size//2-1:grid_size.z//2 + source_z_size//2
+        ] = 1
 
         # find linear source indices
         p_source_index = np.where(p_mask.flatten(order='F') == 1)[0] + 1  # +1 due to Matlab indexing

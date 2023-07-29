@@ -24,7 +24,8 @@ def save_to_disk_func(
     # check for a binary sensor mask or cuboid corners
     # modified by Farid | disabled temporarily!
     # assert self.binary_sensor_mask or self.cuboid_corners, \
-    #     "Optional input ''save_to_disk'' only supported for sensor masks defined as a binary matrix or the opposing corners of a rectangle (2D) or cuboid (3D)."
+    #     "Optional input ''save_to_disk'' only supported for sensor masks defined as a binary matrix
+    #           or the opposing corners of a rectangle (2D) or cuboid (3D)."
 
     # =========================================================================
     # VARIABLE LIST

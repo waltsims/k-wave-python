@@ -46,7 +46,11 @@ def test_tvsp_3D_simulation():
     source = kSource()
     source_radius = 5  # [grid points]
     source.p_mask = np.zeros(grid_size)
-    source.p_mask[grid_size.x//4 - 1, grid_size.y//2 - source_radius - 1:grid_size.y//2 + source_radius, grid_size.z//2 - source_radius - 1:grid_size.z//2 + source_radius] = 1
+    source.p_mask[
+        grid_size.x//4 - 1,
+        grid_size.y//2 - source_radius - 1:grid_size.y//2 + source_radius,
+        grid_size.z//2 - source_radius - 1:grid_size.z//2 + source_radius
+    ] = 1
 
     # define a time varying sinusoidal source
     source_freq = 2e6  # [Hz]
