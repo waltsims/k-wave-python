@@ -82,3 +82,4 @@ line-length = 200
 # create_storage_variables.py references a few functions that are not ported yet.
 "kwave/kWaveSimulation_helper/create_storage_variables.py" = ["F821"]
 "kwave/kWaveSimulation_helper/__init__.py" = ["F401"]
+"kwave/options/__init__.py" = ["F401"]
