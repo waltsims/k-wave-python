@@ -10,7 +10,7 @@ from kwave.ksensor import kSensor
 from kwave.ktransducer import NotATransducer
 from numpy.fft import ifftshift
 
-from kwave import kWaveGrid
+from kwave.kgrid import kWaveGrid
 from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation

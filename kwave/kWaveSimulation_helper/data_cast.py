@@ -1,4 +1,6 @@
-from kwave import kWaveMedium, kWaveGrid, SimulationOptions
+from kwave.kmedium import kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.conversion import cast_to_type
 from kwave.utils.dotdictionary import dotdict
 

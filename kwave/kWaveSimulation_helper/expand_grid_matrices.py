@@ -1,6 +1,9 @@
 import numpy as np
 
-from kwave import kWaveGrid, kWaveMedium, SimulationOptions, NotATransducer
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.options.simulation_options import SimulationOptions
+from kwave.ktransducer import NotATransducer
 from kwave.data import Vector
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict

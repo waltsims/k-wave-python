@@ -3,7 +3,7 @@ from warnings import warn
 
 import numpy as np
 
-from kwave import kWaveGrid
+from kwave.kgrid import kWaveGrid
 from kwave.ksource import kSource
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.matlab import matlab_mask

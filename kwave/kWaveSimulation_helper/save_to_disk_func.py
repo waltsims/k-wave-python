@@ -3,7 +3,9 @@ import os
 import numpy as np
 from scipy.io import savemat
 
-from kwave import kWaveMedium, kWaveGrid, SimulationOptions
+from kwave.kmedium import kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.io import write_attributes, write_matrix
