@@ -44,7 +44,7 @@ def expand_grid_matrices(
     expand_sensor(sensor, expand_size, flags.use_sensor, flags.blank_sensor)
 
     # TODO why it is not self.record ? "self"
-    record = expand_cuboid_corner_list(flags.cuboid_corners, kgrid, pml_size)
+    record = expand_cuboid_corner_list(flags.cuboid_corners, kgrid, pml_size)  # noqa: F841
 
     expand_medium(medium, expand_size)
 

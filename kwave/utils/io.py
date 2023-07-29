@@ -220,7 +220,7 @@ def write_attributes_typed(filename, file_description=None):
     with h5py.File(filename, "a") as f:
         f[h5_literals.FILE_MAJOR_VER_ATT_NAME] = h5_literals.HDF_FILE_MAJOR_VERSION
         f[h5_literals.FILE_MINOR_VER_ATT_NAME] = h5_literals.HDF_FILE_MINOR_VERSION
-        f[h5_literals.CREATED_BY_ATT_NAME] = f'k-Wave 1.3'
+        f[h5_literals.CREATED_BY_ATT_NAME] = 'k-Wave 1.3'
         f[h5_literals.FILE_DESCR_ATT_NAME] = file_description
         f[h5_literals.FILE_TYPE_ATT_NAME] = h5_literals.HDF_INPUT_FILE
         f[h5_literals.FILE_CREATION_DATE_ATT_NAME] = get_date_string()
@@ -277,7 +277,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None, lega
         attributes = {
             h5_literals.FILE_MAJOR_VER_ATT_NAME: h5_literals.HDF_FILE_MAJOR_VERSION,
             h5_literals.FILE_MINOR_VER_ATT_NAME: h5_literals.HDF_FILE_MINOR_VERSION,
-            h5_literals.CREATED_BY_ATT_NAME: f'k-Wave N/A',
+            h5_literals.CREATED_BY_ATT_NAME: 'k-Wave N/A',
             h5_literals.FILE_DESCR_ATT_NAME: file_description,
             h5_literals.FILE_TYPE_ATT_NAME: h5_literals.HDF_INPUT_FILE,
             h5_literals.FILE_CREATION_DATE_ATT_NAME: get_date_string(),
@@ -330,7 +330,7 @@ def write_flags(filename):
 
     """
 
-    h5_literals = get_h5_literals()
+    # h5_literals = get_h5_literals()
 
     with h5py.File(filename, 'r') as hf:
         names = hf.keys()

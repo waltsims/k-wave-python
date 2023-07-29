@@ -481,10 +481,6 @@ class kWaveSimulation(object):
         self.calling_func_name = calling_func_name
 
         k_dim = self.kgrid.dim
-        k_Nx, k_Ny, k_Nz, k_Nt = self.kgrid.Nx, \
-                                 self.kgrid.Ny, \
-                                 self.kgrid.Nz, \
-                                 self.kgrid.Nt
 
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
@@ -507,7 +503,7 @@ class kWaveSimulation(object):
             = set_sound_speed_ref(self.medium, opt.simulation_type)
 
         self.check_source(k_dim)
-        self.check_sensor(k_dim, k_Nt)
+        self.check_sensor(k_dim, self.kgrid.Nt)
         self.check_kgrid_time()
         self.precision = self.select_precision(opt)
         self.check_input_combinations(opt, user_medium_density_input, k_dim, pml_size, self.kgrid.N)
@@ -650,7 +646,7 @@ class kWaveSimulation(object):
                     if directivity is not None and self.sensor.directivity.angle is not None:
 
                         # make sure the sensor mask is not blank
-                        assert self.sensor.mask is not None, f'The mask must be defined for the sensor'
+                        assert self.sensor.mask is not None, 'The mask must be defined for the sensor'
 
                         # check sensor.directivity.pattern and sensor.mask have the same size
                         assert directivity.angle.shape == self.sensor.mask.shape, \
@@ -953,14 +949,14 @@ class kWaveSimulation(object):
                 's_unique = unique(source.s_mask);'
 
                 # create a second indexing variable
-                if eng.eval('numel(s_unique) <= 2 && sum(s_unique) == 1'):
+                if eng.eval('numel(s_unique) <= 2 && sum(s_unique) == 1'):  # noqa: F821
                     # set signal index to all elements
-                    eng.workspace['s_source_sig_index'] = ':'
+                    eng.workspace['s_source_sig_index'] = ':'  # noqa: F821
 
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    s_source_sig_index = source.s_mask(source.s_mask != 0)
+                    s_source_sig_index = source.s_mask(source.s_mask != 0)  # noqa
 
                 f's_source_pos_index = {self.index_data_type}(s_source_pos_index);'
                 if self.source_s_labelled:

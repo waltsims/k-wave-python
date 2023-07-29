@@ -46,7 +46,10 @@ class SimulationOptions(object):
     """
     Args:
         axisymmetric: Flag that indicates whether axisymmetric simulation is used
-        cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest' and more than one Cartesian point maps to the same grid point, duplicated data points are discarded and sensor_data will be returned with less points than that specified by sensor.mask (default = 'linear').
+        cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given.
+                     If set to 'nearest' and more than one Cartesian point maps to the same grid point,
+                     duplicated data points are discarded and sensor_data will be returned
+                     with less points than that specified by sensor.mask (default = 'linear').
         pml_inside: put the PML inside the grid defined by the user
         pml_alpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
         save_to_disk: save the input data to a HDF5 file
@@ -61,7 +64,10 @@ class SimulationOptions(object):
         pml_auto: automatically choose the PML size to give small prime factors
         create_log: create a log using diary
         use_finite_difference: use finite difference gradients instead of spectral (in 1D)
-        stream_to_disk:  String containing a filename (including pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
+        stream_to_disk:  String containing a filename (including pathname if required).
+                         If set, after the precomputation phase, the input variables used in the time loop are saved
+                         the specified location in HDF5 format. The simulation then exits.
+                         The saved variables can be used to run simulations using the C++ code.
         data_recast: recast the sensor data back to double precision
         cartesian_interp: interpolation mode for Cartesian sensor mask
         hdf_compression_level: zip compression level for HDF5 input files
@@ -162,7 +168,7 @@ class SimulationOptions(object):
             if isinstance(self.pml_size, int):
                 self.pml_size = np.array([self.pml_size])
             if not isinstance(self.pml_size, (list, np.ndarray)):
-                raise ValueError(f"Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
+                raise ValueError("Optional input ''PMLSize'' must be a integer array of 1, 2 or 3 dimensions.")
 
         # Check if each member variable is None, and set it to self.pml_alpha if it is
         self.pml_x_alpha = self.pml_alpha if self.pml_x_alpha is None else self.pml_x_alpha
@@ -186,19 +192,46 @@ class SimulationOptions(object):
             elastic_code: Flag that indicates whether elastic simulation is used
             **kwargs: Dictionary that holds following optional simulation properties:
 
-                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given. If set to 'nearest', duplicated data points are discarded and sensor_data will be returned with fewer points than specified by sensor.mask (default = 'linear').
-                * create_log: Boolean controlling whether the command line output is saved using the diary function with a date and time stamped filename (default = false).
-                * data_cast: String input of the data type that variables are cast to before computation. For example, setting to 'single' will speed up the computation time (due to the improved efficiency of fftn and ifftn for this data type) at the expense of a loss in precision. This variable is also useful for utilising GPU parallelisation through libraries such as the Parallel Computing Toolbox by setting 'data_cast' to 'gpuArray-single' (default = 'off').
-                * data_recast: Boolean controlling whether the output data is cast back to double precision. If set to false, sensor_data will be returned in the data format set using the 'data_cast' option.
-                * hdf_compression_level: Compression level used for writing the input HDF5 file when using 'save_to_disk' or kspaceFirstOrder3DC. Can be set to an integer between 0 (no compression, the default) and 9 (maximum compression). The compression is lossless. Increasing the compression level will reduce the file size if there are portions of the medium that are homogeneous, but will also increase the time to create the HDF5 file.
+                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given.
+                               If set to 'nearest', duplicated data points are discarded and sensor_data
+                               will be returned with fewer points than specified by sensor.mask (default = 'linear').
+                * create_log: Boolean controlling whether the command line output is saved using the diary function
+                              with a date and time stamped filename (default = false).
+                * data_cast: String input of the data type that variables are cast to before computation.
+                             For example, setting to 'single' will speed up the computation time
+                             (due to the improved efficiency of fftn and ifftn for this data type) at the expense
+                             of a loss in precision. This variable is also useful for utilising GPU parallelisation
+                             through libraries such as the Parallel Computing Toolbox
+                             by setting 'data_cast' to 'gpuArray-single' (default = 'off').
+                * data_recast: Boolean controlling whether the output data is cast back to double precision.
+                               If set to false, sensor_data will be returned in
+                               the data format set using the 'data_cast' option.
+                * hdf_compression_level: Compression level used for writing the input HDF5 file when using
+                                         'save_to_disk' or kspaceFirstOrder3DC. Can be set to an integer
+                                         between 0 (no compression, the default) and 9 (maximum compression).
+                                         The compression is lossless. Increasing the compression level will reduce
+                                         the file size if there are portions of the medium that are homogeneous,
+                                         but will also increase the time to create the HDF5 file.
                 * multi_axial_pml_ratio: MPML settings
                 * pml_alpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
-                * pml_inside: Boolean controlling whether the perfectly matched layer is inside or outside the grid. If set to false, the input grids are enlarged by pml_size before running the simulation (default = true).
+                * pml_inside: Boolean controlling whether the perfectly matched layer is inside or outside the grid.
+                              If set to false, the input grids are enlarged by pml_size
+                              before running the simulation (default = true).
                 * pml_range: Search range used when automatically determining PML size. Tuple of two elements
-                * pml_size: Size of the perfectly matched layer in grid points. By default, the PML is added evenly to all sides of the grid, however, both pml_size and pml_alpha can be given as three element arrays to specify the x, y, and z properties, respectively. To remove the PML, set the appropriate pml_alpha to zero rather than forcing the PML to be of zero size (default = 10).
+                * pml_size: Size of the perfectly matched layer in grid points. By default, the PML is added evenly to
+                            all sides of the grid, however, both pml_size and pml_alpha can be given as three element
+                            arrays to specify the x, y, and z properties, respectively.
+                            To remove the PML, set the appropriate pml_alpha to zero rather than forcing
+                            the PML to be of zero size (default = 10).
                 * radial_symmetry: Radial symmetry used in axisymmetric code
-                * stream_to_disk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing the complete matrix in memory. StreamToDisk may also be given as an integer which specifies the number of time steps that are taken before the data is saved to disk (default = 200).
-                * save_to_disk: String containing a filename (including pathname if required). If set, after the precomputation phase, the input variables used in the time loop are saved the specified location in HDF5 format. The simulation then exits. The saved variables can be used to run simulations using the C++ code.
+                * stream_to_disk: Boolean controlling whether sensor_data is periodically saved to disk to avoid storing
+                                  the complete matrix in memory. StreamToDisk may also be given as an integer which
+                                  specifies the number of time steps that are taken before the data
+                                  is saved to disk (default = 200).
+                * save_to_disk: String containing a filename (including pathname if required).
+                                If set, after the precomputation phase, the input variables used in the time loop are
+                                saved the specified location in HDF5 format. The simulation then exits.
+                                The saved variables can be used to run simulations using the C++ code.
                 * save_to_disk_exit: Exit the simulation after saving the HDF5 file
                 * scale_source_terms: Apply the source scaling term to time varying sources
                 * use_fd: Use finite difference gradients instead of spectral (in 1D)
@@ -219,7 +252,7 @@ class SimulationOptions(object):
                     raise ValueError(
                         f"Optional input ''pml_size'' must be a 1 or {kgrid.dim} element numerical array.")
                 else:
-                    raise ValueError(f"Optional input ''pml_size'' must be a single numerical value.")
+                    raise ValueError("Optional input ''pml_size'' must be a single numerical value.")
 
         if kgrid.dim == 1:
             options.pml_x_alpha = 2
@@ -252,7 +285,7 @@ class SimulationOptions(object):
                     raise ValueError(
                         f"Optional input ''pml_alpha'' must be a 1 or {kgrid.dim} element numerical array.")
                 else:
-                    raise ValueError(f"Optional input ''pml_alpha'' must be a single numerical value.")
+                    raise ValueError("Optional input ''pml_alpha'' must be a single numerical value.")
 
             # assign input based on number of dimensions
             if kgrid.dim == 1:

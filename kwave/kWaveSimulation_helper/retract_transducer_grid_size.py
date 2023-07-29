@@ -1,5 +1,6 @@
-from kwave import NotATransducer
 import numpy as np
+
+from kwave.ktransducer import NotATransducer
 
 
 def retract_transducer_grid_size(source, sensor, retract_size, pml_inside: bool):

@@ -607,10 +607,15 @@ class NotATransducer(kSensor):
 
             # add delay times
             # mask[active_elements_index] = delay_times[indexed_active_elements_mask_copy[active_elements_index]]
-            mask[unflatten_matlab_mask(mask, active_elements_index, diff=-1)] = matlab_mask(delay_times, matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1), diff=-1).squeeze()
+            mask[unflatten_matlab_mask(mask, active_elements_index, diff=-1)] = matlab_mask(
+                delay_times,
+                matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1),
+                diff=-1
+            ).squeeze()
 
         # calculate elevation focus time delays provided each element is longer than one grid point
-        if not np.isinf(self.elevation_focus_distance) and (self.transducer.element_length > 1) and (mode is None or mode != 3):
+        if not np.isinf(self.elevation_focus_distance) and \
+                (self.transducer.element_length > 1) and (mode is None or mode != 3):
 
             # get elevation beamforming delays
             elevation_delay_times = self.elevation_beamforming_delays
@@ -619,13 +624,18 @@ class NotATransducer(kSensor):
             element_voxel_mask = self.indexed_element_voxel_mask
 
             # add delay times
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += matlab_mask(elevation_delay_times, matlab_mask(element_voxel_mask, active_elements_index - 1) - 1)[:, 0]  # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += matlab_mask(
+                elevation_delay_times,
+                matlab_mask(element_voxel_mask, active_elements_index - 1) - 1
+            )[:, 0]  # -1s compatibility
 
         # shift delay times (these should all be >= 0, where a value of 0 means no delay)
         if self.stored_appended_zeros == 'auto':
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= mask[unflatten_matlab_mask(mask, active_elements_index - 1)].min()  # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= \
+                mask[unflatten_matlab_mask(mask, active_elements_index - 1)].min()  # -1s compatibility
         else:
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += self.stored_beamforming_delays_offset # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += \
+                self.stored_beamforming_delays_offset  # -1s compatibility
         return mask.astype(np.uint8)
 
     @property

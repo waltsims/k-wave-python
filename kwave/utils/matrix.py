@@ -124,7 +124,13 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> 
     """
     Calculate the gradient of an n-dimensional input matrix using the finite-difference method.
 
-    This function is a wrapper of the numpy gradient method for use in the k-wave library. For one-dimensional inputs, the gradient is always computed along the non-singleton dimension. For higher dimensional inputs, the gradient for singleton dimensions is returned as 0. For elements in the center of the grid, the gradient is computed using centered finite-differences. For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences. The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2). The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.
+    This function is a wrapper of the numpy gradient method for use in the k-wave library.
+    For one-dimensional inputs, the gradient is always computed along the non-singleton dimension.
+    For higher dimensional inputs, the gradient for singleton dimensions is returned as 0.
+    For elements in the center of the grid, the gradient is computed using centered finite-differences.
+    For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences.
+    The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2).
+    The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.
 
     Args:
         f: Input matrix.

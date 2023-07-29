@@ -282,7 +282,7 @@ def angular_spectrum_cw(
 
     # Reverse time signals and grid if stepping backwards
     if reverse_proj:
-        pressure_max = np.flip(np.conj(pressure), axis=2)
+        np.flip(np.conj(pressure), axis=2)
 
     # Cast output back to double precision
     if data_recast:
