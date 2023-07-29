@@ -29,7 +29,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_na_optimising_performance():
     # change scale to 2 to increase the computational time
-    scale = 1
+    scale = 1  # noqa: F841
 
     # assign the grid size and create the computational grid
     grid_size_points = Vector([256, 256])  # [grid points]

@@ -83,3 +83,5 @@ line-length = 200
 "kwave/kWaveSimulation_helper/create_storage_variables.py" = ["F821"]
 "kwave/kWaveSimulation_helper/__init__.py" = ["F401"]
 "kwave/options/__init__.py" = ["F401"]
+# Fix in the future => E731: Do not assign a `lambda` expression, use a `def`
+"kwave/utils/mapgen.py" = ["E731"]

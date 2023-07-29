@@ -180,7 +180,7 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     if np.isinf(radius):
         # bowl = make_cart_disc(bowl_pos, diameter / 2, focus_pos, num_points, plot_bowl)
         # return bowl
-        raise NotImplemented("make_cart_disc")
+        raise NotImplementedError("make_cart_disc")
 
     # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
     varphi_max = np.arcsin(diameter / (2 * radius))
