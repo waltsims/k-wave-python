@@ -74,7 +74,7 @@ exclude = [
 testpaths = ["tests"]
 
 [tool.ruff]
-# Allow lines to be as long as 120 characters.
+# Allow lines to be as long as 140 characters.
 line-length = 140
 [tool.ruff.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
