@@ -13,7 +13,7 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -93,4 +93,4 @@ def test_pr_2D_FFT_line_sensor():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_FFT_line_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_FFT_line_sensor', input_file_full_path), 'Files do not match!'

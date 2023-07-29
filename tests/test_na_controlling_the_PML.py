@@ -13,7 +13,7 @@ from tempfile import gettempdir
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -25,7 +25,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_na_controlling_the_pml():
     # modify this parameter to run the different examples
-    example_number = 1
+    example_number = 1  # noqa: F841
     # 1: PML with no absorption
     # 2: PML with the absorption value set too high
     # 3: partially effective PML
@@ -124,7 +124,7 @@ def test_na_controlling_the_pml():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_3', input_file_full_path), \
+    assert compare_against_ref('out_na_controlling_the_PML/input_3', input_file_full_path), \
         'Files do not match!'
 
     # Example 4

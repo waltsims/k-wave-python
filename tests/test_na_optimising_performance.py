@@ -13,7 +13,7 @@ from tempfile import gettempdir
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
@@ -97,7 +97,7 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_2', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_2', input_file_full_path), \
         'Files do not match!'
 
     # 3: as above with 'data_cast' set to 'single'
@@ -117,5 +117,5 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_3', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_3', input_file_full_path), \
         'Files do not match!'

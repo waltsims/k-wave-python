@@ -13,7 +13,7 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -146,9 +146,9 @@ def test_us_beam_patterns():
         sensor.mask[:, Ny//2 - 1, :] = 1
 
         # store z axis properties
-        Nj = Nz
-        j_vec = kgrid.z_vec
-        j_label = 'z'
+        Nj = Nz  # noqa: F841
+        j_vec = kgrid.z_vec  # noqa: F841
+        j_label = 'z'  # noqa: F841
 
     # set the record mode such that only the rms and peak values are stored
     if USE_STATISTICS:
@@ -186,5 +186,5 @@ def test_us_beam_patterns():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_us_beam_patterns', input_file_full_path), \
+    assert compare_against_ref('out_us_beam_patterns', input_file_full_path), \
         'Files do not match!'

@@ -14,12 +14,12 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC, kspaceFirstOrder3DG
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_ball
@@ -139,7 +139,7 @@ def test_cpp_running_simulations():
     elif example_number == 2:
         # load output data from the C++ simulation
         with h5py.File(output_file_full_path, 'r') as hf:
-            sensor_data = dotdict({
+            sensor_data = dotdict({  # noqa: F841
                 'p_final': np.array(hf['p_final']),
                 'p_max': np.array(hf['p_max']),
             })

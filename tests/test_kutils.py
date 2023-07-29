@@ -65,10 +65,12 @@ def test_get_alpha_filters_2d():
     medium = kWaveMedium(sound_speed=1500)
 
     # size of the initial pressure distribution
-    source_radius = 2  # [grid points]
+    # [grid points]
+    source_radius = 2  # noqa: F841
 
     # distance between the centre of the source and the sensor
-    source_sensor_distance = 10  # [grid points]
+    # [grid points]
+    source_sensor_distance = 10  # noqa: F841
 
     # time array
     dt = 2e-9  # [s]
@@ -115,10 +117,12 @@ def test_get_alpha_filters_1D():
     medium = kWaveMedium(sound_speed=1500)
 
     # size of the initial pressure distribution
-    source_radius = 2  # [grid points]
+    # [grid points]
+    source_radius = 2  # noqa: F841
 
     # distance between the centre of the source and the sensor
-    source_sensor_distance = 10  # [grid points]
+    # [grid points]
+    source_sensor_distance = 10  # noqa: F841
 
     # time array
     dt = 2e-9  # [s]
@@ -139,8 +143,8 @@ def test_get_alpha_filters_1D():
 
 def test_focus():
     # simulation settings
-    DATA_CAST = 'single'
-    RUN_SIMULATION = True
+    DATA_CAST = 'single'  # noqa: F841
+    RUN_SIMULATION = True  # noqa: F841
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
@@ -175,7 +179,7 @@ def test_focus():
     c0 = 1540
     rho0 = 1000
 
-    medium = kWaveMedium(
+    medium = kWaveMedium(  # noqa: F841
         sound_speed=None,  # will be set later
         alpha_coeff=0.75,
         alpha_power=1.5,

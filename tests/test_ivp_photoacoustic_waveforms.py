@@ -14,7 +14,7 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -92,7 +92,7 @@ def test_ivp_photoacoustic_waveforms():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
-    input_filename = f'example_ivp_pa_input.h5'
+    input_filename = 'example_ivp_pa_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -113,7 +113,7 @@ def test_ivp_photoacoustic_waveforms():
         execution_options=SimulationExecutionOptions()
     )
 
-    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
+    assert compare_against_ref('out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
         'Files do not match!'
 
     # =========================================================================
@@ -150,5 +150,5 @@ def test_ivp_photoacoustic_waveforms():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \
+    assert compare_against_ref('out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \
         'Files do not match!'

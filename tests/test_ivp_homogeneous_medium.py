@@ -13,7 +13,7 @@ from tempfile import gettempdir
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -57,7 +57,7 @@ def test_ivp_homogeneous_medium():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
-    input_filename = f'example_ivp_homo_input.h5'
+    input_filename = 'example_ivp_homo_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -75,5 +75,5 @@ def test_ivp_homogeneous_medium():
         execution_options=SimulationExecutionOptions()
     )
 
-    assert compare_against_ref(f'out_ivp_homogeneous_medium', input_file_full_path), \
+    assert compare_against_ref('out_ivp_homogeneous_medium', input_file_full_path), \
         'Files do not match!'

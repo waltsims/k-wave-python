@@ -10,7 +10,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import cast_to_type
 from kwave.utils.interp import interpolate3d

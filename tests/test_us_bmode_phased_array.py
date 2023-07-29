@@ -13,7 +13,7 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
@@ -177,7 +177,7 @@ def test_us_bmode_phased_array():
 
     # preallocate the storage
     number_scan_lines = steering_angles.size
-    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))
+    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))  # noqa: F841
 
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:

@@ -14,7 +14,7 @@ import numpy as np
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -92,7 +92,7 @@ def test_sd_directional_array_elements():
     # source continues up to the edge of the domain (and from there infinitely,
     # because of the periodic assumption implicit in pseudospectral methods)
     # input arguments
-    input_filename = f'example_sd_direct_input.h5'
+    input_filename = 'example_sd_direct_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -113,4 +113,4 @@ def test_sd_directional_array_elements():
         execution_options=SimulationExecutionOptions()
     )
 
-    assert compare_against_ref(f'out_sd_directional_array_elements', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_sd_directional_array_elements', input_file_full_path), 'Files do not match!'
