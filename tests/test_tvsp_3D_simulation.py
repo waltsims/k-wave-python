@@ -68,7 +68,7 @@ def test_tvsp_3D_simulation():
 
     # define the field parameters to record
     sensor.record = ['p', 'p_final']
-    input_filename = f'example_tvsp_3d_input.h5'
+    input_filename = 'example_tvsp_3d_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # input arguments
@@ -89,5 +89,5 @@ def test_tvsp_3D_simulation():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_tvsp_3D_simulation', input_file_full_path), \
+    assert compare_against_ref('out_tvsp_3D_simulation', input_file_full_path), \
         'Files do not match!'

@@ -71,7 +71,7 @@ def test_pr_2D_FFT_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
-    input_filename = f'example_fft_line_input.h5'
+    input_filename = 'example_fft_line_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
 

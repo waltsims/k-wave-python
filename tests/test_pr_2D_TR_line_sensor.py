@@ -66,7 +66,7 @@ def test_pr_2D_TR_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
-    input_filename = f'example_tr_dir_input.h5'
+    input_filename = 'example_tr_dir_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -87,4 +87,4 @@ def test_pr_2D_TR_line_sensor():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_TR_line_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_TR_line_sensor', input_file_full_path), 'Files do not match!'

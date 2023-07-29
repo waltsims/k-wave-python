@@ -203,7 +203,7 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
 
     # preallocate the storage
-    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))
+    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))  # noqa: F841
 
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:
@@ -222,7 +222,7 @@ def test_us_bmode_linear_transducer():
             medium.density = density_map[:, medium_position:medium_position + Ny, :]
 
             # set the input settings
-            input_filename = f'example_lin_tran_input.h5'
+            input_filename = 'example_lin_tran_input.h5'
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)
             simulation_options = SimulationOptions(

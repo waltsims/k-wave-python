@@ -93,7 +93,7 @@ def test_tvsp_doppler_effect():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
-    input_filename = f'example_doppler_input.h5'
+    input_filename = 'example_doppler_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -111,5 +111,5 @@ def test_tvsp_doppler_effect():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_tvsp_doppler_effect', input_file_full_path), \
+    assert compare_against_ref('out_tvsp_doppler_effect', input_file_full_path), \
         'Files do not match!'

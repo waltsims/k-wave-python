@@ -36,7 +36,7 @@ def test_add_noise():
 
 def test_tone_error():
     try:
-        test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, envelope='BobTheBuilder')
+        test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, envelope='BobTheBuilder')  # noqa: F841
     except ValueError as e:
         if str(e) == 'Unknown envelope BobTheBuilder.':
             pass
@@ -205,7 +205,7 @@ def test_gradient_spect_2D():
 # TODO:
 def test_resize_2D_splinef2d():
     mat = np.ones([10, 10])
-    out = resize(mat, [20, 20], 'splinef2d')
+    out = resize(mat, [20, 20], 'splinef2d')  # noqa: F841
 
 
 def test_resize_2D_linear_larger():

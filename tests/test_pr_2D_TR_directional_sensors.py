@@ -90,7 +90,7 @@ def test_pr_2D_TR_directional_sensors():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
 
     # define the directionality of the sensor elements
     directivity = kSensorDirectivity()
@@ -114,4 +114,4 @@ def test_pr_2D_TR_directional_sensors():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'

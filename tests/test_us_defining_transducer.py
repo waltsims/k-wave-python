@@ -147,7 +147,7 @@ def test_us_defining_transducer():
     sensor = kSensor(sensor_mask)
 
     # set the input settings
-    input_filename = f'example_def_tran_input.h5'
+    input_filename = 'example_def_tran_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(

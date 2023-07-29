@@ -59,7 +59,7 @@ def test_pr_3D_FFT_planar_sensor():
     kgrid.makeTime(medium.sound_speed)
 
     # set the input settings
-    input_filename = f'example_3D_fft_planar_input.h5'
+    input_filename = 'example_3D_fft_planar_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(

@@ -60,7 +60,7 @@ def test_na_optimising_performance():
     # run the simulation
 
     # 1: default input options
-    input_filename = f'example_opt_perf_input.h5'
+    input_filename = 'example_opt_perf_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -77,7 +77,7 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_1', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_1', input_file_full_path), \
         'Files do not match!'
 
     # 2: nearest neighbour Cartesian interpolation and plotting switched off

@@ -7,7 +7,6 @@
     Simulating Ultrasound Beam Patterns examples.
 """
 import os
-from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np

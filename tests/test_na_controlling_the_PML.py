@@ -68,7 +68,7 @@ def test_na_controlling_the_pml():
     sensor = kSensor(sensor_mask)
 
     # Example 1
-    input_filename = f'input_1.h5'
+    input_filename = 'input_1.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -86,7 +86,7 @@ def test_na_controlling_the_pml():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_1', input_file_full_path), \
+    assert compare_against_ref('out_na_controlling_the_PML/input_1', input_file_full_path), \
         'Files do not match!'
 
     # Example 2
@@ -105,7 +105,7 @@ def test_na_controlling_the_pml():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_2', input_file_full_path), \
+    assert compare_against_ref('out_na_controlling_the_PML/input_2', input_file_full_path), \
         'Files do not match!'
 
     # Example 3
@@ -143,5 +143,5 @@ def test_na_controlling_the_pml():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_controlling_the_PML/input_4', input_file_full_path), \
+    assert compare_against_ref('out_na_controlling_the_PML/input_4', input_file_full_path), \
         'Files do not match!'

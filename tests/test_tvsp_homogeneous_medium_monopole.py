@@ -60,7 +60,7 @@ def test_tvsp_homogeneous_medium_monopole():
     sensor.record = ['p', 'p_final']
 
     # set the input settings
-    input_filename = f'example_tvsp_homo_input.h5'
+    input_filename = 'example_tvsp_homo_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -78,4 +78,4 @@ def test_tvsp_homogeneous_medium_monopole():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_tvsp_homogeneous_medium_monopole', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_tvsp_homogeneous_medium_monopole', input_file_full_path), 'Files do not match!'
