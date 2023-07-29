@@ -852,8 +852,8 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
     # catch input errors
     assert origin_size in ['single', 'double'], 'Unknown setting for optional input Center.'
 
-    assert len(
-        shift) == map_dimension, f'Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters.'
+    assert len(shift) == map_dimension, \
+        f'Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters.'
 
     if map_dimension == 2:
         # create the maps for each dimension
@@ -2249,7 +2249,8 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
 def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
                    diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
     """
-    Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.
+    Generates a multi-arc mask for an image given the size of the grid,
+    the positions and properties of the arcs, and the position of the focus.
 
     Args:
         grid_size: The size of the grid (assumed to be square).

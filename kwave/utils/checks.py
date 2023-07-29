@@ -66,7 +66,8 @@ def check_field_names(dictionary, *fields):
 
 def check_str_eq(value, target: str) -> bool:
     """
-    This method checks whether the given value is a string and is equal to the target string. It is useful to avoid FutureWarnings when value is not a string.
+    This method checks whether the given value is a string and is equal to the target string.
+    It is useful to avoid FutureWarnings when value is not a string.
 
     Args:
         value: The value to check.

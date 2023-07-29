@@ -281,7 +281,8 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
 
         # elif interp == 'linear':
         #
-        #         # dist = np.sqrt((cart_bsm[0, point_index] - cart_sensor_mask[0, :])**2 + (cart_bsm[1, point_index] - cart_sensor_mask[1, :])**2)
+        #         # dist = np.sqrt((cart_bsm[0, point_index] - cart_sensor_mask[0, :])**2 +
+        #                                                   (cart_bsm[1, point_index] - cart_sensor_mask[1, :])**2)
         #         # dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, axis=1)
         #         # append the distance information onto the data set
         #         new_col_pos = len(cart_sensor_data[1, :]) -1
@@ -292,8 +293,10 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
         #         cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
         #
         #         # linearly interpolate between the two closest points
-        #         perc = cart_sensor_data_ro[1, new_col_pos] / (cart_sensor_data_ro[0, new_col_pos] + cart_sensor_data_ro[1, new_col_pos] )
-        #         binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :new_col_pos - 1] + (1 - perc) * cart_sensor_data_ro[1, :new_col_pos - 1]
+        #         perc = cart_sensor_data_ro[1, new_col_pos] /
+        #                           (cart_sensor_data_ro[0, new_col_pos] + cart_sensor_data_ro[1, new_col_pos] )
+        #         binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :new_col_pos - 1] +
+        #                                                       (1 - perc) * cart_sensor_data_ro[1, :new_col_pos - 1]
         #
         # else:
         #     raise ValueError('Unknown interpolation option.')

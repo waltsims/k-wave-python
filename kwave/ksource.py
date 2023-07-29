@@ -218,8 +218,10 @@ class kSource(object):
 
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                if (self.flag_ux and (ux_size > 1)) or (self.flag_uy and (uy_size > 1)) or (self.flag_uz and (uz_size > 1)):
-                    if (self.flag_ux and (ux_size != u_sum)) or (self.flag_uy and (uy_size != u_sum)) or (self.flag_uz and (uz_size != u_sum)):
+                if (self.flag_ux and (ux_size > 1)) or \
+                        (self.flag_uy and (uy_size > 1)) or (self.flag_uz and (uz_size > 1)):
+                    if (self.flag_ux and (ux_size != u_sum)) or \
+                            (self.flag_uy and (uy_size != u_sum)) or (self.flag_uz and (uz_size != u_sum)):
                         raise ValueError('The number of time series in source.ux (etc) '
                                          'must match the number of source elements in source.u_mask.')
             else:
@@ -316,13 +318,16 @@ class kSource(object):
                             (self.source_sxy and (eng.eval('length(source.sxy(:,1))') != s_mask_sum)) or \
                             (self.source_sxz and (eng.eval('length(source.sxz(:,1))') != s_mask_sum)) or \
                             (self.source_syz and (eng.eval('length(source.syz(:,1))') != s_mask_sum)):
-                        raise ValueError('The number of time series in source.sxx (etc) must match the number of source elements in source.s_mask.')
+                        raise ValueError('The number of time series in source.sxx (etc) '
+                                         'must match the number of source elements in source.s_mask.')
 
             else:
                 # check the source labels are monotonic, and start from 1
                 # if (sum(s_unique(2:end) - s_unique(1:end-1)) != (numel(s_unique) - 1)) or (~any(s_unique == 1))
-                if eng.eval('(sum(s_unique(2:end) - s_unique(1:end-1)) ~= (numel(s_unique) - 1)) || (~any(s_unique == 1))'):
-                    raise ValueError('If using a labelled source.s_mask, the source labels must be monotonically increasing and start from 1.')
+                if eng.eval('(sum(s_unique(2:end) - s_unique(1:end-1)) ~= '
+                            '(numel(s_unique) - 1)) || (~any(s_unique == 1))'):
+                    raise ValueError('If using a labelled source.s_mask, '
+                                     'the source labels must be monotonically increasing and start from 1.')
 
                 numel_s_unique = eng.eval('numel(s_unique) - 1;')
                 # if more than one time series is given, check the number of time
@@ -333,7 +338,8 @@ class kSource(object):
                         (self.source_sxy and (eng.eval('size(source.sxy, 1)') != numel_s_unique)) or \
                         (self.source_sxz and (eng.eval('size(source.sxz, 1)') != numel_s_unique)) or \
                         (self.source_syz and (eng.eval('size(source.syz, 1)') != numel_s_unique)):
-                    raise ValueError('The number of time series in source.sxx (etc) must match the number of labelled source elements in source.u_mask.')
+                    raise ValueError('The number of time series in source.sxx (etc) '
+                                     'must match the number of labelled source elements in source.u_mask.')
 
     @property
     def flag_ux(self):

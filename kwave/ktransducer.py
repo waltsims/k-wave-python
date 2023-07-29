@@ -529,7 +529,11 @@ class NotATransducer(kSensor):
         indexed_mask = self.indexed_mask
         retract_size = np.array(retract_size[0]).astype(np.int_)
 
-        self.indexed_mask = indexed_mask[retract_size[0]:-retract_size[0], retract_size[1]:-retract_size[1], retract_size[2]:-retract_size[2]]
+        self.indexed_mask = indexed_mask[
+            retract_size[0]:-retract_size[0],
+            retract_size[1]:-retract_size[1],
+            retract_size[2]:-retract_size[2]
+        ]
 
     @property
     def transmit_apodization_mask(self):

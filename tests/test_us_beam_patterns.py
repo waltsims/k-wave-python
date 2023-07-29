@@ -91,10 +91,16 @@ def test_us_beam_patterns():
     transducer_spec.radius = float('inf')   # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer_spec.number_elements * transducer_spec.element_width + (transducer_spec.number_elements - 1) * transducer_spec.element_spacing
+    transducer_width = transducer_spec.number_elements * \
+                       transducer_spec.element_width + \
+                       (transducer_spec.number_elements - 1) * transducer_spec.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer_spec.position = np.array([1, grid_size_points.y//2 - transducer_width//2, grid_size_points.z//2 - transducer_spec.element_length//2])
+    transducer_spec.position = np.array([
+        1,
+        grid_size_points.y//2 - transducer_width//2,
+        grid_size_points.z//2 - transducer_spec.element_length//2
+    ])
 
     # properties used to derive the beamforming delays
     not_transducer_spec = dotdict()

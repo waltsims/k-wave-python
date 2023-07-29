@@ -64,8 +64,10 @@ class kWaveMedium(object):
             raise ValueError('medium.alpha_filter must be the same size as the computational grid.')
 
         # check the absorption sign input is valid
-        if self.alpha_sign is not None and (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
-            raise ValueError('medium.alpha_sign must be given as a 2 element numerical array controlling absorption and dispersion, respectively.')
+        if self.alpha_sign is not None and \
+                (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
+            raise ValueError('medium.alpha_sign must be given as a '
+                             '2 element numerical array controlling absorption and dispersion, respectively.')
 
         # check alpha_coeff is non-negative and real
         if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):

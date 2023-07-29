@@ -144,7 +144,8 @@ def test_us_bmode_linear_transducer():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * \
+                     np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
