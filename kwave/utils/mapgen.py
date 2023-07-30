@@ -164,7 +164,6 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     """
 
     # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
-    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 
     # check input values
     if radius <= 0:
@@ -182,7 +181,6 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
         # return bowl
         raise NotImplemented("make_cart_disc")
 
-    # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
     varphi_max = np.arcsin(diameter / (2 * radius))
 
     # compute spiral parameters
@@ -2906,8 +2904,6 @@ def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diame
     Returns:
         numpy.ndarray: 3 x num_points array of Cartesian coordinates.
     """
-    # define literals
-    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 
     # check input values
     if radius <= 0:
