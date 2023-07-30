@@ -8,7 +8,7 @@ from example_utils import download_from_gdrive_if_does_not_exist
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         )
         # run the simulation
         if RUN_SIMULATION:
-            sensor_data = kspaceFirstOrder3DC(
+            sensor_data = kspaceFirstOrder3D(
                 medium=medium,
                 kgrid=kgrid,
                 source=not_transducer,
