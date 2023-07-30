@@ -1,5 +1,3 @@
-import os
-import tempfile
 from typing import Union
 
 import numpy as np
@@ -436,10 +434,8 @@ def kspaceFirstOrder2D(
         if options.save_to_disk_exit:
             return
 
-        input_filename = k_sim.options.save_to_disk
-        output_filename = os.path.join(tempfile.gettempdir(), 'output.h5')
-
+        executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
         executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
-        executor = Executor(simulation_options, execution_options)
-        sensor_data = executor.run_simulation(input_filename, output_filename)
+        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
+                                              options=executor_options)
         return sensor_data
