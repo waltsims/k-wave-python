@@ -57,7 +57,7 @@ def kspace_first_order_2d_gpu(
     of kspaceFirstOrder3DC by replacing the binary name with the name of the
     GPU binary.
     """
-    assert execution_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
+    execution_options.is_gpu_simulation = True  # force to GPU
     sensor_data = kspaceFirstOrder2DC(
         kgrid=kgrid,
         source=source,
@@ -124,6 +124,7 @@ def kspaceFirstOrder2DC(
     Returns:
         Sensor data as a numpy array
     """
+    execution_options.is_gpu_simulation = False  # force to CPU
     # generate the input file and save to disk
     sensor_data = kspaceFirstOrder2D(
         kgrid=kgrid,

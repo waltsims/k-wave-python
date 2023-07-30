@@ -62,8 +62,9 @@ def kspaceFirstOrder3DG(
     Returns:
 
     """
+    execution_options.is_gpu_simulation = True
     assert execution_options.is_gpu_simulation, 'kspaceFirstOrder2DG can only be used for GPU simulations'
-    sensor_data = kspaceFirstOrder3DC(
+    sensor_data = kspaceFirstOrder3D(
         kgrid=kgrid,
         source=source,
         sensor=sensor,
@@ -119,6 +120,7 @@ def kspaceFirstOrder3DC(
     Returns:
 
     """
+    execution_options.is_gpu_simulation = False
     # generate the input file and save to disk
     sensor_data = kspaceFirstOrder3D(
         kgrid=kgrid,
