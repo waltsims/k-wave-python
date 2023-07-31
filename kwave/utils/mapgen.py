@@ -181,6 +181,7 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
         # return bowl
         raise NotImplemented("make_cart_disc")
 
+    # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
     varphi_max = np.arcsin(diameter / (2 * radius))
 
     # compute spiral parameters
