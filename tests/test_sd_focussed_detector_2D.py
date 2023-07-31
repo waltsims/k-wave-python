@@ -16,7 +16,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
@@ -50,7 +50,7 @@ def test_sd_focussed_detector_2d():
     source.p0 = 2 * make_disc(grid_size, grid_size / 2, 4)
 
     # run the first simulation
-    input_filename = f'example_sd_focused_2d_input.h5'
+    input_filename = 'example_sd_focused_2d_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -69,5 +69,5 @@ def test_sd_focussed_detector_2d():
         execution_options=SimulationExecutionOptions()
     )
 
-    assert compare_against_ref(f'out_sd_focussed_detector_2D', input_file_full_path), \
+    assert compare_against_ref('out_sd_focussed_detector_2D', input_file_full_path), \
         'Files do not match!'

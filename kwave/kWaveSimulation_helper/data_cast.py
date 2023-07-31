@@ -1,4 +1,6 @@
-from kwave import kWaveMedium, kWaveGrid, SimulationOptions
+from kwave.kmedium import kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.conversion import cast_to_type
 from kwave.utils.dotdictionary import dotdict
 
@@ -112,7 +114,7 @@ def dataCast(data_cast, medium: kWaveMedium, kgrid: kWaveGrid, opt: SimulationOp
     # additional variables only used if there is a time varying velocity source term
     if flags.source_ux or flags.source_uy or flags.source_uz:
         cast_index_variables += ['u_source_pos_index']
-        if self.source_u_labelled:
+        if self.source_u_labelled:  # noqa: F821
             cast_index_variables += ['u_source_sig_index']
 
     if flags.source_ux:
@@ -174,10 +176,10 @@ def dataCast(data_cast, medium: kWaveMedium, kgrid: kWaveGrid, opt: SimulationOp
     for cast_var in cast_variables:
         if '.' in cast_var:
             part1, part2 = cast_var.split('.')
-            subdict = getattr(self, part1)
+            subdict = getattr(self, part1)  # noqa: F821
             subdict[part2] = cast_to_type(subdict[part2], data_cast)
         else:
-            setattr(self, cast_var, cast_to_type(getattr(self, cast_var), data_cast))
+            setattr(self, cast_var, cast_to_type(getattr(self, cast_var), data_cast))  # noqa: F821
 
     # cast index variables only if casting to the GPU
     if data_cast.startswith('kWaveGPU'):

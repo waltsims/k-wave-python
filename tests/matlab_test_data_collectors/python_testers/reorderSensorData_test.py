@@ -17,11 +17,11 @@ def test_reorder_sensor_data():
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
-        mask_size = np.squeeze(recorded_data['mask_size'])
+        mask_size = np.squeeze(recorded_data['mask_size'])  # noqa: F841
         kgrid_size = np.squeeze(recorded_data['kgrid_size'])
         kgrid_dx_dy = np.squeeze(recorded_data['kgrid_dx_dy'])
 
-        sensor_data_size = np.squeeze(recorded_data['sensor_data_size'])
+        sensor_data_size = np.squeeze(recorded_data['sensor_data_size'])  # noqa: F841
         mask = recorded_data['mask']
         sensor_data = recorded_data['sensor_data']
         expected_reordered_sensor_data = recorded_data['reordered_sensor_data']

@@ -1,8 +1,6 @@
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Union
-from warnings import warn
 
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix

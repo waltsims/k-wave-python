@@ -180,7 +180,7 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     if np.isinf(radius):
         # bowl = make_cart_disc(bowl_pos, diameter / 2, focus_pos, num_points, plot_bowl)
         # return bowl
-        raise NotImplemented("make_cart_disc")
+        raise NotImplementedError("make_cart_disc")
 
     # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
     varphi_max = np.arcsin(diameter / (2 * radius))
@@ -407,7 +407,8 @@ def water_sound_speed(temp: float) -> float:
         ValueError: if `temp` is not between 0 and 95
 
     References:
-        Marczak, R. (1997). The sound velocity in water as a function of temperature. Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+        Marczak, R. (1997). The sound velocity in water as a function of temperature.
+                        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
@@ -851,8 +852,8 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
     # catch input errors
     assert origin_size in ['single', 'double'], 'Unknown setting for optional input Center.'
 
-    assert len(
-        shift) == map_dimension, f'Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters.'
+    assert len(shift) == map_dimension, \
+        f'Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters.'
 
     if map_dimension == 2:
         # create the maps for each dimension
@@ -945,12 +946,16 @@ def make_line(
     Args:
         grid_size: The size of the grid in pixels.
         startpoint: The start point of the line, given as a tuple of x and y coordinates.
-        endpoint: The end point of the line, given as a tuple of x and y coordinates. If not specified, the line is drawn from the start point at a given angle and length.
-        angle: The angle of the line in radians, measured counterclockwise from the x-axis. If not specified, the line is drawn from the start point to the end point.
-        length: The length of the line in pixels. If not specified, the line is drawn from the start point to the end point.
+        endpoint: The end point of the line, given as a tuple of x and y coordinates.
+                   If not specified, the line is drawn from the start point at a given angle and length.
+        angle: The angle of the line in radians, measured counterclockwise from the x-axis.
+                If not specified, the line is drawn from the start point to the end point.
+        length: The length of the line in pixels.
+                If not specified, the line is drawn from the start point to the end point.
 
     Returns:
-        line: A 2D array of the same size as the input parameters, with a value of 1 for pixels that are part of the line and 0 for pixels that are not.
+        line: A 2D array of the same size as the input parameters,
+                with a value of 1 for pixels that are part of the line and 0 for pixels that are not.
     """
     assert len(grid_size) == 2, 'Grid size must be a 2-element vector.'
 
@@ -2138,7 +2143,8 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
                     focus_pos: Tuple[int, int], binary: bool = False, remove_overlap: bool = False) -> Tuple[
     np.ndarray, List[np.ndarray]]:
     """
-    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls, the radius of each bowl, the diameter of the bowls, and the position of the focus.
+    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
+    the radius of each bowl, the diameter of the bowls, and the position of the focus.
 
     Args:
         grid_size: The size of the grid (assumed to be square).
@@ -2243,7 +2249,8 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
 def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
                    diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
     """
-    Generates a multi-arc mask for an image given the size of the grid, the positions and properties of the arcs, and the position of the focus.
+    Generates a multi-arc mask for an image given the size of the grid,
+    the positions and properties of the arcs, and the position of the focus.
 
     Args:
         grid_size: The size of the grid (assumed to be square).
@@ -2257,7 +2264,8 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
         arcs_labelled: A labelled mask of the arcs.
 
     Raises:
-        ValueError: If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match, or if the number of rows in arc_pos and diameter do not match.
+        ValueError: If the shape of arc_pos is not (N, 2), if the number of rows in arc_pos and radius do not match,
+                    or if the number of rows in arc_pos and diameter do not match.
     """
     # check inputs
     if arc_pos.shape[-1] != 2:
@@ -2332,7 +2340,8 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
 def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
                 binary: bool = False) -> np.ndarray:
     """
-    Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere, and optional flags to plot the sphere and/or return a binary mask.
+    Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
+        and optional flags to plot the sphere and/or return a binary mask.
 
     Args:
         grid_size: The size of the grid (assumed to be cubic).
@@ -2429,7 +2438,8 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
 def make_spherical_section(radius: float, height: float, width: float = None, plot_section: bool = False,
                            binary: bool = False) -> np.ndarray:
     """
-    Generates a spherical section mask given the radius and height of the section and optional parameters to specify the width and/or plot and return a binary mask.
+    Generates a spherical section mask given the radius and height of the section and
+        optional parameters to specify the width and/or plot and return a binary mask.
 
     Args:
         radius: The radius of the spherical section.
@@ -2653,8 +2663,10 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
         frequency: The driving frequency of the sinusoid.
         sound_speed: The sound speed in the medium.
         density: The density of the medium.
-        axial_positions: The positions along the beam axis where the pressure is evaluated (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.
-        lateral_positions: The lateral positions through the geometric focus where the pressure is evaluated (0 corresponds to the beam axis). Set to [] to return only axial pressure.
+        axial_positions: The positions along the beam axis where the pressure is evaluated
+                         (0 corresponds to the transducer surface). Set to [] to return only lateral pressure.
+        lateral_positions: The lateral positions through the geometric focus where the pressure is evaluated
+                           (0 corresponds to the beam axis). Set to [] to return only axial pressure.
 
     Returns:
        p_axial:          pressure amplitude at the positions specified by axial_position [Pa]

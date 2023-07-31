@@ -202,14 +202,24 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> 
     """
     Calculate the gradient of an n-dimensional input matrix using the finite-difference method.
 
-    This function is a wrapper of the numpy gradient method for use in the k-wave library. For one-dimensional inputs, the gradient is always computed along the non-singleton dimension. For higher dimensional inputs, the gradient for singleton dimensions is returned as 0. For elements in the center of the grid, the gradient is computed using centered finite-differences. For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences. The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2). The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.
+    This function is a wrapper of the numpy gradient method for use in the k-wave library.
+    For one-dimensional inputs, the gradient is always computed along the non-singleton dimension.
+    For higher dimensional inputs, the gradient for singleton dimensions is returned as 0.
+    For elements in the center of the grid, the gradient is computed using centered finite-differences.
+    For elements on the edge of the grid, the gradient is computed using forward or backward finite-differences.
+    The order of accuracy of the finite-difference approximation is controlled by `accuracy_order` (default = 2).
+    The calculations are done using sparse multiplication, so the input matrix is always cast to double precision.
 
     Args:
         f: Input matrix.
-        dx: Array of values for the grid point spacing in each dimension. If a value for `dim` is given, `dn` is the spacing in dimension `dim`.
+        dx: Array of values for the grid point spacing in each dimension.
+                If a value for `dim` is given, `dn` is the spacing in dimension `dim`.
         dim: Optional input to specify a single dimension over which to compute the gradient for
-        deriv_order: Order of the derivative to compute, e.g., use 1 to compute df/dx, 2 to compute df^2/dx^2, etc. (default = 1).
-        accuracy_order: Order of accuracy for the finite difference coefficients. Because centered differences are used, this must be set to an integer multiple of 2 (default = 2).
+        deriv_order: Order of the derivative to compute,
+                        e.g., use 1 to compute df/dx, 2 to compute df^2/dx^2, etc. (default = 1).
+        accuracy_order: Order of accuracy for the finite difference coefficients.
+                            Because centered differences are used, this must be set to an integer
+                            multiple of 2 (default = 2).
 
     Returns:
         A list of ndarrays (or a single ndarray if there is only one dimension)
@@ -241,7 +251,8 @@ def min_nd(matrix: np.ndarray) -> Tuple[float, Tuple]:
         matrix: A numpy array of any value type.
 
     Returns:
-        A tuple containing the minimum value and a tuple of indices in the form (row, column, ...). Indices are 1-based, following the convention used in MATLAB.
+        A tuple containing the minimum value and a tuple of indices in the form (row, column, ...).
+            Indices are 1-based, following the convention used in MATLAB.
 
     Examples:
         >>> matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])

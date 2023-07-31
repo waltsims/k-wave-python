@@ -14,7 +14,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
@@ -29,7 +29,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_na_optimising_performance():
     # change scale to 2 to increase the computational time
-    scale = 1
+    scale = 1  # noqa: F841
 
     # assign the grid size and create the computational grid
     grid_size_points = Vector([256, 256])  # [grid points]
@@ -58,7 +58,7 @@ def test_na_optimising_performance():
     # run the simulation
 
     # 1: default input options
-    input_filename = f'example_opt_perf_input.h5'
+    input_filename = 'example_opt_perf_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -75,7 +75,7 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_1', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_1', input_file_full_path), \
         'Files do not match!'
 
     # 2: nearest neighbour Cartesian interpolation and plotting switched off
@@ -95,7 +95,7 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_2', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_2', input_file_full_path), \
         'Files do not match!'
 
     # 3: as above with 'data_cast' set to 'single'
@@ -115,5 +115,5 @@ def test_na_optimising_performance():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_na_optimising_performance/input_3', input_file_full_path), \
+    assert compare_against_ref('out_na_optimising_performance/input_3', input_file_full_path), \
         'Files do not match!'

@@ -15,7 +15,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -58,7 +58,7 @@ def test_ivp_axisymmetric_simulation():
     sensor.mask[:, sensor.mask[1, :] < 0] = np.nan
 
     # set the input settings
-    input_filename = f'example_ivp_axisymmetric_input.h5'
+    input_filename = 'example_ivp_axisymmetric_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -78,4 +78,4 @@ def test_ivp_axisymmetric_simulation():
         execution_options=SimulationExecutionOptions()
     )
 
-    assert compare_against_ref(f'out_ivp_axisymmetric_simulation', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_ivp_axisymmetric_simulation', input_file_full_path), 'Files do not match!'

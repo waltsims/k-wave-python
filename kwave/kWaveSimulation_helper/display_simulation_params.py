@@ -1,6 +1,7 @@
 import numpy as np
 
-from kwave import kWaveGrid, kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
 from kwave.utils.data import scale_SI
 
 
@@ -80,4 +81,7 @@ def print_max_supported_freq(kgrid, c_min):
         if k_max.x == k_max.z and k_max.x == k_max.y:
             print('  maximum supported frequency: ', f'{scale_SI(k_max_all * c_min / (2*np.pi))[0]}Hz')
         else:
-            print('  maximum supported frequency: ', f'{scale_SI(k_max.x * c_min / (2*np.pi))[0]}Hz by {scale_SI(k_max.y * c_min / (2*np.pi))[0]}Hz by {scale_SI(k_max.z * c_min / (2*np.pi))[0]}Hz')
+            print('  maximum supported frequency: ',
+                  f'{scale_SI(k_max.x * c_min / (2*np.pi))[0]}Hz by '
+                  f'{scale_SI(k_max.y * c_min / (2*np.pi))[0]}Hz by '
+                  f'{scale_SI(k_max.z * c_min / (2*np.pi))[0]}Hz')

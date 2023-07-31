@@ -10,7 +10,8 @@ from math import ceil
 
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
-from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc
+from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, \
+    make_cart_spherical_segment, make_cart_disc
 from kwave.utils.math import sinc, get_affine_matrix
 from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
 
@@ -745,7 +746,7 @@ def off_grid_points(kgrid, points,
         # convert to the computational coordinate if the physical coordinate is
         # sampled nonuniformly
         if kgrid.nonuniform:
-            point, BLIscale = mapPoint(kgrid, point)
+            point, BLIscale = mapPoint(kgrid, point)  # noqa: F821
 
         if bli_tolerance == 0:
             if mask_only:

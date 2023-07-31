@@ -3,7 +3,9 @@ import os
 import numpy as np
 from scipy.io import savemat
 
-from kwave import kWaveMedium, kWaveGrid, SimulationOptions
+from kwave.kmedium import kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.io import write_attributes, write_matrix
@@ -22,7 +24,8 @@ def save_to_disk_func(
     # check for a binary sensor mask or cuboid corners
     # modified by Farid | disabled temporarily!
     # assert self.binary_sensor_mask or self.cuboid_corners, \
-    #     "Optional input ''save_to_disk'' only supported for sensor masks defined as a binary matrix or the opposing corners of a rectangle (2D) or cuboid (3D)."
+    #     "Optional input ''save_to_disk'' only supported for sensor masks defined as a binary matrix
+    #           or the opposing corners of a rectangle (2D) or cuboid (3D)."
 
     # =========================================================================
     # VARIABLE LIST

@@ -7,7 +7,6 @@
     Simulating Ultrasound Beam Patterns examples.
 """
 import os
-from copy import deepcopy
 from tempfile import gettempdir
 
 import numpy as np
@@ -16,7 +15,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
@@ -102,7 +101,11 @@ def test_us_bmode_phased_array():
                 transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2])
+    transducer.position = np.round([
+        1,
+        grid_size_points.y / 2 - transducer_width / 2,
+        grid_size_points.z / 2 - transducer.element_length / 2
+    ])
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
@@ -133,7 +136,8 @@ def test_us_bmode_phased_array():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * \
+                     np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
@@ -155,8 +159,14 @@ def test_us_bmode_phased_array():
     radius = 8e-3  # [m]
     x_pos = 32e-3  # [m]
     y_pos = grid_spacing_meters.y * (grid_size_points.y / 2)  # [m]
-    ball_location = Vector([round(x_pos / grid_spacing_meters.x + rounding_eps), round(y_pos / grid_spacing_meters.x + rounding_eps), grid_size_points.z / 2])
-    scattering_region1 = make_ball(grid_size_points, ball_location, round(radius / grid_spacing_meters.x + rounding_eps))
+    ball_location = Vector([
+        round(x_pos / grid_spacing_meters.x + rounding_eps),
+        round(y_pos / grid_spacing_meters.x + rounding_eps),
+        grid_size_points.z / 2
+    ])
+    scattering_region1 = make_ball(
+        grid_size_points, ball_location, round(radius / grid_spacing_meters.x + rounding_eps)
+    )
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -173,7 +183,7 @@ def test_us_bmode_phased_array():
 
     # preallocate the storage
     number_scan_lines = steering_angles.size
-    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))
+    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))  # noqa: F841
 
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:

@@ -15,7 +15,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
@@ -134,7 +134,7 @@ def test_us_transducer_as_sensor():
     # transducer.properties
 
     # set the input settings
-    input_filename = f'example_tran_as_sen_input.h5'
+    input_filename = 'example_tran_as_sen_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # run the simulation

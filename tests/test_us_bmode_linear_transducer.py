@@ -15,7 +15,7 @@ from kwave.data import Vector
 from kwave.options import SimulationOptions, SimulationExecutionOptions
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
@@ -144,7 +144,8 @@ def test_us_bmode_linear_transducer():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * \
+                     np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
@@ -202,7 +203,7 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
 
     # preallocate the storage
-    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))
+    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))  # noqa: F841
 
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:
@@ -221,7 +222,7 @@ def test_us_bmode_linear_transducer():
             medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
 
             # set the input settings
-            input_filename = f'example_lin_tran_input.h5'
+            input_filename = 'example_lin_tran_input.h5'
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)
             simulation_options = SimulationOptions(
