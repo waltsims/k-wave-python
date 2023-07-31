@@ -286,7 +286,6 @@ def atten_comp(
         tv_filter[t_index, :] = np.roll(tv_filter[t_index, :], t_index)
 
     # zero out lower and upper triangles
-    np.ones((N, N))
     tv_filter[np.tril_indices(N, -np.ceil(N / 2) + 1)] = 0
     tv_filter[np.triu_indices(N, np.ceil(N / 2) + 1)] = 0
 
