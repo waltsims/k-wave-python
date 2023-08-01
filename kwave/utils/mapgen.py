@@ -17,6 +17,7 @@ from .tictoc import TicToc
 from ..data import Vector
 
 # GLOBALS
+# define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
 
@@ -162,9 +163,6 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
         bowl = makeCartBowl([0, 0, 0], 1, 2, [0, 0, 1], 100)
         bowl = makeCartBowl([0, 0, 0], 1, 2, [0, 0, 1], 100, True)
     """
-
-    # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
-    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 
     # check input values
     if radius <= 0:
@@ -2918,8 +2916,6 @@ def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diame
     Returns:
         numpy.ndarray: 3 x num_points array of Cartesian coordinates.
     """
-    # define literals
-    GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 
     # check input values
     if radius <= 0:
