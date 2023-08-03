@@ -9,15 +9,20 @@ class kSensor(object):
 
     def __init__(self, mask=None, record=None):
         self._mask = mask
-        self.record = record                #: cell array of the acoustic parameters to record in the form Recorder
+        # cell array of the acoustic parameters to record in the form Recorder
+        self.record = record
         # record the time series from the beginning by default
-        self._record_start_index = 1        #: time index at which the sensor should start recording the data specified by sensor.record
+        # time index at which the sensor should start recording the data specified by sensor.record
+        self._record_start_index = 1
 
-        #: Directivity of the individiual sensor points
+        # Directivity of the individiual sensor points
         self.directivity = None
 
-        self.time_reversal_boundary_data = None     #: time varying pressure enforced as a Dirichlet boundary condition over sensor.mask
-        self.frequency_response = None              #: two element array specifying the center frequency and percentage bandwidth of a frequency domain Gaussian filter applied to the sensor_data
+        # time varying pressure enforced as a Dirichlet boundary condition over sensor.mask
+        self.time_reversal_boundary_data = None
+        # two element array specifying the center frequency and percentage bandwidth
+        # of a frequency domain Gaussian filter applied to the sensor_data
+        self.frequency_response = None
 
     @property
     def mask(self):

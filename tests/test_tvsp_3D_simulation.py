@@ -12,7 +12,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -46,7 +46,11 @@ def test_tvsp_3D_simulation():
     source = kSource()
     source_radius = 5  # [grid points]
     source.p_mask = np.zeros(grid_size)
-    source.p_mask[grid_size.x//4 - 1, grid_size.y//2 - source_radius - 1:grid_size.y//2 + source_radius, grid_size.z//2 - source_radius - 1:grid_size.z//2 + source_radius] = 1
+    source.p_mask[
+        grid_size.x//4 - 1,
+        grid_size.y//2 - source_radius - 1:grid_size.y//2 + source_radius,
+        grid_size.z//2 - source_radius - 1:grid_size.z//2 + source_radius
+    ] = 1
 
     # define a time varying sinusoidal source
     source_freq = 2e6  # [Hz]
@@ -65,7 +69,7 @@ def test_tvsp_3D_simulation():
 
     # define the field parameters to record
     sensor.record = ['p', 'p_final']
-    input_filename = f'example_tvsp_3d_input.h5'
+    input_filename = 'example_tvsp_3d_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # input arguments
@@ -86,5 +90,5 @@ def test_tvsp_3D_simulation():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_tvsp_3D_simulation', input_file_full_path), \
+    assert compare_against_ref('out_tvsp_3D_simulation', input_file_full_path), \
         'Files do not match!'

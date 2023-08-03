@@ -9,17 +9,29 @@ import kwave.utils.checks
 
 @dataclass
 class kWaveMedium(object):
-    sound_speed                 : np.array             #: sound speed distribution within the acoustic medium [m/s] | required to be defined
-    sound_speed_ref             : np.array = None      #: reference sound speed used within the k-space operator (phase correction term) [m/s]
-    density                     : np.array = None      #: density distribution within the acoustic medium [kg/m^3]
-    alpha_coeff                 : np.array = None      #: power law absorption coefficient [dB/(MHz^y cm)]
-    alpha_power                 : np.array = None      #: power law absorption exponent
-    alpha_mode                  : np.array = None      #: optional input to force either the absorption or dispersion terms in the equation of state to be excluded; valid inputs are 'no_absorption' or 'no_dispersion'
-    alpha_filter                : np.array = None      #: frequency domain filter applied to the absorption and dispersion terms in the equation of state
-    alpha_sign                  : np.array = None      #: two element array used to control the sign of absorption and dispersion terms in the equation of state
-    BonA                        : np.array = None      #: parameter of nonlinearity
-    absorbing                   : bool     = False     #: is the medium absorbing?
-    stokes                      : bool     = False     #: is the medium absorbing stokes?
+    # sound speed distribution within the acoustic medium [m/s] | required to be defined
+    sound_speed                 : np.array
+    # reference sound speed used within the k-space operator (phase correction term) [m/s]
+    sound_speed_ref             : np.array = None
+    # density distribution within the acoustic medium [kg/m^3]
+    density                     : np.array = None
+    # power law absorption coefficient [dB/(MHz^y cm)]
+    alpha_coeff                 : np.array = None
+    # power law absorption exponent
+    alpha_power                 : np.array = None
+    # optional input to force either the absorption or dispersion terms in the equation of state to be excluded;
+    # valid inputs are 'no_absorption' or 'no_dispersion'
+    alpha_mode                  : np.array = None
+    # frequency domain filter applied to the absorption and dispersion terms in the equation of state
+    alpha_filter                : np.array = None
+    # two element array used to control the sign of absorption and dispersion terms in the equation of state
+    alpha_sign                  : np.array = None
+    # parameter of nonlinearity
+    BonA                        : np.array = None
+    # is the medium absorbing?
+    absorbing                   : bool     = False
+    # is the medium absorbing stokes?
+    stokes                      : bool     = False
 
    #  """
    #     Note: For heterogeneous medium parameters, medium.sound_speed and
@@ -52,8 +64,10 @@ class kWaveMedium(object):
             raise ValueError('medium.alpha_filter must be the same size as the computational grid.')
 
         # check the absorption sign input is valid
-        if self.alpha_sign is not None and (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
-            raise ValueError('medium.alpha_sign must be given as a 2 element numerical array controlling absorption and dispersion, respectively.')
+        if self.alpha_sign is not None and \
+                (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
+            raise ValueError('medium.alpha_sign must be given as a '
+                             '2 element numerical array controlling absorption and dispersion, respectively.')
 
         # check alpha_coeff is non-negative and real
         if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):

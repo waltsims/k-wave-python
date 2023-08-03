@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -66,7 +66,7 @@ def test_pr_2D_TR_directional_sensors():
     kgrid.makeTime(medium.sound_speed)
 
     # set the input arguements
-    input_filename = f'example_tr_dir_input.h5'
+    input_filename = 'example_tr_dir_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -87,7 +87,7 @@ def test_pr_2D_TR_directional_sensors():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
 
     # define the directionality of the sensor elements
     directivity = kSensorDirectivity()
@@ -111,4 +111,4 @@ def test_pr_2D_TR_directional_sensors():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'

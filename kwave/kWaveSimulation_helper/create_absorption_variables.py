@@ -2,7 +2,8 @@ import math
 
 import numpy as np
 
-from kwave import kWaveGrid, kWaveMedium
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
 from kwave.utils.conversion import db2neper
 
 

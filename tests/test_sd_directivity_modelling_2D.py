@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  #noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -73,7 +73,7 @@ def test_sd_directivity_modelling_2D():
     source.p = filter_time_series(kgrid, medium, source.p)
 
     # pre-allocate array for storing the output time series
-    single_element_data = np.zeros((Nt, points))
+    single_element_data = np.zeros((Nt, points))  # noqa: F841
 
 
     # run a simulation for each of these sources to see the effect that the

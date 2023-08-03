@@ -1,6 +1,6 @@
 import numpy as np
 
-from kwave import kWaveMedium
+from kwave.kmedium import kWaveMedium
 from kwave.options.simulation_options import SimulationType
 
 

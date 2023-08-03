@@ -13,8 +13,8 @@ import h5py
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
 from kwave.data import Vector
+import setup_test  # noqa: F401
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -87,7 +87,11 @@ def test_cpp_running_simulations():
     source_z_size = 30         # [grid points]
     source = kSource()
     source.p_mask = np.zeros(grid_size)
-    source.p_mask[pml_size, grid_size.y//2 - source_y_size//2 - 1:grid_size.y//2 + source_y_size//2, grid_size.z//2 - source_z_size//2 - 1:grid_size.z//2 + source_z_size//2] = 1  # ???
+    source.p_mask[
+        pml_size,
+        grid_size.y//2 - source_y_size//2 - 1:grid_size.y//2 + source_y_size//2,
+        grid_size.z//2 - source_z_size//2 - 1:grid_size.z//2 + source_z_size//2
+    ] = 1  # ???
 
     # define a time varying sinusoidal source
     source_freq     = 2e6      # [Hz]
@@ -135,7 +139,7 @@ def test_cpp_running_simulations():
     elif example_number == 2:
         # load output data from the C++ simulation
         with h5py.File(output_file_full_path, 'r') as hf:
-            sensor_data = dotdict({
+            sensor_data = dotdict({  # noqa: F841
                 'p_final': np.array(hf['p_final']),
                 'p_max': np.array(hf['p_max']),
             })

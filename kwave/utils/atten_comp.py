@@ -1,15 +1,8 @@
-import time
-
 import numpy as np
 from matplotlib import pyplot as plt
 
 from kwave.utils.conversion import db2neper
-from kwave.utils.data import scale_SI, scale_time
-from kwave.utils.filters import next_pow2
 from kwave.utils.math import find_closest
-from kwave.utils.matrix import expand_matrix
-from kwave.utils.tictoc import TicToc
-from scipy.io import loadmat
 
 
 # =========================================================================
@@ -63,7 +56,6 @@ def atten_comp(
 
     """
     # dynamic range used in TFD plot [dB]
-    PLOT_DNR = 40
     # multiplier used to scale the auto-plot range
     PLOT_RANGE_MULT = 1.5
 
@@ -165,7 +157,7 @@ def atten_comp(
     def findClosest(arr, value):
         return (np.abs(arr - value)).argmin()
 
-    if filter_cutoff == 'auto':
+    if filter_cutoff == 'auto':  # noqa: F821
         # update display
         if display_updates:
             print("finding filter thresholds... ")
@@ -197,13 +189,13 @@ def atten_comp(
         if fit_type == 'linear':
             neg_penalty = 10
             x0 = np.array([-f_array_hs[-1] / N, f_array_hs[int(len(f_array_hs) / 2)]])
-            opt_vals = opt.fmin(constlinfit, x0, args=(1, N, cutoff_freq_array, neg_penalty))
+            opt_vals = opt.fmin(constlinfit, x0, args=(1, N, cutoff_freq_array, neg_penalty))  # noqa: F821
             x = np.array(list(range(1, N + 1)))
             cutoff_freq_array = opt_vals[0] * x + opt_vals[1]
 
         elif fit_type == 'spline':
-            pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, 'r')
-            cutoff_freq_array = ppval(pp, list(range(1, N + 1)))
+            pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, 'r')  # noqa: F821
+            cutoff_freq_array = ppval(pp, list(range(1, N + 1)))  # noqa: F821
 
         elif fit_type == 'mav':
             cutoff_freq_array = np.convolve(cutoff_freq_array, np.ones(mav_terms) / mav_terms, mode='same')
@@ -294,7 +286,6 @@ def atten_comp(
         tv_filter[t_index, :] = np.roll(tv_filter[t_index, :], t_index)
 
     # zero out lower and upper triangles
-    ones_mat = np.ones((N, N))
     tv_filter[np.tril_indices(N, -np.ceil(N / 2) + 1)] = 0
     tv_filter[np.triu_indices(N, np.ceil(N / 2) + 1)] = 0
 

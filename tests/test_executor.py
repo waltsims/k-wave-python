@@ -1,7 +1,6 @@
 import sys
 import unittest.mock
 import logging
-import sys
 from kwave.executor import Executor
 import pytest
 import os

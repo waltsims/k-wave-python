@@ -10,17 +10,29 @@ from kwave.utils.matrix import num_dim2
 @dataclass
 class kSource(object):
     _p0             = None
-    p               = None      #: time varying pressure at each of the source positions given by source.p_mask
-    p_mask          = None      #: binary matrix specifying the positions of the time varying pressure source distribution
-    p_mode          = None      #: optional input to control whether the input pressure is injected as a mass source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
-    p_frequency_ref = None      #: Pressure reference frequency
+    #: time varying pressure at each of the source positions given by source.p_mask
+    p               = None
+    #: binary matrix specifying the positions of the time varying pressure source distribution
+    p_mask          = None
+    #: optional input to control whether the input pressure is injected as a mass source or enforced
+    # as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
+    p_mode          = None
+    #: Pressure reference frequency
+    p_frequency_ref = None
 
-    ux              = None      #: time varying particle velocity in the x-direction at each of the source positions given by source.u_mask
-    uy              = None      #: time varying particle velocity in the y-direction at each of the source positions given by source.u_mask
-    uz              = None      #: time varying particle velocity in the z-direction at each of the source positions given by source.u_mask
-    u_mask          = None      #: binary matrix specifying the positions of the time varying particle velocity distribution
-    u_mode          = None      #: optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
-    u_frequency_ref = None      #: Velocity reference frequency
+    #: time varying particle velocity in the x-direction at each of the source positions given by source.u_mask
+    ux              = None
+    #: time varying particle velocity in the y-direction at each of the source positions given by source.u_mask
+    uy              = None
+    #: time varying particle velocity in the z-direction at each of the source positions given by source.u_mask
+    uz              = None
+    #: binary matrix specifying the positions of the time varying particle velocity distribution
+    u_mask          = None
+    #: optional input to control whether the input velocity is applied as a force source or enforced as a dirichlet
+    # boundary condition; valid inputs are 'additive' (the default) or 'dirichlet'
+    u_mode          = None
+    #: Velocity reference frequency
+    u_frequency_ref = None
 
     sxx             = None      #: Stress source in x -> x direction
     syy             = None      #: Stress source in y -> y direction
@@ -124,16 +136,19 @@ class kSource(object):
                 # series given matches the number of source elements, or the number
                 # of labelled sources
                 if self.p.shape[0] > 1 and (len(self.p[:, 0]) != self.p_mask.sum()):
-                    raise ValueError('The number of time series in source.p must match the number of source elements in source.p_mask.')
+                    raise ValueError('The number of time series in source.p '
+                                     'must match the number of source elements in source.p_mask.')
             else:
 
                 # check the source labels are monotonic, and start from 1
                 if (sum(p_unique[1:] - p_unique[:-1]) != len(p_unique) - 1) or (not any(p_unique == 1)):
                     raise ValueError(
-                        'If using a labelled source.p_mask, the source labels must be monotonically increasing and start from 1.')
+                        'If using a labelled source.p_mask, '
+                        'the source labels must be monotonically increasing and start from 1.')
                 # make sure the correct number of input signals are given
                 if np.size(self.p, 1) != (np.size(p_unique) - 1):
-                    raise ValueError('The number of time series in source.p must match the number of labelled source elements in source.p_mask.')
+                    raise ValueError('The number of time series in source.p '
+                                     'must match the number of labelled source elements in source.p_mask.')
 
         # check for time varying velocity source input and set source flag
         if any([(getattr(self, k) is not None) for k in ['ux', 'uy', 'uz', 'u_mask']]):
@@ -170,13 +185,16 @@ class kSource(object):
 
             if self.ux is not None:
                 if self.flag_ux > kgrid.Nt:
-                    warn('  WARNING: source.ux has more time points than kgrid.Nt, remaining time points will not be used.')
+                    warn('  WARNING: source.ux has more time points than kgrid.Nt, '
+                         'remaining time points will not be used.')
             if self.uy is not None:
                 if self.flag_uy > kgrid.Nt:
-                    warn('  WARNING: source.uy has more time points than kgrid.Nt, remaining time points will not be used.')
+                    warn('  WARNING: source.uy has more time points than kgrid.Nt, '
+                         'remaining time points will not be used.')
             if self.uz is not None:
                 if self.flag_uz > kgrid.Nt:
-                    warn('  WARNING: source.uz has more time points than kgrid.Nt, remaining time points will not be used.')
+                    warn('  WARNING: source.uz has more time points than kgrid.Nt, '
+                         'remaining time points will not be used.')
 
             # check if the mask is binary or labelled
             u_unique = np.unique(self.u_mask)
@@ -189,28 +207,47 @@ class kSource(object):
                 uy_size = self.uy[:, 0].size if (self.uy is not None) else None
                 uz_size = self.uz[:, 0].size if (self.uz is not None) else None
                 u_sum = np.sum(self.u_mask)
-                if (self.flag_ux and (ux_size > 1)) or (self.flag_uy and (uy_size > 1)) or (self.flag_uz and (uz_size > 1)):
-                    if (self.flag_ux and (ux_size != u_sum)) and (self.flag_uy and (uy_size != u_sum)) or (self.flag_uz and (uz_size != u_sum)):
-                        raise ValueError('The number of time series in source.ux (etc) must match the number of source elements in source.u_mask.')
+                if (self.flag_ux and (ux_size > 1)) or \
+                        (self.flag_uy and (uy_size > 1)) or \
+                        (self.flag_uz and (uz_size > 1)):
+                    if (self.flag_ux and (ux_size != u_sum)) and \
+                            (self.flag_uy and (uy_size != u_sum)) or \
+                            (self.flag_uz and (uz_size != u_sum)):
+                        raise ValueError('The number of time series in source.ux (etc) '
+                                         'must match the number of source elements in source.u_mask.')
 
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                if (self.flag_ux and (ux_size > 1)) or (self.flag_uy and (uy_size > 1)) or (self.flag_uz and (uz_size > 1)):
-                    if (self.flag_ux and (ux_size != u_sum)) or (self.flag_uy and (uy_size != u_sum)) or (self.flag_uz and (uz_size != u_sum)):
-                        raise ValueError('The number of time series in source.ux (etc) must match the number of source elements in source.u_mask.')
+                if (self.flag_ux and (ux_size > 1)) or \
+                        (self.flag_uy and (uy_size > 1)) or (self.flag_uz and (uz_size > 1)):
+                    if (self.flag_ux and (ux_size != u_sum)) or \
+                            (self.flag_uy and (uy_size != u_sum)) or (self.flag_uz and (uz_size != u_sum)):
+                        raise ValueError('The number of time series in source.ux (etc) '
+                                         'must match the number of source elements in source.u_mask.')
             else:
                 raise NotImplementedError
 
                 # check the source labels are monotonic, and start from 1
                 # if (sum(u_unique(2:end) - u_unique(1:end-1)) != (numel(u_unique) - 1)) or (~any(u_unique == 1))
-                if eng.eval('(sum(u_unique(2:end) - u_unique(1:end-1)) ~= (numel(u_unique) - 1)) || (~any(u_unique == 1))'):
-                    raise ValueError('If using a labelled source.u_mask, the source labels must be monotonically increasing and start from 1.')
+                if eng.eval('(sum(u_unique(2:end) - '
+                            'u_unique(1:end-1)) ~= '
+                            '(numel(u_unique) - 1)) '
+                            '|| '
+                            '(~any(u_unique == 1))'):
+                    raise ValueError('If using a labelled source.u_mask, '
+                                     'the source labels must be monotonically increasing and start from 1.')
 
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                # if (flgs.source_ux and (size(source.ux, 1) != (numel(u_unique) - 1))) or (flgs.source_uy and (size(source.uy, 1) != (numel(u_unique) - 1))) or (flgs.source_uz and (size(source.uz, 1) != (numel(u_unique) - 1)))
-                if eng.eval('(flgs.source_ux && (size(source.ux, 1) ~= (numel(u_unique) - 1))) || (flgs.source_uy && (size(source.uy, 1) ~= (numel(u_unique) - 1))) || (flgs.source_uz && (size(source.uz, 1) ~= (numel(u_unique) - 1)))'):
-                    raise ValueError('The number of time series in source.ux (etc) must match the number of labelled source elements in source.u_mask.')
+                # if (flgs.source_ux and (size(source.ux, 1) != (numel(u_unique) - 1))) or
+                #   (flgs.source_uy and (size(source.uy, 1) != (numel(u_unique) - 1))) or
+                #   (flgs.source_uz and (size(source.uz, 1) != (numel(u_unique) - 1)))
+                if eng.eval('(flgs.source_ux && (size(source.ux, 1) ~= (numel(u_unique) - 1))) '
+                            '|| (flgs.source_uy && (size(source.uy, 1) ~= (numel(u_unique) - 1))) '
+                            '|| '
+                            '(flgs.source_uz && (size(source.uz, 1) ~= (numel(u_unique) - 1)))'):
+                    raise ValueError('The number of time series in source.ux (etc) '
+                                     'must match the number of labelled source elements in source.u_mask.')
 
         # check for time varying stress source input and set source flag
         if any([(getattr(self, k) is not None) for k in ['sxx', 'syy', 'szz', 'sxy', 'sxz', 'syz', 's_mask']]):
@@ -281,13 +318,16 @@ class kSource(object):
                             (self.source_sxy and (eng.eval('length(source.sxy(:,1))') != s_mask_sum)) or \
                             (self.source_sxz and (eng.eval('length(source.sxz(:,1))') != s_mask_sum)) or \
                             (self.source_syz and (eng.eval('length(source.syz(:,1))') != s_mask_sum)):
-                        raise ValueError('The number of time series in source.sxx (etc) must match the number of source elements in source.s_mask.')
+                        raise ValueError('The number of time series in source.sxx (etc) '
+                                         'must match the number of source elements in source.s_mask.')
 
             else:
                 # check the source labels are monotonic, and start from 1
                 # if (sum(s_unique(2:end) - s_unique(1:end-1)) != (numel(s_unique) - 1)) or (~any(s_unique == 1))
-                if eng.eval('(sum(s_unique(2:end) - s_unique(1:end-1)) ~= (numel(s_unique) - 1)) || (~any(s_unique == 1))'):
-                    raise ValueError('If using a labelled source.s_mask, the source labels must be monotonically increasing and start from 1.')
+                if eng.eval('(sum(s_unique(2:end) - s_unique(1:end-1)) ~= '
+                            '(numel(s_unique) - 1)) || (~any(s_unique == 1))'):
+                    raise ValueError('If using a labelled source.s_mask, '
+                                     'the source labels must be monotonically increasing and start from 1.')
 
                 numel_s_unique = eng.eval('numel(s_unique) - 1;')
                 # if more than one time series is given, check the number of time
@@ -298,7 +338,8 @@ class kSource(object):
                         (self.source_sxy and (eng.eval('size(source.sxy, 1)') != numel_s_unique)) or \
                         (self.source_sxz and (eng.eval('size(source.sxz, 1)') != numel_s_unique)) or \
                         (self.source_syz and (eng.eval('size(source.syz, 1)') != numel_s_unique)):
-                    raise ValueError('The number of time series in source.sxx (etc) must match the number of labelled source elements in source.u_mask.')
+                    raise ValueError('The number of time series in source.sxx (etc) '
+                                     'must match the number of labelled source elements in source.u_mask.')
 
     @property
     def flag_ux(self):

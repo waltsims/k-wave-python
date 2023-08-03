@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -46,7 +46,11 @@ def test_sd_directivity_modelling_3D():
     # define a large area detector
     sz = 16        # [grid points]
     sensor_mask = np.zeros(grid_size_points)
-    sensor_mask[grid_size_points.x//2, (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1), (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)] = 1
+    sensor_mask[
+        grid_size_points.x//2,
+        (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1),
+        (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)
+    ] = 1
     sensor = kSensor(sensor_mask)
 
     # define equally spaced point sources lying on a circle centred at the
@@ -73,7 +77,7 @@ def test_sd_directivity_modelling_3D():
     source.p = filter_time_series(kgrid, medium, source.p)
 
     # pre-allocate array for storing the output time series
-    single_element_data = np.zeros((kgrid.Nt, points))
+    single_element_data = np.zeros((kgrid.Nt, points))  # noqa: F841
 
     # run a simulation for each of these sources to see the effect that the
     # angle from the detector has on the measured signal

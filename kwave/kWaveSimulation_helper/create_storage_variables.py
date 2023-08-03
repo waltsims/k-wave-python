@@ -1,8 +1,9 @@
 import numpy as np
 from numpy.fft import ifftshift
 
-from kwave import SimulationOptions, kWaveGrid
 from kwave.data import Vector
+from kwave.kgrid import kWaveGrid
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 
 
@@ -343,7 +344,7 @@ def create_transducer_buffer(is_transducer_sensor, is_transducer_receive_elevati
             # ???
             sensor_data_buffer_size = sensor.elevation_beamforming_delays.max() + 1
             if sensor_data_buffer_size > 1:
-                sensor_data_buffer = np.zeros([num_sensor_points, sensor_data_buffer_size])
+                sensor_data_buffer = np.zeros([num_sensor_points, sensor_data_buffer_size])  # noqa: F841
             else:
                 del sensor_data_buffer_size
                 flags.transducer_receive_elevation_focus = False

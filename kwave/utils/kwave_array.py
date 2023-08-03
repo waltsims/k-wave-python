@@ -748,7 +748,7 @@ def off_grid_points(kgrid, points,
         # convert to the computational coordinate if the physical coordinate is
         # sampled nonuniformly
         if kgrid.nonuniform:
-            point, BLIscale = mapPoint(kgrid, point)
+            point, BLIscale = mapPoint(kgrid, point)  # noqa: F821
 
         if bli_tolerance == 0:
             if mask_only:

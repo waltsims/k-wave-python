@@ -12,7 +12,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -29,7 +29,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_us_transducer_as_sensor():
     # input and output filenames (these must have the .h5 extension)
-    input_filename = 'example_input.h5'
+    input_filename  = 'example_input.h5'
     output_filename = 'example_output.h5'
 
     # pathname for the input and output files
@@ -134,7 +134,7 @@ def test_us_transducer_as_sensor():
     # transducer.properties
 
     # set the input settings
-    input_filename = f'example_tran_as_sen_input.h5'
+    input_filename = 'example_tran_as_sen_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     # run the simulation

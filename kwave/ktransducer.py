@@ -529,7 +529,11 @@ class NotATransducer(kSensor):
         indexed_mask = self.indexed_mask
         retract_size = np.array(retract_size[0]).astype(np.int_)
 
-        self.indexed_mask = indexed_mask[retract_size[0]:-retract_size[0], retract_size[1]:-retract_size[1], retract_size[2]:-retract_size[2]]
+        self.indexed_mask = indexed_mask[
+            retract_size[0]:-retract_size[0],
+            retract_size[1]:-retract_size[1],
+            retract_size[2]:-retract_size[2]
+        ]
 
     @property
     def transmit_apodization_mask(self):
@@ -607,10 +611,15 @@ class NotATransducer(kSensor):
 
             # add delay times
             # mask[active_elements_index] = delay_times[indexed_active_elements_mask_copy[active_elements_index]]
-            mask[unflatten_matlab_mask(mask, active_elements_index, diff=-1)] = matlab_mask(delay_times, matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1), diff=-1).squeeze()
+            mask[unflatten_matlab_mask(mask, active_elements_index, diff=-1)] = matlab_mask(
+                delay_times,
+                matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1),
+                diff=-1
+            ).squeeze()
 
         # calculate elevation focus time delays provided each element is longer than one grid point
-        if not np.isinf(self.elevation_focus_distance) and (self.transducer.element_length > 1) and (mode is None or mode != 3):
+        if not np.isinf(self.elevation_focus_distance) and \
+                (self.transducer.element_length > 1) and (mode is None or mode != 3):
 
             # get elevation beamforming delays
             elevation_delay_times = self.elevation_beamforming_delays
@@ -619,13 +628,18 @@ class NotATransducer(kSensor):
             element_voxel_mask = self.indexed_element_voxel_mask
 
             # add delay times
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += matlab_mask(elevation_delay_times, matlab_mask(element_voxel_mask, active_elements_index - 1) - 1)[:, 0]  # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += matlab_mask(
+                elevation_delay_times,
+                matlab_mask(element_voxel_mask, active_elements_index - 1) - 1
+            )[:, 0]  # -1s compatibility
 
         # shift delay times (these should all be >= 0, where a value of 0 means no delay)
         if self.stored_appended_zeros == 'auto':
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= mask[unflatten_matlab_mask(mask, active_elements_index - 1)].min()  # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= \
+                mask[unflatten_matlab_mask(mask, active_elements_index - 1)].min()  # -1s compatibility
         else:
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += self.stored_beamforming_delays_offset # -1s compatibility
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += \
+                self.stored_beamforming_delays_offset  # -1s compatibility
         return mask.astype(np.uint8)
 
     @property
@@ -640,7 +654,12 @@ class NotATransducer(kSensor):
             element_index = np.arange(-(self.transducer.element_length - 1) / 2, (self.transducer.element_length + 1) / 2)
 
             # calculate time delays for a focussed beam
-            delay_times = (self.elevation_focus_distance - np.sqrt((element_index * self.transducer.grid_spacing[2]) ** 2 + self.elevation_focus_distance ** 2)) / self.sound_speed
+            delay_times = self.elevation_focus_distance - \
+                          np.sqrt(
+                              (element_index * self.transducer.grid_spacing[2]) ** 2
+                              + self.elevation_focus_distance ** 2
+                          )
+            delay_times /= self.sound_speed
 
             # convert the delays to be in units of time points and then reverse
             delay_times = -np.round(delay_times / self.dt).astype(np.int32)
@@ -663,11 +682,17 @@ class NotATransducer(kSensor):
     #     for element_index in np.arange(0, obj.number_active_elements):
     #         if delays(element_index) > 0:
     #             # shift element data forwards
-    #             sensor_data[element_index, :] = apodization[element_index] *[sensor_data(element_index, 1 + delays(element_index):end), zeros(1, delays(element_index))];
+    #             sensor_data[element_index, :] = apodization[element_index] * [
+    #                       sensor_data(element_index, 1 + delays(element_index):end),
+    #                       zeros(1, delays(element_index))
+    #             ];
     #
     #         elif delays(element_index) < 0
     #             # shift element data backwards
-    #             sensor_data[element_index, :] = apodization[element_index] *[zeros(1, -delays(element_index)), sensor_data(element_index, 1:end + delays(element_index))];
+    #             sensor_data[element_index, :] = apodization[element_index] *[
+    #                   zeros(1, -delays(element_index)),
+    #                   sensor_data(element_index, 1:end + delays(element_index))
+    #             ];
     #
     #     # form the a-line summing across the elements
     #     line = sum(sensor_data)
@@ -676,7 +701,8 @@ class NotATransducer(kSensor):
     def combine_sensor_data(self, sensor_data):
         # check the data is the correct size
         if sensor_data.shape[0] != (self.number_active_elements * self.transducer.element_width * self.transducer.element_length):
-            raise ValueError('The number of time series in the input sensor_data must match the number of grid points in the active tranducer elements.')
+            raise ValueError('The number of time series in the input sensor_data must '
+                             'match the number of grid points in the active tranducer elements.')
 
         # get index of which element each time series belongs to
         # Tricky things going on here

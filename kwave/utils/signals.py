@@ -64,11 +64,17 @@ def get_win(N: Union[int, List[int]],
 
     Args:
         N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.
-        type_: Window type. Supported values: 'Bartlett', 'Bartlett-Hanning', 'Blackman', 'Blackman-Harris', 'Blackman-Nuttall', 'Cosine', 'Flattop', 'Gaussian', 'HalfBand', 'Hamming', 'Hanning', 'Kaiser', 'Lanczos', 'Nuttall', 'Rectangular', 'Triangular', 'Tukey'.
+        type_: Window type. Supported values: 'Bartlett', 'Bartlett-Hanning', 'Blackman', 'Blackman-Harris',
+                                              'Blackman-Nuttall', 'Cosine', 'Flattop', 'Gaussian', 'HalfBand',
+                                              'Hamming', 'Hanning', 'Kaiser', 'Lanczos', 'Nuttall',
+                                              'Rectangular', 'Triangular', 'Tukey'.
         plot_win: Boolean to display the window (default = False).
-        param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey), alpha (Blackman, Kaiser), standard deviation (Gaussian) (default = 0.5, 0.16, 3 respectively).
+        param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey),
+                                     alpha (Blackman, Kaiser), standard deviation (Gaussian)
+                                     (default = 0.5, 0.16, 3 respectively).
         rotation: Boolean to create windows via rotation or outer product (default = False).
-        symmetric: Boolean to make the window symmetrical (default = True). Can also be a vector defining the symmetry in each matrix dimension.
+        symmetric: Boolean to make the window symmetrical (default = True).
+                   Can also be a vector defining the symmetry in each matrix dimension.
         square: Boolean to force the window to be square (default = False).
 
     Returns:
@@ -151,7 +157,6 @@ def get_win(N: Union[int, List[int]],
             win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
         elif type_ == 'Flattop':
             win = cosine_series(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
-            ylim = [-0.2, 1]
         elif type_ == 'Gaussian':
             win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
         elif type_ == 'HalfBand':
@@ -200,12 +205,6 @@ def get_win(N: Union[int, List[int]],
         # calculate the coherent gain
         cg = win.sum() / N
     elif N.size == 2:
-        input_options = {
-            "param": param,
-            "rotation": rotation,
-            "symmetric": symmetric,
-            "square": square
-        }
 
         # create the 2D window
         if rotation:
@@ -326,7 +325,9 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
                 The last option generates a continuous wave signal with a cosine taper of the specified length at the beginning and end.
         plot: Boolean controlling whether the created tone burst is plotted.
         signal_length: Signal length in number of samples. If longer than the tone burst length, the signal is appended with zeros.
-        signal_offset: Signal offset before the tone burst starts in number of samples. If an array is given, a matrix of tone bursts is created where each row corresponds to a tone burst for each value of the 'SignalOffset'.
+        signal_offset: Signal offset before the tone burst starts in number of samples.
+                        If an array is given, a matrix of tone bursts is created where each row corresponds to
+                        a tone burst for each value of the 'SignalOffset'.
 
     Returns:
         created tone burst
@@ -459,8 +460,11 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     Args:
         kgrid: simulation grid
         medium: simulation medium
-        filter_cutoff: Any of the filter_cutoff inputs may be set to 'max' to set the cutoff frequency to the maximum frequency supported by the grid
-        taper_ratio: The taper_ratio input is used to control the width of the transition region between the passband and stopband. The default value is 0.5, which corresponds to a transition region of 50% of the filter width.
+        filter_cutoff: Any of the filter_cutoff inputs may be set to 'max' to set the cutoff frequency to
+                       the maximum frequency supported by the grid
+        taper_ratio: The taper_ratio input is used to control the width of the transition region between
+                     the passband and stopband. The default value is 0.5, which corresponds to
+                     a transition region of 50% of the filter width.
 
     Returns:
         alpha_filter
@@ -500,9 +504,10 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
         alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1],
         indexes[2]:indexes[2] + filter_size[2]] = filter_sec
 
-    dim_string = lambda cutoff_vals: "".join([str(scale_SI(co)[0]) + " Hz by " for co in cutoff_vals])
+    def dim_string(cutoff_vals):
+        return "".join([(str(scale_SI(co)[0]) + " Hz by ") for co in cutoff_vals])
     # update the command line status
-    print(f'  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
+    print('  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
 
     return alpha_filter
 

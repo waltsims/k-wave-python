@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test
+import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -57,7 +57,7 @@ def test_ivp_binary_sensor_mask():
     sensor = kSensor(sensor_mask)
 
     # run the simulation
-    input_filename = f'example_ivp_bin_input.h5'
+    input_filename = 'example_ivp_bin_input.h5'
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -74,5 +74,5 @@ def test_ivp_binary_sensor_mask():
         simulation_options=simulation_options,
         execution_options=SimulationExecutionOptions()
     )
-    assert compare_against_ref(f'out_ivp_binary_sensor_mask', input_file_full_path), \
+    assert compare_against_ref('out_ivp_binary_sensor_mask', input_file_full_path), \
         'Files do not match!'

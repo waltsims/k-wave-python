@@ -138,7 +138,8 @@ def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: 
     """
     Convert 3D subscript indices to a linear index.
 
-    This function converts 3D subscript indices to a linear index in a way that is consistent with the way that MATLAB handles indexing. The output is a 1D numpy array containing the linear indices.
+    This function converts 3D subscript indices to a linear index in a way that is consistent with the way
+    that MATLAB handles indexing. The output is a 1D numpy array containing the linear indices.
 
     Args:
         array_shape: A tuple containing the shape of the array.

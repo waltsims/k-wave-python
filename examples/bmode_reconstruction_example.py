@@ -64,9 +64,11 @@ if __name__ == '__main__':
             transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round(
-        [1, grid_size_points.y / 2 - transducer_width / 2,
-         grid_size_points.z / 2 - transducer.element_length / 2])
+    transducer.position = np.round([
+        1,
+        grid_size_points.y / 2 - transducer_width / 2,
+        grid_size_points.z / 2 - transducer.element_length / 2
+    ])
 
     transducer = kWaveTransducerSimple(kgrid, **transducer)
 
