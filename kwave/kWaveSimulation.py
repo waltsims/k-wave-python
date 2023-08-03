@@ -1397,7 +1397,7 @@ class kWaveSimulation(object):
                     'binary_sensor_mask': self.binary_sensor_mask,
                     'time_rev': self.time_rev,
                     'blank_sensor': self.blank_sensor,
-                    'record_u_split_field': self.record_u_split_field,
+                    'record_u_split_field': False,  # self.record_u_split_field,
                     'axisymmetric': self.options.simulation_type.is_axisymmetric(),
                     'reorder_data': self.reorder_data,
                 }),
