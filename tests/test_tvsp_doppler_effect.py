@@ -12,9 +12,6 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test  # noqa: F401
 from kwave.data import Vector

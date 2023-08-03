@@ -5,7 +5,6 @@ import unittest.mock
 
 import h5py
 
-from kwave.options.simulation_options import SimulationType
 from kwave.utils.dotdictionary import dotdict
 
 
@@ -23,7 +22,11 @@ class Executor:
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
 
-        command = f'{self.execution_options.system_string} {self.execution_options.binary_path} -i {input_filename} -o {output_filename} {options}'
+        command = f'{self.execution_options.system_string} ' \
+                  f'{self.execution_options.binary_path} ' \
+                  f'-i {input_filename} ' \
+                  f'-o {output_filename} ' \
+                  f'{options}'
         return_code = os.system(command)
 
         try:
@@ -39,24 +42,24 @@ class Executor:
     def parse_executable_output(self, output_filename: str) -> dotdict:
 
         # Load the simulation and pml sizes from the output file
-        with h5py.File(output_filename, 'r') as output_file:
-            Nx, Ny, Nz = output_file['/Nx'][0].item(), output_file['/Ny'][0].item(), output_file['/Nz'][0].item()
-            pml_x_size, pml_y_size = output_file['/pml_x_size'][0].item(), output_file['/pml_y_size'][0].item()
-            pml_z_size = output_file['/pml_z_size'][0].item() if Nz > 1 else 0
+        # with h5py.File(output_filename, 'r') as output_file:
+        #     Nx, Ny, Nz = output_file['/Nx'][0].item(), output_file['/Ny'][0].item(), output_file['/Nz'][0].item()
+        #     pml_x_size, pml_y_size = output_file['/pml_x_size'][0].item(), output_file['/pml_y_size'][0].item()
+        #     pml_z_size = output_file['/pml_z_size'][0].item() if Nz > 1 else 0
 
-        # Set the default index variables for the _all and _final variables
-        x1, x2 = 1, Nx
-        y1, y2 = (
-            1, 1 + pml_y_size) if self.simulation_options.simulation_type is not SimulationType.AXISYMMETRIC else (
-            1, Ny)
-        z1, z2 = (1 + pml_z_size, Nz - pml_z_size) if Nz > 1 else (1, Nz)
-
-        # Check if the PML is set to be outside the computational grid
-        if self.simulation_options.pml_inside:
-            x1, x2 = 1 + pml_x_size, Nx - pml_x_size
-            y1, y2 = (1, Ny) if self.simulation_options.simulation_type is SimulationType.AXISYMMETRIC else (
-                1 + pml_y_size, Ny - pml_y_size)
-            z1, z2 = 1 + pml_z_size, Nz - pml_z_size if Nz > 1 else (1, Nz)
+        # # Set the default index variables for the _all and _final variables
+        # x1, x2 = 1, Nx
+        # y1, y2 = (
+        #     1, 1 + pml_y_size) if self.simulation_options.simulation_type is not SimulationType.AXISYMMETRIC else (
+        #     1, Ny)
+        # z1, z2 = (1 + pml_z_size, Nz - pml_z_size) if Nz > 1 else (1, Nz)
+        #
+        # # Check if the PML is set to be outside the computational grid
+        # if self.simulation_options.pml_inside:
+        #     x1, x2 = 1 + pml_x_size, Nx - pml_x_size
+        #     y1, y2 = (1, Ny) if self.simulation_options.simulation_type is SimulationType.AXISYMMETRIC else (
+        #         1 + pml_y_size, Ny - pml_y_size)
+        #     z1, z2 = 1 + pml_z_size, Nz - pml_z_size if Nz > 1 else (1, Nz)
 
         # Load the C++ data back from disk using h5py
         with h5py.File(output_filename, 'r') as output_file:

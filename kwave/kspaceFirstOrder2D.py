@@ -1,7 +1,6 @@
 from typing import Union
 
 import numpy as np
-from numpy.fft import ifftshift
 
 from kwave.executor import Executor
 from kwave.kWaveSimulation import kWaveSimulation
@@ -283,7 +282,6 @@ def kspaceFirstOrder2D(
         medium: kWaveMedium instance
         source: kWaveSource instance
         sensor: kWaveSensor instance
-        **kwargs:
 
     Returns:
 
