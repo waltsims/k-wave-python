@@ -11,16 +11,16 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test  # noqa: F401
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kSensor
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import filter_time_series
 from tests.diff_utils import compare_against_ref
 

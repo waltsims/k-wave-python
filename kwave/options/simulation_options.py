@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 from dataclasses import dataclass, field
 from enum import Enum
@@ -87,7 +88,7 @@ class SimulationOptions(object):
     pml_inside: bool = True
     pml_alpha: float = 2.0
     save_to_disk: bool = False
-    save_to_disk_exit: bool = True
+    save_to_disk_exit: bool = False
     scale_source_terms: bool = True
     smooth_c0: bool = False
     smooth_rho0: bool = False
@@ -324,7 +325,10 @@ class SimulationOptions(object):
                 "Optional input ''use_fd'' only supported in 1D."
         # get optimal pml size
         if options.simulation_type.is_axisymmetric() or options.pml_auto:
-            pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+            if options.simulation_type.is_axisymmetric():
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+            else:
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range)
 
             # assign to individual variables
             if kgrid.dim == 1:

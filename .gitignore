@@ -17,4 +17,7 @@ src/
 .vscode/
 *.asv
 *.h5
+*.tar.gz
+*.whl
+*.png
 *.pyc

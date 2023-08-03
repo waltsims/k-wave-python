@@ -12,7 +12,7 @@ def display_simulation_params(kgrid: kWaveGrid, medium: kWaveMedium, elastic_cod
     k_size = kgrid.size
 
     # display time step information
-    print('  dt: ', f'{scale_SI(dt)[0]}s', f', t_end: {scale_SI(t_array_end)[0]}s', ', time steps:', Nt)
+    print('  dt: ', f'{scale_SI(dt)[0]}s, t_end: {scale_SI(t_array_end)[0]}s, time steps:', Nt)
 
     c_min, c_min_comp, c_min_shear = get_min_sound_speed(medium, elastic_code)
 

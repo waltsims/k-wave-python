@@ -11,15 +11,15 @@ from tempfile import gettempdir
 
 import numpy as np
 
-from kwave.data import Vector
-from kwave.options import SimulationOptions, SimulationExecutionOptions
-
 # noinspection PyUnresolvedReferences
 import setup_test  # noqa: F401
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
 from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.mapgen import make_ball
 from kwave.utils.signals import tone_burst
@@ -37,7 +37,6 @@ def test_us_bmode_linear_transducer():
 
     # simulation settings
     DATA_CAST = 'single'
-    RUN_SIMULATION = True
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
@@ -197,7 +196,6 @@ def test_us_bmode_linear_transducer():
     sound_speed_map[scattering_region3 == 1] = scattering_c0[scattering_region3 == 1]
     density_map[scattering_region3 == 1] = scattering_rho0[scattering_region3 == 1]
 
-
     # =========================================================================
     # RUN THE SIMULATION
     # =========================================================================
@@ -205,56 +203,52 @@ def test_us_bmode_linear_transducer():
     # preallocate the storage
     scan_lines = np.zeros((number_scan_lines, kgrid.Nt))  # noqa: F841
 
-    # run the simulation if set to true, otherwise, load previous results from disk
-    if RUN_SIMULATION:
+    # set medium position
+    medium_position = 0
 
-        # set medium position
-        medium_position = 0
+    # loop through the scan lines
+    # for scan_line_index in range(1, number_scan_lines + 1):
+    for scan_line_index in range(1, 10):
+        # update the command line status
+        print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
 
-        # loop through the scan lines
-        # for scan_line_index in range(1, number_scan_lines + 1):
-        for scan_line_index in range(1, 10):
-            # update the command line status
-            print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
+        # load the current section of the medium
+        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
+        medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
 
-            # load the current section of the medium
-            medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
-            medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
+        # set the input settings
+        input_filename = 'example_lin_tran_input.h5'
+        pathname = gettempdir()
+        input_file_full_path = os.path.join(pathname, input_filename)
+        simulation_options = SimulationOptions(
+            pml_inside=False,
+            pml_size=pml_size,
+            data_cast=DATA_CAST,
+            data_recast=True,
+            save_to_disk=True,
+            input_filename=input_filename,
+            save_to_disk_exit=True,
+            data_path=pathname
+        )
+        # run the simulation
+        kspaceFirstOrder3DC(
+            medium=medium,
+            kgrid=kgrid,
+            source=not_transducer,
+            sensor=not_transducer,
+            simulation_options=simulation_options,
+            execution_options=SimulationExecutionOptions()
+        )
 
-            # set the input settings
-            input_filename = 'example_lin_tran_input.h5'
-            pathname = gettempdir()
-            input_file_full_path = os.path.join(pathname, input_filename)
-            simulation_options = SimulationOptions(
-                pml_inside=False,
-                pml_size=pml_size,
-                data_cast=DATA_CAST,
-                data_recast=True,
-                save_to_disk=True,
-                input_filename=input_filename,
-                save_to_disk_exit=True,
-                data_path=pathname
-            )
-            # run the simulation
-            kspaceFirstOrder3DC(
-                medium=medium,
-                kgrid=kgrid,
-                source=not_transducer,
-                sensor=not_transducer,
-                simulation_options=simulation_options,
-                execution_options=SimulationExecutionOptions()
-            )
+        assert compare_against_ref(f'out_us_bmode_linear_transducer/input_{scan_line_index}', input_file_full_path,
+                                   precision=6), \
+            'Files do not match!'
 
-            assert compare_against_ref(f'out_us_bmode_linear_transducer/input_{scan_line_index}', input_file_full_path, precision=6), \
-                'Files do not match!'
+        # extract the scan line from the sensor data
+        # scan_lines(scan_line_index, :) = transducer.scan_line(sensor_data);
 
-            # extract the scan line from the sensor data
-            # scan_lines(scan_line_index, :) = transducer.scan_line(sensor_data);
-
-            # update medium position
-            medium_position = medium_position + transducer.element_width
+        # update medium position
+        medium_position = medium_position + transducer.element_width
 
         # % save the scan lines to disk
         # save example_us_bmode_scan_lines scan_lines;
-    else:
-        raise NotImplementedError

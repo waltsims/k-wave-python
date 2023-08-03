@@ -333,7 +333,8 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         created tone burst
 
     """
-    assert isinstance(signal_offset, int), "signal_offset must be integer"
+    assert isinstance(signal_offset, int) or isinstance(signal_offset,
+                                                        np.ndarray), "signal_offset must be integer or array of integers"
     assert isinstance(signal_length, int), "signal_length must be integer"
 
     # calculate the temporal spacing
@@ -348,7 +349,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         tone_t = np.arange(0, tone_length, dt)
 
     tone_burst = np.sin(2 * np.pi * signal_freq * tone_t)
-    tone_index = round(signal_offset)
+    tone_index = np.round(signal_offset)
 
     # check for ring up and ring down input
     if isinstance(envelope, list) or isinstance(envelope, np.ndarray):  # and envelope.size == 2:
@@ -404,7 +405,6 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     # fw = 2 * sqrt(2 * log(2) * w_var)
 
     # Convert tone_index and signal_offset to numpy arrays
-    tone_index = np.array([tone_index])
     signal_offset = np.array(signal_offset)
 
     # Determine the length of the signal array
@@ -414,8 +414,14 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     signal = np.zeros((tone_index.size, signal_length))
 
     # Add the tone burst to the signal array
-    signal[:, tone_index[0]:tone_index[0] + len(tone_burst)] = tone_burst.T
+    # Add the tone burst to the signal array
+    tone_index = np.atleast_1d(tone_index)
 
+    if tone_index.size == 1:
+        signal[:, int(tone_index):int(tone_index) + len(tone_burst)] = tone_burst.T
+    else:
+        for offset, tone_idx in enumerate(tone_index):
+            signal[offset, int(tone_idx):int(tone_idx) + len(tone_burst)] = tone_burst.T
     # plot the signal if required
     if plot_signal:
         raise NotImplementedError

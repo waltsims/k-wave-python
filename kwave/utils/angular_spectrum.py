@@ -127,7 +127,6 @@ def angular_spectrum(
             absorbing = True
 
     else:
-
         # assign the sound speed
         c0 = medium
 
