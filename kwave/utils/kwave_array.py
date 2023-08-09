@@ -8,6 +8,7 @@ from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
 
 import kwave
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
@@ -262,10 +263,10 @@ class kWaveArray(object):
 
     def add_arc_element(self, position, radius, diameter, focus_pos):
 
-        assert isinstance(position, (list, tuple)), "'position' must be list or tuple"
+        assert isinstance(position, (list, tuple, Vector)), "'position' must be list, tuple or Vector"
         assert isinstance(radius, (int, float)), "'radius' must be an integer or float"
         assert isinstance(diameter, (int, float)), "'diameter' must be an integer or float"
-        assert isinstance(focus_pos, (list, tuple)), "'focus_pos' must be list or tuple"
+        assert isinstance(focus_pos, (list, tuple, Vector)), "'focus_pos' must be list, tuple or Vector"
         assert len(position) == 2, "'position' must have 2 elements"
         assert len(focus_pos) == 2, "'focus_pos' must have 2 elements"
 
@@ -395,7 +396,7 @@ class kWaveArray(object):
 
         for ind in range(self.number_elements):
             grid_weights = self.get_off_grid_points(kgrid, ind, True)
-            mask |= grid_weights
+            mask = np.bitwise_or(np.squeeze(mask), grid_weights)
 
         return mask
 
@@ -606,7 +607,7 @@ class kWaveArray(object):
         mask = self.get_array_binary_mask(kgrid)
         mask_ind = matlab_find(mask).squeeze(axis=-1)
 
-        Nt = np.shape(sensor_data)[1]
+        Nt = np.shape(sensor_data)[0]
 
         combined_sensor_data = np.zeros((self.number_elements, Nt))
 
@@ -787,14 +788,14 @@ def off_grid_points(kgrid, points,
         else:
             # create an array of neighbouring grid points for BLI evaluation
             if kgrid.dim == 1:
-                ind, is_ = tol_star(bli_tolerance, kgrid, point, debug)
+                ind, is_, _, _ = tol_star(bli_tolerance, kgrid, point, debug)
                 xs = x_vec[is_]
                 xyz = xs
             elif kgrid.dim == 2:
-                ind, is_, js = tol_star(bli_tolerance, kgrid, point, debug)
+                ind, is_, js, _ = tol_star(bli_tolerance, kgrid, point, debug)
                 xs = x_vec[is_]
                 ys = y_vec[js]
-                xyz = np.array([xs, ys]).T
+                xyz = np.array([xs, ys]).squeeze().T
             elif kgrid.dim == 3:
                 ind, is_, js, ks = tol_star(bli_tolerance, kgrid, point, debug)
                 xs = x_vec[is_.astype(int)].squeeze(axis=-1)

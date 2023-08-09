@@ -47,44 +47,45 @@ class kWaveSimulation(object):
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
-        if self.sensor.time_reversal_boundary_data is not None:
-            # define a new source structure
-            source = {
-                'p_mask': self.sensor.p_mask,
-                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
-                'p_mode': 'dirichlet'
-            }
+        if sensor is not None:
+            if self.sensor.time_reversal_boundary_data is not None:
+                # define a new source structure
+                source = {
+                    'p_mask': self.sensor.p_mask,
+                    'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
+                    'p_mode': 'dirichlet'
+                }
 
-            # define a new sensor structure
-            Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
-            sensor = kSensor(
-                mask=np.ones((Nx, Ny, max(1, Nz))),
-                record=['p_final']
-            )
-            # set time reversal flag
-            self.userarg_time_rev = True
-        else:
-            # set time reversal flag
-            self.userarg_time_rev = False
+                # define a new sensor structure
+                Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
+                sensor = kSensor(
+                    mask=np.ones((Nx, Ny, max(1, Nz))),
+                    record=['p_final']
+                )
+                # set time reversal flag
+                self.userarg_time_rev = True
+            else:
+                # set time reversal flag
+                self.userarg_time_rev = False
 
-        #: Whether sensor.mask should be re-ordered.
-        #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
-        #: and thus must be re-ordered
-        self.reorder_data              = False
+            #: Whether sensor.mask should be re-ordered.
+            #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
+            #: and thus must be re-ordered
+            self.reorder_data = False
 
-        #: Whether the sensor.mask is binary
-        self.binary_sensor_mask        = True
+            #: Whether the sensor.mask is binary
+            self.binary_sensor_mask = True
 
-        # check if the sensor mask is defined as a list of cuboid corners
-        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-            self.userarg_cuboid_corners = True
-        else:
-            self.userarg_cuboid_corners = False
+            # check if the sensor mask is defined as a list of cuboid corners
+            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+                self.userarg_cuboid_corners = True
+            else:
+                self.userarg_cuboid_corners = False
 
-        #: If tse sensor is an object of the kWaveTransducer class
-        self.transducer_sensor         = False
+            #: If tse sensor is an object of the kWaveTransducer class
+            self.transducer_sensor = False
 
-        self.record = Recorder()
+            self.record = Recorder()
 
         # transducer source flags
         #: transducer is object of kWaveTransducer class
@@ -861,6 +862,7 @@ class kWaveSimulation(object):
         # CHECK SOURCE STRUCTURE INPUTS
         # =========================================================================
 
+        # TODO: why is check source checking sensor?
         # check source inputs
         if not isinstance(self.source, (kSource, NotATransducer)):
             # allow an invalid or empty source input if computing time reversal,

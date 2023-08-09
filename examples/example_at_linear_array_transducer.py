@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import kwave.data
-from kwave import kWaveGrid, SimulationOptions, kWaveMedium
+from kwave.kWaveSimulation import SimulationOptions
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC

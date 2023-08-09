@@ -55,6 +55,12 @@ def kspace_first_order_2d_gpu(
     GPU binary.
     """
     execution_options.is_gpu_simulation = True  # force to GPU
+    assert isinstance(kgrid, kWaveGrid), 'kgrid must be a kWaveGrid object'
+    assert isinstance(medium, kWaveMedium), 'medium must be a kWaveMedium object'
+    assert isinstance(simulation_options, SimulationOptions), 'simulation_options must be a SimulationOptions object'
+    assert isinstance(execution_options,
+                      SimulationExecutionOptions), 'execution_options must be a SimulationExecutionOptions object'
+
     sensor_data = kspaceFirstOrder2DC(
         kgrid=kgrid,
         source=source,
@@ -113,7 +119,7 @@ def kspaceFirstOrder2DC(
     Args:
         kgrid: kWaveGrid instance
         source: kWaveSource instance
-        sensor: NotATransducer or kSensor instance
+        sensor: NotATransducer or kSensor instance or None
         medium: kWaveMedium instance
         simulation_options: SimulationOptions instance
         execution_options: SimulationExecutionOptions instance
@@ -137,7 +143,7 @@ def kspaceFirstOrder2DC(
 def kspaceFirstOrder2D(
         kgrid: kWaveGrid,
         source: kSource,
-        sensor: Union[NotATransducer, kSensor],
+        sensor: Union[NotATransducer, kSensor, None],
         medium: kWaveMedium,
         simulation_options: SimulationOptions,
         execution_options: SimulationExecutionOptions
@@ -281,7 +287,7 @@ def kspaceFirstOrder2D(
         kgrid: kWaveGrid instance
         medium: kWaveMedium instance
         source: kWaveSource instance
-        sensor: kWaveSensor instance
+        sensor: kWaveSensor instance or None
 
     Returns:
 
