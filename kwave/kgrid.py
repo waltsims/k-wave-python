@@ -344,7 +344,7 @@ class kWaveGrid(object):
     @property
     def x_size(self):
         """
-        Size of grid in the y-direction [m]
+        Size of grid in the x-direction [m]
         """
         return self.Nx * self.dx
 
