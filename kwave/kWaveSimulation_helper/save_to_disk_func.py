@@ -358,6 +358,8 @@ def grab_sensor_props(integer_variables, kgrid_dim, sensor_mask_index, cuboid_co
     # SENSOR VARIABLES
     # =========================================================================
 
+    # print("integer_variables.sensor_mask_type: ", integer_variables.sensor_mask_type)
+    
     if integer_variables.sensor_mask_type == 0:
         # mask is defined as a list of grid indices
         integer_variables.sensor_mask_index = sensor_mask_index

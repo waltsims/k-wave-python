@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from tempfile import gettempdir
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Union, TYPE_CHECKING
 
 import numpy as np
 
@@ -107,7 +107,7 @@ class SimulationOptions(object):
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
-    pml_size: Optional[List[int]] = None
+    pml_size: Optional[Union[List[int], np.ndarray] ] = None
     pml_x_size: Optional[int] = None
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
@@ -252,7 +252,8 @@ class SimulationOptions(object):
                 options.plot_scale = [-1, 1]
 
         # replace defaults with user defined values if provided and check inputs
-        if (val := options.pml_alpha) is not None and options.pml_alpha != 'auto':
+        if options.pml_alpha is not None and options.pml_alpha != 'auto':
+            val = options.pml_alpha
             # check input is correct size
             val = np.atleast_1d(val)
             if val.size > kgrid.dim:
@@ -290,9 +291,13 @@ class SimulationOptions(object):
             # input only supported in 1D fluid code
             assert kgrid.dim == 1 and not options.simulation_type.is_elastic_simulation(), \
                 "Optional input ''use_fd'' only supported in 1D."
+            
         # get optimal pml size
-        if options.simulation_type.is_axisymmetric() or options.pml_auto:
-            pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+        if options.pml_auto:
+            if options.simulation_type.is_axisymmetric():
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range, options.radial_symmetry[:4])
+            else:
+                pml_size_temp = get_optimal_pml_size(kgrid, options.pml_search_range)
 
             # assign to individual variables
             if kgrid.dim == 1:
@@ -307,4 +312,5 @@ class SimulationOptions(object):
 
             # cleanup unused variables
             del pml_size_temp
+
         return options

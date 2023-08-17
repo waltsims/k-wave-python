@@ -462,4 +462,4 @@ def kspaceFirstOrder3D(
         executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
         sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
                                               options=executor_options)
-        return k_sim.sensor.combine_sensor_data(sensor_data)
+        return sensor_data # k_sim.sensor.combine_sensor_data(sensor_data)

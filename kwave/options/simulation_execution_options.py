@@ -59,8 +59,8 @@ class SimulationExecutionOptions:
         if self.device_num:
             options_dict['-g'] = self.device_num
 
-        if self.num_threads:
-            options_dict['-t'] = self.num_threads
+        # if self.num_threads:
+        #     options_dict['-t'] = self.num_threads
 
         if self.verbose_level:
             options_dict['--verbose'] = self.verbose_level

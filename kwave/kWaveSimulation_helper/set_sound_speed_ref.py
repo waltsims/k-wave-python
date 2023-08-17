@@ -35,7 +35,7 @@ def get_ordinary_sound_speed_ref(medium):
 
     """
     c_ref = _get_sound_speed_ref(medium.sound_speed_ref, medium.sound_speed)
-    print('  reference sound speed: ', c_ref, 'm/s')
+    print('  ---reference sound speed: ', c_ref, 'm/s')
     return c_ref, None, None
 
 
@@ -50,7 +50,7 @@ def get_pstd_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
 
     """
     c_ref = _get_sound_speed_ref(medium.sound_speed_ref, medium.sound_speed_compression)
-    print('  reference sound speed: ', c_ref, 'm/s')
+    print('  ***reference sound speed: ', c_ref, 'm/s')
     return c_ref, None, None
 
 
@@ -89,5 +89,5 @@ def _get_sound_speed_ref(reference, speed):
     else:
         c_ref = reductions['max'](speed)
 
-    print('  reference sound speed: ', c_ref, 'm/s')
+    print('  +++reference sound speed: ', c_ref, 'm/s')
     return float(c_ref)

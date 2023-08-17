@@ -1,0 +1,235 @@
+2023-07-28 09:43:46,359 | __main__ | INFO | PPW = 3.0
+2023-07-28 09:43:46,359 | __main__ | INFO | CFL = 0.3
+2023-07-28 09:43:46,375 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 09:43:46,375 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 09:51:47,648 | __main__ | INFO | simulation_options
+2023-07-28 09:51:47,648 | __main__ | INFO | execution_options
+2023-07-28 09:51:47,660 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 10:11:11,456 | __main__ | INFO | PPW = 3.0
+2023-07-28 10:11:11,456 | __main__ | INFO | CFL = 0.3
+2023-07-28 10:11:11,456 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 10:11:11,456 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 10:19:58,913 | __main__ | INFO | simulation_options
+2023-07-28 10:19:58,913 | __main__ | INFO | execution_options
+2023-07-28 10:19:58,913 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 10:24:35,973 | __main__ | INFO | PPW = 3.0
+2023-07-28 10:24:35,973 | __main__ | INFO | CFL = 0.3
+2023-07-28 10:24:35,973 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 10:24:35,973 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 10:32:36,686 | __main__ | INFO | simulation_options
+2023-07-28 10:32:36,686 | __main__ | INFO | execution_options
+2023-07-28 10:32:36,686 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 11:54:43,166 | __main__ | INFO | PPW = 3.0
+2023-07-28 11:54:43,174 | __main__ | INFO | CFL = 0.3
+2023-07-28 11:54:43,174 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 11:54:43,174 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:02:12,387 | __main__ | INFO | simulation_options
+2023-07-28 12:02:12,387 | __main__ | INFO | execution_options
+2023-07-28 12:02:12,387 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 12:04:25,493 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:04:25,493 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:04:25,493 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:04:25,493 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:12:49,939 | __main__ | INFO | simulation_options
+2023-07-28 12:12:49,940 | __main__ | INFO | execution_options
+2023-07-28 12:12:49,940 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 12:16:19,651 | __main__ | INFO | extract_amp_phase
+2023-07-28 12:16:23,534 | __main__ | INFO | Max Pressure = 0.33553803625559336 MPa
+2023-07-28 12:16:23,543 | __main__ | INFO | MI = 0.47452244156469536
+2023-07-28 12:16:23,543 | __main__ | INFO | Coordinates of max pressure: (64, 64, 0).
+2023-07-28 12:16:23,543 | __main__ | INFO | Location of max pressure: (64.0, 64.0, 0.0).
+2023-07-28 12:16:23,543 | __main__ | INFO | Isppa = 3.752859125808662 W/cm2
+2023-07-28 12:16:23,543 | __main__ | INFO | Ispta = 375.2859125808662 mW/cm2
+2023-07-28 12:28:26,754 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:28:26,754 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:28:26,754 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:28:26,754 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:29:19,353 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:29:19,353 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:29:19,353 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:29:19,353 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:30:12,136 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:30:12,138 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:30:12,139 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:30:12,140 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:33:43,594 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:33:43,594 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:33:43,594 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:33:43,594 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:33:43,931 | __main__ | INFO | simulation_options
+2023-07-28 12:37:26,314 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:37:26,314 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:37:26,314 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:37:26,314 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:37:26,496 | __main__ | INFO | simulation_options
+2023-07-28 12:38:03,481 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:38:03,481 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:38:03,481 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:38:03,481 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:38:03,662 | __main__ | INFO | simulation_options
+2023-07-28 12:39:32,241 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:39:32,241 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:39:32,241 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:39:32,241 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:40:38,807 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:40:38,807 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:40:38,807 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:40:38,807 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:41:06,808 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:41:06,808 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:41:06,808 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:41:06,808 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:41:25,615 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:41:25,615 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:41:25,615 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:41:25,615 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:42:10,404 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:42:10,405 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:42:10,406 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:42:10,406 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 12:50:28,455 | __main__ | INFO | simulation_options
+2023-07-28 12:50:28,455 | __main__ | INFO | execution_options
+2023-07-28 12:50:28,455 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 12:54:32,881 | __main__ | INFO | PPW = 3.0
+2023-07-28 12:54:32,881 | __main__ | INFO | CFL = 0.3
+2023-07-28 12:54:32,881 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 12:54:32,881 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:04:09,433 | __main__ | INFO | simulation_options
+2023-07-28 13:04:09,433 | __main__ | INFO | execution_options
+2023-07-28 13:04:09,433 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 13:12:48,398 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:12:48,398 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:12:48,398 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:12:48,398 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:20:20,178 | __main__ | INFO | simulation_options
+2023-07-28 13:20:20,178 | __main__ | INFO | execution_options
+2023-07-28 13:20:20,178 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 13:24:15,780 | __main__ | INFO | extract_amp_phase
+2023-07-28 13:24:19,113 | __main__ | INFO | Max Pressure = 0.3881305307792682 MPa
+2023-07-28 13:24:19,113 | __main__ | INFO | MI = 0.548899460599109
+2023-07-28 13:24:19,113 | __main__ | INFO | Coordinates of max pressure: (13, 13, 55).
+2023-07-28 13:24:19,114 | __main__ | INFO | Location of max pressure: (13.000000000000002, 13.000000000000002, 55.0).
+2023-07-28 13:24:19,114 | __main__ | INFO | Isppa = 5.021510297433216 W/cm2
+2023-07-28 13:24:19,114 | __main__ | INFO | Ispta = 502.1510297433216 mW/cm2
+2023-07-28 13:33:19,715 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:33:19,716 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:33:19,717 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:33:19,718 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:41:04,526 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:41:04,526 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:41:04,527 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:41:04,528 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:41:14,901 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:41:14,901 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:41:14,901 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:41:14,901 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:52:19,865 | __main__ | INFO | simulation_options
+2023-07-28 13:52:19,865 | __main__ | INFO | execution_options
+2023-07-28 13:52:19,865 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 13:54:50,657 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:54:50,672 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:54:50,672 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:54:50,672 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 13:55:33,386 | __main__ | INFO | PPW = 3.0
+2023-07-28 13:55:33,386 | __main__ | INFO | CFL = 0.3
+2023-07-28 13:55:33,388 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 13:55:33,389 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 14:08:00,514 | __main__ | INFO | simulation_options
+2023-07-28 14:08:00,514 | __main__ | INFO | execution_options
+2023-07-28 14:08:00,514 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 14:21:10,267 | __main__ | INFO | PPW = 3.0
+2023-07-28 14:21:10,267 | __main__ | INFO | CFL = 0.3
+2023-07-28 14:21:10,267 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 14:21:10,267 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 14:31:06,529 | __main__ | INFO | simulation_options
+2023-07-28 14:31:06,529 | __main__ | INFO | execution_options
+2023-07-28 14:31:06,529 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 14:37:23,531 | __main__ | INFO | extract_amp_phase
+2023-07-28 14:37:32,938 | __main__ | INFO | Max Pressure = 0.54624981899494 MPa
+2023-07-28 14:37:32,938 | __main__ | INFO | MI = 0.7725139024664923
+2023-07-28 14:37:32,938 | __main__ | INFO | Coordinates of max pressure: (72, 72, 10).
+2023-07-28 14:37:32,938 | __main__ | INFO | Location of max pressure: (72.00000000000001, 72.00000000000001, 10.0).
+2023-07-28 14:37:32,938 | __main__ | INFO | Isppa = 9.946295491733492 W/cm2
+2023-07-28 14:37:32,938 | __main__ | INFO | Ispta = 994.6295491733492 mW/cm2
+2023-07-28 14:55:09,427 | __main__ | INFO | PPW = 3.0
+2023-07-28 14:55:09,427 | __main__ | INFO | CFL = 0.3
+2023-07-28 14:55:09,427 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 14:55:09,427 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 15:27:47,202 | __main__ | INFO | PPW = 3.0
+2023-07-28 15:27:47,202 | __main__ | INFO | CFL = 0.3
+2023-07-28 15:27:47,202 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 15:27:47,202 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 15:49:59,753 | __main__ | INFO | simulation_options
+2023-07-28 15:49:59,753 | __main__ | INFO | execution_options
+2023-07-28 15:49:59,753 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 16:06:47,221 | __main__ | INFO | extract_amp_phase
+2023-07-28 16:07:11,762 | __main__ | INFO | Max Pressure = 0.43973465792372946 MPa
+2023-07-28 16:07:11,762 | __main__ | INFO | MI = 0.6218787170812318
+2023-07-28 16:07:11,762 | __main__ | INFO | Coordinates of max pressure: (81, 81, 143).
+2023-07-28 16:07:11,762 | __main__ | INFO | Location of max pressure: (81.0, 81.0, 143.00000000000003).
+2023-07-28 16:07:11,762 | __main__ | INFO | Isppa = 6.445552312643312 W/cm2
+2023-07-28 16:07:11,762 | __main__ | INFO | Ispta = 644.5552312643313 mW/cm2
+2023-07-28 16:32:44,025 | __main__ | INFO | PPW = 3.0
+2023-07-28 16:32:44,025 | __main__ | INFO | CFL = 0.3
+2023-07-28 16:32:44,025 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-07-28 16:32:44,025 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-07-28 16:39:41,572 | __main__ | INFO | simulation_options
+2023-07-28 16:39:41,572 | __main__ | INFO | execution_options
+2023-07-28 16:39:41,572 | __main__ | INFO | kspaceFirstOrder3DG
+2023-07-28 16:42:29,881 | __main__ | INFO | extract_amp_phase
+2023-07-28 16:42:35,234 | __main__ | INFO | Max Pressure = 0.37282372470270453 MPa
+2023-07-28 16:42:35,234 | __main__ | INFO | MI = 0.5272523678490179
+2023-07-28 16:42:35,234 | __main__ | INFO | Coordinates of max pressure: (36, 64, 64).
+2023-07-28 16:42:35,234 | __main__ | INFO | Location of max pressure: (36.00000000000001, 36.00000000000001, 64.0).
+2023-07-28 16:42:35,234 | __main__ | INFO | Isppa = 4.633250990039933 W/cm2
+2023-07-28 16:42:35,234 | __main__ | INFO | Ispta = 463.32509900399333 mW/cm2
+2023-08-16 14:40:28,178 | __main__ | INFO | PPW = 3.0
+2023-08-16 14:40:28,178 | __main__ | INFO | CFL = 0.3
+2023-08-16 14:40:28,178 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-08-16 14:40:28,178 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-08-16 14:41:21,926 | __main__ | INFO | PPW = 3.0
+2023-08-16 14:41:21,926 | __main__ | INFO | CFL = 0.3
+2023-08-16 14:41:21,926 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-08-16 14:41:21,926 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-08-16 14:42:27,762 | __main__ | INFO | PPW = 3.0
+2023-08-16 14:42:27,762 | __main__ | INFO | CFL = 0.3
+2023-08-16 14:42:27,762 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-08-16 14:42:27,762 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-08-16 14:50:31,088 | __main__ | INFO | simulation_options
+2023-08-16 14:50:31,090 | __main__ | INFO | execution_options
+2023-08-16 14:50:31,091 | __main__ | INFO | kspaceFirstOrder3DG
+2023-08-16 14:54:04,001 | __main__ | INFO | extract_amp_phase
+2023-08-16 14:54:09,914 | __main__ | INFO | Max Pressure = 0.7822062449614564 MPa
+2023-08-16 14:54:09,915 | __main__ | INFO | MI = 1.106206680197423
+2023-08-16 14:54:09,915 | __main__ | INFO | Coordinates of max pressure: (64, 64, 80).
+2023-08-16 14:54:09,915 | __main__ | INFO | Location of max pressure: (64.0, 64.0, 80.0).
+2023-08-16 14:54:09,915 | __main__ | INFO | Isppa = 20.39488698855673 W/cm2
+2023-08-16 14:54:09,916 | __main__ | INFO | Ispta = 2039.4886988556732 mW/cm2
+2023-08-16 15:15:02,143 | __main__ | INFO | PPW = 3.0
+2023-08-16 15:15:02,143 | __main__ | INFO | CFL = 0.3
+2023-08-16 15:15:02,143 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-08-16 15:15:02,143 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-08-16 15:23:27,799 | __main__ | INFO | simulation_options
+2023-08-16 15:23:27,801 | __main__ | INFO | execution_options
+2023-08-16 15:23:27,802 | __main__ | INFO | kspaceFirstOrder3DG
+2023-08-16 15:26:28,510 | __main__ | INFO | extract_amp_phase
+2023-08-16 15:26:35,173 | __main__ | INFO | Max Pressure = 0.7822062449614564 MPa
+2023-08-16 15:26:35,174 | __main__ | INFO | MI = 1.106206680197423
+2023-08-16 15:26:35,174 | __main__ | INFO | Coordinates of max pressure: (64, 64, 80).
+2023-08-16 15:26:35,174 | __main__ | INFO | Location of max pressure: (64.0, 64.0, 80.0).
+2023-08-16 15:26:35,175 | __main__ | INFO | Isppa = 20.39488698855673 W/cm2
+2023-08-16 15:26:35,175 | __main__ | INFO | Ispta = 2039.4886988556732 mW/cm2
+2023-08-16 15:32:13,251 | __main__ | INFO | PPW = 3.0
+2023-08-16 15:32:13,251 | __main__ | INFO | CFL = 0.3
+2023-08-16 15:32:13,252 | __main__ | INFO | source_amp.dim = [51590. 51590. 51590. 51590.]
+2023-08-16 15:32:13,253 | __main__ | INFO | source_phase.dim = [0.         5.56760031 4.85201532 4.13643033]
+2023-08-16 15:38:57,889 | __main__ | INFO | simulation_options
+2023-08-16 15:38:57,889 | __main__ | INFO | execution_options
+2023-08-16 15:38:57,890 | __main__ | INFO | kspaceFirstOrder3DG
+2023-08-16 15:41:34,113 | __main__ | INFO | extract_amp_phase
+2023-08-16 15:41:39,819 | __main__ | INFO | Max Pressure = 0.7822062449614564 MPa
+2023-08-16 15:41:39,819 | __main__ | INFO | MI = 1.106206680197423
+2023-08-16 15:41:39,820 | __main__ | INFO | Coordinates of max pressure: (64, 64, 80).
+2023-08-16 15:41:39,820 | __main__ | INFO | Location of max pressure: (64.0, 64.0, 80.0).
+2023-08-16 15:41:39,820 | __main__ | INFO | Isppa = 20.39488698855673 W/cm2
+2023-08-16 15:41:39,820 | __main__ | INFO | Ispta = 2039.4886988556732 mW/cm2

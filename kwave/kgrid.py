@@ -342,6 +342,14 @@ class kWaveGrid(object):
             return np.nan
 
     @property
+    def x_size(self):
+        """
+        Size of grid in the y-direction [m]
+        """
+        return self.Nx * self.dx
+
+
+    @property
     def y_size(self):
         """
         Size of grid in the y-direction [m]

@@ -79,6 +79,7 @@ class kWaveSimulation(object):
         if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
             self.userarg_cuboid_corners = True
         else:
+            # print("********** self.userarg_cuboid_corners = False **********" )
             self.userarg_cuboid_corners = False
 
         #: If tse sensor is an object of the kWaveTransducer class
@@ -1247,6 +1248,7 @@ class kWaveSimulation(object):
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
         if opt.pml_inside is False:
+            print("if opt.pml_inside is False:")
             expand_results = expand_grid_matrices(
                 self.kgrid, self.medium, self.source, self.sensor, self.options,
                 dotdict({
@@ -1313,6 +1315,8 @@ class kWaveSimulation(object):
         if self.use_sensor:
             if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
                 if self.cuboid_corners:
+                    
+                    print("if self.cuboid_corners: True")
 
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
@@ -1348,10 +1352,15 @@ class kWaveSimulation(object):
                     del temp_mask
 
                 else:
+                    
+                    # print("if self.cuboid_corners: False")
+
                     # create mask indices (this works for both normal sensor and
                     # transducer inputs)
                     self.sensor_mask_index = np.where(self.sensor.mask.flatten(order='F') != 0)[0] + 1  # +1 due to matlab indexing
+                    # print(np.shape(self.sensor_mask_index))
                     self.sensor_mask_index = np.expand_dims(self.sensor_mask_index, -1)  # compatibility, n => [n, 1]
+                    # print(np.shape(self.sensor_mask_index))
 
                 # convert the data type depending on the number of indices (this saves
                 # memory)
@@ -1370,7 +1379,7 @@ class kWaveSimulation(object):
                     'binary_sensor_mask': self.binary_sensor_mask,
                     'time_rev': self.time_rev,
                     'blank_sensor': self.blank_sensor,
-                    'record_u_split_field': self.record_u_split_field,
+                    'record_u_split_field': False, # self.record_u_split_field,
                     'axisymmetric': self.options.simulation_type.is_axisymmetric(),
                     'reorder_data': self.reorder_data,
                 }),

@@ -113,11 +113,14 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     assert pml_range[1] > pml_range[0], 'The second value for pml_range must be greater than the first.'
 
     # check for axisymmetric input
+    print("axisymetric:", axisymmetric)
     if axisymmetric is None:
         axisymmetric = False
 
+    print("instance of axisymetric:", isinstance(axisymmetric, str) )
     # check for correct string
-    assert not isinstance(axisymmetric, str) or axisymmetric.startswith(('WSWA', 'WSWS')), \
+    if isinstance(axisymmetric, str):
+        assert not axisymmetric.startswith(('WSWA', 'WSWS')), \
         "Optional input axisymmetric must be set to ''WSWA'' or ''WSWS''."
 
     # check for correct dimensions
