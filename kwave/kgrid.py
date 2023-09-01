@@ -97,6 +97,8 @@ class kWaveGrid(object):
             return 'auto'
         else:
             t_array = np.arange(0, self.Nt) * self.dt
+            # TODO: adding this extra dimension seems unnecessary
+            # This leads to an extra squeeze when plotting e.g. in example "array as sensor" on lines 110 and 111
             return np.expand_dims(t_array, axis=0)
 
     @t_array.setter

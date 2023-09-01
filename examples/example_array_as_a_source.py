@@ -101,6 +101,7 @@ source.p = source_p
 p = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
 
 p_field = np.reshape(p['p'], (kgrid.Nt, Nx, Ny))
+p_field = np.transpose(p_field, (0, 2, 1))
 # =========================================================================
 # VISUALIZATION
 # =========================================================================
@@ -130,7 +131,7 @@ def update(frame):
 ani = FuncAnimation(fig, update, frames=kgrid.Nt, interval=100)  # Adjust interval as needed (in milliseconds)
 
 # Save the animation as a video file (e.g., MP4)
-video_filename = 'output_video.mp4'
+video_filename = 'output_video1.mp4'
 ani.save('/tmp/' + video_filename, writer='ffmpeg', fps=30)  # Adjust FPS as needed
 
 # Show the animation (optional)

@@ -602,12 +602,14 @@ class kWaveArray(object):
         return distributed_source_signal
 
     def combine_sensor_data(self, kgrid, sensor_data):
+
         self.check_for_elements()
 
         mask = self.get_array_binary_mask(kgrid)
         mask_ind = matlab_find(mask).squeeze(axis=-1)
 
-        Nt = np.shape(sensor_data)[0]
+        Nt = np.shape(sensor_data)[1]
+        assert kgrid.Nt == Nt, 'sensor_data must have the same number of time steps as kgrid'
 
         combined_sensor_data = np.zeros((self.number_elements, Nt))
 
@@ -820,16 +822,17 @@ def off_grid_points(kgrid, points,
                         mask_t = sinc(pi_on_dxyz * (xyz - point.T))
                     else:
                         mask_t = sinc(pi_on_dxyz * (xyz - point.T))
-                mask_t = np.prod(mask_t, axis=1)
+                current_mask_t = np.prod(np.atleast_2d(mask_t), axis=1)
 
                 # apply scaling for non-uniform grid
                 if kgrid.nonuniform:
-                    mask_t = mask_t * BLIscale
+                    current_mask_t = mask_t * BLIscale
 
+                updated_mask_value = matlab_mask(mask, ind - 1).squeeze(axis=-1) + scale[point_ind] * current_mask_t
                 # add this contribution to the overall source mask
                 mask = matlab_assign(mask,
                                      ind - 1,
-                                     matlab_mask(mask, ind - 1).squeeze(axis=-1) + scale[point_ind] * mask_t)
+                                     updated_mask_value)
 
         # update the waitbar
         if display_wait_bar and (point_ind % wait_bar_update_freq == 0):
