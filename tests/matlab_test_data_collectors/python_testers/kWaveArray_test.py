@@ -129,7 +129,7 @@ def test_kwave_array():
     reader.increment()
 
     kwave_array = kWaveArray()
-    kwave_array.add_annular_array([3, 5, 10], 5, [[1.2, 0.5]], [12, 21, 3])
+    kwave_array.add_annular_array([3.1, 5.2, 10.9], 5, [[1.2, 0.5]], [12, 21, 3])
     element_pos = kwave_array.get_element_positions()
     assert np.allclose(element_pos.squeeze(axis=-1), reader.expected_value_of('element_pos'))
     reader.increment()

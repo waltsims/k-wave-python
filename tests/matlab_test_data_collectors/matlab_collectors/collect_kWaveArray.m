@@ -147,7 +147,7 @@ recorder.increment();
 
 % Useful for testing addAnnularArray
 kwave_array = kWaveArray();
-kwave_array.addAnnularArray([3, 5, 10], 5, [1.2; 0.5], [12, 21, 3]);
+kwave_array.addAnnularArray([3.1, 5.2, 10.9], 5, [1.2; 0.5], [12, 21, 3]);
 element_pos = kwave_array.getElementPositions();
 recorder.recordVariable('element_pos', element_pos);
 recorder.increment();
