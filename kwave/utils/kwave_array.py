@@ -141,7 +141,7 @@ class kWaveArray(object):
                 element_number=el_ind + 1,
                 type='annulus',
                 dim=2,
-                position=array(position, dtype=np.uint8),
+                position=array(position),
                 radius_of_curvature=radius,
                 inner_diameter=diameters[el_ind][0],
                 outer_diameter=diameters[el_ind][1],
