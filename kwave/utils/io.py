@@ -71,8 +71,8 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
     if dims == 3:
         Nx, Ny, Nz = matrix.shape
     elif dims == 2:
-        Ny, Nz = matrix.shape
-        Nx = 1
+        Nx, Ny = matrix.shape
+        Nz = 1
     else:
         Nx, Ny, Nz = 1, 1, 1
 
