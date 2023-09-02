@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Union, Tuple, List
 
 import numpy as np
@@ -469,7 +470,7 @@ def filter_time_series(
         raise TypeError('Input signal must be a vector.')
 
     # update the command line status
-    print('Filtering input signal...')
+    logging.log(logging.INFO,  'Filtering input signal...')
 
     # extract the time step
     assert not isinstance(kgrid.t_array, str) or kgrid.t_array != 'auto', 'kgrid.t_array must be explicitly defined.'
@@ -529,13 +530,13 @@ def filter_time_series(
         filtered_signal = filtered_signal.T
 
     # update the command line status
-    print(f'  maximum frequency supported by kgrid: {scale_SI(f_max)}Hz (2 PPW)')
+    logging.log(logging.INFO,  f'  maximum frequency supported by kgrid: {scale_SI(f_max)}Hz (2 PPW)')
     if ppw != 0:
-        print(f'  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({ppw} PPW)')
+        logging.log(logging.INFO,  f'  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({ppw} PPW)')
     if rppw != 0:
-        print(
+        logging.log(logging.INFO,  
             f'  ramp frequency: {scale_SI(2 * np.pi / (2 * ramp_length * kgrid.dt))}Hz (ramp_points_per_wavelength PPW)')
-    print('  computation complete.')
+    logging.log(logging.INFO,  '  computation complete.')
 
     # plot signals if required
     if plot_signals or plot_spectrums:

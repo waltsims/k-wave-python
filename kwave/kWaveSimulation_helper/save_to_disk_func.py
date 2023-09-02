@@ -1,3 +1,4 @@
+import logging
 import os
 
 import numpy as np
@@ -17,9 +18,9 @@ def save_to_disk_func(
         kgrid: kWaveGrid, medium: kWaveMedium, source,
         opt: SimulationOptions, values: dotdict, flags: dotdict):
     # update command line status
-    print('  precomputation completed in ', scale_time(TicToc.toc()))
+    logging.log(logging.INFO,  '  precomputation completed in ', scale_time(TicToc.toc()))
     TicToc.tic()
-    print('  saving input files to disk...')
+    logging.log(logging.INFO,  '  saving input files to disk...')
 
     # check for a binary sensor mask or cuboid corners
     # modified by Farid | disabled temporarily!
@@ -58,7 +59,7 @@ def save_to_disk_func(
     save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level)
 
     # update command line status
-    print('  completed in ', scale_time(TicToc.toc()))
+    logging.log(logging.INFO,  '  completed in ', scale_time(TicToc.toc()))
 
 
 def grab_integer_variables(integer_variables, kgrid, flags, medium):

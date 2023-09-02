@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -11,7 +12,7 @@ def test_get_win():
     data = []
     directory_path = os.path.join(Path(__file__).parent, 'collectedValues/getWin')
     for i in range(5440):
-        print('i: => ', i)
+        logging.log(logging.INFO,  'i: => ', i)
         filepath = os.path.join(directory_path, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
@@ -46,7 +47,7 @@ def test_get_win():
             'win': win,
         })
 
-        # print(N, type_, param, rotation, symmetric, square, win)
+        # logging.log(logging.INFO,  N, type_, param, rotation, symmetric, square, win)
 
         win_py, cg_py = get_win(N, type_,
                                 param=param, rotation=rotation,

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from warnings import warn
+import logging
 
 import numpy as np
 
@@ -124,7 +124,7 @@ class kSource(object):
                 self.p_mode = 'additive-no-correction'
 
             if len(self.p[0]) > kgrid.Nt:
-                warn('  WARNING: source.p has more time points than kgrid.Nt, remaining time points will not be used.')
+                logging.log(logging.WARN, '  WARNING: source.p has more time points than kgrid.Nt, remaining time points will not be used.')
 
             # check if the mask is binary or labelled
             p_unique = np.unique(self.p_mask)
@@ -185,15 +185,15 @@ class kSource(object):
 
             if self.ux is not None:
                 if self.flag_ux > kgrid.Nt:
-                    warn('  WARNING: source.ux has more time points than kgrid.Nt, '
+                    logging.log(logging.WARN, '  WARNING: source.ux has more time points than kgrid.Nt, '
                          'remaining time points will not be used.')
             if self.uy is not None:
                 if self.flag_uy > kgrid.Nt:
-                    warn('  WARNING: source.uy has more time points than kgrid.Nt, '
+                    logging.log(logging.WARN, '  WARNING: source.uy has more time points than kgrid.Nt, '
                          'remaining time points will not be used.')
             if self.uz is not None:
                 if self.flag_uz > kgrid.Nt:
-                    warn('  WARNING: source.uz has more time points than kgrid.Nt, '
+                    logging.log(logging.WARN, '  WARNING: source.uz has more time points than kgrid.Nt, '
                          'remaining time points will not be used.')
 
             # check if the mask is binary or labelled
@@ -274,22 +274,22 @@ class kSource(object):
             # set source flgs to the length of the sources, this allows the
             # inputs to be defined independently and be of any length
             if self.sxx is not None and self_sxx > k_Nt:
-                warn('  WARNING: source.sxx has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.sxx has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
             if self.syy is not None and self_syy > k_Nt:
-                warn('  WARNING: source.syy has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.syy has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
             if self.szz is not None and self_szz > k_Nt:
-                warn('  WARNING: source.szz has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.szz has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
             if self.sxy is not None and self_sxy > k_Nt:
-                warn('  WARNING: source.sxy has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.sxy has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
             if self.sxz is not None and self_sxz > k_Nt:
-                warn('  WARNING: source.sxz has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.sxz has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
             if self.syz is not None and self_syz > k_Nt:
-                warn('  WARNING: source.syz has more time points than kgrid.Nt,'
+                logging.log(logging.WARN, '  WARNING: source.syz has more time points than kgrid.Nt,'
                      ' remaining time points will not be used.')
 
             # create an indexing variable corresponding to the location of all

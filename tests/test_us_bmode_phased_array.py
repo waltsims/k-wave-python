@@ -6,6 +6,7 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import logging
 import os
 from tempfile import gettempdir
 
@@ -195,7 +196,7 @@ def test_us_bmode_phased_array():
         # for angle_index in range(1, number_scan_lines + 1):
         for angle_index in range(1, 2):  # only compare first to angles to speed up test
             # update the command line status
-            print(f'Computing scan line {angle_index} of {number_scan_lines}')
+            logging.log(logging.INFO,  f'Computing scan line {angle_index} of {number_scan_lines}')
 
             # update the current steering angle
             not_transducer.steering_angle = steering_angles[angle_index - 1]

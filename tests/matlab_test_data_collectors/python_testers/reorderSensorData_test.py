@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -35,4 +36,4 @@ def test_reorder_sensor_data():
 
         assert np.allclose(expected_reordered_sensor_data, calculated_reordered_sensor_data, equal_nan=True)
 
-    print('reorder_sensor_data(..) works as expected!')
+    logging.log(logging.INFO,  'reorder_sensor_data(..) works as expected!')

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
+import logging
 from typing import List
-from warnings import warn
 
 import numpy as np
 
@@ -165,7 +165,7 @@ class kWaveMedium(object):
 
         # give warning if y is specified
         if self.alpha_power is not None and (self.alpha_power.size != 1 or self.alpha_power != 2):
-            warn('WARNING: the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.')
+            logging.log(logging.WARN, 'WARNING: the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.')
 
         # overwrite y value
         self.alpha_power = 2

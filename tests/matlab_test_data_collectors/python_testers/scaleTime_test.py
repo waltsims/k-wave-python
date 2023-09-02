@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -21,4 +22,4 @@ def test_scale_time():
         time = scale_time(seconds)
         assert time == expected_time
 
-    print('scale_time(..) works as expected!')
+    logging.log(logging.INFO,  'scale_time(..) works as expected!')

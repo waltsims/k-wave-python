@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -25,8 +26,8 @@ def test_create_cw_signals():
     is_close = np.allclose(signal, signal_prime, atol=tolerance, rtol=tolerance)
 
     if not is_close:
-        print("signal and signal_prime are not equal")
-        print("difference =", difference)
+        logging.log(logging.INFO,  "signal and signal_prime are not equal")
+        logging.log(logging.INFO,  "difference =", difference)
     else:
-        print("signal and signal_prime are equal within the specified tolerance")
+        logging.log(logging.INFO,  "signal and signal_prime are equal within the specified tolerance")
     assert is_close, "signal did not match expected signal"

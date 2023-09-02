@@ -1,3 +1,4 @@
+import logging
 import math
 
 import numpy as np
@@ -91,7 +92,7 @@ def apply_alpha_filter(medium, nabla1, nabla2):
         return nabla1, nabla2
 
     # update command line status
-    print('  filtering absorption variables...')
+    logging.log(logging.INFO,  '  filtering absorption variables...')
 
     # frequency shift the absorption parameters
     nabla1 = np.fft.fftshift(nabla1)

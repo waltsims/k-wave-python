@@ -4,6 +4,7 @@
     This example demonstrates how to save the HDF5 input files required by
     the C++ code in parts. It builds on the Running C++ Simulations Example.
 """
+import logging
 import os
 from tempfile import gettempdir
 
@@ -87,7 +88,7 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.tic()
-        print('Writing medium parameters... ')
+        logging.log(logging.INFO,  'Writing medium parameters... ')
 
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
@@ -165,7 +166,7 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        print('Writing source parameters... ')
+        logging.log(logging.INFO,  'Writing source parameters... ')
 
         # define a square source mask facing in the x-direction using the
         # normal k-Wave syntax
@@ -218,7 +219,7 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        print('Writing sensor parameters... ')
+        logging.log(logging.INFO,  'Writing sensor parameters... ')
 
         # define a sensor mask through the central plane
         sensor_mask = np.zeros(grid_size, dtype=bool)
@@ -244,7 +245,7 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        print('Writing grid parameters and attributes... ')
+        logging.log(logging.INFO,  'Writing grid parameters and attributes... ')
 
         # write grid parameters
         write_grid(input_file_full_path, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c_ref)

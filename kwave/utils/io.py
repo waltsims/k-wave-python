@@ -1,7 +1,7 @@
+import logging
 import os
 import platform
 import socket
-import warnings
 from datetime import datetime
 from typing import Optional
 
@@ -251,7 +251,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None, lega
         write_attributes_typed(filename, file_description)
         return
 
-    warnings.warn("Attributes will soon be typed when saved and not saved ", DeprecationWarning)
+    logging.log(logging.WARN, "Attributes will soon be typed when saved and not saved ", DeprecationWarning)
     # get literals
     h5_literals = get_h5_literals()
 

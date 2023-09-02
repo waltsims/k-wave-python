@@ -1,3 +1,4 @@
+import logging
 from scipy.io import loadmat
 from pathlib import Path
 import numpy as np
@@ -41,4 +42,4 @@ def test_interpcartdata():
 
         assert np.allclose(trbd, trbd_py)
 
-    print('cart2grid(..) works as expected!')
+    logging.log(logging.INFO,  'cart2grid(..) works as expected!')
