@@ -229,9 +229,9 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> 
     """
 
     if deriv_order:
-        logging.log(logging.WARN, "deriv_order is no longer a supported argument.", DeprecationWarning)
+        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: deriv_order is no longer a supported argument.')
     if accuracy_order:
-        logging.log(logging.WARN, "accuracy_order is no longer a supported argument.", DeprecationWarning)
+        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: accuracy_order is no longer a supported argument.')
 
     if dim is not None and dx is not None:
         return np.gradient(f, dx, axis=dim)

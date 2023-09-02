@@ -337,7 +337,7 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     """
 
     if 0 >= y or y >= 3:
-        logging.log(logging.WARN, "y must be within the interval (0,3)", UserWarning)
+        logging.log(logging.WARN, f"{UserWarning.__name__}: y must be within the interval (0,3)")
         c_kk = c0 * np.ones_like(w)
     elif y == 1:
         # Kramers-Kronig for y = 1

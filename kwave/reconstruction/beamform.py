@@ -185,7 +185,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
     # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
 
-    logging.log(logging.WARN, "This method is not fully migrated, might be depricated and is untested.", PendingDeprecationWarning)
+    logging.log(logging.WARN, f'{PendingDeprecationWarning.__name__}: This method is not fully migrated, might be depricated and is untested.')
     return signal_mat
 
 
