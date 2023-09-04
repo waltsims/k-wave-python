@@ -1,5 +1,4 @@
 from typing import Union
-import logging
 
 import numpy as np
 from numpy.fft import ifftshift
@@ -161,7 +160,7 @@ def kspaceFirstOrderAS(
     TicToc.tic()
 
     if simulation_options.simulation_type is not SimulationType.AXISYMMETRIC:
-        logging.log(logging.WARN,  "simulation type is not set to axisymmetric while using kSapceFirstOrderAS. "
+        print("WARNING: simulation type is not set to axisymmetric while using kSapceFirstOrderAS. "
               "Setting simulation type to axisymmetric.")
         simulation_options.simulation_type = SimulationType.AXISYMMETRIC
 

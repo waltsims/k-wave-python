@@ -1,4 +1,3 @@
-import logging
 from typing import List, Tuple, Optional
 
 import numpy as np
@@ -236,10 +235,10 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     num_binary_sensor_points = np.sum(binary_sensor_mask.flatten())
 
     # update command line status
-    logging.log(logging.INFO, 'Interpolating Cartesian sensor data...')
-    logging.log(logging.INFO, f'  interpolation mode: {interp}')
-    logging.log(logging.INFO, f'  number of Cartesian sensor points:  {num_cart_data_points}')
-    logging.log(logging.INFO, f'  number of binary sensor points: {num_binary_sensor_points}')
+    print('Interpolating Cartesian sensor data...')
+    print(f'  interpolation mode: {interp}')
+    print(f'  number of Cartesian sensor points:  {num_cart_data_points}')
+    print(f'  number of binary sensor points: {num_binary_sensor_points}')
 
     binary_sensor_data = np.zeros((num_binary_sensor_points, num_time_points))
 
@@ -303,7 +302,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
         #     raise ValueError('Unknown interpolation option.')
 
     # update command line status
-    logging.log(logging.INFO, f'  computation completed in {scale_time(timer.toc())}')
+    print(f'  computation completed in {scale_time(timer.toc())}')
     return binary_sensor_data
 
 

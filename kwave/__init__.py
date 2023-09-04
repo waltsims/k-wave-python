@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 import urllib.request
@@ -58,7 +57,7 @@ def binaries_present() -> bool:
 
     for binary in binary_list[system]:
         if not os.path.exists(os.path.join(binary_path, binary)):
-            logging.log(logging.WARN,  f"{binary} not found")
+            print(f"{binary} not found")
             return False
     return True
 
@@ -95,7 +94,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Extract the file name from the GitHub release URL
         filename = url.split("/")[-1]
 
-        logging.log(logging.INFO, f"Downloading {filename} to {binary_path}...")
+        print(f"Downloading {filename} to {binary_path}...")
 
         # Create the directory if it does not yet exist
         os.makedirs(binary_path, exist_ok=True)

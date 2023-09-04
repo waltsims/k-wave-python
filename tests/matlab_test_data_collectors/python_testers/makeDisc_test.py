@@ -1,7 +1,6 @@
 from kwave.data import Vector
 from kwave.utils.mapgen import make_disc
 
-import logging
 from scipy.io import loadmat
 import numpy as np
 import os
@@ -13,7 +12,7 @@ def test_makeDisc():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        logging.log(logging.INFO, i)
+        print(i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
@@ -27,4 +26,4 @@ def test_makeDisc():
 
         assert np.allclose(expected_disc, disc)
 
-    logging.log(logging.INFO, 'make_disc(..) works as expected!')
+    print('make_disc(..) works as expected!')

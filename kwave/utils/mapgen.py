@@ -1,8 +1,7 @@
-import logging
 import math
+import warnings
 from math import floor
 from typing import Tuple, Optional, Union, List, Any, cast
-import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -338,7 +337,6 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     """
 
     if 0 >= y or y >= 3:
-        logging.log(logging.WARN, f"{UserWarning.__name__}: y must be within the interval (0,3)")
         warnings.warn("y must be within the interval (0,3)", UserWarning)
         c_kk = c0 * np.ones_like(w)
     elif y == 1:
@@ -2090,7 +2088,7 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
 
         # display status
         if deleted_points:
-            logging.log(logging.INFO, '{deleted_points} overlapped points removed from bowl')
+            print('{deleted_points} overlapped points removed from bowl')
 
     # =========================================================================
     # PLACE BOWL WITHIN LARGER GRID
@@ -2197,7 +2195,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             TicToc.tic()
         else:
             TicToc.toc(reset=True)
-        logging.log(logging.INFO, f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
+        print(f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
 
         # get parameters for current bowl
         if bowl_pos.shape[0] > 1:
@@ -2238,7 +2236,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     max_nd_val, _ = max_nd(bowls)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'{max_nd_val - 1} bowls are overlapping')
+        print(f'WARNING: {max_nd_val - 1} bowls are overlapping')
 
         # force the output to be binary
         bowls[bowls != 0] = 1
@@ -2329,7 +2327,7 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
     max_nd_val, _ = max_nd(arcs)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'{max_nd_val - 1} arcs are overlapping')
+        print(f'WARNING: {max_nd_val - 1} arcs are overlapping')
 
         # force the output to be binary
         arcs[arcs != 0] = 1

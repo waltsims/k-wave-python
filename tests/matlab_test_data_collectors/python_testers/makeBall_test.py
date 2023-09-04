@@ -1,7 +1,6 @@
 from kwave.data import Vector
 from kwave.utils.mapgen import make_ball
 
-import logging
 from scipy.io import loadmat
 import numpy as np
 import os
@@ -13,7 +12,7 @@ def test_makeBall():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        logging.log(logging.INFO, i)
+        print(i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
@@ -28,4 +27,4 @@ def test_makeBall():
 
         assert np.allclose(expected_ball, ball)
 
-    logging.log(logging.INFO, 'make_ball(..) works as expected!')
+    print('make_ball(..) works as expected!')

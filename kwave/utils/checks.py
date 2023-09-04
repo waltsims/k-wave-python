@@ -1,4 +1,3 @@
-import logging
 import platform
 from copy import deepcopy
 from typing import List, TYPE_CHECKING, Any
@@ -290,10 +289,10 @@ def check_factors(min_number: int, max_number: int) -> None:
 
     # print the numbers that match each maximum prime factor
     for factor in [2, 3, 5, 7]:
-        logging.log(logging.INFO, f'Numbers with a maximum prime factor of {factor}:')
+        print(f'Numbers with a maximum prime factor of {factor}:')
         for n in range(min_number, max_number):
             if factors[n]['max_prime_factor'] == factor:
-                logging.log(logging.INFO, n)
+                print(n)
 
 
 def check_divisible(number: float, divider: float) -> bool:

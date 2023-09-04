@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -19,4 +18,4 @@ def test_make_cart_rect():
         assert np.allclose(coordinates, reader.expected_value_of('coordinates'))
         reader.increment()
 
-    logging.log(logging.INFO, 'make_cart_rect(..) works as expected!')
+    print('make_cart_rect(..) works as expected!')

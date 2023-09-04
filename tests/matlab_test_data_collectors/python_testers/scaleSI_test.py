@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -38,7 +37,9 @@ def test_scale_si():
         assert prefix == expected_prefix
         assert prefix_fullname == expected_prefix_fullname
 
+        print('aaa')
+
         # calculated_reordered_data = reorder_binary_sensor_data(sensor_data, reorder_index)
         # assert np.allclose(expected_reordered_data, calculated_reordered_data, equal_nan=True)
 
-    logging.log(logging.INFO, 'scale_si(..) works as expected!')
+    print('scale_si(..) works as expected!')

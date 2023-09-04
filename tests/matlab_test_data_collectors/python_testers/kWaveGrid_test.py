@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -19,7 +18,7 @@ def test_kwave_grid():
     grid_spacing = Vector([0.1, 0.05, 0.13])
 
     for dim in range(1, 4):
-        logging.log(logging.INFO, 'Dim: %d', dim)
+        print('Dim:', dim)
         kgrid = kWaveGrid(grid_size[:dim], grid_spacing[:dim])
 
         check_kgrid_equality(kgrid, reader.expected_value_of('kgrid'))
@@ -36,7 +35,7 @@ def test_kwave_grid():
         reader.increment()
 
         for dtt_type in [*list(DiscreteCosine), *list(DiscreteSine)]:
-            logging.log(logging.INFO, dtt_type)
+            print(dtt_type)
             k, M = kgrid.k_dtt([dtt_type] * dim)
             check_kgrid_equality(kgrid, reader.expected_value_of('kgrid'))
             assert np.allclose(reader.expected_value_of('returned_k'), k)

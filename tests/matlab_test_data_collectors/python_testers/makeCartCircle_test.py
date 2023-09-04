@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -30,4 +29,4 @@ def test_makeCartCircle():
 
         assert np.allclose(expected_value, circle)
 
-    logging.log(logging.INFO, 'makeCartCircle(..) works as expected!')
+    print('makeCartCircle(..) works as expected!')

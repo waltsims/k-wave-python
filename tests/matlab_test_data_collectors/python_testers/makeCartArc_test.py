@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -27,4 +26,4 @@ def test_makeCartArc():
 
         assert np.allclose(expected_value, cart_arc), "Step {} of {} failed!".format(i, collected_values_file)
 
-    logging.log(logging.INFO, 'makeCartArc(..) works as expected!')
+    print('makeCartArc(..) works as expected!')

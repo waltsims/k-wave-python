@@ -1,6 +1,6 @@
 import logging
+import os
 import stat
-import subprocess
 import unittest.mock
 
 import h5py
@@ -27,9 +27,7 @@ class Executor:
                   f'-i {input_filename} ' \
                   f'-o {output_filename} ' \
                   f'{options}'
-        
-        stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
-        return_code = subprocess.run(command, stdout=stdout, shell=True).returncode
+        return_code = os.system(command)
 
         try:
             assert return_code == 0, f'Simulation call returned code: {return_code}'

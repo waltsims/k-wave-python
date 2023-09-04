@@ -1,5 +1,5 @@
-import logging
 from dataclasses import dataclass
+from warnings import warn
 
 import numpy as np
 
@@ -110,7 +110,7 @@ class kWaveSimulation(object):
         self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]  #: default log filename
 
         self.calling_func_name = None
-        logging.log(logging.INFO, f'  start time: {get_date_string()}')
+        print(f'  start time: {get_date_string()}')
 
         self.c_ref, self.c_ref_compression, self.c_ref_shear = [None] * 3
         self.transducer_input_signal = None
@@ -558,10 +558,10 @@ class kWaveSimulation(object):
             None
         """
         if is_elastic_code:  # pragma: no cover
-            logging.log(logging.INFO, 'Running k-Wave elastic simulation...')
+            print('Running k-Wave elastic simulation...')
         else:
-            logging.log(logging.INFO, 'Running k-Wave simulation...')
-        logging.log(logging.INFO, f'  start time: {get_date_string()}')
+            print('Running k-Wave simulation...')
+        print(f'  start time: {get_date_string()}')
 
     def set_index_data_type(self) -> None:
         """
@@ -683,7 +683,7 @@ class kWaveSimulation(object):
 
                     # check for time reversal data
                     if self.time_rev:
-                        logging.log(logging.WARN, 'sensor.record is not used for time reversal reconstructions')
+                        warn('WARNING: sensor.record is not used for time reversal reconstructions')
 
                     # check the input is a cell array
                     assert isinstance(self.sensor.record, list), \
@@ -844,7 +844,7 @@ class kWaveSimulation(object):
 
         # check for directivity inputs with time reversal
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
-            logging.log(logging.WARN, 'sensor directivity fields are not used for time reversal.')
+            warn('WARNING: sensor directivity fields are not used for time reversal.')
 
     def check_sensor(self, k_dim, k_Nt) -> None:
         """
@@ -904,7 +904,7 @@ class kWaveSimulation(object):
                     self.source.p_mode = self.SOURCE_P_MODE_DEF
 
                 if self.source_p > k_Nt:
-                    logging.log(logging.WARN, '  source.p has more time points than kgrid.Nt, remaining time points will not be used.')
+                    warn('  WARNING: source.p has more time points than kgrid.Nt, remaining time points will not be used.')
 
                 # create an indexing variable corresponding to the location of all the source elements
                 self.p_source_pos_index = matlab_find(self.source.p_mask)
@@ -1068,7 +1068,7 @@ class kWaveSimulation(object):
 
             # give a warning if the timestep is larger than stability limit allows
             if self.kgrid.dt > dt_stability_limit:
-                logging.log(logging.WARN, '  time step may be too large for a stable simulation.')
+                warn('  WARNING: time step may be too large for a stable simulation.')
 
     @staticmethod
     def select_precision(opt: SimulationOptions):
@@ -1187,7 +1187,7 @@ class kWaveSimulation(object):
 
             # display a warning only if using WSWS symmetry (not WSWA-FFT)
             if self.options.radial_symmetry.startswith('WSWS'):
-                logging.log(logging.WARN,  '  Optional input ''RadialSymmetry'' changed to ''WSWA'' for compatability with ''SaveToDisk''.')
+                print('  WARNING: Optional input ''RadialSymmetry'' changed to ''WSWA'' for compatability with ''SaveToDisk''.')
 
             # update setting
             self.options.radial_symmetry = 'WSWA'
@@ -1202,7 +1202,7 @@ class kWaveSimulation(object):
 
         # update command line status
         if self.time_rev:
-            logging.log(logging.INFO, '  time reversal mode')
+            print('  time reversal mode')
 
         # cleanup unused variables
         for k in list(self.__dict__.keys()):
@@ -1234,7 +1234,7 @@ class kWaveSimulation(object):
         if self.source_p0 and self.options.smooth_p0:
 
             # update command line status
-            logging.log(logging.INFO, '  smoothing p0 distribution...')
+            print('  smoothing p0 distribution...')
 
             if self.options.simulation_type.is_axisymmetric():
                 if self.options.radial_symmetry in ['WSWA-FFT', 'WSWA']:
@@ -1315,18 +1315,18 @@ class kWaveSimulation(object):
         # give warning for bad dimension sizes
         if prime_facs.max() > self.HIGHEST_PRIME_FACTOR_WARNING:
             prime_facs = prime_facs[prime_facs != 0]
-            logging.log(logging.WARN, f'Highest prime factors in each dimension are {prime_facs}')
-            logging.log(logging.WARN, 'Use dimension sizes with lower prime factors to improve speed')
+            warn(f'WARNING: Highest prime factors in each dimension are {prime_facs}')
+            warn('Use dimension sizes with lower prime factors to improve speed')
         del prime_facs
 
         # smooth the sound speed distribution if required
         if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
-            logging.log(logging.INFO, '  smoothing sound speed distribution...')
+            print('  smoothing sound speed distribution...')
             self.medium.sound_speed = smooth(self.medium.sound_speed)
 
         # smooth the ambient density distribution if required
         if opt.smooth_rho0 and num_dim2(self.medium.density) == k_dim and self.medium.density.size > 1:
-            logging.log(logging.INFO, 'smoothing density distribution...')
+            print('smoothing density distribution...')
             self.medium.density = smooth(self.medium.density)
 
     def create_sensor_variables(self) -> None:

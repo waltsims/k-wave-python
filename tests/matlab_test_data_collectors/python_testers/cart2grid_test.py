@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 from unittest.mock import Mock
@@ -38,7 +37,7 @@ def test_cart2grid():
         expected_reorder_index = recorded_data['reorder_index']
         is_axisymmetric = bool(recorded_data['is_axisymmetric'])
 
-        logging.log(logging.INFO, is_axisymmetric)
+        print(is_axisymmetric)
 
         if kgrid.dim == 3:
             expected_reorder_index = np.reshape(expected_reorder_index, (-1, 1, 1))
@@ -50,4 +49,4 @@ def test_cart2grid():
         assert np.allclose(expected_reorder_index, reorder_index), f"Failed on example {i}"
         assert np.allclose(expected_grid_data, grid_data), f"Failed on example {i}"
 
-    logging.log(logging.INFO, 'cart2grid(..) works as expected!')
+    print('cart2grid(..) works as expected!')
