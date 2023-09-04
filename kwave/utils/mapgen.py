@@ -2,6 +2,7 @@ import logging
 import math
 from math import floor
 from typing import Tuple, Optional, Union, List, Any, cast
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -338,6 +339,7 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
 
     if 0 >= y or y >= 3:
         logging.log(logging.WARN, f"{UserWarning.__name__}: y must be within the interval (0,3)")
+        warnings.warn("y must be within the interval (0,3)", UserWarning)
         c_kk = c0 * np.ones_like(w)
     elif y == 1:
         # Kramers-Kronig for y = 1
