@@ -38,8 +38,6 @@ def test_scale_si():
         assert prefix == expected_prefix
         assert prefix_fullname == expected_prefix_fullname
 
-        logging.log(logging.INFO, 'aaa')
-
         # calculated_reordered_data = reorder_binary_sensor_data(sensor_data, reorder_index)
         # assert np.allclose(expected_reordered_data, calculated_reordered_data, equal_nan=True)
 
