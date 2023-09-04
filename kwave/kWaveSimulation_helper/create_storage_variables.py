@@ -70,7 +70,7 @@ def set_flags(flags, sensor_x, sensor_mask, is_cartesian_interp):
         num_discarded_points = len(sensor_x) - sensor_mask.sum()
         if num_discarded_points != 0:
             logging.log(logging.WARN,  
-                f'  WARNING: {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
+                f'  {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
 
 
 def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, sensor_mask_index, sensor_x):

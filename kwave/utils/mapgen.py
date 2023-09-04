@@ -2236,7 +2236,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     max_nd_val, _ = max_nd(bowls)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'WARNING: {max_nd_val - 1} bowls are overlapping')
+        logging.log(logging.WARN,  f'{max_nd_val - 1} bowls are overlapping')
 
         # force the output to be binary
         bowls[bowls != 0] = 1
@@ -2327,7 +2327,7 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
     max_nd_val, _ = max_nd(arcs)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'WARNING: {max_nd_val - 1} arcs are overlapping')
+        logging.log(logging.WARN,  f'{max_nd_val - 1} arcs are overlapping')
 
         # force the output to be binary
         arcs[arcs != 0] = 1

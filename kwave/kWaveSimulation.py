@@ -683,7 +683,7 @@ class kWaveSimulation(object):
 
                     # check for time reversal data
                     if self.time_rev:
-                        logging.log(logging.WARN, 'WARNING: sensor.record is not used for time reversal reconstructions')
+                        logging.log(logging.WARN, 'sensor.record is not used for time reversal reconstructions')
 
                     # check the input is a cell array
                     assert isinstance(self.sensor.record, list), \
@@ -844,7 +844,7 @@ class kWaveSimulation(object):
 
         # check for directivity inputs with time reversal
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
-            logging.log(logging.WARN, 'WARNING: sensor directivity fields are not used for time reversal.')
+            logging.log(logging.WARN, 'sensor directivity fields are not used for time reversal.')
 
     def check_sensor(self, k_dim, k_Nt) -> None:
         """
@@ -904,7 +904,7 @@ class kWaveSimulation(object):
                     self.source.p_mode = self.SOURCE_P_MODE_DEF
 
                 if self.source_p > k_Nt:
-                    logging.log(logging.WARN, '  WARNING: source.p has more time points than kgrid.Nt, remaining time points will not be used.')
+                    logging.log(logging.WARN, '  source.p has more time points than kgrid.Nt, remaining time points will not be used.')
 
                 # create an indexing variable corresponding to the location of all the source elements
                 self.p_source_pos_index = matlab_find(self.source.p_mask)
@@ -1068,7 +1068,7 @@ class kWaveSimulation(object):
 
             # give a warning if the timestep is larger than stability limit allows
             if self.kgrid.dt > dt_stability_limit:
-                logging.log(logging.WARN, '  WARNING: time step may be too large for a stable simulation.')
+                logging.log(logging.WARN, '  time step may be too large for a stable simulation.')
 
     @staticmethod
     def select_precision(opt: SimulationOptions):
@@ -1187,7 +1187,7 @@ class kWaveSimulation(object):
 
             # display a warning only if using WSWS symmetry (not WSWA-FFT)
             if self.options.radial_symmetry.startswith('WSWS'):
-                logging.log(logging.WARN,  '  WARNING: Optional input ''RadialSymmetry'' changed to ''WSWA'' for compatability with ''SaveToDisk''.')
+                logging.log(logging.WARN,  '  Optional input ''RadialSymmetry'' changed to ''WSWA'' for compatability with ''SaveToDisk''.')
 
             # update setting
             self.options.radial_symmetry = 'WSWA'
@@ -1315,7 +1315,7 @@ class kWaveSimulation(object):
         # give warning for bad dimension sizes
         if prime_facs.max() > self.HIGHEST_PRIME_FACTOR_WARNING:
             prime_facs = prime_facs[prime_facs != 0]
-            logging.log(logging.WARN, f'WARNING: Highest prime factors in each dimension are {prime_facs}')
+            logging.log(logging.WARN, f'Highest prime factors in each dimension are {prime_facs}')
             logging.log(logging.WARN, 'Use dimension sizes with lower prime factors to improve speed')
         del prime_facs
 
