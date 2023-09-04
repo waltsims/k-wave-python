@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from unittest.mock import Mock
@@ -13,7 +14,7 @@ def test_unmask_sensor_data():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        print(i)
+        logging.log(logging.INFO, i)
         # Read recorded data
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
@@ -40,4 +41,4 @@ def test_unmask_sensor_data():
 
         assert np.allclose(unmasked_sensor_data, expected_unmasked_sensor_data)
 
-    print('unmask_sensor_data(..) works as expected!')
+    logging.log(logging.INFO, 'unmask_sensor_data(..) works as expected!')

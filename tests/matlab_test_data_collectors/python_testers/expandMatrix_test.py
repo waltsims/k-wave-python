@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -27,8 +28,8 @@ def test_expand_matrix_test():
 
         expanded_matrix  = expand_matrix(matrix, exp_coeff=exp_coeff, edge_val=edge_val)
 
-        print(i)
+        logging.log(logging.INFO, i)
         assert np.allclose(expected_expanded_matrix, expanded_matrix, equal_nan=True)
 
 
-    print('expanded_matrix(..) works as expected!')
+    logging.log(logging.INFO, 'expanded_matrix(..) works as expected!')

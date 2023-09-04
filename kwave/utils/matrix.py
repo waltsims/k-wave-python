@@ -1,4 +1,4 @@
-import warnings
+import logging
 from typing import Tuple, Union, List
 
 import numpy as np
@@ -12,7 +12,7 @@ def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
     """
     Create a tight bounding box by removing zeros.
 
-    Args:
+    Args: 
         data: Matrix to trim.
 
     Returns:
@@ -164,7 +164,7 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     TicToc.tic()
 
     # update command line status
-    print('Resizing matrix...')
+    logging.log(logging.INFO, 'Resizing matrix...')
     # check inputs
     assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
@@ -193,7 +193,7 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     else:
         mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
-    print(f'  completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}')
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
@@ -229,9 +229,9 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> 
     """
 
     if deriv_order:
-        warnings.warn("deriv_order is no longer a supported argument.", DeprecationWarning)
+        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: deriv_order is no longer a supported argument.')
     if accuracy_order:
-        warnings.warn("accuracy_order is no longer a supported argument.", DeprecationWarning)
+        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: accuracy_order is no longer a supported argument.')
 
     if dim is not None and dx is not None:
         return np.gradient(f, dx, axis=dim)
@@ -341,7 +341,7 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
     TicToc.tic()
 
     # Update command line status
-    print('Revolving 2D matrix to form a 3D matrix...')
+    logging.log(logging.INFO, 'Revolving 2D matrix to form a 3D matrix...')
 
     # Get size of matrix
     m, n = mat2d.shape
@@ -364,7 +364,7 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
         mat3D[x_index, :, :] = interp(r)
 
     # Update command line status
-    print(f'  completed in {scale_time(TicToc.toc())}s')
+    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}s')
     return mat3D
 
 
