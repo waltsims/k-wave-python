@@ -27,4 +27,4 @@ def test_compute_linear_transform():
         assert np.allclose(offset_pos, reader.expected_value_of('offsetPos'), equal_nan=True)
         reader.increment()
 
-    logging.log(logging.INFO,  'compute_linear_transform(..) works as expected!')
+    logging.log(logging.INFO, 'compute_linear_transform(..) works as expected!')

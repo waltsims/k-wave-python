@@ -13,7 +13,7 @@ def test_makeSphericalSection():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        logging.log(logging.INFO,  i)
+        logging.log(logging.INFO, i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
@@ -33,4 +33,4 @@ def test_makeSphericalSection():
         assert np.allclose(expected_spherical_section, spherical_section)
         assert np.allclose(expected_distance_map, distance_map)
 
-    logging.log(logging.INFO,  'make_spherical_section(..) works as expected!')
+    logging.log(logging.INFO, 'make_spherical_section(..) works as expected!')

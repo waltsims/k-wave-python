@@ -2088,7 +2088,7 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
 
         # display status
         if deleted_points:
-            logging.log(logging.INFO,  '{deleted_points} overlapped points removed from bowl')
+            logging.log(logging.INFO, '{deleted_points} overlapped points removed from bowl')
 
     # =========================================================================
     # PLACE BOWL WITHIN LARGER GRID
@@ -2195,7 +2195,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             TicToc.tic()
         else:
             TicToc.toc(reset=True)
-        logging.log(logging.INFO,  f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
+        logging.log(logging.INFO, f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
 
         # get parameters for current bowl
         if bowl_pos.shape[0] > 1:

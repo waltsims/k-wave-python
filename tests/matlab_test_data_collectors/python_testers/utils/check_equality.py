@@ -64,10 +64,10 @@ def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
             are_equal = (actual_value == expected_value)
 
         if not are_equal:
-            logging.log(logging.INFO,  'Following property does not match:')
-            logging.log(logging.INFO,  f'\tkey: {key}, mapped_key: {mapped_key}')
-            logging.log(logging.INFO,  f'\t\texpected: {expected_value}')
-            logging.log(logging.INFO,  f'\t\tactual: {actual_value}')
+            logging.log(logging.INFO, 'Following property does not match:')
+            logging.log(logging.INFO, f'\tkey: {key}, mapped_key: {mapped_key}')
+            logging.log(logging.INFO, f'\t\texpected: {expected_value}')
+            logging.log(logging.INFO, f'\t\tactual: {actual_value}')
             are_totally_equal = False
 
     assert are_totally_equal
@@ -119,10 +119,10 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
 
 
         if not are_equal:
-            logging.log(logging.INFO,  'Following property does not match:')
-            logging.log(logging.INFO,  f'\tkey: {key}, mapped_key: {mapped_key}')
-            logging.log(logging.INFO,  f'\t\texpected: {expected_value}')
-            logging.log(logging.INFO,  f'\t\tactual: {actual_value}')
+            logging.log(logging.INFO, 'Following property does not match:')
+            logging.log(logging.INFO, f'\tkey: {key}, mapped_key: {mapped_key}')
+            logging.log(logging.INFO, f'\t\texpected: {expected_value}')
+            logging.log(logging.INFO, f'\t\tactual: {actual_value}')
             are_totally_equal = False
 
     assert are_totally_equal

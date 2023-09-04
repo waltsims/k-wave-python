@@ -13,7 +13,7 @@ def dataCast(data_cast, medium: kWaveMedium, kgrid: kWaveGrid, opt: SimulationOp
     # Originally, self was referring to the kWaveSimulation class
 
     # update command line status
-    logging.log(logging.INFO,  f'  casting variables to {data_cast} type...')
+    logging.log(logging.INFO, f'  casting variables to {data_cast} type...')
 
     # create list of variable names used in all dimensions
     if flags.elastic_code:  # pragma: no cover

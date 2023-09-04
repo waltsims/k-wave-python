@@ -69,7 +69,7 @@ def beamform(channel_data: ChannelData) -> None:
         origin = get_origin_array(channel_data, transmit_wave)
         t0_point = get_t0(transmit_wave)
 
-        # logging.log(logging.INFO,  origin, t0_point)
+        # logging.log(logging.INFO, origin, t0_point)
 
         transmit_distance = np.sign(pixel_positions[:, 2] - origin[2]) * \
                             np.sqrt(np.sum((pixel_positions - origin) ** 2, axis=1)) + \
@@ -95,7 +95,7 @@ def beamform(channel_data: ChannelData) -> None:
             element_location = Position.deserialize(transform(element_position).serialize())
 
             pixel_element_lateral_distance = abs(pixel_positions[:, 0] - element_location[0])
-            # logging.log(logging.INFO,  pixel_element_lateral_distance)
+            # logging.log(logging.INFO, pixel_element_lateral_distance)
             receive_apodization = apodize(pixel_element_lateral_distance, expanding_aperture, apodization_window)
 
             # receive distance
@@ -128,7 +128,7 @@ def beamform(channel_data: ChannelData) -> None:
 
     filename = "example_bmode.png"
     plt.savefig(os.path.join(os.getcwd(), filename))
-    logging.log(logging.INFO,  f"Plot saved to {os.path.join(os.getcwd(), filename)}")
+    logging.log(logging.INFO, f"Plot saved to {os.path.join(os.getcwd(), filename)}")
 
     pass
 
@@ -209,7 +209,7 @@ def scan_conversion(
     TicToc.tic()
 
     # update command line status
-    logging.log(logging.INFO,  'Computing ultrasound scan conversion...')
+    logging.log(logging.INFO, 'Computing ultrasound scan conversion...')
 
     # extract a_line parameters
     Nt = scan_lines.shape[1]
@@ -254,7 +254,7 @@ def scan_conversion(
     b_mode[np.isnan(b_mode)] = 0
 
     # update command line status
-    logging.log(logging.INFO,  f'  completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}')
 
     return b_mode
 

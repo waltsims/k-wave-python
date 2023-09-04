@@ -164,7 +164,7 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     TicToc.tic()
 
     # update command line status
-    logging.log(logging.INFO,  'Resizing matrix...')
+    logging.log(logging.INFO, 'Resizing matrix...')
     # check inputs
     assert num_dim2(mat) == len(new_size), \
         'Resolution input must have the same number of elements as data dimensions.'
@@ -193,7 +193,7 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     else:
         mat_rs = mat_rs.reshape(new_size, order='F')
     # update command line status
-    logging.log(logging.INFO,  f'  completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}')
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
@@ -341,7 +341,7 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
     TicToc.tic()
 
     # Update command line status
-    logging.log(logging.INFO,  'Revolving 2D matrix to form a 3D matrix...')
+    logging.log(logging.INFO, 'Revolving 2D matrix to form a 3D matrix...')
 
     # Get size of matrix
     m, n = mat2d.shape
@@ -364,7 +364,7 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
         mat3D[x_index, :, :] = interp(r)
 
     # Update command line status
-    logging.log(logging.INFO,  f'  completed in {scale_time(TicToc.toc())}s')
+    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}s')
     return mat3D
 
 

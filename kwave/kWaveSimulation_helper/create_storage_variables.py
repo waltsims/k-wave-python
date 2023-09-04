@@ -369,7 +369,7 @@ def compute_triangulation_points(flags, kgrid, record):
         else:
 
             # update command line status
-            logging.log(logging.INFO,  '  calculating Delaunay triangulation...')
+            logging.log(logging.INFO, '  calculating Delaunay triangulation...')
 
             # compute triangulation
             if kgrid.dim == 2:

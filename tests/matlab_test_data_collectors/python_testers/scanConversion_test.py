@@ -32,4 +32,4 @@ def test_scanConversion():
 
         assert np.allclose(expected_b_mode, calculated_b_mode, equal_nan=True)
 
-    logging.log(logging.INFO,  'scan_conversion(..) works as expected!')
+    logging.log(logging.INFO, 'scan_conversion(..) works as expected!')

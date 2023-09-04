@@ -19,4 +19,4 @@ def test_get_affine_matrix():
         assert np.allclose(affine_matrix, reader.expected_value_of('affine_matrix'))
         reader.increment()
 
-    logging.log(logging.INFO,  'get_affine_matrix(..) works as expected!')
+    logging.log(logging.INFO, 'get_affine_matrix(..) works as expected!')

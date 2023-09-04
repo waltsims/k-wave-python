@@ -95,7 +95,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Extract the file name from the GitHub release URL
         filename = url.split("/")[-1]
 
-        logging.log(logging.INFO,  f"Downloading {filename} to {binary_path}...")
+        logging.log(logging.INFO, f"Downloading {filename} to {binary_path}...")
 
         # Create the directory if it does not yet exist
         os.makedirs(binary_path, exist_ok=True)

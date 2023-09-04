@@ -22,4 +22,4 @@ def test_scale_time():
         time = scale_time(seconds)
         assert time == expected_time
 
-    logging.log(logging.INFO,  'scale_time(..) works as expected!')
+    logging.log(logging.INFO, 'scale_time(..) works as expected!')

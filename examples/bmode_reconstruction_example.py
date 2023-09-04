@@ -88,14 +88,14 @@ if __name__ == '__main__':
 
     number_scan_lines = 96
 
-    logging.log(logging.INFO,  "Fetching phantom data...")
+    logging.log(logging.INFO, "Fetching phantom data...")
     download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
 
     phantom = scipy.io.loadmat(phantom_data_path)
     sound_speed_map = phantom['sound_speed_map']
     density_map = phantom['density_map']
 
-    logging.log(logging.INFO,  f"RUN_SIMULATION set to {RUN_SIMULATION}")
+    logging.log(logging.INFO, f"RUN_SIMULATION set to {RUN_SIMULATION}")
 
     # preallocate the storage set medium position
     scan_lines = np.zeros((number_scan_lines, not_transducer.number_active_elements, kgrid.Nt))
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         # scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
-        logging.log(logging.INFO,  "Downloading data from remote server...")
+        logging.log(logging.INFO, "Downloading data from remote server...")
         SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
         sensor_data_path = 'sensor_data.mat'
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
@@ -158,5 +158,5 @@ if __name__ == '__main__':
     channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
                                       sampling_frequency, prf, focal_depth)
 
-    logging.log(logging.INFO,  "Beamforming channel data and reconstructing the image...")
+    logging.log(logging.INFO, "Beamforming channel data and reconstructing the image...")
     beamform(channel_data)

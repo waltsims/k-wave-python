@@ -42,4 +42,4 @@ def test_interpcartdata():
 
         assert np.allclose(trbd, trbd_py)
 
-    logging.log(logging.INFO,  'cart2grid(..) works as expected!')
+    logging.log(logging.INFO, 'cart2grid(..) works as expected!')

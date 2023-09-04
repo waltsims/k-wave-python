@@ -27,4 +27,4 @@ def test_maxND():
         assert np.allclose(expected_ind, ind)
 
 
-    logging.log(logging.INFO,  'max_nd(..) works as expected!')
+    logging.log(logging.INFO, 'max_nd(..) works as expected!')

@@ -30,4 +30,4 @@ def test_makeCartCircle():
 
         assert np.allclose(expected_value, circle)
 
-    logging.log(logging.INFO,  'makeCartCircle(..) works as expected!')
+    logging.log(logging.INFO, 'makeCartCircle(..) works as expected!')

@@ -7,7 +7,7 @@ def compare_against_ref(reference: str, h5_path, eps=1e-8, precision=8):
     summary_ref = H5Summary.load(reference)
     summary_new = H5Summary.from_h5(h5_path)
 
-    logging.log(logging.INFO,  'Comparing Summary files ...')
+    logging.log(logging.INFO, 'Comparing Summary files ...')
     diff = summary_ref.get_diff(summary_new, eps=eps, precision=precision)
     if len(diff) != 0:
         logging.log(logging.WARN, 'H5Summary files do not match! Printing the difference:')
@@ -26,6 +26,6 @@ def compare_against_ref(reference: str, h5_path, eps=1e-8, precision=8):
 #                     del f.attrs[attr]
 #
 #     cmd = f'h5diff -c -d 0.00000001 {path_a} {path_b}'
-#     logging.log(logging.INFO,  cmd)
+#     logging.log(logging.INFO, cmd)
 #     res = os.system(cmd)
 #     return res == 0

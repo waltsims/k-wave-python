@@ -110,7 +110,7 @@ class kWaveSimulation(object):
         self.LOG_NAME                        = ['k-Wave-Log-', get_date_string()]  #: default log filename
 
         self.calling_func_name = None
-        logging.log(logging.INFO,  f'  start time: {get_date_string()}')
+        logging.log(logging.INFO, f'  start time: {get_date_string()}')
 
         self.c_ref, self.c_ref_compression, self.c_ref_shear = [None] * 3
         self.transducer_input_signal = None
@@ -558,10 +558,10 @@ class kWaveSimulation(object):
             None
         """
         if is_elastic_code:  # pragma: no cover
-            logging.log(logging.INFO,  'Running k-Wave elastic simulation...')
+            logging.log(logging.INFO, 'Running k-Wave elastic simulation...')
         else:
-            logging.log(logging.INFO,  'Running k-Wave simulation...')
-        logging.log(logging.INFO,  f'  start time: {get_date_string()}')
+            logging.log(logging.INFO, 'Running k-Wave simulation...')
+        logging.log(logging.INFO, f'  start time: {get_date_string()}')
 
     def set_index_data_type(self) -> None:
         """
@@ -1202,7 +1202,7 @@ class kWaveSimulation(object):
 
         # update command line status
         if self.time_rev:
-            logging.log(logging.INFO,  '  time reversal mode')
+            logging.log(logging.INFO, '  time reversal mode')
 
         # cleanup unused variables
         for k in list(self.__dict__.keys()):
@@ -1234,7 +1234,7 @@ class kWaveSimulation(object):
         if self.source_p0 and self.options.smooth_p0:
 
             # update command line status
-            logging.log(logging.INFO,  '  smoothing p0 distribution...')
+            logging.log(logging.INFO, '  smoothing p0 distribution...')
 
             if self.options.simulation_type.is_axisymmetric():
                 if self.options.radial_symmetry in ['WSWA-FFT', 'WSWA']:
@@ -1321,12 +1321,12 @@ class kWaveSimulation(object):
 
         # smooth the sound speed distribution if required
         if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
-            logging.log(logging.INFO,  '  smoothing sound speed distribution...')
+            logging.log(logging.INFO, '  smoothing sound speed distribution...')
             self.medium.sound_speed = smooth(self.medium.sound_speed)
 
         # smooth the ambient density distribution if required
         if opt.smooth_rho0 and num_dim2(self.medium.density) == k_dim and self.medium.density.size > 1:
-            logging.log(logging.INFO,  'smoothing density distribution...')
+            logging.log(logging.INFO, 'smoothing density distribution...')
             self.medium.density = smooth(self.medium.density)
 
     def create_sensor_variables(self) -> None:

@@ -25,4 +25,4 @@ def test_trim_cart_points():
 
             assert np.allclose(expected_trimmed_points, trimmed_points)
 
-    logging.log(logging.INFO,  'trim_cart_points(..) works as expected!')
+    logging.log(logging.INFO, 'trim_cart_points(..) works as expected!')

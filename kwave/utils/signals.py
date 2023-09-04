@@ -473,7 +473,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     """
 
     dim = num_dim(kgrid.k)
-    logging.log(logging.INFO,  f'    taper ratio: {taper_ratio}')
+    logging.log(logging.INFO, f'    taper ratio: {taper_ratio}')
     # extract the maximum sound speed
     c = max(medium.sound_speed)
 
@@ -508,7 +508,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     def dim_string(cutoff_vals):
         return "".join([(str(scale_SI(co)[0]) + " Hz by ") for co in cutoff_vals])
     # update the command line status
-    logging.log(logging.INFO,  '  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
+    logging.log(logging.INFO, '  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
 
     return alpha_filter
 

@@ -31,7 +31,7 @@ def test_fourier_shift():
         # Check correctness
         assert np.allclose(shifted_data, expected_shifted_data)
 
-    logging.log(logging.INFO,  'fourier_shift(..) works as expected!')
+    logging.log(logging.INFO, 'fourier_shift(..) works as expected!')
 
 
 if __name__ == '__main__':

@@ -579,7 +579,7 @@ class kWaveArray(object):
 
         prefixes = ['', 'K', 'M', 'G', 'T']
         sz_bytes = np.round(sz_bytes, 2)  # TODO: should round to significant to map matlab functionality
-        logging.log(logging.INFO,  f'approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)')
+        logging.log(logging.INFO, f'approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)')
 
         source_signal = source_signal.astype(data_type)
 
@@ -597,7 +597,7 @@ class kWaveArray(object):
             )
 
         end_time = time.time()
-        logging.log(logging.INFO,  f'total computation time : {end_time - start_time:.2f} s')
+        logging.log(logging.INFO, f'total computation time : {end_time - start_time:.2f} s')
 
         return distributed_source_signal
 

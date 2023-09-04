@@ -22,4 +22,4 @@ def test_make_cart_disc():
         assert np.allclose(coordinates, reader.expected_value_of('coordinates'), equal_nan=True)
         reader.increment()
 
-    logging.log(logging.INFO,  'make_cart_disc(..) works as expected!')
+    logging.log(logging.INFO, 'make_cart_disc(..) works as expected!')

@@ -72,7 +72,7 @@ def atten_comp(
 
     # update command line status
     if display_updates:
-        logging.log(logging.INFO,  'Applying time variant filter...')
+        logging.log(logging.INFO, 'Applying time variant filter...')
 
     # check FitType input
     if fit_type == 'mav':
@@ -114,9 +114,9 @@ def atten_comp(
         # update display
         if display_updates:
             if num_signals > 1:
-                logging.log(logging.INFO,  '  calculating average time-frequency spectrum...')
+                logging.log(logging.INFO, '  calculating average time-frequency spectrum...')
             else:
-                logging.log(logging.INFO,  '  calculating time-frequency spectrum...')
+                logging.log(logging.INFO, '  calculating time-frequency spectrum...')
 
         # compute the TFD of the input signal
 
@@ -161,7 +161,7 @@ def atten_comp(
     if filter_cutoff == 'auto':  # noqa: F821
         # update display
         if display_updates:
-            logging.log(logging.INFO,  "finding filter thresholds... ")
+            logging.log(logging.INFO, "finding filter thresholds... ")
 
         f_array_hs = f_array[f_array >= 0]
         tfd_hs = 2 * tfd[f_array >= 0, :]
@@ -236,7 +236,7 @@ def atten_comp(
     # =========================================================================
 
     if display_updates:
-        logging.log(logging.INFO,  "  creating time variant filter... ")
+        logging.log(logging.INFO, "  creating time variant filter... ")
 
     # create distance vector accounting for the index of the laser pulse
     # relative to the start of the signals

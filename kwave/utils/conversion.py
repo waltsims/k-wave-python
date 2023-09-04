@@ -297,7 +297,7 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarr
     # thereby reducing the total number of points
     num_discarded_points = cart_data.shape[1] - np.sum(grid_data)
     if num_discarded_points != 0:
-        logging.log(logging.INFO,  f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
+        logging.log(logging.INFO, f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
     return grid_data.astype(int), order_index, reorder_index
 
 

@@ -138,10 +138,10 @@ def angular_spectrum_cw(
     _, scale, prefix, _ = scale_SI(min(Nx * dx, Ny * dx))
 
     # update command line status
-    logging.log(logging.INFO,  'Running CW angular spectrum projection...')
-    logging.log(logging.INFO,  f"  start time: {TicToc.start_time}")
-    logging.log(logging.INFO,  f"  input plane size: {Nx} by {Ny} grid points ({scale * Nx * dx} by {scale * Ny * dx} {prefix}m)")
-    logging.log(logging.INFO,  f"  grid expansion: {grid_expansion} grid points")
+    logging.log(logging.INFO, 'Running CW angular spectrum projection...')
+    logging.log(logging.INFO, f"  start time: {TicToc.start_time}")
+    logging.log(logging.INFO, f"  input plane size: {Nx} by {Ny} grid points ({scale * Nx * dx} by {scale * Ny * dx} {prefix}m)")
+    logging.log(logging.INFO, f"  grid expansion: {grid_expansion} grid points")
 
     # apply phase conjugation if stepping backwards
     if reverse_proj:
@@ -157,8 +157,8 @@ def angular_spectrum_cw(
         fft_length = int(2 ** (next_pow2(max([Nx, Ny])) + 1))
 
     # update command line status
-    logging.log(logging.INFO,  f"  FFT size: {fft_length} points")
-    logging.log(logging.INFO,  f"  maximum supported frequency: {scale_SI(c0 / (2 * dx))}Hz")
+    logging.log(logging.INFO, f"  FFT size: {fft_length} points")
+    logging.log(logging.INFO, f"  maximum supported frequency: {scale_SI(c0 / (2 * dx))}Hz")
 
     # create wavenumber vector
     N = fft_length
@@ -197,7 +197,7 @@ def angular_spectrum_cw(
     # =========================================================================
 
     if data_cast != 'off':
-        logging.log(logging.INFO,  f'  casting variables to {data_cast} type...')
+        logging.log(logging.INFO, f'  casting variables to {data_cast} type...')
 
         # List of variables to cast
         cast_variables = ['kz', 'z_pos', 'input_plane_fft', 'pressure']
@@ -219,8 +219,8 @@ def angular_spectrum_cw(
     # =========================================================================
 
     # Update command line status
-    logging.log(logging.INFO,  f'  precomputation completed in {scale_time(TicToc.toc())}')
-    logging.log(logging.INFO,  '  starting z-step loop...')
+    logging.log(logging.INFO, f'  precomputation completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, '  starting z-step loop...')
 
     # Loop over z-positions
     for z_index in range(Nz):
@@ -261,10 +261,10 @@ def angular_spectrum_cw(
         # Update command line status
         if z_index == loops_for_time_est:
             est_sim_time = scale_time(TicToc.toc() * Nz / z_index)
-            logging.log(logging.INFO,  f'  estimated simulation time {est_sim_time}  ...')
+            logging.log(logging.INFO, f'  estimated simulation time {est_sim_time}  ...')
 
     # update command line status
-    logging.log(logging.INFO,  f'  simulation completed in {time.perf_counter() - TicToc.start_time}')
+    logging.log(logging.INFO, f'  simulation completed in {time.perf_counter() - TicToc.start_time}')
 
     # == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == =
     # POST PROCESSING
@@ -291,6 +291,6 @@ def angular_spectrum_cw(
         pressure = float(pressure)
 
     # Update command line status
-    logging.log(logging.INFO,  f"Total computation time: {total_computation_time:.2f} seconds")
+    logging.log(logging.INFO, f"Total computation time: {total_computation_time:.2f} seconds")
 
     return pressure
