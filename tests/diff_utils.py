@@ -1,5 +1,4 @@
 import logging
-from pprint import pprint
 from tests.h5_summary import H5Summary
 
 
