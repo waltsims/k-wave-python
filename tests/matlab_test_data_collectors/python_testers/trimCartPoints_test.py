@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -24,4 +25,4 @@ def test_trim_cart_points():
 
             assert np.allclose(expected_trimmed_points, trimmed_points)
 
-    print('trim_cart_points(..) works as expected!')
+    logging.log(logging.INFO, 'trim_cart_points(..) works as expected!')

@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -22,4 +23,4 @@ def test_get_delta_bli():
         assert np.allclose(f_grid, reader.expected_value_of('f_grid'))
         reader.increment()
 
-    print('get_delta_bli(..) works as expected!')
+    logging.log(logging.INFO, 'get_delta_bli(..) works as expected!')

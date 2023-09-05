@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from numpy.fft import ifftshift
 
@@ -68,8 +69,8 @@ def set_flags(flags, sensor_x, sensor_mask, is_cartesian_interp):
         # conversion from a Cartesian to binary mask
         num_discarded_points = len(sensor_x) - sensor_mask.sum()
         if num_discarded_points != 0:
-            print(
-                f'  WARNING: {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
+            logging.log(logging.WARN,  
+                f'  {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
 
 
 def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, sensor_mask_index, sensor_x):
@@ -368,7 +369,7 @@ def compute_triangulation_points(flags, kgrid, record):
         else:
 
             # update command line status
-            print('  calculating Delaunay triangulation...')
+            logging.log(logging.INFO, '  calculating Delaunay triangulation...')
 
             # compute triangulation
             if kgrid.dim == 2:

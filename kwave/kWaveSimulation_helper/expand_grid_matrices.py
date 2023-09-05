@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 
 from kwave.kgrid import kWaveGrid
@@ -15,7 +16,7 @@ def expand_grid_matrices(
         kgrid: kWaveGrid, medium: kWaveMedium, source, sensor, opt: SimulationOptions,
         values: dotdict, flags: dotdict):
     # update command line status
-    print('  expanding computational grid...')
+    logging.log(logging.INFO, '  expanding computational grid...')
 
     #####################
     # Grab values
@@ -256,11 +257,11 @@ def print_grid_size(kgrid):
     """
     k_Nx, k_Ny, k_Nz = kgrid.Nx, kgrid.Ny, kgrid.Nz
     if kgrid.dim == 1:
-        print('  computational grid size:', int(k_Nx), 'grid points')
+        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'grid points')
     elif kgrid.dim == 2:
-        print('  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'grid points')
+        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'grid points')
     elif kgrid.dim == 3:
-        print('  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'by', int(k_Nz), 'grid points')
+        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'by', int(k_Nz), 'grid points')
 
 
 def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):

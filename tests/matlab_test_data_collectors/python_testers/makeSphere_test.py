@@ -1,6 +1,7 @@
 from kwave.data import Vector
 from kwave.utils.mapgen import make_sphere
 
+import logging
 from scipy.io import loadmat
 import numpy as np
 import os
@@ -13,7 +14,7 @@ def test_makeSphere():
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        print(i)
+        logging.log(logging.INFO, i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
 
@@ -26,4 +27,4 @@ def test_makeSphere():
 
         assert np.allclose(expected_sphere, sphere)
 
-    print('make_sphere(..) works as expected!')
+    logging.log(logging.INFO, 'make_sphere(..) works as expected!')
