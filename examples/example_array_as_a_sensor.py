@@ -98,7 +98,7 @@ def main():
 
     # Plot recorded sensor data
     fig = plt.figure()
-    ax1 = fig.add_subplot(211)
+    ax1 = fig.add_subplot(211)  # noqa
     plt.imshow(sensor_data_point / np.max(sensor_data_point), cmap='gray', aspect='auto')
     plt.xlabel(r'Time [$\mu$s]')
     plt.ylabel('Detector Number')
