@@ -609,7 +609,8 @@ class kWaveArray(object):
         mask_ind = matlab_find(mask).squeeze(axis=-1)
 
         Nt = np.shape(sensor_data)[1]
-        assert kgrid.Nt == Nt, 'sensor_data must have the same number of time steps as kgrid'
+        # TODO (Walter): this assertion does not work when "auto" is set
+        # assert kgrid.Nt == Nt, 'sensor_data must have the same number of time steps as kgrid'
 
         combined_sensor_data = np.zeros((self.number_elements, Nt))
 

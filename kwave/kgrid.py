@@ -93,6 +93,9 @@ class kWaveGrid(object):
         """
         time array [s]
         """
+        # TODO (walter): I would change this functionality to return a time array even if Nt or dt are not yet set
+        #  (e.g. if they are still 'auto')
+
         if self.Nt == 'auto' or self.dt == 'auto':
             return 'auto'
         else:

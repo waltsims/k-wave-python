@@ -12,10 +12,12 @@ for idx=1:length(all_params)
         params = all_params{idx};
         if length(all_params{idx}) < 4
             circle = makeCartCircle(params{1}, params{2}, params{3});
+            params = {params{1}, params{2}, params{3}};
         else
             circle = makeCartCircle(params{1}, params{2}, params{3}, params{4});
+            params = {params{1}, params{2}, params{3}, params{4}};
         end
-        recorder.recordVariable('params', params{:});
+        recorder.recordVariable('params', params);
         recorder.recordVariable('circle', circle);
         recorder.increment()
 

@@ -9,10 +9,10 @@ import cv2
 import h5py
 import numpy as np
 
+import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
-import kwave
 
 
 def get_h5_literals():
@@ -71,8 +71,8 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
     if dims == 3:
         Nx, Ny, Nz = matrix.shape
     elif dims == 2:
-        Nx, Ny = matrix.shape
-        Nz = 1
+        Ny, Nz = matrix.shape
+        Nx = 1
     else:
         Nx, Ny, Nz = 1, 1, 1
 
