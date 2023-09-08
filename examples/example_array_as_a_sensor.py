@@ -46,7 +46,8 @@ def main():
 
     source = kSource()
     source.p0 = make_disc(Vector([Nx, Ny]), Vector([Nx / 4 + 20, Ny / 4]), 4)
-
+    source.p0[99:119, 59:199] = 1
+    logical_p0 = source.p0.astype(bool)
     sensor = kSensor()
     sensor.mask = element_pos
     simulation_options = SimulationOptions(
@@ -76,33 +77,28 @@ def main():
     pml_mask[:, :pml_size] = 1
     pml_mask[-pml_size:, :] = 1
     pml_mask[:, -pml_size:] = 1
-    # =========================================================================
-    # VISUALISATION
-    # =========================================================================
-
-    # Create pml mask (default size in 2D is 20 grid points)
-    pml_size = 20
-    pml_mask = np.zeros((Nx, Ny), dtype=bool)
-    pml_mask[1:pml_size, :] = True
-    pml_mask[:, 1:pml_size] = True
-    pml_mask[-pml_size+1:, :] = True
-    pml_mask[:, -pml_size+1:] = True
 
     # Plot source, sensor, and pml masks
     fig = plt.figure()
-    plt.imshow(np.logical_or(sensor.mask, source.p0, pml_mask), cmap='gray')
+    plt.imshow(np.logical_or(sensor.mask, logical_p0, pml_mask), cmap='gray')
     plt.axis('image')
 
     # Overlay the physical source positions
     # karray.plotArray(False)
 
     # Plot recorded sensor data
-    fig = plt.figure()
-    ax1 = fig.add_subplot(211)  # noqa
-    plt.imshow(sensor_data_point / np.max(sensor_data_point), cmap='gray', aspect='auto')
-    plt.xlabel(r'Time [$\mu$s]')
-    plt.ylabel('Detector Number')
-    plt.title('Arc detectors')
+    fig,  (ax1, ax2)= plt.subplots(ncols=1, nrows=2)
+    ax1.imshow(sensor_data_point, aspect='auto')
+    ax1.set_xlabel(r'Time [$\mu$s]')
+    ax1.set_ylabel('Detector Number')
+    ax1.set_title('Cartesian point detectors')
+    
+    ax2.imshow(combined_sensor_data, aspect='auto')
+    ax2.set_xlabel(r'Time [$\mu$s]')
+    ax2.set_ylabel('Detector Number')
+    ax2.set_title('Arc detectors')
+
+    fig.subplots_adjust(hspace=0.5)
 
     # Plot a trace from the recorded sensor data
     fig = plt.figure()
