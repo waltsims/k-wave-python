@@ -23,7 +23,6 @@ def test_linear_array_transducer():
     test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/linear_array_transducer.mat')
     reader = TestRecordReader(test_record_path)
 
-    model = 1
     c0 = 1500
     rho0 = 1000
     source_f0 = 1e6
@@ -85,18 +84,18 @@ def test_linear_array_transducer():
     sensor_mask = np.zeros((Nx, Ny, Nz))
     sensor_mask[:, Ny // 2, :] = 1
     sensor = kSensor(sensor_mask, record=['p_max'])
+    
+    # # SIMULATION
+    # simulation_options = SimulationOptions(
+    #     pml_auto=True,
+    #     pml_inside=False,
+    #     save_to_disk=True,
+    #     data_cast='single',
+    # )
 
-    # SIMULATION
-    simulation_options = SimulationOptions(
-        pml_auto=True,
-        pml_inside=False,
-        save_to_disk=True,
-        data_cast='single',
-    )
+    # execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
+    # sensor_data = kspaceFirstOrder3DC(kgrid=kgrid, medium=medium, source=source, sensor=sensor,
+    #                                   simulation_options=simulation_options, execution_options=execution_options)
 
-    sensor_data = kspaceFirstOrder3DC(kgrid=kgrid, medium=medium, source=source, sensor=sensor,
-                                      simulation_options=simulation_options, execution_options=execution_options)
-
-    p_max = np.reshape(sensor_data['p_max'], (Nx, Nz), order='F')
+    # p_max = np.reshape(sensor_data['p_max'], (Nx, Nz), order='F')
