@@ -39,6 +39,7 @@ class Executor:
 
         return sensor_data
 
+    # TODO (Walter): make static
     def parse_executable_output(self, output_filename: str) -> dotdict:
 
         # Load the simulation and pml sizes from the output file

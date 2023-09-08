@@ -17,7 +17,8 @@ from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 
-if __name__ == '__main__':
+
+def main():
     # pathname for the input and output files
     pathname = gettempdir()
     phantom_data_path = 'phantom_data.mat'
@@ -159,3 +160,7 @@ if __name__ == '__main__':
 
     print("Beamforming channel data and reconstructing the image...")
     beamform(channel_data)
+
+
+if __name__ == '__main__':
+    main()

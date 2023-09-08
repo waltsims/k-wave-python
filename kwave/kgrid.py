@@ -400,6 +400,7 @@ class kWaveGrid(object):
     # functions that can only be accessed by class members
     ########################################
     @staticmethod
+    # TODO (walter): convert this name to snake case
     def makeDim(num_points, spacing):
         """
         Create the grid parameters for a single spatial direction
@@ -456,6 +457,7 @@ class kWaveGrid(object):
                           largest_prime_factor(self.Nz)]
         return np.array(prime_facs)
 
+    # TODO (walter): convert this name to snake case
     def makeTime(self, c, cfl=CFL_DEFAULT, t_end=None):
         """
         Compute Nt and dt based on the cfl number and grid size, where
@@ -543,6 +545,7 @@ class kWaveGrid(object):
         return kz_vec_dtt, M
 
     @staticmethod
+    # TODO (walter): convert this name to snake case
     def makeDTTDim(Nx, dx, dtt_type):
         """
         Create the DTT grid parameters for a single spatial direction
@@ -602,6 +605,7 @@ class kWaveGrid(object):
     ########################################
     # functions for non-uniform grids
     ########################################
+    # TODO (walter): convert this name to snake case
     def setNUGrid(self, dim, n_vec, dudn, n_vec_sg, dudn_sg):
         """
         Function to set non-uniform grid parameters in specified dimension
