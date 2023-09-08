@@ -44,12 +44,12 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
 
         # even FFT length
         if dim == 0:
-            func_fft[1: -1, :, :, :] = func_fft[1: -1, :, :, :] * 2
+            func_fft[1: -1] = func_fft[1: -1] * 2
+        elif dim == 1:
+            func_fft[:, 1: -1] = func_fft[:, 1: -1] * 2
         elif dim == 2:
-            func_fft[:, 1: -1, :, :] = func_fft[:, 1: -1, :, :] * 2
+            func_fft[:, :, 1: -1] = func_fft[:, :, 1: -1] * 2
         elif dim == 3:
-            func_fft[:, :, 1: -1, :] = func_fft[:, :, 1: -1, :] * 2
-        elif dim == 4:
             func_fft[:, :, :, 1: -1] = func_fft[:, :, :, 1: -1] * 2
 
     return func_fft
