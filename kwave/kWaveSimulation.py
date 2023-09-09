@@ -502,8 +502,8 @@ class kWaveSimulation(object):
         self.c_ref, self.c_ref_compression, self.c_ref_shear \
             = set_sound_speed_ref(self.medium, opt.simulation_type)
 
-        self.check_source(k_dim)
-        self.check_sensor(k_dim, self.kgrid.Nt)
+        self.check_source(k_dim, self.kgrid.Nt)
+        self.check_sensor(k_dim)
         self.check_kgrid_time()
         self.precision = self.select_precision(opt)
         self.check_input_combinations(opt, user_medium_density_input, k_dim, pml_size, self.kgrid.N)
@@ -606,12 +606,12 @@ class kWaveSimulation(object):
             medium.check_fields(kgrid_k.shape)
         return user_medium_density_input
 
-    def check_sensor(self, kgrid_dim) -> None:
+    def check_sensor(self, kgrid_dim)-> None:
         """
-        Check the source properties for correctness and validity
+        Check the Sensor properties for correctness and validity
 
         Args:
-            kgrid_dim: kWaveGrid dimension
+            k_dim: kWaveGrid dimensionality
 
         Returns:
             None
@@ -829,10 +829,10 @@ class kWaveSimulation(object):
 
     def check_source(self, k_dim, k_Nt) -> None:
         """
-        Check the Sensor properties for correctness and validity
+        Check the source properties for correctness and validity
 
         Args:
-            k_dim: kWaveGrid dimensionality
+            kgrid_dim: kWaveGrid dimension
             k_Nt: Number of time steps in kWaveGrid
 
         Returns:
