@@ -15,7 +15,6 @@ from kwave.utils.signals import tone_burst
 
 
 def main():
-    model = 1
     c0 = 1500
     rho0 = 1000
     source_f0 = 1e6

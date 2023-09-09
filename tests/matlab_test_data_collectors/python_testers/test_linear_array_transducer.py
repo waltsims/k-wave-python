@@ -1,21 +1,21 @@
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import os
 from pathlib import Path
 
 import kwave.data
-from kwave.kWaveSimulation import SimulationOptions
+# from kwave.kWaveSimulation import SimulationOptions
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
+# from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
+# from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.plot import voxel_plot
+# from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
 
 
@@ -78,12 +78,12 @@ def test_linear_array_transducer():
     source.p = karray.get_distributed_source_signal(kgrid, source_sig)
     # MEDIUM
 
-    medium = kWaveMedium(sound_speed=c0, density=rho0)
+    medium = kWaveMedium(sound_speed=c0, density=rho0) # noqa: F841
 
     # SENSOR
     sensor_mask = np.zeros((Nx, Ny, Nz))
     sensor_mask[:, Ny // 2, :] = 1
-    sensor = kSensor(sensor_mask, record=['p_max'])
+    sensor = kSensor(sensor_mask, record=['p_max']) # noqa: F841
     
     # # SIMULATION
     # simulation_options = SimulationOptions(

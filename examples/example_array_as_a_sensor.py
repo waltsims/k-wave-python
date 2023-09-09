@@ -9,9 +9,10 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.conversion import cart2grid, reorder_sensor_data
+from kwave.utils.conversion import cart2grid
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import make_cart_circle, make_disc
+from kwave.utils.signals import reorder_binary_sensor_data
 
 
 def main():

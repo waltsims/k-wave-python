@@ -110,7 +110,7 @@ def main():
 
         # set the input settings
         input_filename = f'example_input_{scan_line_index}.h5'
-        input_file_full_path = os.path.join(pathname, input_filename)
+        input_file_full_path = os.path.join(pathname, input_filename) # noqa: F841
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
