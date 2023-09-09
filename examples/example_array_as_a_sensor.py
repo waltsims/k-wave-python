@@ -9,6 +9,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.conversion import cart2grid, reorder_sensor_data
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import make_cart_circle, make_disc
 
@@ -57,8 +58,10 @@ def main():
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
     output = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data_point = output['p'].T
-
+        # TODO (walter): This should be done by kspaceFirstOrder
+    _, _, reorder_index = cart2grid(kgrid, element_pos)
+    sensor_data_point = reorder_binary_sensor_data(output['p'].T, reorder_index=reorder_index)
+    
     # assign binary mask from karray to the source mask
     sensor.mask = karray.get_array_binary_mask(kgrid)
 
@@ -80,14 +83,14 @@ def main():
 
     # Plot source, sensor, and pml masks
     fig = plt.figure()
-    plt.imshow(np.logical_or(sensor.mask, logical_p0, pml_mask), cmap='gray')
+    plt.imshow(sensor.mask | logical_p0 | pml_mask, cmap='gray')
     plt.axis('image')
 
     # Overlay the physical source positions
     # karray.plotArray(False)
 
     # Plot recorded sensor data
-    fig,  (ax1, ax2)= plt.subplots(ncols=1, nrows=2)
+    fig, (ax1, ax2)= plt.subplots(ncols=1, nrows=2)
     ax1.imshow(sensor_data_point, aspect='auto')
     ax1.set_xlabel(r'Time [$\mu$s]')
     ax1.set_ylabel('Detector Number')

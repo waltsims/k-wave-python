@@ -9,6 +9,48 @@ from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
 
 
+def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    """
+    Reorders the sensor data based on the coordinates of the sensor points.
+
+    Args:
+        kgrid: The k-Wave grid object.
+        sensor: The k-Wave sensor object.
+        sensor_data: The sensor data to be reordered.
+
+    Returns:
+        np.ndarray of the reordered sensor data.
+
+    Raises:
+        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
+    """
+    # check simulation is 2D
+    if kgrid.dim != 2:
+        raise ValueError('The simulation must be 2D.')
+
+    # check sensor.mask is a binary mask
+    if sensor.mask.dtype != bool and set(np.unique(sensor.mask).tolist()) != {0, 1}:
+        raise ValueError('The sensor must be defined as a binary mask.')
+
+    # find the coordinates of the sensor points
+    x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
+    x_sensor = np.squeeze(x_sensor)
+    y_sensor = matlab_mask(kgrid.y, sensor.mask == 1)
+    y_sensor = np.squeeze(y_sensor)
+
+    # find the angle of each sensor point (from the centre)
+    angle = np.arctan2(-x_sensor, -y_sensor)
+    angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+
+    # sort the sensor points in order of increasing angle
+    indices_new = np.argsort(angle, kind='stable')
+
+    # reorder the measure time series so that adjacent time series correspond
+    # to adjacent sensor points.
+    reordered_sensor_data = sensor_data[indices_new]
+    return reordered_sensor_data
+
+
 def db2neper(alpha: float, y: int = 1) -> float:
     """
     Convert decibels to nepers.
