@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -40,4 +41,4 @@ def test_focused_bowl_oneil():
     assert p_axial is None
     assert p_axial_complex is None
 
-    print('focused_bowl_oneil(..) works as expected!')
+    logging.log(logging.INFO, 'focused_bowl_oneil(..) works as expected!')

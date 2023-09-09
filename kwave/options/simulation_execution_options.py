@@ -34,6 +34,9 @@ class SimulationExecutionOptions:
     system_call: Optional[str] = None
     verbose_level: int = 0
 
+    # show simulation log
+    show_sim_log: bool = True
+
     def __post_init__(self):
         self.validate()
 
@@ -43,7 +46,7 @@ class SimulationExecutionOptions:
             else:
                 self.binary_name = 'kspaceFirstOrder-OMP' if is_unix() else 'kspaceFirstOrder-OMP.exe'
 
-        self._is_linux = True  # sys.platform.startswith('linux')
+        self._is_linux = sys.platform.startswith('linux')
         self._is_windows = sys.platform.startswith(('win', 'cygwin'))
         self._is_darwin = sys.platform.startswith('darwin')
 
@@ -51,7 +54,6 @@ class SimulationExecutionOptions:
             binary_folder = 'linux'
         elif self._is_windows:
             binary_folder = 'windows'
-            self.binary_name += '.exe'
         elif self._is_darwin:
             raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
 

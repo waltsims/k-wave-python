@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from copy import deepcopy
 from hashlib import sha256
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     # summary.save(f'example_pr_2D_FFT_line_sensor')
 
     for i in range(1, 3):
-        print('Processing file:', i)
+        logging.log(logging.INFO, 'Processing file:', i)
         h5_path = f'/private/var/folders/wd/pzn3h1fn37s6gbt12tyj50gw0000gn/T/example_input_{i}.h5'
         folder = 'example_pr_2D_TR_directional_sensors'
         folder_path = os.path.join('tests', 'reference_outputs', folder)

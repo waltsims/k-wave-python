@@ -6,6 +6,7 @@
     structure. It builds on the Defining An Ultrasound Transducer and
     Simulating Ultrasound Beam Patterns examples.
 """
+import logging
 import os
 from tempfile import gettempdir
 
@@ -210,7 +211,7 @@ def test_us_bmode_linear_transducer():
     # for scan_line_index in range(1, number_scan_lines + 1):
     for scan_line_index in range(1, 10):
         # update the command line status
-        print(f'Computing scan line {scan_line_index} of {number_scan_lines}')
+        logging.log(logging.INFO, f'Computing scan line {scan_line_index} of {number_scan_lines}')
 
         # load the current section of the medium
         medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]

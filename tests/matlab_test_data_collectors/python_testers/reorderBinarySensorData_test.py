@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -22,4 +23,4 @@ def test_binary_sensor_data():
         calculated_reordered_data = reorder_binary_sensor_data(sensor_data, reorder_index)
         assert np.allclose(expected_reordered_data, calculated_reordered_data, equal_nan=True)
 
-    print('reorder_binary_sensor_data(..) works as expected!')
+    logging.log(logging.INFO, 'reorder_binary_sensor_data(..) works as expected!')

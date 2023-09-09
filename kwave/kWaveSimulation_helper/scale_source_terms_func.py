@@ -1,5 +1,5 @@
+import logging
 import math
-from warnings import warn
 
 import numpy as np
 
@@ -65,7 +65,7 @@ def check_conditions(is_nonuniform_grid, is_source_uy, is_source_uz, is_transduc
 
     """
     if is_nonuniform_grid and (is_source_uy or is_source_uz or is_transducer_source):
-        warn('WARNING: source scaling not implemented for non-uniform grids with given source condition')
+        logging.log(logging.WARN, 'source scaling not implemented for non-uniform grids with given source condition')
         return False
     return True
 
