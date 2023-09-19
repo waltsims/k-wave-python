@@ -343,13 +343,11 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
     # create the tone burst
     tone_length = num_cycles / signal_freq  # [s]
-    # We want to include the endpoint but only if it's divisible by the step-size
-    if tone_length % dt < 1e-18:
+    # We want to include the endpoint but only if it's divisible by the step-size. Modulo operator is not stable, so multiple conditions included
+    if ( (tone_length % dt) < 1e-18 or (np.abs(tone_length % dt - dt) < 1e-18) ):
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
         tone_t = np.arange(0, tone_length, dt)
-    
-    tone_t = np.arange(0.0, tone_length, dt)
 
     tone_burst = np.sin(2 * np.pi * signal_freq * tone_t)
     tone_index = np.round(signal_offset)
