@@ -82,7 +82,7 @@ def test_extract_amp_phase():
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
     # even length signal
-    test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=3, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=18_000_000, signal_freq=3_000_000, num_cycles=3, envelope='Gaussian')
     a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=18_000_000, source_freq=6_000_000)
     a, b, c = 0.6854, -np.pi / 2.0, 6e06
     assert (abs(a_t - a) < 0.01).all()

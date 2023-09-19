@@ -348,6 +348,8 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
         tone_t = np.arange(0, tone_length, dt)
+    
+    tone_t = np.arange(0.0, tone_length, dt)
 
     tone_burst = np.sin(2 * np.pi * signal_freq * tone_t)
     tone_index = np.round(signal_offset)
