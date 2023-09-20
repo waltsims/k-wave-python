@@ -44,6 +44,13 @@ def test_kwave_array():
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
     reader.increment()
 
+    kwave_array.add_custom_element(
+        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0]]),
+        9, 2, label='custom_3d'
+    )
+    check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
+    reader.increment()
+
     kwave_array.add_rect_element([12, -8, 0.3], 3, 4, [2, 4, 5])
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
     reader.increment()
@@ -58,6 +65,13 @@ def test_kwave_array():
     reader.increment()
 
     kwave_array.add_disc_element([0, 0.3], 5)
+    check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
+    reader.increment()
+
+    kwave_array.add_custom_element(
+        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]]),
+        9, 1, label='custom_2d'
+    )
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
     reader.increment()
 
