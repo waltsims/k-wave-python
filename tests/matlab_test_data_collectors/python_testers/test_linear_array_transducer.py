@@ -1,21 +1,16 @@
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
-# import matplotlib.pyplot as plt
 import numpy as np
 import os
 from pathlib import Path
 
 import kwave.data
-# from kwave.kWaveSimulation import SimulationOptions
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-# from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-# from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.kwave_array import kWaveArray
-# from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
 
 
@@ -71,31 +66,3 @@ def test_linear_array_transducer():
     karray.set_array_position(translation, rotation)
 
     check_kwave_array_equality(karray, reader.expected_value_of('karray'))
-    
-    source = kSource()
-    source.p_mask = karray.get_array_binary_mask(kgrid)
-
-    source.p = karray.get_distributed_source_signal(kgrid, source_sig)
-    # MEDIUM
-
-    medium = kWaveMedium(sound_speed=c0, density=rho0) # noqa: F841
-
-    # SENSOR
-    sensor_mask = np.zeros((Nx, Ny, Nz))
-    sensor_mask[:, Ny // 2, :] = 1
-    sensor = kSensor(sensor_mask, record=['p_max']) # noqa: F841
-    
-    # # SIMULATION
-    # simulation_options = SimulationOptions(
-    #     pml_auto=True,
-    #     pml_inside=False,
-    #     save_to_disk=True,
-    #     data_cast='single',
-    # )
-
-    # execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-    # sensor_data = kspaceFirstOrder3DC(kgrid=kgrid, medium=medium, source=source, sensor=sensor,
-    #                                   simulation_options=simulation_options, execution_options=execution_options)
-
-    # p_max = np.reshape(sensor_data['p_max'], (Nx, Nz), order='F')
