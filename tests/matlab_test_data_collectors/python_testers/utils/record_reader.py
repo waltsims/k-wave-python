@@ -1,10 +1,10 @@
 import numpy as np
-
 from scipy.io import loadmat
 
 
-class TestRecordReader(object):
 
+class TestRecordReader(object):
+    __test__ = False
     def __init__(self, record_filename):
         recorded_data = loadmat(record_filename, simplify_cells=True)
         self._records = recorded_data
