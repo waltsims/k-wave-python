@@ -499,7 +499,7 @@ def save_mat_file(filepath, integer_variables, float_variables):
         float_variables[key] = np.array(value, dtype=np.float32)
 
     for key, value in integer_variables.items():
-        integer_variables[key] = np.array(value, dtype=np.uin64)
+        integer_variables[key] = np.array(value, dtype=np.uint64)
 
     # save the input variables to disk as a MATLAB binary file
     float_variables = dict(**float_variables, **integer_variables)
