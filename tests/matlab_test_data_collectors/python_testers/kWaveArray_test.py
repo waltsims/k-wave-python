@@ -45,7 +45,7 @@ def test_kwave_array():
     reader.increment()
 
     kwave_array.add_custom_element(
-        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0]]),
+        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.float32),
         9, 2, label='custom_3d'
     )
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
@@ -69,7 +69,7 @@ def test_kwave_array():
     reader.increment()
 
     kwave_array.add_custom_element(
-        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]]),
+        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.float32),
         9, 1, label='custom_2d'
     )
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
