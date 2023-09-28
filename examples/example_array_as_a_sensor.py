@@ -34,11 +34,9 @@ def main():
         karray.add_arc_element(element_pos[:, idx], radius, diameter, focus_pos)
 
     # grid properties
-    Nx = 256
-    dx = 0.5e-3
-    Ny = 256
-    dy = 0.5e-3
-    kgrid = kWaveGrid(Vector([Nx, Ny]), Vector([dx, dy]))
+    Nxy = Vector([256, 256])
+    dxy = Vector([0.5e-3, 0.5e-3])
+    kgrid = kWaveGrid(Nxy, dxy)
 
     # medium properties
     medium = kWaveMedium(sound_speed=1500)
@@ -47,7 +45,7 @@ def main():
     kgrid.makeTime(medium.sound_speed)
 
     source = kSource()
-    source.p0 = make_disc(Vector([Nx, Ny]), Vector([Nx / 4 + 20, Ny / 4]), 4)
+    source.p0 = make_disc(Nxy, Vector([Nx / 4 + 20, Ny / 4]), 4)
     source.p0[99:119, 59:199] = 1
     logical_p0 = source.p0.astype(bool)
     sensor = kSensor()
