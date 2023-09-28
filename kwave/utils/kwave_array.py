@@ -2,7 +2,7 @@ import logging
 import time
 from dataclasses import dataclass
 from math import ceil
-from typing import Optional
+from typing import Iterable, Optional
 
 import numpy as np
 from numpy import arcsin, pi, cos, size, array
@@ -40,7 +40,7 @@ class Element:
 
     length: Optional[float] = None
     width: Optional[float] = None
-    orientation: Optional = None
+    orientation: Optional[np.ndarray] = None
 
     start_point: Optional[np.ndarray] = None
     end_point: Optional[np.ndarray] = None
@@ -264,10 +264,10 @@ class kWaveArray(object):
 
     def add_arc_element(self, position, radius, diameter, focus_pos):
 
-        assert isinstance(position, (list, tuple, Vector)), "'position' must be list, tuple or Vector"
+        assert isinstance(position, Iterable), "'position' must be list, tuple or Vector"
         assert isinstance(radius, (int, float)), "'radius' must be an integer or float"
         assert isinstance(diameter, (int, float)), "'diameter' must be an integer or float"
-        assert isinstance(focus_pos, (list, tuple, Vector)), "'focus_pos' must be list, tuple or Vector"
+        assert isinstance(focus_pos, Iterable), "'focus_pos' must be list, tuple or Vector"
         assert len(position) == 2, "'position' must have 2 elements"
         assert len(focus_pos) == 2, "'focus_pos' must have 2 elements"
 
