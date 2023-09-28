@@ -243,15 +243,20 @@ def atten_comp(
     dist_vec = c * dt * (np.arange(N) - t0)
     dist_vec[dist_vec < 0] = 0
 
-    # create the time variant filter
+    # Check if f_array and dist_vec are valid
+    assert f_array is not None and len(f_array) > 0, "f_array must be valid."
+    assert dist_vec is not None and len(dist_vec) > 0, "dist_vec must be valid."
+    
+    # Create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
-    part_1 = (2 * np.pi * np.abs(f_mat)) ** y
+    
+    # Add conditionals or use np.where to manage zero and NaN
+    part_1 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** y, 0)
     part_2 = 1j * np.tan(np.pi * y / 2)
     part_3 = (2 * np.pi * f_mat)
-    part_4 = (2 * np.pi * np.abs(f_mat)) ** (y - 1)
-    tv_filter = alpha_0 * dist_mat * (
-            part_1 - part_2 * part_3 * part_4
-    )
+    part_4 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** (y - 1), 0)
+    
+    tv_filter = alpha_0 * dist_mat * (part_1 - part_2 * part_3 * part_4)
 
     # convert cutoff frequency to a window size
     N_win_array = np.floor((cutoff_freq_array / f_array[-1]) * N) - 1
