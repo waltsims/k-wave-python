@@ -75,7 +75,7 @@ def print_max_supported_freq(kgrid, c_min):
             logging.log(logging.INFO, '  maximum supported frequency: ', scale_SI(k_max_all * c_min / (2*np.pi))[0], 'Hz')
         else:
             logging.log(logging.INFO, '  maximum supported frequency: ', scale_SI(k_max.x * c_min / (2*np.pi))[0],
-                  'Hz by ', scale_SI(kgrid.ky_max * c_min / (2*np.pi))[0], 'Hz')
+                  'Hz by ', scale_SI(k_max.y * c_min / (2*np.pi))[0], 'Hz')
 
     elif kgrid.dim == 3:
         # display maximum supported frequency
