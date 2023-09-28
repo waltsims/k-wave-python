@@ -155,7 +155,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
          input_signal_mat:  matrix of time series following the source points
     """
 
-    assert kgrid.t_array != 'auto', "kgrid.t_array must be defined."
+    assert not np.all(kgrid.t_array == 'auto'), "kgrid.t_array must be defined."
     if isinstance(sound_speed, int):
         sound_speed = float(sound_speed)
 
