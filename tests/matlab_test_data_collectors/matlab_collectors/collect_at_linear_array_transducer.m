@@ -1,29 +1,4 @@
-% Script to show how to setup a linear array transducer using the
-% kWaveArray class.
-%
-% NOTE: setting the position does not correctly rotate the angle of the
-% elements if an element angle is set. As a work around, set the element
-% angle in addRectElement to the same angle as the array rotation.
-%
-% author: Bradley Treeby, Walter Simson
-% date: 1st November 2020
-% last update: 8th September 2023
-%  
-% This function is part of the k-Wave Toolbox (http://www.k-wave.org)
-% Copyright (C) 2020-2022 Bradley Treeby
-
-% This file is part of k-Wave. k-Wave is free software: you can
-% redistribute it and/or modify it under the terms of the GNU Lesser
-% General Public License as published by the Free Software Foundation,
-% either version 3 of the License, or (at your option) any later version.
-% 
-% k-Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-% WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-% FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-% more details. 
-% 
-% You should have received a copy of the GNU Lesser General Public License
-% along with k-Wave. If not, see <http://www.gnu.org/licenses/>. 
+% derived from linear_array_transducer script of k-Wave MATLAB
 
 % create data recorder
 recorder = utils.TestRecorder('collectedValues/linear_array_transducer.mat');
