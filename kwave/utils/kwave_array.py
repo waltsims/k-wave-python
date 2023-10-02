@@ -232,6 +232,20 @@ class kWaveArray(object):
         assert isinstance(element_dim, (int)) and element_dim in [2, 1], "'element_dim' must be an integer and either 2 or 3"
         assert isinstance(label, (str)), "'label' must be a string"
         
+        # check the dimensionality of the integration points
+        input_dim = integration_points.shape[0]
+        if (input_dim < 1) or (input_dim > 3):
+            raise ValueError("Input integration_points must be a 1 x N (in 1D), 2 x N (in 2D), or 3 x N (in 3D) array.")
+
+        # check if this is the first element, and set the dimension
+        if self.number_elements == 0:
+            self.dim = input_dim
+        
+        # check that the element is being added to an array with the
+        # correct dimensions
+        if self.dim != input_dim:
+            raise ValueError(f"{element_dim}D custom element cannot be added to an array with {self.dim}D elements.")
+
         self.number_elements += 1
         
         self.elements.append(
