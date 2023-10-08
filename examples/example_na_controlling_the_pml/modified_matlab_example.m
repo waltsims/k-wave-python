@@ -50,7 +50,7 @@ run_simulation_and_record_input_output('example_4', kgrid, medium, source, senso
 % define a new matlab function
 function run_simulation_and_record_input_output(name, kgrid, medium, source, sensor, input_args)
 
-    sensor_data = kspaceFirstOrder2D(kgrid, medium, source, sensor, input_args{:});
+    sensor_data = kspaceFirstOrder2DC(kgrid, medium, source, sensor, input_args{:});
 
     % plot the simulated sensor data
     figure;
