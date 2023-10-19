@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 from kwave.kgrid import kWaveGrid
 
 from kwave.utils.kwave_array import kWaveArray
@@ -45,10 +46,19 @@ def test_kwave_array():
     reader.increment()
 
     kwave_array.add_custom_element(
-        np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.float32),
-        9, 2, label='custom_3d'
+        integration_points=np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.float32),
+        measure=9,
+        element_dim=2, label='custom_3d'
     )
     check_kwave_array_equality(kwave_array, reader.expected_value_of('kwave_array'))
+
+    with pytest.raises(ValueError):
+        kwave_array.add_custom_element(
+            integration_points=np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.float32),
+            measure=9,
+            element_dim=2, label='custom_3d'
+        )
+
     reader.increment()
 
     kwave_array.add_rect_element([12, -8, 0.3], 3, 4, [2, 4, 5])

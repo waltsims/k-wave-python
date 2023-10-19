@@ -229,7 +229,7 @@ class kWaveArray(object):
         
         assert isinstance(integration_points, (np.ndarray)), "'integration_points' must be a numpy array"
         assert isinstance(measure, (int, float)), "'measure' must be an integer or float"
-        assert isinstance(element_dim, (int)) and element_dim in [2, 1], "'element_dim' must be an integer and either 2 or 3"
+        assert isinstance(element_dim, (int)) and element_dim in [1, 2, 3], "'element_dim' must be an integer and either 1, 2 or 3"
         assert isinstance(label, (str)), "'label' must be a string"
         
         # check the dimensionality of the integration points
@@ -244,7 +244,7 @@ class kWaveArray(object):
         # check that the element is being added to an array with the
         # correct dimensions
         if self.dim != input_dim:
-            raise ValueError(f"{element_dim}D custom element cannot be added to an array with {self.dim}D elements.")
+            raise ValueError(f"{input_dim}D custom element cannot be added to an array with {self.dim}D elements.")
 
         self.number_elements += 1
         
