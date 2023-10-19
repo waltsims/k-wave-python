@@ -182,9 +182,10 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        for p_index in range(source_p[:, 0].size):
-            source_p[p_index, :] = source_p[p_index, :] * \
-                                   (2 * dt / (N * matlab_mask(c0, p_source_pos_index.flatten('F')[p_index]) * dx))
+        ind = range(source_p[:, 0].size)
+        mask = p_source_pos_index.flatten('F')[ind]
+        scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) * dx)
+        source_p[ind, :] *= scale
     return source_p
 
 
