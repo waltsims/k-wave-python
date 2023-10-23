@@ -7,9 +7,6 @@ from pathlib import Path
 
 import kwave.data
 from kwave.kgrid import kWaveGrid
-from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensor
-from kwave.ksource import kSource
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import tone_burst
 
@@ -36,6 +33,8 @@ def test_linear_array_transducer():
     ppw = 3
     t_end = 35e-6
     cfl = 0.5
+    bli_tolerance = 0.05
+    upsampling_rate = 10
 
     # GRID
     dx = c0 / (ppw * source_f0)
@@ -59,7 +58,7 @@ def test_linear_array_transducer():
 
     source_sig = source_amp * tone_burst(1 / kgrid.dt, source_f0, source_cycles,
                                          signal_offset=np.round(time_delays / kgrid.dt).astype(int))
-    karray = kWaveArray(bli_tolerance=0.05, upsampling_rate=10)
+    karray = kWaveArray(bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate)
 
     for ind in range(1, element_num + 1):
         x_pos = 0 - (element_num * element_pitch / 2 - element_pitch / 2) + (ind - 1) * element_pitch
