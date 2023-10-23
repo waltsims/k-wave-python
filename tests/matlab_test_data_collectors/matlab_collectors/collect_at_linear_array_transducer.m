@@ -128,47 +128,4 @@ sensor.mask(:, Ny/2, :) = 1;
 sensor.record = {'p_max'};
 
 recorder.recordObject('sensor', sensor);
-% % --------------------
-% % SIMULATION
-% % --------------------
-
-% % set input options
-% input_args = {...
-%     'PMLSize', 'auto', ...
-%     'PMLInside', false, ...
-%     'PlotPML', false, ...
-%     'DisplayMask', 'off'};
-
-% % run code
-% switch model
-%     case 1
-        
-%         % MATLAB CPU
-%         sensor_data = kspaceFirstOrder3D(kgrid, medium, source, sensor, ...
-%             input_args{:}, ...
-%             'DataCast', 'single', ...
-%             'PlotScale', [-1, 1] * source_amp);
-        
-%     case 2
-        
-%         % MATLAB GPU
-%         sensor_data = kspaceFirstOrder3D(kgrid, medium, source, sensor, ...
-%             input_args{:}, ...
-%             'DataCast', 'gpuArray-single', ...
-%             'PlotScale', [-1, 1] * source_amp);
-        
-%     case 3
-        
-%         % C++
-%         sensor_data = kspaceFirstOrder3DC(kgrid, medium, source, sensor, input_args{:});
-        
-%     case 4
-        
-%         % C++/CUDA GPU
-%         sensor_data = kspaceFirstOrder3DG(kgrid, medium, source, sensor, input_args{:});
-        
-% end
-
-
-% save testRecorder
 recorder.saveRecordsToDisk();
