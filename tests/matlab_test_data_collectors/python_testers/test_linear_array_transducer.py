@@ -48,11 +48,13 @@ def test_linear_array_transducer():
     check_kgrid_equality(kgrid, reader.expected_value_of('kgrid'))
     # SOURCE
     if element_num % 2 != 0:
-        ids = np.arange(1, element_num + 1) - np.ceil(element_num / 2)
+        centering_offset = np.ceil(element_num / 2)
     else:
-        ids = np.arange(1, element_num + 1) - (element_num + 1) / 2
+        centering_offset = (element_num + 1) / 2
 
-    time_delays = -(np.sqrt((ids * element_pitch) ** 2 + source_focus ** 2) - source_focus) / c0
+    positional_basis = np.arange(1, element_num + 1) - centering_offset
+    
+    time_delays = -(np.sqrt((positional_basis * element_pitch) ** 2 + source_focus ** 2) - source_focus) / c0
     time_delays = time_delays - min(time_delays)
 
     source_sig = source_amp * tone_burst(1 / kgrid.dt, source_f0, source_cycles,
