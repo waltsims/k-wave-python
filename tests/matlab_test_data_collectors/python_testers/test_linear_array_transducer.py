@@ -16,10 +16,7 @@ def test_linear_array_transducer():
     reader = TestRecordReader(test_record_path)
 
     c0 = 1500
-    rho0 = 1000
     source_f0 = 1e6
-    source_amp = 1e6
-    source_cycles = 5
     source_focus = 20e-3
     element_num = 15
     element_width = 1e-3
@@ -56,8 +53,6 @@ def test_linear_array_transducer():
     time_delays = -(np.sqrt((positional_basis * element_pitch) ** 2 + source_focus ** 2) - source_focus) / c0
     time_delays = time_delays - min(time_delays)
 
-    source_sig = source_amp * tone_burst(1 / kgrid.dt, source_f0, source_cycles,
-                                         signal_offset=np.round(time_delays / kgrid.dt).astype(int))
     karray = kWaveArray(bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate)
 
     for ind in range(1, element_num + 1):
