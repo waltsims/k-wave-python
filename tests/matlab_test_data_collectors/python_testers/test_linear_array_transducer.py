@@ -8,7 +8,6 @@ from pathlib import Path
 import kwave.data
 from kwave.kgrid import kWaveGrid
 from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.signals import tone_burst
 
 
 def test_linear_array_transducer():
