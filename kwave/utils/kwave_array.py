@@ -9,7 +9,6 @@ from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
 
 import kwave
-from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
