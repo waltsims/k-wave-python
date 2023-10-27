@@ -55,8 +55,8 @@ def main():
                                          signal_offset=np.round(time_delays / kgrid.dt).astype(int))
     karray = kWaveArray(bli_tolerance=0.05, upsampling_rate=10)
 
-    for ind in range(1, element_num + 1):
-        x_pos = 0 - (element_num * element_pitch / 2 - element_pitch / 2) + (ind - 1) * element_pitch
+    for ind in range(element_num):
+        x_pos = 0 - (element_num * element_pitch / 2 - element_pitch / 2) + ind * element_pitch
         karray.add_rect_element([x_pos, 0, kgrid.z_vec[0]], element_width, element_length, rotation)
 
     karray.set_array_position(translation, rotation)
