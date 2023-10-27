@@ -16,9 +16,10 @@ def test_makeCartCircle():
     for i in range(num_collected_values):
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
         recorded_data = loadmat(filepath)
+        params = recorded_data['params'][0]
 
-        if len(recorded_data['params'][0]) == 4:
-            radius, num_points, center, arc_angle = recorded_data['params'][0]
+        if len(params) == 4:
+            radius, num_points, center, arc_angle = params 
             center = Vector(center[0])
             num_points = num_points[0][0]
             radius = radius[0][0]
@@ -28,7 +29,7 @@ def test_makeCartCircle():
 
             circle = make_cart_circle(radius, num_points, center, arc_angle)
         else:
-            radius, num_points, center = recorded_data['params'][0]
+            radius, num_points, center = params 
             center = Vector(center[0])
             num_points = num_points[0][0]
             radius = radius[0][0]
