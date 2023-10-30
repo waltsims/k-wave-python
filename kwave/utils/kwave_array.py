@@ -793,12 +793,12 @@ def off_grid_points(kgrid, points,
             # create an array of neighbouring grid points for BLI evaluation
             if kgrid.dim == 1:
                 ind, is_, _, _ = tol_star(bli_tolerance, kgrid, point, debug)
-                xs = x_vec[is_]
+                xs = x_vec[is_.astype(int)].squeeze(axis=-1)
                 xyz = xs
             elif kgrid.dim == 2:
                 ind, is_, js, _ = tol_star(bli_tolerance, kgrid, point, debug)
-                xs = x_vec[is_]
-                ys = y_vec[js]
+                xs = x_vec[is_.astype(int)].squeeze(axis=-1)
+                ys = y_vec[js.astype(int)].squeeze(axis=-1)
                 xyz = np.array([xs, ys]).squeeze().T
             elif kgrid.dim == 3:
                 ind, is_, js, ks = tol_star(bli_tolerance, kgrid, point, debug)
