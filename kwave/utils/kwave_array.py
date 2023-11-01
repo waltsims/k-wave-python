@@ -573,7 +573,7 @@ class kWaveArray(object):
             data_type = 'float64'
             sz_bytes = num_source_points * Nt * 8
 
-        sz_ind = 1
+        sz_ind = 0
         while sz_bytes > 1024:
             sz_bytes = sz_bytes / 1024
             sz_ind += 1
