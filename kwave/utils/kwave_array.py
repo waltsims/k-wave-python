@@ -26,6 +26,7 @@ class Element:
     active: bool
     measure: float
 
+    label: Optional[str] = None
     group_type: Optional[str] = None
     element_number: Optional[int] = None
 
@@ -36,10 +37,13 @@ class Element:
     radius_of_curvature: Optional[float] = None
     position: Optional[np.ndarray] = None
     focus_position: Optional[np.ndarray] = None
+    
+    # custom element
+    integration_points: Optional[np.ndarray] = None
 
     length: Optional[float] = None
     width: Optional[float] = None
-    orientation: Optional = None
+    orientation: Optional[np.ndarray] = None
 
     start_point: Optional[np.ndarray] = None
     end_point: Optional[np.ndarray] = None
@@ -220,7 +224,43 @@ class kWaveArray(object):
             active=True,
             measure=area
         ))
+        
+    def add_custom_element(self, integration_points, measure, element_dim, label):
+        
+        assert isinstance(integration_points, (np.ndarray)), "'integration_points' must be a numpy array"
+        assert isinstance(measure, (int, float)), "'measure' must be an integer or float"
+        assert isinstance(element_dim, (int)) and element_dim in [1, 2, 3], "'element_dim' must be an integer and either 1, 2 or 3"
+        assert isinstance(label, (str)), "'label' must be a string"
+        
+        # check the dimensionality of the integration points
+        input_dim = integration_points.shape[0]
+        if (input_dim < 1) or (input_dim > 3):
+            raise ValueError("Input integration_points must be a 1 x N (in 1D), 2 x N (in 2D), or 3 x N (in 3D) array.")
 
+        # check if this is the first element, and set the dimension
+        if self.number_elements == 0:
+            self.dim = input_dim
+        
+        # check that the element is being added to an array with the
+        # correct dimensions
+        if self.dim != input_dim:
+            raise ValueError(f"{input_dim}D custom element cannot be added to an array with {self.dim}D elements.")
+
+        self.number_elements += 1
+        
+        self.elements.append(
+            Element(
+                group_id=0,
+                type='custom',
+                dim=element_dim,
+                label=label,
+                integration_points=integration_points,
+                active=True,
+                measure=measure
+            )
+        )
+        
+        
     def add_rect_element(self, position, Lx, Ly, theta):
 
         assert isinstance(position, (list, tuple)), "'position' must be a list or tuple"

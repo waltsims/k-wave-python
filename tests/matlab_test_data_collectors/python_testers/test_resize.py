@@ -22,5 +22,6 @@ def test_resize():
 
         assert np.allclose(expected_resized_volume,
                            resized_volume), f"Results do not match for {i + 1} dimensional case."
+        reader.increment()
 
-    logging.log(logging.INFO, 'revolve2d(..) works as expected!')
+    logging.log(logging.INFO, 'resize(..) works as expected!')
