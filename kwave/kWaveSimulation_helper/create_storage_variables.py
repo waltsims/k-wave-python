@@ -8,7 +8,7 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 
 
-# Note from Farid: This function/file is very suspicios. I'm pretty sure that the implementation is not correct.
+# Note from Farid: This function/file is very suspicious. I'm pretty sure that the implementation is not correct.
 # Full test-coverage is required for bug-fixes!
 
 def create_storage_variables(

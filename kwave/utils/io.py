@@ -9,10 +9,10 @@ import cv2
 import h5py
 import numpy as np
 
+import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
-import kwave
 
 
 def get_h5_literals():
