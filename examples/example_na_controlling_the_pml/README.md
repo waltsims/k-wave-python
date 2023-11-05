@@ -1,5 +1,9 @@
 # Using An Ultrasound Transducer As A Sensor Example
 
+<a target="_blank" href="https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/example_na_controlling_the_pml/example_na_controlling_the_pml.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 # Running the example
 
 Please have a look at the `example_na_controlling_the_pml.ipynb` notebook file to see the example in action.
