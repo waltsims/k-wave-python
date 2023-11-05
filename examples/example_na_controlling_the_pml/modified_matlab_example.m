@@ -29,6 +29,7 @@ source.p0 = disc_1 + disc_2;
 sensor_radius = 4e-3;   % [m]
 num_sensor_points = 50;
 sensor.mask = makeCartCircle(sensor_radius, num_sensor_points);
+sensor.mask = cart2grid(kgrid, sensor.mask, false);  % otherwise cpu computation will not work
 
 % Example 1: PML with no absorption
 input_args = {'PMLAlpha', 0};
