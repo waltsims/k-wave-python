@@ -184,10 +184,13 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        p_index = range(source_p[:, 0].size)
-        mask = p_source_pos_index.flatten('F')[p_index]
-        scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) * dx)
-        source_p[p_index, :] *= scale
+        #p_index = range(source_p.size[0])
+        #mask = p_source_pos_index.flatten('F')[p_index]
+        #scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) * dx)
+        #source_p[p_index, :] *= scale
+
+        for p_index in range(source_p.size[0]):
+            source_p[p_index, :] = source_p[p_index, :] * (2.0 * dt) / (N * c0[p_source_pos_index[p_index]] * dx)
 
         return source_p
 
