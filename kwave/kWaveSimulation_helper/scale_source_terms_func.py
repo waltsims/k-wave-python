@@ -234,20 +234,20 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
             else:
 
-                #for s_index in range(source_val.size[0]):
-                #    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                for s_index in range(source_val.size[0]):
+                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
 
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
                 # s_index = range(source_val.size[0])
                 # mask = s_source_pos_index.flatten('F')[s_index]
-                # scale = (2.0 * dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / (N * dx)
+                # scale = (2* dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / (N * dx)
                 # source_val[s_index, :] *= scale
 
-                s_index = range(source_val.size[0])
-                mask = s_source_pos_index[s_index]
-                scale = (2 * dt * c0[mask]) / (N * dx)
-                source_val[s_index, :] *= scale
+                #s_index = range(source_val.size[0])
+                #mask = s_source_pos_index[s_index]
+                #scale = (2 * dt * c0[mask]) / (N * dx)
+                #source_val[s_index, :] *= scale
                     
     return source_val
 
