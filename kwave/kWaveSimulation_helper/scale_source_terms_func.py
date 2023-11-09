@@ -232,8 +232,10 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
-                for s_index in range(source_val.size[0]):
-                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                #for s_index in range(source_val.size[0]):
+                #    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                s_index = range(source_val.size[0])
+                source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
     return source_val
 
 
