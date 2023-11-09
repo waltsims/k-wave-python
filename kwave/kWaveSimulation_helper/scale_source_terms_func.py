@@ -127,10 +127,10 @@ def scale_pressure_source_dirichlet(source_p, c0, N, p_source_pos_index):
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        p_index = range(source_p[:, 0].size)
-        mask = p_source_pos_index.flatten('F')[p_index]
-        scale = 1.0 / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ** 2 )
-        source_p[p_index, :] *= scale
+        ind = range(source_p[:, 0].size)
+        mask = p_source_pos_index.flatten('F')[ind]
+        scale = 1.0 / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')] ** 2, axis=-1) )
+        source_p[ind, :] *= scale
 
     return source_p
 
@@ -184,15 +184,11 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        p_index = range(source_p[:, 0].size)
-        mask = p_source_pos_index.flatten('F')[p_index]
+        ind = range(source_p[:, 0].size)
+        mask = p_source_pos_index.flatten('F')[ind]
         scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) * dx)
-        source_p[p_index, :] *= scale
-
-        # for p_index in range(source_p[:, 0].size):
-        #     source_p[p_index, :] = source_p[p_index, :] * (2.0 * dt) / (N * c0[p_source_pos_index[p_index]] * dx)
-
-        return source_p
+        source_p[ind, :] *= scale
+    return source_p
 
 
 def scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index):
@@ -234,21 +230,10 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
             else:
 
-                for s_index in range(source_val.size[0]):
-                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
-
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
-                # s_index = range(source_val.size[0])
-                # mask = s_source_pos_index.flatten('F')[s_index]
-                # scale = (2* dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / (N * dx)
-                # source_val[s_index, :] *= scale
-
-                #s_index = range(source_val.size[0])
-                #mask = s_source_pos_index[s_index]
-                #scale = (2 * dt * c0[mask]) / (N * dx)
-                #source_val[s_index, :] *= scale
-                    
+                for s_index in range(source_val.size[0]):
+                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
     return source_val
 
 
@@ -340,17 +325,8 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
     else:
         # compute the scale parameter seperately for each source position
         # based on the sound speed at that position
-        # u_index = range(source_val.size[0])
-        # mask = u_source_pos_index.flatten('F')[u_index]
-        # scale = (2.0 * dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / d_direction
-        # source_val[u_index, :] *= scale
-
-        #u_index = range(source_val.size[0])
-        #source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
-
         for u_index in range(source_val.size[0]):
             source_val[u_index, :] = source_val[u_index, :] * (2 * c0(u_source_pos_index[u_index]) * dt / d_direction)
-                
     return source_val
 
 
