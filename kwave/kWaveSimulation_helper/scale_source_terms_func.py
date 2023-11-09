@@ -234,8 +234,8 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
             else:
 
-                for s_index in range(source_val.size[0]):
-                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                #for s_index in range(source_val.size[0]):
+                #    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
 
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
@@ -244,10 +244,10 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
                 # scale = (2.0 * dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / (N * dx)
                 # source_val[s_index, :] *= scale
 
-                #s_index = range(source_val.size[0])
-                #mask = s_source_pos_index[s_index]
-                #scale = (2 * dt * c0[mask]) / (N * dx)
-                #source_val[s_index, :] *= scale
+                s_index = range(source_val.size[0])
+                mask = s_source_pos_index[s_index]
+                scale = (2 * dt * c0[mask]) / (N * dx)
+                source_val[s_index, :] *= scale
                     
     return source_val
 
@@ -345,11 +345,11 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         # scale = (2.0 * dt * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) ) / d_direction
         # source_val[u_index, :] *= scale
 
-        u_index = range(source_val.size[0])
-        source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
+        #u_index = range(source_val.size[0])
+        #source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
 
-        #for u_index in range(source_val.size[0]):
-        #    source_val[u_index, :] = source_val[u_index, :] * (2 * c0(u_source_pos_index[u_index]) * dt / d_direction)
+        for u_index in range(source_val.size[0]):
+            source_val[u_index, :] = source_val[u_index, :] * (2 * c0(u_source_pos_index[u_index]) * dt / d_direction)
                 
     return source_val
 
