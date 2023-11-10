@@ -188,7 +188,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         raise NotImplementedError('Currently there is no support for saving 2D complex matrices.')
 
     # allocate a holder for the new matrix within the file
-    if (isinstance(chunk_size, bool) and (chunk_size==True)):
+    if (isinstance(chunk_size, bool) and (chunk_size is True)):
         opts = {
             'dtype': data_type_matlab,
             'chunks': chunk_size
