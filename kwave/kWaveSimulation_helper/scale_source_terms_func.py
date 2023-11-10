@@ -328,7 +328,7 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         # compute the scale parameter seperately for each source position
         # based on the sound speed at that position
         for u_index in range(source_val.size[0]):
-            source_val[u_index, :] = source_val[u_index, :] * (2 * c0(u_source_pos_index[u_index]) * dt / d_direction)
+            source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
     return source_val
 
 
