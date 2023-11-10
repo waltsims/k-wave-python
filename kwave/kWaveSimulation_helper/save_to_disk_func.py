@@ -7,6 +7,7 @@ from scipy.io import savemat
 from kwave.kmedium import kWaveMedium
 from kwave.kgrid import kWaveGrid
 from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.io import write_attributes, write_matrix
@@ -16,7 +17,8 @@ from kwave.utils.tictoc import TicToc
 
 def save_to_disk_func(
         kgrid: kWaveGrid, medium: kWaveMedium, source,
-        opt: SimulationOptions, values: dotdict, flags: dotdict):
+        opt: SimulationOptions, exec_opt: SimulationExecutionOptions,
+        values: dotdict, flags: dotdict):
     # update command line status
     logging.log(logging.INFO, '  precomputation completed in ', scale_time(TicToc.toc()))
     TicToc.tic()
@@ -56,7 +58,8 @@ def save_to_disk_func(
     # =========================================================================
 
     remove_z_dimension(float_variables, kgrid.dim)
-    save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level)
+    save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, 
+              exec_opt.auto_chunking)
 
     # update command line status
     logging.log(logging.INFO, '  completed in ', scale_time(TicToc.toc()))
@@ -445,12 +448,12 @@ def enforce_filename_standards(filepath):
     return filepath, filename_ext
 
 
-def save_file(filepath, integer_variables, float_variables, hdf_compression_level):
+def save_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk):
     filepath, filename_ext = enforce_filename_standards(filepath)
 
     # save file
     if filename_ext == '.h5':
-        save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level)
+        save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk)
 
     elif filename_ext == '.mat':
         save_mat_file(filepath, integer_variables, float_variables)
@@ -459,7 +462,7 @@ def save_file(filepath, integer_variables, float_variables, hdf_compression_leve
         raise NotImplementedError('unknown file extension for ''save_to_disk'' filename')
 
 
-def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level):
+def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk):
     # ----------------
     # SAVE HDF5 FILE
     # ----------------
@@ -474,7 +477,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
     for key, value in float_variables.items():
         # cast matrix to single precision
         value = np.array(value, dtype=np.float32)
-        write_matrix(filepath, value, key, hdf_compression_level)
+        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
         del value
 
     # change all the index variables to be in 64-bit unsigned integers
@@ -482,7 +485,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
     for key, value in integer_variables.items():
         # cast matrix to 64-bit unsigned integer
         value = np.array(value, dtype=np.uint64)
-        write_matrix(filepath, value, key, hdf_compression_level)
+        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
         del value
 
     # set additional file attributes

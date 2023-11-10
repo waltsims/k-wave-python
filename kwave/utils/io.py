@@ -52,7 +52,7 @@ def get_h5_literals():
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=None, auto_chunk=False):
+def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=None, auto_chunk=True):
     # get literals
     h5_literals = get_h5_literals()
 
@@ -188,10 +188,10 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         raise NotImplementedError('Currently there is no support for saving 2D complex matrices.')
 
     # allocate a holder for the new matrix within the file
-    if isinstance(chunk_size, bool):
+    if (isinstance(chunk_size, bool) and (chunk_size==True)):
         opts = {
             'dtype': data_type_matlab,
-            'chunks': True
+            'chunks': chunk_size
         }
     else:
         opts = {
