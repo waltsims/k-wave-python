@@ -52,9 +52,11 @@ def get_h5_literals():
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=None, auto_chunk=True):
+def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_level:int =None, auto_chunk: bool =True):
     # get literals
     h5_literals = get_h5_literals()
+
+    assert isinstance(auto_chunk, bool), "auto_chunk must be a boolean."
 
     if compression_level is None:
         compression_level = h5_literals.HDF_COMPRESSION_LEVEL
@@ -78,45 +80,36 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
 
     # check size of matrix and set chunk size and compression level
     if dims == 3:
-        if (auto_chunk):
-            chunk_size = True
-        else:
-            # set chunk size to Nx * Ny
-            chunk_size = [Nx, Ny, 1]
+        # set chunk size to Nx * Ny
+        chunk_size = [Nx, Ny, 1]
     elif dims == 2:
-        if (auto_chunk):
-            chunk_size = True
-        else:
-            # set chunk size to Nx
-            chunk_size = [Nx, 1, 1]
+        # set chunk size to Nx
+        chunk_size = [Nx, 1, 1]
     elif dims <= 1:
-        if (auto_chunk):
-            chunk_size = True
-        else:
-            # check that the matrix size is greater than 1 MB
-            one_mb = (1024 ** 2) / 8
-            if matrix.size > one_mb:
-                # set chunk size to 1 MB
-                if Nx > Ny:
-                    chunk_size = [one_mb, 1, 1]
-                elif Ny > Nz:
-                    chunk_size = [1, one_mb, 1]
-                else:
-                    chunk_size = [1, 1, one_mb]
+        # check that the matrix size is greater than 1 MB
+        one_mb = (1024 ** 2) / 8
+        if matrix.size > one_mb:
+            # set chunk size to 1 MB
+            if Nx > Ny:
+                chunk_size = [one_mb, 1, 1]
+            elif Ny > Nz:
+                chunk_size = [1, one_mb, 1]
             else:
-    
-                # set no compression
-                compression_level = 0
-    
-                # set chunk size to grid size
-                if matrix.size == 1:
-                    chunk_size = (1, 1, 1)
-                elif Nx > Ny:
-                    chunk_size = (Nx, 1, 1)
-                elif Ny > Nz:
-                    chunk_size = (1, Ny, 1)
-                else:
-                    chunk_size = (1, 1, Nz)
+                chunk_size = [1, 1, one_mb]
+        else:
+
+            # set no compression
+            compression_level = 0
+
+            # set chunk size to grid size
+            if matrix.size == 1:
+                chunk_size = (1, 1, 1)
+            elif Nx > Ny:
+                chunk_size = (Nx, 1, 1)
+            elif Ny > Nz:
+                chunk_size = (1, Ny, 1)
+            else:
+                chunk_size = (1, 1, Nz)
     else:
         # throw error for unknown matrix size
         raise ValueError('Input matrix must have 1, 2 or 3 dimensions.')
@@ -188,16 +181,10 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
         raise NotImplementedError('Currently there is no support for saving 2D complex matrices.')
 
     # allocate a holder for the new matrix within the file
-    if (isinstance(chunk_size, bool) and (chunk_size is True)):
-        opts = {
-            'dtype': data_type_matlab,
-            'chunks': chunk_size
-        }
-    else:
-        opts = {
-            'dtype': data_type_matlab,
-            'chunks': tuple(chunk_size)
-        }
+    opts = {
+        'dtype': data_type_matlab,
+        'chunks': auto_chunk if auto_chunk is True else chunk_size
+    }
     
     if compression_level != 0:
         # use compression
