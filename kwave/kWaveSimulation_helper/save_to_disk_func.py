@@ -7,7 +7,6 @@ from scipy.io import savemat
 from kwave.kmedium import kWaveMedium
 from kwave.kgrid import kWaveGrid
 from kwave.options.simulation_options import SimulationOptions
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.io import write_attributes, write_matrix
@@ -17,7 +16,7 @@ from kwave.utils.tictoc import TicToc
 
 def save_to_disk_func(
         kgrid: kWaveGrid, medium: kWaveMedium, source,
-        opt: SimulationOptions, exec_opt: SimulationExecutionOptions,
+        opt: SimulationOptions, auto_chunk: bool,
         values: dotdict, flags: dotdict):
     # update command line status
     logging.log(logging.INFO, '  precomputation completed in ', scale_time(TicToc.toc()))
@@ -59,7 +58,7 @@ def save_to_disk_func(
 
     remove_z_dimension(float_variables, kgrid.dim)
     save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, 
-              exec_opt.auto_chunking)
+              auto_chunk=auto_chunk)
 
     # update command line status
     logging.log(logging.INFO, '  completed in ', scale_time(TicToc.toc()))

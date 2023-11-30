@@ -391,7 +391,7 @@ def kspaceFirstOrder2D(
         retract_size = [[options.pml_x_size, options.pml_y_size, options.pml_z_size]]
 
         # run subscript to save files to disk
-        save_to_disk_func(k_sim.kgrid, k_sim.medium, k_sim.source, k_sim.options, execution_options,
+        save_to_disk_func(k_sim.kgrid, k_sim.medium, k_sim.source, k_sim.options, execution_options.auto_chunking,
                           dotdict({
                               'ddx_k_shift_pos': k_sim.ddx_k_shift_pos,
                               'ddx_k_shift_neg': k_sim.ddx_k_shift_neg,
