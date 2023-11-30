@@ -183,7 +183,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
     # allocate a holder for the new matrix within the file
     opts = {
         'dtype': data_type_matlab,
-        'chunks': auto_chunk if auto_chunk is True else chunk_size
+        'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
     
     if compression_level != 0:
