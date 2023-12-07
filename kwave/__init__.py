@@ -6,7 +6,7 @@ from os import environ
 from pathlib import Path
 
 
-VERSION = '0.2.1'
+VERSION = '0.3.0'
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
