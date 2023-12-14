@@ -6,7 +6,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.conversion import cart2grid
@@ -58,15 +58,14 @@ def main():
     )
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-    output = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
-        # TODO (walter): This should be done by kspaceFirstOrder
+    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
     _, _, reorder_index = cart2grid(kgrid, element_pos)
     sensor_data_point = reorder_binary_sensor_data(output['p'].T, reorder_index=reorder_index)
     
     # assign binary mask from karray to the source mask
     sensor.mask = karray.get_array_binary_mask(kgrid)
 
-    output = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
+    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
     sensor_data = output['p'].T
     combined_sensor_data = karray.combine_sensor_data(kgrid, sensor_data)
 
