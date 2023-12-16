@@ -64,8 +64,8 @@ def main():
     source.p_mask = karray.get_array_binary_mask(kgrid)
     voxel_plot(np.single(source.p_mask))
     source.p = karray.get_distributed_source_signal(kgrid, source_sig)
-    # MEDIUM
 
+    # MEDIUM
     medium = kWaveMedium(sound_speed=c0, density=rho0)
 
     # SENSOR
