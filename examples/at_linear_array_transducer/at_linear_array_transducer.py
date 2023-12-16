@@ -68,6 +68,10 @@ def main():
 
     medium = kWaveMedium(sound_speed=c0, density=rho0)
 
+    # SENSOR
+    sensor_mask = np.zeros((Nx, Ny, Nz))
+    sensor_mask[:, Ny // 2, :] = 1
+    sensor = kSensor(sensor_mask, record=['p_max'])
 
     # SIMULATION
     simulation_options = SimulationOptions(
