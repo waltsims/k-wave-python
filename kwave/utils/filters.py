@@ -397,8 +397,12 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
     # create double-sided Gaussain filter
     gfilter = np.fmax(gaussian(f, magnitude, mean, variance), gaussian(f, magnitude, -mean, variance))
 
+    # add dimensions to filter to be broadcastable to signal shape
+    if len(signal.shape) == 2:
+        gfilter = gfilter[:, np.newaxis]
+
     # apply filter
-    signal = np.real(ifft(ifftshift(gfilter * fftshift(fft(signal)))))
+    signal = np.real(ifft(ifftshift(gfilter.T * fftshift(fft(signal.T))))).T
 
     return signal
 

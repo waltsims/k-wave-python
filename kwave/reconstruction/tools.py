@@ -14,7 +14,7 @@ def log_compression(signal, cf, normalize=False):
    Returns: signal: log-compressed signal
     """
     if normalize:
-        ms = max(signal)
+        ms = np.max(signal, axis=0)
         signal = ms * (np.log10(1 + cf * signal / ms) / np.log10(1 + cf))
     else:
         signal = np.log10(1 + cf * signal) / np.log10(1 + cf)

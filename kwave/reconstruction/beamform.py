@@ -128,6 +128,7 @@ def beamform(channel_data: ChannelData) -> None:
 
     filename = "example_bmode.png"
     plt.savefig(os.path.join(os.getcwd(), filename))
+    plt.plot()
     logging.log(logging.INFO, f"Plot saved to {os.path.join(os.getcwd(), filename)}")
 
     pass

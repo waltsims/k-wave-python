@@ -13,10 +13,12 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.reconstruction.beamform import beamform
-from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.signals import tone_burst
+from kwave.utils.signals import tone_burst, get_win
+from kwave.utils.filters import gaussian_filter
+from kwave.reconstruction.tools import log_compression
+from kwave.reconstruction.beamform import scan_conversion, envelope_detection
+
 
 
 def main():
@@ -99,7 +101,7 @@ def main():
     logging.log(logging.INFO, f"RUN_SIMULATION set to {RUN_SIMULATION}")
 
     # preallocate the storage set medium position
-    scan_lines = np.zeros((number_scan_lines, not_transducer.number_active_elements, kgrid.Nt))
+    scan_lines = np.zeros((number_scan_lines, kgrid.Nt))
     medium_position = 0
 
     for scan_line_index in range(0, number_scan_lines):
@@ -133,14 +135,14 @@ def main():
                 execution_options=SimulationExecutionOptions(is_gpu_simulation=True)
             )
 
-            scan_lines[scan_line_index, :] = not_transducer.combine_sensor_data(sensor_data['p'].T)
+            scan_lines[scan_line_index, :] = not_transducer.scan_line(not_transducer.combine_sensor_data(sensor_data['p'].T))
 
         # update medium position
         medium_position = medium_position + transducer.element_width
 
     if RUN_SIMULATION:
         simulation_data = scan_lines
-        # scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
+        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
         logging.log(logging.INFO, "Downloading data from remote server...")
@@ -150,17 +152,103 @@ def main():
 
         simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
 
-    # temporary fix for dimensionality
-    simulation_data = simulation_data[None, :]
+        # temporary fix for dimensionality
+    import matplotlib.pyplot as plt
 
-    sampling_frequency = 2.772e+07
-    prf = 1e4
-    focal_depth = 20e-3  # [m]
-    channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
-                                      sampling_frequency, prf, focal_depth)
+    scan_lines = simulation_data
 
-    logging.log(logging.INFO, "Beamforming channel data and reconstructing the image...")
-    beamform(channel_data)
+
+    # =========================================================================
+    # PROCESS THE RESULTS
+    # =========================================================================
+
+    # -----------------------------
+    # Remove Input Signal
+    # -----------------------------
+    # Trim the delay offset from the scan line data
+    t0_offset = 85 # round(len(input_signal) / 2) + (not_transducer.stored_appended_zeros - not_transducer.beamforming_delays_offset)
+    scan_lines = scan_lines[:, t0_offset:]
+
+    # Get the new length of the scan lines
+    Nt = len(scan_lines[0, :])
+
+    # TODO: fix this
+    scan_line_win, cg = get_win(N= Nt* 2,type_='Tukey', plot_win=False,param=0.05)
+    # scan_line_win = np.concatenate((np.zeros([1, t0_offset * 2]), scan_line_win.T[:, :Nt - t0_offset * 2]), axis=1)
+
+    # -----------------------------
+    # Time Gain Compensation
+    # -----------------------------
+
+    # Create radius variable
+    r = c0 * np.arange(1, Nt + 1) * kgrid.dt / 2
+
+    # Define absorption value and convert to correct units
+    tgc_alpha_db_cm = medium.alpha_coeff * (tone_burst_freq * 1e-6)**medium.alpha_power
+    tgc_alpha_np_m = tgc_alpha_db_cm / 8.686 * 100
+
+    # Create time gain compensation function
+    tgc = np.exp(tgc_alpha_np_m * 2 * r)
+
+    # Apply the time gain compensation to each of the scan lines
+    scan_lines *= tgc
+
+    # -----------------------------
+    # Frequency Filtering
+    # -----------------------------
+
+    scan_lines_fund = gaussian_filter(scan_lines.T, 1/kgrid.dt, tone_burst_freq, 100)
+    scan_lines_harm = gaussian_filter(scan_lines.T, 1/kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
+
+    # -----------------------------
+    # Envelope Detection
+    # -----------------------------
+
+    scan_lines_fund = envelope_detection(scan_lines_fund)
+    scan_lines_harm = envelope_detection(scan_lines_harm)
+
+    # -----------------------------
+    # Log Compression
+    # -----------------------------
+
+    compression_ratio = 3
+    scan_lines_fund = log_compression(scan_lines_fund, compression_ratio, True)
+    scan_lines_harm = log_compression(scan_lines_harm, compression_ratio, True)
+
+    # =========================================================================
+    # VISUALISATION
+    # =========================================================================
+
+    # Set the desired size of the image
+    image_size = kgrid.size 
+
+    # Create the axis variables
+    x_axis = [0, image_size[0] * 1e3] # [mm]      
+    y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
+    # Plot the data before and after scan conversion
+    plt.figure()
+    # plot the sound speed map
+    plt.subplot(1, 3, 1)
+    plt.imshow(sound_speed_map[int(t0_offset/4):, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
+                extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.title('Sound Speed Map')
+    plt.xlabel('Image width [mm]')
+    plt.ylabel('Depth [mm]')
+    plt.subplot(1, 3, 2)
+    plt.imshow(scan_lines_fund, cmap='bone', aspect='auto',  extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.xlabel('Image width [mm]')
+    plt.title('Fundamental')
+    plt.yticks([])
+    plt.subplot(1, 3, 3)
+    plt.imshow(scan_lines_harm, cmap='bone', aspect='auto',
+                extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.yticks([])
+    plt.xlabel('Image width [mm]')
+    plt.title('Harmonic')
+    
+    plt.show()
+    # plt.title('Raw Scan
+
 
 
 if __name__ == '__main__':
