@@ -17,7 +17,7 @@ from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst, get_win
 from kwave.utils.filters import gaussian_filter
 from kwave.reconstruction.tools import log_compression
-from kwave.reconstruction.beamform import scan_conversion, envelope_detection
+from kwave.reconstruction.beamform import envelope_detection
 
 
 
