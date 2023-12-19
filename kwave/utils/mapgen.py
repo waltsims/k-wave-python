@@ -205,7 +205,7 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     bowl = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         # select suitable axis scaling factor
         _, scale, prefix, unit = scale_SI(np.max(bowl))
 
@@ -557,6 +557,8 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     y = k * off - 1 + (off / 2)
     r = np.sqrt(1 - (y ** 2))
     phi = k * inc
+
+    assert num_points > 0, "num_points must be greater than 0"
 
     # create the sphere
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
@@ -2968,7 +2970,7 @@ def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diame
     segment = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         _, scale, prefix, unit = scale_SI(np.max(segment))
 
         # create the figure
