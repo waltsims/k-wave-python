@@ -144,6 +144,8 @@ def get_win(N: Union[int, List[int]],
     if N.size == 1:
         n = np.arange(0, N)
 
+        assert (N - 1) != 0, 'N must be greater than 1'
+
         if type_ == 'Bartlett':
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Bartlett-Hanning':
