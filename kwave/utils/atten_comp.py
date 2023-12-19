@@ -38,7 +38,7 @@ def atten_comp(
         dt: time step [s]
         c: sound speed [m/s]
         alpha_0: power law absorption prefactor [dB/(MHz^y cm)]
-        y: power law absorption exponent [0 < y < 3, y ~= 1]
+        y: power law absorption exponent [0 < y < 3, y != 1]
         display_updates: Boolean controlling whether command line updates
 %       and compute time are printed to the command line
         distribution: default TF distribution
@@ -66,6 +66,8 @@ def atten_comp(
 
     # extract signal characteristics
     N, num_signals = signal.shape
+
+    assert y != 1, "A power exponent [y] of 1 is not valid." 
 
     # convert absorption coefficient to nepers
     alpha_0 = db2neper(alpha_0, y)
@@ -254,7 +256,7 @@ def atten_comp(
     part_1 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** y, 0)
     part_2 = 1j * np.tan(np.pi * y / 2)
     part_3 = (2 * np.pi * f_mat)
-    part_4 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** (y - 1), 0)
+    part_4 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** (y - 1), 0) 
     
     tv_filter = alpha_0 * dist_mat * (part_1 - part_2 * part_3 * part_4)
 
