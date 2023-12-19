@@ -253,10 +253,10 @@ def atten_comp(
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
     
     # Add conditionals or use np.where to manage zero and NaN
-    part_1 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** y, 0)
+    part_1 = (2 * np.pi * np.abs(f_mat)) ** y
     part_2 = 1j * np.tan(np.pi * y / 2)
     part_3 = (2 * np.pi * f_mat)
-    part_4 = np.where(f_mat != 0, (2 * np.pi * np.abs(f_mat)) ** (y - 1), 0) 
+    part_4 = (2 * np.pi * np.abs(f_mat)) ** (y - 1)
     
     tv_filter = alpha_0 * dist_mat * (part_1 - part_2 * part_3 * part_4)
 
