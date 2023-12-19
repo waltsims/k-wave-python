@@ -178,6 +178,7 @@ def get_win(N: Union[int, List[int]],
         elif type_ == 'Hanning':
             win = (0.5 - 0.5 * np.cos(2 * np.pi * n / (N - 1))).T
         elif type_ == 'Kaiser':
+            assert np.all(N) > 1, 'Signal length N must be greater than 1'
             part_1 = scipy.special.iv(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1) ** 2))
             part_2 = scipy.special.iv(0, np.pi * param)
             win = part_1 / part_2
