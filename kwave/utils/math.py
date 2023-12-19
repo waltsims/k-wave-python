@@ -410,8 +410,14 @@ def compute_linear_transform(pos1, pos2, offset=None):
     # Compute vector pointing from pos1 to pos2
     beam_vec = pos2 - pos1
 
+    magnitude = np.linalg.norm(beam_vec)
+    
+    if magnitude == 0:
+        # "pos1 and pos2 are the same"
+        return np.eye(3), 0 if offset is None else offset
+
     # Normalise to give unit beam vector
-    beam_vec = beam_vec / np.linalg.norm(beam_vec)
+    beam_vec = beam_vec /  magnitude
 
     # Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])
     beam_vec0 = np.array([0, 0, -1])
