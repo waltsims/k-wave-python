@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Tuple, Optional
+from warnings import warn
 
 import numpy as np
 import scipy
@@ -26,6 +27,7 @@ def beamform(channel_data: ChannelData) -> None:
     Returns:
 
     """
+    warn("This method is no longer supported and will be depricated in v0.4.0 of k-wave-python.", DeprecationWarning, stacklevel=2)
     f_number = 1.2
     num_px_z = 256
     imaging_depth = 40e-3
