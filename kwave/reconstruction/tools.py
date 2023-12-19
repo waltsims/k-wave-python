@@ -14,12 +14,16 @@ def log_compression(signal, cf, normalize=False):
    Returns: signal: log-compressed signal
     """
     if normalize:
-        ms = np.max(signal, axis=0)
+        ms = np.max(signal, axis=-1)
+        if np.ndim(signal) == 2:
+            ms = ms[:, np.newaxis]
         signal = ms * (np.log10(1 + cf * signal / ms) / np.log10(1 + cf))
     else:
         signal = np.log10(1 + cf * signal) / np.log10(1 + cf)
     return signal
 
+def db(x):
+    return 20 * np.log10(np.abs(x))
 
 def apodize(distance, aperture, window):
     """

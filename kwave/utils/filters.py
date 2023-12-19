@@ -374,7 +374,7 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
     applied to each matrix row.
 
     Args:
-        signal:         Signal to filter
+        signal:         Signal to filter [channel, samples]
         Fs:             Sampling frequency [Hz]
         frequency:      Center frequency of filter [Hz]
         bandwidth:      Bandwidth of filter in percentage
@@ -384,7 +384,7 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
 
     """
 
-    N = len(signal)
+    N = signal.shape[-1]
     if N % 2 == 0:
         f = np.arange(-N / 2, N / 2) * Fs / N
     else:
@@ -399,10 +399,10 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
 
     # add dimensions to filter to be broadcastable to signal shape
     if len(signal.shape) == 2:
-        gfilter = gfilter[:, np.newaxis]
+        gfilter = gfilter[np.newaxis,:]
 
     # apply filter
-    signal = np.real(ifft(ifftshift(gfilter.T * fftshift(fft(signal.T))))).T
+    signal = np.real(ifft(ifftshift(gfilter * fftshift(fft(signal)))))
 
     return signal
 

@@ -16,7 +16,7 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst, get_win
 from kwave.utils.filters import gaussian_filter
-from kwave.reconstruction.tools import log_compression
+from kwave.reconstruction.tools import log_compression, db
 from kwave.reconstruction.beamform import envelope_detection
 
 
@@ -197,8 +197,8 @@ def main():
     # Frequency Filtering
     # -----------------------------
 
-    scan_lines_fund = gaussian_filter(scan_lines.T, 1/kgrid.dt, tone_burst_freq, 100)
-    scan_lines_harm = gaussian_filter(scan_lines.T, 1/kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
+    scan_lines_fund = gaussian_filter(scan_lines, 1/kgrid.dt, tone_burst_freq, 100)
+    scan_lines_harm = gaussian_filter(scan_lines, 1/kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
 
     # -----------------------------
     # Envelope Detection
@@ -221,6 +221,8 @@ def main():
 
     # Set the desired size of the image
     image_size = kgrid.size 
+    harm_img = db(scan_lines_harm.T)
+    fund_img = db(scan_lines_fund.T)
 
     # Create the axis variables
     x_axis = [0, image_size[0] * 1e3] # [mm]      
@@ -235,12 +237,13 @@ def main():
     plt.xlabel('Image width [mm]')
     plt.ylabel('Depth [mm]')
     plt.subplot(1, 3, 2)
-    plt.imshow(scan_lines_fund, cmap='bone', aspect='auto',  extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.imshow(fund_img, cmap='bone', aspect='auto',  extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
+               vmax=np.max(fund_img), vmin=np.max(fund_img)-40)
     plt.xlabel('Image width [mm]')
     plt.title('Fundamental')
     plt.yticks([])
     plt.subplot(1, 3, 3)
-    plt.imshow(scan_lines_harm, cmap='bone', aspect='auto',
+    plt.imshow(harm_img, cmap='bone', aspect='auto', vmax=np.max(harm_img), vmin=np.max(harm_img)-40,
                 extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
     plt.yticks([])
     plt.xlabel('Image width [mm]')
