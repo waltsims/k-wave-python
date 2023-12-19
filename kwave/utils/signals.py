@@ -145,7 +145,7 @@ def get_win(N: Union[int, List[int]],
         # TODO: what should this behaviour be if N is a list of ints? make windows of multiple lengths?
         n = np.arange(0, N)
 
-        assert np.all(N - 1) != 0, 'N must be greater than 1'
+        # assert np.all(N - 1) != 0, 'N must be greater than 1'
 
         if type_ == 'Bartlett':
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
