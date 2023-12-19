@@ -2726,7 +2726,7 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
     def calculate_lateral_pressure() -> float:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
-        assert Z > 0, 'Z must be greater than 0'
+        assert np.all(Z) > 0, 'Z must be greater than 0'
         lateral_pressure = 2. * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
 
         # replace origin with limit
