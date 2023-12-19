@@ -251,7 +251,9 @@ def atten_comp(
     
     # Create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
-    
+
+    assert y != 1, "A power exponent [y] of 1 is not valid." # this is a duplicate assertion to attempt to remove a warning
+
     # Add conditionals or use np.where to manage zero and NaN
     part_1 = (2 * np.pi * np.abs(f_mat)) ** y
     part_2 = 1j * np.tan(np.pi * y / 2)
