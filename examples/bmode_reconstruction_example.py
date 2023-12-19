@@ -18,7 +18,8 @@ from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 
-if __name__ == '__main__':
+
+def main():
     # pathname for the input and output files
     pathname = gettempdir()
     phantom_data_path = 'phantom_data.mat'
@@ -110,7 +111,7 @@ if __name__ == '__main__':
 
         # set the input settings
         input_filename = f'example_input_{scan_line_index}.h5'
-        input_file_full_path = os.path.join(pathname, input_filename)
+        input_file_full_path = os.path.join(pathname, input_filename) # noqa: F841
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
@@ -160,3 +161,7 @@ if __name__ == '__main__':
 
     logging.log(logging.INFO, "Beamforming channel data and reconstructing the image...")
     beamform(channel_data)
+
+
+if __name__ == '__main__':
+    main()

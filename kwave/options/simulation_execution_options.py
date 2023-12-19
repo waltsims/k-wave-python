@@ -34,6 +34,9 @@ class SimulationExecutionOptions:
     system_call: Optional[str] = None
     verbose_level: int = 0
 
+    # determine whether chunking is handled automatically (the default), or manually
+    auto_chunking: Optional[bool] = True
+
     # show simulation log
     show_sim_log: bool = True
 

@@ -6,7 +6,6 @@ import numpy as np
 from kwave.kgrid import kWaveGrid
 from kwave.ksource import kSource
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.matlab import matlab_mask
 
 
 def scale_source_terms_func(
@@ -128,8 +127,11 @@ def scale_pressure_source_dirichlet(source_p, c0, N, p_source_pos_index):
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        for p_index in range(source_p.size[0]):
-            source_p[p_index, :] = source_p[p_index, :] / (N * (c0[p_source_pos_index[p_index]] ** 2))
+        ind = range(source_p[:, 0].size)
+        mask = p_source_pos_index.flatten('F')[ind]
+        scale = 1.0 / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')] ** 2, axis=-1) )
+        source_p[ind, :] *= scale
+
     return source_p
 
 
@@ -182,9 +184,10 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
     else:
         # compute the scale parameter seperately for each source
         # position based on the sound speed at that position
-        for p_index in range(source_p[:, 0].size):
-            source_p[p_index, :] = source_p[p_index, :] * \
-                                   (2 * dt / (N * matlab_mask(c0, p_source_pos_index.flatten('F')[p_index]) * dx))
+        ind = range(source_p[:, 0].size)
+        mask = p_source_pos_index.flatten('F')[ind]
+        scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order='F')[mask.ravel(order='F')], axis=-1) * dx)
+        source_p[ind, :] *= scale
     return source_p
 
 
@@ -229,8 +232,8 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
-                for s_index in range(source_val.size[0]):
-                    source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                s_index = range(source_val.size[0])
+                source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
     return source_val
 
 
@@ -322,8 +325,8 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
     else:
         # compute the scale parameter seperately for each source position
         # based on the sound speed at that position
-        for u_index in range(source_val.size[0]):
-            source_val[u_index, :] = source_val[u_index, :] * (2 * c0(u_source_pos_index[u_index]) * dt / d_direction)
+        u_index = range(source_val.size[0])
+        source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
     return source_val
 
 

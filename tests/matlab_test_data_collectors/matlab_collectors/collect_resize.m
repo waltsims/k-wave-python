@@ -3,9 +3,7 @@
 output_file = 'collectedValues/resize.mat';
 recorder = utils.TestRecorder(output_file);
 
-% TODO: test also for nearest
-% interp_methods = {'nearest', 'linear'};
-interp_methods = {'linear'};
+interp_methods = {'nearest', 'linear'};
 
 % Generate a random 3D volume with dimensions Nx x Ny x Nz
 Nx = randi([10,20]);
@@ -30,4 +28,3 @@ for method = interp_methods
 
 end
 recorder.saveRecordsToDisk(); 
-    

@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: k-Wave-python
       - name: checkout reference k-Wave repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ucl-bug/k-wave
           path: k-wave
@@ -50,7 +50,7 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download collectedValues
         uses: actions/download-artifact@v3
         with:

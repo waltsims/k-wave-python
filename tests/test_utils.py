@@ -74,12 +74,23 @@ def test_spect():
 
 
 def test_extract_amp_phase():
+    # odd length signal
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    assert( np.shape(np.squeeze(test_signal))[0] % 2 != 0)
     a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10 ** 6)
     a, b, c = 0.6547, -1.8035, 2.5926e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
+    # even length signal
+    test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=5, envelope='Gaussian')
+    assert( np.shape(np.squeeze(test_signal))[0] % 2 == 0)
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=18_000_000, source_freq=6_000_000)
+    a, b, c = 0.6591, -1.5708, 6.000e06
+    assert (abs(a_t - a) < 0.01).all()
+    assert (abs(b_t - b) < 0.0001).all()
+    assert (abs(c_t - c) < 100).all()
+
 
 
 def test_apply_filter_lowpass():
