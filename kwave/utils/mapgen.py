@@ -59,9 +59,11 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         return p0
 
     def make_concentric_circle_points(num_points: int, radius: float) -> Tuple[np.ndarray, int]:
+
+        assert num_points > 1, "The number of points must be greater than 1." 
+
         num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
        
-        assert num_radial > 1, "The number of radial points must be greater than 1." 
         d_radial = radius / (num_radial - 1)
 
         r = np.arange(num_radial) * (radius - d_radial / 2) / (num_radial - 1)
