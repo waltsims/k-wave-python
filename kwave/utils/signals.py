@@ -265,13 +265,7 @@ def get_win(N: Union[int, List[int]],
             win_y, _ = get_win(N[1], type_, param=param)
             win_z, _ = get_win(N[2], type_, param=param)
 
-            # create the 2D window using the outer product
-            win_2D = (win_x * win_z.T)
-
-            # create the 3D window
-            win = np.zeros((N[0], N[1], N[2]))
-            for index in range(0, N[1]):
-                win[:, index, :] = win_2D[:, :] * win_y[index]
+            win = win_x[:, np.newaxis] * win_z.T * win_y[np.newaxis, :]
 
         # trim the window if required
         N = N - 1 * (1 - np.array(symmetric).astype(int))
