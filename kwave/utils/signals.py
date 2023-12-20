@@ -4,8 +4,6 @@ from typing import Union, List, Optional
 
 import numpy as np
 import scipy
-from scipy.signal.windows import general_cosine
-from scipy.signal import get_window
 from numpy.fft import ifftshift, fft, ifft
 
 from .conversion import freq2wavenumber
