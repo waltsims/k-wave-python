@@ -100,6 +100,26 @@ def get_win(N: Union[int, List[int]],
             series = series + (-1) ** index * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
         return series.T
     
+    def _multi_dim_window(N, type_, param, symmetric):
+        """
+        Generates a multi-dimensional window.
+
+        Args:
+            N: List of dimensions.
+            type_: Window type.
+            param: Parameter for specific window types.
+            symmetric: Symmetric flag for each dimension.
+
+        Returns:
+            Multi-dimensional window.
+        """
+        windows = [_win1D(dim, type_, param) for dim in N]
+        multi_dim_win = windows[0][0]
+
+        for win in windows[1:]:
+            multi_dim_win = np.expand_dims(multi_dim_win, axis=-1) * win[0].T
+
+        return multi_dim_win
     def _win1D(N: int, type_: str, param: Optional[float] = None) -> np.ndarray:
         # TODO: replace and refactor for scipy.signal.get_window
         # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
@@ -243,11 +263,10 @@ def get_win(N: Union[int, List[int]],
             win  = rotate_win(type_, N)
         else:
             # create the window in each dimension using getWin recursively
-            win_x, _ = _win1D(N[0], type_, param=param)
-            win_y, _ = _win1D(N[1], type_, param=param)
-
+            windows1D = [_win1D(dim, type_, param=param)[0] for dim in N]
+            
             # create the 2D window using the outer product
-            win = (win_y * win_x.T).T
+            win = np.outer(*windows1D)
 
         # trim the window if required
         N = N - 1 * (1 - np.array(symmetric).astype(int))
@@ -261,9 +280,7 @@ def get_win(N: Union[int, List[int]],
             win  = rotate_win(type_, N)
         else:
             # create the window in each dimension using getWin recursively
-            win_x, _ = get_win(N[0], type_, param=param)
-            win_y, _ = get_win(N[1], type_, param=param)
-            win_z, _ = get_win(N[2], type_, param=param)
+            [win_x, win_y, win_z] = [_win1D(dim, type_, param=param)[0] for dim in N]
 
             win = win_x[:, np.newaxis] * win_z.T * win_y[np.newaxis, :]
 
