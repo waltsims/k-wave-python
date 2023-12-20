@@ -4,6 +4,7 @@ from typing import Union, List, Optional
 
 import numpy as np
 import scipy
+from scipy.signal import get_window
 from numpy.fft import ifftshift, fft, ifft
 
 from .conversion import freq2wavenumber
@@ -155,16 +156,18 @@ def get_win(N: Union[int, List[int]],
         elif type_ == 'Nuttall':
             win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Rectangular':
-            win = np.ones(N)
+            win = get_window(str.lower(type_), N, not symmetric)
         elif type_ == 'Triangular':
+            # win = get_window(str.lower(type_[:-4]), N, not symmetric)
             win = (2 / N * (N / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Tukey':
-            win = np.ones((N, 1))
-            index = np.arange(0, (N - 1) * param / 2 + 1e-8)
+            # win = get_window((str.lower(type_), param), N, not symmetric)
+            rise_func = lambda x: 0.5 * (1 + np.cos(2 * np.pi / param * (x - param / 2)))
+            win = np.ones((N,))
+            index = np.arange((N - 1) * param / 2 + 1e-8)
             param = param * N
-            win[0: len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
-            win[np.arange(-1, -len(index) - 1, -1)] = win[0:len(index)]
-            win = win.squeeze(axis=-1)
+            win[: len(index)] = rise_func(index) # left side
+            win[-len(index):] = np.flip(win[0:len(index)])
         else:
             raise ValueError(f'Unknown window type: {type_}')
 
