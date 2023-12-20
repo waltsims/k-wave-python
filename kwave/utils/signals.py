@@ -4,6 +4,8 @@ from typing import Union, List, Optional
 
 import numpy as np
 import scipy
+from scipy.signal.windows import general_cosine
+from scipy.signal import get_window
 from numpy.fft import ifftshift, fft, ifft
 
 from .conversion import freq2wavenumber
@@ -51,8 +53,6 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 
 def get_win(N: Union[int, List[int]],
-            # TODO: replace and refactor for scipy.signal.get_window
-            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
             type_: str,  # TODO change this to enum in the future
             plot_win: bool = False,
             param: Optional[float] = None,
@@ -96,55 +96,23 @@ def get_win(N: Union[int, List[int]],
             A numpy ndarray containing the calculated series.
 
         """
+        # return general_cosine(N, coeffs)
         series = coeffs[0]
         for index in range(1, len(coeffs)):
             series = series + (-1) ** index * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
         return series.T
-
-    # Check if N is either `int` or `list of ints`
-    # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
-    N = np.array(N, dtype=int)
-    N = N if np.size(N) > 1 else int(N)
-
-    # Check if symmetric is either `bool` or `list of bools`
-    # assert isinstance(symmetric, int) or isinstance(symmetric, list)
-    symmetric = np.array(symmetric, dtype=bool)
-
-    # Set default value for `param` if type is one of the special ones
-    assert not plot_win, NotImplementedError('Plotting is not implemented.')
-    if type_ == 'Tukey':
-        if param is None:
-            param = 0.5
-        param = np.clip(param, a_min=0, a_max=1)
-    elif type_ == 'Blackman':
-        if param is None:
-            param = 0.16
-        param = np.clip(param, a_min=0, a_max=1)
-    elif type_ == 'Gaussian':
-        if param is None:
-            param = 0.5
-        param = np.clip(param, a_min=0, a_max=0.5)
-    elif type_ == 'Kaiser':
-        if param is None:
-            param = 3
-        param = np.clip(param, a_min=0, a_max=100)
-
-    # if a non-symmetrical window is required, enlarge the window size (note,
-    # this expands each dimension individually if symmetric is a vector)
-    N = N + 1 * (1 - symmetric.astype(int))
-
-    # if a square window is required, replace grid sizes with smallest size and
-    # store a copy of the original size
-    if square and (N.size != 1):
-        N_orig = np.copy(N)
-        L = min(N)
-        N[:] = L
-
-    # create the window
-    if N.size == 1:
+    
+    def _win1D(N: int, type_: str, param: Optional[float] = None) -> np.ndarray:
+        # TODO: replace and refactor for scipy.signal.get_window
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
+        # TODO: what should this behaviour be if N is a list of ints? make windows of multiple lengths?
         n = np.arange(0, N)
 
+        # TODO: find failure cases in test suite when N is zero.
+        # assert np.all(N) > 1, 'Signal length N must be greater than 1'
+
         if type_ == 'Bartlett':
+            # win = get_window(str.lower(type_), N, not symmetric)
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Bartlett-Hanning':
             win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
@@ -155,10 +123,14 @@ def get_win(N: Union[int, List[int]],
         elif type_ == 'Blackman-Nuttall':
             win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
         elif type_ == 'Cosine':
-            win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
+            # win = scipy.signal.windows.cosine(n)
+            # w = np.sin(np.pi / M * (np.arange(0, M) + .5))
+            win = (np.cos(np.pi * (n / (N - 1) - 0.5))).T
         elif type_ == 'Flattop':
+            # win = get_window(str.lower(type_), N, not symmetric)
             win = cosine_series(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
         elif type_ == 'Gaussian':
+            # win = get_window((str.lower(type_), param), N, not symmetric)
             win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
         elif type_ == 'HalfBand':
             win = np.ones(N)
@@ -205,34 +177,76 @@ def get_win(N: Union[int, List[int]],
 
         # calculate the coherent gain
         cg = win.sum() / N
+        return win, cg
+
+    def rotate_win(type_: str, N: int) -> np.ndarray:
+        # create the window in one dimension using getWin recursively
+        L = np.max(N)
+        win_lin, _ = get_win(L, type_, param=param)
+
+        # create the reference axis
+        radius = (L - 1) / 2
+        ll = np.linspace(-radius, radius, L)
+
+        # create the 3D window using rotation
+        axes = [np.linspace(-radius, radius, x) for x in N]  # axes describe the axes of the grid
+        coords = ndgrid(*axes)  # coords desribe the coordinates of all points in the grid
+        r = np.linalg.norm(coords, axis=0)
+        r[r > radius] = radius
+
+        win_lin = np.squeeze(win_lin)
+        interp_func = scipy.interpolate.interp1d(ll, win_lin)
+        win = interp_func(r)
+        win[r <= radius] = interp_func(r[r <= radius])
+
+        return win
+
+    # Check if symmetric is either `bool` or `list of bools`
+    symmetric = np.array(symmetric, dtype=bool)
+
+    # Check if N is either `int` or `list of ints`
+    N = np.array(N, dtype=int)
+    N = N if np.size(N) > 1 else int(N)
+
+    # if a non-symmetrical window is required, enlarge the window size (note,
+    # this expands each dimension individually if symmetric is a vector)
+    N = N + 1 * (1 - symmetric.astype(int))
+
+    # if a square window is required, replace grid sizes with smallest size and
+    # store a copy of the original size
+    if square and (N.size != 1):
+        N_orig = np.copy(N)
+        L = min(N)
+        N[:] = L
+
+    # Set default value for `param` if type is one of the special ones
+    assert not plot_win, NotImplementedError('Plotting is not implemented.')
+
+    # Define default parameters and clipping ranges for each window type
+    window_params = {
+        'Tukey': {'default': 0.5, 'min': 0, 'max': 1},
+        'Blackman': {'default': 0.16, 'min': 0, 'max': 1},
+        'Gaussian': {'default': 0.5, 'min': 0, 'max': 0.5},
+        'Kaiser': {'default': 3, 'min': 0, 'max': 100}
+    }
+
+    # Set and clip param based on the window type
+    if type_ in window_params:
+        param = window_params[type_]['default'] if param is None else param
+        param = np.clip(param, a_min=window_params[type_]['min'], a_max=window_params[type_]['max'])
+
+    # create the window
+    if N.size == 1:
+        win, cg = _win1D(N, type_, param=param)
     elif N.size == 2:
 
         # create the 2D window
         if rotation:
-
-            # create the window in one dimension using getWin recursively
-            L = max(N)
-            win_lin, _ = get_win(L, type_, param=param)
-            win_lin = np.squeeze(win_lin)
-
-            # create the reference axis
-            radius = (L - 1) / 2
-            ll = np.linspace(-radius, radius, L)
-
-            # create the 2D window using rotation
-            xx = np.linspace(-radius, radius, N[0])
-            yy = np.linspace(-radius, radius, N[1])
-            [x, y] = ndgrid(xx, yy)
-            r = np.sqrt(x ** 2 + y ** 2)
-            r[r > radius] = radius
-            interp_func = scipy.interpolate.interp1d(ll, win_lin)
-            win = interp_func(r)
-            win[r <= radius] = interp_func(r[r <= radius])
-
+            win  = rotate_win(type_, N)
         else:
             # create the window in each dimension using getWin recursively
-            win_x, _ = get_win(N[0], type_, param=param)
-            win_y, _ = get_win(N[1], type_, param=param)
+            win_x, _ = _win1D(N[0], type_, param=param)
+            win_y, _ = _win1D(N[1], type_, param=param)
 
             # create the 2D window using the outer product
             win = (win_y * win_x.T).T
@@ -246,30 +260,8 @@ def get_win(N: Union[int, List[int]],
     elif N.size == 3:
         # create the 3D window
         if rotation:
-
-            # create the window in one dimension using getWin recursively
-            L = N.max()
-            win_lin, _ = get_win(L, type_, param=param)
-
-            # create the reference axis
-            radius = (L - 1) / 2
-            ll = np.linspace(-radius, radius, L)
-
-            # create the 3D window using rotation
-            xx = np.linspace(-radius, radius, N[0])
-            yy = np.linspace(-radius, radius, N[1])
-            zz = np.linspace(-radius, radius, N[2])
-            [x, y, z] = ndgrid(xx, yy, zz)
-            r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
-            r[r > radius] = radius
-
-            win_lin = np.squeeze(win_lin)
-            interp_func = scipy.interpolate.interp1d(ll, win_lin)
-            win = interp_func(r)
-            win[r <= radius] = interp_func(r[r <= radius])
-
+            win  = rotate_win(type_, N)
         else:
-
             # create the window in each dimension using getWin recursively
             win_x, _ = get_win(N[0], type_, param=param)
             win_y, _ = get_win(N[1], type_, param=param)
@@ -294,6 +286,7 @@ def get_win(N: Union[int, List[int]],
 
     # enlarge the window if required
     if square and (N.size != 1):
+        # TODO: use expand matrix or a padding opperation to abstract this logic away
         L = N[0]
         win_sq = win
         win = np.zeros(N_orig)
