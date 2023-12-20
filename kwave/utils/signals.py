@@ -162,7 +162,8 @@ def get_win(N: Union[int, List[int]],
             win = (2 / N * (N / 2 - abs(n - (N - 1) / 2))).T
         elif type_ == 'Tukey':
             # win = get_window((str.lower(type_), param), N, not symmetric)
-            rise_func = lambda x: 0.5 * (1 + np.cos(2 * np.pi / param * (x - param / 2)))
+            def rise_func(x):
+                return 0.5 * (1 + np.cos(2 * np.pi / param * (x - param / 2)))
             win = np.ones((N,))
             index = np.arange((N - 1) * param / 2 + 1e-8)
             param = param * N
