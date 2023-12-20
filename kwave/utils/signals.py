@@ -99,27 +99,8 @@ def get_win(N: Union[int, List[int]],
         for index in range(1, len(coeffs)):
             series = series + (-1) ** index * coeffs[index] * np.cos(index * 2 * np.pi * n / (N - 1))
         return series.T
+
     
-    def _multi_dim_window(N, type_, param, symmetric):
-        """
-        Generates a multi-dimensional window.
-
-        Args:
-            N: List of dimensions.
-            type_: Window type.
-            param: Parameter for specific window types.
-            symmetric: Symmetric flag for each dimension.
-
-        Returns:
-            Multi-dimensional window.
-        """
-        windows = [_win1D(dim, type_, param) for dim in N]
-        multi_dim_win = windows[0][0]
-
-        for win in windows[1:]:
-            multi_dim_win = np.expand_dims(multi_dim_win, axis=-1) * win[0].T
-
-        return multi_dim_win
     def _win1D(N: int, type_: str, param: Optional[float] = None) -> np.ndarray:
         # TODO: replace and refactor for scipy.signal.get_window
         # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
@@ -265,7 +246,7 @@ def get_win(N: Union[int, List[int]],
             # create the window in each dimension using getWin recursively
             windows1D = [_win1D(dim, type_, param=param)[0] for dim in N]
             
-            # create the 2D window using the outer product
+            # # create the 2D window using the outer product
             win = np.outer(*windows1D)
 
         # trim the window if required
