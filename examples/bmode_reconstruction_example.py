@@ -1,3 +1,4 @@
+import logging
 import os
 from tempfile import gettempdir
 
@@ -17,7 +18,8 @@ from kwave.reconstruction.converter import build_channel_data
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst
 
-if __name__ == '__main__':
+
+def main():
     # pathname for the input and output files
     pathname = gettempdir()
     phantom_data_path = 'phantom_data.mat'
@@ -87,14 +89,14 @@ if __name__ == '__main__':
 
     number_scan_lines = 96
 
-    print("Fetching phantom data...")
+    logging.log(logging.INFO, "Fetching phantom data...")
     download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
 
     phantom = scipy.io.loadmat(phantom_data_path)
     sound_speed_map = phantom['sound_speed_map']
     density_map = phantom['density_map']
 
-    print(f"RUN_SIMULATION set to {RUN_SIMULATION}")
+    logging.log(logging.INFO, f"RUN_SIMULATION set to {RUN_SIMULATION}")
 
     # preallocate the storage set medium position
     scan_lines = np.zeros((number_scan_lines, not_transducer.number_active_elements, kgrid.Nt))
@@ -109,7 +111,7 @@ if __name__ == '__main__':
 
         # set the input settings
         input_filename = f'example_input_{scan_line_index}.h5'
-        input_file_full_path = os.path.join(pathname, input_filename)
+        input_file_full_path = os.path.join(pathname, input_filename) # noqa: F841
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
@@ -141,7 +143,7 @@ if __name__ == '__main__':
         # scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
 
     else:
-        print("Downloading data from remote server...")
+        logging.log(logging.INFO, "Downloading data from remote server...")
         SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
         sensor_data_path = 'sensor_data.mat'
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
@@ -157,5 +159,9 @@ if __name__ == '__main__':
     channel_data = build_channel_data(simulation_data, kgrid, not_transducer,
                                       sampling_frequency, prf, focal_depth)
 
-    print("Beamforming channel data and reconstructing the image...")
+    logging.log(logging.INFO, "Beamforming channel data and reconstructing the image...")
     beamform(channel_data)
+
+
+if __name__ == '__main__':
+    main()

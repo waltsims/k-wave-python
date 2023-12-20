@@ -1,8 +1,8 @@
 # k-Wave-python
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 
-This project is a Python implementation of most of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
-interface to the pre-compiled v1.3 of k-Wave simulation binaries which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
+This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
+interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
 ## Mission
 
@@ -31,7 +31,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-git checkout v0.2.1
+git checkout v0.3.0
 pip install '.[example]' 
 python3 examples/bmode_reconstruction_example.py
 ```
@@ -46,7 +46,7 @@ This example file steps through the process of:
 This example expects an NVIDIA GPU by default to simulate with k-Wave.
 
 To test the reconstruction on a machine with a GPU,
-set `RUN_SIMULATION` [on line 28 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L28)
+set `RUN_SIMULATION` [on line 30 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L30)
 to `True`, and the example will run without the pre-computed data.
 
 ## Development
@@ -68,4 +68,4 @@ The documentation for k-wave-python can be found [here](https://k-wave-python.re
 
 ## Contact
 
-e-mail [walter.simson@tum.de](mailto:walter.simson@tum.de).
+e-mail [wsimson@stanford.edu](mailto:wsimson@stanford.edu).

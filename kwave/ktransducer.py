@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor
@@ -61,9 +62,9 @@ class kWaveTransducerSimple(object):
                 self.number_elements - 1) * self.element_spacing) > self.stored_grid_size[1]:
             raise ValueError('The defined transducer is too large or positioned outside the grid in the y-direction')
         elif (self.position[2] + self.element_length) > self.stored_grid_size[2]:
-            print(self.position[2])
-            print(self.element_length)
-            print(self.stored_grid_size[2])
+            logging.log(logging.INFO, self.position[2])
+            logging.log(logging.INFO, self.element_length)
+            logging.log(logging.INFO, self.stored_grid_size[2])
             raise ValueError('The defined transducer is too large or positioned outside the grid in the z-direction')
         elif self.position[0] > self.stored_grid_size[0]:
             raise ValueError('The defined transducer is positioned outside the grid in the x-direction')
@@ -448,7 +449,7 @@ class NotATransducer(kSensor):
             # maximum delay
             if leading_zeros < delay_max + 1:
 
-                print(f'  prepending transducer.input_signal with {delay_max - leading_zeros + 1} leading zeros')
+                logging.log(logging.INFO, f'  prepending transducer.input_signal with {delay_max - leading_zeros + 1} leading zeros')
 
                 # prepend extra leading zeros
                 signal = np.vstack([np.zeros((delay_max - leading_zeros + 1, 1)), signal])
@@ -457,7 +458,7 @@ class NotATransducer(kSensor):
             # maximum delay
             if trailing_zeros < delay_max + 1:
 
-                print(f'  appending transducer.input_signal with {delay_max - trailing_zeros + 1} trailing zeros')
+                logging.log(logging.INFO, f'  appending transducer.input_signal with {delay_max - trailing_zeros + 1} trailing zeros')
 
                 # append extra trailing zeros
                 signal = np.vstack([signal, np.zeros((delay_max - trailing_zeros + 1, 1))])

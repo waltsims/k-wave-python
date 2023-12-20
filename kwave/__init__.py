@@ -1,11 +1,13 @@
+import logging
 import os
 import sys
 import urllib.request
 from os import environ
 from pathlib import Path
 
-
-VERSION = '0.2.1'
+# Test installation with:
+# python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
+VERSION = '0.3.0'
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
@@ -57,7 +59,7 @@ def binaries_present() -> bool:
 
     for binary in binary_list[system]:
         if not os.path.exists(os.path.join(binary_path, binary)):
-            print(f"{binary} not found")
+            logging.log(logging.WARN,  f"{binary} not found")
             return False
     return True
 
@@ -94,7 +96,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Extract the file name from the GitHub release URL
         filename = url.split("/")[-1]
 
-        print(f"Downloading {filename} to {binary_path}...")
+        logging.log(logging.INFO, f"Downloading {filename} to {binary_path}...")
 
         # Create the directory if it does not yet exist
         os.makedirs(binary_path, exist_ok=True)

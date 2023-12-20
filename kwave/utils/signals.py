@@ -1,3 +1,4 @@
+import logging
 from math import floor
 from typing import Union, List, Optional
 
@@ -9,7 +10,7 @@ from .conversion import freq2wavenumber
 from .data import scale_SI
 from .mapgen import ndgrid
 from .math import sinc, gaussian
-from .matlab import matlab_mask, unflatten_matlab_mask
+from .matlab import matlab_mask, unflatten_matlab_mask, rem
 from .matrix import broadcast_axis, num_dim
 
 
@@ -342,8 +343,10 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
     # create the tone burst
     tone_length = num_cycles / signal_freq  # [s]
-    # We want to include the endpoint but only if it's divisible by the step-size
-    if tone_length % dt < 1e-18:
+    # We want to include the endpoint but only if it's divisible by the step-size. 
+    # Modulo operator is not stable, so multiple conditions included.
+    # if ( (tone_length % dt) < 1e-18 or (np.abs(tone_length % dt - dt) < 1e-18) ):
+    if (rem(tone_length, dt) < 1e-18):
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
         tone_t = np.arange(0, tone_length, dt)
@@ -429,6 +432,48 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     return signal
 
 
+def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
+    """
+    Reorders the sensor data based on the coordinates of the sensor points.
+
+    Args:
+        kgrid: The k-Wave grid object.
+        sensor: The k-Wave sensor object.
+        sensor_data: The sensor data to be reordered.
+
+    Returns:
+        np.ndarray of the reordered sensor data.
+
+    Raises:
+        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
+    """
+    # check simulation is 2D
+    if kgrid.dim != 2:
+        raise ValueError('The simulation must be 2D.')
+
+    # check sensor.mask is a binary mask
+    if sensor.mask.dtype != bool and set(np.unique(sensor.mask).tolist()) != {0, 1}:
+        raise ValueError('The sensor must be defined as a binary mask.')
+
+    # find the coordinates of the sensor points
+    x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
+    x_sensor = np.squeeze(x_sensor)
+    y_sensor = matlab_mask(kgrid.y, sensor.mask == 1)
+    y_sensor = np.squeeze(y_sensor)
+
+    # find the angle of each sensor point (from the centre)
+    angle = np.arctan2(-x_sensor, -y_sensor)
+    angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+
+    # sort the sensor points in order of increasing angle
+    indices_new = np.argsort(angle, kind='stable')
+
+    # reorder the measure time series so that adjacent time series correspond
+    # to adjacent sensor points.
+    reordered_sensor_data = sensor_data[indices_new]
+    return reordered_sensor_data
+
+
 def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarray):
     """
     Args:
@@ -472,7 +517,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     """
 
     dim = num_dim(kgrid.k)
-    print(f'    taper ratio: {taper_ratio}')
+    logging.log(logging.INFO, f'    taper ratio: {taper_ratio}')
     # extract the maximum sound speed
     c = max(medium.sound_speed)
 
@@ -507,7 +552,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     def dim_string(cutoff_vals):
         return "".join([(str(scale_SI(co)[0]) + " Hz by ") for co in cutoff_vals])
     # update the command line status
-    print('  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
+    logging.log(logging.INFO, '  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
 
     return alpha_filter
 
@@ -564,7 +609,7 @@ def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List
         # calculate derivative and assign output
         grads = np.real(ifft((1j * kx) ** deriv_order * fft(f, axis=dim), axis=dim))
     else:
-        # warnings.warn("This implementation is not tested.")
+        # logging.log(logging.WARN, "This implementation is not tested.")
         # get the wave number
         # kx = get_wave_number(sz(dim), dn[dim], dim)
 
@@ -602,48 +647,6 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     unmasked_sensor_data[assignment_mask] = sensor_data.flatten()
     # unmasked_sensor_data[unflatten_matlab_mask(unmasked_sensor_data, sensor.mask != 0)] = sensor_data
     return unmasked_sensor_data
-
-
-def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
-    """
-    Reorders the sensor data based on the coordinates of the sensor points.
-
-    Args:
-        kgrid: The k-Wave grid object.
-        sensor: The k-Wave sensor object.
-        sensor_data: The sensor data to be reordered.
-
-    Returns:
-        np.ndarray of the reordered sensor data.
-
-    Raises:
-        ValueError: If the simulation is not 2D or the sensor is not defined as a binary mask.
-    """
-    # check simulation is 2D
-    if kgrid.dim != 2:
-        raise ValueError('The simulation must be 2D.')
-
-    # check sensor.mask is a binary mask
-    if sensor.mask.dtype != bool and set(np.unique(sensor.mask).tolist()) != {0, 1}:
-        raise ValueError('The sensor must be defined as a binary mask.')
-
-    # find the coordinates of the sensor points
-    x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
-    x_sensor = np.squeeze(x_sensor)
-    y_sensor = matlab_mask(kgrid.y, sensor.mask == 1)
-    y_sensor = np.squeeze(y_sensor)
-
-    # find the angle of each sensor point (from the centre)
-    angle = np.arctan2(-x_sensor, -y_sensor)
-    angle[angle < 0] = 2 * np.pi + angle[angle < 0]
-
-    # sort the sensor points in order of increasing angle
-    indices_new = np.argsort(angle, kind='stable')
-
-    # reorder the measure time series so that adjacent time series correspond
-    # to adjacent sensor points.
-    reordered_sensor_data = sensor_data[indices_new]
-    return reordered_sensor_data
 
 
 def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: np.ndarray,

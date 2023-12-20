@@ -38,6 +38,11 @@ kwave_array.addBowlElement([0, 0, 0], 5, 4.3, [1, 5, -3]);
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
+% Useful for testing addCustomElement in 3D
+kwave_array.addCustomElement(single([[1, 1, 1, 2, 2, 2, 3, 3, 3]; [1, 2, 3, 1, 2, 3, 1, 2, 3]; [0, 0, 0, 0, 0, 0, 0, 0, 0]]), 9, 2, 'custom_3d');
+recorder.recordObject('kwave_array', kwave_array);
+recorder.increment();
+
 % Useful for testing addRectElement in 3D
 kwave_array.addRectElement([12, -8, 0.3], 3, 4, [2, 4, 5]);
 recorder.recordObject('kwave_array', kwave_array);
@@ -58,6 +63,11 @@ recorder.increment();
 
 % Useful for testing addDiscElement in 2D
 kwave_array.addDiscElement([0, 0.3], 5);
+recorder.recordObject('kwave_array', kwave_array);
+recorder.increment();
+
+% Useful for testing addCustomElement in 2D
+kwave_array.addCustomElement(single([[1, 1, 1, 2, 2, 2, 3, 3, 3]; [1, 2, 3, 1, 2, 3, 1, 2, 3]]), 9, 1, 'custom_2d');
 recorder.recordObject('kwave_array', kwave_array);
 recorder.increment();
 
@@ -147,7 +157,7 @@ recorder.increment();
 
 % Useful for testing addAnnularArray
 kwave_array = kWaveArray();
-kwave_array.addAnnularArray([3, 5, 10], 5, [1.2; 0.5], [12, 21, 3]);
+kwave_array.addAnnularArray([3.1, 5.2, 10.9], 5, [1.2; 0.5], [12, 21, 3]);
 element_pos = kwave_array.getElementPositions();
 recorder.recordVariable('element_pos', element_pos);
 recorder.increment();

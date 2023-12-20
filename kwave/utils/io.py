@@ -1,7 +1,7 @@
+import logging
 import os
 import platform
 import socket
-import warnings
 from datetime import datetime
 from typing import Optional
 
@@ -9,10 +9,10 @@ import cv2
 import h5py
 import numpy as np
 
+import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
-import kwave
 
 
 def get_h5_literals():
@@ -52,9 +52,11 @@ def get_h5_literals():
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=None):
+def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_level:int =None, auto_chunk: bool =True):
     # get literals
     h5_literals = get_h5_literals()
+
+    assert isinstance(auto_chunk, bool), "auto_chunk must be a boolean."
 
     if compression_level is None:
         compression_level = h5_literals.HDF_COMPRESSION_LEVEL
@@ -181,8 +183,9 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name, compression_level=No
     # allocate a holder for the new matrix within the file
     opts = {
         'dtype': data_type_matlab,
-        'chunks': tuple(chunk_size)
+        'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
+    
     if compression_level != 0:
         # use compression
         opts['compression'] = compression_level
@@ -251,7 +254,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None, lega
         write_attributes_typed(filename, file_description)
         return
 
-    warnings.warn("Attributes will soon be typed when saved and not saved ", DeprecationWarning)
+    logging.log(logging.WARN, f'{DeprecationWarning.__name__}: Attributes will soon be typed when saved and not saved ')
     # get literals
     h5_literals = get_h5_literals()
 

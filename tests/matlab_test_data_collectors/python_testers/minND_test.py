@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -26,4 +27,4 @@ def test_minND():
         assert np.allclose(expected_ind, ind)
 
 
-    print('min_nd(..) works as expected!')
+    logging.log(logging.INFO, 'min_nd(..) works as expected!')

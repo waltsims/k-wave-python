@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from numpy.fft import ifftshift
 
@@ -7,7 +8,7 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 
 
-# Note from Farid: This function/file is very suspicios. I'm pretty sure that the implementation is not correct.
+# Note from Farid: This function/file is very suspicious. I'm pretty sure that the implementation is not correct.
 # Full test-coverage is required for bug-fixes!
 
 def create_storage_variables(
@@ -68,8 +69,8 @@ def set_flags(flags, sensor_x, sensor_mask, is_cartesian_interp):
         # conversion from a Cartesian to binary mask
         num_discarded_points = len(sensor_x) - sensor_mask.sum()
         if num_discarded_points != 0:
-            print(
-                f'  WARNING: {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
+            logging.log(logging.WARN,  
+                f'  {num_discarded_points} duplicated sensor points discarded (nearest neighbour interpolation)')
 
 
 def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, sensor_mask_index, sensor_x):
@@ -368,7 +369,7 @@ def compute_triangulation_points(flags, kgrid, record):
         else:
 
             # update command line status
-            print('  calculating Delaunay triangulation...')
+            logging.log(logging.INFO, '  calculating Delaunay triangulation...')
 
             # compute triangulation
             if kgrid.dim == 2:
