@@ -179,26 +179,26 @@ def get_win(N: Union[int, List[int]],
         return win, cg
 
     def rotate_win(type_: str, N: int) -> np.ndarray:
-        # create the window in one dimension using getWin recursively
+        # Compute the radius and create a linear window
         L = np.max(N)
-        win_lin, _ = get_win(L, type_, param=param)
-
-        # create the reference axis
         radius = (L - 1) / 2
-        ll = np.linspace(-radius, radius, L)
+        linear_window = get_win(L, type_, param=param)[0].squeeze()
 
-        # create the 3D window using rotation
-        axes = [np.linspace(-radius, radius, x) for x in N]  # axes describe the axes of the grid
-        coords = ndgrid(*axes)  # coords desribe the coordinates of all points in the grid
-        r = np.linalg.norm(coords, axis=0)
-        r[r > radius] = radius
+        # Create the reference axis for interpolation
+        reference_axis = np.linspace(-radius, radius, L)
+        interp_func = scipy.interpolate.interp1d(reference_axis, linear_window)
 
-        win_lin = np.squeeze(win_lin)
-        interp_func = scipy.interpolate.interp1d(ll, win_lin)
-        win = interp_func(r)
-        win[r <= radius] = interp_func(r[r <= radius])
+        # Create the grid
+        axes = [np.linspace(-radius, radius, dim_size) for dim_size in N]
+        grid = ndgrid(*axes)  
 
-        return win
+        # Compute radial distances and interpolate the window values
+        radial_distances = np.linalg.norm(grid, axis=0)
+        radial_distances_clipped = np.clip(radial_distances, a_min=None, a_max=radius)
+        window = interp_func(radial_distances_clipped)
+
+        return window
+
 
     # Check if symmetric is either `bool` or `list of bools`
     symmetric = np.array(symmetric, dtype=bool)
