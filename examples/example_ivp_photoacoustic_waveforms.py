@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -161,7 +162,6 @@ sensor_data_3D = kspaceFirstOrder3D(
 
 # plot the simulations
 t_sc, t_scale, t_prefix, _ = scale_SI(t_end)
-import matplotlib.pyplot as plt
 _, ax1 = plt.subplots()
 ax1.plot(np.squeeze(kgrid2.t_array * t_scale), sensor_data_2D['p'] / np.max(np.abs(sensor_data_2D['p'])), 'r-', label='2D')
 ax1.plot(np.squeeze(kgrid3.t_array * t_scale), sensor_data_3D['p'] / np.max(np.abs(sensor_data_3D['p'])), 'k-', label='3D')
