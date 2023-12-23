@@ -146,7 +146,7 @@ def main():
 
     else:
         logging.log(logging.INFO, "Downloading data from remote server...")
-        SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
+        SENSOR_DATA_GDRIVE_ID = '1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv'
         sensor_data_path = 'sensor_data.mat'
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
