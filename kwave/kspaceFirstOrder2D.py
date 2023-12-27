@@ -61,7 +61,7 @@ def kspace_first_order_2d_gpu(
     assert isinstance(execution_options,
                       SimulationExecutionOptions), 'execution_options must be a SimulationExecutionOptions object'
 
-    sensor_data = kspaceFirstOrder2DC(
+    sensor_data = kspaceFirstOrder2D(
         kgrid=kgrid,
         source=source,
         sensor=sensor,
