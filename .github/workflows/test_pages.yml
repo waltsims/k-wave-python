@@ -7,7 +7,7 @@ jobs:
     steps:
     - uses: actions/setup-python@v3
       with:
-        python-version: '3.8'
+        python-version: '3.9'
     - uses: actions/checkout@master
       with:
         fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
