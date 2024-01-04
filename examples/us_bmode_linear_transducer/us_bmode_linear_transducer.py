@@ -1,5 +1,4 @@
 import logging
-import os
 from tempfile import gettempdir
 
 import numpy as np
@@ -173,7 +172,7 @@ def main():
     scan_lines = scan_lines * scan_line_win
 
     # store intermediate results
-    scan_lines_no_input = scan_lines[len(scan_lines) // 2:, :]  
+    scan_lines_no_input = scan_lines[len(scan_lines) // 2, :]
     
     Nt = kgrid.Nt
 
@@ -195,7 +194,7 @@ def main():
     scan_lines *= tgc
 
     # store intermediate results
-    scan_lines_tgc = scan_lines[len(scan_lines) // 2:, :]
+    scan_lines_tgc = scan_lines[len(scan_lines) // 2, :]
 
     # -----------------------------
     # Frequency Filtering
@@ -216,8 +215,8 @@ def main():
     scan_lines_harm = envelope_detection(scan_lines_harm)
 
     # store intermediate results
-    scan_lines_fund_env_ex = scan_lines_fund[len(scan_lines_fund) // 2:, :]
-    scan_lines_harm_env_ex = scan_lines_harm[len(scan_lines_harm) // 2:, :]
+    scan_lines_fund_env_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
+    scan_lines_harm_env_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
 
     # -----------------------------
     # Log Compression
@@ -247,7 +246,7 @@ def main():
     # make plotting non-blocking
     plt.ion()
     # Plot the data before and after scan conversion
-    plt.figure()
+    plt.figure(figsize=(10, 6))
     # plot the sound speed map
     plt.subplot(1, 3, 1)
     plt.imshow(sound_speed_map[:, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
@@ -274,6 +273,30 @@ def main():
     ax = plt.gca()
     ax.set_ylim(40, 5)
     plt.show()
+
+    # Creating a dictionary with the step labels as keys
+    processing_steps = {
+        '1. Beamformed Signal': scan_lines_no_input,
+        '2. Time Gain Compensation': scan_lines_tgc,
+        '3. Frequency Filtering': scan_lines_fund_ex,
+        '4. Envelope Detection': scan_lines_fund_env_ex,
+        '5. Log Compression': scan_lines_fund_log_ex    
+    }
+
+    plt.figure(figsize=(14, 4), tight_layout=True)
+
+    offset = -6e5
+    # Plotting each step using the dictionary
+    for i, (label, data) in enumerate(processing_steps.items()):
+        plt.plot(kgrid.t_array.squeeze(), data.squeeze() + offset * i, label=label)
+
+    # Set y-ticks and y-labels
+    plt.yticks([offset * i for i in range(5)], list(processing_steps.keys()))
+    # plt.xlabel('Time [\u03BCs]')
+    # plt.xlim(5, t_end * 1e6)
+    plt.title('Processing Steps Visualization')
+    plt.show()
+
     
     # sleep for 1 min and then close all figures for CI completion
     plt.pause(60)
