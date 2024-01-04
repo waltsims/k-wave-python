@@ -12,7 +12,7 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Array as a sensor](at_array_as_a_sensor/) ([original example](http://www.k-wave.org/documentation/example_at_array_as_sensor.php), notebook)
 - [Array as a source](array_as_a_source/) ([original example](http://www.k-wave.org/documentation/example_at_array_as_source.php), notebook)
 - [Linear array transducer](at_linear_array_transducer/)
-(http://www.k-wave.org/documentation/example_at_linear_array_transducer.php), notebook)
+([original example](http://www.k-wave.org/documentation/example_at_linear_array_transducer.php), notebook)
     
 ## Contributing new examples
 
