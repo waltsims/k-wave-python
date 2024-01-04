@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 from tempfile import gettempdir
 
 import numpy as np
