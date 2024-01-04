@@ -205,18 +205,18 @@ def main():
 
     # store intermediate results
     scan_lines_fund_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
-    scan_lines_harm_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
+    # scan_lines_harm_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
     
     # -----------------------------
     # Envelope Detection
     # -----------------------------
 
     scan_lines_fund = envelope_detection(scan_lines_fund)
-    scan_lines_harm = envelope_detection(scan_lines_harm)
+    # scan_lines_harm = envelope_detection(scan_lines_harm)
 
     # store intermediate results
     scan_lines_fund_env_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
-    scan_lines_harm_env_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
+    # scan_lines_harm_env_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
 
     # -----------------------------
     # Log Compression
