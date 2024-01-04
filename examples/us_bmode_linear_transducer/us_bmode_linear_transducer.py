@@ -25,8 +25,6 @@ PHANTOM_DATA_PATH = 'phantom_data.mat'
 
 
 def main():
-    # pathname for the input and output files
-    pathname = gettempdir()
 
     # simulation settings
     DATA_CAST = 'single'
@@ -228,7 +226,7 @@ def main():
 
     # store intermediate results
     scan_lines_fund_log_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
-    scan_lines_harm_log_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
+    # scan_lines_harm_log_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
 
     # =========================================================================
     # VISUALISATION
