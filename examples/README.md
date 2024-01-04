@@ -1,10 +1,7 @@
 # Examples
 
 Many examples from k-wave-python are Python mirrors of the [large collection of great examples](http://www.k-wave.org/documentation/k-wave_examples.php) from the original k-wave project.
-
-## Example directory layout
-
-All examples are included as python files or ipython notebooks in a subdirectory of the example directory.
+All examples are included as python files or notebooks in a subdirectory of the example directory.
 Every example has a short readme.md file which briefly describes the purpose of the example.
 
 ## List of Examples
