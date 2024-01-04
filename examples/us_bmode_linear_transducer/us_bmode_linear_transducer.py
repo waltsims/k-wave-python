@@ -1,6 +1,4 @@
 import logging
-from tempfile import gettempdir
-
 import numpy as np
 import scipy.io
 
