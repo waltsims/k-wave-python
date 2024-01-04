@@ -5,7 +5,7 @@ from tempfile import gettempdir
 import numpy as np
 import scipy.io
 
-from example_utils import download_from_gdrive_if_does_not_exist
+from examples.us_bmode_linear_transducer.example_utils import download_from_gdrive_if_does_not_exist
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -16,16 +16,18 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.signals import tone_burst, get_win
 from kwave.utils.filters import gaussian_filter
+from kwave.utils.conversion import db2neper
 from kwave.reconstruction.tools import log_compression, db
 from kwave.reconstruction.beamform import envelope_detection
 
+SENSOR_DATA_GDRIVE_ID = '1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv'
+PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
+PHANTOM_DATA_PATH = 'phantom_data.mat'
 
 
 def main():
     # pathname for the input and output files
     pathname = gettempdir()
-    phantom_data_path = 'phantom_data.mat'
-    PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
 
     # simulation settings
     DATA_CAST = 'single'
@@ -92,9 +94,9 @@ def main():
     number_scan_lines = 96
 
     logging.log(logging.INFO, "Fetching phantom data...")
-    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
+    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
 
-    phantom = scipy.io.loadmat(phantom_data_path)
+    phantom = scipy.io.loadmat(PHANTOM_DATA_PATH)
     sound_speed_map = phantom['sound_speed_map']
     density_map = phantom['density_map']
 
@@ -113,7 +115,6 @@ def main():
 
         # set the input settings
         input_filename = f'example_input_{scan_line_index}.h5'
-        input_file_full_path = os.path.join(pathname, input_filename) # noqa: F841
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
@@ -146,7 +147,6 @@ def main():
 
     else:
         logging.log(logging.INFO, "Downloading data from remote server...")
-        SENSOR_DATA_GDRIVE_ID = '1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv'
         sensor_data_path = 'sensor_data.mat'
         download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
@@ -166,15 +166,16 @@ def main():
     # Remove Input Signal
     # -----------------------------
     # Trim the delay offset from the scan line data
-    t0_offset = 85 # round(len(input_signal) / 2) + (not_transducer.stored_appended_zeros - not_transducer.beamforming_delays_offset)
-    scan_lines = scan_lines[:, t0_offset:]
+    tukey_win, _ = get_win(kgrid.Nt * 2, 'Tukey', False, 0.05)
+    transmit_len = len(input_signal.squeeze())
+    scan_line_win = np.concatenate((np.zeros([1, transmit_len * 2]), tukey_win.T[:, :kgrid.Nt - transmit_len * 2]), axis=1)
 
-    # Get the new length of the scan lines
-    Nt = len(scan_lines[0, :])
+    scan_lines = scan_lines * scan_line_win
 
-    # TODO: fix this
-    scan_line_win, cg = get_win(N= Nt* 2,type_='Tukey', plot_win=False,param=0.05)
-    # scan_line_win = np.concatenate((np.zeros([1, t0_offset * 2]), scan_line_win.T[:, :Nt - t0_offset * 2]), axis=1)
+    # store intermediate results
+    scan_lines_no_input = scan_lines[len(scan_lines) // 2:, :]  
+    
+    Nt = kgrid.Nt
 
     # -----------------------------
     # Time Gain Compensation
@@ -185,13 +186,16 @@ def main():
 
     # Define absorption value and convert to correct units
     tgc_alpha_db_cm = medium.alpha_coeff * (tone_burst_freq * 1e-6)**medium.alpha_power
-    tgc_alpha_np_m = tgc_alpha_db_cm / 8.686 * 100
+    tgc_alpha_np_m = db2neper(tgc_alpha_db_cm) * 100
 
     # Create time gain compensation function
     tgc = np.exp(tgc_alpha_np_m * 2 * r)
 
     # Apply the time gain compensation to each of the scan lines
     scan_lines *= tgc
+
+    # store intermediate results
+    scan_lines_tgc = scan_lines[len(scan_lines) // 2:, :]
 
     # -----------------------------
     # Frequency Filtering
@@ -200,12 +204,20 @@ def main():
     scan_lines_fund = gaussian_filter(scan_lines, 1/kgrid.dt, tone_burst_freq, 100)
     scan_lines_harm = gaussian_filter(scan_lines, 1/kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
 
+    # store intermediate results
+    scan_lines_fund_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
+    scan_lines_harm_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
+    
     # -----------------------------
     # Envelope Detection
     # -----------------------------
 
     scan_lines_fund = envelope_detection(scan_lines_fund)
     scan_lines_harm = envelope_detection(scan_lines_harm)
+
+    # store intermediate results
+    scan_lines_fund_env_ex = scan_lines_fund[len(scan_lines_fund) // 2:, :]
+    scan_lines_harm_env_ex = scan_lines_harm[len(scan_lines_harm) // 2:, :]
 
     # -----------------------------
     # Log Compression
@@ -214,6 +226,10 @@ def main():
     compression_ratio = 3
     scan_lines_fund = log_compression(scan_lines_fund, compression_ratio, True)
     scan_lines_harm = log_compression(scan_lines_harm, compression_ratio, True)
+
+    # store intermediate results
+    scan_lines_fund_log_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
+    scan_lines_harm_log_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
 
     # =========================================================================
     # VISUALISATION
@@ -225,24 +241,29 @@ def main():
     fund_img = db(scan_lines_fund.T)
 
     # Create the axis variables
-    x_axis = [0, image_size[0] * 1e3] # [mm]      
+    x_axis = [0, image_size[0] * 1e3 * 1.1] # [mm]      
     y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
+
     # make plotting non-blocking
     plt.ion()
     # Plot the data before and after scan conversion
     plt.figure()
     # plot the sound speed map
     plt.subplot(1, 3, 1)
-    plt.imshow(sound_speed_map[int(t0_offset/4):, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
+    plt.imshow(sound_speed_map[:, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
                 extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
-    plt.title('Sound Speed Map')
-    plt.xlabel('Image width [mm]')
+    plt.title('Sound Speed')
+    plt.xlabel('Width [mm]')
     plt.ylabel('Depth [mm]')
+    ax = plt.gca()
+    ax.set_ylim(40, 5)
     plt.subplot(1, 3, 2)
     plt.imshow(fund_img, cmap='bone', aspect='auto',  extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
                vmax=np.max(fund_img), vmin=np.max(fund_img)-40)
     plt.xlabel('Image width [mm]')
     plt.title('Fundamental')
+    ax = plt.gca()
+    ax.set_ylim(40, 5)
     plt.yticks([])
     plt.subplot(1, 3, 3)
     plt.imshow(harm_img, cmap='bone', aspect='auto', vmax=np.max(harm_img), vmin=np.max(harm_img)-40,
@@ -250,7 +271,8 @@ def main():
     plt.yticks([])
     plt.xlabel('Image width [mm]')
     plt.title('Harmonic')
-    
+    ax = plt.gca()
+    ax.set_ylim(40, 5)
     plt.show()
     
     # sleep for 1 min and then close all figures for CI completion
