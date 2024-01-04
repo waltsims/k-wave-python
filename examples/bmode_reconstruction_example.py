@@ -228,6 +228,8 @@ def main():
     # Create the axis variables
     x_axis = [0, image_size[0] * 1e3] # [mm]      
     y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
+    # make plotting non-blocking
+    plt.ion()
     # Plot the data before and after scan conversion
     plt.figure()
     # plot the sound speed map
@@ -253,7 +255,7 @@ def main():
     plt.show()
     
     # sleep for 1 min and then close all figures for CI completion
-    time.sleep(60)
+    plt.pause(60)
     plt.close('all')
 
 
