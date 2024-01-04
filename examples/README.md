@@ -20,7 +20,7 @@ When adding a new example notebook, follow these steps:
 3. Fork and clone the repository and create a branch for your new example.
 2. Create an example sub-directory using the name from the hyperlink of the origional k-wave example if it exists (e.g. for http://www.k-wave.org/documentation/example_ivp_loading_external_image.php name the directory "ivp_loading_external_image).
 3. Add your example notebook or files to your example directory.
-4. Add a readme.md file to your example directory briefly describing the concept or principle the example is meant to display and linking to the origonal k-wave example page if it exists.
+4. Add a README.md file to your example directory briefly describing the concept or principle the example is meant to display and linking to the origonal k-wave example page if it exists.
 5. Include a link in the readme.md in the examples directory to a colab notebook for your example.
 6. Add a your example to the list on this readme.md and add a colab badge [using html](https://openincolab.com/) OR copy the pure markdown version above.
 7. Open a pull request that [closes the open issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) from your forked example branch and name pull request "[Example] \<name of your example\>".
