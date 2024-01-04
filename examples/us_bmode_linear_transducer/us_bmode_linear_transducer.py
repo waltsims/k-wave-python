@@ -208,7 +208,7 @@ def main():
     # -----------------------------
 
     scan_lines_fund = envelope_detection(scan_lines_fund)
-    # scan_lines_harm = envelope_detection(scan_lines_harm)
+    scan_lines_harm = envelope_detection(scan_lines_harm)
 
     # store intermediate results
     scan_lines_fund_env_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
@@ -242,7 +242,7 @@ def main():
     # make plotting non-blocking
     plt.ion()
     # Plot the data before and after scan conversion
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(14, 4))
     # plot the sound speed map
     plt.subplot(1, 3, 1)
     plt.imshow(sound_speed_map[:, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
@@ -292,7 +292,6 @@ def main():
     plt.xlim(5e-3 * 2 / c0, t_end)
     plt.title('Processing Steps Visualization')
     plt.show()
-
     
     # sleep for 1 min and then close all figures for CI completion
     plt.pause(60)
