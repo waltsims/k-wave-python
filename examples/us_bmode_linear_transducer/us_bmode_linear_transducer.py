@@ -38,6 +38,7 @@ def main():
     source_strength = 1e6  # [Pa]
     tone_burst_freq = 1.5e6  # [Hz]
     tone_burst_cycles = 4
+    number_scan_lines = 96
 
     kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
     t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
@@ -86,7 +87,6 @@ def main():
 
     not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-    number_scan_lines = 96
 
     logging.log(logging.INFO, "Fetching phantom data...")
     download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
