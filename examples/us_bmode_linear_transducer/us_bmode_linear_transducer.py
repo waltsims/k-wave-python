@@ -288,8 +288,8 @@ def main():
 
     # Set y-ticks and y-labels
     plt.yticks([offset * i for i in range(5)], list(processing_steps.keys()))
-    # plt.xlabel('Time [\u03BCs]')
-    # plt.xlim(5, t_end * 1e6)
+    plt.xlabel('Time [\u03BCs]')
+    plt.xlim(5e-3 * 2 / c0, t_end)
     plt.title('Processing Steps Visualization')
     plt.show()
 
