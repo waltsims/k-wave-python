@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from tempfile import gettempdir
 
 import numpy as np
@@ -250,7 +251,10 @@ def main():
     plt.title('Harmonic')
     
     plt.show()
-    # plt.title('Raw Scan
+    
+    # sleep for 1 min and then close all figures for CI completion
+    time.sleep(60)
+    plt.close('all')
 
 
 
