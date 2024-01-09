@@ -120,7 +120,7 @@ def main():
     ax.set_yticks([])
 
     # Plot recorded sensor data
-    fig, (ax1, ax2)= plt.subplots(ncols=1, nrows=2)
+    fig, [ax1, ax2] = plt.subplots(ncols=1, nrows=2)
     ax1.imshow(sensor_data_point, aspect='auto')
     ax1.set_xlabel(r'Time [$\mu$s]')
     ax1.set_ylabel('Detector Number')

@@ -27,7 +27,7 @@ class Executor:
                   f'-i {input_filename} ' \
                   f'-o {output_filename} ' \
                   f'{options}'
-        
+
         stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
         return_code = subprocess.run(command, stdout=stdout, shell=True).returncode
 
@@ -36,6 +36,8 @@ class Executor:
         except AssertionError:
             if isinstance(return_code, unittest.mock.MagicMock):
                 logging.info('Skipping AssertionError in testing.')
+            else:
+                raise AssertionError(f"Simulation failed. Return code: {return_code}")
 
         sensor_data = self.parse_executable_output(output_filename)
 
