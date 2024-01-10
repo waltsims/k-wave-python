@@ -10,7 +10,7 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Array as a source](array_as_source/) ([original example](http://www.k-wave.org/documentation/example_at_array_as_source.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/migrate-examples-to-notebooks/examples/at_array_as_source/at_array_as_source.ipynb))
 - [Linear array transducer](at_linear_array_transducer/)
 ([original example](http://www.k-wave.org/documentation/example_at_linear_array_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/migrate-examples-to-notebooks/examples/at_linear_array_transducer/at_linear_array_transducer.ipynb))
-- [Linear transducer B-mode](us_bmode_linear_transducer/)([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/migrate-examples-to-notebooks/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))    
+- [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/migrate-examples-to-notebooks/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))    
 
 ## Contributing new examples
 
