@@ -156,11 +156,6 @@ def main():
     plt.title('Source and PML Masks')
     plt.show()
 
-    # overlay the physical source positions
-    plt.figure()
-    # TODO: missing karray.plot_array(show=True)
-    # karray.plot_array(show=True)
-
 
 if __name__ == "__main__":
     main()
