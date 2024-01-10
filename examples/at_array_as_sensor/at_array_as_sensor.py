@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 from kwave.data import Vector
@@ -101,8 +102,8 @@ def main():
     ]
     cmap = plt.matplotlib.colors.ListedColormap(colors)
 
-    fig, ax = plt.subplots()
-    c = ax.pcolormesh(combined_mask, cmap=cmap, shading='auto')
+    fig, ax = plt.subplots(layout='tight', figsize=(10, 4))
+    ax.pcolormesh(combined_mask, cmap=cmap, shading='auto')
     plt.axis('image')
 
     # Define labels for the colorbar
@@ -117,7 +118,7 @@ def main():
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
     ax2 = fig.add_axes([0.95, 0.1, 0.03, 0.8])
-    cb = mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+    mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
         spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
 
     # Update the title and label as before
