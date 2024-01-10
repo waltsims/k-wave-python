@@ -113,11 +113,24 @@ def main():
         3: 'PML Mask',
     }
 
-    colorbar = plt.colorbar(c, ticks=list(labels.keys()), ax=ax)
-    colorbar.ax.set_yticklabels(list(labels.values()))
+    bounds = np.linspace(0, len(labels), len(labels)+1)
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
-    ax.set_xticks([])
-    ax.set_yticks([])
+    ax2 = fig.add_axes([0.95, 0.1, 0.03, 0.8])
+    cb = mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+        spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
+
+    # Update the title and label as before
+    ax.set_title('Simulation Layout')
+    ax2.set_ylabel('Simulation Components [-]', size=12)
+
+    # Calculate the middle points for each segment of the colorbar
+    mid_points = [(bounds[i] + bounds[i+1])/2 for i in range(len(bounds)-1)]
+
+    # Set the new tick positions and labels
+    ax2.set_yticks(mid_points)
+    ax2.set_yticklabels(list(labels.values()))
+
 
     # Plot recorded sensor data
     fig, [ax1, ax2] = plt.subplots(ncols=1, nrows=2)
