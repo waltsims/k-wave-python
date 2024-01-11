@@ -5,8 +5,17 @@ from unittest.mock import Mock
 
 import numpy as np
 from scipy.io import loadmat
+from kwave.kgrid import kWaveGrid
 
 from kwave.utils.conversion import cart2grid
+
+
+
+class kGridMock():
+
+    @property
+    def __class__(self) -> type:
+        return kWaveGrid
 
 
 def test_cart2grid():
@@ -19,7 +28,7 @@ def test_cart2grid():
 
         # 'kgrid', 'cart_data', 'grid_data', ...
         # 'order_index', 'reorder_index'
-        kgrid = Mock()
+        kgrid = kGridMock()
         kgrid.dim = int(recorded_data['kgrid']['dim'])
         kgrid.Nx = int(recorded_data['kgrid']['Nx'])
         kgrid.dx = float(recorded_data['kgrid']['dx'])

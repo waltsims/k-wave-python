@@ -1,9 +1,12 @@
 import logging
 import math
-from typing import Tuple, Union, Any
+from typing import Any
 
 import numpy as np
 from numpy import ndarray
+from beartype import beartype
+from beartype.typing import Tuple, Union
+from nptyping import NDArray, Float, Shape
 
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
@@ -150,7 +153,14 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
     return filter_size, filter_cutoff
 
 
-def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarray:
+@beartype
+def cart2grid(kgrid: kWaveGrid, 
+              cart_data: Union[
+                  NDArray[Shape["1, NumPoints"], Float],
+                  NDArray[Shape["2, NumPoints"], Float],
+                  NDArray[Shape["3, NumPoints"], Float],
+              ], 
+              axisymmetric: bool=False) -> Tuple:
     """
     Interpolates the set of Cartesian points defined by
     cart_data onto a binary matrix defined by the kWaveGrid object
