@@ -334,7 +334,11 @@ def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
     return sound_speed
 
 
-def hounsfield2density(ct_data: np.ndarray, plot_fitting: bool = False) -> np.ndarray:
+@beartype
+def hounsfield2density(
+    ct_data: NDArray[Shape["Dim1, Dim2"], Float], 
+    plot_fitting: bool = False
+) -> NDArray[Shape["Dim1, Dim2"], Float]:
     """
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
