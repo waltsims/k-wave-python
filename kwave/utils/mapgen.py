@@ -742,7 +742,7 @@ def make_disc(
 def make_circle(
         grid_size: Vector, 
         center: Vector, 
-        radius: int, 
+        radius: Union[int, Int, Float], 
         arc_angle: Optional[float] = None,
         plot_circle: bool = False
 ) -> NDArray[Shape["Dim1, Dim2"], Int]:
@@ -987,8 +987,8 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 @beartype
 def make_line(
         grid_size: Vector,
-        startpoint: Tuple[Int, Int],
-        endpoint: Optional[Tuple[Int, Int]] = None,
+        startpoint: Union[Tuple[Int, Int], NDArray[Shape['2'], Int]],
+        endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
         angle: Optional[float] = None,
         length: Optional[int] = None
 ) -> np.ndarray:
@@ -1380,7 +1380,7 @@ def make_arc(
         grid_size: Vector, 
         arc_pos: np.ndarray, 
         radius: Union[int, float], 
-        diameter: int, 
+        diameter: Int, 
         focus_pos: Vector
 ) -> Union[NDArray[Shape["Dim1, Dim2"], Int], NDArray[Shape["Dim1, Dim2"], Bool]]:
     """
@@ -1624,7 +1624,7 @@ def make_bowl(
     grid_size: Vector, 
     bowl_pos: Vector, 
     radius: Union[int, float], 
-    diameter: int,
+    diameter: Int,
     focus_pos: Vector, 
     binary: bool = False, 
     remove_overlap: bool = False
@@ -2206,9 +2206,15 @@ def make_bowl(
     return bowl
 
 
-def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int, diameter: int,
-                    focus_pos: Tuple[int, int], binary: bool = False, remove_overlap: bool = False) -> Tuple[
-    np.ndarray, List[np.ndarray]]:
+def make_multi_bowl(
+    grid_size: Vector, 
+    bowl_pos: List[Tuple[int, int]], 
+    radius: int, 
+    diameter: int,
+    focus_pos: Tuple[int, int],
+    binary: bool = False,
+    remove_overlap: bool = False
+) -> Tuple[np.ndarray, List[np.ndarray]]:
     """
     Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
     the radius of each bowl, the diameter of the bowls, and the position of the focus.
@@ -2271,6 +2277,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             bowl_pos_k = bowl_pos[bowl_index]
         else:
             bowl_pos_k = bowl_pos
+        bowl_pos_k = Vector(bowl_pos_k)
 
         if len(radius) > 1:
             radius_k = radius[bowl_index]
@@ -2286,6 +2293,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             focus_pos_k = focus_pos[bowl_index]
         else:
             focus_pos_k = focus_pos
+        focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
         new_bowl = make_bowl(
@@ -2313,8 +2321,14 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     return bowls, bowls_labelled
 
 
-def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
-                   diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
+@beartype
+def make_multi_arc(
+    grid_size: Vector,
+    arc_pos: np.ndarray,
+    radius: Union[int, np.ndarray],
+    diameter: Union[int, np.ndarray], 
+    focus_pos: np.ndarray
+) -> Tuple[NP_ARRAY_FLOAT_2D, NP_ARRAY_FLOAT_2D]:
     """
     Generates a multi-arc mask for an image given the size of the grid,
     the positions and properties of the arcs, and the position of the focus.
@@ -2404,8 +2418,13 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
     return arcs, arcs_labelled
 
 
-def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
-                binary: bool = False) -> np.ndarray:
+@beartype
+def make_sphere(
+    grid_size: Vector, 
+    radius: Union[float, int], 
+    plot_sphere: bool = False,
+    binary: bool = False
+) -> Union[NP_ARRAY_INT_3D, NP_ARRAY_BOOL_3D]:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
         and optional flags to plot the sphere and/or return a binary mask.
@@ -2428,7 +2447,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     if binary:
         sphere = np.zeros(grid_size, dtype=bool)
     else:
-        sphere = np.zeros(grid_size)
+        sphere = np.zeros(grid_size, dtype=int)
 
     # create a guide circle from which the individal radii can be extracted
     guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
@@ -2502,8 +2521,14 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     return sphere
 
 
-def make_spherical_section(radius: float, height: float, width: float = None, plot_section: bool = False,
-                           binary: bool = False) -> np.ndarray:
+@beartype
+def make_spherical_section(
+    radius: Union[float, int], 
+    height: Union[float, int], 
+    width: Optional[Union[float, int]] = None, 
+    plot_section: bool = False,
+    binary: bool = False
+) -> Tuple:
     """
     Generates a spherical section mask given the radius and height of the section and
         optional parameters to specify the width and/or plot and return a binary mask.
@@ -2997,9 +3022,17 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
     return R, b
 
 
-def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diameter: float, outer_diameter: float,
-                                focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False,
-                                num_points_inner: int = 0) -> np.ndarray:
+@beartype
+def make_cart_spherical_segment(
+    bowl_pos: NDArray[Shape["3"], Int], 
+    radius: Union[float, int], 
+    inner_diameter: Union[float, int], 
+    outer_diameter: Union[float, int],
+    focus_pos: NDArray[Shape["3"], Int], 
+    num_points: int, 
+    plot_bowl: Optional[bool] = False,
+    num_points_inner: int = 0
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Create evenly distributed Cartesian points covering a spherical segment.
 
