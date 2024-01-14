@@ -5,13 +5,14 @@ from beartype import beartype
 from nptyping import NDArray
 
 import numpy as np
+from kwave.data import Vector
 
 from kwave.utils.typing import NUMERIC_WITH_COMPLEX
 
 
 @beartype
 def get_smallest_possible_type(
-    max_array_val: NUMERIC_WITH_COMPLEX, 
+    max_array_val: Union[NUMERIC_WITH_COMPLEX, Vector], 
     target_type_group: str, 
     default: Optional[str]=None
 ) -> Union[str, None]:
