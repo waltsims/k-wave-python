@@ -391,7 +391,13 @@ tol = None
 subs0 = None
 
 
-def tol_star(tolerance, kgrid, point, debug):
+@beartype
+def tol_star(
+    tolerance: NUMERIC, 
+    kgrid: kWaveGrid, 
+    point: NDArray, 
+    debug
+) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     global tol, subs0
 
     ongrid_threshold = kgrid.dx * 1e-3
