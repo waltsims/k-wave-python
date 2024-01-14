@@ -11,7 +11,7 @@ from nptyping import NDArray, Float, Shape
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
-from kwave.utils.typing import NUMERIC
+from kwave.utils.typing import NUMERIC, NUMERIC_WITH_COMPLEX
 
 
 @beartype
@@ -132,6 +132,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     return cart_data.squeeze(), order_index
 
 
+@beartype
 def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
     int, float]:
     """
@@ -320,7 +321,8 @@ def cart2grid(kgrid: kWaveGrid,
     return grid_data.astype(int), order_index, reorder_index
 
 
-def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
+@beartype
+def hounsfield2soundspeed(ct_data: NDArray[Shape["Dim1, Dim2"], Float]) -> np.ndarray:
     """
     Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
     For soft tissue, the approximate sound speed can also be returned using the empirical relationship
@@ -485,8 +487,8 @@ def tol_star(tolerance, kgrid, point, debug):
         ks) - 1  # -1 for mapping from Matlab indexing to Python indexing
 
 
-
-def find_closest(array, value):
+@beartype
+def find_closest(array: NDArray, value: NUMERIC_WITH_COMPLEX):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
