@@ -11,9 +11,11 @@ from nptyping import NDArray, Float, Shape
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
+from kwave.utils.typing import NUMERIC
 
 
-def db2neper(alpha: float, y: int = 1) -> float:
+@beartype
+def db2neper(alpha: float, y: NUMERIC = 1) -> float:
     """
     Convert decibels to nepers.
 
@@ -31,7 +33,8 @@ def db2neper(alpha: float, y: int = 1) -> float:
     return alpha
 
 
-def neper2db(alpha: float, y: int = 1) -> float:
+@beartype
+def neper2db(alpha: float, y: NUMERIC = 1) -> float:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
@@ -49,7 +52,8 @@ def neper2db(alpha: float, y: int = 1) -> float:
     return alpha
 
 
-def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
+@beartype
+def cast_to_type(data: Union[NDArray, NUMERIC], matlab_type: str) -> Any:
     """
 
     Args:
@@ -72,7 +76,11 @@ def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
     return data.astype(type_map[matlab_type])
 
 
-def cart2pol(x: float, y: float) -> Tuple[float, float]:
+@beartype
+def cart2pol(
+    x: Union[NUMERIC, NDArray], 
+    y: Union[NUMERIC, NDArray]
+) -> Tuple[Union[NUMERIC, NDArray], Union[NUMERIC, NDArray]]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -90,6 +98,7 @@ def cart2pol(x: float, y: float) -> Tuple[float, float]:
     return phi, rho
 
 
+@beartype
 def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray, ndarray]:
     """
     Returns the Cartesian coordinates of the non-zero points of a binary grid.
