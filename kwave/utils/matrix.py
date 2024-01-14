@@ -3,12 +3,21 @@ from typing import Tuple, Union, List
 
 import numpy as np
 from scipy.interpolate import interpn, interp1d
+from beartype import beartype
+from beartype.typing import Union, List, Tuple, Any, Optional
+from nptyping import NDArray, Number, Shape, Float, Int
+
+from kwave.utils.typing import INT, NUMERIC
 
 from .data import scale_time
 from .tictoc import TicToc
 
 
-def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
+
+
+
+@beartype
+def trim_zeros(data: NDArray[Any, Number]) -> Tuple[NDArray[Any, Number], List[Tuple[INT, INT]]]:
     """
     Create a tight bounding box by removing zeros.
 
@@ -86,7 +95,11 @@ def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
     return data, ind
 
 
-def expand_matrix(matrix, exp_coeff, edge_val=None):
+@beartype
+def expand_matrix(
+    matrix: NDArray[Any, Any], 
+    exp_coeff: Union[NDArray[Shape["*"], Int], List[int]], 
+    edge_val: Optional[NUMERIC]=None):
     """
     Enlarge a matrix by extending the edge values.
 

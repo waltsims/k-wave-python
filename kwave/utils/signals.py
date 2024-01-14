@@ -7,7 +7,7 @@ from numpy.fft import ifftshift, fft, ifft
 
 from beartype import beartype
 from beartype.typing import Dict, Union, List, Optional, Tuple
-from nptyping import NDArray, Float, Shape, Int, Int64
+from nptyping import NDArray, Float, Shape, Int, Int64, Bool
 
 from .conversion import freq2wavenumber
 from .data import scale_SI
@@ -54,14 +54,14 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 
 @beartype
-def get_win(N: Union[int, NDArray, Tuple[int, int]],
+def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
             # TODO: replace and refactor for scipy.signal.get_window
             # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
             type_: str,  # TODO change this to enum in the future
             plot_win: bool = False,
             param: Optional[float] = None,
             rotation: bool = False,
-            symmetric: bool = True,
+            symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
             square: bool = False):
     """
 

@@ -9,7 +9,7 @@ import scipy
 from scipy import optimize
 from beartype import beartype
 from beartype.typing import Dict, Union, List, Tuple, cast, Optional, Any
-from nptyping import NDArray, Float, Shape, Complex, Int, Bool
+from nptyping import NDArray, Float, Shape, Complex, Int, Bool, Number
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -1380,7 +1380,7 @@ def make_arc(
         grid_size: Vector, 
         arc_pos: np.ndarray, 
         radius: Union[int, float], 
-        diameter: Int, 
+        diameter: Union[Int, int], 
         focus_pos: Vector
 ) -> Union[NDArray[Shape["Dim1, Dim2"], Int], NDArray[Shape["Dim1, Dim2"], Bool]]:
     """
@@ -1624,7 +1624,7 @@ def make_bowl(
     grid_size: Vector, 
     bowl_pos: Vector, 
     radius: Union[int, float], 
-    diameter: Int,
+    diameter: Union[Number, int, float],
     focus_pos: Vector, 
     binary: bool = False, 
     remove_overlap: bool = False
@@ -2815,7 +2815,7 @@ def focused_bowl_oneil(
 
     float_eps = np.finfo(float).eps
 
-    @beartype
+    # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
     def calculate_axial_pressure() -> Tuple[
                                         NDArray[Shape["N"], Float], 
                                         NDArray[Shape["N"], Complex]

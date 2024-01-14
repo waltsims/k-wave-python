@@ -88,7 +88,7 @@ def test_ivp_photoacoustic_waveforms():
 
     # create initial pressure distribution
     source = kSource()
-    source.p0 = make_disc(grid_size, grid_size / 2, source_radius)
+    source.p0 = make_disc(grid_size, grid_size / 2, source_radius).astype(int)
 
     # define a single sensor point
     sensor_mask = np.zeros(grid_size)
