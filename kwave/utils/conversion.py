@@ -15,7 +15,7 @@ from kwave.utils.typing import NUMERIC
 
 
 @beartype
-def db2neper(alpha: float, y: NUMERIC = 1) -> float:
+def db2neper(alpha: Union[float, int], y: NUMERIC = 1) -> float:
     """
     Convert decibels to nepers.
 
