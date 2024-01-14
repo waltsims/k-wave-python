@@ -59,6 +59,7 @@ def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
+@beartype
 def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
@@ -72,6 +73,7 @@ def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
+@beartype
 def gray(m: int) -> NDArray[Shape["N, 3"], Float]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.

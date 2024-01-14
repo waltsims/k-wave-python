@@ -17,6 +17,10 @@ def test_scale_time():
         recorded_data = loadmat(filepath)
 
         seconds = np.squeeze(recorded_data['seconds'])
+        if seconds.dtype == np.uint8:
+            seconds = int(seconds)
+        else:
+            seconds = float(seconds)
         expected_time = str(recorded_data['time'][0])
 
         time = scale_time(seconds)
