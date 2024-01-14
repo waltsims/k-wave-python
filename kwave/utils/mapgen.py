@@ -8,7 +8,7 @@ import numpy as np
 import scipy
 from scipy import optimize
 from beartype import beartype
-from beartype.typing import Dict, Union, List, Tuple, cast, Optional, Any
+from beartype.typing import Union, List, Tuple, cast, Optional
 from nptyping import NDArray, Float, Shape, Complex, Int, Bool, Number
 
 from .conversion import db2neper, neper2db

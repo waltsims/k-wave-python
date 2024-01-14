@@ -6,8 +6,8 @@ import scipy
 from numpy.fft import ifftshift, fft, ifft
 
 from beartype import beartype
-from beartype.typing import Dict, Union, List, Optional, Tuple
-from nptyping import NDArray, Float, Shape, Int, Int64, Bool
+from beartype.typing import Union, List, Optional, Tuple
+from nptyping import NDArray, Shape, Int, Bool
 
 from .conversion import freq2wavenumber
 from .data import scale_SI

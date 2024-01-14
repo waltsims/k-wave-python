@@ -1,11 +1,10 @@
 import logging
-from typing import Tuple, Union, List
 
 import numpy as np
 from scipy.interpolate import interpn, interp1d
 from beartype import beartype
 from beartype.typing import Union, List, Tuple, Any, Optional
-from nptyping import NDArray, Number, Shape, Float, Int
+from nptyping import NDArray, Number, Shape, Int
 
 from kwave.utils.typing import INT, NUMERIC
 
@@ -98,7 +97,7 @@ def trim_zeros(data: NDArray[Any, Number]) -> Tuple[NDArray[Any, Number], List[T
 @beartype
 def expand_matrix(
     matrix: NDArray[Any, Any], 
-    exp_coeff: Union[NDArray[Shape["*"], Int], List[int]], 
+    exp_coeff: Union[NDArray[Shape["*"], Int], List[int]],   # noqa: F722
     edge_val: Optional[NUMERIC]=None):
     """
     Enlarge a matrix by extending the edge values.

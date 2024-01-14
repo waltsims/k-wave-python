@@ -11,7 +11,7 @@ from kwave.utils.conversion import cart2grid
 
 
 
-class kGridMock():
+class kGridMock(Mock):
 
     @property
     def __class__(self) -> type:
