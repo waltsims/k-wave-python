@@ -6,7 +6,7 @@ import scipy
 from numpy.fft import ifftshift, fft, ifft
 
 from beartype import beartype
-from beartype.typing import Dict, Union, List, Optional
+from beartype.typing import Dict, Union, List, Optional, Tuple
 from nptyping import NDArray, Float, Shape, Int, Int64
 
 from .conversion import freq2wavenumber
@@ -54,7 +54,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 
 @beartype
-def get_win(N: Union[int, NDArray],
+def get_win(N: Union[int, NDArray, Tuple[int, int]],
             # TODO: replace and refactor for scipy.signal.get_window
             # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
             type_: str,  # TODO change this to enum in the future
