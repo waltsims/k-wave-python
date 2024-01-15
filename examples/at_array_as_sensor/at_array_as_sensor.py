@@ -60,6 +60,7 @@ def main():
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
     output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    # Reorder the sensor data returned by k-Wave to match the order of the elements in the array
     _, _, reorder_index = cart2grid(kgrid, element_pos)
     sensor_data_point = reorder_binary_sensor_data(output['p'].T, reorder_index=reorder_index)
     
