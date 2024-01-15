@@ -6,8 +6,6 @@ jobs:
   collect_references:
     name: collect_references
     runs-on: ubuntu-latest
-    outputs:
-      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -57,7 +55,6 @@ jobs:
           outPath: collectedValues.tar.gz
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
-        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         with:
           name: collectedValues
           path: collectedValues.tar.gz
@@ -69,20 +66,12 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     runs-on: ${{matrix.os}}
     steps:
-      # - uses: actions/checkout@v4
-      # - name: Download collectedValues
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: collectedValues
-      #     path: tests/matlab_test_data_collectors/python_testers/
-      - name: Cache collected references
-        uses: actions/cache@v3
-        id: cache-matlab-refs
-        env:
-          cache-name: cache-matlab-references
+      - uses: actions/checkout@v4
+      - name: Download collectedValues
+        uses: actions/download-artifact@v3
         with:
-            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
-            path: ./collectedValues.tar.gz
+          name: collectedValues
+          path: tests/matlab_test_data_collectors/python_testers/
       - name: Move file
         run: mv ./collectedValues.tar.gz ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz  
       - name: unpack collectedValues
