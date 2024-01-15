@@ -67,24 +67,24 @@ class kWaveSimulation(object):
             # set time reversal flag
             self.userarg_time_rev = False
 
-        #: Whether sensor.mask should be re-ordered.
-        #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
-        #: and thus must be re-ordered
-        self.reorder_data              = False
+            #: Whether sensor.mask should be re-ordered.
+            #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
+            #: and thus must be re-ordered
+            self.reorder_data = False
 
-        #: Whether the sensor.mask is binary
-        self.binary_sensor_mask        = True
+            #: Whether the sensor.mask is binary
+            self.binary_sensor_mask = True
 
-        # check if the sensor mask is defined as a list of cuboid corners
-        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-            self.userarg_cuboid_corners = True
-        else:
-            self.userarg_cuboid_corners = False
+            # check if the sensor mask is defined as a list of cuboid corners
+            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+                self.userarg_cuboid_corners = True
+            else:
+                self.userarg_cuboid_corners = False
 
-        #: If tse sensor is an object of the kWaveTransducer class
-        self.transducer_sensor         = False
+            #: If tse sensor is an object of the kWaveTransducer class
+            self.transducer_sensor = False
 
-        self.record = Recorder()
+            self.record = Recorder()
 
         # transducer source flags
         #: transducer is object of kWaveTransducer class
@@ -502,8 +502,8 @@ class kWaveSimulation(object):
         self.c_ref, self.c_ref_compression, self.c_ref_shear \
             = set_sound_speed_ref(self.medium, opt.simulation_type)
 
-        self.check_source(k_dim)
-        self.check_sensor(k_dim, self.kgrid.Nt)
+        self.check_source(k_dim, self.kgrid.Nt)
+        self.check_sensor(k_dim)
         self.check_kgrid_time()
         self.precision = self.select_precision(opt)
         self.check_input_combinations(opt, user_medium_density_input, k_dim, pml_size, self.kgrid.N)
@@ -606,12 +606,12 @@ class kWaveSimulation(object):
             medium.check_fields(kgrid_k.shape)
         return user_medium_density_input
 
-    def check_source(self, kgrid_dim) -> None:
+    def check_sensor(self, kgrid_dim)-> None:
         """
-        Check the source properties for correctness and validity
+        Check the Sensor properties for correctness and validity
 
         Args:
-            kgrid_dim: kWaveGrid dimension
+            k_dim: kWaveGrid dimensionality
 
         Returns:
             None
@@ -630,17 +630,6 @@ class kWaveSimulation(object):
             # check if sensor is a transducer, otherwise check input fields
             if not isinstance(self.sensor, NotATransducer):
                 if kgrid_dim == 2:
-
-                    # check field names, including the directivity inputs for the
-                    # regular 2D code, but not the axisymmetric code
-                    # TODO question to Walter: we do not need following checks anymore
-                    #  because we have kSensor that defines the structure, right?
-                    # if self.axisymmetric:
-                    #     check_field_names(self.sensor, *['mask', 'time_reversal_boundary_data', 'frequency_response',
-                    #                                        'record_mode', 'record', 'record_start_index'])
-                    # else:
-                    #     check_field_names(self.sensor, *['mask', 'directivity', 'time_reversal_boundary_data',
-                    #                                      'frequency_response', 'record_mode', 'record', 'record_start_index'])
 
                     # check for sensor directivity input and set flag
                     directivity = self.sensor.directivity
@@ -663,15 +652,7 @@ class kWaveSimulation(object):
                         directivity.set_unique_angles(self.sensor.mask)
                         directivity.set_wavenumbers(self.kgrid)
 
-                else:
-                    # TODO question to Walter: we do not need following checks anymore because
-                    #  we have kSensor that defines the structure, right?
-                    # check field names without directivity inputs (these are not supported in 1 or 3D)
-                    # check_field_names(self.sensor, *['mask', 'time_reversal_boundary_data', 'frequency_response',
-                    #                                    'record_mode', 'record', 'record_start_index'])
-                    pass
-
-                # check for time reversal inputs and set flgs
+                # check for time reversal inputs and set flags
                 if not self.options.simulation_type.is_elastic_simulation() and \
                         self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
@@ -846,12 +827,12 @@ class kWaveSimulation(object):
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
             logging.log(logging.WARN, 'sensor directivity fields are not used for time reversal.')
 
-    def check_sensor(self, k_dim, k_Nt) -> None:
+    def check_source(self, k_dim, k_Nt) -> None:
         """
-        Check the Sensor properties for correctness and validity
+        Check the source properties for correctness and validity
 
         Args:
-            k_dim: kWaveGrid dimensionality
+            kgrid_dim: kWaveGrid dimension
             k_Nt: Number of time steps in kWaveGrid
 
         Returns:
