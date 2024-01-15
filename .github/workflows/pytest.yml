@@ -17,8 +17,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            # key: ${{ hashFiles('./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/*.m', './k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/utils/*.m') }}
-            key: fixed-test-key
+            key: ${{ hashFiles('./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**') }}
             path: ./collectedValues.tar.gz
       - name: checkout reference k-Wave repo
         if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
