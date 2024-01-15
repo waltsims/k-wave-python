@@ -13,6 +13,7 @@ jobs:
           path: k-Wave-python
       - name: Cache collected references
         uses: actions/cache@v3
+        id: cache-matlab-refs
         env:
           cache-name: cache-matlab-references
         with:
@@ -20,6 +21,7 @@ jobs:
             key: fixed-test-key
             path: tests/matlab_test_data_collectors/python_testers/collectedValues
       - name: checkout reference k-Wave repo
+        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ucl-bug/k-wave
@@ -27,8 +29,10 @@ jobs:
           ref: v1.4.0
       - name: setup MATLAB
         uses: matlab-actions/setup-matlab@v1
+        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
       - name: run reference generation
         uses: matlab-actions/run-command@v1
+        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         with:
           command: |
             ls;
@@ -39,6 +43,7 @@ jobs:
             run_all_collectors;
       - name: compress artifact
         uses: a7ul/tar-action@v1.1.0
+        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         with:
           command: c
           cwd: ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
@@ -47,6 +52,7 @@ jobs:
           outPath: collectedValues.tar.gz
       - name: upload reference values artifact
         uses: actions/upload-artifact@v3
+        if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         with:
           name: collectedValues
           path: collectedValues.tar.gz
