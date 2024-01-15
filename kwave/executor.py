@@ -36,7 +36,7 @@ class Executor:
             if isinstance(e.returncode, unittest.mock.MagicMock):
                 logging.info('Skipping AssertionError in testing.')
             else:
-                raise(e)
+                raise
 
         sensor_data = self.parse_executable_output(output_filename)
 
