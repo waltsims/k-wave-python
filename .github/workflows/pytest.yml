@@ -6,18 +6,24 @@ jobs:
   collect_references:
     name: collect_references
     runs-on: ubuntu-latest
+    outputs:
+      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outcome.MATLAB_REFS_HASH }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
         with:
           path: k-Wave-python
+      - name: Calculate matlab refs hash
+        id: matlab-refs-hash
+        run: |
+          echo "MATLAB_REFS_HASH=$(sha1sum ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**/*  | sha1sum |  awk '{ print $1 }')" >> $GITHUB_OUTPUT
       - name: Cache collected references
         uses: actions/cache@v3
         id: cache-matlab-refs
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ hashFiles('./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**') }}
+            key: ${{ steps.matlab-refs-hash.outcome.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
       - name: checkout reference k-Wave repo
         if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
@@ -63,12 +69,22 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v4
-      - name: Download collectedValues
-        uses: actions/download-artifact@v3
+      # - uses: actions/checkout@v4
+      # - name: Download collectedValues
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: collectedValues
+      #     path: tests/matlab_test_data_collectors/python_testers/
+      - name: Cache collected references
+        uses: actions/cache@v3
+        id: cache-matlab-refs
+        env:
+          cache-name: cache-matlab-references
         with:
-          name: collectedValues
-          path: tests/matlab_test_data_collectors/python_testers/
+            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
+            path: ./collectedValues.tar.gz
+      - name: Move file
+        run: mv ./collectedValues.tar.gz ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz  
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
