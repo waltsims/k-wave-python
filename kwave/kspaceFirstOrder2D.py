@@ -295,11 +295,12 @@ def kspaceFirstOrder2D(
     # start the timer and store the start time
     TicToc.tic()
 
-    if execution_options.is_gpu_simulation:
-        assert simulation_options.save_to_disk, 'GPU simulation requires saving to disk'
-    else:
-        # Currently we only support binary execution, meaning all simulations must be saved to disk.
-        assert simulation_options.save_to_disk, 'CPU simulation requires saving to disk'
+    # Currently we only support binary execution, meaning all simulations must be saved to disk.
+    if not simulation_options.save_to_disk:
+        if execution_options.is_gpu_simulation:
+            raise ValueError('GPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True')
+        else:
+            raise ValueError('CPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True')
 
     k_sim = kWaveSimulation(
         kgrid=kgrid,
