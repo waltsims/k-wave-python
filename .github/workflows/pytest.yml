@@ -85,14 +85,12 @@ jobs:
             key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
-      - name: Move file
-        run: mv ./collectedValues.tar.gz ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz  
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
-          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+          files: /home/runner/work/k-wave-python/k-wave-python/collectedValues.tar.gz
       - name: where are the files?
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
