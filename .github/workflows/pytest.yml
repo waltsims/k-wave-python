@@ -77,6 +77,7 @@ jobs:
           path: ./
       - name: Read matlab references hash
         id: read-matlab-refs-hash
+        shell: bash
         run: echo "MATLAB_REFS_HASH=$(cat matlab_refs_hash.txt)" >> $GITHUB_OUTPUT
       - name: x
         run: pwd
