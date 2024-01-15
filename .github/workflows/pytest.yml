@@ -25,6 +25,7 @@ jobs:
         with:
             key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
+            lookup-only: true
       - name: checkout reference k-Wave repo
         if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
@@ -68,7 +69,8 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     runs-on: ${{matrix.os}}
     steps:
-      - name: Download collectedValues
+      - uses: actions/checkout@v4
+      - name: Download matlab references hash
         uses: actions/download-artifact@v3
         with:
           name: matlab_refs_hash
@@ -85,14 +87,12 @@ jobs:
             key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
-      - name: Move file
-        run: mv ./collectedValues.tar.gz ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz  
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
-          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+          files: /home/runner/work/k-wave-python/k-wave-python/collectedValues.tar.gz
       - name: where are the files?
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
