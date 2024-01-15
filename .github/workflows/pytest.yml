@@ -7,7 +7,7 @@ jobs:
     name: collect_references
     runs-on: ubuntu-latest
     outputs:
-      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outcome.MATLAB_REFS_HASH }}
+      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ steps.matlab-refs-hash.outcome.MATLAB_REFS_HASH }}
+            key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
       - name: checkout reference k-Wave repo
         if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
