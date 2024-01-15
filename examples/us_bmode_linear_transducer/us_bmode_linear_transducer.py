@@ -2,7 +2,7 @@ import logging
 import numpy as np
 import scipy.io
 
-from examples.us_bmode_linear_transducer.example_utils import download_from_gdrive_if_does_not_exist
+from examples.us_bmode_linear_transducer.example_utils import download_if_does_not_exist
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -89,7 +89,7 @@ def main():
 
 
     logging.log(logging.INFO, "Fetching phantom data...")
-    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
+    download_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
 
     phantom = scipy.io.loadmat(PHANTOM_DATA_PATH)
     sound_speed_map = phantom['sound_speed_map']
@@ -143,7 +143,7 @@ def main():
     else:
         logging.log(logging.INFO, "Downloading data from remote server...")
         sensor_data_path = 'sensor_data.mat'
-        download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
+        download_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
         simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
 
