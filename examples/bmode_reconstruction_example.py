@@ -5,7 +5,7 @@ from tempfile import gettempdir
 import numpy as np
 import scipy.io
 
-from example_utils import download_from_gdrive_if_does_not_exist
+from example_utils import download_if_does_not_exist
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -90,7 +90,7 @@ def main():
     number_scan_lines = 96
 
     logging.log(logging.INFO, "Fetching phantom data...")
-    download_from_gdrive_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
+    download_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, phantom_data_path)
 
     phantom = scipy.io.loadmat(phantom_data_path)
     sound_speed_map = phantom['sound_speed_map']
@@ -146,7 +146,7 @@ def main():
         logging.log(logging.INFO, "Downloading data from remote server...")
         SENSOR_DATA_GDRIVE_ID = '168wACeJOyV9urSlf7Q_S8dMnpvRNsc9C'
         sensor_data_path = 'sensor_data.mat'
-        download_from_gdrive_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
+        download_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
         simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
 
