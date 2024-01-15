@@ -16,7 +16,9 @@ jobs:
       - name: Calculate matlab refs hash
         id: matlab-refs-hash
         run: |
-          echo "MATLAB_REFS_HASH=$(sha1sum ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**/*  | sha1sum |  awk '{ print $1 }')" >> $GITHUB_OUTPUT
+          MATLAB_REFS_HASH=$(sha1sum ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**/*  | sha1sum |  awk '{ print $1 }');
+          echo "$MATLAB_REFS_HASH" >> matlab_refs_hash.txt;
+          echo "MATLAB_REFS_HASH=$MATLAB_REFS_HASH" >> $GITHUB_OUTPUT
       - name: Cache collected references
         uses: actions/cache@v3
         id: cache-matlab-refs
@@ -61,6 +63,10 @@ jobs:
         with:
           name: collectedValues
           path: collectedValues.tar.gz
+      - name: Show file
+        run: echo matlab_refs_hash.txt
+      - name: Show file 2
+        run: cat matlab_refs_hash.txt
   test:
     needs: collect_references
     strategy:
@@ -75,10 +81,9 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: 61431e68266181b16197b354a281a645d19f95ae
+            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
-            lookup-only: true
       - name: Move file
         run: mv ./collectedValues.tar.gz ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz  
       - name: unpack collectedValues
