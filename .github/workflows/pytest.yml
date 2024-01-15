@@ -72,7 +72,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: matlab_refs_hash
-          path: matlab_refs_hash.txt
+          path: ./
       - name: Read matlab references hash
         id: read-matlab-refs-hash
         run: echo "MATLAB_REFS_HASH=$(cat matlab_refs_hash.txt)" >> $GITHUB_OUTPUT
