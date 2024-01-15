@@ -1,6 +1,7 @@
 import logging
 import stat
 import subprocess
+import traceback
 import unittest.mock
 
 import h5py
@@ -29,13 +30,13 @@ class Executor:
                   f'{options}'
         
         stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
-        return_code = subprocess.run(command, stdout=stdout, shell=True).returncode
-
         try:
-            assert return_code == 0, f'Simulation call returned code: {return_code}'
-        except AssertionError:
-            if isinstance(return_code, unittest.mock.MagicMock):
+            subprocess.run(command, stdout=stdout, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            if isinstance(e.returncode, unittest.mock.MagicMock):
                 logging.info('Skipping AssertionError in testing.')
+            else:
+                raise(e)
 
         sensor_data = self.parse_executable_output(output_filename)
 
