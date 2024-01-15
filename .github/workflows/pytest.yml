@@ -85,14 +85,14 @@ jobs:
           cache-name: cache-matlab-references
         with:
             key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
-            path: tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+            path: ~/collectedValues.tar.gz
             fail-on-cache-miss: true
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
-          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+          files: ~/collectedValues.tar.gz
       - name: where are the files?
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
