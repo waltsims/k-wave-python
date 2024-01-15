@@ -90,6 +90,7 @@ jobs:
             key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
+            enableCrossOsArchive: true
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
