@@ -94,7 +94,7 @@ jobs:
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
-          files: /home/runner/work/k-wave-python/k-wave-python/collectedValues.tar.gz
+          files: ${{github.workspace}}/collectedValues.tar.gz
       - name: where are the files?
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
