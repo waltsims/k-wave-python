@@ -19,7 +19,7 @@ jobs:
         with:
             # key: ${{ hashFiles('./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/*.m', './k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/utils/*.m') }}
             key: fixed-test-key
-            path: /home/runner/work/k-wave-python/k-wave-python/collectedValues
+            path: ./collectedValues.tar.gz
       - name: checkout reference k-Wave repo
         if: ${{ steps.cache-matlab-refs.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
@@ -56,10 +56,6 @@ jobs:
         with:
           name: collectedValues
           path: collectedValues.tar.gz
-      - name: List files in directory
-        run: ls
-      - name: List files in directory 2
-        run: ls ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
   test:
     needs: collect_references
     strategy:
