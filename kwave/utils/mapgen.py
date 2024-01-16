@@ -1370,7 +1370,7 @@ def make_arc(
         radius: Union[int, float], 
         diameter: Union[Int, int], 
         focus_pos: Vector
-) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]]:
+) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
 
