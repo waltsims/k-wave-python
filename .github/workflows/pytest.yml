@@ -27,19 +27,17 @@ jobs:
         with:
             key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
-      - name: Checkout reference k-Wave repo
+      - if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
+        name: Checkout reference k-Wave repo
         uses: actions/checkout@v4
-        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           repository: ucl-bug/k-wave
           path: k-wave
           ref: v1.4.0
       - name: setup MATLAB
         uses: matlab-actions/setup-matlab@v1
-        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
       - name: run reference generation
         uses: matlab-actions/run-command@v1
-        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: |
             ls;
@@ -50,19 +48,13 @@ jobs:
             run_all_collectors;
       - name: Compress generated references
         uses: a7ul/tar-action@v1.1.0
-        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: c
           cwd: ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-      # Upload hash value as an artifact. This way we can use access it in the next job.
-      - name: Upload matlab references hash as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: matlab_refs_hash
-          path: matlab_refs_hash.txt
+
   test:
     needs: collect_references
     strategy:
@@ -72,17 +64,6 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
-      # Get the file which contains matlab references hash value
-      - name: Download matlab references hash
-        uses: actions/download-artifact@v3
-        with:
-          name: matlab_refs_hash
-          path: ./
-      # Read the hash value
-      - name: Read matlab references hash
-        id: read-matlab-refs-hash
-        shell: bash
-        run: echo "MATLAB_REFS_HASH=$(cat matlab_refs_hash.txt)" >> $GITHUB_OUTPUT
       # Pull the cache based on the hash value
       - name: Cache collected references
         uses: actions/cache@v3
@@ -90,7 +71,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
+            key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
             enableCrossOsArchive: true
