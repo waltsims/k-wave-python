@@ -15,7 +15,7 @@ jobs:
       - name: Calculate matlab references hash
         id: matlab-refs-hash
         run: | 
-          MATLAB_REFS_HASH=$(sha1sum ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/**/*  | sha1sum |  awk '{ print $1 }');
+          MATLAB_REFS_HASH=$(find ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors -type f | xargs sha1sum | sha1sum |  awk '{ print $1 }');
           echo "$MATLAB_REFS_HASH" >> matlab_refs_hash.txt;
           echo "MATLAB_REFS_HASH=$MATLAB_REFS_HASH" >> $GITHUB_OUTPUT
       # Pull cache if exists, otherwise cache will be created at the specified path
