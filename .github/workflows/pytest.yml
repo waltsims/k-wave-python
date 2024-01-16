@@ -71,7 +71,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
+            key: ${{ needs.collect_references.steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
             enableCrossOsArchive: true
