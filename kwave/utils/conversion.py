@@ -15,7 +15,7 @@ from kwave.utils.typing import NUMERIC, NUMERIC_WITH_COMPLEX
 
 
 @beartype
-def db2neper(alpha: Union[float, int], y: NUMERIC = 1) -> float:
+def db2neper(alpha: NUMERIC, y: NUMERIC = 1) -> float:
     """
     Convert decibels to nepers.
 
@@ -34,7 +34,7 @@ def db2neper(alpha: Union[float, int], y: NUMERIC = 1) -> float:
 
 
 @beartype
-def neper2db(alpha: float, y: NUMERIC = 1) -> float:
+def neper2db(alpha: NUMERIC, y: NUMERIC = 1) -> float:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
