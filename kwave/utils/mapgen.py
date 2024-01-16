@@ -19,21 +19,12 @@ from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
 
+import kwave.utils.typing as kt
+
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
-
-
-NP_ARRAY_INT_1D = NDArray[Shape["Dim1"], Int]
-NP_ARRAY_FLOAT_1D = NDArray[Shape["Dim1"], Int]
-NP_ARRAY_BOOL_1D = NDArray[Shape["Dim1"], Int]
-NP_ARRAY_INT_2D = NDArray[Shape["Dim1, Dim2"], Int]
-NP_ARRAY_BOOL_2D = NDArray[Shape["Dim1, Dim2"], Bool]
-NP_ARRAY_FLOAT_2D = NDArray[Shape["Dim1, Dim2"], Float]
-NP_ARRAY_INT_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Int]
-NP_ARRAY_BOOL_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Bool]
-NP_ARRAY_FLOAT_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Float]
 
 
 def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
@@ -511,10 +502,7 @@ def make_ball(
         radius: int, 
         plot_ball: bool = False,
         binary: bool = False
-) -> Union[
-    NDArray[Shape["Dim1, Dim2, Dim3"], Int],
-    NDArray[Shape["Dim1, Dim2, Dim3"], Bool]
-]:
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Creates a binary map of a filled ball within a 3D grid.
 
@@ -681,7 +669,7 @@ def make_disc(
     center: Vector, 
     radius, 
     plot_disc=False
-) -> NP_ARRAY_BOOL_2D:
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Create a binary map of a filled disc within a 2D grid.
 
@@ -1628,7 +1616,7 @@ def make_bowl(
     focus_pos: Vector, 
     binary: bool = False, 
     remove_overlap: bool = False
-) -> Union[NP_ARRAY_BOOL_3D, NP_ARRAY_INT_3D]:
+) -> Union[kt.NP_ARRAY_BOOL_3D, kt.NP_ARRAY_INT_3D]:
     """
     Generate a matrix representing a bowl-shaped object in 3D space.
 
@@ -2328,7 +2316,7 @@ def make_multi_arc(
     radius: Union[int, np.ndarray],
     diameter: Union[int, np.ndarray], 
     focus_pos: np.ndarray
-) -> Tuple[NP_ARRAY_FLOAT_2D, NP_ARRAY_FLOAT_2D]:
+) -> Tuple[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_2D]:
     """
     Generates a multi-arc mask for an image given the size of the grid,
     the positions and properties of the arcs, and the position of the focus.
@@ -2424,7 +2412,7 @@ def make_sphere(
     radius: Union[float, int], 
     plot_sphere: bool = False,
     binary: bool = False
-) -> Union[NP_ARRAY_INT_3D, NP_ARRAY_BOOL_3D]:
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
         and optional flags to plot the sphere and/or return a binary mask.
@@ -2674,10 +2662,10 @@ def make_cart_rect(
     Ly: Union[float, int], 
     theta: Optional[Union[
         int, float, List, 
-        NP_ARRAY_INT_1D, NP_ARRAY_FLOAT_1D]]=None, 
+        kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]]=None, 
     num_points: int=0, 
     plot_rect: bool=False
-) -> Union[NP_ARRAY_FLOAT_2D, NP_ARRAY_FLOAT_3D]:
+) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
     """
     Create evenly distributed Cartesian points covering a rectangle.
 
