@@ -210,6 +210,5 @@ def scale_SI(x: Union[float, NDArray]) -> Tuple[str, Union[int, float], str, str
     return x_sc, scale, prefix, prefix_fullname
 
 
-@beartype
 def get_date_string() -> str:
     return datetime.now().strftime("%d-%b-%Y-%H-%M-%S")
