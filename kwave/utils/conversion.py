@@ -322,7 +322,9 @@ def cart2grid(kgrid: kWaveGrid,
 
 
 @beartype
-def hounsfield2soundspeed(ct_data: NDArray[Shape["Dim1, Dim2"], Float]) -> np.ndarray:
+def hounsfield2soundspeed(
+    ct_data:  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]
+) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
     For soft tissue, the approximate sound speed can also be returned using the empirical relationship
@@ -347,9 +349,9 @@ def hounsfield2soundspeed(ct_data: NDArray[Shape["Dim1, Dim2"], Float]) -> np.nd
 
 @beartype
 def hounsfield2density(
-    ct_data: NDArray[Shape["Dim1, Dim2"], Float], 
+    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]], 
     plot_fitting: bool = False
-) -> NDArray[Shape["Dim1, Dim2"], Float]:
+) ->  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
