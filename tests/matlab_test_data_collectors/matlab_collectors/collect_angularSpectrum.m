@@ -22,4 +22,3 @@ recorder.recordVariable('pressure_max', pressure_max);
 recorder.recordVariable('pressure_time', pressure_time);
 
 recorder.saveRecordsToDisk();
-
