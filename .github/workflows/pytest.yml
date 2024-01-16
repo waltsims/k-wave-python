@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   collect_references:
     name: collect_references
+    outputs:
+      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
@@ -16,7 +18,6 @@ jobs:
         id: matlab-refs-hash
         run: | 
           MATLAB_REFS_HASH=$(find ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors -type f | xargs sha1sum | sha1sum |  awk '{ print $1 }');
-          echo "$MATLAB_REFS_HASH" >> matlab_refs_hash.txt;
           echo "MATLAB_REFS_HASH=$MATLAB_REFS_HASH" >> $GITHUB_OUTPUT
       # Pull cache if exists, otherwise cache will be created at the specified path
       - name: Cache collected references
@@ -57,12 +58,7 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-      # Upload hash value as an artifact. This way we can use access it in the next job.
-      - name: Upload matlab references hash as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: matlab_refs_hash
-          path: matlab_refs_hash.txt
+
   test:
     needs: collect_references
     strategy:
@@ -72,17 +68,6 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
-      # Get the file which contains matlab references hash value
-      - name: Download matlab references hash
-        uses: actions/download-artifact@v3
-        with:
-          name: matlab_refs_hash
-          path: ./
-      # Read the hash value
-      - name: Read matlab references hash
-        id: read-matlab-refs-hash
-        shell: bash
-        run: echo "MATLAB_REFS_HASH=$(cat matlab_refs_hash.txt)" >> $GITHUB_OUTPUT
       # Pull the cache based on the hash value
       - name: Cache collected references
         uses: actions/cache@v3
@@ -90,7 +75,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ steps.read-matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
+            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
             enableCrossOsArchive: true
