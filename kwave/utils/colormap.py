@@ -1,9 +1,10 @@
 from typing import Optional
 
 import numpy as np
+from matplotlib.colors import ListedColormap
 
 
-def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
+def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
     the k-Wave Toolbox. Zero values are displayed as white, positive values
@@ -30,7 +31,8 @@ def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
     neg = neg[neg_pad:, :]
     pos = np.flipud(hot(num_colors // 2))
 
-    return np.vstack([neg, pos])
+    colors = np.vstack([neg, pos])
+    return ListedColormap(colors)
 
 
 def hot(m: int) -> np.ndarray:
