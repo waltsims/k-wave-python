@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   collect_references:
     name: collect_references
+    outputs:
+      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
@@ -73,7 +75,7 @@ jobs:
         env:
           cache-name: cache-matlab-references
         with:
-            key: ${{ needs.collect_references.steps.matlab-refs-hash.MATLAB_REFS_HASH }}
+            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
             fail-on-cache-miss: true
             enableCrossOsArchive: true
