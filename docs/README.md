@@ -33,7 +33,7 @@ git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
 git checkout v0.3.0
 pip install '.[example]' 
-python3 examples/bmode_reconstruction_example.py
+python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
 ```
 
 This example file steps through the process of:
