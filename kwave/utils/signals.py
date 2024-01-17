@@ -107,7 +107,7 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
 
     # Check if N is either `int` or `list of ints`
     # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
-    N = np.array(N, dtype=np.int32)
+    N = np.array(N, dtype=int)
     N = N if np.size(N) > 1 else int(N)
 
     # Check if symmetric is either `bool` or `list of bools`
