@@ -247,8 +247,8 @@ def atten_comp(
     dist_vec[dist_vec < 0] = 0
 
     # Check if f_array and dist_vec are valid
-    assert f_array is not None and len(f_array) > 0, "f_array must be valid."
-    assert dist_vec is not None and len(dist_vec) > 0, "dist_vec must be valid."
+    assert f_array is not None and len(f_array) > 0, "f_array must have non-zero length."
+    assert dist_vec is not None and len(dist_vec) > 0, "dist_vec must have non-zero length."
     
     # Create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
