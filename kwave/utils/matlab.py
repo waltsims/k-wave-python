@@ -47,7 +47,7 @@ def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
 
     """
     original_shape = matrix.shape
-    matrix = matrix.flatten(order='F')
+    matrix = np.ravel(matrix, order='F')
     matrix[indices] = values
     return matrix.reshape(original_shape, order='F')
 
