@@ -7,7 +7,7 @@ import numpy as np
 
 
 _ShapeType = TypeVar("_ShapeType", bound=Any)
-_DType_co = TypeVar("_DType_co", covariant=True, bound=np.dtype[Any])
+_DType_co = TypeVar("_DType_co", covariant=True) #, bound=np.dtype[Any]) => enable after we drop 3.8 support!
 
 
 class Vector(np.ndarray, Generic[_ShapeType, _DType_co]):
