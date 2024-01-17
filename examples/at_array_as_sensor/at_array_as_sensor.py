@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 from kwave.data import Vector
@@ -6,7 +7,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.conversion import cart2grid
@@ -58,15 +59,15 @@ def main():
     )
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-    output = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
-        # TODO (walter): This should be done by kspaceFirstOrder
+    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    # Reorder the sensor data returned by k-Wave to match the order of the elements in the array
     _, _, reorder_index = cart2grid(kgrid, element_pos)
     sensor_data_point = reorder_binary_sensor_data(output['p'].T, reorder_index=reorder_index)
     
     # assign binary mask from karray to the source mask
     sensor.mask = karray.get_array_binary_mask(kgrid)
 
-    output = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
+    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
     sensor_data = output['p'].T
     combined_sensor_data = karray.combine_sensor_data(kgrid, sensor_data)
 
@@ -102,8 +103,8 @@ def main():
     ]
     cmap = plt.matplotlib.colors.ListedColormap(colors)
 
-    fig, ax = plt.subplots()
-    c = ax.pcolormesh(combined_mask, cmap=cmap, shading='auto')
+    fig, ax = plt.subplots(layout='tight', figsize=(10, 4))
+    ax.pcolormesh(combined_mask, cmap=cmap, shading='auto')
     plt.axis('image')
 
     # Define labels for the colorbar
@@ -114,14 +115,27 @@ def main():
         3: 'PML Mask',
     }
 
-    colorbar = plt.colorbar(c, ticks=list(labels.keys()), ax=ax)
-    colorbar.ax.set_yticklabels(list(labels.values()))
+    bounds = np.linspace(0, len(labels), len(labels)+1)
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
-    ax.set_xticks([])
-    ax.set_yticks([])
+    ax2 = fig.add_axes([0.95, 0.1, 0.03, 0.8])
+    mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm,
+        spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
+
+    # Update the title and label as before
+    ax.set_title('Simulation Layout')
+    ax2.set_ylabel('Simulation Components [-]', size=12)
+
+    # Calculate the middle points for each segment of the colorbar
+    mid_points = [(bounds[i] + bounds[i+1])/2 for i in range(len(bounds)-1)]
+
+    # Set the new tick positions and labels
+    ax2.set_yticks(mid_points)
+    ax2.set_yticklabels(list(labels.values()))
+
 
     # Plot recorded sensor data
-    fig, (ax1, ax2)= plt.subplots(ncols=1, nrows=2)
+    fig, [ax1, ax2] = plt.subplots(ncols=1, nrows=2)
     ax1.imshow(sensor_data_point, aspect='auto')
     ax1.set_xlabel(r'Time [$\mu$s]')
     ax1.set_ylabel('Detector Number')
