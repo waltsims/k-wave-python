@@ -67,7 +67,8 @@ def atten_comp(
     # extract signal characteristics
     N, num_signals = signal.shape
 
-    assert y != 1, "A power exponent [y] of 1 is not valid." 
+    if y == 1:
+        raise ValueError("A power exponent [y] of 1 is not valid.")
 
     # convert absorption coefficient to nepers
     alpha_0 = db2neper(alpha_0, y)
