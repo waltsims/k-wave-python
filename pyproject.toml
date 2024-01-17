@@ -29,7 +29,6 @@ dependencies = [
     "deepdiff==6.7.1",
     "matplotlib==3.7.2",
     "numpy>=1.22.2,<1.25.0",
-    "scikit-image==0.21.0",
 ]
 
 [project.urls]
