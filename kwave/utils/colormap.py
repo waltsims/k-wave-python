@@ -3,10 +3,11 @@ from typing import Optional
 import numpy as np
 from beartype import beartype
 from nptyping import NDArray, Float, Shape
+from matplotlib.colors import ListedColormap
 
 
 @beartype
-def get_color_map(num_colors: Optional[int] = None) -> NDArray[Shape["N, 3"], Float]:
+def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
     the k-Wave Toolbox. Zero values are displayed as white, positive values
@@ -33,7 +34,8 @@ def get_color_map(num_colors: Optional[int] = None) -> NDArray[Shape["N, 3"], Fl
     neg = neg[neg_pad:, :]
     pos = np.flipud(hot(num_colors // 2))
 
-    return np.vstack([neg, pos])
+    colors = np.vstack([neg, pos])
+    return ListedColormap(colors)
 
 
 @beartype

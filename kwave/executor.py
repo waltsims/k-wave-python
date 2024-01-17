@@ -27,7 +27,7 @@ class Executor:
                   f'-i {input_filename} ' \
                   f'-o {output_filename} ' \
                   f'{options}'
-        
+
         stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
         try:
             subprocess.run(command, stdout=stdout, shell=True, check=True)
