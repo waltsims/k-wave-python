@@ -670,34 +670,49 @@ class NotATransducer(kSensor):
             delay_times = np.zeros((1, self.transducer.element_length))
         return delay_times
 
-    # # function to create a scan line based on the input sensor data and the current apodization and beamforming setting
-    # def scan_line(obj, sensor_data):
-    #
-    #     # get the current apodization setting
-    #     apodization = obj.get_receive_apodization
-    #
-    #     # get the current beamforming weights and reverse
-    #     delays = -obj.beamforming_delays
-    #
-    #     # offset the received sensor_data by the beamforming delays and apply receive apodization
-    #     for element_index in np.arange(0, obj.number_active_elements):
-    #         if delays(element_index) > 0:
-    #             # shift element data forwards
-    #             sensor_data[element_index, :] = apodization[element_index] * [
-    #                       sensor_data(element_index, 1 + delays(element_index):end),
-    #                       zeros(1, delays(element_index))
-    #             ];
-    #
-    #         elif delays(element_index) < 0
-    #             # shift element data backwards
-    #             sensor_data[element_index, :] = apodization[element_index] *[
-    #                   zeros(1, -delays(element_index)),
-    #                   sensor_data(element_index, 1:end + delays(element_index))
-    #             ];
-    #
-    #     # form the a-line summing across the elements
-    #     line = sum(sensor_data)
-    #     return lin
+    def get_receive_apodization(self):
+        """
+        Get the current receive apodization setting.
+        """
+        # Example implementation, adjust based on actual logic
+        if is_number(self.receive_apodization):
+            assert self.receive_apodization.size == self.number_active_elements, \
+                'The length of the receive apodization input must match the number of active elements'
+            return self.receive_apodization
+        else:
+            if self.number_active_elements > 1:
+                apodization, _ = get_win(int(self.number_active_elements), type_=self.receive_apodization)
+            else:
+                apodization = 1
+        return np.array(apodization)
+
+    def scan_line(self, sensor_data):
+        """
+        Apply beamforming and apodization to the sensor data.
+        """
+        # Get the current apodization setting
+        apodization = self.get_receive_apodization()
+
+        # Get the current beamforming weights and reverse
+        delays = -self.beamforming_delays
+
+        # Offset the received sensor_data by the beamforming delays and apply receive apodization
+        for element_index in range(self.number_active_elements):
+            if delays[element_index] > 0:
+                # Shift element data forwards
+                sensor_data[element_index, :] = np.pad(sensor_data[element_index, delays[element_index]:],
+                                                       (0, delays[element_index]),
+                                                       'constant') * apodization[element_index]
+            elif delays[element_index] < 0:
+                # Shift element data backwards
+                sensor_data[element_index, :] = np.pad(sensor_data[element_index, :sensor_data.shape[1] + delays[element_index]],
+                                                       (-delays[element_index], 0),
+                                                       'constant') * apodization[element_index]
+
+        # Form the line summing across the elements
+        line = np.sum(sensor_data, axis=0)
+        return line
+
 
     def combine_sensor_data(self, sensor_data):
         # check the data is the correct size
