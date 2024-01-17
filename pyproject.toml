@@ -30,7 +30,6 @@ dependencies = [
     "matplotlib==3.7.2",
     "numpy>=1.22.2,<1.25.0",
     "scikit-image==0.21.0",
-    "uff-reader==0.0.2",
 ]
 
 [project.urls]
@@ -40,13 +39,16 @@ Repository = "https://github.com/waltsims/k-wave-python"
 Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
-test = ["pytest", "phantominator"]
+test = ["pytest",
+        "phantominator",
+        "requests==2.31.0"]
 example = ["gdown==4.6.0"]
 docs = ["m2r2==0.3.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.4",
     "sphinx-toolbox==3.5.0",
     "furo==2023.9.10"]
+dev = ["pre-commit==3.5.0"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"

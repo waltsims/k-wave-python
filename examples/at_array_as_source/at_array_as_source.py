@@ -132,7 +132,7 @@ def main():
 
     # Save the animation as a video file (e.g., MP4)
     video_filename = 'output_video1.mp4'
-    ani.save('/tmp/' + video_filename, writer='ffmpeg', fps=30)  # Adjust FPS as needed
+    ani.save('./' + video_filename, writer='ffmpeg', fps=30)  # Adjust FPS as needed
 
     # Show the animation (optional)
     plt.show()
@@ -155,11 +155,6 @@ def main():
     plt.ylabel('y-position [m]')
     plt.title('Source and PML Masks')
     plt.show()
-
-    # overlay the physical source positions
-    plt.figure()
-    # TODO: missing karray.plot_array(show=True)
-    # karray.plot_array(show=True)
 
 
 if __name__ == "__main__":
