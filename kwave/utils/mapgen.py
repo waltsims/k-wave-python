@@ -497,8 +497,8 @@ def water_non_linearity(temp: float) -> float:
 
 @beartype
 def make_ball(
-        grid_size: Vector[Shape["3"], int], 
-        ball_center: Vector[Shape["3"], int], 
+        grid_size: Vector, 
+        ball_center: Vector, 
         radius: int, 
         plot_ball: bool = False,
         binary: bool = False
@@ -556,7 +556,7 @@ def make_ball(
 def make_cart_sphere(
     radius: Union[float, int], 
     num_points: int, 
-    center_pos: Vector[Shape["3"], int] = Vector([0, 0, 0]),
+    center_pos: Vector = Vector([0, 0, 0]),
     plot_sphere: bool = False
 ) -> NDArray[Shape["3, NumPoints"], Float]:
     """
@@ -609,7 +609,7 @@ def make_cart_sphere(
 def make_cart_circle(
     radius: float, 
     num_points: int, 
-    center_pos: Vector[Shape["2"], int] = Vector([0, 0]),
+    center_pos: Vector = Vector([0, 0]),
     arc_angle: float = 2 * np.pi, 
     plot_circle: bool = False
 ) -> NDArray[Shape["2, NumPoints"], Float]:
@@ -665,8 +665,8 @@ def make_cart_circle(
 
 @beartype
 def make_disc(
-    grid_size: Vector[Shape["2"], int], 
-    center: Vector[Shape["2"], int], 
+    grid_size: Vector, 
+    center: Vector, 
     radius, 
     plot_disc=False
 ) -> kt.NP_ARRAY_BOOL_2D:
@@ -728,8 +728,8 @@ def make_disc(
 
 @beartype
 def make_circle(
-        grid_size: Vector[Shape["2"], int], 
-        center: Vector[Shape["2"], int], 
+        grid_size: Vector, 
+        center: Vector, 
         radius: Union[int, Int, Float], 
         arc_angle: Optional[float] = None,
         plot_circle: bool = False
@@ -833,7 +833,7 @@ def make_circle(
     return circle
 
 
-def make_pixel_map(grid_size: Union[Vector[Shape["2"], int], Vector[Shape["3"], int]], shift=None, origin_size='single') -> np.ndarray:
+def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.ndarray:
     """
     Generates a matrix with values of the distance of each pixel from the center of a grid.
 
@@ -974,7 +974,7 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 
 @beartype
 def make_line(
-        grid_size: Vector[Shape["2"], int],
+        grid_size: Vector,
         startpoint: Union[Tuple[Int, Int], NDArray[Shape['2'], Int]],
         endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
         angle: Optional[float] = None,
@@ -1365,11 +1365,11 @@ def make_line(
 
 @beartype
 def make_arc(
-        grid_size: Vector[Shape["2"], int], 
+        grid_size: Vector, 
         arc_pos: np.ndarray, 
         radius: Union[int, float], 
         diameter: Union[Int, int], 
-        focus_pos: Vector[Shape["2"], int]
+        focus_pos: Vector
 ) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
@@ -1486,7 +1486,7 @@ def make_arc(
     return arc
 
 
-def make_pixel_map_point(grid_size: Vector[Shape["2"], int], centre_pos: np.ndarray) -> np.ndarray:
+def make_pixel_map_point(grid_size: Vector, centre_pos: np.ndarray) -> np.ndarray:
     """
     Generates a map of the distance of each pixel from a given centre position.
 
@@ -1547,7 +1547,7 @@ def make_pixel_map_point(grid_size: Vector[Shape["2"], int], centre_pos: np.ndar
     return pixel_map
 
 
-def make_pixel_map_plane(grid_size: Vector[Shape["2"], int], normal: np.ndarray, point: np.ndarray) -> np.ndarray:
+def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarray) -> np.ndarray:
     """
     Generates a pixel map of a plane with given normal vector and point.
 
@@ -1609,11 +1609,11 @@ def make_pixel_map_plane(grid_size: Vector[Shape["2"], int], normal: np.ndarray,
 
 @beartype
 def make_bowl(
-    grid_size: Vector[Shape["3"], int], 
-    bowl_pos: Vector[Shape["3"], int], 
+    grid_size: Vector, 
+    bowl_pos: Vector, 
     radius: Union[int, float], 
     diameter: Union[Number, int, float],
-    focus_pos: Vector[Shape["3"], int], 
+    focus_pos: Vector, 
     binary: bool = False, 
     remove_overlap: bool = False
 ) -> Union[kt.NP_ARRAY_BOOL_3D, kt.NP_ARRAY_INT_3D]:
@@ -2195,7 +2195,7 @@ def make_bowl(
 
 
 def make_multi_bowl(
-    grid_size: Vector[Shape["2"], int], 
+    grid_size: Vector, 
     bowl_pos: List[Tuple[int, int]], 
     radius: int, 
     diameter: int,
@@ -2311,7 +2311,7 @@ def make_multi_bowl(
 
 @beartype
 def make_multi_arc(
-    grid_size: Vector[Shape["2"], int],
+    grid_size: Vector,
     arc_pos: np.ndarray,
     radius: Union[int, np.ndarray],
     diameter: Union[int, np.ndarray], 
@@ -2408,7 +2408,7 @@ def make_multi_arc(
 
 @beartype
 def make_sphere(
-    grid_size: Vector[Shape["3"], int], 
+    grid_size: Vector, 
     radius: Union[float, int], 
     plot_sphere: bool = False,
     binary: bool = False
@@ -2893,10 +2893,10 @@ def trim_cart_points(kgrid, points: np.ndarray):
 
 @beartype
 def make_cart_arc(
-    arc_pos: Vector[Shape["2"], float], 
+    arc_pos: Vector, 
     radius: Union[float, int], 
     diameter: int, 
-    focus_pos: Vector[Shape["2"], float], 
+    focus_pos: Vector, 
     num_points: int,
     plot_arc: bool = False
 ) -> NDArray[Shape["2, NumPoints"], Float]:
@@ -2973,9 +2973,9 @@ def make_cart_arc(
 
 
 def compute_linear_transform2D(
-    arc_pos: Vector[Shape["2"], float], 
+    arc_pos: Vector, 
     radius: float, 
-    focus_pos: Vector[Shape["2"], float]
+    focus_pos: Vector
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
 

@@ -1,16 +1,10 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 import numpy as np
 
 
-_ShapeType = TypeVar("_ShapeType", bound=Any)
-_DType_co = TypeVar("_DType_co", covariant=True) #, bound=np.dtype[Any]) => enable after we drop 3.8 support!
-
-
-class Vector(np.ndarray, Generic[_ShapeType, _DType_co]):
+class Vector(np.ndarray):
     def __new__(cls, elements: list):
         assert 1 <= len(elements) <= 3
         elements = list(elements)
