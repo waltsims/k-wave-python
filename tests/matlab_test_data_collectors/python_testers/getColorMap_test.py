@@ -21,7 +21,7 @@ def test_get_color_map():
         expected_color_map = recorded_data['color_map']
 
         # Execute implementation
-        color_map = get_color_map(num_colors)
+        color_map = get_color_map(num_colors).colors
 
         # Check correctness
         assert np.allclose(color_map, expected_color_map)

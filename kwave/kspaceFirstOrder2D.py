@@ -61,7 +61,7 @@ def kspace_first_order_2d_gpu(
     assert isinstance(execution_options,
                       SimulationExecutionOptions), 'execution_options must be a SimulationExecutionOptions object'
 
-    sensor_data = kspaceFirstOrder2DC(
+    sensor_data = kspaceFirstOrder2D(
         kgrid=kgrid,
         source=source,
         sensor=sensor,
@@ -295,6 +295,13 @@ def kspaceFirstOrder2D(
     # start the timer and store the start time
     TicToc.tic()
 
+    # Currently we only support binary execution, meaning all simulations must be saved to disk.
+    if not simulation_options.save_to_disk:
+        if execution_options.is_gpu_simulation:
+            raise ValueError('GPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True')
+        else:
+            raise ValueError('CPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True')
+
     k_sim = kWaveSimulation(
         kgrid=kgrid,
         source=source,
@@ -302,6 +309,7 @@ def kspaceFirstOrder2D(
         medium=medium,
         simulation_options=simulation_options
     )
+
     k_sim.input_checking('kspaceFirstOrder2D')
 
     # =========================================================================
