@@ -1,5 +1,4 @@
 import numpy as np
-from uff import Position
 
 
 def log_compression(signal, cf, normalize=False):
@@ -14,12 +13,16 @@ def log_compression(signal, cf, normalize=False):
    Returns: signal: log-compressed signal
     """
     if normalize:
-        ms = max(signal)
+        ms = np.max(signal, axis=-1)
+        if np.ndim(signal) == 2:
+            ms = ms[:, np.newaxis]
         signal = ms * (np.log10(1 + cf * signal / ms) / np.log10(1 + cf))
     else:
         signal = np.log10(1 + cf * signal) / np.log10(1 + cf)
     return signal
 
+def db(x):
+    return 20 * np.log10(np.abs(x))
 
 def apodize(distance, aperture, window):
     """
@@ -52,17 +55,6 @@ def apodize(distance, aperture, window):
         raise ValueError('Unknown window type. Known types are: boxcar, hamming, hanning, tukey25, tukey50, tukey75.')
 
     return apod
-
-
-def get_t0(transmit_wave):
-    serialized_tx_wave = transmit_wave.time_zero_reference_point.serialize()
-    return np.array(Position.deserialize(serialized_tx_wave))
-
-
-def get_origin_array(channel_data, transmit_wave):
-    serialized_origin = channel_data.unique_waves[transmit_wave.wave - 1].origin.position.serialize()
-    return np.array(
-        Position.deserialize(serialized_origin))
 
 
 def make_time_vector(num_samples, sampling_freq, time_offset):
