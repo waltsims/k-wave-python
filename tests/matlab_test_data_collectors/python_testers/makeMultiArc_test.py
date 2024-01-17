@@ -20,7 +20,6 @@ def test_makeMultiArc():
         recorded_data = loadmat(filepath, simplify_cells=True)
 
         grid_size, arc_pos, radius, diameter, focus_pos = recorded_data['params']
-        diameter = diameter.astype(int)
         expected_multi_arc = recorded_data['multi_arc']
 
         grid_size = Vector(grid_size)

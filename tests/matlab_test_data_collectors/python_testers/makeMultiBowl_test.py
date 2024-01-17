@@ -21,7 +21,6 @@ def test_makeMultiBowl():
         params = recorded_data['params']
         grid_size, bowl_pos, radius, diameter, focus_pos = params[:5]
         grid_size = Vector(grid_size)
-        diameter = diameter.astype(int)
 
         binary = bool(params[6])
         remove_overlap = bool(params[8])
