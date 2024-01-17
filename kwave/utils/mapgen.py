@@ -979,7 +979,7 @@ def make_line(
         endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
         angle: Optional[float] = None,
         length: Optional[int] = None
-) -> np.ndarray:
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Generate a line shape with a given start and end point, angle, or length.
 
@@ -1060,7 +1060,7 @@ def make_line(
     if linetype == 'AtoB':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # find the equation of the line
         m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
@@ -1157,7 +1157,7 @@ def make_line(
     elif linetype == 'angled':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # start at the atart
         x, y = startpoint
