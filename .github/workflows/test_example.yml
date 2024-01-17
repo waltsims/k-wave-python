@@ -20,7 +20,7 @@ jobs:
           pip install -e '.[example]'
       - name: Run example script
         run: |
-          python3 examples/bmode_reconstruction_example.py
+          python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
       - name: Upload example results
         uses: actions/upload-artifact@v3
         with:
