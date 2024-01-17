@@ -397,7 +397,7 @@ subs0 = None
 def tol_star(
     tolerance: NUMERIC, 
     kgrid: kWaveGrid, 
-    point: NDArray, 
+    point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]], 
     debug
 ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     global tol, subs0

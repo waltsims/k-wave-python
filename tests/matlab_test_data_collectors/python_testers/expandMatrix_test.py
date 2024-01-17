@@ -24,7 +24,6 @@ def test_expand_matrix_test():
             exp_coeff = input_args[0]
         else:
             edge_val = None
-        exp_coeff = exp_coeff.astype(int)
         expected_expanded_matrix = recorded_data['expanded_matrix']
 
         expanded_matrix  = expand_matrix(matrix, exp_coeff=exp_coeff, edge_val=edge_val)
