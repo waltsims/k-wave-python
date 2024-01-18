@@ -675,6 +675,9 @@ def smooth(
     """
 
     DEF_USE_ROTATION = True
+    
+    if a.dtype == bool:
+        a = a.astype(int)
 
     assert is_number(a) and np.all(~np.isinf(a))
     assert isinstance(restore_max, bool)

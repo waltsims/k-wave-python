@@ -2,6 +2,9 @@ import logging
 import time
 
 import numpy as np
+from beartype import beartype
+from beartype.typing import Dict, Union
+from nptyping import NDArray, Float, Shape
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
@@ -10,16 +13,21 @@ from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
 
 
+@beartype
 def angular_spectrum_cw(
-        input_plane, dx, z_pos, f0, medium,
-        angular_restriction=True,
-        grid_expansion=0,
-        fft_length='auto',
-        data_cast='off',
-        data_recast=False,
-        reverse_proj=False,
-        absorbing=False,
-        loops_for_time_est=5,
+        input_plane: NDArray[Shape["Dim1, Dim2"], Float], 
+        dx: float, 
+        z_pos: float, 
+        f0: int, 
+        medium: Union[Dict, int],
+        angular_restriction: bool=True,
+        grid_expansion: int=0,
+        fft_length: str='auto',
+        data_cast: str='off',
+        data_recast: bool=False,
+        reverse_proj: bool=False,
+        absorbing: bool=False,
+        loops_for_time_est: int=5,
 ):
     """
     Projects a 2D input plane (given as a 3D matrix of
