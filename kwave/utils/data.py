@@ -1,11 +1,21 @@
 from datetime import datetime
 from math import floor
-from typing import Tuple, Union
+from beartype.typing import Tuple, Union, Optional
+from beartype import beartype
+from nptyping import NDArray
 
 import numpy as np
+from kwave.data import Vector
+
+from kwave.utils.typing import NUMERIC_WITH_COMPLEX
 
 
-def get_smallest_possible_type(max_array_val, target_type_group, default=None) -> Union[str, None]:
+@beartype
+def get_smallest_possible_type(
+    max_array_val: Union[NUMERIC_WITH_COMPLEX, Vector], 
+    target_type_group: str, 
+    default: Optional[str]=None
+) -> Union[str, None]:
     """
     Returns the smallest possible type for the given array.
     Args:
@@ -30,6 +40,7 @@ def get_smallest_possible_type(max_array_val, target_type_group, default=None) -
     return type_
 
 
+@beartype
 def intmax(dtype: str) -> int:
     """
     Returns the maximum value for the given integer type.
@@ -45,7 +56,8 @@ def intmax(dtype: str) -> int:
     return np.iinfo(getattr(np, dtype)).max
 
 
-def scale_time(seconds: int) -> str:
+@beartype
+def scale_time(seconds: Union[int, float]) -> str:
     """
     Converts an integer number of seconds into hours, minutes,
     and seconds, and returns a string with this information.
@@ -102,7 +114,8 @@ def scale_time(seconds: int) -> str:
     return time
 
 
-def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
+@beartype
+def scale_SI(x: Union[float, NDArray]) -> Tuple[str, Union[int, float], str, str]:
     """
     Scale a number to the nearest SI unit prefix.
 
@@ -197,5 +210,5 @@ def scale_SI(x: float) -> Tuple[float, Union[int, float], str, str]:
     return x_sc, scale, prefix, prefix_fullname
 
 
-def get_date_string():
+def get_date_string() -> str:
     return datetime.now().strftime("%d-%b-%Y-%H-%M-%S")

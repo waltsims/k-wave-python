@@ -1,13 +1,15 @@
 import logging
 import math
 from math import floor
-from typing import Tuple, Optional, Union, List, Any, cast
 import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
+from beartype import beartype
+from beartype.typing import Union, List, Tuple, cast, Optional
+from nptyping import NDArray, Float, Shape, Complex, Int, Number
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -17,10 +19,13 @@ from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
 
+import kwave.utils.typing as kt
+
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
+
 
 def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
                    use_spiral: bool = False) -> np.ndarray:
@@ -145,8 +150,15 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     return np.squeeze(disc)
 
 
-def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int,
-                   plot_bowl: Optional[bool] = False) -> np.ndarray:
+@beartype
+def make_cart_bowl(
+    bowl_pos: np.ndarray, 
+    radius: float, 
+    diameter: float, 
+    focus_pos: np.ndarray, 
+    num_points: int,
+    plot_bowl: Optional[bool] = False
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Create evenly distributed Cartesian points covering a bowl.
 
@@ -487,8 +499,14 @@ def water_non_linearity(temp: float) -> float:
     return BonA
 
 
-def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False,
-              binary: bool = False) -> np.ndarray:
+@beartype
+def make_ball(
+        grid_size: Vector, 
+        ball_center: Vector, 
+        radius: int, 
+        plot_ball: bool = False,
+        binary: bool = False
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Creates a binary map of a filled ball within a 3D grid.
 
@@ -519,7 +537,7 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
             ball_center[i] = int(floor(grid_size[i] / 2)) + 1
 
     # create empty matrix
-    ball = np.zeros(grid_size).astype(bool if binary else float)
+    ball = np.zeros(grid_size).astype(bool if binary else int)
 
     # define np.pixel map
     r = make_pixel_map(grid_size, shift=[0, 0, 0])
@@ -538,9 +556,13 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
     return ball
 
 
-def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector([0, 0, 0]),
-                     plot_sphere: bool = False) -> Union[
-    List[Tuple[float, float, float]], Tuple[List[Tuple[float, float, float]], Any]]:
+@beartype
+def make_cart_sphere(
+    radius: Union[float, int], 
+    num_points: int, 
+    center_pos: Vector = Vector([0, 0, 0]),
+    plot_sphere: bool = False
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
 
@@ -568,7 +590,7 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
 
     # offset if needed
-    sphere = sphere + center_pos[:, None, None]
+    sphere = sphere + center_pos[:, None]
 
     # plot results
     if plot_sphere:
@@ -590,8 +612,13 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     return sphere.squeeze()
 
 
-def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector([0, 0]),
-                     arc_angle: float = 2 * np.pi, plot_circle: bool = False) -> np.ndarray:
+def make_cart_circle(
+    radius: float, 
+    num_points: int, 
+    center_pos: Vector = Vector([0, 0]),
+    arc_angle: float = 2 * np.pi, 
+    plot_circle: bool = False
+) -> NDArray[Shape["2, NumPoints"], Float]:
     """
     Create a set of points in cartesian coordinates defining a circle or arc.
 
@@ -642,7 +669,13 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector
     return np.squeeze(circle)
 
 
-def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
+@beartype
+def make_disc(
+    grid_size: Vector, 
+    center: Vector, 
+    radius, 
+    plot_disc=False
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Create a binary map of a filled disc within a 2D grid.
 
@@ -681,7 +714,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     assert np.all(0 < center) and np.all(center <= grid_size), 'Disc center must be within grid.'
 
     # create empty matrix
-    disc = np.zeros(grid_size)
+    disc = np.zeros(grid_size, dtype=bool)
 
     # define np.pixel map
     r = make_pixel_map(grid_size, shift=[0, 0])
@@ -699,8 +732,14 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     return disc
 
 
-def make_circle(grid_size: Vector, center: Vector, radius: int, arc_angle: Optional[float] = None,
-                plot_circle: bool = False) -> np.ndarray:
+@beartype
+def make_circle(
+        grid_size: Vector, 
+        center: Vector, 
+        radius: Union[int, Int, Float], 
+        arc_angle: Optional[float] = None,
+        plot_circle: bool = False
+) -> kt.NP_ARRAY_INT_2D:
     """
     Create a binary map of a circle within a 2D grid.
 
@@ -939,13 +978,14 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
     return nx
 
 
+@beartype
 def make_line(
         grid_size: Vector,
-        startpoint: Tuple[int, int],
-        endpoint: Optional[Tuple[int, int]] = None,
+        startpoint: Union[Tuple[Int, Int], NDArray[Shape['2'], Int]],
+        endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
         angle: Optional[float] = None,
         length: Optional[int] = None
-) -> np.ndarray:
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Generate a line shape with a given start and end point, angle, or length.
 
@@ -1026,7 +1066,7 @@ def make_line(
     if linetype == 'AtoB':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # find the equation of the line
         m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
@@ -1123,7 +1163,7 @@ def make_line(
     elif linetype == 'angled':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # start at the atart
         x, y = startpoint
@@ -1329,7 +1369,14 @@ def make_line(
     return line
 
 
-def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: float, focus_pos: Vector) -> np.ndarray:
+@beartype
+def make_arc(
+        grid_size: Vector, 
+        arc_pos: np.ndarray, 
+        radius: Union[int, float], 
+        diameter: Union[Int, int], 
+        focus_pos: Vector
+) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
 
@@ -1566,8 +1613,16 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
     return pixel_map
 
 
-def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
-              focus_pos: Vector, binary: bool = False, remove_overlap: bool = False) -> np.ndarray:
+@beartype
+def make_bowl(
+    grid_size: Vector, 
+    bowl_pos: Vector, 
+    radius: Union[int, float], 
+    diameter: Union[Number, int, float],
+    focus_pos: Vector, 
+    binary: bool = False, 
+    remove_overlap: bool = False
+) -> Union[kt.NP_ARRAY_BOOL_3D, kt.NP_ARRAY_INT_3D]:
     """
     Generate a matrix representing a bowl-shaped object in 3D space.
 
@@ -2106,7 +2161,7 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
     if binary:
         bowl = np.zeros(grid_size, dtype=bool)
     else:
-        bowl = np.zeros(grid_size)
+        bowl = np.zeros(grid_size, dtype=int)
 
     # calculate position of bounding box within larger grid
     x1 = bowl_pos[0] - bx
@@ -2145,9 +2200,15 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
     return bowl
 
 
-def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int, diameter: int,
-                    focus_pos: Tuple[int, int], binary: bool = False, remove_overlap: bool = False) -> Tuple[
-    np.ndarray, List[np.ndarray]]:
+def make_multi_bowl(
+    grid_size: Vector, 
+    bowl_pos: List[Tuple[int, int]], 
+    radius: int, 
+    diameter: int,
+    focus_pos: Tuple[int, int],
+    binary: bool = False,
+    remove_overlap: bool = False
+) -> Tuple[np.ndarray, List[np.ndarray]]:
     """
     Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
     the radius of each bowl, the diameter of the bowls, and the position of the focus.
@@ -2210,6 +2271,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             bowl_pos_k = bowl_pos[bowl_index]
         else:
             bowl_pos_k = bowl_pos
+        bowl_pos_k = Vector(bowl_pos_k)
 
         if len(radius) > 1:
             radius_k = radius[bowl_index]
@@ -2225,6 +2287,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             focus_pos_k = focus_pos[bowl_index]
         else:
             focus_pos_k = focus_pos
+        focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
         new_bowl = make_bowl(
@@ -2252,8 +2315,14 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     return bowls, bowls_labelled
 
 
-def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
-                   diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
+@beartype
+def make_multi_arc(
+    grid_size: Vector,
+    arc_pos: np.ndarray,
+    radius: Union[int, np.ndarray],
+    diameter: Union[int, np.ndarray], 
+    focus_pos: np.ndarray
+) -> Tuple[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_2D]:
     """
     Generates a multi-arc mask for an image given the size of the grid,
     the positions and properties of the arcs, and the position of the focus.
@@ -2343,8 +2412,13 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
     return arcs, arcs_labelled
 
 
-def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
-                binary: bool = False) -> np.ndarray:
+@beartype
+def make_sphere(
+    grid_size: Vector, 
+    radius: Union[float, int], 
+    plot_sphere: bool = False,
+    binary: bool = False
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
         and optional flags to plot the sphere and/or return a binary mask.
@@ -2367,7 +2441,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     if binary:
         sphere = np.zeros(grid_size, dtype=bool)
     else:
-        sphere = np.zeros(grid_size)
+        sphere = np.zeros(grid_size, dtype=int)
 
     # create a guide circle from which the individal radii can be extracted
     guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
@@ -2441,8 +2515,14 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     return sphere
 
 
-def make_spherical_section(radius: float, height: float, width: float = None, plot_section: bool = False,
-                           binary: bool = False) -> np.ndarray:
+@beartype
+def make_spherical_section(
+    radius: Union[float, int], 
+    height: Union[float, int], 
+    width: Optional[Union[float, int]] = None, 
+    plot_section: bool = False,
+    binary: bool = False
+) -> Tuple:
     """
     Generates a spherical section mask given the radius and height of the section and
         optional parameters to specify the width and/or plot and return a binary mask.
@@ -2581,7 +2661,17 @@ def make_spherical_section(radius: float, height: float, width: float = None, pl
     return ss, dist_map
 
 
-def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
+@beartype
+def make_cart_rect(
+    rect_pos, 
+    Lx: Union[float, int], 
+    Ly: Union[float, int], 
+    theta: Optional[Union[
+        int, float, List, 
+        kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]]=None, 
+    num_points: int=0, 
+    plot_rect: bool=False
+) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
     """
     Create evenly distributed Cartesian points covering a rectangle.
 
@@ -2656,9 +2746,25 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     return rect
 
 
-def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequency: float, sound_speed: float,
-                       density: float, axial_positions: Union[np.ndarray, float, list] = None,
-                       lateral_positions: Union[np.ndarray, float, list] = None) -> [float, float]:
+@beartype
+def focused_bowl_oneil(
+    radius: float, 
+    diameter: float, 
+    velocity: float, 
+    frequency: int, 
+    sound_speed: int,
+    density: int, 
+    axial_positions: Optional[
+        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
+    ] = None,
+    lateral_positions: Optional[
+        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
+    ] = None
+) -> Tuple[
+    Optional[kt.NP_ARRAY_FLOAT_1D], 
+    Optional[kt.NP_ARRAY_FLOAT_1D], 
+    Optional[kt.NP_ARRAY_COMPLEX_1D]
+]:
     """
     Calculates O'Neil's solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.
 
@@ -2703,7 +2809,11 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
     float_eps = np.finfo(float).eps
 
-    def calculate_axial_pressure() -> float:
+    # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
+    def calculate_axial_pressure() -> Tuple[
+                                        NDArray[Shape["N"], Float], 
+                                        NDArray[Shape["N"], Complex]
+                                    ]:
         # calculate distances
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
         d = B - axial_positions
@@ -2723,7 +2833,8 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
         return axial_pressure, complex_axial_pressure
 
-    def calculate_lateral_pressure() -> float:
+    @beartype
+    def calculate_lateral_pressure() -> NDArray[Shape["N"], Float]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
         # TODO: this should work
@@ -2788,8 +2899,15 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
-                  plot_arc: bool = False) -> np.ndarray:
+@beartype
+def make_cart_arc(
+    arc_pos: Vector, 
+    radius: Union[float, int], 
+    diameter: int, 
+    focus_pos: Vector, 
+    num_points: int,
+    plot_arc: bool = False
+) -> NDArray[Shape["2, NumPoints"], Float]:
     """
     make_cart_arc creates a 2 x num_points array of the Cartesian
     coordinates of points evenly distributed over an arc. The midpoint of
@@ -2862,7 +2980,11 @@ def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Ve
     return arc
 
 
-def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector) -> Tuple[np.ndarray, np.ndarray]:
+def compute_linear_transform2D(
+    arc_pos: Vector, 
+    radius: float, 
+    focus_pos: Vector
+) -> Tuple[np.ndarray, np.ndarray]:
     """
 
     Compute a rotation matrix to transform the computed arc points to the orientation
@@ -2900,9 +3022,17 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
     return R, b
 
 
-def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diameter: float, outer_diameter: float,
-                                focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False,
-                                num_points_inner: int = 0) -> np.ndarray:
+@beartype
+def make_cart_spherical_segment(
+    bowl_pos: NDArray[Shape["3"], Int], 
+    radius: Union[float, int], 
+    inner_diameter: Union[float, int], 
+    outer_diameter: Union[float, int],
+    focus_pos: NDArray[Shape["3"], Int], 
+    num_points: int, 
+    plot_bowl: Optional[bool] = False,
+    num_points_inner: int = 0
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Create evenly distributed Cartesian points covering a spherical segment.
 
