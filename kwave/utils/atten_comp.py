@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 from matplotlib import pyplot as plt
+from beartype import beartype
+from nptyping import NDArray, Float, Shape
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.math import find_closest
@@ -10,26 +12,32 @@ from kwave.utils.math import find_closest
 # FITTING FUNCTION
 # =========================================================================
 
-def constlinfit(x, y, a, b, neg_penalty=10):
+@beartype
+def constlinfit(x: float, y: float, a: float, b: float, neg_penalty: float=10):
     error = a * x + b - y
     error[error < 0] = error[error < 0] * neg_penalty
     return sum(abs(error))
 
 
+@beartype
 def atten_comp(
-        signal, dt, c, alpha_0, y,
-        display_updates=False,
-        distribution='Rihaczek',
-        energy_cutoff=0.98,
-        freq_multiplier=2,
-        filter_cutoff='auto',
-        fit_type='spline',
-        noise_cutoff=0.03,
-        num_splines=40,
-        plot_tfd=False,
-        plot_range='auto',
-        t0=1,
-        taper_ratio=0.5,
+        signal: NDArray[Shape["SensorIndex, TimeIndex"], Float], 
+        dt: float, 
+        c: int, 
+        alpha_0: float, 
+        y: float,
+        display_updates: bool=False,
+        distribution: str='Rihaczek',
+        energy_cutoff: float=0.98,
+        freq_multiplier: float=2,
+        filter_cutoff: str='auto',
+        fit_type: str='spline',
+        noise_cutoff: float=0.03,
+        num_splines: int=40,
+        plot_tfd: bool=False,
+        plot_range: str='auto',
+        t0: int=1,
+        taper_ratio: float=0.5,
 ):
     """
 
@@ -38,7 +46,7 @@ def atten_comp(
         dt: time step [s]
         c: sound speed [m/s]
         alpha_0: power law absorption prefactor [dB/(MHz^y cm)]
-        y: power law absorption exponent [0 < y < 3, y ~= 1]
+        y: power law absorption exponent [0 < y < 3, y != 1]
         display_updates: Boolean controlling whether command line updates
 %       and compute time are printed to the command line
         distribution: default TF distribution
@@ -66,6 +74,9 @@ def atten_comp(
 
     # extract signal characteristics
     N, num_signals = signal.shape
+
+    if y == 1:
+        raise ValueError("A power exponent [y] of 1 is not valid.")
 
     # convert absorption coefficient to nepers
     alpha_0 = db2neper(alpha_0, y)
@@ -134,7 +145,7 @@ def atten_comp(
             )
             tfd = np.fft.fftshift(tfd, 0) / (N * num_signals)
         elif distribution == 'Wigner':
-            def qwigner2(x, Fs):
+            def qwigner2(x: NDArray[Shape["Dim1"], Float], Fs: float):
                 raise NotImplementedError
 
             tfd = qwigner2(signal[:, 0], Fs)
@@ -155,7 +166,8 @@ def atten_comp(
     # FIND CUTOFF FREQUENCIES
     # =========================================================================
 
-    def findClosest(arr, value):
+    @beartype
+    def findClosest(arr: NDArray[Shape["Dim1"], Float], value: float):
         return (np.abs(arr - value)).argmin()
 
     if filter_cutoff == 'auto':  # noqa: F821
@@ -243,15 +255,22 @@ def atten_comp(
     dist_vec = c * dt * (np.arange(N) - t0)
     dist_vec[dist_vec < 0] = 0
 
-    # create the time variant filter
+    # Check if f_array and dist_vec are valid
+    assert f_array is not None and len(f_array) > 0, "f_array must have non-zero length."
+    assert dist_vec is not None and len(dist_vec) > 0, "dist_vec must have non-zero length."
+    
+    # Create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
+
+    assert y != 1, "A power exponent [y] of 1 is not valid." # this is a duplicate assertion to attempt to remove a warning
+
+    # Add conditionals or use np.where to manage zero and NaN
     part_1 = (2 * np.pi * np.abs(f_mat)) ** y
     part_2 = 1j * np.tan(np.pi * y / 2)
     part_3 = (2 * np.pi * f_mat)
     part_4 = (2 * np.pi * np.abs(f_mat)) ** (y - 1)
-    tv_filter = alpha_0 * dist_mat * (
-            part_1 - part_2 * part_3 * part_4
-    )
+    
+    tv_filter = alpha_0 * dist_mat * (part_1 - part_2 * part_3 * part_4)
 
     # convert cutoff frequency to a window size
     N_win_array = np.floor((cutoff_freq_array / f_array[-1]) * N) - 1
