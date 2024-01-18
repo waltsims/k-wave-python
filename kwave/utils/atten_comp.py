@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 from matplotlib import pyplot as plt
+from beartype import beartype
+from nptyping import NDArray, Float, Shape
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.math import find_closest
@@ -10,26 +12,32 @@ from kwave.utils.math import find_closest
 # FITTING FUNCTION
 # =========================================================================
 
-def constlinfit(x, y, a, b, neg_penalty=10):
+@beartype
+def constlinfit(x: float, y: float, a: float, b: float, neg_penalty: float=10):
     error = a * x + b - y
     error[error < 0] = error[error < 0] * neg_penalty
     return sum(abs(error))
 
 
+@beartype
 def atten_comp(
-        signal, dt, c, alpha_0, y,
-        display_updates=False,
-        distribution='Rihaczek',
-        energy_cutoff=0.98,
-        freq_multiplier=2,
-        filter_cutoff='auto',
-        fit_type='spline',
-        noise_cutoff=0.03,
-        num_splines=40,
-        plot_tfd=False,
-        plot_range='auto',
-        t0=1,
-        taper_ratio=0.5,
+        signal: NDArray[Shape["SensorIndex, TimeIndex"], Float], 
+        dt: float, 
+        c: int, 
+        alpha_0: float, 
+        y: float,
+        display_updates: bool=False,
+        distribution: str='Rihaczek',
+        energy_cutoff: float=0.98,
+        freq_multiplier: float=2,
+        filter_cutoff: str='auto',
+        fit_type: str='spline',
+        noise_cutoff: float=0.03,
+        num_splines: int=40,
+        plot_tfd: bool=False,
+        plot_range: str='auto',
+        t0: int=1,
+        taper_ratio: float=0.5,
 ):
     """
 
@@ -137,7 +145,7 @@ def atten_comp(
             )
             tfd = np.fft.fftshift(tfd, 0) / (N * num_signals)
         elif distribution == 'Wigner':
-            def qwigner2(x, Fs):
+            def qwigner2(x: NDArray[Shape["Dim1"], Float], Fs: float):
                 raise NotImplementedError
 
             tfd = qwigner2(signal[:, 0], Fs)
@@ -158,7 +166,8 @@ def atten_comp(
     # FIND CUTOFF FREQUENCIES
     # =========================================================================
 
-    def findClosest(arr, value):
+    @beartype
+    def findClosest(arr: NDArray[Shape["Dim1"], Float], value: float):
         return (np.abs(arr - value)).argmin()
 
     if filter_cutoff == 'auto':  # noqa: F821

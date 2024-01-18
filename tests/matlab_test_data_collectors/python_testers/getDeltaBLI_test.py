@@ -17,7 +17,7 @@ def test_get_delta_bli():
         dx = reader.expected_value_of('dx')
         xgrid = reader.expected_value_of('x_grid')
         position = reader.expected_value_of('position')
-        include_imag = reader.expected_value_of('include_imag')
+        include_imag = reader.expected_value_of('include_imag') == 1
         f_grid = get_delta_bli(Nx, dx, xgrid, position, include_imag)
 
         assert np.allclose(f_grid, reader.expected_value_of('f_grid'))

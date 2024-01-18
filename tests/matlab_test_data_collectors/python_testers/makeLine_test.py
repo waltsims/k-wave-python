@@ -18,17 +18,20 @@ def test_makeLine():
         logging.log(logging.INFO, i)
 
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
+        recorded_data = loadmat(filepath, simplify_cells=True)
 
-        params = recorded_data['params'][0]
+        params = recorded_data['params']
         if len(params) == 4:
             Nx, Ny, startpoint, endpoint = params
-            Nx, Ny, startpoint, endpoint = int(Nx), int(Ny), startpoint[0], endpoint[0]
+            Nx, Ny = int(Nx), int(Ny)
+            startpoint = tuple(startpoint.astype(np.int32))
+            endpoint = tuple(endpoint.astype(int))
             grid_size = Vector([Nx, Ny])
             line = make_line(grid_size, startpoint, endpoint)
         else:
             Nx, Ny, startpoint, angle, length = params
-            Nx, Ny, startpoint, angle, length = int(Nx), int(Ny), startpoint[0], float(angle), int(length)
+            Nx, Ny, angle, length = int(Nx), int(Ny), float(angle), int(length)
+            startpoint = tuple(startpoint.astype(np.int32))
             grid_size = Vector([Nx, Ny])
             line = make_line(grid_size, startpoint, endpoint=None, angle=angle, length=length)
 

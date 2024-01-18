@@ -15,6 +15,7 @@ def test_make_cart_spherical_segments():
     for i in range(len(reader)):
         params = reader.expected_value_of('params')
         bowl_pos, radius, inner_diameter, outer_diameter, focus_pos, num_points, plot_bowl, num_points_inner = params
+        plot_bowl = isinstance(plot_bowl, bool) or (isinstance(plot_bowl, int) and plot_bowl == 1)
 
         coordinates = make_cart_spherical_segment(bowl_pos, radius, inner_diameter, outer_diameter, focus_pos,
                                                   num_points, plot_bowl, num_points_inner)

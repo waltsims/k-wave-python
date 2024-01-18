@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_bowl
 
 import logging
@@ -21,6 +22,9 @@ def test_makeBowl():
         params = recorded_data['params'][0]
         grid_size, bowl_pos, radius, diameter, focus_pos = params[:5]
         grid_size, bowl_pos, diameter, focus_pos = grid_size[0], bowl_pos[0], int(diameter), focus_pos[0]
+        grid_size = Vector(grid_size)
+        bowl_pos = Vector(bowl_pos)
+        focus_pos = Vector(focus_pos)
 
         try:
             radius = int(radius)
