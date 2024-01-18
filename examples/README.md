@@ -12,7 +12,6 @@ Every example has a short readme.md file which briefly describes the purpose of 
 ([original example](http://www.k-wave.org/documentation/example_at_linear_array_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_linear_array_transducer/at_linear_array_transducer.ipynb))
 - [Controling the PML](na_controlling_the_pml/)
 ([original example](http://www.k-wave.org/documentation/example_na_controlling_the_pml.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/na_controlling_the_pml/na_controlling_the_pml.ipynb))
-example_na_controlling_the_pml
 - [Photoacoustic Waveforms](ivp_photoacoustic_waveforms/) ([original example](http://www.k-wave.org/documentation/example_ivp_photoacoustic_waveforms.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/ivp_photoacoustic_waveforms/ivp_photoacoustic_waveforms.ipynb))
 - [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))    
 
