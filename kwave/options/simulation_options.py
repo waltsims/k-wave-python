@@ -285,7 +285,7 @@ class SimulationOptions(object):
                 options.plot_scale = [-1, 1]
 
         # replace defaults with user defined values if provided and check inputs
-        if (val := options.pml_alpha) is not None and options.pml_alpha != 'auto':
+        if (val := options.pml_alpha) is not None and not isinstance(options.pml_alpha, str):
             # check input is correct size
             val = np.atleast_1d(val)
             if val.size > kgrid.dim:
