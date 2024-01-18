@@ -562,7 +562,8 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     r = np.sqrt(1 - (y ** 2))
     phi = k * inc
 
-    assert num_points > 0, "num_points must be greater than 0"
+    if num_points <= 0:
+        raise ValueError("num_points must be greater than 0")
 
     # create the sphere
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
