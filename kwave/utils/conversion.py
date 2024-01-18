@@ -1,16 +1,21 @@
 import logging
 import math
-from typing import Tuple, Union, Any
+from typing import Any
 
 import numpy as np
 from numpy import ndarray
+from beartype import beartype
+from beartype.typing import Tuple, Union
+from nptyping import NDArray, Float, Shape
 
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
+from kwave.utils.typing import NUMERIC, NUMERIC_WITH_COMPLEX
 
 
-def db2neper(alpha: float, y: int = 1) -> float:
+@beartype
+def db2neper(alpha: NUMERIC, y: NUMERIC = 1) -> float:
     """
     Convert decibels to nepers.
 
@@ -28,7 +33,8 @@ def db2neper(alpha: float, y: int = 1) -> float:
     return alpha
 
 
-def neper2db(alpha: float, y: int = 1) -> float:
+@beartype
+def neper2db(alpha: NUMERIC, y: NUMERIC = 1) -> float:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
@@ -46,7 +52,8 @@ def neper2db(alpha: float, y: int = 1) -> float:
     return alpha
 
 
-def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
+@beartype
+def cast_to_type(data: Union[NDArray, NUMERIC], matlab_type: str) -> Any:
     """
 
     Args:
@@ -69,7 +76,11 @@ def cast_to_type(data: np.ndarray, matlab_type: str) -> Any:
     return data.astype(type_map[matlab_type])
 
 
-def cart2pol(x: float, y: float) -> Tuple[float, float]:
+@beartype
+def cart2pol(
+    x: Union[NUMERIC, NDArray], 
+    y: Union[NUMERIC, NDArray]
+) -> Tuple[Union[NUMERIC, NDArray], Union[NUMERIC, NDArray]]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -87,6 +98,7 @@ def cart2pol(x: float, y: float) -> Tuple[float, float]:
     return phi, rho
 
 
+@beartype
 def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray, ndarray]:
     """
     Returns the Cartesian coordinates of the non-zero points of a binary grid.
@@ -120,6 +132,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     return cart_data.squeeze(), order_index
 
 
+@beartype
 def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
     int, float]:
     """
@@ -150,7 +163,14 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
     return filter_size, filter_cutoff
 
 
-def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarray:
+@beartype
+def cart2grid(kgrid: kWaveGrid, 
+              cart_data: Union[
+                  NDArray[Shape["1, NumPoints"], Float],
+                  NDArray[Shape["2, NumPoints"], Float],
+                  NDArray[Shape["3, NumPoints"], Float],
+              ], 
+              axisymmetric: bool=False) -> Tuple:
     """
     Interpolates the set of Cartesian points defined by
     cart_data onto a binary matrix defined by the kWaveGrid object
@@ -301,7 +321,10 @@ def cart2grid(kgrid: kWaveGrid, cart_data: ndarray, axisymmetric=False) -> ndarr
     return grid_data.astype(int), order_index, reorder_index
 
 
-def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
+@beartype
+def hounsfield2soundspeed(
+    ct_data:  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]
+) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
     For soft tissue, the approximate sound speed can also be returned using the empirical relationship
@@ -324,7 +347,11 @@ def hounsfield2soundspeed(ct_data: np.ndarray) -> np.ndarray:
     return sound_speed
 
 
-def hounsfield2density(ct_data: np.ndarray, plot_fitting: bool = False) -> np.ndarray:
+@beartype
+def hounsfield2density(
+    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]], 
+    plot_fitting: bool = False
+) ->  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
@@ -366,7 +393,13 @@ tol = None
 subs0 = None
 
 
-def tol_star(tolerance, kgrid, point, debug):
+@beartype
+def tol_star(
+    tolerance: NUMERIC, 
+    kgrid: kWaveGrid, 
+    point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]], 
+    debug
+) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     global tol, subs0
 
     ongrid_threshold = kgrid.dx * 1e-3
@@ -462,8 +495,8 @@ def tol_star(tolerance, kgrid, point, debug):
         ks) - 1  # -1 for mapping from Matlab indexing to Python indexing
 
 
-
-def find_closest(array, value):
+@beartype
+def find_closest(array: NDArray, value: NUMERIC_WITH_COMPLEX):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx

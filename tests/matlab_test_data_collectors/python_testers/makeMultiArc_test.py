@@ -17,10 +17,9 @@ def test_makeMultiArc():
     for i in range(num_collected_values):
         logging.log(logging.INFO, i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
+        recorded_data = loadmat(filepath, simplify_cells=True)
 
-        grid_size, arc_pos, radius, diameter, focus_pos = recorded_data['params'][0]
-        grid_size, radius, diameter, focus_pos = grid_size[0], radius[0], diameter[0], focus_pos
+        grid_size, arc_pos, radius, diameter, focus_pos = recorded_data['params']
         expected_multi_arc = recorded_data['multi_arc']
 
         grid_size = Vector(grid_size)
