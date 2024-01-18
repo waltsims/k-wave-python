@@ -15,6 +15,9 @@ def test_make_cart_rect():
     for i in range(len(reader)):
         params = reader.expected_value_of('params')
         rect_pos, Lx, Ly, theta, num_points, plot_rect = params
+        if theta is not None and isinstance(theta, np.ndarray) and theta.size == 1:
+            theta = float(theta)
+        plot_rect = plot_rect == 1
         coordinates = make_cart_rect(rect_pos, Lx, Ly, theta, num_points, plot_rect)
         assert np.allclose(coordinates, reader.expected_value_of('coordinates'))
         reader.increment()

@@ -3,6 +3,9 @@ import time
 
 import numpy as np
 from matplotlib import pyplot as plt
+from beartype import beartype
+from beartype.typing import Dict, Union
+from nptyping import NDArray, Float, Shape
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
@@ -11,18 +14,23 @@ from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
 
 
+@beartype
 def angular_spectrum(
-        input_plane, dx, dt, z_pos, medium,
-        angular_restriction=True,
-        grid_expansion=0,
-        fft_length='auto',
-        data_cast='off',
-        data_recast=False,
-        reverse_proj=False,
-        absorbing=False,
-        plot_updates=False,
-        loops_for_time_est=5,
-        record_time_series=False
+        input_plane: NDArray[Shape["Dim1, Dim2, Dim3"], Float], 
+        dx: float, 
+        dt: float, 
+        z_pos: float, 
+        medium: Union[Dict, int],
+        angular_restriction: bool=True,
+        grid_expansion: int=0,
+        fft_length: str='auto',
+        data_cast: str='off',
+        data_recast: bool=False,
+        reverse_proj: bool=False,
+        absorbing: bool=False,
+        plot_updates: bool=False,
+        loops_for_time_est: int=5,
+        record_time_series: bool=False
 ):
     """
     Projects a 2D input plane (given as a 3D matrix of

@@ -15,15 +15,15 @@ def test_makeSphericalSection():
     for i in range(num_collected_values):
         logging.log(logging.INFO, i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
+        recorded_data = loadmat(filepath, simplify_cells=True)
 
-        params = recorded_data['params'][0]
+        params = recorded_data['params']
         if len(params) == 2:
             radius, height = params
             radius, height = int(radius), int(height)
             width, plot_section, binary = None, False, False
         else:
-            radius, height, width, plot_section, binary = recorded_data['params'][0]
+            radius, height, width, plot_section, binary = recorded_data['params']
             radius, height, width, plot_section, binary = int(radius), int(height), int(width), bool(plot_section), bool(binary)
         expected_spherical_section = recorded_data['spherical_section']
         expected_distance_map = recorded_data['distance_map']
