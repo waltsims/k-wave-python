@@ -146,7 +146,11 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
 
     # create the window
     if N.size == 1:
+        # TODO: what should this behaviour be if N is a list of ints? make windows of multiple lengths?
         n = np.arange(0, N)
+
+        # TODO: find failure cases in test suite when N is zero.
+        # assert np.all(N) > 1, 'Signal length N must be greater than 1'
 
         if type_ == 'Bartlett':
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T

@@ -64,7 +64,11 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         return p0
 
     def make_concentric_circle_points(num_points: int, radius: float) -> Tuple[np.ndarray, int]:
+
+        assert num_points >= 1, "The number of points must be greater or equal to 1." 
+
         num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
+       
         try:
             d_radial = radius / (num_radial - 1)
         except ZeroDivisionError:
@@ -217,7 +221,7 @@ def make_cart_bowl(
     bowl = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         # select suitable axis scaling factor
         _, scale, prefix, unit = scale_SI(np.max(bowl))
 
@@ -579,6 +583,9 @@ def make_cart_sphere(
     y = k * off - 1 + (off / 2)
     r = np.sqrt(1 - (y ** 2))
     phi = k * inc
+
+    if num_points <= 0:
+        raise ValueError("num_points must be greater than 0")
 
     # create the sphere
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
@@ -2831,6 +2838,8 @@ def focused_bowl_oneil(
     def calculate_lateral_pressure() -> NDArray[Shape["N"], Float]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
+        # TODO: this should work
+        # assert np.all(Z) > 0, 'Z must be greater than 0'
         lateral_pressure = 2. * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
 
         # replace origin with limit
@@ -3098,7 +3107,7 @@ def make_cart_spherical_segment(
     segment = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         _, scale, prefix, unit = scale_SI(np.max(segment))
 
         # create the figure
