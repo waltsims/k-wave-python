@@ -99,7 +99,7 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run 
-      - name: create coverage report
+      - name: Create coverage report
         run: |
           coverage xml
       - name: Upload coverage reports to Codecov
