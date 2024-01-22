@@ -108,6 +108,6 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           env_vars: ${{matrix.os}},${{ matrix.python-version }}
           fail_ci_if_error: true
-          flags: unittests
+          flags: ${{matrix.os}},${{ matrix.python-version }}
           name: ${{matrix.os}},${{ matrix.python-version }}
           verbose: true
