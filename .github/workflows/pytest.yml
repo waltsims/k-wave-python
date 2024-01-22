@@ -106,7 +106,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
+          env_vars: ${{matrix.os}},${{ matrix.python-version }}
           fail_ci_if_error: true
           flags: unittests
           name: codecov-umbrella
