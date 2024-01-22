@@ -109,5 +109,5 @@ jobs:
           env_vars: ${{matrix.os}},${{ matrix.python-version }}
           fail_ci_if_error: true
           flags: unittests
-          name: codecov-umbrella
+          name: ${{matrix.os}},${{ matrix.python-version }}
           verbose: true
