@@ -98,7 +98,7 @@ jobs:
           pip install '.[test]'
       - name: Test with pytest
         run: |
-          coverage -m pytest
+          coverage run 
       - name: create coverage report
         run: |
           coverage xml
@@ -106,6 +106,13 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./coverage1.xml,./coverage2.xml,!./cache
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
 #      - name: Lint with flake8
 #        run: |
 #          # stop the build if there are Python syntax errors or undefined names
