@@ -5,15 +5,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
     - uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         cache: 'pip'
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
     - name: Build and Commit
       uses: waltsims/pages@pyproject.toml-support
       with:
         pyproject_toml_deps: ".[docs]"
-        
