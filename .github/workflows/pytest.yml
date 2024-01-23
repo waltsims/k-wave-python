@@ -90,9 +90,10 @@ jobs:
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: Install dependencies
         run: |
           pip install '.[test]'
