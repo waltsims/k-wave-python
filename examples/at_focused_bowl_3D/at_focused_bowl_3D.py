@@ -10,7 +10,7 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.filters import extract_amp_phase
 from kwave.utils.mapgen import focused_bowl_oneil
-from kwave.utils.math import round_even, L2_error
+from kwave.utils.math import round_even
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
 
