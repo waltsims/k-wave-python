@@ -197,18 +197,10 @@ p_ref_axial, _, _ = focused_bowl_oneil(source_roc,
 p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, source_amp / (c0 * rho0),
                                     source_f0, c0, rho0, axial_positions=x_vec)
 
+# calculate errors
+L2 = L2_error(p_ref_axial_kw, amp_on_axis, ord=2)
 
-
-
-
-
-# calculate error
-L2: float = 100.0 * np.sqrt(np.sum((np.ravel(p_ref_axial_kw) - np.ravel(amp_on_axis))**2 )
-                                   / np.sum(np.ravel(p_ref_axial_kw)**2))
-
-Linf: float = 100.0 * np.max(np.abs(np.ravel(p_ref_axial_kw) -
-                                          np.ravel(amp_on_axis))) / np.max(np.ravel(p_ref_axial_kw))
-
+Linf = L2_error(p_ref_axial_kw, amp_on_axis, ord=np.inf)
 
 # =========================================================================
 # VISUALISATION

@@ -9,7 +9,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.filters import extract_amp_phase
-from kwave.utils.math import round_even
+from kwave.utils.math import round_even, L2_error
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
 
@@ -132,6 +132,7 @@ sensor.record_start_index: int = kgrid.Nt - (record_periods * ppp) + 1
 # --------------------
 
 simulation_options = SimulationOptions(
+    pml_auto=True,
     data_recast=True,
     save_to_disk=True,
     save_to_disk_exit=False,
@@ -186,9 +187,8 @@ r = np.sqrt(x_vec**2 + a**2)
 p_ref_kw = source_amp * np.abs(2.0 * np.sin((k * r - k * x_vec) / 2.0))
 
 # calculate error
-L2_error: float = 100.0 * np.sqrt(np.sum((np.ravel(p_ref_kw) - np.ravel(amp_on_axis))**2 ) / np.sum(np.ravel(p_ref_kw)**2))
-Linf_error: float = 100.0 * np.max(np.abs(np.ravel(p_ref_kw) - np.ravel(amp_on_axis))) / np.max(np.ravel(p_ref_kw))
-
+L2_error = L2_error(p_ref_kw, amp_on_axis, ord=2)
+Linf_error = L2_error(p_ref_kw, amp_on_axis, ord=np.inf)
 # =========================================================================
 # VISUALISATION
 # =========================================================================
