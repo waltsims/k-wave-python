@@ -41,6 +41,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
+        "coverage==7.4.0",
         "phantominator",
         "requests==2.31.0"]
 example = ["gdown==4.7.3"]
@@ -75,6 +76,17 @@ exclude = [
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+command_line = "-m pytest"
+include = [
+    "kwave/*",
+    ]
+omit = [
+    # omit anything in a .local directory anywhere
+    "tests/*",
+    ]
 
 [tool.ruff]
 # Allow lines to be as long as 140 characters.
