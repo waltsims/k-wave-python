@@ -15,6 +15,13 @@ Every example has a short readme.md file which briefly describes the purpose of 
 ([original example](http://www.k-wave.org/documentation/example_na_controlling_the_pml.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/na_controlling_the_pml/na_controlling_the_pml.ipynb))
 - [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))    
 
+- [Circular piston transducer](at_circular_piston/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading3))
+- [Focused bowl transducer](at_focused_bowl_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading5))
+- [Focused annular array](at_focused_annular_array/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7))
+
+
+ 
+
 
 ## Contributing new examples
 
