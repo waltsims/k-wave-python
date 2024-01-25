@@ -2924,10 +2924,10 @@ def focused_annulus_oneil(radius: float,
     """
 
     assert (2 in np.shape(diameter)), "wrong shape for diameter"
-    assert (np.all(np.greater_equal(diameter, 0.0)) and np.isreal(diameter) and np.all(np.isfinite(diameter))), "wrong values in diameter object"
+    assert (np.greater_equal(diameter, np.zeros_like(diameter)).all() and np.isreal(diameter).all() and np.isfinite(diameter).all()), "wrong values in diameter object"
 
     # set the number of elements in annular array
-    num_elements: int = np.size(diameter)[1]
+    num_elements: int = np.shape(diameter)[1]
 
     assert (np.shape(amplitude) == np.shape(phase)), "amplitude and phase have different shapes"
     assert (np.size(np.squeeze(amplitude)) == num_elements), "amplitude object does not the same size as elements"
