@@ -2934,8 +2934,8 @@ def focused_annulus_oneil(radius: float,
     assert (np.all(np.isreal(amplitude)) and np.all(np.isfinite(amplitude))), "amplitude has a bad value"
     assert (np.all(np.isreal(frequency)) and np.all(np.isfinite(frequency))), "frequency has a bad value"
     assert ((radius > 0.0) and np.isreal(radius) and np.isfinite(radius) ), "radius is incorrect"
-    assert ((phase >= 0.0) and (phase <= 2.0 * np.pi) and np.isreal(phase)
-            and np.isfinite(phase) ), "phase is incorrect"
+    assert ((phase >= 0.0).all() and (phase <= 2.0 * np.pi).all() and np.isreal(phase).all()
+            and np.isfinite(phase).all()), "phase is incorrect"
                             
     # pre-allocate output
     p_axial = np.zeros(np.shape(axial_positions))
