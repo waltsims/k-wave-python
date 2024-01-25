@@ -2863,6 +2863,118 @@ def focused_bowl_oneil(
     return p_axial, p_lateral, p_axial_complex
 
 
+
+@beartype
+def focused_annulus_oneil(radius: float,
+                          diameter: kt.NP_ARRAY_FLOAT_2D,
+                          amplitude: kt.NP_ARRAY_FLOAT_1D,
+                          phase: kt.NP_ARRAY_FLOAT_1D,
+                          frequency: float,
+                          sound_speed: float,
+                          density: float,
+                          axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list]) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
+    """Compute axial pressure for focused annulus transducer using O'Neil's solution
+
+    focused_annulus_oneil calculates the axial pressure for a focused
+    annular transducer using O'Neil's solution (O'Neil, H. Theory of
+    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949). The
+    annuluar elements are uniformly driven by a continuous wave sinusoid
+    at a given frequency and normal surface velocity.
+
+    The solution is evaluated at the positions (along the beam axis) given
+    by axial_position. Where 0 corresponds to the transducer surface.
+
+    Note, O'Neil's formulae are derived under the assumptions of the
+    Rayleigh integral, which are valid when the transducer diameter is
+    large compared to both the transducer height and the acoustic
+    wavelength.
+
+    Example:
+        # define transducer parameters
+        radius = 140e-3  # [m]
+        diameter = 120e-3  # [m]
+        velocity = 100e-3  # [m / s]
+        frequency = 1e6  # [Hz]
+        sound_speed = 1500  # [m / s]
+        density = 1000  # [kg / m^3]
+
+        # define position vectors
+        axial_position = np.arange(0, 250e-3 + 1e-4, 1e-4)  # [m]
+        p_axial = focused_annulus_oneil(radius, diameter, amplitude, phase, frequency, sound_speed, density, axial_position)
+
+    Args:
+        radius: transducer radius of curvature [m]
+        diameter: 2 x num_elements array containing pairs of inner and outer aperture diameter
+                  (diameter of opening) [m].
+        amplitude: array containing the normal surface velocities for each element [m/s]
+        phase: array containing the phase for each element [rad]
+        frequency: driving frequency [Hz]
+        sound_speed: speed of sound in the propagating medium [m/s]
+        density: density in the propagating medium [kg/m^3]
+        axial_positions: vector of positions along the beam axis where the
+                         pressure amplitude is calculated [m]
+
+    Returns:
+        p_axial: pressure amplitude at the positions specified by axial_position [Pa]
+
+    References:
+        O'Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.
+
+    See also focused_bowl_oneil.
+    """
+
+    assert (2 in np.shape(diameter)), "wrong shape for diameter"
+    assert (np.all(np.greater_equal(diameter, 0.0)) and np.isreal(diameter) and np.all(np.isfinite(diameter))), "wrong values in diameter object"
+
+    # set the number of elements in annular array
+    num_elements: int = np.size(diameter)[1]
+
+    assert (np.shape(amplitude) == np.shape(phase)), "amplitude and phase have different shapes"
+    assert (np.size(np.squeeze(amplitude)) == num_elements), "amplitude object does not the same size as elements"
+    assert (np.all(np.isreal(amplitude)) and np.all(np.isfinite(amplitude))), "amplitude has a bad value"
+    assert (np.all(np.isreal(phase)) and np.all(np.isfinite(phase))), "phase has a bad value"
+
+    assert ((radius > 0.0) and np.isreal(radius) and np.isfinite(radius) ), "radius is incorrect"
+
+    assert ((frequency >= 0.0) and (frequency <= 2.0 * np.pi) and np.isreal(frequency)
+            and np.isfinite(frequency) ), "frequency is incorrect"
+
+    # pre-allocate output
+    p_axial = np.zeros(np.shape(axial_positions))
+
+    # loop over elements and sum fields
+    for ind in range(num_elements):
+
+        # get complex pressure for bowls with inner and outer aperature diameter
+        if (diameter[0, ind] == 0):
+            p_el_inner = 0.0 + 0.0j
+        else:
+            _, _, p_el_inner = focused_bowl_oneil(radius, diameter[0, ind], amplitude[ind], frequency,
+                                                  sound_speed, density, axial_positions=axial_positions)
+
+        _, _, p_el_outer = focused_bowl_oneil(radius, diameter[1, ind], amplitude[ind], frequency,
+                                              sound_speed, density, axial_positions=axial_positions)
+
+        # pressure for annular element
+        p_el = p_el_outer - p_el_inner
+
+        # account for phase
+        p_el = np.abs(p_el) * np.exp(1j * (np.angle[p_el] + np.phase[ind]))
+
+        # add to complete response
+        p_axial = p_axial + p_el
+
+    # take magnitude of complete response
+    return np.abs(p_axial)
+
+
+
+
+
+
+
+
+
 def ndgrid(*args):
     return np.array(np.meshgrid(*args, indexing='ij'))
 
