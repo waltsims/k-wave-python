@@ -2927,18 +2927,16 @@ def focused_annulus_oneil(radius: float,
     assert (np.greater_equal(diameter, np.zeros_like(diameter)).all() and np.isreal(diameter).all() and np.isfinite(diameter).all()), "wrong values in diameter object"
 
     # set the number of elements in annular array
-    num_elements: int = np.shape(diameter)[1]
+    num_elements: int = [int(x) for x in np.shape(diameter) if x != 2][0]
 
     assert (np.shape(amplitude) == np.shape(phase)), "amplitude and phase have different shapes"
     assert (np.size(np.squeeze(amplitude)) == num_elements), "amplitude object does not the same size as elements"
     assert (np.all(np.isreal(amplitude)) and np.all(np.isfinite(amplitude))), "amplitude has a bad value"
-    assert (np.all(np.isreal(phase)) and np.all(np.isfinite(phase))), "phase has a bad value"
-
+    assert (np.all(np.isreal(frequency)) and np.all(np.isfinite(frequency))), "frequency has a bad value"
     assert ((radius > 0.0) and np.isreal(radius) and np.isfinite(radius) ), "radius is incorrect"
-
-    assert ((frequency >= 0.0) and (frequency <= 2.0 * np.pi) and np.isreal(frequency)
-            and np.isfinite(frequency) ), "frequency is incorrect"
-
+    assert ((phase >= 0.0) and (phase <= 2.0 * np.pi) and np.isreal(phase)
+            and np.isfinite(phase) ), "phase is incorrect"
+                            
     # pre-allocate output
     p_axial = np.zeros(np.shape(axial_positions))
 
