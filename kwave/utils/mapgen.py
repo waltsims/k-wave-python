@@ -2957,7 +2957,7 @@ def focused_annulus_oneil(radius: float,
         p_el = p_el_outer - p_el_inner
 
         # account for phase
-        p_el = np.abs(p_el) * np.exp(1j * (np.angle[p_el] + np.phase[ind]))
+        p_el = np.abs(p_el) * np.exp(1j * (np.angle(p_el) + phase[ind]))
 
         # add to complete response
         p_axial = p_axial + p_el
