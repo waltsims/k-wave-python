@@ -55,3 +55,6 @@ autodoc_typehints = "description"
 
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
+
+# Remove module name from object names
+add_module_names = False
