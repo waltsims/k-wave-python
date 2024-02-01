@@ -55,7 +55,7 @@ class H5Summary(object):
     def save(self, name: str):
         path = self._get_json_filepath(name)
 
-        # assert not os.path.exists(path), 'File already exists, would not overwrite!'
+        assert not os.path.exists(path), 'File already exists, would not overwrite!'
 
         with open(path, "w") as write_file:
             json.dump(self.summary, write_file, indent=4)
