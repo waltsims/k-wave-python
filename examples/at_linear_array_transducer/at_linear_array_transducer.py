@@ -91,7 +91,7 @@ def main():
     # VISUALISATION
     plt.figure()
     plt.imshow(1e-6 * p_max, extent=[1e3 * kgrid.x_vec[0][0], 1e3 * kgrid.x_vec[-1][0], 1e3 * kgrid.z_vec[0][0],
-                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto')
+                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto', cmap=kwave.utils.colormap.get_color_map())
     plt.xlabel('z-position [mm]')
     plt.ylabel('x-position [mm]')
     plt.title('Pressure Field')
