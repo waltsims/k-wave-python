@@ -12,6 +12,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
+from kwave.utils.colormap import get_color_map
 
 
 def main():
@@ -91,7 +92,7 @@ def main():
     # VISUALISATION
     plt.figure()
     plt.imshow(1e-6 * p_max, extent=[1e3 * kgrid.x_vec[0][0], 1e3 * kgrid.x_vec[-1][0], 1e3 * kgrid.z_vec[0][0],
-                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto')
+                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto', cmap=get_color_map())
     plt.xlabel('z-position [mm]')
     plt.ylabel('x-position [mm]')
     plt.title('Pressure Field')
