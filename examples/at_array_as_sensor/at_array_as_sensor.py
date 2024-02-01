@@ -12,6 +12,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.conversion import cart2grid
 from kwave.utils.kwave_array import kWaveArray
+from kwave.utils.colormap import get_color_map
 from kwave.utils.mapgen import make_cart_circle, make_disc
 from kwave.utils.signals import reorder_binary_sensor_data
 
@@ -136,7 +137,7 @@ def main():
 
     # Plot recorded sensor data
     fig, [ax1, ax2] = plt.subplots(ncols=1, nrows=2)
-    ax1.imshow(sensor_data_point, aspect='auto')
+    ax1.imshow(sensor_data_point, aspect='auto', cmap=get_color_map())
     ax1.set_xlabel(r'Time [$\mu$s]')
     ax1.set_ylabel('Detector Number')
     ax1.set_title('Cartesian point detectors')
