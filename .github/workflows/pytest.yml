@@ -103,11 +103,12 @@ jobs:
         run: |
           coverage xml
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           env_vars: ${{matrix.os}},${{ matrix.python-version }}
           fail_ci_if_error: true
           flags: ${{matrix.os}},${{ matrix.python-version }}
           name: ${{matrix.os}},${{ matrix.python-version }}
           verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
