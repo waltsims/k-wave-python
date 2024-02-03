@@ -58,7 +58,6 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-
   test:
     needs: collect_references
     strategy:
