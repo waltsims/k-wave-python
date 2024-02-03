@@ -1,6 +1,3 @@
-# This CITATION.cff file was generated with cffinit.
-# Visit https://bit.ly/cffinit to generate yours today!
-
 cff-version: 1.2.0
 title: k-Wave-Python
 message: >-
@@ -15,10 +12,10 @@ authors:
     family-names: Sinden
     affiliation: Frauenhofer Institute for Digital Medicine
     orcid: 'https://orcid.org/0000-0002-8514-8279'
-  - orcid: 'https://orcid.org/0000-0002-2801-8646'
-    family-names: Simson
+  - family-names: Simson
     given-names: Walter
     email: wsimson@stanford.edu
     affiliation: Stanford University
+    orcid: 'https://orcid.org/0000-0002-2801-8646'
 repository-code: 'https://github.com/waltsims/k-wave-python'
 license: GPL-3.0
