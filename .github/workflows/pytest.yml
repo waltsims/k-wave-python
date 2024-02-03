@@ -58,6 +58,12 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
+      - name: upload reference values artifact
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: collectedValues
+          path: collectedValues.tar.gz
   test:
     needs: collect_references
     strategy:
