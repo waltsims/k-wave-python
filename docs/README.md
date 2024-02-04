@@ -1,5 +1,6 @@
 # k-Wave-python
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
 
 This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
@@ -31,9 +32,9 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-git checkout v0.3.0
+git checkout v0.3.1
 pip install '.[example]' 
-python3 examples/bmode_reconstruction_example.py
+python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
 ```
 
 This example file steps through the process of:

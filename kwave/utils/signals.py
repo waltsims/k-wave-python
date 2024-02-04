@@ -1,10 +1,13 @@
 import logging
 from math import floor
-from typing import Union, List, Optional
 
 import numpy as np
 import scipy
 from numpy.fft import ifftshift, fft, ifft
+
+from beartype import beartype
+from beartype.typing import Union, List, Optional, Tuple
+from nptyping import NDArray, Shape, Int, Bool
 
 from .conversion import freq2wavenumber
 from .data import scale_SI
@@ -50,14 +53,15 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     return signal
 
 
-def get_win(N: Union[int, List[int]],
+@beartype
+def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
             # TODO: replace and refactor for scipy.signal.get_window
             # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
             type_: str,  # TODO change this to enum in the future
             plot_win: bool = False,
             param: Optional[float] = None,
             rotation: bool = False,
-            symmetric: bool = True,
+            symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
             square: bool = False):
     """
 
@@ -142,7 +146,11 @@ def get_win(N: Union[int, List[int]],
 
     # create the window
     if N.size == 1:
+        # TODO: what should this behaviour be if N is a list of ints? make windows of multiple lengths?
         n = np.arange(0, N)
+
+        # TODO: find failure cases in test suite when N is zero.
+        # assert np.all(N) > 1, 'Signal length N must be greater than 1'
 
         if type_ == 'Bartlett':
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
@@ -212,7 +220,7 @@ def get_win(N: Union[int, List[int]],
 
             # create the window in one dimension using getWin recursively
             L = max(N)
-            win_lin, _ = get_win(L, type_, param=param)
+            win_lin, _ = get_win(int(L), type_, param=param)
             win_lin = np.squeeze(win_lin)
 
             # create the reference axis
@@ -231,8 +239,8 @@ def get_win(N: Union[int, List[int]],
 
         else:
             # create the window in each dimension using getWin recursively
-            win_x, _ = get_win(N[0], type_, param=param)
-            win_y, _ = get_win(N[1], type_, param=param)
+            win_x, _ = get_win(int(N[0]), type_, param=param)
+            win_y, _ = get_win(int(N[1]), type_, param=param)
 
             # create the 2D window using the outer product
             win = (win_y * win_x.T).T
@@ -249,7 +257,7 @@ def get_win(N: Union[int, List[int]],
 
             # create the window in one dimension using getWin recursively
             L = N.max()
-            win_lin, _ = get_win(L, type_, param=param)
+            win_lin, _ = get_win(int(L), type_, param=param)
 
             # create the reference axis
             radius = (L - 1) / 2
@@ -271,9 +279,9 @@ def get_win(N: Union[int, List[int]],
         else:
 
             # create the window in each dimension using getWin recursively
-            win_x, _ = get_win(N[0], type_, param=param)
-            win_y, _ = get_win(N[1], type_, param=param)
-            win_z, _ = get_win(N[2], type_, param=param)
+            win_x, _ = get_win(int(N[0]), type_, param=param)
+            win_y, _ = get_win(int(N[1]), type_, param=param)
+            win_z, _ = get_win(int(N[2]), type_, param=param)
 
             # create the 2D window using the outer product
             win_2D = (win_x * win_z.T)

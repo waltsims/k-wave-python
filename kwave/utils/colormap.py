@@ -1,9 +1,13 @@
 from typing import Optional
 
 import numpy as np
+from beartype import beartype
+from nptyping import NDArray, Float, Shape
+from matplotlib.colors import ListedColormap
 
 
-def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
+@beartype
+def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
     the k-Wave Toolbox. Zero values are displayed as white, positive values
@@ -30,10 +34,12 @@ def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
     neg = neg[neg_pad:, :]
     pos = np.flipud(hot(num_colors // 2))
 
-    return np.vstack([neg, pos])
+    colors = np.vstack([neg, pos])
+    return ListedColormap(colors)
 
 
-def hot(m: int) -> np.ndarray:
+@beartype
+def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
     """
     Generate a hot colormap of length m.
     The colormap consists of a progression from black to red, yellow, and white.
@@ -55,7 +61,8 @@ def hot(m: int) -> np.ndarray:
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
-def bone(m: int) -> np.ndarray:
+@beartype
+def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
 
@@ -68,7 +75,8 @@ def bone(m: int) -> np.ndarray:
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
-def gray(m: int) -> np.ndarray:
+@beartype
+def gray(m: int) -> NDArray[Shape["N, 3"], Float]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.
 

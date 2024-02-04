@@ -5,22 +5,42 @@ on: pull_request
 jobs:
   collect_references:
     name: collect_references
+    outputs:
+      MATLAB_REFS_HASH: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
         with:
           path: k-Wave-python
-      - name: checkout reference k-Wave repo
+      # Calculate hash value that will be used as a cache key
+      - name: Calculate matlab references hash
+        id: matlab-refs-hash
+        run: | 
+          MATLAB_REFS_HASH=$(find ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors -type f | xargs sha1sum | sha1sum |  awk '{ print $1 }');
+          echo "MATLAB_REFS_HASH=$MATLAB_REFS_HASH" >> $GITHUB_OUTPUT
+      # Pull cache if exists, otherwise cache will be created at the specified path
+      - name: Cache collected references
+        uses: actions/cache@v3
+        id: matlab-refs-cache
+        env:
+          cache-name: cache-matlab-references
+        with:
+            key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
+            path: ./collectedValues.tar.gz
+      - name: Checkout reference k-Wave repo
         uses: actions/checkout@v4
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           repository: ucl-bug/k-wave
           path: k-wave
           ref: v1.4.0
       - name: setup MATLAB
         uses: matlab-actions/setup-matlab@v1
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
       - name: run reference generation
         uses: matlab-actions/run-command@v1
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: |
             ls;
@@ -29,55 +49,67 @@ jobs:
             addpath('k-Wave-python','k-wave/k-Wave');
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
-      - name: compress artifact
+      - name: Compress generated references
         uses: a7ul/tar-action@v1.1.0
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: c
           cwd: ./k-Wave-python/tests/matlab_test_data_collectors/matlab_collectors/
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-      - name: upload reference values artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: collectedValues
-          path: collectedValues.tar.gz
+
   test:
     needs: collect_references
     strategy:
       matrix:
         os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
-        python-version: [ "3.8", "3.9", "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
-      - name: Download collectedValues
-        uses: actions/download-artifact@v3
+      # Pull the cache based on the hash value
+      - name: Cache collected references
+        uses: actions/cache@v3
+        id: cache-matlab-refs
+        env:
+          cache-name: cache-matlab-references
         with:
-          name: collectedValues
-          path: tests/matlab_test_data_collectors/python_testers/
+            key: ${{ needs.collect_references.outputs.MATLAB_REFS_HASH }}
+            path: ./collectedValues.tar.gz
+            fail-on-cache-miss: true
+            enableCrossOsArchive: true
+      # Now we have the references archive available in this job, proceed by unpacking it
       - name: unpack collectedValues
         uses: a7ul/tar-action@v1.1.0
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
-          files: ./tests/matlab_test_data_collectors/python_testers/collectedValues.tar.gz
+          files: ${{github.workspace}}/collectedValues.tar.gz
       - name: where are the files?
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: Install dependencies
         run: |
           pip install '.[test]'
       - name: Test with pytest
         run: |
-          pytest
-#      - name: Lint with flake8
-#        run: |
-#          # stop the build if there are Python syntax errors or undefined names
-#          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          coverage run 
+      - name: Create coverage report
+        run: |
+          coverage xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          env_vars: ${{matrix.os}},${{ matrix.python-version }}
+          fail_ci_if_error: true
+          flags: ${{matrix.os}},${{ matrix.python-version }}
+          name: ${{matrix.os}},${{ matrix.python-version }}
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

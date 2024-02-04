@@ -12,6 +12,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
+from kwave.utils.colormap import get_color_map
 
 
 def main():
@@ -57,15 +58,15 @@ def main():
 
     for ind in range(element_num):
         x_pos = 0 - (element_num * element_pitch / 2 - element_pitch / 2) + ind * element_pitch
-        karray.add_rect_element([x_pos, 0, kgrid.z_vec[0]], element_width, element_length, rotation)
+        karray.add_rect_element([x_pos, 0, kgrid.z_vec[0][0]], element_width, element_length, rotation)
 
     karray.set_array_position(translation, rotation)
     source = kSource()
     source.p_mask = karray.get_array_binary_mask(kgrid)
     voxel_plot(np.single(source.p_mask))
     source.p = karray.get_distributed_source_signal(kgrid, source_sig)
-    # MEDIUM
 
+    # MEDIUM
     medium = kWaveMedium(sound_speed=c0, density=rho0)
 
     # SENSOR
@@ -91,7 +92,7 @@ def main():
     # VISUALISATION
     plt.figure()
     plt.imshow(1e-6 * p_max, extent=[1e3 * kgrid.x_vec[0][0], 1e3 * kgrid.x_vec[-1][0], 1e3 * kgrid.z_vec[0][0],
-                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto')
+                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto', cmap=get_color_map())
     plt.xlabel('z-position [mm]')
     plt.ylabel('x-position [mm]')
     plt.title('Pressure Field')

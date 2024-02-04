@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored

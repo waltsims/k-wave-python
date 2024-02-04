@@ -7,20 +7,21 @@ jobs:
     strategy:
       matrix:
         os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
-        python-version: [ "3.8", "3.9" ] #, "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11"]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: Install dependencies
         run: |
           pip install -e '.[example]'
       - name: Run example script
         run: |
-          python3 examples/bmode_reconstruction_example.py
+          python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
       - name: Upload example results
         uses: actions/upload-artifact@v3
         with:
