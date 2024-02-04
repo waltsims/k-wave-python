@@ -9,7 +9,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.io import write_attributes_typed, write_matrix
+from kwave.utils.io import write_attributes, write_matrix
 from kwave.utils.matrix import num_dim2
 from kwave.utils.tictoc import TicToc
 
@@ -488,7 +488,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
         del value
 
     # set additional file attributes
-    write_attributes_typed(filepath)
+    write_attributes(filepath, legacy=True)  # TODO: update to currently breaking code after references are updated
 
 
 def save_mat_file(filepath, integer_variables, float_variables):
