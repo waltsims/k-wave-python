@@ -19,30 +19,18 @@ class H5Summary(object):
         data = {}
 
         def extract_summary(name, obj):
-            if obj.dtype != 'O':
-                py_obj = np.array(obj)
-            else:
-                # obj is a string with reference dtype ('|O')
-                py_obj = obj[()].decode("utf-8")
-            
-            hashes = {}
-            for sd in range(6, 17, 2):
-                # why to have " + 0" here?
-                # because in NumPy, there could be 0 & -0
-                # while hashing we only want single type of zero
-                # therefore we add 0 to have only non-negative zero
-                if isinstance(py_obj, str):
-                    hash = sha256(py_obj.encode()).hexdigest()
-                else:
-                    hash = sha256(py_obj.round(sd) + 0).hexdigest()
-                   
-                hashes[str(sd)] = hash
-
+            np_obj = np.array(obj)
             data[name] = {
                 'dtype': str(obj.dtype),
                 'attrs': H5Summary._convert_attrs(obj.attrs),
                 'shape': list(obj.shape),
-                'checksums': hashes
+                'checksums': {
+                    # why to have " + 0" here?
+                    # because in NumPy, there could be 0 & -0
+                    # while hashing we only want single type of zero
+                    # therefore we add 0 to have only non-negative zero
+                    str(sd): sha256(np_obj.round(sd) + 0).hexdigest() for sd in range(6, 17, 2)
+                }
             }
 
         with h5py.File(h5_path, 'r') as hf:
@@ -80,9 +68,9 @@ class H5Summary(object):
     def get_diff(self, other, eps=1e-8, precision=8):
         assert isinstance(other, H5Summary)
         excluded = [
-            "root['created_by']",
-            "root['creation_date']",
-            "root['file_description']",
+            "root['root']['attrs']['created_by']",
+            "root['root']['attrs']['creation_date']",
+            "root['root']['attrs']['file_description']",
             "root['Nt']"  # Skip Nt after updating kgrid logic
         ]
         own_summary = self._strip_checksums(precision)

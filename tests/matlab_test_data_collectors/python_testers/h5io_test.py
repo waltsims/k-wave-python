@@ -4,7 +4,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 
-from kwave.utils.io import write_matrix, write_attributes_typed, write_grid, write_flags
+from kwave.utils.io import write_matrix, write_attributes, write_grid, write_flags
 
 
 def compare_h5_attributes(local_h5_path, ref_path):
@@ -62,7 +62,7 @@ def test_write_attributes(tmp_path_factory):
     matrix = np.single(10.0 * np.ones([1, 1]))
     ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeAttributes/{idx}.h5")
     write_matrix(tmp_path, matrix, matrix_name)
-    write_attributes_typed(tmp_path)
+    write_attributes(tmp_path)
     compare_h5_attributes(tmp_path, ref_path)
     idx = idx + 1
     pass
