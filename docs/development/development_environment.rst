@@ -11,7 +11,7 @@ To correctly set up your development environment for this repository, clone the 
 
     git clone https://github.com/waltsims/k-wave-python
     cd k-wave-python
-    pip install -e '.[dev]'
+    pip install -e '.[test,dev]'
 
 Test References
 =======================
@@ -46,4 +46,4 @@ To run the tests with coverage, use the following command:
 
 .. code-block:: bash
 
-    coverage run -m pytest
+    coverage run
