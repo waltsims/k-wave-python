@@ -39,9 +39,11 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
 To run the tests, use the following command:    
 
 .. code-block:: bash
+
     pytest 
 
 To run the tests with coverage, use the following command:
 
 .. code-block:: bash
+
     coverage run -m pytest
