@@ -1,6 +1,6 @@
 output_file = 'collectedValues/brenner.mat';
 recorder = utils.TestRecorder(output_file);
- 
+
 img2 = rand([5,5]);
 out2 = sharpness(img2, 'Brenner');
 recorder.recordVariable('img2', img2);
