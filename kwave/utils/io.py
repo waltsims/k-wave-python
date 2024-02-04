@@ -1,15 +1,12 @@
-import logging
 import os
 import platform
 import socket
 from datetime import datetime
-from typing import Optional
 
 import cv2
 import h5py
 import numpy as np
 
-import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
@@ -200,6 +197,18 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
 
 
 def write_attributes_typed(filename, file_description=None):
+    """
+    Write attributes to a HDF5 file.
+
+    This function writes attributes to a HDF5 file using a deprecated legacy method if legacy is set to True, or a new
+    typed method if legacy is set to False. The function warns if legacy is set to True and deprecates it. If
+    file_description is not provided, a default file description will be used.
+
+    Args:
+        filename: The name of the HDF5 file.
+        file_description: The description of the file. If not provided, a default description
+            will be used.
+    """
     # get literals
     h5_literals = get_h5_literals()
 
@@ -228,67 +237,6 @@ def write_attributes_typed(filename, file_description=None):
         f[h5_literals.FILE_DESCR_ATT_NAME] = file_description
         f[h5_literals.FILE_TYPE_ATT_NAME] = h5_literals.HDF_INPUT_FILE
         f[h5_literals.FILE_CREATION_DATE_ATT_NAME] = get_date_string()
-
-
-def write_attributes(filename: str, file_description: Optional[str] = None, legacy: bool = False) -> None:
-    """
-    Write attributes to a HDF5 file.
-
-    This function writes attributes to a HDF5 file using a deprecated legacy method if legacy is set to True, or a new
-    typed method if legacy is set to False. The function warns if legacy is set to True and deprecates it. If
-    file_description is not provided, a default file description will be used.
-
-    Args:
-        filename: The name of the HDF5 file.
-        file_description: The description of the file. If not provided, a default description
-            will be used.
-        legacy: If set to True, the function will use the deprecated legacy method to write attributes.
-            If set to False, the function will use the new typed method. Defaults to False.
-
-    Raises:
-        DeprecationWarning: If legacy is set to True, a DeprecationWarning will be raised.
-
-    """
-
-    if not legacy:
-        write_attributes_typed(filename, file_description)
-        return
-
-    logging.log(logging.WARN, f'{DeprecationWarning.__name__}: Attributes will soon be typed when saved and not saved ')
-    # get literals
-    h5_literals = get_h5_literals()
-
-    # get computer infor
-    comp_info = dotdict({
-        'date': datetime.now().strftime("%d-%b-%Y"),
-        'computer_name': socket.gethostname(),
-        'operating_system_type': platform.system(),
-        'operating_system': platform.system() + " " + platform.release() + " " + platform.version(),
-        'user_name': os.environ.get('USERNAME'),
-        'matlab_version': 'N/A',
-        'kwave_version': '1.3',
-        'kwave_path': 'N/A',
-    })
-
-    # set file description if not provided by user
-    if file_description is None:
-        file_description = f'Input data created by {comp_info.user_name} running MATLAB ' \
-                           f'{comp_info.matlab_version} on {comp_info.operating_system_type}'
-
-    # set additional file attributes
-    with h5py.File(filename, "a") as f:
-        # create a dictionary of attributes
-        attributes = {
-            h5_literals.FILE_MAJOR_VER_ATT_NAME: h5_literals.HDF_FILE_MAJOR_VERSION,
-            h5_literals.FILE_MINOR_VER_ATT_NAME: h5_literals.HDF_FILE_MINOR_VERSION,
-            h5_literals.CREATED_BY_ATT_NAME: f'k-Wave {kwave.VERSION}',
-            h5_literals.FILE_DESCR_ATT_NAME: file_description,
-            h5_literals.FILE_TYPE_ATT_NAME: h5_literals.HDF_INPUT_FILE,
-            h5_literals.FILE_CREATION_DATE_ATT_NAME: get_date_string(),
-        }
-        # loop through the attributes dictionary and assign each attribute to the file
-        for key, value in attributes.items():
-            assign_str_attr(f.attrs, key, value)
 
 
 def write_flags(filename):

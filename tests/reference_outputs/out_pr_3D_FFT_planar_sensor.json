@@ -159,6 +159,32 @@
             "16": "82543c9304862fece0caaf1760bf4c0176b6e8c5310f862b8d7c56fcc1b2cab8"
         }
     },
+    "created_by": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693",
+            "8": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693",
+            "10": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693",
+            "12": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693",
+            "14": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693",
+            "16": "6640fe2857501271816938cd9541df3696cfa0470377c804a18d87ea1592d693"
+        }
+    },
+    "creation_date": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf",
+            "8": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf",
+            "10": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf",
+            "12": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf",
+            "14": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf",
+            "16": "147ea4f80f18fc766ab1597410d785562944fedad63d1c48f495f9d158a27abf"
+        }
+    },
     "dt": {
         "dtype": "float32",
         "attrs": {
@@ -257,6 +283,58 @@
             "12": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
             "14": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
             "16": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        }
+    },
+    "file_description": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7",
+            "8": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7",
+            "10": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7",
+            "12": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7",
+            "14": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7",
+            "16": "97273e0f179b26e2428e2d35eec3e92f1280acf86c194d9bf58d5a7d59efaea7"
+        }
+    },
+    "file_type": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+            "8": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+            "10": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+            "12": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+            "14": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+            "16": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20"
+        }
+    },
+    "major_version": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "8": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "10": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "12": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "14": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "16": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        }
+    },
+    "minor_version": {
+        "dtype": "object",
+        "attrs": {},
+        "shape": [],
+        "checksums": {
+            "6": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "8": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "10": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "12": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "14": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "16": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
         }
     },
     "nonlinear_flag": {
@@ -800,13 +878,6 @@
         }
     },
     "root": {
-        "attrs": {
-            "created_by": "b'k-Wave 1.3'",
-            "creation_date": "b'16-Apr-2021-00-09-14'",
-            "file_description": "b'Input data created by faridyagubbayli running MATLAB 9.7 (R2019b) on MACI64'",
-            "file_type": "b'input'",
-            "major_version": "b'1'",
-            "minor_version": "b'2'"
-        }
+        "attrs": {}
     }
 }
