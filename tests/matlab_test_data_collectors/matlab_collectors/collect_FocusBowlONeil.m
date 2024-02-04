@@ -9,6 +9,7 @@ frequency   = 1e6;        % [Hz]
 sound_speed = 1500;       % [m/s]
 density     = 1000;       % [kg/m^3]
 
+
 % define position vectors
 axial_position   = 0:1e-4:250e-3;     % [m]
 lateral_position = -15e-3:1e-4:15e-3; % [m]
