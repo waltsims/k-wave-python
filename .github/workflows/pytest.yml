@@ -59,6 +59,7 @@ jobs:
             ./collectedValues
           outPath: collectedValues.tar.gz
       - name: upload reference values artifact
+        id: artifact-upload-step
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         uses: actions/upload-artifact@v4
         with:
@@ -67,7 +68,7 @@ jobs:
           # overwrite: true
       - name: Output artifact URL
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
-        run:  echo 'Artifact URL is ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}'
+        run:  echo 'Artifact URL is ${{ steps.artifact-upload-step.outputs.artifact-url }}''
   test:
     needs: collect_references
     strategy:
