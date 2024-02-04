@@ -31,8 +31,13 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
 - Integration testing: k-Wave-python tests output .h5 files that are passed to the k-Wave binaries and ensures that they match the output of the original k-Wave.
   This testing compares the output for many of the example scripts from the original k-Wave package.
   Hash values of the reference output .h5 file from MATLAB examples are generated and stored in ``.json`` files in ``tests/reference_outputs/``.
+  This .json files are contained in the code repository and do not need to be generated.
+  Since these files are generated from the original k-Wave package, they only need to be updated when a new release of k-Wave is made.
 
-<TODO: How to regenerate theses outputs?>
+<TODO: @farid How to regenerate theses outputs?>
 
-<TODO: how to run pytest locally>
+To run the tests, use the following command:    
+
+.. code-block:: bash
+    pytest 
 
