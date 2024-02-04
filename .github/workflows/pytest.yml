@@ -68,7 +68,7 @@ jobs:
           # overwrite: true
       - name: Output artifact URL
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
-        run:  echo 'Artifact URL is ${{ steps.artifact-upload-step.outputs.artifact-url }}''
+        run:  echo 'Artifact URL is ${{ steps.artifact-upload-step.outputs.artifact-url }}'
   test:
     needs: collect_references
     strategy:
