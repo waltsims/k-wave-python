@@ -55,11 +55,10 @@ class kWaveSimulation(object):
 
         if self.sensor.time_reversal_boundary_data is not None:
             # define a new source structure
-            kSource
-            source = kSource()
-            source.p=np.flip(self.sensor.time_reversal_boundary_data, 0)
-            source.p_mask = self.sensor.mask
-            source.p_mode = 'dirichlet'
+            self.source = kSource()
+            self.source.p=np.flip(self.sensor.time_reversal_boundary_data, 0)
+            self.source.p_mask = self.sensor.mask
+            self.source.p_mode = 'dirichlet'
 
             # define a new sensor structure
             Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
@@ -72,6 +71,7 @@ class kWaveSimulation(object):
             self.record.p = False
             # set time reversal flag
             self.userarg_time_rev = True
+            assert self.time_rev == True
         else:
             # set time reversal flag
             self.userarg_time_rev = False
@@ -200,10 +200,10 @@ class kWaveSimulation(object):
             True for time reversal simulaions using sensor.time_reversal_boundary_data
 
         """
-        if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.options.simulation_type.is_elastic_simulation() and \
-                    self.sensor.time_reversal_boundary_data is not None:
-                return True
+        # if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
+        if not self.options.simulation_type.is_elastic_simulation() and \
+                self.sensor.time_reversal_boundary_data is not None:
+            return True
         else:
             return self.userarg_time_rev
 
