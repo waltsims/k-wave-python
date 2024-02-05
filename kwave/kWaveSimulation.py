@@ -47,20 +47,29 @@ class kWaveSimulation(object):
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
+
         if self.sensor.time_reversal_boundary_data is not None:
             # define a new source structure
-            source = {
-                'p_mask': self.sensor.p_mask,
-                'p': np.flip(self.sensor.time_reversal_boundary_data, 2),
-                'p_mode': 'dirichlet'
-            }
+            kSource
+            source = kSource()
+            source.p=np.flip(self.sensor.time_reversal_boundary_data, 0)
+            source.p_mask = self.sensor.mask
+            source.p_mode = 'dirichlet'
 
             # define a new sensor structure
             Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
-            sensor = kSensor(
-                mask=np.ones((Nx, Ny, max(1, Nz))),
+            self.sensor = kSensor(
+                mask=np.ones((Nx, Ny, max(1, Nz))).squeeze(),
                 record=['p_final']
             )
+            self.record = Recorder()
+            self.record.p_final = True
+            self.record.p = False
             # set time reversal flag
             self.userarg_time_rev = True
         else:
@@ -75,16 +84,11 @@ class kWaveSimulation(object):
             #: Whether the sensor.mask is binary
             self.binary_sensor_mask = True
 
-            # check if the sensor mask is defined as a list of cuboid corners
-            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-                self.userarg_cuboid_corners = True
-            else:
-                self.userarg_cuboid_corners = False
-
             #: If tse sensor is an object of the kWaveTransducer class
             self.transducer_sensor = False
 
             self.record = Recorder()
+
 
         # transducer source flags
         #: transducer is object of kWaveTransducer class
@@ -794,21 +798,6 @@ class kWaveSimulation(object):
                         self.sensor.mask, self.order_index, self.reorder_index = \
                             cart2grid(self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric())
 
-                        # if in time reversal mode, reorder the p0 input data in
-                        # the order of the binary sensor_mask
-                        if self.time_rev:
-                            raise NotImplementedError
-                            """
-                            # append the reordering data
-                            new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
-                            sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
-        
-                            # reorder p0 based on the order_index
-                            sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
-        
-                            # remove the reordering data
-                            sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
-                            """
             else:
                 # set transducer sensor flag
                 self.transducer_sensor = True
@@ -822,6 +811,21 @@ class kWaveSimulation(object):
                     # get the elevation mask that is used to extract the correct values
                     # from the sensor data buffer for averaging
                     self.transducer_receive_mask = self.sensor.elevation_beamforming_mask
+            # if in time reversal mode, reorder the p0 input data in
+            # the order of the binary sensor_mask
+            if self.time_rev:
+                raise NotImplementedError
+                """
+                # append the reordering data
+                new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
+                sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
+
+                # reorder p0 based on the order_index
+                sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
+
+                # remove the reordering data
+                sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
+                """
 
         # check for directivity inputs with time reversal
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
