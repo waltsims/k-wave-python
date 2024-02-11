@@ -28,14 +28,17 @@ class Executor:
                   f'-o {output_filename} ' \
                   f'{options}'
 
-        stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
         try:
-            subprocess.run(command, stdout=stdout, shell=True, check=True)
+            result = subprocess.run(command, capture_output=True, shell=True, check=True, text=True)
         except subprocess.CalledProcessError as e:
             if isinstance(e.returncode, unittest.mock.MagicMock):
                 logging.info('Skipping AssertionError in testing.')
             else:
-                raise
+                print(e.stdout) 
+                raise  
+        else:
+            if self.execution_options.show_sim_log:
+                print(result.stdout)
 
         sensor_data = self.parse_executable_output(output_filename)
 
