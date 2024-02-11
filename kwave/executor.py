@@ -29,16 +29,21 @@ class Executor:
                   f'{options}'
 
         try:
-            result = subprocess.run(command, capture_output=True, shell=True, check=True, text=True)
+            with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True) as proc:
+                # Stream stdout in real-time
+                if self.execution_options.show_sim_log:
+                    for line in proc.stdout:
+                        print(line, end='')
+
+                    proc.wait()
+                if proc.returncode != 0:
+                    raise subprocess.CalledProcessError(proc.returncode, command)
         except subprocess.CalledProcessError as e:
             if isinstance(e.returncode, unittest.mock.MagicMock):
                 logging.info('Skipping AssertionError in testing.')
             else:
-                print(e.stdout) 
-                raise  
-        else:
-            if self.execution_options.show_sim_log:
-                print(result.stdout)
+                print(e.stdout)
+                raise
 
         sensor_data = self.parse_executable_output(output_filename)
 
