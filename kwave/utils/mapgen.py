@@ -2868,9 +2868,9 @@ def focused_annulus_oneil(radius: float,
                           diameter: kt.NP_ARRAY_FLOAT_2D,
                           amplitude: kt.NP_ARRAY_FLOAT_1D,
                           phase: kt.NP_ARRAY_FLOAT_1D,
-                          frequency: float,
-                          sound_speed: float,
-                          density: float,
+                          frequency: kt.NUMERIC,
+                          sound_speed: kt.NUMERIC,
+                          density: kt.NUMERIC,
                           axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list]) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
     """Compute axial pressure for focused annulus transducer using O'Neil's solution
 
