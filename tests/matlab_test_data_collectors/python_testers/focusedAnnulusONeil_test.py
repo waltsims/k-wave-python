@@ -26,5 +26,10 @@ def test_focused_annulus_oneil():
 
     assert np.allclose(p_axial, reader.expected_value_of('p_axial'))
 
+    p_axial = focused_annulus_oneil(radius, diameters.T, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                                             density, axial_positions=axial_positions)
+
+    assert np.allclose(p_axial, reader.expected_value_of('p_axial'))
+
 
     logging.log(logging.INFO, 'focused_annulus_oneil(..) works as expected!')
