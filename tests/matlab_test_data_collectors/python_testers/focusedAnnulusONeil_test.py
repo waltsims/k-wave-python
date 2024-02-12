@@ -1,11 +1,13 @@
 import logging
 import os
 from pathlib import Path
+import pytest
 
 import numpy as np
 
 from kwave.utils.mapgen import focused_annulus_oneil
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+from beartype.roar import BeartypeCallHintParamViolation
 
 
 def test_focused_annulus_oneil():
@@ -22,14 +24,18 @@ def test_focused_annulus_oneil():
     axial_positions = reader.expected_value_of('axial_position')
 
     p_axial = focused_annulus_oneil(radius, diameters, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
-                                                             density, axial_positions=axial_positions)
+                                                            density, axial_positions=axial_positions)
 
     assert np.allclose(p_axial, reader.expected_value_of('p_axial'))
 
     p_axial = focused_annulus_oneil(radius, diameters.T, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
-                                                             density, axial_positions=axial_positions)
+                                                                density, axial_positions=axial_positions)
 
     assert np.allclose(p_axial, reader.expected_value_of('p_axial'))
 
 
     logging.log(logging.INFO, 'focused_annulus_oneil(..) works as expected!')
+
+    with pytest.raises(BeartypeCallHintParamViolation):
+        focused_annulus_oneil(radius, diameters[0,:], amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
