@@ -2865,7 +2865,7 @@ def focused_bowl_oneil(
 
 @beartype
 def focused_annulus_oneil(radius: float,
-                          diameter: NDArray[Shape["NumElements, 2"], Float],
+                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]]
                           amplitude: NDArray[Shape["NumElements"], Float],
                           phase: NDArray[Shape["NumElements"], Float],
                           frequency: kt.NUMERIC,
@@ -2940,6 +2940,9 @@ def focused_annulus_oneil(radius: float,
     if (((phase < -np.pi).any() and (phase > np.pi).any()) or not np.isreal(phase).any()
         or not np.isfinite(phase).all()):
         raise ValueError("phase is incorrect")
+
+    if (np.shape(diameter)[0] != 2):
+        diameter = np.transpose(diameter)
 
     # pre-allocate output
     p_axial = np.zeros(np.shape(axial_positions))
