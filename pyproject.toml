@@ -15,7 +15,8 @@ authors = [
 ]
 maintainers = [
     { name = "Walter Simson", email = "walter.simson@tum.de" },
-    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" }
+    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
+    { name = "David Sinden", email = "david.sinden@mevis.fraunhofer.de" }
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
