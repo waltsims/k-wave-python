@@ -34,7 +34,26 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
   This ``.json`` files are contained in the code repository and do not need to be generated.
   Since these files are generated from the original k-Wave package, they only need to be updated when a new release of k-Wave is made.
 
-<TODO: @farid How to regenerate theses outputs?>
+**Matlab reference file generation** is a bit involved process. Below are the steps that describe the process.
+
+#. Open desired example in matlab, e.g. `example_pr_2D_TR_directional_sensors.m <https://github.com/ucl-bug/k-wave/blob/main/k-Wave/examples/example_pr_2D_TR_directional_sensors.m>`_
+#. Find the lines where the call to one of the `kSpaceFirstOrder-family` function is made. For example,
+
+    .. code-block:: python
+    
+        input_args = {'PMLInside', false, 'PMLSize', PML_size, 'PlotPML', false, 'Smooth', false};
+        sensor_data = kspaceFirstOrder2D(kgrid, medium, source, sensor, input_args{:});
+
+#. Update the ``input_args`` field by adding two new options - ``{'SaveToDisk', true, 'SaveToDiskExit': true}``. These options will ensure that we a ``.h5`` file will be created and saved in your ``tmp`` folder, while avoiding to run the actual simulation.
+#. Run the modified example. You will find created files in your ``tmp`` folder. Usually exact file name depends on how many calls are made to the `kSpaceFirstOrder-family` function in the example:
+    * If there is only a single call, created file name will be ``example_input.h5``
+    * If there are two or more calls, created files will have names like ``example_input_1.h5``, ``example_input_2.h5``, ``example_input_3.h5`` and so on
+#. Now it is time to turn the ``.h5`` files to the hashed ``.json`` files. This can be done with the ``H5Summary``.
+    * If you have a single ``.h5`` file, adapt the lines below and run the script:
+        https://github.com/waltsims/k-wave-python/blob/1f9df5d987d0b3edb1a8a43fad0885d3d6079029/tests/h5_summary.py#L92-L95
+    * For multiple files, adapt the lines below:
+        https://github.com/waltsims/k-wave-python/blob/1f9df5d987d0b3edb1a8a43fad0885d3d6079029/tests/h5_summary.py#L97-L106
+
 
 To run the tests, use the following command:    
 
