@@ -2865,7 +2865,7 @@ def focused_bowl_oneil(
 
 @beartype
 def focused_annulus_oneil(radius: float,
-                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]]
+                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]],
                           amplitude: NDArray[Shape["NumElements"], Float],
                           phase: NDArray[Shape["NumElements"], Float],
                           frequency: kt.NUMERIC,
