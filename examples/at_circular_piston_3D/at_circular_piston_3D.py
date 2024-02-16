@@ -140,7 +140,7 @@ sensor.mask[1:, :, Nz // 2] = True
 sensor.record = ['p']
 
 # record only the final few periods when the field is in steady state
-sensor.record_start_index: int = kgrid.Nt - (record_periods * ppp) + 1
+sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 
 # --------------------
 # SIMULATION
