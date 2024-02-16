@@ -367,7 +367,7 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     return c_kk
 
 
-def water_absorption(f: float, temp: Union[float, NDArray[Float]]) -> Union[float, NDArray[Float]]:
+def water_absorption(f: float, temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArray[Any,Float]]:
     """
     Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
@@ -409,7 +409,7 @@ def water_absorption(f: float, temp: Union[float, NDArray[Float]]) -> Union[floa
     return abs
 
 
-def water_sound_speed(temp: Union[float, NDArray[Float]]) -> Union[float, NDArray[Float]]:
+def water_sound_speed(temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArray[Any,Float]]:
     """
     Calculate the sound speed in distilled water with temperature according to Marczak (1997)
 
@@ -438,7 +438,7 @@ def water_sound_speed(temp: Union[float, NDArray[Float]]) -> Union[float, NDArra
     return c
 
 
-def water_density(temp: Union[float, NDArray[Float]]) -> Union[float, NDArray[Float]]:
+def water_density(temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArray[Any,Float]]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -469,7 +469,7 @@ def water_density(temp: Union[float, NDArray[Float]]) -> Union[float, NDArray[Fl
     return density
 
 
-def water_non_linearity(temp: Union[float, NDArray[Float]]) -> Union[float, NDArray[Float]]:
+def water_non_linearity(temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArray[Any,Float]]:
     """
      Calculates the parameter of nonlinearity B/A at a
      given temperature using a fourth-order polynomial fitted to the data
