@@ -429,7 +429,7 @@ def water_sound_speed(temp: Union[float, NDArray[Any,Float]]) -> Union[float, ND
     """
 
     # check limits
-    if not (0.0 <= np.all(temp) <= 95.0):
+    if not np.all([np.all(temp>=0.0), np.all(temp<=95.0)]):
         raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
@@ -438,7 +438,7 @@ def water_sound_speed(temp: Union[float, NDArray[Any,Float]]) -> Union[float, ND
     return c
 
 
-def water_density(temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArray[Any,Float]]:
+def water_density(temp: Union[kt.NUMERIC, NDArray[Any,kt.NUMERIC]]) -> Union[kt.NUMERIC, NDArray[Any,kt.NUMERIC]]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -461,7 +461,7 @@ def water_density(temp: Union[float, NDArray[Any,Float]]) -> Union[float, NDArra
     """
 
     # check limits
-    if not (5.0 <= np.all(temp) <= 40.0):
+    if not np.all([np.all(temp>=5.0), np.all(temp<=40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
@@ -491,7 +491,7 @@ def water_non_linearity(temp: Union[float, NDArray[Any,Float]]) -> Union[float, 
     """
 
     # check limits
-    if not (0.0 <= np.all(temp) <= 100.0): 
+    if not np.all([np.all(temp>=0.0), np.all(temp<=100.0)]):
         raise ValueError("Temp must be between 0 and 100.")
 
     # find value
