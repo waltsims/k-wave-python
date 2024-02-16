@@ -59,7 +59,12 @@ def test_focused_annulus_oneil():
     with pytest.raises(ValueError):
         focused_annulus_oneil(radius, diameters * np.inf, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
                                 density, axial_positions=axial_positions)
-    # Test inf diameter
+    # Test inf amplitude
     with pytest.raises(ValueError):
         focused_annulus_oneil(radius, diameters, np.inf * amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+
+    # Test inf frequency
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(radius, diameters, amplitude / (sound_speed * density), source_phase, np.inf * frequency, sound_speed,
                                 density, axial_positions=axial_positions)
