@@ -23,6 +23,7 @@ def test_focused_annulus_oneil():
     density = reader.expected_value_of('density')
     axial_positions = reader.expected_value_of('axial_position')
 
+
     p_axial = focused_annulus_oneil(radius, diameters, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
                                                             density, axial_positions=axial_positions)
 
@@ -38,4 +39,27 @@ def test_focused_annulus_oneil():
 
     with pytest.raises(BeartypeCallHintParamViolation):
         focused_annulus_oneil(radius, diameters[0,:], amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+
+    # Test phase out of range
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(radius, diameters, amplitude / (sound_speed * density),  np.ones_like(source_phase) * -8, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+
+    # Test negative radius
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(-radius, diameters, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+
+    # Test negative diameter
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(radius, -diameters, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+    # Test inf diameter
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(radius, diameters * np.inf, amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
+                                density, axial_positions=axial_positions)
+    # Test inf diameter
+    with pytest.raises(ValueError):
+        focused_annulus_oneil(radius, diameters, np.inf * amplitude / (sound_speed * density), source_phase, frequency, sound_speed,
                                 density, axial_positions=axial_positions)

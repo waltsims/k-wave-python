@@ -2926,10 +2926,10 @@ def focused_annulus_oneil(radius: float,
         or not np.isfinite(diameter).all()): 
         raise ValueError("wrong values in diameter object")
 
-    if (not np.all(np.isreal(amplitude)) or not np.all(np.isfinite(amplitude))): 
-        raise ValueError("amplitude has a bad value")
-    if (not np.all(np.isreal(frequency)) or not np.all(np.isfinite(frequency))):
-         raise ValueError("frequency has a bad value")
+    if not np.all(np.isfinite(amplitude)): 
+        raise ValueError("amplitude contains an np.inf")
+    if not np.all(np.isfinite(frequency)):
+         raise ValueError("frequency contains an np.inf")
 
     # set the number of elements in annular array
     num_elements: int = np.size(amplitude)
@@ -2937,7 +2937,7 @@ def focused_annulus_oneil(radius: float,
     if ((radius <= 0.0) or not np.isreal(radius) or not np.isfinite(radius)): 
         raise ValueError("radius is incorrect")
 
-    if (((phase < -np.pi).any() and (phase > np.pi).any()) or not np.isreal(phase).any()
+    if (((phase < -np.pi).any() or (phase > np.pi).any()) or not np.isreal(phase).any()
         or not np.isfinite(phase).all()):
         raise ValueError("phase is incorrect")
 
