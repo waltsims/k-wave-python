@@ -2863,15 +2863,14 @@ def focused_bowl_oneil(
     return p_axial, p_lateral, p_axial_complex
 
 
-
 @beartype
 def focused_annulus_oneil(radius: float,
-                          diameter: kt.NP_ARRAY_FLOAT_2D,
-                          amplitude: kt.NP_ARRAY_FLOAT_1D,
-                          phase: kt.NP_ARRAY_FLOAT_1D,
-                          frequency: float,
-                          sound_speed: float,
-                          density: float,
+                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]],
+                          amplitude: NDArray[Shape["NumElements"], Float],
+                          phase: NDArray[Shape["NumElements"], Float],
+                          frequency: kt.NUMERIC,
+                          sound_speed: kt.NUMERIC,
+                          density: kt.NUMERIC,
                           axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list]) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
     """Compute axial pressure for focused annulus transducer using O'Neil's solution
 
@@ -2923,20 +2922,28 @@ def focused_annulus_oneil(radius: float,
     See also focused_bowl_oneil.
     """
 
-    assert (2 in np.shape(diameter)), "wrong shape for diameter"
-    assert (np.greater_equal(diameter, np.zeros_like(diameter)).all() and np.isreal(diameter).all() and np.isfinite(diameter).all()), "wrong values in diameter object"
+    if (not np.greater_equal(diameter, np.zeros_like(diameter)).all() or not np.isreal(diameter).all() 
+        or not np.isfinite(diameter).all()): 
+        raise ValueError("wrong values in diameter object")
+
+    if not np.all(np.isfinite(amplitude)): 
+        raise ValueError("amplitude contains an np.inf")
+    if not np.all(np.isfinite(frequency)):
+         raise ValueError("frequency contains an np.inf")
 
     # set the number of elements in annular array
-    num_elements: int = [int(x) for x in np.shape(diameter) if x != 2][0]
+    num_elements: int = np.size(amplitude)
 
-    assert (np.shape(amplitude) == np.shape(phase)), "amplitude and phase have different shapes"
-    assert (np.size(np.squeeze(amplitude)) == num_elements), "amplitude object does not the same size as elements"
-    assert (np.all(np.isreal(amplitude)) and np.all(np.isfinite(amplitude))), "amplitude has a bad value"
-    assert (np.all(np.isreal(frequency)) and np.all(np.isfinite(frequency))), "frequency has a bad value"
-    assert ((radius > 0.0) and np.isreal(radius) and np.isfinite(radius) ), "radius is incorrect"
-    assert ((phase >= 0.0).all() and (phase <= 2.0 * np.pi).all() and np.isreal(phase).all()
-            and np.isfinite(phase).all()), "phase is incorrect"
-                            
+    if ((radius <= 0.0) or not np.isreal(radius) or not np.isfinite(radius)): 
+        raise ValueError("radius is incorrect")
+
+    if (((phase < -np.pi).any() or (phase > np.pi).any()) or not np.isreal(phase).any()
+        or not np.isfinite(phase).all()):
+        raise ValueError("phase is incorrect")
+
+    if (np.shape(diameter)[0] != 2):
+        diameter = np.transpose(diameter)
+
     # pre-allocate output
     p_axial = np.zeros(np.shape(axial_positions))
 
@@ -2957,19 +2964,13 @@ def focused_annulus_oneil(radius: float,
         p_el = p_el_outer - p_el_inner
 
         # account for phase
-        p_el = np.abs(p_el) * np.exp(1j * (np.angle(p_el) + phase[ind]))
+        p_el = np.abs(p_el) * np.exp(1.0j * (np.angle(p_el) + phase[ind]))
 
         # add to complete response
         p_axial = p_axial + p_el
 
     # take magnitude of complete response
     return np.abs(p_axial)
-
-
-
-
-
-
 
 
 
