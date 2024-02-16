@@ -438,7 +438,7 @@ def water_sound_speed(temp: Union[float, NDArray[Any,Float]]) -> Union[float, ND
     return c
 
 
-def water_density(temp: Union[kt.NUMERIC, NDArray[Any,kt.NUMERIC]]) -> Union[kt.NUMERIC, NDArray[Any,kt.NUMERIC]]:
+def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.ndarray]:
     """
     Calculate the density of air-saturated water with temperature.
 
