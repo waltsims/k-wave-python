@@ -15,7 +15,8 @@ authors = [
 ]
 maintainers = [
     { name = "Walter Simson", email = "walter.simson@tum.de" },
-    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" }
+    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
+    { name = "David Sinden", email = "david.sinden@mevis.fraunhofer.de" }
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -41,15 +42,16 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
+        "coverage==7.4.1",
         "phantominator",
         "requests==2.31.0"]
-example = ["gdown==4.7.3"]
+example = ["gdown==4.6.0"]
 docs = ["m2r2==0.3.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.4",
     "sphinx-toolbox==3.5.0",
     "furo==2023.9.10"]
-dev = ["pre-commit==3.5.0"]
+dev = ["pre-commit==3.6.1"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
@@ -75,6 +77,17 @@ exclude = [
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+command_line = "-m pytest"
+include = [
+    "kwave/*",
+    ]
+omit = [
+    # omit anything in a .local directory anywhere
+    "tests/*",
+    ]
 
 [tool.ruff]
 # Allow lines to be as long as 140 characters.
