@@ -9,13 +9,28 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.filters import extract_amp_phase
-from kwave.utils.math import round_even, L2_error
+from kwave.utils.math import round_even
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 
 from kwave.options import SimulationOptions, SimulationExecutionOptions
+
+def L2_error(x: np.ndarray, y: np.ndarray, ord=None) -> float:	
+    """	
+    L_2 error between two arrays	
+    """	
+
+    if (x.shape != y.shape):
+        raise ValueError("Wrong sizes: '{x.shape}' and '{y.shape}' ")	
+
+    if ((ord == 2) or (ord is None)):	
+        return 100.0 * np.sqrt(np.vdot(np.ravel(x) - np.ravel(y))) / np.sum(np.vdot(np.ravel(x)))	
+    elif np.isposinf(ord):	
+        return 100.0 * np.max(np.abs(np.ravel(x) - np.ravel(y))) / np.max(np.ravel(x))	
+    else:	
+        raise ValueError(f"Invalid norm order: '{ord}'.")
 
 # material values
 c0: float       = 1500.0     # sound speed [m/s]
