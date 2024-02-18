@@ -461,7 +461,7 @@ def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.n
     """
 
     # check limits
-    if not np.all([np.all(temp>=5.0), np.all(temp<=40.0)]):
+    if not np.all([np.all(np.asarray(temp)>=5.0), np.all(np.asarray(temp)<=40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
