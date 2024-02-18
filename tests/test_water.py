@@ -56,6 +56,8 @@ def test_water_density():
 
     for idx, value in enumerate(expected_values):
         assert abs(value - water_density(input_temp[idx])) < 1e-6, "Expected value deviates from water_density output"
+    
+    assert np.max(np.abs(expected_values - water_density(input_temp))) < 1e-6, "Expected value deviates from water_density output"
 
 
 def test_water_sound_speed():
