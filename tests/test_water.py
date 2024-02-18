@@ -1,3 +1,4 @@
+import numpy as np
 from kwave.utils.mapgen import water_sound_speed, water_non_linearity, water_density, water_absorption
 
 
