@@ -15,14 +15,14 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 def test_nepers2db():
     assert abs(neper2db(1.5) - 8.186258123051049e+05) < 1e-6, "Point check of nepers2db incorrect"
-    assert np.max(np.abs(neper2db(1.5 * np.ones((10,10)) ) - 8.186258123051049e+05 * np.ones((10,10)))), \
+    assert np.max(np.abs(neper2db(1.5 * np.ones((10,10))) - 8.186258123051049e+05 * np.ones((10,10)))) < 1e-6, \
         "Point check of nepers2db incorrect"
     return
 
 
 def test_db2nepers():
     assert abs(db2neper(1.6) - 2.931742395517710e-06) < 1e-6, "Point check of db2nepers incorrect"
-    assert np.max(np.abs(db2neper(1.6 * np.ones((10,10)) ) - 2.931742395517710e-06 * np.ones((10,10)))), \
+    assert np.max(np.abs(db2neper(1.6 * np.ones((10,10))) - 2.931742395517710e-06 * np.ones((10,10)))) < 1e-6, \
         "Point check of db2nepers incorrect"
     return
 
