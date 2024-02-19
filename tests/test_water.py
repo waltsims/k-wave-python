@@ -53,7 +53,7 @@ def test_water_density():
                        994.69944501, 994.36802644, 994.02842288, 993.68073453,
                        993.32505242, 992.9614584, 992.59002517, 992.21081622])
     input_temp = np.array([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-                  32, 33, 34, 35, 36, 37, 38, 39, 40])
+                  32, 33, 34, 35, 36, 37, 38, 39, 40], dtype=float)
 
     for idx, value in enumerate(expected_values):
         assert abs(value - water_density(input_temp[idx])) < 1e-6, "Expected value deviates from water_density output"
@@ -97,7 +97,7 @@ def test_water_sound_speed():
 
 
 def test_water_non_linearity():
-    expected_values = [4.18653394, 4.23941757, 4.29049232, 4.33981942, 4.38745897,
+    expected_values = np.array([4.18653394, 4.23941757, 4.29049232, 4.33981942, 4.38745897,
                        4.43347001, 4.47791044, 4.52083708, 4.56230564, 4.60237073,
                        4.64108587, 4.67850347, 4.71467483, 4.74965016, 4.78347857,
                        4.81620807, 4.84788556, 4.87855684, 4.90826661, 4.93705849,
@@ -117,7 +117,7 @@ def test_water_non_linearity():
                        6.04106348, 6.04998878, 6.05837788, 6.06619841, 6.07341691,
                        6.0799988, 6.08590839, 6.0911089, 6.09556247, 6.0992301,
                        6.10207171, 6.10404612, 6.10511105, 6.10522312, 6.10433782,
-                       6.10240959]
+                       6.10240959])
     for idx, value in enumerate(expected_values):
         assert abs(value - water_non_linearity(idx)) < 1e-6, "Expected value deviates from water_non_linearity output"
 
