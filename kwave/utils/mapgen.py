@@ -492,7 +492,7 @@ def water_non_linearity(temp: Union[float, NDArray[Any,Float]]) -> Union[float, 
 
     # check limits
     if not np.all([np.all(temp>=0.0), np.all(temp<=100.0)]):
-        raise ValueError("Temp must be between 0 and 100.")
+        raise ValueError("`temp` must be between 0 and 100.")
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
