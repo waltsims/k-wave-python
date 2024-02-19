@@ -393,7 +393,7 @@ def water_absorption(f: float, temp: Union[float, NDArray[Any,Float]]) -> Union[
 
     NEPER2DB = 8.686
     # check temperature is within range
-    if not (0.0 <= np.all(temp) <= 60.0):
+    if not np.all([np.all(temp>=0.0), np.all(temp<=60.0)]):
         raise Warning("Temperature outside range of experimental data")
 
     # conversion factor between Nepers and dB NEPER2DB = 8.686;

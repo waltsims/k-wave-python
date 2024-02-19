@@ -3,7 +3,7 @@ from kwave.utils.mapgen import water_sound_speed, water_non_linearity, water_den
 
 
 def test_water_absorption():
-    expected_outputs = [4.92700598e-03, 3.10935008e-03, 2.18550989e-03, 1.65777741e-03,
+    expected_outputs = np.array([4.92700598e-03, 3.10935008e-03, 2.18550989e-03, 1.65777741e-03,
                         1.29686047e-03, 1.03350585e-03, 8.60898169e-04, 1.97080239e-02,
                         1.24374003e-02, 8.74203957e-03, 6.63110962e-03, 5.18744190e-03,
                         4.13402339e-03, 3.44359267e-03, 4.43430538e-02, 2.79841507e-02,
@@ -29,16 +29,22 @@ def test_water_absorption():
                         6.09432615e-01, 4.28359939e-01, 3.24924372e-01, 2.54184653e-01,
                         2.02567146e-01, 1.68736041e-01, 1.10857634e+00, 6.99603767e-01,
                         4.91739726e-01, 3.72999916e-01, 2.91793607e-01, 2.32538816e-01,
-                        1.93702088e-01]
-    input_temps = [0, 10, 20, 30, 40, 50, 60]
-    input_fs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    idx = 0
+                        1.93702088e-01])
+    input_temps = np.array([0, 10, 20, 30, 40, 50, 60], dtype=float)
+    input_fs = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], dtype=float)
+    idx : int = 0
     for f in input_fs:
         for temp in input_temps:
             assert abs(expected_outputs[idx] - water_absorption(f,
                                                                 temp)) < 1e-6, "Expected value deviates from expected " \
                                                                                "absorption value "
             idx += 1
+    
+    n: int = np.size(input_temps)
+    for idx, f in enumerate(input_fs):
+        assert np.max(np.abs(expected_outputs[idx * n : (idx + 1) * n] - 
+                   water_absorption(f, input_temps))) < 1e-6, "Expected value deviates from expected " \
+                                                                               "absorption value "
     return
 
 
