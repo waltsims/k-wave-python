@@ -123,4 +123,5 @@ def test_water_non_linearity():
 
     input_temp = np.arange(101, dtype=float)
     assert np.max(np.abs(expected_values - water_non_linearity(input_temp))) < 1e-6, "Expected value deviates from water_non_linearity output"
-    assert np.max(np.abs(expected_values.reshape(10,10) - water_non_linearity(input_temp.reshape(10,10)))) < 1e-6, "Expected value deviates from water_non_linearity output"
+    assert np.max(np.abs(expected_values[1:101].reshape(10,10) - 
+                         water_non_linearity(input_temp[1:101].reshape(10,10)))) < 1e-6, "Expected value deviates from water_non_linearity output"
