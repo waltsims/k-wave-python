@@ -46,8 +46,8 @@ def get_h5_literals():
         'HDF_FILE_MAJOR_VERSION': '1',
         'HDF_FILE_MINOR_VERSION': '2',
 
-        # compression level
-        'HDF_COMPRESSION_LEVEL': 0
+        # compression level: set to be same as default h5py
+        'HDF_COMPRESSION_LEVEL': 4
     })
     return literals
 

@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from tempfile import gettempdir
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Union, Optional, TYPE_CHECKING
 
 import numpy as np
 
@@ -102,7 +102,7 @@ class SimulationOptions(object):
     stream_to_disk: bool = False
     data_recast: Optional[bool] = False
     cartesian_interp: str = 'linear'
-    hdf_compression_level: Optional[int] = None
+    hdf_compression_level: Optional[Union[int, str]] = None
     data_cast: str = 'off'
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = 'WSWA-FFT'
@@ -134,8 +134,10 @@ class SimulationOptions(object):
         h5_literals = get_h5_literals()
         self.hdf_compression_level = h5_literals.HDF_COMPRESSION_LEVEL
         # check value is an integer between 0 and 9
-        assert isinstance(self.hdf_compression_level, int) and 0 <= self.hdf_compression_level <= 9, \
-            "Optional input ''hdf_compression_level'' must be an integer between 0 and 9."
+        assert ((isinstance(self.hdf_compression_level, int) and (0 <= self.hdf_compression_level <= 9)) or 
+                (isinstance(self.hdf_compression_level, str) and ((self.hdf_compression_level.lower() == 'lzf') or
+                                                                  (self.hdf_compression_level.lower() == 'szip')))), \
+            "Optional input ''hdf_compression_level'' is false: must be between 0-9 or either lzf or szip"
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
             "Optional input ''multi_axial_PML_ratio'' must be a single positive value."
