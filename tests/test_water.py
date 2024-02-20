@@ -66,6 +66,8 @@ def test_water_density():
     
     assert np.max(np.abs(expected_values - water_density(input_temp))) < 1e-6, "Expected value deviates from water_density output"
     assert np.max(np.abs(expected_values.reshape(6,6) - water_density(input_temp.reshape(6,6)))) < 1e-6, "Expected value deviates from water_density output"
+    with pytest.raises(ValueError):
+        _ = water_density(3.0)
 
 
 def test_water_sound_speed():
@@ -101,6 +103,9 @@ def test_water_sound_speed():
     assert np.max(np.abs(expected_values - water_sound_speed(input_temp))) < 1e-6, "Expected value deviates from water_sound_speed output"
     assert np.max(np.abs(expected_values.reshape(12,8) - water_sound_speed(input_temp.reshape(12,8)))) < 1e-6, "Expected value deviates from water_sound_speed output"
 
+    with pytest.raises(ValueError):
+        _ = water_sound_speed(96.0)
+
 
 def test_water_non_linearity():
     expected_values = np.array([4.18653394, 4.23941757, 4.29049232, 4.33981942, 4.38745897,
@@ -131,3 +136,5 @@ def test_water_non_linearity():
     assert np.max(np.abs(expected_values - water_non_linearity(input_temp))) < 1e-6, "Expected value deviates from water_non_linearity output"
     assert np.max(np.abs(expected_values[1:101].reshape(10,10) - 
                          water_non_linearity(input_temp[1:101].reshape(10,10)))) < 1e-6, "Expected value deviates from water_non_linearity output"
+    with pytest.raises(ValueError):
+            _ = water_non_linearity(101.0)
