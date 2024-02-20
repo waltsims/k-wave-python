@@ -30,7 +30,7 @@ def test_write_matrix(tmp_path_factory):
         for compression_level in compression_options:
             tmp_path = tmp_path_factory.mktemp("matrix") / f"{idx}.h5"
             matrix = np.single(10.0 * np.ones([1, dim]))
-            write_matrix(tmp_path, matrix=matrix, matrix_name='test', compression_level=compression_level)
+            write_matrix(tmp_path, matrix=matrix, matrix_name='test')
             ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeMatrix/{idx}.h5")
             compare_h5_values(tmp_path, ref_path)
             idx = idx + 1
