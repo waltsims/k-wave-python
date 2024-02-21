@@ -6,7 +6,6 @@ from kwave.utils.matrix import expand_matrix
 
 
 class kSensor(object):
-
     def __init__(self, mask=None, record=None):
         self._mask = mask
         # cell array of the acoustic parameters to record in the form Recorder
@@ -68,21 +67,21 @@ class kSensorDirectivity(object):
     #: sensor.mask. The angles are in radians where 0 = max
     #: sensitivity in x direction (up/down) and pi/2 or -pi/2
     #: = max sensitivity in y direction (left/right)
-    angle               : np.ndarray    = None
+    angle: np.ndarray = None
 
     #: string defining the directivity pattern, valid inputs
     #: are 'pressure' (spatial averaging over the sensor
     #: surface equivalent to a sinc function) and 'gradient'
-    pattern             : str           = 'pressure'
+    pattern: str = "pressure"
 
     #: equivalent element size (the larger the element size the more directional the response)
-    size                : float         = None
+    size: float = None
 
     #: list of the unique directivity angles
-    unique_angles       : np.ndarray    = None
+    unique_angles: np.ndarray = None
 
     #: It is precomputed to allow data casting, as kgrid.kx (etc) are computed on the fly.
-    wavenumbers         : np.ndarray    = None
+    wavenumbers: np.ndarray = None
 
     def set_default_size(self, kgrid) -> None:
         """

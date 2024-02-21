@@ -7,30 +7,40 @@ from pathlib import Path
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = '0.3.1'
+VERSION = "0.3.1"
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
 
 platform = sys.platform
 
-if platform.startswith('linux'):
-    system = 'linux'
-elif platform.startswith(('win', 'cygwin')):
-    system = 'windows'
-elif platform.startswith('darwin'):
-    system = 'darwin'
-    raise NotImplementedError('k-wave-python is currently unsupported on MacOS.')
+if platform.startswith("linux"):
+    system = "linux"
+elif platform.startswith(("win", "cygwin")):
+    system = "windows"
+elif platform.startswith("darwin"):
+    system = "darwin"
+    raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
 
-binary_path = os.path.join(Path(__file__).parent, 'bin', system)
-environ['KWAVE_BINARY_PATH'] = binary_path
+binary_path = os.path.join(Path(__file__).parent, "bin", system)
+environ["KWAVE_BINARY_PATH"] = binary_path
 
 url_base = "https://github.com/waltsims/"
 
 prefix = "https://github.com/waltsims/kspaceFirstOrder-{0}-{1}/releases/download/v1.3.0/"
 
-common_filenames = ["cufft64_10.dll", "hdf5.dll", "hdf5_hl.dll", "libiomp5md.dll", "libmmd.dll",
-                    "msvcp140.dll", "svml_dispmd.dll", "szip.dll", "vcruntime140.dll", "zlib.dll"]
+common_filenames = [
+    "cufft64_10.dll",
+    "hdf5.dll",
+    "hdf5_hl.dll",
+    "libiomp5md.dll",
+    "libmmd.dll",
+    "msvcp140.dll",
+    "svml_dispmd.dll",
+    "szip.dll",
+    "vcruntime140.dll",
+    "zlib.dll",
+]
 
 specific_omp_filenames = ["kspaceFirstOrder-OMP.exe"]
 specific_cuda_filenames = ["kspaceFirstOrder-CUDA.exe"]
@@ -47,19 +57,19 @@ def binaries_present() -> bool:
         "linux": [
             # "acousticFieldPropagator-OMP",
             "kspaceFirstOrder-OMP",
-            "kspaceFirstOrder-CUDA"
+            "kspaceFirstOrder-CUDA",
         ],
         "darwin": [
             # "acousticFieldPropagator-OMP",
             "kspaceFirstOrder-OMP",
-            "kspaceFirstOrder-CUDA"
+            "kspaceFirstOrder-CUDA",
         ],
-        "windows": specific_omp_filenames + specific_cuda_filenames + common_filenames
+        "windows": specific_omp_filenames + specific_cuda_filenames + common_filenames,
     }
 
     for binary in binary_list[system]:
         if not os.path.exists(os.path.join(binary_path, binary)):
-            logging.log(logging.WARN,  f"{binary} not found")
+            logging.log(logging.WARN, f"{binary} not found")
             return False
     return True
 
@@ -92,7 +102,6 @@ def download_binaries(system_os: str, bin_type: str):
         },
     }
     for url in url_dict[system_os][bin_type]:
-
         # Extract the file name from the GitHub release URL
         filename = url.split("/")[-1]
 

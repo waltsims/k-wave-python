@@ -35,9 +35,8 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_us_bmode_linear_transducer():
-
     # simulation settings
-    DATA_CAST = 'single'
+    DATA_CAST = "single"
 
     # =========================================================================
     # DEFINE THE K-WAVE GRID
@@ -50,7 +49,7 @@ def test_us_bmode_linear_transducer():
     grid_size_points = Vector([256, 128, 128]) - 2 * pml_size  # [grid points]
 
     # set desired grid size in the x-direction not including the PML
-    grid_size_meters = 40e-3                  # [m]
+    grid_size_meters = 40e-3  # [m]
 
     # calculate the spacing between the grid points
     grid_spacing_meters = grid_size_meters / Vector([grid_size_points.x, grid_size_points.x, grid_size_points.x])  # [m]
@@ -70,11 +69,11 @@ def test_us_bmode_linear_transducer():
         sound_speed=None,  # will be set later
         alpha_coeff=0.75,
         alpha_power=1.5,
-        BonA=6
+        BonA=6,
     )
 
     # create the time array
-    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0   # [s]
+    t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
     # =========================================================================
@@ -82,8 +81,8 @@ def test_us_bmode_linear_transducer():
     # =========================================================================
 
     # define properties of the input signal
-    source_strength = 1e6          # [Pa]
-    tone_burst_freq = 1.5e6        # [Hz]
+    source_strength = 1e6  # [Pa]
+    tone_burst_freq = 1.5e6  # [Hz]
     tone_burst_cycles = 4
 
     # create the input signal using tone_burst
@@ -99,29 +98,30 @@ def test_us_bmode_linear_transducer():
 
     # physical properties of the transducer
     transducer = dotdict()
-    transducer.number_elements = 32    # total number of transducer elements
-    transducer.element_width = 2       # width of each element [grid points/voxels]
-    transducer.element_length = 24     # length of each element [grid points/voxels]
-    transducer.element_spacing = 0     # spacing (kerf  width) between the elements [grid points/voxels]
-    transducer.radius = float('inf')   # radius of curvature of the transducer [m]
+    transducer.number_elements = 32  # total number of transducer elements
+    transducer.element_width = 2  # width of each element [grid points/voxels]
+    transducer.element_length = 24  # length of each element [grid points/voxels]
+    transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
+    transducer.radius = float("inf")  # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
     transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([1, grid_size_points.y/2 - transducer_width/2, grid_size_points.z/2 - transducer.element_length/2])
-
+    transducer.position = np.round(
+        [1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2]
+    )
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
-    not_transducer.sound_speed = c0                    # sound speed [m/s]
-    not_transducer.focus_distance = 20e-3              # focus distance [m]
-    not_transducer.elevation_focus_distance = 19e-3    # focus distance in the elevation plane [m]
-    not_transducer.steering_angle = 0                  # steering angle [degrees]
+    not_transducer.sound_speed = c0  # sound speed [m/s]
+    not_transducer.focus_distance = 20e-3  # focus distance [m]
+    not_transducer.elevation_focus_distance = 19e-3  # focus distance in the elevation plane [m]
+    not_transducer.steering_angle = 0  # steering angle [degrees]
 
     # apodization
-    not_transducer.transmit_apodization = 'Hanning'
-    not_transducer.receive_apodization = 'Rectangular'
+    not_transducer.transmit_apodization = "Hanning"
+    not_transducer.receive_apodization = "Rectangular"
 
     # define the transducer elements that are currently active
     not_transducer.active_elements = np.ones((transducer.number_elements, 1))
@@ -144,8 +144,9 @@ def test_us_bmode_linear_transducer():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * \
-                     np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * np.ones(
+        N_tot
+    )  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones(N_tot)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
@@ -165,9 +166,9 @@ def test_us_bmode_linear_transducer():
     dx = grid_spacing_meters.x
 
     # define a sphere for a highly scattering region
-    radius = 6e-3       # [m]
-    x_pos = 27.5e-3     # [m]
-    y_pos = 20.5e-3     # [m]
+    radius = 6e-3  # [m]
+    x_pos = 27.5e-3  # [m]
+    y_pos = 20.5e-3  # [m]
     ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
     scattering_region1 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
@@ -176,9 +177,9 @@ def test_us_bmode_linear_transducer():
     density_map[scattering_region1 == 1] = scattering_rho0[scattering_region1 == 1]
 
     # define a sphere for a highly scattering region
-    radius = 5e-3       # [m]
-    x_pos = 30.5e-3     # [m]
-    y_pos = 37e-3       # [m]
+    radius = 5e-3  # [m]
+    x_pos = 30.5e-3  # [m]
+    y_pos = 37e-3  # [m]
     ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
     scattering_region2 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
@@ -187,9 +188,9 @@ def test_us_bmode_linear_transducer():
     density_map[scattering_region2 == 1] = scattering_rho0[scattering_region2 == 1]
 
     # define a sphere for a highly scattering region
-    radius = 4.5e-3     # [m]
-    x_pos = 15.5e-3     # [m]
-    y_pos = 30.5e-3     # [m]
+    radius = 4.5e-3  # [m]
+    x_pos = 15.5e-3  # [m]
+    y_pos = 30.5e-3  # [m]
     ball_location = Vector([round(x_pos / dx + rounding_eps), round(y_pos / dx + rounding_eps), N_tot.z / 2])
     scattering_region3 = make_ball(N_tot, ball_location, round(radius / dx + rounding_eps))
 
@@ -211,14 +212,14 @@ def test_us_bmode_linear_transducer():
     # for scan_line_index in range(1, number_scan_lines + 1):
     for scan_line_index in range(1, 10):
         # update the command line status
-        logging.log(logging.INFO, f'Computing scan line {scan_line_index} of {number_scan_lines}')
+        logging.log(logging.INFO, f"Computing scan line {scan_line_index} of {number_scan_lines}")
 
         # load the current section of the medium
-        medium.sound_speed = sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
-        medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
+        medium.sound_speed = sound_speed_map[:, medium_position : medium_position + grid_size_points.y, :]
+        medium.density = density_map[:, medium_position : medium_position + grid_size_points.y, :]
 
         # set the input settings
-        input_filename = 'example_lin_tran_input.h5'
+        input_filename = "example_lin_tran_input.h5"
         pathname = gettempdir()
         input_file_full_path = os.path.join(pathname, input_filename)
         simulation_options = SimulationOptions(
@@ -229,7 +230,7 @@ def test_us_bmode_linear_transducer():
             save_to_disk=True,
             input_filename=input_filename,
             save_to_disk_exit=True,
-            data_path=pathname
+            data_path=pathname,
         )
         # run the simulation
         kspaceFirstOrder3DC(
@@ -238,12 +239,12 @@ def test_us_bmode_linear_transducer():
             source=not_transducer,
             sensor=not_transducer,
             simulation_options=simulation_options,
-            execution_options=SimulationExecutionOptions()
+            execution_options=SimulationExecutionOptions(),
         )
 
-        assert compare_against_ref(f'out_us_bmode_linear_transducer/input_{scan_line_index}', input_file_full_path,
-                                   precision=6), \
-            'Files do not match!'
+        assert compare_against_ref(
+            f"out_us_bmode_linear_transducer/input_{scan_line_index}", input_file_full_path, precision=6
+        ), "Files do not match!"
 
         # extract the scan line from the sensor data
         # scan_lines(scan_line_index, :) = transducer.scan_line(sensor_data);

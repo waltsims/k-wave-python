@@ -42,17 +42,13 @@ def rwh_primes(n: int) -> List[int]:
     """
 
     sieve = bytearray([True]) * (n // 2 + 1)
-    for i in range(1, int(n ** 0.5) // 2 + 1):
+    for i in range(1, int(n**0.5) // 2 + 1):
         if sieve[i]:
-            sieve[2 * i * (i + 1)::2 * i + 1] = bytearray((n // 2 - 2 * i * (i + 1)) // (2 * i + 1) + 1)
+            sieve[2 * i * (i + 1) :: 2 * i + 1] = bytearray((n // 2 - 2 * i * (i + 1)) // (2 * i + 1) + 1)
     return [2, *compress(range(3, n, 2), sieve[1:])]
 
 
-def fourier_shift(
-        data: np.ndarray,
-        shift: float,
-        shift_dim: Optional[int] = None
-) -> np.ndarray:
+def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
     """
     Shifts an array along one of its dimensions using Fourier interpolation.
 
@@ -94,7 +90,7 @@ def fourier_shift(
         reshape_dims_to[shift_dim] = -1
         k_vec = np.reshape(k_vec, reshape_dims_to)
     else:
-        raise ValueError('Input dim must be 0, 1, 2 or 3.')
+        raise ValueError("Input dim must be 0, 1, 2 or 3.")
 
     # shift the input using a Fourier interpolant
     part_1 = ifftshift(np.exp(1j * k_vec * shift))
@@ -188,13 +184,12 @@ def primefactors(n: int) -> List[int]:
 
     factors = []
     while n % 2 == 0:
-        factors.append(2),
+        (factors.append(2),)
         n = n / 2
 
     # n became odd
     for i in range(3, int(math.sqrt(n)) + 1, 2):
-
-        while (n % i == 0):
+        while n % i == 0:
             factors.append(i)
             n = n / i
 
@@ -251,10 +246,10 @@ def norm_var(im: np.ndarray) -> float:
 
 
 def gaussian(
-        x: Union[int, float, np.ndarray],
-        magnitude: Optional[Union[int, float]] = None,
-        mean: Optional[float] = 0,
-        variance: Optional[float] = 1,
+    x: Union[int, float, np.ndarray],
+    magnitude: Optional[Union[int, float]] = None,
+    mean: Optional[float] = 0,
+    variance: Optional[float] = 1,
 ) -> Union[int, float, np.ndarray]:
     """
     Returns a Gaussian distribution f(x) with the specified magnitude, mean, and variance. If these values are not specified,
@@ -282,7 +277,7 @@ def gaussian(
     if magnitude is None:
         magnitude = (2 * math.pi * variance) ** -0.5
 
-    gauss_distr = magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
+    gauss_distr = magnitude * np.exp(-((x - mean) ** 2) / (2 * variance))
 
     return gauss_distr
     # return magnitude * norm.pdf(x, loc=mean, scale=variance)
@@ -299,6 +294,7 @@ def cosd(angle_in_degrees):
     #   does not yield the same results as matlab
     angle_in_radians = math.radians(angle_in_degrees)
     return math.cos(angle_in_radians)
+
 
 def sind(angle_in_degrees):
     # Note:
@@ -318,10 +314,9 @@ def Rx(theta):
     Returns:
     np.array. 3D rotation matrix
     """
-    R = np.array([[1, 0, 0],
-                  [0, cosd(theta), -sind(theta)],
-                  [0, sind(theta), cosd(theta)]])
+    R = np.array([[1, 0, 0], [0, cosd(theta), -sind(theta)], [0, sind(theta), cosd(theta)]])
     return R
+
 
 def Ry(theta):
     """
@@ -333,10 +328,9 @@ def Ry(theta):
     Returns:
     np.array. 3D rotation matrix
     """
-    R = np.array([[cosd(theta), 0, sind(theta)],
-                  [0, 1, 0],
-                  [-sind(theta), 0, cosd(theta)]])
+    R = np.array([[cosd(theta), 0, sind(theta)], [0, 1, 0], [-sind(theta), 0, cosd(theta)]])
     return R
+
 
 def Rz(theta):
     """
@@ -348,52 +342,32 @@ def Rz(theta):
     Returns:
     np.array. 3D rotation matrix
     """
-    R = np.array([[cosd(theta), -sind(theta), 0],
-                  [sind(theta), cosd(theta), 0],
-                  [0, 0, 1]])
+    R = np.array([[cosd(theta), -sind(theta), 0], [sind(theta), cosd(theta), 0], [0, 0, 1]])
     return R
 
 
 def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarray, Vector]):
     # Check dimensions
     if len(translation) == 2 and isinstance(rotation, (int, float)):
-
         # Assign the inputs
         dx = translation[0]
         dy = translation[1]
         th = rotation
 
         # Build affine matrix (counter-clockwise)
-        affine = np.array([
-            [cosd(th), -sind(th), dx],
-            [sind(th), cosd(th), dy],
-            [0, 0, 1]
-        ])
+        affine = np.array([[cosd(th), -sind(th), dx], [sind(th), cosd(th), dy], [0, 0, 1]])
 
     elif len(translation) == 3 and isinstance(rotation, (np.ndarray, Vector)) and len(rotation) == 3:
-
         # Assign the inputs
         dx, dy, dz = translation
         x_th, y_th, z_th = rotation
 
         # Build the rotation matrices
-        x_th_matrix = np.array([
-            [1, 0, 0],
-            [0, cosd(x_th), -sind(x_th)],
-            [0, sind(x_th), cosd(x_th)]
-        ])
+        x_th_matrix = np.array([[1, 0, 0], [0, cosd(x_th), -sind(x_th)], [0, sind(x_th), cosd(x_th)]])
 
-        y_th_matrix = np.array([
-            [cosd(y_th), 0, sind(y_th)],
-            [0, 1, 0],
-            [-sind(y_th), 0, cosd(y_th)]
-        ])
+        y_th_matrix = np.array([[cosd(y_th), 0, sind(y_th)], [0, 1, 0], [-sind(y_th), 0, cosd(y_th)]])
 
-        z_th_matrix = np.array([
-            [cosd(z_th), -sind(z_th), 0],
-            [sind(z_th), cosd(z_th), 0],
-            [0, 0, 1]
-        ])
+        z_th_matrix = np.array([[cosd(z_th), -sind(z_th), 0], [sind(z_th), cosd(z_th), 0], [0, 0, 1]])
 
         # Build affine matrix
         affine = np.zeros((4, 4))
@@ -401,7 +375,7 @@ def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarra
         affine[:, 3] = [dx, dy, dz, 1]
 
     else:
-        raise ValueError('Incorrect size for translation and rotation inputs.')
+        raise ValueError("Incorrect size for translation and rotation inputs.")
 
     return affine
 
@@ -411,7 +385,7 @@ def compute_linear_transform(pos1, pos2, offset=None):
     beam_vec = pos2 - pos1
 
     magnitude = np.linalg.norm(beam_vec)
-    
+
     # TODO: it seems matlab behaviour is to return nans when positions are the same.
     #       we should open an issue and change our behaviour once matlab is fixed.
     # if magnitude == 0:
@@ -419,7 +393,7 @@ def compute_linear_transform(pos1, pos2, offset=None):
     #     return np.eye(3), 0 if offset is None else offset
 
     # Normalise to give unit beam vector
-    beam_vec = beam_vec /  magnitude
+    beam_vec = beam_vec / magnitude
 
     # Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])
     beam_vec0 = np.array([0, 0, -1])

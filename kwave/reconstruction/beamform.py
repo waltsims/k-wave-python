@@ -31,7 +31,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     """
 
     assert not isinstance(kgrid.t_array, str), "kgrid.t_array must be a numeric array."
-    
+
     if isinstance(sound_speed, int):
         sound_speed = float(sound_speed)
 
@@ -61,19 +61,15 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
     # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
 
-    logging.log(logging.WARN, f'{PendingDeprecationWarning.__name__}: '
-                'This method is not fully migrated, might be depricated and is untested.')
+    logging.log(
+        logging.WARN, f"{PendingDeprecationWarning.__name__}: " "This method is not fully migrated, might be depricated and is untested."
+    )
 
     return signal_mat
 
 
 def scan_conversion(
-        scan_lines: np.ndarray,
-        steering_angles,
-        image_size: Tuple[float, float],
-        c0,
-        dt,
-        resolution: Optional[Tuple[int, int]]
+    scan_lines: np.ndarray, steering_angles, image_size: Tuple[float, float], c0, dt, resolution: Optional[Tuple[int, int]]
 ) -> np.ndarray:
     if resolution is None:
         resolution = (256, 256)  # in pixels
@@ -87,7 +83,7 @@ def scan_conversion(
     TicToc.tic()
 
     # update command line status
-    logging.log(logging.INFO, 'Computing ultrasound scan conversion...')
+    logging.log(logging.INFO, "Computing ultrasound scan conversion...")
 
     # extract a_line parameters
     Nt = scan_lines.shape[1]
@@ -99,7 +95,7 @@ def scan_conversion(
     # create regular Cartesian grid to remap to
     pos_vec_y_new = np.linspace(0, 1, y_resolution) * y - y / 2
     pos_vec_x_new = np.linspace(0, 1, x_resolution) * x
-    [pos_mat_x_new, pos_mat_y_new] = np.array(np.meshgrid(pos_vec_x_new, pos_vec_y_new, indexing='ij'))
+    [pos_mat_x_new, pos_mat_y_new] = np.array(np.meshgrid(pos_vec_x_new, pos_vec_y_new, indexing="ij"))
 
     # convert new points to polar coordinates
     [th_cart, r_cart] = cart2pol(pos_mat_x_new, pos_mat_y_new)
@@ -118,13 +114,7 @@ def scan_conversion(
     # Modifications -start
     queries = np.array([r_cart.flatten(), th_cart.flatten()]).T
 
-    b_mode = interpolate2d_with_queries(
-        [r, 2 * np.pi * steering_angles / 360],
-        scan_lines.T,
-        queries,
-        method='linear',
-        copy_nans=False
-    )
+    b_mode = interpolate2d_with_queries([r, 2 * np.pi * steering_angles / 360], scan_lines.T, queries, method="linear", copy_nans=False)
     image_size_points = (len(pos_vec_x_new), len(pos_vec_y_new))
     b_mode = b_mode.reshape(image_size_points)
     # Modifications -end
@@ -132,7 +122,7 @@ def scan_conversion(
     b_mode[np.isnan(b_mode)] = 0
 
     # update command line status
-    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, f"  completed in {scale_time(TicToc.toc())}")
 
     return b_mode
 

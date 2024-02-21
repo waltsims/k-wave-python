@@ -8,16 +8,16 @@ from kwave.utils.io import write_matrix, write_attributes, write_grid, write_fla
 
 
 def compare_h5_attributes(local_h5_path, ref_path):
-    local_h5 = h5py.File(local_h5_path, 'r')
-    ref_h5 = h5py.File(ref_path, 'r')
+    local_h5 = h5py.File(local_h5_path, "r")
+    ref_h5 = h5py.File(ref_path, "r")
     for key in local_h5.attrs.keys():
         assert key in ref_h5.attrs.keys()
         assert np.isclose(local_h5.attrs[key], ref_h5.attrs[key])
 
 
 def compare_h5_values(local_h5_path, ref_path):
-    local_h5 = h5py.File(local_h5_path, 'r')
-    ref_h5 = h5py.File(ref_path, 'r')
+    local_h5 = h5py.File(local_h5_path, "r")
+    ref_h5 = h5py.File(ref_path, "r")
     assert ref_h5.keys() == local_h5.keys()
     for key in ref_h5.keys():
         assert np.isclose(local_h5[key], ref_h5[key]).all()
@@ -29,7 +29,7 @@ def test_write_matrix(tmp_path_factory):
         for compression_level in range(1, 9):
             tmp_path = tmp_path_factory.mktemp("matrix") / f"{idx}.h5"
             matrix = np.single(10.0 * np.ones([1, dim]))
-            write_matrix(tmp_path, matrix=matrix, matrix_name='test')
+            write_matrix(tmp_path, matrix=matrix, matrix_name="test")
             ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeMatrix/{idx}.h5")
             compare_h5_values(tmp_path, ref_path)
             idx = idx + 1
@@ -45,7 +45,7 @@ def test_write_flags(tmp_path_factory):
         pml_size = 2 * np.ones([3, 1])
         pml_alpha = 0.5 * np.ones([3, 1])
         write_grid(tmp_path, grid_size, grid_spacing, pml_size, pml_alpha, 5, 0.5, 1540)
-        write_matrix(tmp_path, np.asarray([0.], dtype=np.single), 'sensor_mask_index')
+        write_matrix(tmp_path, np.asarray([0.0], dtype=np.single), "sensor_mask_index")
         write_flags(tmp_path)
         ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeFlags/{idx}.h5")
 
@@ -57,7 +57,7 @@ def test_write_flags(tmp_path_factory):
 
 def test_write_attributes(tmp_path_factory):
     idx = 0
-    matrix_name = 'test'
+    matrix_name = "test"
     tmp_path = tmp_path_factory.mktemp("attributes") / f"{idx}.h5"
     matrix = np.single(10.0 * np.ones([1, 1]))
     ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeAttributes/{idx}.h5")
