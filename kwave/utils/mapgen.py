@@ -2752,9 +2752,9 @@ def focused_bowl_oneil(
     radius: float, 
     diameter: float, 
     velocity: float, 
-    frequency: int, 
-    sound_speed: int,
-    density: int, 
+    frequency: float, 
+    sound_speed: float,
+    density: float, 
     axial_positions: Optional[
         Union[kt.NP_ARRAY_FLOAT_1D, float, List]
     ] = None,
