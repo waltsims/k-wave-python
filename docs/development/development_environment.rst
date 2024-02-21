@@ -11,7 +11,15 @@ In order to correctly set up your development environment for this repository, c
 
     git clone https://github.com/waltsims/k-wave-python
     cd k-wave-python
-    pip install -e .
+    pip install -e '.[dev,test]' 
+
+This installs all the dependencies for development, and testing.
+
+Ensure pre-commit is configured by running the following command:
+
+.. code-block:: bash
+
+    pre-commit install
 
 Next, download all k-Wave binaries from the `k-Wave download page <http://www.k-wave.org/download.php>`_.
 
