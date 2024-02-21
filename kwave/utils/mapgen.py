@@ -2749,12 +2749,12 @@ def make_cart_rect(
 
 @beartype
 def focused_bowl_oneil(
-    radius: float, 
-    diameter: float, 
-    velocity: float, 
-    frequency: float, 
-    sound_speed: float,
-    density: float, 
+    radius: kt.NUMERIC, 
+    diameter: kt.NUMERIC, 
+    velocity: kt.NUMERIC, 
+    frequency: kt.NUMERIC, 
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC, 
     axial_positions: Optional[
         Union[kt.NP_ARRAY_FLOAT_1D, float, List]
     ] = None,
