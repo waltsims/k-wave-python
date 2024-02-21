@@ -45,11 +45,11 @@ def test_make_cart_spherical_segments():
                                                 num_points, plot_bowl, num_points_inner)
     # bowl position is same as focus position 
     with pytest.raises(ValueError):
-        coordinates = make_cart_spherical_segment(bowl_pos, np.inf, inner_diameter, outer_diameter bowl_pos,
+        coordinates = make_cart_spherical_segment(bowl_pos, np.inf, inner_diameter, outer_diameter, bowl_pos,
                                                 num_points, plot_bowl, num_points_inner)
     # radius is infinite
     with pytest.raises(ValueError):
-        coordinates = make_cart_spherical_segment(bowl_pos, np.inf, inner_diameter, outer_diameter focus_pos,
+        coordinates = make_cart_spherical_segment(bowl_pos, np.inf, inner_diameter, outer_diameter, focus_pos,
                                                 num_points, plot_bowl, num_points_inner)
         
     logging.log(logging.INFO, 'make_cart_spherical_segment(..) works as expected!')
