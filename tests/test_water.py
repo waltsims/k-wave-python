@@ -59,7 +59,7 @@ def test_water_density():
                        995.94094449, 995.64345126, 995.33728055, 995.02256923,
                        994.69944501, 994.36802644, 994.02842288, 993.68073453,
                        993.32505242, 992.9614584, 992.59002517, 992.21081622])
-    input_temp = np.arange(5, 41, dytpe=float)
+    input_temp = np.arange(5, 41, dtype=float)
 
     for idx, value in enumerate(expected_values):
         assert abs(value - water_density(input_temp[idx])) < 1e-6, \
