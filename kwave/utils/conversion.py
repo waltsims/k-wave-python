@@ -11,11 +11,12 @@ from nptyping import NDArray, Float, Shape
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
-from kwave.utils.typing import NUMERIC, NUMERIC_WITH_COMPLEX
+
+import kwave.utils.typing as kt
 
 
 @beartype
-def db2neper(alpha: Union[NDArray, NUMERIC], y: NUMERIC = 1) -> Union[NDArray, NUMERIC]:
+def db2neper(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDArray, kt.NUMERIC]:
     """
     Convert decibels to nepers.
 
@@ -34,7 +35,7 @@ def db2neper(alpha: Union[NDArray, NUMERIC], y: NUMERIC = 1) -> Union[NDArray, N
 
 
 @beartype
-def neper2db(alpha: Union[NDArray, NUMERIC], y: NUMERIC = 1) -> Union[NDArray, NUMERIC]:
+def neper2db(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDArray, kt.NUMERIC]:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
@@ -53,7 +54,7 @@ def neper2db(alpha: Union[NDArray, NUMERIC], y: NUMERIC = 1) -> Union[NDArray, N
 
 
 @beartype
-def cast_to_type(data: Union[NDArray, NUMERIC], matlab_type: str) -> Any:
+def cast_to_type(data: Union[NDArray, kt.NUMERIC], matlab_type: str) -> Any:
     """
 
     Args:
@@ -78,9 +79,9 @@ def cast_to_type(data: Union[NDArray, NUMERIC], matlab_type: str) -> Any:
 
 @beartype
 def cart2pol(
-    x: Union[NUMERIC, NDArray], 
-    y: Union[NUMERIC, NDArray]
-) -> Tuple[Union[NUMERIC, NDArray], Union[NUMERIC, NDArray]]:
+    x: Union[kt.NUMERIC, NDArray], 
+    y: Union[kt.NUMERIC, NDArray]
+) -> Tuple[Union[kt.NUMERIC, NDArray], Union[kt.NUMERIC, NDArray]]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -395,7 +396,7 @@ subs0 = None
 
 @beartype
 def tol_star(
-    tolerance: NUMERIC, 
+    tolerance: kt.NUMERIC, 
     kgrid: kWaveGrid, 
     point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]], 
     debug
@@ -496,7 +497,7 @@ def tol_star(
 
 
 @beartype
-def find_closest(array: NDArray, value: NUMERIC_WITH_COMPLEX):
+def find_closest(array: NDArray, value: kt.NUMERIC_WITH_COMPLEX):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
