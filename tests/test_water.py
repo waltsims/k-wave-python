@@ -42,7 +42,7 @@ def test_water_absorption():
             idx += 1
     
     n: int = np.size(input_temps)
-    for idx, fs in enumerate(input_fs):
+    for idx, fs in enumerate(input_fsampling):
         assert np.max(np.abs(expected_outputs[idx * n : (idx + 1) * n] - 
                    water_absorption(fs, input_temps))) < 1e-6, "Expected value deviates from expected " \
                                                                                "absorption value "
