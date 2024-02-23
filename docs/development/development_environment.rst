@@ -2,7 +2,7 @@ Development Environment
 =======================
 
 Currently, this package serves as an interface to the cpp binaries of k-Wave.
-For this reason, are required to run simulations with `k-Wave-python`.
+For this reason, binaries are required to run simulations with `k-Wave-python`.
 The binaries are downloaded by k-Wave-python when the package is run for the first time.
 
 To correctly set up your development environment for this repository, clone the repository from github, and install the project dependencies.
