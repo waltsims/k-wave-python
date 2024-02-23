@@ -1,5 +1,6 @@
 import numpy as np
 import pytest 
+import itertools
 from kwave.utils.mapgen import water_sound_speed, water_non_linearity, water_density, water_absorption
 
 
@@ -31,20 +32,21 @@ def test_water_absorption():
                         2.02567146e-01, 1.68736041e-01, 1.10857634e+00, 6.99603767e-01,
                         4.91739726e-01, 3.72999916e-01, 2.91793607e-01, 2.32538816e-01,
                         1.93702088e-01])
+    
     input_temps = np.arange(0, 70, 10, dtype=float)
     input_fsampling = np.arange(1, 16, dtype=float)
-    idx : int = 0
-    for fs in input_fsampling:
-        for temp in input_temps:
-            assert abs(expected_outputs[idx] - water_absorption(fs,
-                                                                temp)) < 1e-6, "Expected value deviates from expected " \
-                                                                               "absorption value "
-            idx += 1
+    # idx : int = 0
+
+    #for fs in input_fsampling:
+    #    for temp in input_temps:
+    for idx, (f_s, temp) in enumerate(itertools.product(input_fsampling, input_temps)):
+        assert abs(expected_outputs[idx] - water_absorption(f_s, temp)) < 1e-6, \
+          "Expected value deviates from expected absorption value "
     
     n: int = np.size(input_temps)
-    for idx, fs in enumerate(input_fsampling):
+    for idx, f_s in enumerate(input_fsampling):
         assert np.max(np.abs(expected_outputs[idx * n : (idx + 1) * n] - 
-                   water_absorption(fs, input_temps))) < 1e-6, "Expected value deviates from expected " \
+                   water_absorption(f_s, input_temps))) < 1e-6, "Expected value deviates from expected " \
                                                                                "absorption value "
     return
 
