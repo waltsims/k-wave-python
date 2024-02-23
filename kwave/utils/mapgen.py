@@ -2749,12 +2749,12 @@ def make_cart_rect(
 
 @beartype
 def focused_bowl_oneil(
-    radius: float, 
-    diameter: float, 
-    velocity: float, 
-    frequency: int, 
-    sound_speed: int,
-    density: int, 
+    radius: kt.NUMERIC, 
+    diameter: kt.NUMERIC, 
+    velocity: kt.NUMERIC, 
+    frequency: kt.NUMERIC, 
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC, 
     axial_positions: Optional[
         Union[kt.NP_ARRAY_FLOAT_1D, float, List]
     ] = None,
@@ -3136,11 +3136,11 @@ def compute_linear_transform2D(
 
 @beartype
 def make_cart_spherical_segment(
-    bowl_pos: NDArray[Shape["3"], Int], 
+    bowl_pos: NDArray[Shape["3"], Float], 
     radius: Union[float, int], 
     inner_diameter: Union[float, int], 
     outer_diameter: Union[float, int],
-    focus_pos: NDArray[Shape["3"], Int], 
+    focus_pos: NDArray[Shape["3"], Float], 
     num_points: int, 
     plot_bowl: Optional[bool] = False,
     num_points_inner: int = 0
