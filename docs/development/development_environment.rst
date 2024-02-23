@@ -16,7 +16,7 @@ To correctly set up your development environment for this repository, clone the 
 Test References
 =======================
 
-Test compare the output of the python interface to the output of the matlab interface.
+Tests compare the outputs of the python and the matlab interfaces.
 These tests are located in the ``tests`` directory. The comparison between ``matlab`` and ``python`` outputs are done in two ways:
 
 - **Unit testing**: k-Wave-python functions that have a direct counterpart in original k-Wave are tested by comparing the outputs of the two functions.
