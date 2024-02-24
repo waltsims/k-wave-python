@@ -46,8 +46,8 @@ def test_tol_star():
         expected_js = reader.expected_value_of("js")
         expected_ks = reader.expected_value_of("ks")
 
-        assert np.allclose(lin_ind, expected_lin_ind), "tone_burst did not match expected tone_burst"
-        assert np.allclose(is_, expected_is - 1), "tone_burst did not match expected tone_burst"
-        assert np.allclose(js, expected_js - 1), "tone_burst did not match expected tone_burst"
-        assert np.allclose(ks, expected_ks - 1), "tone_burst did not match expected tone_burst"
+        assert np.allclose(lin_ind, expected_lin_ind), "lin_ind did not match expected lin_ind"
+        assert np.allclose(is_, expected_is - 1), "is_ did not match expected is"
+        assert np.allclose(js, expected_js - 1), "js did not match expected js"
+        assert np.allclose(ks, expected_ks - 1), "ks did not match expected ks"
         reader.increment()
