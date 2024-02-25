@@ -222,18 +222,6 @@ source.p_mask = karray.get_array_binary_mask(kgrid)
 # assign source pressure output in time
 source.p = karray.get_distributed_source_signal(kgrid, source_sig)
 
-tx_pos = karray.get_element_nodes(kgrid)
-tx_mask = np.empty((skull_mask.shape), dtype=float)
-tx_mask.fill(0.0)
-for ind in np.arange(np.shape(tx_pos)[1]):
-    i = (tx_pos[0, ind] - kgrid.x_vec[0]) / kgrid.dx
-    j = (tx_pos[1, ind] - kgrid.y_vec[0]) / kgrid.dy
-    k = (tx_pos[2, ind] - kgrid.z_vec[0]) / kgrid.dz
-    i = int(i)
-    j = int(j)
-    k = int(k)
-    if ((i >= 0) and (j >= 0) and (k >= 0) and (i < kgrid.Nx) and (j < kgrid.Ny) and (k < kgrid.Nz)):
-        tx_mask[i, j, k] = 1.0
 
 # =========================================================================
 # DEFINE THE SENSOR PARAMETERS
@@ -663,30 +651,6 @@ im4a = ax4a.imshow(p[max_loc_brain[0], :, :].T / 1e6,
 
 im4a_boundary = ax4a.imshow(edges_x, aspect='auto',
                             interpolation='none', origin='upper', cmap='Greys')
-
-tx_mask[tx_mask == 0] = np.nan
-im4a_tx = ax4a.imshow(tx_mask[max_loc_brain[0], :, :].T, aspect='auto',
-                      interpolation='none', origin='upper', cmap='Greys')
-
-ax4a.axes.get_yaxis().set_visible(False)
-ax4a.axes.get_xaxis().set_visible(False)
-ax4a.grid(False)
-
-im4b = ax4b.imshow(p[:, max_loc_brain[0], :].T / 1e6,
-                   vmin=0, vmax=pmax / 1e6,
-                   aspect='auto',
-                   interpolation='none',
-                   origin='upper',
-                   cmap='viridis')
-im4b_tx = ax4b.imshow(tx_mask[:, max_loc_brain[1], :].T, aspect='auto',
-                      interpolation='none', origin='upper', cmap='Greys')
-im4b_boundary = ax4b.imshow(edges_y, aspect='auto',
-                            interpolation='none', origin='upper', cmap='Greys')
-ax4b.grid(False)
-ax4b.axes.get_xaxis().set_visible(False)
-ax4b.axes.get_yaxis().set_visible(False)
-cbar_4 = fig4.colorbar(im, ax=ax4.ravel().tolist(), orientation='horizontal')
-cbar_4.set_label('[MPa]', fontsize='small')
 
 fig5, (ax5a, ax5b) = plt.subplots(1, 2)
 im5a = ax5a.imshow(p[max_loc_brain[0], :, :].T / 1e6,
