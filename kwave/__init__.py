@@ -119,9 +119,10 @@ def download_binaries(system_os: str, bin_type: str):
             try:
                 os.remove(binary_path)
             except Exception:
-                logging.log(logging.WARN, "Error occurred while removing partially downloaded binary. "
-                                          "Please manually delete the `kwave/bin` folder which "
-                                          "can be found in your virtual environment.")
+                folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
+                logging.warning("Error occurred while removing partially downloaded binary. "
+                                f"Please manually delete the `{folder_path}` folder which "
+                                "can be found in your virtual environment.")
 
 
 def get_windows_release_urls(version: str, system_type: str) -> list:
