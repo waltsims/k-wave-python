@@ -40,13 +40,13 @@ def test_water_absorption():
     #for fs in input_fsampling:
     #    for temp in input_temps:
     for idx, (f_s, temp) in enumerate(itertools.product(input_fsampling, input_temps)):
-        assert abs(expected_outputs[idx] - water_absorption(f_s, temp)) < 1e-6, \
+        assert np.isclose(expected_outputs[idx], water_absorption(f_s, temp)), \
           "Expected value deviates from expected absorption value "
     
     n: int = np.size(input_temps)
     for idx, f_s in enumerate(input_fsampling):
-        assert np.max(np.abs(expected_outputs[idx * n : (idx + 1) * n] - 
-                   water_absorption(f_s, input_temps))) < 1e-6, "Expected value deviates from expected " \
+        assert np.allclose(expected_outputs[idx * n : (idx + 1) * n], 
+                   water_absorption(f_s, input_temps)), "Expected value deviates from expected " \
                                                                                "absorption value "
     return
 
