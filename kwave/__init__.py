@@ -115,7 +115,7 @@ def download_binaries(system_os: str, bin_type: str):
         except TimeoutError:
             logging.log(logging.WARN, f"Download of {filename} timed out. "
                                        "This can be due to slow internet connection. "
-                                       "Going to remove partially downloaded file to avoid future problems.")
+                                       "Partially downloaded files will be removed.")
             try:
                 os.remove(binary_path)
             except Exception:
