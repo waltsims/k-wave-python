@@ -103,10 +103,10 @@ def test_water_sound_speed():
     input_temp = np.arange(96, dtype=float)
 
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_sound_speed(idx)) < 1e-6, "Expected value deviates from water_sound_speed output"
+        assert np.isclose(value, water_sound_speed(idx)), "Expected value deviates from water_sound_speed output"
     
-    assert np.max(np.abs(expected_values - water_sound_speed(input_temp))) < 1e-6, "Expected value deviates from water_sound_speed output vector"
-    assert np.max(np.abs(expected_values.reshape(12,8) - water_sound_speed(input_temp.reshape(12,8)))) < 1e-6, \
+    assert np.allclose(expected_values, water_sound_speed(input_temp)), "Expected value deviates from water_sound_speed output vector"
+    assert np.allclose(expected_values.reshape(12,8), water_sound_speed(input_temp.reshape(12,8))), \
       "Expected value deviates from water_sound_speed output matrix"
 
     with pytest.raises(ValueError):
