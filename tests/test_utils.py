@@ -16,8 +16,8 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 def test_nepers2db():
     expected_scalar = 8.186258123051049e+05
     expected_matrix = expected_scalar * np.ones((10,10))
-    assert abs(neper2db(1.5) - expected_scalar) < 1e-6, "Point check of nepers2db incorrect"
-    assert np.max(np.abs(neper2db(1.5 * np.ones((10,10))) - expected_matrix)) < 1e-6, \
+    assert np.isclose(neper2db(1.5), expected_scalar), "Point check of nepers2db incorrect"
+    assert np.allclose(neper2db(1.5 * np.ones((10,10))), expected_matrix) , \
         "matrix check of nepers2db incorrect"
     return
 
