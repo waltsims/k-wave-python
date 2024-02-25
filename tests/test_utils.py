@@ -25,8 +25,8 @@ def test_nepers2db():
 def test_db2nepers():
     expected_scalar = 2.931742395517710e-06
     expected_matrix = expected_scalar * np.ones((10,10))
-    assert abs(db2neper(1.6) - expected_scalar) < 1e-6, "Point check of db2nepers incorrect"
-    assert np.max(np.abs(db2neper(1.6 * np.ones((10,10))) - expected_matrix)) < 1e-6, \
+    assert np.isclose(db2neper(1.6) - expected_scalar), "Point check of db2nepers incorrect"
+    assert np.allclose(db2neper(1.6 * np.ones((10,10))), expected_matrix), \
         "matrix check of db2nepers incorrect"
     return
 
