@@ -1,3 +1,4 @@
+from kwave.data import Vector
 from kwave.utils.mapgen import make_cart_sphere
 
 import logging
@@ -14,10 +15,10 @@ def test_makeCartSphere():
     for i in range(num_collected_values):
         logging.log(logging.INFO, i)
         filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
+        recorded_data = loadmat(filepath, simplify_cells=True)
 
-        radius, num_points, center = recorded_data['params'][0]
-        center = center[0]
+        radius, num_points, center = recorded_data['params']
+        center = Vector(center.astype(int))
         expected_value = recorded_data['sphere']
 
         sphere = make_cart_sphere(radius, num_points, center)

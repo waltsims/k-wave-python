@@ -90,18 +90,26 @@ jobs:
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: Install dependencies
         run: |
           pip install '.[test]'
       - name: Test with pytest
         run: |
-          pytest
-#      - name: Lint with flake8
-#        run: |
-#          # stop the build if there are Python syntax errors or undefined names
-#          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          coverage run 
+      - name: Create coverage report
+        run: |
+          coverage xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          env_vars: ${{matrix.os}},${{ matrix.python-version }}
+          fail_ci_if_error: true
+          flags: ${{matrix.os}},${{ matrix.python-version }}
+          name: ${{matrix.os}},${{ matrix.python-version }}
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

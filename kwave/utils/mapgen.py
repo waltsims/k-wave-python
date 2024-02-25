@@ -1,13 +1,15 @@
 import logging
 import math
 from math import floor
-from typing import Tuple, Optional, Union, List, Any, cast
 import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
+from beartype import beartype
+from beartype.typing import Union, List, Tuple, cast, Optional
+from nptyping import NDArray, Float, Shape, Complex, Int, Number
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -17,10 +19,13 @@ from .matrix import max_nd
 from .tictoc import TicToc
 from ..data import Vector
 
+import kwave.utils.typing as kt
+
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
+
 
 def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
                    use_spiral: bool = False) -> np.ndarray:
@@ -59,7 +64,11 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         return p0
 
     def make_concentric_circle_points(num_points: int, radius: float) -> Tuple[np.ndarray, int]:
+
+        assert num_points >= 1, "The number of points must be greater or equal to 1." 
+
         num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
+       
         try:
             d_radial = radius / (num_radial - 1)
         except ZeroDivisionError:
@@ -141,8 +150,15 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     return np.squeeze(disc)
 
 
-def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int,
-                   plot_bowl: Optional[bool] = False) -> np.ndarray:
+@beartype
+def make_cart_bowl(
+    bowl_pos: np.ndarray, 
+    radius: float, 
+    diameter: float, 
+    focus_pos: np.ndarray, 
+    num_points: int,
+    plot_bowl: Optional[bool] = False
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Create evenly distributed Cartesian points covering a bowl.
 
@@ -205,7 +221,7 @@ def make_cart_bowl(bowl_pos: np.ndarray, radius: float, diameter: float, focus_p
     bowl = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         # select suitable axis scaling factor
         _, scale, prefix, unit = scale_SI(np.max(bowl))
 
@@ -351,11 +367,11 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     return c_kk
 
 
-def water_absorption(f, temp):
+def water_absorption(f: float, temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
     Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
-    polynomial fitted to the data given by np.pinkerton(1949).
+    polynomial fitted to the data given by Pinkerton (1949).
 
 
     Args:
@@ -369,15 +385,15 @@ def water_absorption(f, temp):
         >>> abs = waterAbsorption(f, T)
 
     References:
-        [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
-        and its Relation to Molecular Constitution, " Proceedings of the
-        Physical Society.Section B, 2, 129 - 141
+        [1] J. M. M. Pinkerton (1949) "The Absorption of Ultrasonic Waves in Liquids and its 
+                                        Relation to Molecular Constitution," 
+        Proceedings of the Physical Society. Section B, 2, 129-141
 
     """
 
     NEPER2DB = 8.686
     # check temperature is within range
-    if not 0 <= temp <= 60:
+    if not np.all([np.all(temp>=0.0), np.all(temp<=60.0)]):
         raise Warning("Temperature outside range of experimental data")
 
     # conversion factor between Nepers and dB NEPER2DB = 8.686;
@@ -393,9 +409,9 @@ def water_absorption(f, temp):
     return abs
 
 
-def water_sound_speed(temp: float) -> float:
+def water_sound_speed(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
-    Calculate the sound speed in distilled water with temperature.
+    Calculate the sound speed in distilled water with temperature according to Marczak (1997)
 
     Args:
         temp: The temperature of the water in degrees Celsius.
@@ -407,13 +423,13 @@ def water_sound_speed(temp: float) -> float:
         ValueError: if `temp` is not between 0 and 95
 
     References:
-        Marczak, R. (1997). The sound velocity in water as a function of temperature.
-                        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+        [1] R. Marczak (1997). "The sound velocity in water as a function of temperature".
+        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
     # check limits
-    if not (0 <= temp <= 95):
+    if not np.all([np.all(temp>=0.0), np.all(temp<=95.0)]):
         raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
@@ -422,7 +438,7 @@ def water_sound_speed(temp: float) -> float:
     return c
 
 
-def water_density(temp: float) -> float:
+def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.ndarray]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -439,13 +455,13 @@ def water_density(temp: float) -> float:
         ValueError: if `temp` is not between 5 and 40
 
     References:
-        [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
-        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
+        [1] F. E. Jones and G. L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
+        Journal of Research of the National Institute of Standards and Technology, 97(3), 335-340.
 
     """
 
     # check limits
-    if not (5 <= temp <= 40):
+    if not np.all([np.all(np.asarray(temp)>=5.0), np.all(np.asarray(temp)<=40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
@@ -453,7 +469,7 @@ def water_density(temp: float) -> float:
     return density
 
 
-def water_non_linearity(temp: float) -> float:
+def water_non_linearity(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
      Calculates the parameter of nonlinearity B/A at a
      given temperature using a fourth-order polynomial fitted to the data
@@ -469,13 +485,14 @@ def water_non_linearity(temp: float) -> float:
          >>> BonA = waterNonlinearity(T)
 
      References:
-         [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
-         Acoust. Soc. Am., 32(6), 719-721.
+         [1] R. T. Beyer (1960) "Parameter of nonlinearity in fluids," 
+         J. Acoust. Soc. Am., 32(6), 719-721.
 
     """
 
     # check limits
-    assert 0 <= temp <= 100, "Temp must be between 0 and 100."
+    if not np.all([np.all(temp>=0.0), np.all(temp<=100.0)]):
+        raise ValueError("`temp` must be between 0 and 100.")
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
@@ -483,8 +500,14 @@ def water_non_linearity(temp: float) -> float:
     return BonA
 
 
-def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False,
-              binary: bool = False) -> np.ndarray:
+@beartype
+def make_ball(
+        grid_size: Vector, 
+        ball_center: Vector, 
+        radius: int, 
+        plot_ball: bool = False,
+        binary: bool = False
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Creates a binary map of a filled ball within a 3D grid.
 
@@ -515,7 +538,7 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
             ball_center[i] = int(floor(grid_size[i] / 2)) + 1
 
     # create empty matrix
-    ball = np.zeros(grid_size).astype(bool if binary else float)
+    ball = np.zeros(grid_size).astype(bool if binary else int)
 
     # define np.pixel map
     r = make_pixel_map(grid_size, shift=[0, 0, 0])
@@ -534,9 +557,13 @@ def make_ball(grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bo
     return ball
 
 
-def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector([0, 0, 0]),
-                     plot_sphere: bool = False) -> Union[
-    List[Tuple[float, float, float]], Tuple[List[Tuple[float, float, float]], Any]]:
+@beartype
+def make_cart_sphere(
+    radius: Union[float, int], 
+    num_points: int, 
+    center_pos: Vector = Vector([0, 0, 0]),
+    plot_sphere: bool = False
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
 
@@ -558,11 +585,14 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     r = np.sqrt(1 - (y ** 2))
     phi = k * inc
 
+    if num_points <= 0:
+        raise ValueError("num_points must be greater than 0")
+
     # create the sphere
     sphere = radius * np.concatenate([np.cos(phi) * r[np.newaxis, :], y[np.newaxis, :], np.sin(phi) * r[np.newaxis, :]])
 
     # offset if needed
-    sphere = sphere + center_pos[:, None, None]
+    sphere = sphere + center_pos[:, None]
 
     # plot results
     if plot_sphere:
@@ -584,8 +614,13 @@ def make_cart_sphere(radius: float, num_points: int, center_pos: Vector = Vector
     return sphere.squeeze()
 
 
-def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector([0, 0]),
-                     arc_angle: float = 2 * np.pi, plot_circle: bool = False) -> np.ndarray:
+def make_cart_circle(
+    radius: float, 
+    num_points: int, 
+    center_pos: Vector = Vector([0, 0]),
+    arc_angle: float = 2 * np.pi, 
+    plot_circle: bool = False
+) -> NDArray[Shape["2, NumPoints"], Float]:
     """
     Create a set of points in cartesian coordinates defining a circle or arc.
 
@@ -636,7 +671,13 @@ def make_cart_circle(radius: float, num_points: int, center_pos: Vector = Vector
     return np.squeeze(circle)
 
 
-def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
+@beartype
+def make_disc(
+    grid_size: Vector, 
+    center: Vector, 
+    radius, 
+    plot_disc=False
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Create a binary map of a filled disc within a 2D grid.
 
@@ -675,7 +716,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     assert np.all(0 < center) and np.all(center <= grid_size), 'Disc center must be within grid.'
 
     # create empty matrix
-    disc = np.zeros(grid_size)
+    disc = np.zeros(grid_size, dtype=bool)
 
     # define np.pixel map
     r = make_pixel_map(grid_size, shift=[0, 0])
@@ -693,8 +734,14 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False):
     return disc
 
 
-def make_circle(grid_size: Vector, center: Vector, radius: int, arc_angle: Optional[float] = None,
-                plot_circle: bool = False) -> np.ndarray:
+@beartype
+def make_circle(
+        grid_size: Vector, 
+        center: Vector, 
+        radius: Union[int, Int, Float], 
+        arc_angle: Optional[float] = None,
+        plot_circle: bool = False
+) -> kt.NP_ARRAY_INT_2D:
     """
     Create a binary map of a circle within a 2D grid.
 
@@ -933,13 +980,14 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
     return nx
 
 
+@beartype
 def make_line(
         grid_size: Vector,
-        startpoint: Tuple[int, int],
-        endpoint: Optional[Tuple[int, int]] = None,
+        startpoint: Union[Tuple[Int, Int], NDArray[Shape['2'], Int]],
+        endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
         angle: Optional[float] = None,
         length: Optional[int] = None
-) -> np.ndarray:
+) -> kt.NP_ARRAY_BOOL_2D:
     """
     Generate a line shape with a given start and end point, angle, or length.
 
@@ -1020,7 +1068,7 @@ def make_line(
     if linetype == 'AtoB':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # find the equation of the line
         m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
@@ -1117,7 +1165,7 @@ def make_line(
     elif linetype == 'angled':
 
         # define an empty grid to hold the line
-        line = np.zeros(grid_size)
+        line = np.zeros(grid_size, dtype=bool)
 
         # start at the atart
         x, y = startpoint
@@ -1323,7 +1371,14 @@ def make_line(
     return line
 
 
-def make_arc(grid_size: Vector, arc_pos: np.ndarray, radius: float, diameter: float, focus_pos: Vector) -> np.ndarray:
+@beartype
+def make_arc(
+        grid_size: Vector, 
+        arc_pos: np.ndarray, 
+        radius: Union[int, float], 
+        diameter: Union[Int, int], 
+        focus_pos: Vector
+) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
 
@@ -1560,8 +1615,16 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
     return pixel_map
 
 
-def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
-              focus_pos: Vector, binary: bool = False, remove_overlap: bool = False) -> np.ndarray:
+@beartype
+def make_bowl(
+    grid_size: Vector, 
+    bowl_pos: Vector, 
+    radius: Union[int, float], 
+    diameter: Union[Number, int, float],
+    focus_pos: Vector, 
+    binary: bool = False, 
+    remove_overlap: bool = False
+) -> Union[kt.NP_ARRAY_BOOL_3D, kt.NP_ARRAY_INT_3D]:
     """
     Generate a matrix representing a bowl-shaped object in 3D space.
 
@@ -2100,7 +2163,7 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
     if binary:
         bowl = np.zeros(grid_size, dtype=bool)
     else:
-        bowl = np.zeros(grid_size)
+        bowl = np.zeros(grid_size, dtype=int)
 
     # calculate position of bounding box within larger grid
     x1 = bowl_pos[0] - bx
@@ -2139,9 +2202,15 @@ def make_bowl(grid_size: Vector, bowl_pos: Vector, radius: int, diameter: int,
     return bowl
 
 
-def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int, diameter: int,
-                    focus_pos: Tuple[int, int], binary: bool = False, remove_overlap: bool = False) -> Tuple[
-    np.ndarray, List[np.ndarray]]:
+def make_multi_bowl(
+    grid_size: Vector, 
+    bowl_pos: List[Tuple[int, int]], 
+    radius: int, 
+    diameter: int,
+    focus_pos: Tuple[int, int],
+    binary: bool = False,
+    remove_overlap: bool = False
+) -> Tuple[np.ndarray, List[np.ndarray]]:
     """
     Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
     the radius of each bowl, the diameter of the bowls, and the position of the focus.
@@ -2204,6 +2273,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             bowl_pos_k = bowl_pos[bowl_index]
         else:
             bowl_pos_k = bowl_pos
+        bowl_pos_k = Vector(bowl_pos_k)
 
         if len(radius) > 1:
             radius_k = radius[bowl_index]
@@ -2219,6 +2289,7 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
             focus_pos_k = focus_pos[bowl_index]
         else:
             focus_pos_k = focus_pos
+        focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
         new_bowl = make_bowl(
@@ -2246,8 +2317,14 @@ def make_multi_bowl(grid_size: int, bowl_pos: List[Tuple[int, int]], radius: int
     return bowls, bowls_labelled
 
 
-def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray],
-                   diameter: Union[int, np.ndarray], focus_pos: np.ndarray) -> np.ndarray:
+@beartype
+def make_multi_arc(
+    grid_size: Vector,
+    arc_pos: np.ndarray,
+    radius: Union[int, np.ndarray],
+    diameter: Union[int, np.ndarray], 
+    focus_pos: np.ndarray
+) -> Tuple[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_2D]:
     """
     Generates a multi-arc mask for an image given the size of the grid,
     the positions and properties of the arcs, and the position of the focus.
@@ -2337,8 +2414,13 @@ def make_multi_arc(grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np
     return arcs, arcs_labelled
 
 
-def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
-                binary: bool = False) -> np.ndarray:
+@beartype
+def make_sphere(
+    grid_size: Vector, 
+    radius: Union[float, int], 
+    plot_sphere: bool = False,
+    binary: bool = False
+) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
         and optional flags to plot the sphere and/or return a binary mask.
@@ -2361,7 +2443,7 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     if binary:
         sphere = np.zeros(grid_size, dtype=bool)
     else:
-        sphere = np.zeros(grid_size)
+        sphere = np.zeros(grid_size, dtype=int)
 
     # create a guide circle from which the individal radii can be extracted
     guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
@@ -2435,8 +2517,14 @@ def make_sphere(grid_size: Vector, radius: float, plot_sphere: bool = False,
     return sphere
 
 
-def make_spherical_section(radius: float, height: float, width: float = None, plot_section: bool = False,
-                           binary: bool = False) -> np.ndarray:
+@beartype
+def make_spherical_section(
+    radius: Union[float, int], 
+    height: Union[float, int], 
+    width: Optional[Union[float, int]] = None, 
+    plot_section: bool = False,
+    binary: bool = False
+) -> Tuple:
     """
     Generates a spherical section mask given the radius and height of the section and
         optional parameters to specify the width and/or plot and return a binary mask.
@@ -2575,7 +2663,17 @@ def make_spherical_section(radius: float, height: float, width: float = None, pl
     return ss, dist_map
 
 
-def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
+@beartype
+def make_cart_rect(
+    rect_pos, 
+    Lx: Union[float, int], 
+    Ly: Union[float, int], 
+    theta: Optional[Union[
+        int, float, List, 
+        kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]]=None, 
+    num_points: int=0, 
+    plot_rect: bool=False
+) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
     """
     Create evenly distributed Cartesian points covering a rectangle.
 
@@ -2650,9 +2748,25 @@ def make_cart_rect(rect_pos, Lx, Ly, theta=None, num_points=0, plot_rect=False):
     return rect
 
 
-def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequency: float, sound_speed: float,
-                       density: float, axial_positions: Union[np.ndarray, float, list] = None,
-                       lateral_positions: Union[np.ndarray, float, list] = None) -> [float, float]:
+@beartype
+def focused_bowl_oneil(
+    radius: kt.NUMERIC, 
+    diameter: kt.NUMERIC, 
+    velocity: kt.NUMERIC, 
+    frequency: kt.NUMERIC, 
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC, 
+    axial_positions: Optional[
+        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
+    ] = None,
+    lateral_positions: Optional[
+        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
+    ] = None
+) -> Tuple[
+    Optional[kt.NP_ARRAY_FLOAT_1D], 
+    Optional[kt.NP_ARRAY_FLOAT_1D], 
+    Optional[kt.NP_ARRAY_COMPLEX_1D]
+]:
     """
     Calculates O'Neil's solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.
 
@@ -2697,7 +2811,11 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
     float_eps = np.finfo(float).eps
 
-    def calculate_axial_pressure() -> float:
+    # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
+    def calculate_axial_pressure() -> Tuple[
+                                        NDArray[Shape["N"], Float], 
+                                        NDArray[Shape["N"], Complex]
+                                    ]:
         # calculate distances
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
         d = B - axial_positions
@@ -2717,9 +2835,12 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
 
         return axial_pressure, complex_axial_pressure
 
-    def calculate_lateral_pressure() -> float:
+    @beartype
+    def calculate_lateral_pressure() -> NDArray[Shape["N"], Float]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
+        # TODO: this should work
+        # assert np.all(Z) > 0, 'Z must be greater than 0'
         lateral_pressure = 2. * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
 
         # replace origin with limit
@@ -2741,6 +2862,117 @@ def focused_bowl_oneil(radius: float, diameter: float, velocity: float, frequenc
     if axial_positions is not None:
         p_axial, p_axial_complex = calculate_axial_pressure()
     return p_axial, p_lateral, p_axial_complex
+
+
+@beartype
+def focused_annulus_oneil(radius: float,
+                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]],
+                          amplitude: NDArray[Shape["NumElements"], Float],
+                          phase: NDArray[Shape["NumElements"], Float],
+                          frequency: kt.NUMERIC,
+                          sound_speed: kt.NUMERIC,
+                          density: kt.NUMERIC,
+                          axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list]) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
+    """Compute axial pressure for focused annulus transducer using O'Neil's solution
+
+    focused_annulus_oneil calculates the axial pressure for a focused
+    annular transducer using O'Neil's solution (O'Neil, H. Theory of
+    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949). The
+    annuluar elements are uniformly driven by a continuous wave sinusoid
+    at a given frequency and normal surface velocity.
+
+    The solution is evaluated at the positions (along the beam axis) given
+    by axial_position. Where 0 corresponds to the transducer surface.
+
+    Note, O'Neil's formulae are derived under the assumptions of the
+    Rayleigh integral, which are valid when the transducer diameter is
+    large compared to both the transducer height and the acoustic
+    wavelength.
+
+    Example:
+        # define transducer parameters
+        radius = 140e-3  # [m]
+        diameter = 120e-3  # [m]
+        velocity = 100e-3  # [m / s]
+        frequency = 1e6  # [Hz]
+        sound_speed = 1500  # [m / s]
+        density = 1000  # [kg / m^3]
+
+        # define position vectors
+        axial_position = np.arange(0, 250e-3 + 1e-4, 1e-4)  # [m]
+        p_axial = focused_annulus_oneil(radius, diameter, amplitude, phase, frequency, sound_speed, density, axial_position)
+
+    Args:
+        radius: transducer radius of curvature [m]
+        diameter: 2 x num_elements array containing pairs of inner and outer aperture diameter
+                  (diameter of opening) [m].
+        amplitude: array containing the normal surface velocities for each element [m/s]
+        phase: array containing the phase for each element [rad]
+        frequency: driving frequency [Hz]
+        sound_speed: speed of sound in the propagating medium [m/s]
+        density: density in the propagating medium [kg/m^3]
+        axial_positions: vector of positions along the beam axis where the
+                         pressure amplitude is calculated [m]
+
+    Returns:
+        p_axial: pressure amplitude at the positions specified by axial_position [Pa]
+
+    References:
+        O'Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.
+
+    See also focused_bowl_oneil.
+    """
+
+    if (not np.greater_equal(diameter, np.zeros_like(diameter)).all() or not np.isreal(diameter).all() 
+        or not np.isfinite(diameter).all()): 
+        raise ValueError("wrong values in diameter object")
+
+    if not np.all(np.isfinite(amplitude)): 
+        raise ValueError("amplitude contains an np.inf")
+    if not np.all(np.isfinite(frequency)):
+         raise ValueError("frequency contains an np.inf")
+
+    # set the number of elements in annular array
+    num_elements: int = np.size(amplitude)
+
+    if ((radius <= 0.0) or not np.isreal(radius) or not np.isfinite(radius)): 
+        raise ValueError("radius is incorrect")
+
+    if (((phase < -np.pi).any() or (phase > np.pi).any()) or not np.isreal(phase).any()
+        or not np.isfinite(phase).all()):
+        raise ValueError("phase is incorrect")
+
+    if (np.shape(diameter)[0] != 2):
+        diameter = np.transpose(diameter)
+
+    # pre-allocate output
+    p_axial = np.zeros(np.shape(axial_positions))
+
+    # loop over elements and sum fields
+    for ind in range(num_elements):
+
+        # get complex pressure for bowls with inner and outer aperature diameter
+        if (diameter[0, ind] == 0):
+            p_el_inner = 0.0 + 0.0j
+        else:
+            _, _, p_el_inner = focused_bowl_oneil(radius, diameter[0, ind], amplitude[ind], frequency,
+                                                  sound_speed, density, axial_positions=axial_positions)
+
+        _, _, p_el_outer = focused_bowl_oneil(radius, diameter[1, ind], amplitude[ind], frequency,
+                                              sound_speed, density, axial_positions=axial_positions)
+
+        # pressure for annular element
+        p_el = p_el_outer - p_el_inner
+
+        # account for phase
+        p_el = np.abs(p_el) * np.exp(1.0j * (np.angle(p_el) + phase[ind]))
+
+        # add to complete response
+        p_axial = p_axial + p_el
+
+    # take magnitude of complete response
+    return np.abs(p_axial)
+
 
 
 def ndgrid(*args):
@@ -2780,8 +3012,15 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Vector, num_points: int,
-                  plot_arc: bool = False) -> np.ndarray:
+@beartype
+def make_cart_arc(
+    arc_pos: Vector, 
+    radius: Union[float, int], 
+    diameter: int, 
+    focus_pos: Vector, 
+    num_points: int,
+    plot_arc: bool = False
+) -> NDArray[Shape["2, NumPoints"], Float]:
     """
     make_cart_arc creates a 2 x num_points array of the Cartesian
     coordinates of points evenly distributed over an arc. The midpoint of
@@ -2854,7 +3093,11 @@ def make_cart_arc(arc_pos: Vector, radius: float, diameter: float, focus_pos: Ve
     return arc
 
 
-def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector) -> Tuple[np.ndarray, np.ndarray]:
+def compute_linear_transform2D(
+    arc_pos: Vector, 
+    radius: float, 
+    focus_pos: Vector
+) -> Tuple[np.ndarray, np.ndarray]:
     """
 
     Compute a rotation matrix to transform the computed arc points to the orientation
@@ -2892,9 +3135,17 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
     return R, b
 
 
-def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diameter: float, outer_diameter: float,
-                                focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False,
-                                num_points_inner: int = 0) -> np.ndarray:
+@beartype
+def make_cart_spherical_segment(
+    bowl_pos: NDArray[Shape["3"], Float], 
+    radius: Union[float, int], 
+    inner_diameter: Union[float, int], 
+    outer_diameter: Union[float, int],
+    focus_pos: NDArray[Shape["3"], Float], 
+    num_points: int, 
+    plot_bowl: Optional[bool] = False,
+    num_points_inner: int = 0
+) -> NDArray[Shape["3, NumPoints"], Float]:
     """
     Create evenly distributed Cartesian points covering a spherical segment.
 
@@ -2968,7 +3219,7 @@ def make_cart_spherical_segment(bowl_pos: np.ndarray, radius: float, inner_diame
     segment = R @ p0 + b
 
     # plot results
-    if plot_bowl:
+    if plot_bowl is True:
         _, scale, prefix, unit = scale_SI(np.max(segment))
 
         # create the figure
