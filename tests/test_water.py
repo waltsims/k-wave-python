@@ -64,12 +64,12 @@ def test_water_density():
     input_temp = np.arange(5, 41, dtype=float)
 
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_density(input_temp[idx])) < 1e-6, \
+        assert np.isclose(value, water_density(input_temp[idx])), \
           "The expected value deviates from water_density output"
     
-    assert np.max(np.abs(expected_values - water_density(input_temp))) < 1e-6, \
+    assert np.allclose(expected_values, water_density(input_temp)), \
         "An expected value deviates from water_density output vector"
-    assert np.max(np.abs(expected_values.reshape(6,6) - water_density(input_temp.reshape(6,6)))) < 1e-6, \
+    assert np.allclose(expected_values.reshape(6,6), water_density(input_temp.reshape(6,6))), \
         "An expected value deviates from water_density output matrix"
     with pytest.raises(ValueError):
         _ = water_density(3.0)
