@@ -1,8 +1,11 @@
+import numpy as np
+import pytest 
+import itertools
 from kwave.utils.mapgen import water_sound_speed, water_non_linearity, water_density, water_absorption
 
 
 def test_water_absorption():
-    expected_outputs = [4.92700598e-03, 3.10935008e-03, 2.18550989e-03, 1.65777741e-03,
+    expected_outputs = np.array([4.92700598e-03, 3.10935008e-03, 2.18550989e-03, 1.65777741e-03,
                         1.29686047e-03, 1.03350585e-03, 8.60898169e-04, 1.97080239e-02,
                         1.24374003e-02, 8.74203957e-03, 6.63110962e-03, 5.18744190e-03,
                         4.13402339e-03, 3.44359267e-03, 4.43430538e-02, 2.79841507e-02,
@@ -28,21 +31,28 @@ def test_water_absorption():
                         6.09432615e-01, 4.28359939e-01, 3.24924372e-01, 2.54184653e-01,
                         2.02567146e-01, 1.68736041e-01, 1.10857634e+00, 6.99603767e-01,
                         4.91739726e-01, 3.72999916e-01, 2.91793607e-01, 2.32538816e-01,
-                        1.93702088e-01]
-    input_temps = [0, 10, 20, 30, 40, 50, 60]
-    input_fs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    idx = 0
-    for f in input_fs:
-        for temp in input_temps:
-            assert abs(expected_outputs[idx] - water_absorption(f,
-                                                                temp)) < 1e-6, "Expected value deviates from expected " \
+                        1.93702088e-01])
+    
+    input_temps = np.arange(0, 70, 10, dtype=float)
+    input_fsampling = np.arange(1, 16, dtype=float)
+    # idx : int = 0
+
+    #for fs in input_fsampling:
+    #    for temp in input_temps:
+    for idx, (f_s, temp) in enumerate(itertools.product(input_fsampling, input_temps)):
+        assert np.isclose(expected_outputs[idx], water_absorption(f_s, temp)), \
+          "Expected value deviates from expected absorption value "
+    
+    n: int = np.size(input_temps)
+    for idx, f_s in enumerate(input_fsampling):
+        assert np.allclose(expected_outputs[idx * n : (idx + 1) * n], 
+                   water_absorption(f_s, input_temps)), "Expected value deviates from expected " \
                                                                                "absorption value "
-            idx += 1
     return
 
 
 def test_water_density():
-    expected_values = [999.96069266, 999.93636812, 999.89732966, 999.84393424,
+    expected_values = np.array([999.96069266, 999.93636812, 999.89732966, 999.84393424,
                        999.7765297, 999.69545466, 999.60103861, 999.49360184,
                        999.37345547, 999.24090148, 999.09623264, 998.93973257,
                        998.77167573, 998.59232737, 998.40194361, 998.20077138,
@@ -50,16 +60,23 @@ def test_water_density():
                        997.04108388, 996.77985284, 996.50930509, 996.22961417,
                        995.94094449, 995.64345126, 995.33728055, 995.02256923,
                        994.69944501, 994.36802644, 994.02842288, 993.68073453,
-                       993.32505242, 992.9614584, 992.59002517, 992.21081622]
-    input_temp = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-                  32, 33, 34, 35, 36, 37, 38, 39, 40]
+                       993.32505242, 992.9614584, 992.59002517, 992.21081622])
+    input_temp = np.arange(5, 41, dtype=float)
 
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_density(input_temp[idx])) < 1e-6, "Expected value deviates from water_density output"
+        assert np.isclose(value, water_density(input_temp[idx])), \
+          "The expected value deviates from water_density output"
+    
+    assert np.allclose(expected_values, water_density(input_temp)), \
+        "An expected value deviates from water_density output vector"
+    assert np.allclose(expected_values.reshape(6,6), water_density(input_temp.reshape(6,6))), \
+        "An expected value deviates from water_density output matrix"
+    with pytest.raises(ValueError):
+        _ = water_density(3.0)
 
 
 def test_water_sound_speed():
-    expected_values = [1402.385, 1407.36634896, 1412.23406799, 1416.99007945,
+    expected_values = np.array([1402.385, 1407.36634896, 1412.23406799, 1416.99007945,
                        1421.63627279, 1426.17450488, 1430.60660038, 1434.93435204,
                        1439.15952103, 1443.28383731, 1447.30899994, 1451.2366774,
                        1455.06850798, 1458.80610003, 1462.45103239, 1466.00485465,
@@ -82,14 +99,22 @@ def test_water_sound_speed():
                        1555.76629165, 1555.55766354, 1555.31270576, 1555.03176554,
                        1554.71518402, 1554.3632965, 1553.97643281, 1553.55491766,
                        1553.09907095, 1552.60920812, 1552.08564046, 1551.52867549,
-                       1550.93861723, 1550.31576661, 1549.66042173, 1548.97287827]
+                       1550.93861723, 1550.31576661, 1549.66042173, 1548.97287827])
+    input_temp = np.arange(96, dtype=float)
 
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_sound_speed(idx)) < 1e-6, "Expected value deviates from water_sound_speed output"
+        assert np.isclose(value, water_sound_speed(idx)), "Expected value deviates from water_sound_speed output"
+    
+    assert np.allclose(expected_values, water_sound_speed(input_temp)), "Expected value deviates from water_sound_speed output vector"
+    assert np.allclose(expected_values.reshape(12,8), water_sound_speed(input_temp.reshape(12,8))), \
+      "Expected value deviates from water_sound_speed output matrix"
+
+    with pytest.raises(ValueError):
+        _ = water_sound_speed(96.0)
 
 
 def test_water_non_linearity():
-    expected_values = [4.18653394, 4.23941757, 4.29049232, 4.33981942, 4.38745897,
+    expected_values = np.array([4.18653394, 4.23941757, 4.29049232, 4.33981942, 4.38745897,
                        4.43347001, 4.47791044, 4.52083708, 4.56230564, 4.60237073,
                        4.64108587, 4.67850347, 4.71467483, 4.74965016, 4.78347857,
                        4.81620807, 4.84788556, 4.87855684, 4.90826661, 4.93705849,
@@ -109,6 +134,17 @@ def test_water_non_linearity():
                        6.04106348, 6.04998878, 6.05837788, 6.06619841, 6.07341691,
                        6.0799988, 6.08590839, 6.0911089, 6.09556247, 6.0992301,
                        6.10207171, 6.10404612, 6.10511105, 6.10522312, 6.10433782,
-                       6.10240959]
+                       6.10240959])
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_non_linearity(idx)) < 1e-6, "Expected value deviates from water_non_linearity output"
+        assert np.isclose(value, water_non_linearity(idx)), "The expected value deviates from water_non_linearity output"
+
+    input_temp = np.arange(101, dtype=float)
+    assert np.allclose(expected_values, water_non_linearity(input_temp)), \
+           "An expected value deviates from the output vector from water_non_linearity"
+    
+    assert np.allclose(expected_values[1:101].reshape(10,10),
+                       water_non_linearity(input_temp[1:101].reshape(10,10))), \
+                       "An expected values deviates from the output matrix from water_non_linearity output matrix"
+    
+    with pytest.raises(ValueError):
+        _ = water_non_linearity(101.0)
