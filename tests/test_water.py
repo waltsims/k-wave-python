@@ -141,8 +141,10 @@ def test_water_non_linearity():
     input_temp = np.arange(101, dtype=float)
     assert np.allclose(expected_values, water_non_linearity(input_temp)), \
            "An expected value deviates from the output vector from water_non_linearity"
+    
     assert np.allclose(expected_values[1:101].reshape(10,10),
                        water_non_linearity(input_temp[1:101].reshape(10,10))), \
                        "An expected values deviates from the output matrix from water_non_linearity output matrix"
+    
     with pytest.raises(ValueError):
-            _ = water_non_linearity(101.0)
+        _ = water_non_linearity(101.0)
