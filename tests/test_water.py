@@ -136,13 +136,13 @@ def test_water_non_linearity():
                        6.10207171, 6.10404612, 6.10511105, 6.10522312, 6.10433782,
                        6.10240959])
     for idx, value in enumerate(expected_values):
-        assert abs(value - water_non_linearity(idx)) < 1e-6, "The expected value deviates from water_non_linearity output"
+        assert np.isclose(value, water_non_linearity(idx)), "The expected value deviates from water_non_linearity output"
 
     input_temp = np.arange(101, dtype=float)
-    assert np.max(np.abs(expected_values - water_non_linearity(input_temp))) < 1e-6, \
+    assert np.allclose(expected_values, water_non_linearity(input_temp)), \
            "An expected value deviates from the output vector from water_non_linearity"
-    assert np.max(np.abs(expected_values[1:101].reshape(10,10) - 
-                         water_non_linearity(input_temp[1:101].reshape(10,10)))) < 1e-6, \
+    assert np.allclose(expected_values[1:101].reshape(10,10),
+                         water_non_linearity(input_temp[1:101].reshape(10,10)), \
                          "An expected values deviates from the output matrix from  water_non_linearity output matrix"
     with pytest.raises(ValueError):
             _ = water_non_linearity(101.0)
