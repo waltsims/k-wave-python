@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
 readme = "docs/README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
     { name = "Walter Simson", email = "walter.simson@tum.de"}
