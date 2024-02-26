@@ -253,27 +253,22 @@ class SimulationOptions(object):
                 else:
                     raise ValueError("Optional input ''pml_size'' must be a single numerical value.")
 
-        if kgrid.dim == 1:
-            options.pml_x_alpha = 2
+        if (kgrid.dim == 1):
             options.pml_x_size = options.pml_size if options.pml_size else 20
             options.plot_scale = [-1.1, 1.1]
-        elif kgrid.dim == 2:
-            options.pml_x_alpha = 2
-            options.pml_y_alpha = options.pml_x_alpha
-            if options.pml_size is None:
-                options.pml_x_size = 20
-                options.pml_y_size = 20
-            else:
-                options.pml_x_size = options.pml_size[0]
-                options.pml_y_size = options.pml_x_size
+        elif (kgrid.dim == 2):
+            if (options.pml_size is not None): 
+                if (len(options.pml_size) == kgrid.dim):
+                    options.pml_x_size, options.pml_y_size = options.pml_size.ravel()
+                else:
+                    options.pml_x_size, options.pml_y_size = (options.pml_size[0], options.pml_size[0])
+            else: 
+                options.pml_x_size, options.pml_y_size = (20, 20)
             options.plot_scale = [-1, 1]
-        elif kgrid.dim == 3:
-            if options.pml_size is not None and len(options.pml_size) == kgrid.dim:
+        elif (kgrid.dim == 3):
+            if ((options.pml_size is not None) and (len(options.pml_size) == kgrid.dim)):
                 options.pml_x_size, options.pml_y_size, options.pml_z_size = options.pml_size.ravel()
             else:
-                options.pml_x_alpha = 2
-                options.pml_y_alpha = options.pml_x_alpha
-                options.pml_z_alpha = options.pml_x_alpha
                 if options.pml_size is None:
                     options.pml_x_size = 10
                     options.pml_y_size = 10
