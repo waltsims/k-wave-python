@@ -111,12 +111,13 @@ def test_pml_sizes_2d():
     with pytest.raises(ValueError):
         simulation_options = SimulationOptions(pml_sizes=[18,18,18])
         _ = kspace_first_order_2d_gpu(medium=medium,
-                                                  kgrid=kgrid,
-                                                  source=source,
-                                                  sensor=sensor,
-                                                  simulation_options=simulation_options,
-                                                  execution_options=SimulationExecutionOptions())
-     with pytest.raises(ValueError):
+                                      kgrid=kgrid,
+                                      source=source,
+                                      sensor=sensor,
+                                      simulation_options=simulation_options,
+                                      execution_options=SimulationExecutionOptions())
+    
+    with pytest.raises(ValueError):
         simulation_options = SimulationOptions(pml_sizes=[18,18,18]) 
         _ = kspaceFirstOrder2DC(medium=medium,
                                 kgrid=kgrid,
@@ -131,7 +132,7 @@ def test_pml_sizes_2d():
         "pml sizes incorrect when passing int"
 
     pml_sizes = [21, 22]
-    simulation_options = SimulationOptions(pml_sizes=pml_size)
+    simulation_options = SimulationOptions(pml_sizes=pml_sizes)
     assert ((simulation_options.pml_x_size == pml_sizes[0]) and (simulation_options.pml_y_size == pml_sizes[1])), \
         "pml sizes incorrect when passing list"
 
