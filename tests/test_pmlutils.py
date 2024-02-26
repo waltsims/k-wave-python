@@ -73,18 +73,21 @@ def test_get_optimal_pml_size_3D():
 
 def test_pml_sizes_2d():
     
-    nx = 64  # number of grid points in the x (row) direction
-    x = 1e-3  # size of the domain in the x direction [m]
+    nx = 128  # number of grid points in the x (row) direction
+    x = 128e-3  # size of the domain in the x direction [m]
     dx = x / nx  # grid point spacing in the x direction [m]
     ny = 128  # number of grid points in the y (column) direction
-    y = 1e-3  # size of the domain in the y direction [m]
+    y = 128e-3  # size of the domain in the y direction [m]
     dy = y / ny  # grid point spacing in the y direction [m]
+
+    grid_size = Vector([nx, ny]) # [grid points]
+    grid_spacing = Vector([dx, dy])  # [m]
 
     # time array
     dt = 2e-9  # [s]
     t_end = 300e-9  # [s]
     # create the computational grid
-    kgrid = kWaveGrid([nx, ny], [dx, dy])
+    kgrid = kWaveGrid(grid_size, grid_spacing)
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
