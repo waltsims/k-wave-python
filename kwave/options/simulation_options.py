@@ -259,7 +259,7 @@ class SimulationOptions(object):
         elif (kgrid.dim == 2):
             if (options.pml_size is not None): 
                 if (len(options.pml_size) == kgrid.dim):
-                    options.pml_x_size, options.pml_y_size = options.pml_size.ravel()
+                    options.pml_x_size, options.pml_y_size = np.asarray(options.pml_size, dtype=int).ravel()
                 else:
                     options.pml_x_size, options.pml_y_size = (options.pml_size[0], options.pml_size[0])
             else: 
@@ -267,7 +267,7 @@ class SimulationOptions(object):
             options.plot_scale = [-1, 1]
         elif (kgrid.dim == 3):
             if ((options.pml_size is not None) and (len(options.pml_size) == kgrid.dim)):
-                options.pml_x_size, options.pml_y_size, options.pml_z_size = options.pml_size.ravel()
+                options.pml_x_size, options.pml_y_size, options.pml_z_size = np.asarray(options.pml_size).ravel()
             else:
                 if options.pml_size is None:
                     options.pml_x_size = 10
