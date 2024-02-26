@@ -133,18 +133,21 @@ def test_pml_sizes_2d():
 
     pml_size: int = 19
     simulation_options = SimulationOptions(pml_size=pml_size)
-    assert ((simulation_options.pml_x_size == pml_size) and (simulation_options.pml_y_size == pml_size)), \
+    options = SimulationOptions.option_factory(kgrid, simulation_options)
+    assert ((options.pml_x_size == pml_size) and (options.pml_y_size == pml_size)), \
         "pml sizes incorrect when passing int"
 
     pml_sizes = [21, 22]
     simulation_options = SimulationOptions(pml_size=pml_sizes)
-    assert ((simulation_options.pml_x_size == pml_sizes[0]) and (simulation_options.pml_y_size == pml_sizes[1])), \
+    options = SimulationOptions.option_factory(kgrid, simulation_options)
+    assert ((options.pml_x_size == pml_sizes[0]) and (options.pml_y_size == pml_sizes[1])), \
         "pml sizes incorrect when passing list"
 
     pml_sizes = None
     pml_default: int = 20
     simulation_options = SimulationOptions()
-    assert ((simulation_options.pml_x_size == pml_default) and (simulation_options.pml_y_size == pml_default)), \
+    options = SimulationOptions.option_factory(kgrid, simulation_options)
+    assert ((options.pml_x_size == pml_default) and (options.pml_y_size == pml_default)), \
         "pml sizes incorrect when not defining sizes"
 
 
