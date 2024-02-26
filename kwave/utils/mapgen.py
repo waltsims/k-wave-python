@@ -367,11 +367,11 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     return c_kk
 
 
-def water_absorption(f, temp):
+def water_absorption(f: float, temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
     Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
-    polynomial fitted to the data given by np.pinkerton(1949).
+    polynomial fitted to the data given by Pinkerton (1949).
 
 
     Args:
@@ -385,15 +385,15 @@ def water_absorption(f, temp):
         >>> abs = waterAbsorption(f, T)
 
     References:
-        [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
-        and its Relation to Molecular Constitution, " Proceedings of the
-        Physical Society.Section B, 2, 129 - 141
+        [1] J. M. M. Pinkerton (1949) "The Absorption of Ultrasonic Waves in Liquids and its 
+                                        Relation to Molecular Constitution," 
+        Proceedings of the Physical Society. Section B, 2, 129-141
 
     """
 
     NEPER2DB = 8.686
     # check temperature is within range
-    if not 0 <= temp <= 60:
+    if not np.all([np.all(temp>=0.0), np.all(temp<=60.0)]):
         raise Warning("Temperature outside range of experimental data")
 
     # conversion factor between Nepers and dB NEPER2DB = 8.686;
@@ -409,9 +409,9 @@ def water_absorption(f, temp):
     return abs
 
 
-def water_sound_speed(temp: float) -> float:
+def water_sound_speed(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
-    Calculate the sound speed in distilled water with temperature.
+    Calculate the sound speed in distilled water with temperature according to Marczak (1997)
 
     Args:
         temp: The temperature of the water in degrees Celsius.
@@ -423,13 +423,13 @@ def water_sound_speed(temp: float) -> float:
         ValueError: if `temp` is not between 0 and 95
 
     References:
-        Marczak, R. (1997). The sound velocity in water as a function of temperature.
-                        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+        [1] R. Marczak (1997). "The sound velocity in water as a function of temperature".
+        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
     # check limits
-    if not (0 <= temp <= 95):
+    if not np.all([np.all(temp>=0.0), np.all(temp<=95.0)]):
         raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
@@ -438,7 +438,7 @@ def water_sound_speed(temp: float) -> float:
     return c
 
 
-def water_density(temp: float) -> float:
+def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.ndarray]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -455,13 +455,13 @@ def water_density(temp: float) -> float:
         ValueError: if `temp` is not between 5 and 40
 
     References:
-        [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
-        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
+        [1] F. E. Jones and G. L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
+        Journal of Research of the National Institute of Standards and Technology, 97(3), 335-340.
 
     """
 
     # check limits
-    if not (5 <= temp <= 40):
+    if not np.all([np.all(np.asarray(temp)>=5.0), np.all(np.asarray(temp)<=40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
@@ -469,7 +469,7 @@ def water_density(temp: float) -> float:
     return density
 
 
-def water_non_linearity(temp: float) -> float:
+def water_non_linearity(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
      Calculates the parameter of nonlinearity B/A at a
      given temperature using a fourth-order polynomial fitted to the data
@@ -485,13 +485,14 @@ def water_non_linearity(temp: float) -> float:
          >>> BonA = waterNonlinearity(T)
 
      References:
-         [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
-         Acoust. Soc. Am., 32(6), 719-721.
+         [1] R. T. Beyer (1960) "Parameter of nonlinearity in fluids," 
+         J. Acoust. Soc. Am., 32(6), 719-721.
 
     """
 
     # check limits
-    assert 0 <= temp <= 100, "Temp must be between 0 and 100."
+    if not np.all([np.all(temp>=0.0), np.all(temp<=100.0)]):
+        raise ValueError("`temp` must be between 0 and 100.")
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
@@ -2749,12 +2750,12 @@ def make_cart_rect(
 
 @beartype
 def focused_bowl_oneil(
-    radius: float, 
-    diameter: float, 
-    velocity: float, 
-    frequency: int, 
-    sound_speed: int,
-    density: int, 
+    radius: kt.NUMERIC, 
+    diameter: kt.NUMERIC, 
+    velocity: kt.NUMERIC, 
+    frequency: kt.NUMERIC, 
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC, 
     axial_positions: Optional[
         Union[kt.NP_ARRAY_FLOAT_1D, float, List]
     ] = None,
@@ -2861,6 +2862,117 @@ def focused_bowl_oneil(
     if axial_positions is not None:
         p_axial, p_axial_complex = calculate_axial_pressure()
     return p_axial, p_lateral, p_axial_complex
+
+
+@beartype
+def focused_annulus_oneil(radius: float,
+                          diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]],
+                          amplitude: NDArray[Shape["NumElements"], Float],
+                          phase: NDArray[Shape["NumElements"], Float],
+                          frequency: kt.NUMERIC,
+                          sound_speed: kt.NUMERIC,
+                          density: kt.NUMERIC,
+                          axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list]) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
+    """Compute axial pressure for focused annulus transducer using O'Neil's solution
+
+    focused_annulus_oneil calculates the axial pressure for a focused
+    annular transducer using O'Neil's solution (O'Neil, H. Theory of
+    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949). The
+    annuluar elements are uniformly driven by a continuous wave sinusoid
+    at a given frequency and normal surface velocity.
+
+    The solution is evaluated at the positions (along the beam axis) given
+    by axial_position. Where 0 corresponds to the transducer surface.
+
+    Note, O'Neil's formulae are derived under the assumptions of the
+    Rayleigh integral, which are valid when the transducer diameter is
+    large compared to both the transducer height and the acoustic
+    wavelength.
+
+    Example:
+        # define transducer parameters
+        radius = 140e-3  # [m]
+        diameter = 120e-3  # [m]
+        velocity = 100e-3  # [m / s]
+        frequency = 1e6  # [Hz]
+        sound_speed = 1500  # [m / s]
+        density = 1000  # [kg / m^3]
+
+        # define position vectors
+        axial_position = np.arange(0, 250e-3 + 1e-4, 1e-4)  # [m]
+        p_axial = focused_annulus_oneil(radius, diameter, amplitude, phase, frequency, sound_speed, density, axial_position)
+
+    Args:
+        radius: transducer radius of curvature [m]
+        diameter: 2 x num_elements array containing pairs of inner and outer aperture diameter
+                  (diameter of opening) [m].
+        amplitude: array containing the normal surface velocities for each element [m/s]
+        phase: array containing the phase for each element [rad]
+        frequency: driving frequency [Hz]
+        sound_speed: speed of sound in the propagating medium [m/s]
+        density: density in the propagating medium [kg/m^3]
+        axial_positions: vector of positions along the beam axis where the
+                         pressure amplitude is calculated [m]
+
+    Returns:
+        p_axial: pressure amplitude at the positions specified by axial_position [Pa]
+
+    References:
+        O'Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.
+
+    See also focused_bowl_oneil.
+    """
+
+    if (not np.greater_equal(diameter, np.zeros_like(diameter)).all() or not np.isreal(diameter).all() 
+        or not np.isfinite(diameter).all()): 
+        raise ValueError("wrong values in diameter object")
+
+    if not np.all(np.isfinite(amplitude)): 
+        raise ValueError("amplitude contains an np.inf")
+    if not np.all(np.isfinite(frequency)):
+         raise ValueError("frequency contains an np.inf")
+
+    # set the number of elements in annular array
+    num_elements: int = np.size(amplitude)
+
+    if ((radius <= 0.0) or not np.isreal(radius) or not np.isfinite(radius)): 
+        raise ValueError("radius is incorrect")
+
+    if (((phase < -np.pi).any() or (phase > np.pi).any()) or not np.isreal(phase).any()
+        or not np.isfinite(phase).all()):
+        raise ValueError("phase is incorrect")
+
+    if (np.shape(diameter)[0] != 2):
+        diameter = np.transpose(diameter)
+
+    # pre-allocate output
+    p_axial = np.zeros(np.shape(axial_positions))
+
+    # loop over elements and sum fields
+    for ind in range(num_elements):
+
+        # get complex pressure for bowls with inner and outer aperature diameter
+        if (diameter[0, ind] == 0):
+            p_el_inner = 0.0 + 0.0j
+        else:
+            _, _, p_el_inner = focused_bowl_oneil(radius, diameter[0, ind], amplitude[ind], frequency,
+                                                  sound_speed, density, axial_positions=axial_positions)
+
+        _, _, p_el_outer = focused_bowl_oneil(radius, diameter[1, ind], amplitude[ind], frequency,
+                                              sound_speed, density, axial_positions=axial_positions)
+
+        # pressure for annular element
+        p_el = p_el_outer - p_el_inner
+
+        # account for phase
+        p_el = np.abs(p_el) * np.exp(1.0j * (np.angle(p_el) + phase[ind]))
+
+        # add to complete response
+        p_axial = p_axial + p_el
+
+    # take magnitude of complete response
+    return np.abs(p_axial)
+
 
 
 def ndgrid(*args):
@@ -3025,11 +3137,11 @@ def compute_linear_transform2D(
 
 @beartype
 def make_cart_spherical_segment(
-    bowl_pos: NDArray[Shape["3"], Int], 
+    bowl_pos: NDArray[Shape["3"], Float], 
     radius: Union[float, int], 
     inner_diameter: Union[float, int], 
     outer_diameter: Union[float, int],
-    focus_pos: NDArray[Shape["3"], Int], 
+    focus_pos: NDArray[Shape["3"], Float], 
     num_points: int, 
     plot_bowl: Optional[bool] = False,
     num_points_inner: int = 0

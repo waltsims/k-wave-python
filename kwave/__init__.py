@@ -4,10 +4,11 @@ import sys
 import urllib.request
 from os import environ
 from pathlib import Path
+from typing import List
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 # Set environment variable to binaries to get rid of user warning
 # This code is a crutch and should be removed when kspaceFirstOrder
 # is refactored
@@ -56,12 +57,19 @@ def binaries_present() -> bool:
         ],
         "windows": specific_omp_filenames + specific_cuda_filenames + common_filenames
     }
+    missing_binaries: List[str] = []
 
     for binary in binary_list[system]:
         if not os.path.exists(os.path.join(binary_path, binary)):
-            logging.log(logging.WARN,  f"{binary} not found")
-            return False
-    return True
+            missing_binaries.append(binary)
+    
+    if len(missing_binaries) > 0:
+        missing_binaries_str = ", ".join(missing_binaries)
+        logging.log(logging.INFO,  f"Following binaries were not found: {missing_binaries_str}"
+                                    "If this is first time you're running k-wave-python, "
+                                    "binaries will be downloaded automatically.")
+        
+    return len(missing_binaries) == 0
 
 
 def download_binaries(system_os: str, bin_type: str):
@@ -102,7 +110,19 @@ def download_binaries(system_os: str, bin_type: str):
         os.makedirs(binary_path, exist_ok=True)
 
         # Download the binary file
-        urllib.request.urlretrieve(url, os.path.join(binary_path, filename))
+        try:
+            urllib.request.urlretrieve(url, os.path.join(binary_path, filename))
+        except TimeoutError:
+            logging.log(logging.WARN, f"Download of {filename} timed out. "
+                                       "This can be due to slow internet connection. "
+                                       "Partially downloaded files will be removed.")
+            try:
+                os.remove(binary_path)
+            except Exception:
+                folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
+                logging.warning("Error occurred while removing partially downloaded binary. "
+                                f"Please manually delete the `{folder_path}` folder which "
+                                "can be found in your virtual environment.")
 
 
 def get_windows_release_urls(version: str, system_type: str) -> list:

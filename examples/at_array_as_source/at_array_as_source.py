@@ -12,6 +12,7 @@ from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.kwave_array import kWaveArray
+from kwave.utils.colormap import get_color_map
 from kwave.utils.signals import tone_burst
 
 
@@ -112,8 +113,7 @@ def main():
     max_value = np.max(p_field)
     normalized_frames = p_field / max_value
 
-    # Create a custom colormap (replace 'viridis' with your preferred colormap)
-    cmap = plt.get_cmap('viridis')
+    cmap = get_color_map()
 
     # Create a figure and axis
     fig, ax = plt.subplots()
