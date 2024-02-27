@@ -102,7 +102,7 @@ class SimulationOptions(object):
     stream_to_disk: bool = False
     data_recast: Optional[bool] = False
     cartesian_interp: str = 'linear'
-    hdf_compression_level: Optional[Union[int, str]] = None
+    hdf_compression_options: Optional[Union[int, str]] = None
     data_cast: str = 'off'
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = 'WSWA-FFT'
@@ -132,7 +132,7 @@ class SimulationOptions(object):
 
         # load the HDF5 literals (for the default compression settings)
         h5_literals = get_h5_literals()
-        self.hdf_compression_options = h5_literals.HDF_COMPRESSION_LEVEL
+        self.hdf_compression_options = h5_literals.HDF_COMPRESSION_OPTIONS
         # check value is an integer between 0 and 9
         assert ((isinstance(self.hdf_compression_options, int) and (0 <= self.hdf_compression_options <= 9)) or 
                 (isinstance(self.hdf_compression_options, str) and ((self.hdf_compression_options.lower() == 'lzf') or
