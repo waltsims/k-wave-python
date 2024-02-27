@@ -113,6 +113,8 @@ def test_pml_sizes_2d():
     sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
     
+    # these tests passes a list with three entries for the sizes of the pml 
+    # but to a 2d simulation, and so raises an error.
     with pytest.raises(ValueError):
         simulation_options = SimulationOptions(pml_size=[18,18,18])
         _ = kspace_first_order_2d_gpu(medium=medium,

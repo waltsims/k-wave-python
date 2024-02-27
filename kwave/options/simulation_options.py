@@ -253,10 +253,10 @@ class SimulationOptions(object):
                 else:
                     raise ValueError("Optional input ''pml_size'' must be a single numerical value.")
 
-        if (kgrid.dim == 1):
+        if kgrid.dim == 1:
             options.pml_x_size = options.pml_size if options.pml_size else 20
             options.plot_scale = [-1.1, 1.1]
-        elif (kgrid.dim == 2):
+        elif kgrid.dim == 2:
             if (options.pml_size is not None): 
                 if (len(options.pml_size) == kgrid.dim):
                     options.pml_x_size, options.pml_y_size = np.asarray(options.pml_size, dtype=int).ravel()
@@ -265,7 +265,7 @@ class SimulationOptions(object):
             else: 
                 options.pml_x_size, options.pml_y_size = (20, 20)
             options.plot_scale = [-1, 1]
-        elif (kgrid.dim == 3):
+        elif kgrid.dim == 3:
             if ((options.pml_size is not None) and (len(options.pml_size) == kgrid.dim)):
                 options.pml_x_size, options.pml_y_size, options.pml_z_size = np.asarray(options.pml_size).ravel()
             else:
