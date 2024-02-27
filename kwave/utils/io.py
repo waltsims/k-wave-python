@@ -3,7 +3,7 @@ import os
 import platform
 import socket
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import cv2
 import h5py
@@ -47,19 +47,19 @@ def get_h5_literals():
         'HDF_FILE_MINOR_VERSION': '2',
 
         # compression level: set to be same as default h5py
-        'HDF_COMPRESSION_LEVEL': 4
+        'HDF_COMPRESSION_OPTIONS': 4
     })
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_level:int =None, auto_chunk: bool =True):
+def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_options: Union[int, str] = None, auto_chunk: bool = True):
     # get literals
     h5_literals = get_h5_literals()
 
     assert isinstance(auto_chunk, bool), "auto_chunk must be a boolean."
 
-    if compression_level is None:
-        compression_level = h5_literals.HDF_COMPRESSION_LEVEL
+    if compression_options is None:
+        compression_options = h5_literals.HDF_COMPRESSION_OPTIONS
 
     # dims = num_dim(matrix)
     dims = len(matrix.shape)
@@ -78,7 +78,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
     else:
         Nx, Ny, Nz = 1, 1, 1
 
-    # check size of matrix and set chunk size and compression level
+    # check size of matrix and set chunk size and compression options
     if dims == 3:
         # set chunk size to Nx * Ny
         chunk_size = [Nx, Ny, 1]
@@ -99,7 +99,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
         else:
 
             # set no compression
-            compression_level = 0
+            compression_options = 0
 
             # set chunk size to grid size
             if matrix.size == 1:
@@ -186,9 +186,9 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
         'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
     
-    if compression_level != 0:
+    if compression_options != 0:
         # use compression
-        opts['compression'] = compression_level
+        opts['compression'] = compression_options
 
     # write the matrix into the file
     with h5py.File(filename, "a") as f:
