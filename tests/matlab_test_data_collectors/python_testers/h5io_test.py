@@ -88,22 +88,6 @@ def test_write_grid(tmp_path_factory):
     pass
 
 
-def test_lzf(self):
-    """ Create with explicit lzf """
-    dset = self.f.create_dataset('foo', (20, 30), compression='lzf')
-    self.assertEqual(dset.compression, 'lzf')
-    self.assertEqual(dset.compression_opts, None)
-
-    testdata = np.arange(100)
-    dset = self.f.create_dataset('bar', data=testdata, compression='lzf')
-    self.assertEqual(dset.compression, 'lzf')
-    self.assertEqual(dset.compression_opts, None)
-
-    self.f.flush()  # Actually write to file
-
-    readdata = self.f['bar'][()]
-    self.assertArrayEqual(readdata, testdata)
-
 def test_write_matrix_lzf(tmp_path_factory):
     """
     Tests the compression option `lzf`, which is not an option for the matlab h5create function, by
