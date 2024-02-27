@@ -76,8 +76,8 @@ def test_pml_sizes_2d():
     nx = 128  # number of grid points in the x (row) direction
     x = 128e-3  # size of the domain in the x direction [m]
     dx = x / nx  # grid point spacing in the x direction [m]
-    ny = 128  # number of grid points in the y (column) direction
-    y = 128e-3  # size of the domain in the y direction [m]
+    ny = 132  # number of grid points in the y (column) direction
+    y = 132e-3  # size of the domain in the y direction [m]
     dy = y / ny  # grid point spacing in the y direction [m]
 
     grid_size = Vector([nx, ny]) # [grid points]
