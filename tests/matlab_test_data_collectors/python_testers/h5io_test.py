@@ -26,7 +26,7 @@ def compare_h5_values(local_h5_path, ref_path):
 
 
 def test_write_matrix(tmp_path_factory):
-    compression_options = range(1,9) #[1,2,3,4,5,6,7,8,9,'lzf']
+    compression_options = range(1,9) 
     idx = 0
     for dim in range(1, 3):
         for compression_option in compression_options:
@@ -85,4 +85,35 @@ def test_write_grid(tmp_path_factory):
         # TODO: this introduces dependency on h5diff
         compare_h5_values(tmp_path, ref_path)
         idx = idx + 1
+    pass
+
+
+def test_lzf(self):
+    """ Create with explicit lzf """
+    dset = self.f.create_dataset('foo', (20, 30), compression='lzf')
+    self.assertEqual(dset.compression, 'lzf')
+    self.assertEqual(dset.compression_opts, None)
+
+    testdata = np.arange(100)
+    dset = self.f.create_dataset('bar', data=testdata, compression='lzf')
+    self.assertEqual(dset.compression, 'lzf')
+    self.assertEqual(dset.compression_opts, None)
+
+    self.f.flush()  # Actually write to file
+
+    readdata = self.f['bar'][()]
+    self.assertArrayEqual(readdata, testdata)
+
+def test_write_matrix_lzf(tmp_path_factory):
+    """
+    Tests the compression option `lzf`, which is not an option for the matlab h5create function, by
+    comparing written data to a reference matrix
+    """
+    compression_option = 'lzf'
+    for idx, dim in enumerate(range(2, 3)):
+        tmp_path = tmp_path_factory.mktemp("matrix") / f"{idx}.h5"
+        matrix = np.single(10.0 * np.ones([1, dim]))
+        write_matrix(tmp_path, matrix=matrix, matrix_name='test', compression_options=compression_option)
+        tmp_h5 = h5py.File(tmp_path, 'r')
+        assert np.isclose(tmp_h5['test'], matrix).all()
     pass
