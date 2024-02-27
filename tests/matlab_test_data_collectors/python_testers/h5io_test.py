@@ -29,10 +29,10 @@ def test_write_matrix(tmp_path_factory):
     compression_options = range(1,9) #[1,2,3,4,5,6,7,8,9,'lzf']
     idx = 0
     for dim in range(1, 3):
-        for compression_level in compression_options:
+        for compression_option in compression_options:
             tmp_path = tmp_path_factory.mktemp("matrix") / f"{idx}.h5"
             matrix = np.single(10.0 * np.ones([1, dim]))
-            write_matrix(tmp_path, matrix=matrix, matrix_name='test', compression_level=compression_level)
+            write_matrix(tmp_path, matrix=matrix, matrix_name='test', compression_options=compression_option)
             ref_path = os.path.join(Path(__file__).parent, f"collectedValues/writeMatrix/{idx}.h5")
             compare_h5_values(tmp_path, ref_path)
             idx = idx + 1
