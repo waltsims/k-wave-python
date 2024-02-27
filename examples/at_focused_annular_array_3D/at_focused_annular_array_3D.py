@@ -16,7 +16,8 @@ from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 verbose: bool = False
 
@@ -199,20 +200,21 @@ ax1.grid()
 grid_weights = karray.get_array_grid_weights(kgrid)
 
 fig2, (ax2a, ax2b) = plt.subplots(1, 2)
-ax2a.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-                1e3 * np.squeeze(kgrid.y_vec),
-                source.p_mask[:, :, int(np.ceil(Nz / 2))].T,
-                shading='gouraud')
+ax2a.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+                1e3 * np.squeeze(kgrid.x_vec),
+                np.flip(source.p_mask[:, :, int(np.ceil(Nz / 2))], axis=0),
+                shading='nearest')
 ax2a.set(xlabel='y [mm]',
          ylabel='x [mm]',
          title='Source Mask')
-ax2b.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-                1e3 * np.squeeze(kgrid.y_vec),
-                grid_weights[:, :, int(np.ceil(Nz / 2))].T,
-                shading='gouraud')
+ax2b.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+                1e3 * np.squeeze(kgrid.x_vec),
+                np.flip(grid_weights[:, :, int(np.ceil(Nz / 2))], axis=0),
+                shading='nearest')
 ax2b.set(xlabel='y [mm]',
          ylabel='x [mm]',
          title='Off-Grid Source Weights')
+plt.tight_layout(pad=1.2)
 
 # plot the pressure field
 fig3, ax3 = plt.subplots(1, 1)

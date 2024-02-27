@@ -18,7 +18,6 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 
-
 # material values
 c0: float       = 1500.0     # sound speed [m/s]
 rho0: float     = 1000.0     # density [kg/m^3]
@@ -209,10 +208,10 @@ ax1.grid()
 
 # plot the source mask (pml is outside the grid in this example)
 fig2, ax2 = plt.subplots(1, 1)
-ax2.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-               1e3 * np.squeeze(kgrid.y_vec),
-               source.p_mask[:, :, int(np.ceil(Nz / 2))].T,
-               shading='gouraud')
+ax2.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+               1e3 * np.squeeze(kgrid.x_vec),
+               np.flip(source.p_mask[:, :, int(np.ceil(Nz / 2))], axis=0),
+               shading='nearest')
 ax2.set(xlabel='y [mm]',
         ylabel='x [mm]',
         title='Source Mask')
