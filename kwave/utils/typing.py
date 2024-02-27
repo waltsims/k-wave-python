@@ -18,3 +18,5 @@ NP_ARRAY_FLOAT_2D = NDArray[Shape["Dim1, Dim2"], Float]
 NP_ARRAY_INT_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Int]
 NP_ARRAY_BOOL_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Bool]
 NP_ARRAY_FLOAT_3D = NDArray[Shape["Dim1, Dim2, Dim3"], Float]
+
+NP_DOMAIN = Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]]

@@ -8,14 +8,15 @@ dynamic = ["version"]
 description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
 readme = "docs/README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
     { name = "Walter Simson", email = "walter.simson@tum.de"}
 ]
 maintainers = [
     { name = "Walter Simson", email = "walter.simson@tum.de" },
-    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" }
+    { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
+    { name = "David Sinden", email = "david.sinden@mevis.fraunhofer.de" }
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -24,10 +25,10 @@ classifiers = [
 ]
 dependencies = [
     "h5py==3.10.0",
-    "scipy==1.10.1",
+    "scipy==1.12.0",
     "opencv-python==4.9.0.80",
     "deepdiff==6.7.1",
-    "matplotlib==3.7.2",
+    "matplotlib==3.8.3",
     "numpy>=1.22.2,<1.27.0",
     "nptyping==2.5.0",
     "beartype==0.16.4"
@@ -41,16 +42,16 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.4.0",
+        "coverage==7.4.3",
         "phantominator",
         "requests==2.31.0"]
-example = ["gdown==4.7.3"]
+example = ["gdown==4.6.0"]
 docs = ["m2r2==0.3.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.4",
     "sphinx-toolbox==3.5.0",
-    "furo==2023.9.10"]
-dev = ["pre-commit==3.6.0"]
+    "furo==2024.1.29"]
+dev = ["pre-commit==3.6.2"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
