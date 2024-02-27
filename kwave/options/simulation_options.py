@@ -260,8 +260,10 @@ class SimulationOptions(object):
             if (options.pml_size is not None): 
                 if (len(options.pml_size) == kgrid.dim):
                     options.pml_x_size, options.pml_y_size = np.asarray(options.pml_size, dtype=int).ravel()
-                else:
+                elif (len(options.pml_size) == 1):
                     options.pml_x_size, options.pml_y_size = (options.pml_size[0], options.pml_size[0])
+                else 
+                    raise ValueError("Optional input ''pml_size'' has the wrong size")
             else: 
                 options.pml_x_size, options.pml_y_size = (20, 20)
             options.plot_scale = [-1, 1]
