@@ -15,22 +15,9 @@ from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 
-def L2_error(x: np.ndarray, y: np.ndarray, ord=None) -> float:	
-    """	
-    L_2 error between two arrays	
-    """	
-
-    if (x.shape != y.shape):
-        raise ValueError("Wrong sizes: '{x.shape}' and '{y.shape}' ")	
-
-    if ((ord == 2) or (ord is None)):	
-        return 100.0 * np.sqrt(np.vdot(np.ravel(x) - np.ravel(y))) / np.sum(np.vdot(np.ravel(x)))	
-    elif np.isposinf(ord):	
-        return 100.0 * np.max(np.abs(np.ravel(x) - np.ravel(y))) / np.max(np.ravel(x))	
-    else:	
-        raise ValueError(f"Invalid norm order: '{ord}'.")
 
 # material values
 c0: float       = 1500.0     # sound speed [m/s]
@@ -202,8 +189,8 @@ r = np.sqrt(x_vec**2 + a**2)
 p_ref_kw = source_amp * np.abs(2.0 * np.sin((k * r - k * x_vec) / 2.0))
 
 # calculate error
-L2_error = L2_error(p_ref_kw, amp_on_axis, ord=2)
-Linf_error = L2_error(p_ref_kw, amp_on_axis, ord=np.inf)
+L2_error = 100 * np.linalg.norm(p_ref_kw - amp_on_axis, ord=2)
+Linf_error = 100 * np.linalg.norm(p_ref_kw -  amp_on_axis, ord=np.inf)
 # =========================================================================
 # VISUALISATION
 # =========================================================================
