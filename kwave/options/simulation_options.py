@@ -70,7 +70,7 @@ class SimulationOptions(object):
                          The saved variables can be used to run simulations using the C++ code.
         data_recast: recast the sensor data back to double precision
         cartesian_interp: interpolation mode for Cartesian sensor mask
-        hdf_compression_level: zip compression level for HDF5 input files
+        hdf_compression_options: either gzip compression level for HDF5 input files, or type of compression used
         data_cast: data cast
         pml_search_range: search range used when automatically determining PML size
         radial_symmetry: radial symmetry used in axisymmetric code
@@ -130,14 +130,14 @@ class SimulationOptions(object):
         if self.data_cast == 'double':
             self.data_cast = 'off'
 
-        # load the HDF5 literals (for the default compression level)
+        # load the HDF5 literals (for the default compression settings)
         h5_literals = get_h5_literals()
-        self.hdf_compression_level = h5_literals.HDF_COMPRESSION_LEVEL
+        self.hdf_compression_options = h5_literals.HDF_COMPRESSION_LEVEL
         # check value is an integer between 0 and 9
-        assert ((isinstance(self.hdf_compression_level, int) and (0 <= self.hdf_compression_level <= 9)) or 
-                (isinstance(self.hdf_compression_level, str) and ((self.hdf_compression_level.lower() == 'lzf') or
-                                                                  (self.hdf_compression_level.lower() == 'szip')))), \
-            "Optional input ''hdf_compression_level'' is false: must be between 0-9 or either lzf or szip"
+        assert ((isinstance(self.hdf_compression_options, int) and (0 <= self.hdf_compression_options <= 9)) or 
+                (isinstance(self.hdf_compression_options, str) and ((self.hdf_compression_options.lower() == 'lzf') or
+                                                                  (self.hdf_compression_options.lower() == 'szip')))), \
+            "Optional input ''hdf_compression_options'' is false: must an integer be between 0-9 or either 'lzf' or 'szip'"
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
             "Optional input ''multi_axial_PML_ratio'' must be a single positive value."
@@ -208,9 +208,11 @@ class SimulationOptions(object):
                 * data_recast: Boolean controlling whether the output data is cast back to double precision.
                                If set to false, sensor_data will be returned in
                                the data format set using the 'data_cast' option.
-                * hdf_compression_level: Compression level used for writing the input HDF5 file when using
+                * hdf_compression_options: Compression level used for writing the input HDF5 file when using
                                          'save_to_disk' or kspaceFirstOrder3DC. Can be set to an integer
-                                         between 0 (no compression, the default) and 9 (maximum compression).
+                                         between 0 (no compression, the default) and 9 (maximum compression) for gzip 
+                                         compression or as a string for lzf or szip compression. 
+                                         Note that szip compression requires additional libraries to be installed.
                                          The compression is lossless. Increasing the compression level will reduce
                                          the file size if there are portions of the medium that are homogeneous,
                                          but will also increase the time to create the HDF5 file.
