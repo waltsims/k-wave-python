@@ -10,9 +10,11 @@ from kwave.utils.io import write_matrix, write_attributes, write_grid, write_fla
 def compare_h5_attributes(local_h5_path, ref_path):
     local_h5 = h5py.File(local_h5_path, 'r')
     ref_h5 = h5py.File(ref_path, 'r')
+    keys_to_ignore = ['created_by', 'creation_date', 'file_description']
     for key in local_h5.attrs.keys():
-        assert key in ref_h5.attrs.keys()
-        assert np.isclose(local_h5.attrs[key], ref_h5.attrs[key])
+        if key not in keys_to_ignore:
+            assert key in ref_h5.attrs.keys()
+            assert str(local_h5.attrs[key]) == str(ref_h5.attrs[key])
 
 
 def compare_h5_values(local_h5_path, ref_path):
