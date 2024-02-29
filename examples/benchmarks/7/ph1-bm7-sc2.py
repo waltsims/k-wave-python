@@ -192,8 +192,8 @@ karray = kWaveArray(bli_tolerance=0.01,
                     single_precision=True)
 
 # set disc position
-position = [kgrid.x_vec[disc_coords[2]].item(),
-            kgrid.y_vec[disc_coords[2]].item(),
+position = [kgrid.x_vec[disc_coords[0]].item(),
+            kgrid.y_vec[disc_coords[1]].item(),
             kgrid.z_vec[disc_coords[2]].item()]
 
 # arbitrary position
