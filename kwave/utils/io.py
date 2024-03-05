@@ -4,7 +4,7 @@ import platform
 import socket
 from enum import Enum
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 import cv2
 import h5py
