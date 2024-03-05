@@ -10,9 +10,9 @@ import h5py
 import numpy as np
 
 import kwave
-from kwave.conversion import cast_to_type
-from kwave.data import get_date_string
-from kwave.dotdictionary import dotdict
+from .conversion import cast_to_type
+from .data import get_date_string
+from .dotdictionary import dotdict
 
 # from kwave.options.simulation_options import CompressionOption
 
