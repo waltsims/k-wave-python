@@ -10,10 +10,28 @@ import h5py
 import numpy as np
 
 import kwave
-from .conversion import cast_to_type
-from .data import get_date_string
-from .dotdictionary import dotdict
-from kwave.options.simulation_options import CompressionOption
+from kwave.conversion import cast_to_type
+from kwave.data import get_date_string
+from kwave.dotdictionary import dotdict
+
+# from kwave.options.simulation_options import CompressionOption
+
+class CompressionOption(Enum):
+    """
+    Enum for the compression options
+    """
+    GZIP_0 = 0
+    GZIP_1 = 1
+    GZIP_2 = 2
+    GZIP_3 = 3
+    GZIP_4 = 4
+    GZIP_5 = 5
+    GZIP_6 = 6
+    GZIP_7 = 7
+    GZIP_8 = 8
+    GZIP_9 = 9
+    LZF = 'lzf'
+    SZIP = 'szip'
 
 
 def get_h5_literals():

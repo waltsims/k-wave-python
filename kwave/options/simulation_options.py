@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     # Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
     from kwave.kgrid import kWaveGrid
 from kwave.utils.data import get_date_string
-from kwave.utils.io import get_h5_literals
+from kwave.utils.io import get_h5_literals, CompressionOption
 from kwave.utils.pml import get_optimal_pml_size
 
 
@@ -41,22 +41,22 @@ class SimulationType(Enum):
         return self == SimulationType.AXISYMMETRIC
 
 
-class CompressionOption(Enum):
-    """
-    Enum for the compression options
-    """
-    GZIP_0 = 0
-    GZIP_1 = 1
-    GZIP_2 = 2
-    GZIP_3 = 3
-    GZIP_4 = 4
-    GZIP_5 = 5
-    GZIP_6 = 6
-    GZIP_7 = 7
-    GZIP_8 = 8
-    GZIP_9 = 9
-    LZF = 'lzf'
-    SZIP = 'szip'
+# class CompressionOption(Enum):
+#     """
+#     Enum for the compression options
+#     """
+#     GZIP_0 = 0
+#     GZIP_1 = 1
+#     GZIP_2 = 2
+#     GZIP_3 = 3
+#     GZIP_4 = 4
+#     GZIP_5 = 5
+#     GZIP_6 = 6
+#     GZIP_7 = 7
+#     GZIP_8 = 8
+#     GZIP_9 = 9
+#     LZF = 'lzf'
+#     SZIP = 'szip'
 
 
 
