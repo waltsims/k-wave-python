@@ -153,9 +153,9 @@ class SimulationOptions(object):
         h5_literals = get_h5_literals()
         self.hdf_compression_options = h5_literals.HDF_COMPRESSION_OPTIONS
         # check value is an integer between 0 and 9
-        assert ((isinstance(self.hdf_compression_options.value, int) and (0 <= self.hdf_compression_options.value <= 9)) or 
-                (isinstance(self.hdf_compression_options.value, str) and ((self.hdf_compression_options.value.lower() == 'lzf') or
-                                                                  (self.hdf_compression_options.value.lower() == 'szip')))), \
+        assert ((isinstance(self.hdf_compression_options, int) and (0 <= self.hdf_compression_options <= 9)) or 
+                (isinstance(self.hdf_compression_options, str) and ((self.hdf_compression_options.lower() == 'lzf') or
+                                                                  (self.hdf_compression_options.lower() == 'szip')))), \
             "Optional input ''hdf_compression_options'' is false: must an integer be between 0-9 or either 'lzf' or 'szip'"
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \
