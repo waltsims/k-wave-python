@@ -41,6 +41,25 @@ class SimulationType(Enum):
         return self == SimulationType.AXISYMMETRIC
 
 
+class CompressionOption(Enum):
+    """
+    Enum for the compression options
+    """
+    GZIP_0 = 0
+    GZIP_1 = 1
+    GZIP_2 = 2
+    GZIP_3 = 3
+    GZIP_4 = 4
+    GZIP_5 = 5
+    GZIP_6 = 6
+    GZIP_7 = 7
+    GZIP_8 = 8
+    GZIP_9 = 9
+    LZF = 'lzf'
+    SZIP = 'szip'
+
+
+
 @dataclass
 class SimulationOptions(object):
     """
@@ -102,11 +121,11 @@ class SimulationOptions(object):
     stream_to_disk: bool = False
     data_recast: Optional[bool] = False
     cartesian_interp: str = 'linear'
-    hdf_compression_options: Optional[Union[int, str]] = None
     data_cast: str = 'off'
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = 'WSWA-FFT'
     multi_axial_PML_ratio: float = 0.1
+    hdf_compression_options: Optional[CompressionOption] = None
     data_path: Optional[str] = field(default_factory=lambda: gettempdir())
     output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
     input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")
@@ -134,9 +153,9 @@ class SimulationOptions(object):
         h5_literals = get_h5_literals()
         self.hdf_compression_options = h5_literals.HDF_COMPRESSION_OPTIONS
         # check value is an integer between 0 and 9
-        assert ((isinstance(self.hdf_compression_options, int) and (0 <= self.hdf_compression_options <= 9)) or 
-                (isinstance(self.hdf_compression_options, str) and ((self.hdf_compression_options.lower() == 'lzf') or
-                                                                  (self.hdf_compression_options.lower() == 'szip')))), \
+        assert ((isinstance(self.hdf_compression_options.value, int) and (0 <= self.hdf_compression_options.value <= 9)) or 
+                (isinstance(self.hdf_compression_options.value, str) and ((self.hdf_compression_options.value.lower() == 'lzf') or
+                                                                  (self.hdf_compression_options.value.lower() == 'szip')))), \
             "Optional input ''hdf_compression_options'' is false: must an integer be between 0-9 or either 'lzf' or 'szip'"
 
         assert np.isscalar(self.multi_axial_PML_ratio) and self.multi_axial_PML_ratio >= 0, \

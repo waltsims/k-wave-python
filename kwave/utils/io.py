@@ -13,6 +13,7 @@ import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
+from kwave.options.simulation_options import CompressionOption
 
 
 def get_h5_literals():
@@ -47,12 +48,15 @@ def get_h5_literals():
         'HDF_FILE_MINOR_VERSION': '2',
 
         # compression level: set to be same as default h5py
-        'HDF_COMPRESSION_OPTIONS': 4
+        'HDF_COMPRESSION_OPTIONS': CompressionOption.GZIP_4
     })
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_options: Union[int, str] = None, auto_chunk: bool = True):
+def write_matrix(filename, matrix: np.ndarray, 
+                 matrix_name: str, 
+                 compression_options: Optional[CompressionOption] = None, 
+                 auto_chunk: bool = True):
     # get literals
     h5_literals = get_h5_literals()
 
@@ -99,7 +103,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_opt
         else:
 
             # set no compression
-            compression_options = 0
+            compression_options = CompressionOption.GZIP_0
 
             # set chunk size to grid size
             if matrix.size == 1:
@@ -186,7 +190,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_opt
         'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
     
-    if compression_options != 0:
+    if compression_options != CompressionOption.GZIP_0:
         # use compression
         opts['compression'] = compression_options
 
