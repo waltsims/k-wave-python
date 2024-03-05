@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import socket
+from enum import Enum
 from datetime import datetime
 from typing import Optional, Union
 
