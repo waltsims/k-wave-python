@@ -67,7 +67,7 @@ def get_h5_literals():
         'HDF_FILE_MINOR_VERSION': '2',
 
         # compression level: set to be same as default h5py
-        'HDF_COMPRESSION_OPTIONS': CompressionOption.GZIP_4
+        'HDF_COMPRESSION_OPTIONS': CompressionOption.GZIP_4.value
     })
     return literals
 
@@ -122,7 +122,7 @@ def write_matrix(filename, matrix: np.ndarray,
         else:
 
             # set no compression
-            compression_options = CompressionOption.GZIP_0
+            compression_options = CompressionOption.GZIP_0.value
 
             # set chunk size to grid size
             if matrix.size == 1:
@@ -209,9 +209,9 @@ def write_matrix(filename, matrix: np.ndarray,
         'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
     
-    if compression_options != CompressionOption.GZIP_0:
+    if compression_options != CompressionOption.GZIP_0.value:
         # use compression
-        opts['compression'] = compression_options
+        opts['compression'] = compression_options.value
 
     # write the matrix into the file
     with h5py.File(filename, "a") as f:
