@@ -107,7 +107,7 @@ class SimulationOptions(object):
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = 'WSWA-FFT'
     multi_axial_PML_ratio: float = 0.1
-    hdf_compression_options: Optional[CompressionOption] = None
+    hdf_compression_options: Optional[CompressionOption] = CompressionOption.GZIP_4.value
     data_path: Optional[str] = field(default_factory=lambda: gettempdir())
     output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
     input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")

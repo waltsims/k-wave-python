@@ -74,15 +74,12 @@ def get_h5_literals():
 
 def write_matrix(filename, matrix: np.ndarray, 
                  matrix_name: str, 
-                 compression_options: Optional[CompressionOption] = None, 
+                 compression_options: Optional[CompressionOption] = CompressionOption.GZIP_4.value, 
                  auto_chunk: bool = True):
     # get literals
     h5_literals = get_h5_literals()
 
     assert isinstance(auto_chunk, bool), "auto_chunk must be a boolean."
-
-    if compression_options is None:
-        compression_options = h5_literals.HDF_COMPRESSION_OPTIONS
 
     # dims = num_dim(matrix)
     dims = len(matrix.shape)
