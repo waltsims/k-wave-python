@@ -211,7 +211,7 @@ def write_matrix(filename, matrix: np.ndarray,
     
     if compression_options != CompressionOption.GZIP_0:
         # use compression
-        opts['compression'] = compression_options
+        opts['compression'] = compression_options.value
 
     # write the matrix into the file
     with h5py.File(filename, "a") as f:
