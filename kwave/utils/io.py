@@ -74,7 +74,7 @@ def get_h5_literals():
 
 def write_matrix(filename, matrix: np.ndarray, 
                  matrix_name: str, 
-                 compression_options: Optional[CompressionOption] = h5_literals.HDF_COMPRESSION_OPTIONS,
+                 compression_options: Optional[CompressionOption] = get_h5_literals().HDF_COMPRESSION_OPTIONS,
                  auto_chunk: bool = True):
     # get literals
     h5_literals = get_h5_literals()
