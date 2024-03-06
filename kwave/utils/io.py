@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import socket
+from enum import Enum
 from datetime import datetime
 from typing import Optional
 
@@ -13,6 +14,25 @@ import kwave
 from .conversion import cast_to_type
 from .data import get_date_string
 from .dotdictionary import dotdict
+
+# from kwave.options.simulation_options import CompressionOption
+
+class CompressionOption(Enum):
+    """
+    Enum for the compression options
+    """
+    GZIP_0 = 0
+    GZIP_1 = 1
+    GZIP_2 = 2
+    GZIP_3 = 3
+    GZIP_4 = 4
+    GZIP_5 = 5
+    GZIP_6 = 6
+    GZIP_7 = 7
+    GZIP_8 = 8
+    GZIP_9 = 9
+    LZF = 'lzf'
+    SZIP = 'szip'
 
 
 def get_h5_literals():
@@ -46,20 +66,20 @@ def get_h5_literals():
         'HDF_FILE_MAJOR_VERSION': '1',
         'HDF_FILE_MINOR_VERSION': '2',
 
-        # compression level
-        'HDF_COMPRESSION_LEVEL': 0
+        # compression level: set to be same as default h5py
+        'HDF_COMPRESSION_OPTIONS': CompressionOption.GZIP_4.value
     })
     return literals
 
 
-def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_level:int =None, auto_chunk: bool =True):
+def write_matrix(filename, matrix: np.ndarray, 
+                 matrix_name: str, 
+                 compression_options: Optional[CompressionOption] = get_h5_literals().HDF_COMPRESSION_OPTIONS,
+                 auto_chunk: bool = True):
     # get literals
     h5_literals = get_h5_literals()
 
     assert isinstance(auto_chunk, bool), "auto_chunk must be a boolean."
-
-    if compression_level is None:
-        compression_level = h5_literals.HDF_COMPRESSION_LEVEL
 
     # dims = num_dim(matrix)
     dims = len(matrix.shape)
@@ -78,7 +98,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
     else:
         Nx, Ny, Nz = 1, 1, 1
 
-    # check size of matrix and set chunk size and compression level
+    # check size of matrix and set chunk size and compression options
     if dims == 3:
         # set chunk size to Nx * Ny
         chunk_size = [Nx, Ny, 1]
@@ -99,7 +119,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
         else:
 
             # set no compression
-            compression_level = 0
+            compression_options = CompressionOption.GZIP_0.value
 
             # set chunk size to grid size
             if matrix.size == 1:
@@ -186,9 +206,9 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
         'chunks': auto_chunk if auto_chunk is True else tuple(chunk_size)
     }
     
-    if compression_level != 0:
+    if compression_options != CompressionOption.GZIP_0.value:
         # use compression
-        opts['compression'] = compression_level
+        opts['compression'] = compression_options
 
     # write the matrix into the file
     with h5py.File(filename, "a") as f:

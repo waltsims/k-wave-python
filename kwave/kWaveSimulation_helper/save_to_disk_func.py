@@ -57,7 +57,7 @@ def save_to_disk_func(
     # =========================================================================
 
     remove_z_dimension(float_variables, kgrid.dim)
-    save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, 
+    save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_options, 
               auto_chunk=auto_chunk)
 
     # update command line status
@@ -447,12 +447,12 @@ def enforce_filename_standards(filepath):
     return filepath, filename_ext
 
 
-def save_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk):
+def save_file(filepath, integer_variables, float_variables, hdf_compression_options, auto_chunk):
     filepath, filename_ext = enforce_filename_standards(filepath)
 
     # save file
     if filename_ext == '.h5':
-        save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk)
+        save_h5_file(filepath, integer_variables, float_variables, hdf_compression_options, auto_chunk)
 
     elif filename_ext == '.mat':
         save_mat_file(filepath, integer_variables, float_variables)
@@ -461,7 +461,7 @@ def save_file(filepath, integer_variables, float_variables, hdf_compression_leve
         raise NotImplementedError('unknown file extension for ''save_to_disk'' filename')
 
 
-def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_level, auto_chunk):
+def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_options, auto_chunk):
     # ----------------
     # SAVE HDF5 FILE
     # ----------------
@@ -476,7 +476,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
     for key, value in float_variables.items():
         # cast matrix to single precision
         value = np.array(value, dtype=np.float32)
-        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
+        write_matrix(filepath, value, key, hdf_compression_options, auto_chunk)
         del value
 
     # change all the index variables to be in 64-bit unsigned integers
@@ -484,7 +484,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
     for key, value in integer_variables.items():
         # cast matrix to 64-bit unsigned integer
         value = np.array(value, dtype=np.uint64)
-        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
+        write_matrix(filepath, value, key, hdf_compression_options, auto_chunk)
         del value
 
     # set additional file attributes
