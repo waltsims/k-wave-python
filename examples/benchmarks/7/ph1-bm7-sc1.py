@@ -26,7 +26,8 @@ from kwave.utils.signals import create_cw_signals
 from kwave.utils.filters import extract_amp_phase
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DG
 
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 verbose: bool = True
 savePlotting: bool = False
@@ -409,10 +410,10 @@ for i in range(num_x):
         i_inner = i + 1
 contours_x_inner = measure.find_contours(np.where(contour_x == i_inner, 1, 0))
 if not contours_x_inner:
-    print("size of contours_x_inner is zero")
+    pass
 contours_x_outer = measure.find_contours(np.where(contour_x == i_outer, 1, 0))
 if not contours_x_outer:
-   print("size of contours_x_outer is zero")
+   pass
 inner_index_x = float(Ny)
 outer_index_x = float(0)
 for i in range(len(contours_x_inner)):
@@ -439,10 +440,10 @@ for i in range(num_y):
         i_inner = i + 1
 contours_y_inner = measure.find_contours(np.where(contour_y == i_inner, 1, 0))
 if not contours_y_inner:
-    print("size of contours_y_inner is zero")
+    pass
 contours_y_outer = measure.find_contours(np.where(contour_y == i_outer, 1, 0))
 if not contours_y_outer:
-    print("size of contours_y_outer is zero")
+    pass
 inner_index_y = float(Nx)
 outer_index_y = float(0)
 for i in range(len(contours_y_inner)):
@@ -470,7 +471,7 @@ for i in range(num_z):
 
 contours_z_inner = measure.find_contours(np.where(contour_z == i_inner, 1, 0))
 if not contours_z_inner:
-    print("size of contours_z_inner is zero")
+    pass
 else:
     inner_index_z = float(Nx)
     for i in range(len(contours_z_inner)):
@@ -480,7 +481,7 @@ else:
 
 contours_z_outer = measure.find_contours(np.where(contour_z == i_outer, 1, 0))
 if not contours_z_outer:
-    print("size of contours_z_outer is zero")
+    pass
 else:
     outer_index_z = float(0)
     for i in range(len(contours_z_outer)):
@@ -617,25 +618,11 @@ source.p_mask = np.delete(source.p_mask,
 source.p_mask = np.delete(source.p_mask,
                           np.arange(Nz + pml_z_size, source.p_mask.shape[2], dtype=int), 2)
 
-
 source.p_mask.astype(float)
-print("a", source.p_mask.shape, source.p_mask.size, np.count_nonzero(source.p_mask),
-      np.unravel_index(p_source_index[0], (141, 91, 91)),
-      np.unravel_index(p_source_index[0], (121, 71, 71)), np.max(p_source_index), np.min(p_source_index) )
-# source.p_mask[source.p_mask == 0] = np.nan
-print("b", source.p_mask.shape, source.p_mask.size, np.count_nonzero(np.isnan(source.p_mask)))
-
-# tx = np.empty_like(p)
-# tx.fill(np.nan)
 
 source.p_mask = np.delete(source.p_mask, np.arange(0, pml_x_size, dtype=int), 0)
 source.p_mask = np.delete(source.p_mask, np.arange(0, pml_y_size, dtype=int), 1)
 source.p_mask = np.delete(source.p_mask, np.arange(0, pml_z_size, dtype=int), 2)
-
-print('c', source.p_mask.shape, source.p_mask.size,
-      np.count_nonzero(np.isnan(source.p_mask)))
-
-print('d', karray.get_array_binary_mask(kgrid).shape)
 
 tx = np.empty_like(p)
 tx.fill(np.nan)
