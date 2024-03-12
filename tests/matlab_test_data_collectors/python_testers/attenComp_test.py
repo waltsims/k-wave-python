@@ -8,19 +8,19 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_atten_comp():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/attenComp.mat')
+    test_record_path = os.path.join(Path(__file__).parent, "collectedValues/attenComp.mat")
     reader = TestRecordReader(test_record_path)
 
-    inp_signal = reader.expected_value_of('inp_signal')
-    dt = reader.expected_value_of('dt')
-    c = reader.expected_value_of('c')
-    alpha_0 = reader.expected_value_of('alpha_0')
-    y = reader.expected_value_of('y')
+    inp_signal = reader.expected_value_of("inp_signal")
+    dt = reader.expected_value_of("dt")
+    c = reader.expected_value_of("c")
+    alpha_0 = reader.expected_value_of("alpha_0")
+    y = reader.expected_value_of("y")
 
-    expected_out_signal = reader.expected_value_of('out_signal')
-    expected_tfd = reader.expected_value_of('tfd')
-    expected_cutoff_freq = reader.expected_value_of('cutoff_freq')
-    fit_type = reader.expected_value_of('fit_type')
+    expected_out_signal = reader.expected_value_of("out_signal")
+    expected_tfd = reader.expected_value_of("tfd")
+    expected_cutoff_freq = reader.expected_value_of("cutoff_freq")
+    fit_type = reader.expected_value_of("fit_type")
 
     out_signal, tfd, cutoff_freq = atten_comp(inp_signal, dt, c, alpha_0, y, fit_type=fit_type)
 

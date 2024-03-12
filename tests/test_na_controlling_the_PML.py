@@ -45,35 +45,31 @@ def test_na_controlling_the_pml():
     medium = kWaveMedium(sound_speed=1500)
 
     # create initial pressure distribution using make_disc
-    disc_magnitude = 5 # [Pa]
+    disc_magnitude = 5  # [Pa]
     disc_pos = Vector([50, 50])  # [grid points]
-    disc_radius = 8    # [grid points]
+    disc_radius = 8  # [grid points]
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
-    disc_magnitude = 3 # [Pa]
+    disc_magnitude = 3  # [Pa]
     disc_pos = Vector([80, 60])  # [grid points]
-    disc_radius = 5    # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     source = kSource()
     source.p0 = disc_1 + disc_2
 
     # define a centered circular sensor
-    sensor_radius = 4e-3   # [m]
+    sensor_radius = 4e-3  # [m]
     num_sensor_points = 50
     sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
 
     # Example 1
-    input_filename = 'input_1.h5'
+    input_filename = "input_1.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
-        pml_alpha=0,
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        pml_alpha=0, save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     kspaceFirstOrder2DC(
         medium=medium,
@@ -81,18 +77,13 @@ def test_na_controlling_the_pml():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_controlling_the_PML/input_1', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_controlling_the_PML/input_1", input_file_full_path), "Files do not match!"
 
     # Example 2
     simulation_options = SimulationOptions(
-        pml_alpha=1e6,
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        pml_alpha=1e6, save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     kspaceFirstOrder2DC(
         medium=medium,
@@ -100,18 +91,13 @@ def test_na_controlling_the_pml():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_controlling_the_PML/input_2', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_controlling_the_PML/input_2", input_file_full_path), "Files do not match!"
 
     # Example 3
     simulation_options = SimulationOptions(
-        pml_size=2,
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        pml_size=2, save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     kspaceFirstOrder2DC(
         medium=medium,
@@ -119,18 +105,13 @@ def test_na_controlling_the_pml():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_controlling_the_PML/input_3', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_controlling_the_PML/input_3", input_file_full_path), "Files do not match!"
 
     # Example 4
     simulation_options = SimulationOptions(
-        pml_inside=False,
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        pml_inside=False, save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     kspaceFirstOrder2DC(
         medium=medium,
@@ -138,7 +119,6 @@ def test_na_controlling_the_pml():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_controlling_the_PML/input_4', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_controlling_the_PML/input_4", input_file_full_path), "Files do not match!"

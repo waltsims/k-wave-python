@@ -10,16 +10,16 @@ from kwave.utils.mapgen import make_cart_circle
 
 
 def test_makeCartCircle():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCartCircle')
+    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/makeCartCircle")
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
+        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
         recorded_data = loadmat(filepath)
-        params = recorded_data['params'][0]
+        params = recorded_data["params"][0]
 
         if len(params) == 4:
-            radius, num_points, center, arc_angle = params 
+            radius, num_points, center, arc_angle = params
             center = Vector(center[0])
             num_points = num_points[0][0]
             radius = radius[0][0]
@@ -29,14 +29,13 @@ def test_makeCartCircle():
 
             circle = make_cart_circle(radius, num_points, center, arc_angle)
         else:
-            radius, num_points, center = params 
+            radius, num_points, center = params
             center = Vector(center[0])
             num_points = num_points[0][0]
             radius = radius[0][0]
             circle = make_cart_circle(radius, num_points, center)
-        expected_value = recorded_data['circle']
-
+        expected_value = recorded_data["circle"]
 
         assert np.allclose(expected_value, circle)
 
-    logging.log(logging.INFO, 'makeCartCircle(..) works as expected!')
+    logging.log(logging.INFO, "makeCartCircle(..) works as expected!")

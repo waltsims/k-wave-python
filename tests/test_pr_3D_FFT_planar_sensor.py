@@ -43,8 +43,8 @@ def test_pr_3D_FFT_planar_sensor():
     medium = kWaveMedium(sound_speed=1500)
 
     # create initial pressure distribution using make_ball
-    ball_magnitude = 10         # [Pa]
-    ball_radius = 3 * scale     # [grid points]
+    ball_magnitude = 10  # [Pa]
+    ball_radius = 3 * scale  # [grid points]
     p0 = ball_magnitude * make_ball(num_grid_points, num_grid_points / 2, ball_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
@@ -60,7 +60,7 @@ def test_pr_3D_FFT_planar_sensor():
     kgrid.makeTime(medium.sound_speed)
 
     # set the input settings
-    input_filename = 'example_3D_fft_planar_input.h5'
+    input_filename = "example_3D_fft_planar_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -70,7 +70,7 @@ def test_pr_3D_FFT_planar_sensor():
         save_to_disk=True,
         input_filename=input_filename,
         save_to_disk_exit=True,
-        data_path=pathname
+        data_path=pathname,
     )
     # run the simulation
     kspaceFirstOrder3DC(
@@ -79,7 +79,7 @@ def test_pr_3D_FFT_planar_sensor():
         source=source,
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_pr_3D_FFT_planar_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_pr_3D_FFT_planar_sensor", input_file_full_path), "Files do not match!"
