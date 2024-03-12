@@ -10,17 +10,17 @@ from kwave.utils.mapgen import make_line
 
 
 def test_makeLine():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeLine')
+    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/makeLine")
 
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
         logging.log(logging.INFO, i)
 
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
+        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
         recorded_data = loadmat(filepath, simplify_cells=True)
 
-        params = recorded_data['params']
+        params = recorded_data["params"]
         if len(params) == 4:
             Nx, Ny, startpoint, endpoint = params
             Nx, Ny = int(Nx), int(Ny)
@@ -35,11 +35,11 @@ def test_makeLine():
             grid_size = Vector([Nx, Ny])
             line = make_line(grid_size, startpoint, endpoint=None, angle=angle, length=length)
 
-        expected_line = recorded_data['line']
+        expected_line = recorded_data["line"]
 
         if i == 3:
-            logging.log(logging.INFO, 'here')
+            logging.log(logging.INFO, "here")
 
         assert np.allclose(expected_line, line)
 
-    logging.log(logging.INFO, 'make_line(..) works as expected!')
+    logging.log(logging.INFO, "make_line(..) works as expected!")

@@ -58,13 +58,23 @@ jobs:
           files: |
             ./collectedValues
           outPath: collectedValues.tar.gz
-
+      - name: upload reference values artifact
+        id: artifact-upload-step
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab_reference_test_values
+          path: collectedValues.tar.gz
+          # overwrite: true
+      - name: Output artifact URL
+        if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
+        run:  echo 'Artifact URL is ${{ steps.artifact-upload-step.outputs.artifact-url }}'
   test:
     needs: collect_references
     strategy:
       matrix:
         os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
-        python-version: [ "3.9", "3.10", "3.11" ]
+        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
