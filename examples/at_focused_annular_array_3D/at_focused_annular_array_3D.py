@@ -30,8 +30,8 @@ source_f0: float  = 1.0e6    # source frequency [Hz]
 source_roc: float = 30e-3    # bowl radius of curvature [m]
 
 # driving parameters
-source_amp   = [0.5e6, 1e6, 0.75e6]           # source pressure [Pa]
-source_phase = np.deg2rad([0.0, 10.0, 20.0])  # phase [rad]
+source_amp   = np.array([0.5e6, 1e6, 0.75e6])  # source pressure [Pa]
+source_phase = np.deg2rad([0.0, 10.0, 20.0])   # phase [rad]
 
 # aperture diameters of the elements given an inner, outer pairs [m]
 diameters       = np.array([[0.0, 5.0], [10.0, 15.0], [20.0, 25.0]]) * 1e-3

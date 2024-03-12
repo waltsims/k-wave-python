@@ -19,22 +19,6 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
-
-def L2_error(x: np.ndarray, y: np.ndarray, ord=None) -> float:	
-    """	
-    L_2 error between two arrays	
-    """	
-
-    if (x.shape != y.shape):
-        raise ValueError("Wrong sizes: '{x.shape}' and '{y.shape}' ")	
-
-    if ((ord == 2) or (ord is None)):	
-        return 100.0 * np.sqrt(np.vdot(np.ravel(x) - np.ravel(y))) / np.sum(np.vdot(np.ravel(x)))	
-    elif np.isposinf(ord):	
-        return 100.0 * np.max(np.abs(np.ravel(x) - np.ravel(y))) / np.max(np.ravel(x))	
-    else:	
-        raise ValueError(f"Invalid norm order: '{ord}'.")
-
 # Modelling A Focused Bowl Transducer In 3D Example
 
 # This example models a focused bowl transducer in 3D. The on-axis pressure
@@ -50,8 +34,8 @@ rho0: float          = 1000.0  # density [kg/m^3]
 source_f0            = 1.0e6              # source frequency [Hz]
 source_roc           = 30e-3              # bowl radius of curvature [m]
 source_diameter      = 30e-3              # bowl aperture diameter [m]
-source_amp           = np.array([1.0e6])  # source pressure [Pa]
-source_phase         = np.array([0.0])    # source phase [radians]
+source_amp           = 1.0e6              # source pressure [Pa]
+source_phase         = 0.0                # source phase [radians]
 
 # grid parameters
 axial_size: float    = 50.0e-3  # total grid size in the axial dimension [m]
@@ -110,7 +94,7 @@ if verbose:
 source = kSource()
 
 # create time varying source
-source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, source_amp, source_phase)
+source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, np.array([source_amp]), np.array([source_phase]))
 
 # set bowl position and orientation
 bowl_pos = [kgrid.x_vec[0].item() + source_x_offset * kgrid.dx, 0.0, 0.0]
@@ -214,10 +198,8 @@ p_ref_axial, _, _ = focused_bowl_oneil(source_roc,
 p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, source_amp / (c0 * rho0),
                                           source_f0, c0, rho0, axial_positions=x_vec)
 
-# calculate errors
-L2 = L2_error(p_ref_axial_kw, amp_on_axis, ord=2)
-
-Linf = L2_error(p_ref_axial_kw, amp_on_axis, ord=np.inf)
+L2_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=2)
+Linf_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=np.inf)
 
 # =========================================================================
 # VISUALISATION
