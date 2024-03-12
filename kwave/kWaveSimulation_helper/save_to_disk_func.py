@@ -503,7 +503,7 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
         del value
 
     # set additional file attributes
-    write_attributes(filepath, legacy=True)  # TODO: update to currently breaking code after references are updated
+    write_attributes(filepath)
 
 
 def save_mat_file(filepath, integer_variables, float_variables):

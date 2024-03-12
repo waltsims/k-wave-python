@@ -14,12 +14,18 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_nepers2db():
-    assert abs(neper2db(1.5) - 8.186258123051049e05) < 1e-6, "Point check of nepers2db incorrect"
+    expected_scalar = 8.186258123051049e05
+    expected_matrix = expected_scalar * np.ones((10, 10))
+    assert np.isclose(neper2db(1.5), expected_scalar), "Point check of nepers2db incorrect"
+    assert np.allclose(neper2db(1.5 * np.ones((10, 10))), expected_matrix), "matrix check of nepers2db incorrect"
     return
 
 
 def test_db2nepers():
-    assert abs(db2neper(1.6) - 2.931742395517710e-06) < 1e-6, "Point check of nepers2db incorrect"
+    expected_scalar = 2.931742395517710e-06
+    expected_matrix = expected_scalar * np.ones((10, 10))
+    assert np.isclose(db2neper(1.6), expected_scalar), "Point check of db2nepers incorrect"
+    assert np.allclose(db2neper(1.6 * np.ones((10, 10))), expected_matrix), "matrix check of db2nepers incorrect"
     return
 
 

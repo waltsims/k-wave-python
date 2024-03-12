@@ -357,11 +357,11 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     return c_kk
 
 
-def water_absorption(f, temp):
+def water_absorption(f: float, temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
     Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
-    polynomial fitted to the data given by np.pinkerton(1949).
+    polynomial fitted to the data given by Pinkerton (1949).
 
 
     Args:
@@ -375,15 +375,15 @@ def water_absorption(f, temp):
         >>> abs = waterAbsorption(f, T)
 
     References:
-        [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
-        and its Relation to Molecular Constitution, " Proceedings of the
-        Physical Society.Section B, 2, 129 - 141
+        [1] J. M. M. Pinkerton (1949) "The Absorption of Ultrasonic Waves in Liquids and its
+                                        Relation to Molecular Constitution,"
+        Proceedings of the Physical Society. Section B, 2, 129-141
 
     """
 
     NEPER2DB = 8.686
     # check temperature is within range
-    if not 0 <= temp <= 60:
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 60.0)]):
         raise Warning("Temperature outside range of experimental data")
 
     # conversion factor between Nepers and dB NEPER2DB = 8.686;
@@ -408,9 +408,9 @@ def water_absorption(f, temp):
     return abs
 
 
-def water_sound_speed(temp: float) -> float:
+def water_sound_speed(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
-    Calculate the sound speed in distilled water with temperature.
+    Calculate the sound speed in distilled water with temperature according to Marczak (1997)
 
     Args:
         temp: The temperature of the water in degrees Celsius.
@@ -422,13 +422,13 @@ def water_sound_speed(temp: float) -> float:
         ValueError: if `temp` is not between 0 and 95
 
     References:
-        Marczak, R. (1997). The sound velocity in water as a function of temperature.
-                        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+        [1] R. Marczak (1997). "The sound velocity in water as a function of temperature".
+        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
     # check limits
-    if not (0 <= temp <= 95):
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 95.0)]):
         raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
@@ -437,7 +437,7 @@ def water_sound_speed(temp: float) -> float:
     return c
 
 
-def water_density(temp: float) -> float:
+def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.ndarray]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -454,13 +454,13 @@ def water_density(temp: float) -> float:
         ValueError: if `temp` is not between 5 and 40
 
     References:
-        [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
-        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
+        [1] F. E. Jones and G. L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
+        Journal of Research of the National Institute of Standards and Technology, 97(3), 335-340.
 
     """
 
     # check limits
-    if not (5 <= temp <= 40):
+    if not np.all([np.all(np.asarray(temp) >= 5.0), np.all(np.asarray(temp) <= 40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
@@ -468,7 +468,7 @@ def water_density(temp: float) -> float:
     return density
 
 
-def water_non_linearity(temp: float) -> float:
+def water_non_linearity(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
      Calculates the parameter of nonlinearity B/A at a
      given temperature using a fourth-order polynomial fitted to the data
@@ -484,13 +484,14 @@ def water_non_linearity(temp: float) -> float:
          >>> BonA = waterNonlinearity(T)
 
      References:
-         [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
-         Acoust. Soc. Am., 32(6), 719-721.
+         [1] R. T. Beyer (1960) "Parameter of nonlinearity in fluids,"
+         J. Acoust. Soc. Am., 32(6), 719-721.
 
     """
 
     # check limits
-    assert 0 <= temp <= 100, "Temp must be between 0 and 100."
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 100.0)]):
+        raise ValueError("`temp` must be between 0 and 100.")
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
@@ -2641,12 +2642,12 @@ def make_cart_rect(
 
 @beartype
 def focused_bowl_oneil(
-    radius: float,
-    diameter: float,
-    velocity: float,
-    frequency: int,
-    sound_speed: int,
-    density: int,
+    radius: kt.NUMERIC,
+    diameter: kt.NUMERIC,
+    velocity: kt.NUMERIC,
+    frequency: kt.NUMERIC,
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC,
     axial_positions: Optional[Union[kt.NP_ARRAY_FLOAT_1D, float, List]] = None,
     lateral_positions: Optional[Union[kt.NP_ARRAY_FLOAT_1D, float, List]] = None,
 ) -> Tuple[Optional[kt.NP_ARRAY_FLOAT_1D], Optional[kt.NP_ARRAY_FLOAT_1D], Optional[kt.NP_ARRAY_COMPLEX_1D]]:
@@ -3008,11 +3009,11 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
 
 @beartype
 def make_cart_spherical_segment(
-    bowl_pos: NDArray[Shape["3"], Int],
+    bowl_pos: NDArray[Shape["3"], Float],
     radius: Union[float, int],
     inner_diameter: Union[float, int],
     outer_diameter: Union[float, int],
-    focus_pos: NDArray[Shape["3"], Int],
+    focus_pos: NDArray[Shape["3"], Float],
     num_points: int,
     plot_bowl: Optional[bool] = False,
     num_points_inner: int = 0,
