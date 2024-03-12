@@ -22,7 +22,7 @@ from kwave.ksource import kSource
 from kwave.ksensor import kSensor
 from kwave.utils.signals import create_cw_signals
 from kwave.utils.filters import extract_amp_phase
-from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gp
+from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
@@ -30,7 +30,6 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 verbose: bool = True
 savePlotting: bool = False
 useMaxTimeStep: bool = True
-
 
 Nx: int = 71
 Nz: int = 141
@@ -168,7 +167,11 @@ focus_pos = [kgrid.x_vec[focus_coords[0]].item(),
              kgrid.y_vec[focus_coords[1]].item()]
 
 # add bowl shaped element
-karray.add_bowl_element(bowl_pos, source_roc, diameters, focus_pos)
+
+
+# karray.add_line_element(start_point=[-10E-3, kgrid.y_vec[0].item()], end_point=[10e-3 + dx, kgrid.y_vec[0].item()])
+
+karray.add_arc_element(position, radius, diameters, focus_pos)
 
 # create time varying source
 source_sig = create_cw_signals(np.squeeze(kgrid.t_array),
@@ -233,10 +236,24 @@ execution_options = SimulationExecutionOptions(
 # RUN THE SIMULATION
 # =========================================================================
 
-sensor_data = kspace_first_order_2d_gp(
+sensor_data = kspace_first_order_2d_gpu(
     medium=medium,
-    kgrid=kgrid,
+    kgrid=deepcopy(kgrid),
     source=source,
     sensor=sensor,
     simulation_options=simulation_options,
     execution_options=execution_options)
+
+# sampling frequency
+fs = 1.0 / kgrid.dt
+
+# get Fourier coefficients
+amp, _, _ = extract_amp_phase(sensor_data['p'].T, fs, freq, dim=1, fft_padding=1, window='Rectangular')
+
+p = np.reshape(amp, (Nx, Nz), order='F')
+
+x_vec = np.linspace(kgrid.x_vec[0].item(), kgrid.x_vec[-1].item(), kgrid.Nx)
+y_vec = np.linspace(kgrid.y_vec[0].item(), kgrid.y_vec[-1].item(), kgrid.Ny)
+
+fig1, ax1 = plt.subplots()
+ax1.pcolormesh(x_vec, y_vec, p[:, :].T / 1e6, shading='gouraud', cmap='viridis')
