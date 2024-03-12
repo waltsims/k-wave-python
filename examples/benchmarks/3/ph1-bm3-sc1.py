@@ -31,13 +31,14 @@ verbose: bool = True
 savePlotting: bool = False
 useMaxTimeStep: bool = True
 
-Nx: int = 71
-Nz: int = 141
 
-dx: float = 0.005
+Nx: int = 141
+Nz: int = 241
+
+dx: float = 0.5e-3
 dz: float = dx
 
-focus = 64
+focus = 128
 
 focus_coords = [(Nx - 1) // 2, focus]
 
@@ -55,13 +56,13 @@ alpha_coeff = np.zeros((Nx,Nz))
 # non-dispersive
 alpha_power = 2.0
 
-# skull
+# cortical bone
 sound_speed[:, 60:74] = 2800.0
 density[:, 60:74] = 1850.0
 alpha_coeff[:, 60:74] = 4.0
 
-c0_min = np.min(sound_speed.flatten())
-c0_max = np.min(sound_speed.flatten())
+c0_min = np.min(np.ravel(sound_speed))
+c0_max = np.max(np.ravel(sound_speed))
 
 medium = kWaveMedium(sound_speed=sound_speed,
                      density=density,
@@ -166,12 +167,8 @@ bowl_pos = [kgrid.x_vec[bowl_coords[0]].item(),
 focus_pos = [kgrid.x_vec[focus_coords[0]].item(),
              kgrid.y_vec[focus_coords[1]].item()]
 
-# add bowl shaped element
-
-
-# karray.add_line_element(start_point=[-10E-3, kgrid.y_vec[0].item()], end_point=[10e-3 + dx, kgrid.y_vec[0].item()])
-
-karray.add_arc_element(position, radius, diameters, focus_pos)
+# add planar array
+karray.add_line_element(start_point=[-10E-3, kgrid.y_vec[0].item()], end_point=[10e-3 + dx, kgrid.y_vec[0].item()])
 
 # create time varying source
 source_sig = create_cw_signals(np.squeeze(kgrid.t_array),
@@ -212,8 +209,8 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 DATA_CAST = 'single'
 DATA_PATH = 'data/'
 
-input_filename = 'ph1_bm3_sc1_input.h5'
-output_filename = 'ph1_bm3_sc1_output.h5'
+input_filename = 'ph1_bm3_sc2_input.h5'
+output_filename = 'ph1_bm3_sc2_output.h5'
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
@@ -238,7 +235,7 @@ execution_options = SimulationExecutionOptions(
 
 sensor_data = kspace_first_order_2d_gpu(
     medium=medium,
-    kgrid=deepcopy(kgrid),
+    kgrid=kgrid,
     source=source,
     sensor=sensor,
     simulation_options=simulation_options,
@@ -250,10 +247,23 @@ fs = 1.0 / kgrid.dt
 # get Fourier coefficients
 amp, _, _ = extract_amp_phase(sensor_data['p'].T, fs, freq, dim=1, fft_padding=1, window='Rectangular')
 
+# reshape to array
 p = np.reshape(amp, (Nx, Nz), order='F')
 
-x_vec = np.linspace(kgrid.x_vec[0].item(), kgrid.x_vec[-1].item(), kgrid.Nx)
-y_vec = np.linspace(kgrid.y_vec[0].item(), kgrid.y_vec[-1].item(), kgrid.Ny)
+# axes for plotting
+x_vec = kgrid.x_vec
+y_vec = kgrid.y_vec[0] - kgrid.y_vec
 
-fig1, ax1 = plt.subplots()
-ax1.pcolormesh(x_vec, y_vec, p[:, :].T / 1e6, shading='gouraud', cmap='viridis')
+fig1, ax1 = plt.subplots(1, 1)
+p1 = ax1.pcolormesh(1e3 * np.squeeze(x_vec),
+                    1e3 * np.squeeze(y_vec),
+                    np.flip(p.T, axis=1) / 1e3,
+                    shading='gouraud', cmap='viridis')
+ax1.set(xlabel='Lateral Position [mm]',
+        ylabel='Axial Position [mm]',
+        title='PH1-BM3-SC2')
+ax1.set_aspect('equal')
+cbar1 = fig1.colorbar(p1, ax=ax1)
+_ = cbar1.ax.set_title('[kPa]', fontsize='small')
+
+plt.show()
