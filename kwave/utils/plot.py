@@ -17,21 +17,21 @@ def voxel_plot(mat, axis_tight=False, color=(1, 1, 0.4), transparency=0.8):
     """
     # Check input matrix is 3D and single or double precision
     if len(mat.shape) != 3 or not np.issubdtype(mat.dtype, np.floating):
-        raise ValueError('Input must be a 3D matrix in single or double precision.')
+        raise ValueError("Input must be a 3D matrix in single or double precision.")
 
     # Normalize the matrix
     mat = mat / np.max(mat)
 
     # Create 3D figure
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     ax.voxels(mat, facecolors=color, alpha=transparency, edgecolors=(0.5, 0.5, 0.5, 0.5))
 
     # Set the axes properties and labels
     ax.view_init(elev=35, azim=-35)  # Adjust viewing angles here
-    ax.set_xlabel('x [voxels]')
-    ax.set_ylabel('y [voxels]')
-    ax.set_zlabel('z [voxels]')
+    ax.set_xlabel("x [voxels]")
+    ax.set_ylabel("y [voxels]")
+    ax.set_zlabel("z [voxels]")
 
     if not axis_tight:
         sz = mat.shape

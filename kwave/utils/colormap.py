@@ -54,9 +54,9 @@ def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
 
     n = int(np.fix(3 / 8 * m))
 
-    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m-n)])
-    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m-2*n)])
-    b = np.concatenate([np.zeros(2*n), np.arange(1, m-2*n + 1)/(m-2*n)])
+    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m - n)])
+    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m - 2 * n)])
+    b = np.concatenate([np.zeros(2 * n), np.arange(1, m - 2 * n + 1) / (m - 2 * n)])
 
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 

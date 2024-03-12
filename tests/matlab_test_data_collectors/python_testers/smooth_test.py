@@ -8,12 +8,11 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_smooth():
-    test_record_path = os.path.join(Path(__file__).parent, Path(
-        'collectedValues/smooth.mat'))
+    test_record_path = os.path.join(Path(__file__).parent, Path("collectedValues/smooth.mat"))
     reader = TestRecordReader(test_record_path)
-    img = reader.expected_value_of('img')
+    img = reader.expected_value_of("img")
 
     out = smooth(img)
 
-    out_prime = reader.expected_value_of('out')
+    out_prime = reader.expected_value_of("out")
     assert np.allclose(out, out_prime), "Smooth did not match expected smooth"

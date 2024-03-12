@@ -3,8 +3,9 @@ import numpy as np
 from kwave.utils.math import largest_prime_factor
 
 
-def get_pml(Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: float,
-            staggered: bool, dimension: int, axisymmetric: bool = False) -> np.ndarray:
+def get_pml(
+    Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: float, staggered: bool, dimension: int, axisymmetric: bool = False
+) -> np.ndarray:
     """
     Returns a 1D perfectly matched layer variable based on the given size and absorption coefficient.
 
@@ -45,7 +46,7 @@ def get_pml(Nx: int, dx: float, dt: float, c: float, pml_size: int, pml_alpha: f
     pml = np.ones((1, Nx))
     if not axisymmetric:
         pml[:, :pml_size] = pml_left
-    pml[:, Nx - pml_size:] = pml_right
+    pml[:, Nx - pml_size :] = pml_right
 
     # reshape the pml vector to be in the desired direction
     if dimension == 1:
@@ -87,6 +88,7 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     """
     # check if grid size is given as kgrid, and extract grid size
     from kwave.kgrid import kWaveGrid
+
     if isinstance(grid_size, kWaveGrid):
         grid_size = grid_size.N
 
@@ -94,7 +96,7 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     grid_dim = len(grid_size)
 
     # check grid size is 1, 2, or 3
-    assert 1 <= grid_dim <= 3, 'Grid dimensions must be given as a 1, 2, or 3 element vector.'
+    assert 1 <= grid_dim <= 3, "Grid dimensions must be given as a 1, 2, or 3 element vector."
 
     # check for pml_range input
     if pml_range is None:
@@ -104,25 +106,26 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     pml_range = np.round(pml_range).astype(int)
 
     # check for positive values
-    assert np.all(pml_range >= 0), 'Optional input pml_range must be positive.'
+    assert np.all(pml_range >= 0), "Optional input pml_range must be positive."
 
     # check for correct length
-    assert len(pml_range) == 2, 'Optional input pml_range must be a two element vector.'
+    assert len(pml_range) == 2, "Optional input pml_range must be a two element vector."
 
     # check for monotonic
-    assert pml_range[1] > pml_range[0], 'The second value for pml_range must be greater than the first.'
+    assert pml_range[1] > pml_range[0], "The second value for pml_range must be greater than the first."
 
     # check for axisymmetric input
     if axisymmetric is None:
         axisymmetric = False
 
     # check for correct string
-    assert not isinstance(axisymmetric, str) or axisymmetric.startswith(('WSWA', 'WSWS')), \
-        "Optional input axisymmetric must be set to ''WSWA'' or ''WSWS''."
+    assert not isinstance(axisymmetric, str) or axisymmetric.startswith(
+        ("WSWA", "WSWS")
+    ), "Optional input axisymmetric must be set to ''WSWA'' or ''WSWS''."
 
     # check for correct dimensions
     if isinstance(axisymmetric, str) and grid_dim != 2:
-        raise ValueError('Optional input axisymmetric is only valid for 2D grid sizes.')
+        raise ValueError("Optional input axisymmetric is only valid for 2D grid sizes.")
 
     # create array of PML values to search
     pml_size = np.arange(pml_range[0], pml_range[1] + 1)
@@ -132,9 +135,9 @@ def get_optimal_pml_size(grid_size, pml_range=None, axisymmetric=None):
     for dim in range(0, grid_dim):
         for index in range(0, len(pml_size)):
             if isinstance(axisymmetric, str) and dim == 2:
-                if axisymmetric == 'WSWA':
+                if axisymmetric == "WSWA":
                     facs[dim, index] = largest_prime_factor((grid_size[dim] + pml_size[index]) * 4)
-                if axisymmetric == 'WSWS':
+                if axisymmetric == "WSWS":
                     facs[dim, index] = largest_prime_factor((grid_size[dim] + pml_size[index]) * 2 - 2)
             else:
                 facs[dim, index] = largest_prime_factor(grid_size[dim] + 2 * pml_size[index])
