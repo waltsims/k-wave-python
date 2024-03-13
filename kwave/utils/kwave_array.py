@@ -294,10 +294,10 @@ class kWaveArray(object):
         )
 
     def add_arc_element(self, position, radius, diameter, focus_pos):
-        assert isinstance(position, Iterable), "'position' must be list, tuple or Vector"
+        assert isinstance(position, (list, tuple, Vector)), "'position' must be list, tuple or Vector"
         assert isinstance(radius, (int, float)), "'radius' must be an integer or float"
         assert isinstance(diameter, (int, float)), "'diameter' must be an integer or float"
-        assert isinstance(focus_pos, Iterable), "'focus_pos' must be list, tuple or Vector"
+        assert isinstance(focus_pos, (list, tuple, Vector)), "'focus_pos' must be list, tuple or Vector"
         assert len(position) == 2, "'position' must have 2 elements"
         assert len(focus_pos) == 2, "'focus_pos' must have 2 elements"
 

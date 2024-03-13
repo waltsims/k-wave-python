@@ -2895,7 +2895,7 @@ def trim_cart_points(kgrid, points: np.ndarray):
 
 @beartype
 def make_cart_arc(
-    arc_pos: Vector, radius: Union[float, int], diameter: int, focus_pos: Vector, num_points: int, plot_arc: bool = False
+    arc_pos: NDArray[Shape["2"], Float], radius: Union[float, int], diameter: int, focus_pos: NDArray[Shape["2"], Float], num_points: int, plot_arc: bool = False
 ) -> NDArray[Shape["2, NumPoints"], Float]:
     """
     make_cart_arc creates a 2 x num_points array of the Cartesian
