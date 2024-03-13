@@ -1,17 +1,6 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib.colors import Normalize
-import matplotlib.cm as cm
-
-from cycler import cycler
-
-import h5py
-
-from skimage import measure
-from skimage.segmentation import find_boundaries
-from scipy.interpolate import interpn
 
 from kwave.data import Vector
 from kwave.utils.kwave_array import kWaveArray
@@ -27,10 +16,7 @@ from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
-verbose: bool = True
-savePlotting: bool = False
 useMaxTimeStep: bool = True
-
 
 Nx: int = 141
 Nz: int = 241
@@ -38,7 +24,7 @@ Nz: int = 241
 dx: float = 0.5e-3
 dz: float = dx
 
-focus = 128
+focus: int = 128
 
 focus_coords = [(Nx - 1) // 2, focus]
 
@@ -49,9 +35,9 @@ bowl_coords = [(Nx - 1) // 2, 0]
 # =========================================================================
 
 # water
-sound_speed = 1500.0 * np.ones((Nx,Nz))
-density = 1000.0 * np.ones((Nx,Nz))
-alpha_coeff = np.zeros((Nx,Nz))
+sound_speed = 1500.0 * np.ones((Nx, Nz))
+density = 1000.0 * np.ones((Nx, Nz))
+alpha_coeff = np.zeros((Nx, Nz))
 
 # non-dispersive
 alpha_power = 2.0
@@ -76,7 +62,7 @@ medium = kWaveMedium(sound_speed=sound_speed,
 # bowl radius of curvature [m]
 source_roc: float = 64.0e-3
 
-# as we will use the bowl element this has to be a int or float
+# bowl openning [m]
 diameters: float = 64.0e-3
 
 # frequency [Hz]
@@ -103,7 +89,7 @@ ppw: float = k_min / dx
 record_periods: int = 3
 
 # compute points per period
-ppp: int = 30
+ppp: int = 60
 
 # CFL number determines time step
 cfl: float = (ppw / ppp)
@@ -167,8 +153,8 @@ bowl_pos = [kgrid.x_vec[bowl_coords[0]].item(),
 focus_pos = [kgrid.x_vec[focus_coords[0]].item(),
              kgrid.y_vec[focus_coords[1]].item()]
 
-# add planar array
-karray.add_line_element(start_point=[-10E-3, kgrid.y_vec[0].item()], end_point=[10e-3 + dx, kgrid.y_vec[0].item()])
+# add bowl shaped element
+karray.add_arc_element(bowl_pos, source_roc, diameters, focus_pos)
 
 # create time varying source
 source_sig = create_cw_signals(np.squeeze(kgrid.t_array),
@@ -207,10 +193,10 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 # =========================================================================
 
 DATA_CAST = 'single'
-DATA_PATH = 'data/'
+DATA_PATH = './'
 
-input_filename = 'ph1_bm3_sc2_input.h5'
-output_filename = 'ph1_bm3_sc2_output.h5'
+input_filename = 'ph1_bm3_sc1_input.h5'
+output_filename = 'ph1_bm3_sc1_output.h5'
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
@@ -241,11 +227,17 @@ sensor_data = kspace_first_order_2d_gpu(
     simulation_options=simulation_options,
     execution_options=execution_options)
 
+
+# =========================================================================
+# VISUALIZATION
+# =========================================================================
+
 # sampling frequency
 fs = 1.0 / kgrid.dt
 
 # get Fourier coefficients
-amp, _, _ = extract_amp_phase(sensor_data['p'].T, fs, freq, dim=1, fft_padding=1, window='Rectangular')
+amp, _, _ = extract_amp_phase(sensor_data['p'].T, fs, freq, dim=1, fft_padding=1,
+                              window='Rectangular')
 
 # reshape to array
 p = np.reshape(amp, (Nx, Nz), order='F')
@@ -261,9 +253,16 @@ p1 = ax1.pcolormesh(1e3 * np.squeeze(x_vec),
                     shading='gouraud', cmap='viridis')
 ax1.set(xlabel='Lateral Position [mm]',
         ylabel='Axial Position [mm]',
-        title='PH1-BM3-SC2')
+        title='PH1-BM3-SC1')
 ax1.set_aspect('equal')
 cbar1 = fig1.colorbar(p1, ax=ax1)
 _ = cbar1.ax.set_title('[kPa]', fontsize='small')
+
+fig2, ax2 = plt.subplots(1, 1)
+ax2.plot(-1e3 * y_vec, p[(Nx-1)//2, :] / 1e3 )
+ax2.set(xlabel='Axial Position [mm]',
+        ylabel='Pressure [kPa]',
+        title='PH1-BM3-SC1')
+ax2.grid(True)
 
 plt.show()
