@@ -83,21 +83,79 @@ def test_get_alpha_filters_2d():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    filter = get_alpha_filter(kgrid, medium, ['max', 'max'])
+    filter = get_alpha_filter(kgrid, medium, ["max", "max"])
 
-    assert np.isclose(filter[32], np.array([0., 0.00956799, 0.03793968, 0.08406256, 0.14616399,
-                                   0.22185752, 0.30823458, 0.40197633, 0.4994812, 0.59700331,
-                                   0.69079646, 0.7772581, 0.85306778, 0.91531474, 0.9616098,
-                                   0.99017714, 0.99992254, 1., 1., 1.,
-                                   1., 1., 1., 1., 1.,
-                                   1., 1., 1., 1., 1.,
-                                   1., 1., 1., 1., 1.,
-                                   1., 1., 1., 1., 1.,
-                                   1., 1., 1., 1., 1.,
-                                   1., 1., 0.99992254, 0.99017714, 0.9616098,
-                                   0.91531474, 0.85306778, 0.7772581, 0.69079646, 0.59700331,
-                                   0.4994812, 0.40197633, 0.30823458, 0.22185752, 0.14616399,
-                                   0.08406256, 0.03793968, 0.00956799, 0.])).all()
+    assert np.isclose(
+        filter[32],
+        np.array(
+            [
+                0.0,
+                0.00956799,
+                0.03793968,
+                0.08406256,
+                0.14616399,
+                0.22185752,
+                0.30823458,
+                0.40197633,
+                0.4994812,
+                0.59700331,
+                0.69079646,
+                0.7772581,
+                0.85306778,
+                0.91531474,
+                0.9616098,
+                0.99017714,
+                0.99992254,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.99992254,
+                0.99017714,
+                0.9616098,
+                0.91531474,
+                0.85306778,
+                0.7772581,
+                0.69079646,
+                0.59700331,
+                0.4994812,
+                0.40197633,
+                0.30823458,
+                0.22185752,
+                0.14616399,
+                0.08406256,
+                0.03793968,
+                0.00956799,
+                0.0,
+            ]
+        ),
+    ).all()
 
 
 def test_get_alpha_filters_1D():
@@ -137,7 +195,7 @@ def test_get_alpha_filters_1D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    get_alpha_filter(kgrid, medium, ['max'])
+    get_alpha_filter(kgrid, medium, ["max"])
 
 
 def test_make_time():
@@ -163,12 +221,12 @@ def test_make_time():
     t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
     kgrid.makeTime(c0, t_end=t_end)
 
-    assert kgrid.Nt == 1586, f'Time array length of {kgrid.Nt} is not correct. Expected 1586.'
+    assert kgrid.Nt == 1586, f"Time array length of {kgrid.Nt} is not correct. Expected 1586."
 
 
 def test_focus():
     # simulation settings
-    DATA_CAST = 'single'  # noqa: F841
+    DATA_CAST = "single"  # noqa: F841
     RUN_SIMULATION = True  # noqa: F841
 
     # =========================================================================
@@ -176,7 +234,7 @@ def test_focus():
     # =========================================================================
 
     # set the size of the perfectly matched layer (PML)
-    pml_size_points = Vector([20, 10, 10]) # [grid points]
+    pml_size_points = Vector([20, 10, 10])  # [grid points]
 
     # set total number of grid points not including the PML
     grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
@@ -202,7 +260,7 @@ def test_focus():
         sound_speed=None,  # will be set later
         alpha_coeff=0.75,
         alpha_power=1.5,
-        BonA=6
+        BonA=6,
     )
 
     # create the time array
@@ -235,18 +293,15 @@ def test_focus():
     transducer.element_width = 2  # width of each element [grid points/voxels]
     transducer.element_length = 24  # length of each element [grid points/voxels]
     transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
-    transducer.radius = float('inf')  # radius of curvature of the transducer [m]
+    transducer.radius = float("inf")  # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer.number_elements * transducer.element_width + (
-            transducer.number_elements - 1) * transducer.element_spacing
+    transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([
-        1,
-        grid_size_points.y / 2 - transducer_width / 2,
-        grid_size_points.z / 2 - transducer.element_length / 2
-    ])
+    transducer.position = np.round(
+        [1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2]
+    )
 
     transducer = kWaveTransducerSimple(kgrid, **transducer)
     imaging_system = NotATransducer(transducer, kgrid)

@@ -31,7 +31,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
     """
     if mode == "rms":
-        reference = np.sqrt(np.mean(signal ** 2))
+        reference = np.sqrt(np.mean(signal**2))
     elif mode == "peak":
         reference = np.max(signal)
     else:
@@ -44,8 +44,8 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     noise = std_dev * np.random.randn(*signal.shape)
 
     # check the snr
-    noise_rms = np.sqrt(np.mean(noise ** 2))
-    snr = 20. * np.log10(reference / noise_rms)
+    noise_rms = np.sqrt(np.mean(noise**2))
+    snr = 20.0 * np.log10(reference / noise_rms)
 
     # add noise to the recorded sensor data
     signal = signal + noise
@@ -54,36 +54,38 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 
 @beartype
-def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
-            # TODO: replace and refactor for scipy.signal.get_window
-            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
-            type_: str,  # TODO change this to enum in the future
-            plot_win: bool = False,
-            param: Optional[float] = None,
-            rotation: bool = False,
-            symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
-            square: bool = False):
+def get_win(
+    N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
+    # TODO: replace and refactor for scipy.signal.get_window
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
+    type_: str,  # TODO change this to enum in the future
+    plot_win: bool = False,
+    param: Optional[float] = None,
+    rotation: bool = False,
+    symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
+    square: bool = False,
+):
     """
 
-   A frequency domain windowing function of specified type and dimensions.
+    A frequency domain windowing function of specified type and dimensions.
 
-    Args:
-        N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.
-        type_: Window type. Supported values: 'Bartlett', 'Bartlett-Hanning', 'Blackman', 'Blackman-Harris',
-                                              'Blackman-Nuttall', 'Cosine', 'Flattop', 'Gaussian', 'HalfBand',
-                                              'Hamming', 'Hanning', 'Kaiser', 'Lanczos', 'Nuttall',
-                                              'Rectangular', 'Triangular', 'Tukey'.
-        plot_win: Boolean to display the window (default = False).
-        param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey),
-                                     alpha (Blackman, Kaiser), standard deviation (Gaussian)
-                                     (default = 0.5, 0.16, 3 respectively).
-        rotation: Boolean to create windows via rotation or outer product (default = False).
-        symmetric: Boolean to make the window symmetrical (default = True).
-                   Can also be a vector defining the symmetry in each matrix dimension.
-        square: Boolean to force the window to be square (default = False).
+     Args:
+         N: Number of samples, [Nx] for 1D, [Nx, Ny] for 2D, [Nx, Ny, Nz] for 3D.
+         type_: Window type. Supported values: 'Bartlett', 'Bartlett-Hanning', 'Blackman', 'Blackman-Harris',
+                                               'Blackman-Nuttall', 'Cosine', 'Flattop', 'Gaussian', 'HalfBand',
+                                               'Hamming', 'Hanning', 'Kaiser', 'Lanczos', 'Nuttall',
+                                               'Rectangular', 'Triangular', 'Tukey'.
+         plot_win: Boolean to display the window (default = False).
+         param: Control parameter for Tukey, Blackman, Gaussian, and Kaiser windows: taper ratio (Tukey),
+                                      alpha (Blackman, Kaiser), standard deviation (Gaussian)
+                                      (default = 0.5, 0.16, 3 respectively).
+         rotation: Boolean to create windows via rotation or outer product (default = False).
+         symmetric: Boolean to make the window symmetrical (default = True).
+                    Can also be a vector defining the symmetry in each matrix dimension.
+         square: Boolean to force the window to be square (default = False).
 
-    Returns:
-        A tuple of (win, cg) where win is the window and cg is the coherent gain of the window.
+     Returns:
+         A tuple of (win, cg) where win is the window and cg is the coherent gain of the window.
     """
 
     def cosine_series(n: int, N: int, coeffs: List[float]) -> np.ndarray:
@@ -115,20 +117,20 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
     symmetric = np.array(symmetric, dtype=bool)
 
     # Set default value for `param` if type is one of the special ones
-    assert not plot_win, NotImplementedError('Plotting is not implemented.')
-    if type_ == 'Tukey':
+    assert not plot_win, NotImplementedError("Plotting is not implemented.")
+    if type_ == "Tukey":
         if param is None:
             param = 0.5
         param = np.clip(param, a_min=0, a_max=1)
-    elif type_ == 'Blackman':
+    elif type_ == "Blackman":
         if param is None:
             param = 0.16
         param = np.clip(param, a_min=0, a_max=1)
-    elif type_ == 'Gaussian':
+    elif type_ == "Gaussian":
         if param is None:
             param = 0.5
         param = np.clip(param, a_min=0, a_max=0.5)
-    elif type_ == 'Kaiser':
+    elif type_ == "Kaiser":
         if param is None:
             param = 3
         param = np.clip(param, a_min=0, a_max=100)
@@ -152,58 +154,61 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
         # TODO: find failure cases in test suite when N is zero.
         # assert np.all(N) > 1, 'Signal length N must be greater than 1'
 
-        if type_ == 'Bartlett':
+        if type_ == "Bartlett":
             win = (2 / (N - 1) * ((N - 1) / 2 - abs(n - (N - 1) / 2))).T
-        elif type_ == 'Bartlett-Hanning':
+        elif type_ == "Bartlett-Hanning":
             win = (0.62 - 0.48 * abs(n / (N - 1) - 1 / 2) - 0.38 * np.cos(2 * np.pi * n / (N - 1))).T
-        elif type_ == 'Blackman':
+        elif type_ == "Blackman":
             win = cosine_series(n, N, [(1 - param) / 2, 0.5, param / 2])
-        elif type_ == 'Blackman-Harris':
+        elif type_ == "Blackman-Harris":
             win = cosine_series(n, N, [0.35875, 0.48829, 0.14128, 0.01168])
-        elif type_ == 'Blackman-Nuttall':
+        elif type_ == "Blackman-Nuttall":
             win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
-        elif type_ == 'Cosine':
+        elif type_ == "Cosine":
             win = (np.cos(np.pi * n / (N - 1) - np.pi / 2)).T
-        elif type_ == 'Flattop':
+        elif type_ == "Flattop":
             win = cosine_series(n, N, [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368])
-        elif type_ == 'Gaussian':
+        elif type_ == "Gaussian":
             win = (np.exp(-0.5 * ((n - (N - 1) / 2) / (param * (N - 1) / 2)) ** 2)).T
-        elif type_ == 'HalfBand':
+        elif type_ == "HalfBand":
             win = np.ones(N)
             # why not to just round? => because rounding 0.5 introduces unexpected behaviour
             # round(0.5) should be 1 but it is 0
             ramp_length = round(N / 4 + 1e-8)
-            ramp = 1 / 2 + 9 / 16 * np.cos(np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length)) - 1 / 16 * np.cos(
-                3 * np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length))
+            ramp = (
+                1 / 2
+                + 9 / 16 * np.cos(np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length))
+                - 1 / 16 * np.cos(3 * np.pi * np.arange(1, ramp_length + 1) / (2 * ramp_length))
+            )
             if ramp_length > 0:
                 win[0:ramp_length] = np.flip(ramp)
                 win[-ramp_length:] = ramp
-        elif type_ == 'Hamming':
+        elif type_ == "Hamming":
             win = (0.54 - 0.46 * np.cos(2 * np.pi * n / (N - 1))).T
-        elif type_ == 'Hanning':
+        elif type_ == "Hanning":
             win = (0.5 - 0.5 * np.cos(2 * np.pi * n / (N - 1))).T
-        elif type_ == 'Kaiser':
+        elif type_ == "Kaiser":
             part_1 = scipy.special.iv(0, np.pi * param * np.sqrt(1 - (2 * n / (N - 1) - 1) ** 2))
             part_2 = scipy.special.iv(0, np.pi * param)
             win = part_1 / part_2
-        elif type_ == 'Lanczos':
+        elif type_ == "Lanczos":
             win = 2 * np.pi * n / (N - 1) - np.pi
             win = sinc(win + 1e-12).T
-        elif type_ == 'Nuttall':
+        elif type_ == "Nuttall":
             win = cosine_series(n, N, [0.3635819, 0.4891775, 0.1365995, 0.0106411])
-        elif type_ == 'Rectangular':
+        elif type_ == "Rectangular":
             win = np.ones(N)
-        elif type_ == 'Triangular':
+        elif type_ == "Triangular":
             win = (2 / N * (N / 2 - abs(n - (N - 1) / 2))).T
-        elif type_ == 'Tukey':
+        elif type_ == "Tukey":
             win = np.ones((N, 1))
             index = np.arange(0, (N - 1) * param / 2 + 1e-8)
             param = param * N
-            win[0: len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
-            win[np.arange(-1, -len(index) - 1, -1)] = win[0:len(index)]
+            win[0 : len(index)] = 0.5 * (1 + np.cos(2 * np.pi / param * (index - param / 2)))[:, None]
+            win[np.arange(-1, -len(index) - 1, -1)] = win[0 : len(index)]
             win = win.squeeze(axis=-1)
         else:
-            raise ValueError(f'Unknown window type: {type_}')
+            raise ValueError(f"Unknown window type: {type_}")
 
         # trim the window if required
         if not symmetric:
@@ -214,10 +219,8 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
         # calculate the coherent gain
         cg = win.sum() / N
     elif N.size == 2:
-
         # create the 2D window
         if rotation:
-
             # create the window in one dimension using getWin recursively
             L = max(N)
             win_lin, _ = get_win(int(L), type_, param=param)
@@ -231,7 +234,7 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
             xx = np.linspace(-radius, radius, N[0])
             yy = np.linspace(-radius, radius, N[1])
             [x, y] = ndgrid(xx, yy)
-            r = np.sqrt(x ** 2 + y ** 2)
+            r = np.sqrt(x**2 + y**2)
             r[r > radius] = radius
             interp_func = scipy.interpolate.interp1d(ll, win_lin)
             win = interp_func(r)
@@ -247,14 +250,13 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
 
         # trim the window if required
         N = N - 1 * (1 - np.array(symmetric).astype(int))
-        win = win[0:N[0], 0:N[1]]
+        win = win[0 : N[0], 0 : N[1]]
 
         # calculate the coherent gain
         cg = win.sum() / np.prod(N)
     elif N.size == 3:
         # create the 3D window
         if rotation:
-
             # create the window in one dimension using getWin recursively
             L = N.max()
             win_lin, _ = get_win(int(L), type_, param=param)
@@ -268,7 +270,7 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
             yy = np.linspace(-radius, radius, N[1])
             zz = np.linspace(-radius, radius, N[2])
             [x, y, z] = ndgrid(xx, yy, zz)
-            r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+            r = np.sqrt(x**2 + y**2 + z**2)
             r[r > radius] = radius
 
             win_lin = np.squeeze(win_lin)
@@ -277,14 +279,13 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
             win[r <= radius] = interp_func(r[r <= radius])
 
         else:
-
             # create the window in each dimension using getWin recursively
             win_x, _ = get_win(int(N[0]), type_, param=param)
             win_y, _ = get_win(int(N[1]), type_, param=param)
             win_z, _ = get_win(int(N[2]), type_, param=param)
 
             # create the 2D window using the outer product
-            win_2D = (win_x * win_z.T)
+            win_2D = win_x * win_z.T
 
             # create the 3D window
             win = np.zeros((N[0], N[1], N[2]))
@@ -293,12 +294,12 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
 
         # trim the window if required
         N = N - 1 * (1 - np.array(symmetric).astype(int))
-        win = win[0:N[0], 0:N[1], 0:N[2]]
+        win = win[0 : N[0], 0 : N[1], 0 : N[2]]
 
         # calculate the coherent gain
         cg = win.sum() / np.prod(N)
     else:
-        raise ValueError('Invalid input for N, only 1-, 2-, and 3-D windows are supported.')
+        raise ValueError("Invalid input for N, only 1-, 2-, and 3-D windows are supported.")
 
     # enlarge the window if required
     if square and (N.size != 1):
@@ -308,18 +309,17 @@ def get_win(N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[U
         if N.size == 2:
             index1 = round((N[0] - L) / 2)
             index2 = round((N[1] - L) / 2)
-            win[index1:(index1 + L), index2:(index2 + L)] = win_sq
+            win[index1 : (index1 + L), index2 : (index2 + L)] = win_sq
         elif N.size == 3:
             index1 = floor((N_orig[0] - L) / 2)
             index2 = floor((N_orig[1] - L) / 2)
             index3 = floor((N_orig[2] - L) / 2)
-            win[index1:index1 + L, index2:index2 + L, index3:index3 + L] = win_sq
+            win[index1 : index1 + L, index2 : index2 + L, index3 : index3 + L] = win_sq
 
     return win, cg
 
 
-def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_signal=False, signal_length=0,
-               signal_offset=0):
+def tone_burst(sample_freq, signal_freq, num_cycles, envelope="Gaussian", plot_signal=False, signal_length=0, signal_offset=0):
     """
     Create an enveloped single frequency tone burst.
 
@@ -342,8 +342,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         created tone burst
 
     """
-    assert isinstance(signal_offset, int) or isinstance(signal_offset,
-                                                        np.ndarray), "signal_offset must be integer or array of integers"
+    assert isinstance(signal_offset, int) or isinstance(signal_offset, np.ndarray), "signal_offset must be integer or array of integers"
     assert isinstance(signal_length, int), "signal_length must be integer"
 
     # calculate the temporal spacing
@@ -351,10 +350,10 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
     # create the tone burst
     tone_length = num_cycles / signal_freq  # [s]
-    # We want to include the endpoint but only if it's divisible by the step-size. 
+    # We want to include the endpoint but only if it's divisible by the step-size.
     # Modulo operator is not stable, so multiple conditions included.
     # if ( (tone_length % dt) < 1e-18 or (np.abs(tone_length % dt - dt) < 1e-18) ):
-    if (rem(tone_length, dt) < 1e-18):
+    if rem(tone_length, dt) < 1e-18:
         tone_t = np.linspace(0, tone_length, int(tone_length / dt) + 1)
     else:
         tone_t = np.arange(0, tone_length, dt)
@@ -364,13 +363,13 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
 
     # check for ring up and ring down input
     if isinstance(envelope, list) or isinstance(envelope, np.ndarray):  # and envelope.size == 2:
-
         # assign the inputs
         num_ring_up_cycles, num_ring_down_cycles = envelope
 
         # check signal is long enough for ring up and down
-        assert num_cycles >= (num_ring_up_cycles + num_ring_down_cycles), \
-            'Input num_cycles must be longer than num_ring_up_cycles + num_ring_down_cycles.'
+        assert num_cycles >= (
+            num_ring_up_cycles + num_ring_down_cycles
+        ), "Input num_cycles must be longer than num_ring_up_cycles + num_ring_down_cycles."
 
         # get period
         period = 1 / signal_freq
@@ -390,25 +389,24 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
         tone_burst[-down_ramp_length_points:] = tone_burst[-down_ramp_length_points:] * down_ramp
 
     else:
-
         # create the envelope
-        if envelope == 'Gaussian':
+        if envelope == "Gaussian":
             x_lim = 3
             window_x = np.arange(-x_lim, x_lim + 1e-8, 2 * x_lim / (len(tone_burst) - 1))
             window = gaussian(window_x, 1, 0, 1)
-        elif envelope == 'Rectangular':
+        elif envelope == "Rectangular":
             window = np.ones_like(tone_burst)
-        elif envelope == 'RingUpDown':
+        elif envelope == "RingUpDown":
             raise NotImplementedError("RingUpDown not yet implemented")
         else:
-            raise ValueError(f'Unknown envelope {envelope}.')
+            raise ValueError(f"Unknown envelope {envelope}.")
 
         # apply the envelope
         tone_burst = tone_burst * window
 
         # force the ends to be zero by applying a second window
-        if envelope == 'Gaussian':
-            tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), type_='Tukey', param=0.05)[0])
+        if envelope == "Gaussian":
+            tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), type_="Tukey", param=0.05)[0])
 
     # calculate the expected FWHM in the frequency domain
     # t_var = tone_length/(2*x_lim)
@@ -429,10 +427,10 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope='Gaussian', plot_s
     tone_index = np.atleast_1d(tone_index)
 
     if tone_index.size == 1:
-        signal[:, int(tone_index):int(tone_index) + len(tone_burst)] = tone_burst.T
+        signal[:, int(tone_index) : int(tone_index) + len(tone_burst)] = tone_burst.T
     else:
         for offset, tone_idx in enumerate(tone_index):
-            signal[offset, int(tone_idx):int(tone_idx) + len(tone_burst)] = tone_burst.T
+            signal[offset, int(tone_idx) : int(tone_idx) + len(tone_burst)] = tone_burst.T
     # plot the signal if required
     if plot_signal:
         raise NotImplementedError
@@ -457,11 +455,11 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     """
     # check simulation is 2D
     if kgrid.dim != 2:
-        raise ValueError('The simulation must be 2D.')
+        raise ValueError("The simulation must be 2D.")
 
     # check sensor.mask is a binary mask
     if sensor.mask.dtype != bool and set(np.unique(sensor.mask).tolist()) != {0, 1}:
-        raise ValueError('The sensor must be defined as a binary mask.')
+        raise ValueError("The sensor must be defined as a binary mask.")
 
     # find the coordinates of the sensor points
     x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
@@ -474,7 +472,7 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     angle[angle < 0] = 2 * np.pi + angle[angle < 0]
 
     # sort the sensor points in order of increasing angle
-    indices_new = np.argsort(angle, kind='stable')
+    indices_new = np.argsort(angle, kind="stable")
 
     # reorder the measure time series so that adjacent time series correspond
     # to adjacent sensor points.
@@ -525,7 +523,7 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     """
 
     dim = num_dim(kgrid.k)
-    logging.log(logging.INFO, f'    taper ratio: {taper_ratio}')
+    logging.log(logging.INFO, f"    taper ratio: {taper_ratio}")
     # extract the maximum sound speed
     c = max(medium.sound_speed)
 
@@ -534,33 +532,34 @@ def get_alpha_filter(kgrid, medium, filter_cutoff, taper_ratio=0.5):
     # parse cutoff freqs
     filter_size = []
     for idx, freq in enumerate(filter_cutoff):
-        if freq == 'max':
+        if freq == "max":
             filter_cutoff[idx] = calc_max_freq(kgrid.k_max[idx], c)
             filter_size_local = kgrid.N[idx]
         else:
-            filter_size_local, filter_cutoff[idx] = freq2wavenumber(kgrid.N[idx], kgrid.k_max[idx], filter_cutoff[idx],
-                                                                    c, kgrid.k[idx])
+            filter_size_local, filter_cutoff[idx] = freq2wavenumber(kgrid.N[idx], kgrid.k_max[idx], filter_cutoff[idx], c, kgrid.k[idx])
         filter_size.append(filter_size_local)
 
     # create the alpha_filter
-    filter_sec, _ = get_win(filter_size, 'Tukey', param=taper_ratio, rotation=True)
+    filter_sec, _ = get_win(filter_size, "Tukey", param=taper_ratio, rotation=True)
 
     # enlarge the alpha_filter to the size of the grid
     alpha_filter = np.zeros(kgrid.N)
     indexes = [round((kgrid.N[idx] - filter_size[idx]) / 2) for idx in range(len(filter_size))]
 
     if dim == 1:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0]] = np.squeeze(filter_sec)
+        alpha_filter[indexes[0] : indexes[0] + filter_size[0]] = np.squeeze(filter_sec)
     elif dim == 2:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1]] = filter_sec
+        alpha_filter[indexes[0] : indexes[0] + filter_size[0], indexes[1] : indexes[1] + filter_size[1]] = filter_sec
     elif dim == 3:
-        alpha_filter[indexes[0]: indexes[0] + filter_size[0], indexes[1]: indexes[1] + filter_size[1],
-        indexes[2]:indexes[2] + filter_size[2]] = filter_sec
+        alpha_filter[
+            indexes[0] : indexes[0] + filter_size[0], indexes[1] : indexes[1] + filter_size[1], indexes[2] : indexes[2] + filter_size[2]
+        ] = filter_sec
 
     def dim_string(cutoff_vals):
         return "".join([(str(scale_SI(co)[0]) + " Hz by ") for co in cutoff_vals])
+
     # update the command line status
-    logging.log(logging.INFO, '  filter cutoff: ' + dim_string(filter_cutoff)[:-4] + '.')
+    logging.log(logging.INFO, "  filter cutoff: " + dim_string(filter_cutoff)[:-4] + ".")
 
     return alpha_filter
 
@@ -577,8 +576,7 @@ def get_wave_number(Nx, dx, dim):
     return kx
 
 
-def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List[int]]] = None,
-                   deriv_order: int = 1) -> np.ndarray:
+def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List[int]]] = None, deriv_order: int = 1) -> np.ndarray:
     """
     gradient_spect calculates the gradient of an n-dimensional input matrix using the Fourier collocation spectral method.
     The gradient for singleton dimensions is returned as 0.
@@ -599,7 +597,6 @@ def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List
 
     # check if input is 1D or user defined input dimension is given
     if dim or len(sz) == 1:
-
         # check if a single dn value is given, if not, extract the required value
         if not (isinstance(dn, int) or isinstance(dn, float)):
             dn = dn[dim]
@@ -621,8 +618,7 @@ def gradient_spect(f: np.ndarray, dn: List[float], dim: Optional[Union[int, List
         # get the wave number
         # kx = get_wave_number(sz(dim), dn[dim], dim)
 
-        assert len(dn) == len(sz), ValueError(
-            f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
+        assert len(dn) == len(sz), ValueError(f"{len(sz)} values for dn must be specified for a {len(sz)}-dimensional input matrix.")
 
         grads = []
         # calculate the gradient for each non-singleton dimension
@@ -649,7 +645,7 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
     # reorder input data
-    flat_sensor_mask = (sensor.mask != 0).flatten('F')
+    flat_sensor_mask = (sensor.mask != 0).flatten("F")
     assignment_mask = unflatten_matlab_mask(unmasked_sensor_data, np.where(flat_sensor_mask)[0])
     # unmasked_sensor_data.flatten('F')[flat_sensor_mask] = sensor_data.flatten()
     unmasked_sensor_data[assignment_mask] = sensor_data.flatten()
@@ -657,8 +653,7 @@ def unmask_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
     return unmasked_sensor_data
 
 
-def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: np.ndarray,
-                      ramp_length: int = 4) -> np.ndarray:
+def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: np.ndarray, ramp_length: int = 4) -> np.ndarray:
     """
     Generate a series of continuous wave (CW) signals based on the 1D or 2D input matrices `amp` and `phase`, where each signal
     is given by:
@@ -710,8 +705,7 @@ def create_cw_signals(t_array: np.ndarray, freq: float, amp: np.ndarray, phase: 
     for index1 in range(N1):
         for index2 in range(N2):
             if amp.ndim > 1:
-                cw_signal[index1, index2, :] = amp[index1, index2] * np.sin(
-                    2 * np.pi * freq * t_array + phase[index1, index2])
+                cw_signal[index1, index2, :] = amp[index1, index2] * np.sin(2 * np.pi * freq * t_array + phase[index1, index2])
             else:
                 cw_signal[index1, index2, :] = amp[index1] * np.sin(2 * np.pi * freq * t_array + phase[index1])
 

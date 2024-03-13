@@ -38,13 +38,13 @@ def test_pr_2D_TR_line_sensor():
     medium = kWaveMedium(sound_speed=1500)
 
     # create initial pressure distribution using make_disc
-    disc_magnitude = 5         # [Pa]
+    disc_magnitude = 5  # [Pa]
     disc_pos = Vector([60, 140])  # [grid points]
-    disc_radius = 5            # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_pos = Vector([30, 110])  # [grid points]
-    disc_radius = 8            # [grid points]
+    disc_radius = 8  # [grid points]
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
@@ -64,7 +64,7 @@ def test_pr_2D_TR_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
-    input_filename = 'example_tr_dir_input.h5'
+    input_filename = "example_tr_dir_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -74,7 +74,7 @@ def test_pr_2D_TR_line_sensor():
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
-        save_to_disk_exit=True
+        save_to_disk_exit=True,
     )
     # run the simulation
     kspaceFirstOrder2DC(
@@ -83,6 +83,6 @@ def test_pr_2D_TR_line_sensor():
         source=deepcopy(source),
         sensor=deepcopy(sensor),
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_pr_2D_TR_line_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_pr_2D_TR_line_sensor", input_file_full_path), "Files do not match!"

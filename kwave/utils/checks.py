@@ -28,7 +28,7 @@ def enforce_fields(dictionary, *fields):
     """
 
     for f in fields:
-        assert f in dictionary.keys(), [f'The field {f} must be defined in the given dictionary']
+        assert f in dictionary.keys(), [f"The field {f} must be defined in the given dictionary"]
 
 
 def enforce_fields_obj(obj, *fields):
@@ -45,7 +45,7 @@ def enforce_fields_obj(obj, *fields):
     """
 
     for f in fields:
-        assert getattr(obj, f) is not None, f'The field {f} must be not None in the given object'
+        assert getattr(obj, f) is not None, f"The field {f} must be not None in the given object"
 
 
 def check_field_names(dictionary, *fields):
@@ -62,7 +62,7 @@ def check_field_names(dictionary, *fields):
     """
 
     for k in dictionary.keys():
-        assert k in fields, f'The field {k} is not a valid field for the given dictionary'
+        assert k in fields, f"The field {k} is not a valid field for the given dictionary"
 
 
 def check_str_eq(value, target: str) -> bool:
@@ -131,7 +131,7 @@ def is_unix() -> bool:
         True if the current platform is a Unix-like system, False otherwise.
 
     """
-    return platform.system() in ['Linux', 'Darwin']
+    return platform.system() in ["Linux", "Darwin"]
 
 
 def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
@@ -174,11 +174,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
     # calculate the reference sound speed for the fluid code, using the
     # maximum by default which ensures the model is unconditionally stable
-    reductions = {
-        'min': np.min,
-        'max': np.max,
-        'mean': np.mean
-    }
+    reductions = {"min": np.min, "max": np.max, "mean": np.mean}
 
     if medium.sound_speed_ref is not None:
         ss_ref = medium.sound_speed_ref
@@ -188,13 +184,12 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
             try:
                 c_ref = reductions[ss_ref](medium.sound_speed)
             except KeyError:
-                raise NotImplementedError('Unknown input for medium.sound_speed_ref.')
+                raise NotImplementedError("Unknown input for medium.sound_speed_ref.")
     else:
-        c_ref = reductions['max'](medium.sound_speed)
+        c_ref = reductions["max"](medium.sound_speed)
 
     # calculate the timesteps required for stability
     if medium.alpha_coeff is None or np.all(medium.alpha_coeff == 0):
-
         # =====================================================================
         # NON-ABSORBING CASE
         # =====================================================================
@@ -202,14 +197,13 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
         medium.sound_speed = np.atleast_1d(medium.sound_speed)
         if c_ref >= medium.sound_speed.max():
             # set the timestep to Inf when the model is unconditionally stable
-            dt_stability_limit = float('inf')
+            dt_stability_limit = float("inf")
 
         else:
             # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
             dt_stability_limit = 2 / (c_ref * kmax) * np.asin(c_ref / medium.sound_speed.max())
 
     else:
-
         # =====================================================================
         # ABSORBING CASE
         # =====================================================================
@@ -218,15 +212,14 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
         medium.alpha_coeff = db2neper(medium.alpha_coeff, medium.alpha_power)
 
         # calculate the absorption constant
-        if medium.alpha_mode == 'no_absorption':
+        if medium.alpha_mode == "no_absorption":
             absorb_tau = -2 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1)
         else:
             absorb_tau = np.array([0])
 
         # calculate the dispersion constant
-        if medium.alpha_mode == 'no_dispersion':
-            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed ** medium.alpha_power * np.tan(
-                np.pi * medium.alpha_power / 2)
+        if medium.alpha_mode == "no_dispersion":
+            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed**medium.alpha_power * np.tan(np.pi * medium.alpha_power / 2)
         else:
             absorb_eta = np.array([0])
 
@@ -237,7 +230,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
         temp1 = medium.sound_speed.max() * absorb_tau.min() * kmax ** (medium.alpha_power - 1)
         temp2 = 1 - absorb_eta.min() * kmax ** (medium.alpha_power - 1)
-        dt_estimate = (temp1 + np.sqrt(temp1 ** 2 + 4 * temp2)) / (temp2 * kmax * medium.sound_speed.max())
+        dt_estimate = (temp1 + np.sqrt(temp1**2 + 4 * temp2)) / (temp2 * kmax * medium.sound_speed.max())
 
         # use a fixed point iteration to find the correct timestep, assuming
         # now that kappa = kappa(dt), using the previous estimate as a starting
@@ -251,8 +244,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
             return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax ** (medium.alpha_power - 1)
 
         def func_to_solve(dt):
-            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2 + 4 * temp2)) / (
-                    temp2 * kmax * kappa(dt) * medium.sound_speed.max())
+            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2 + 4 * temp2)) / (temp2 * kmax * kappa(dt) * medium.sound_speed.max())
 
         # run the fixed point iteration
         dt_stability_limit = dt_estimate
@@ -283,16 +275,13 @@ def check_factors(min_number: int, max_number: int) -> None:
     # compute the factors and maximum prime factors for each number in the range
     factors = {}
     for n in range(min_number, max_number):
-        factors[n] = {
-            'factors': primefactors(n),
-            'max_prime_factor': max(primefactors(n))
-        }
+        factors[n] = {"factors": primefactors(n), "max_prime_factor": max(primefactors(n))}
 
     # print the numbers that match each maximum prime factor
     for factor in [2, 3, 5, 7]:
-        logging.log(logging.INFO, f'Numbers with a maximum prime factor of {factor}:')
+        logging.log(logging.INFO, f"Numbers with a maximum prime factor of {factor}:")
         for n in range(min_number, max_number):
-            if factors[n]['max_prime_factor'] == factor:
+            if factors[n]["max_prime_factor"] == factor:
                 logging.log(logging.INFO, n)
 
 

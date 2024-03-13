@@ -32,8 +32,8 @@ def rem(x, y, rtol=1e-05, atol=1e-08):
 
     return remainder
 
-def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
-                  values: Union[int, float, np.ndarray]) -> np.ndarray:
+
+def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray], values: Union[int, float, np.ndarray]) -> np.ndarray:
     """
     Assigns values to elements of a matrix using subscript indices.
 
@@ -47,12 +47,12 @@ def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray],
 
     """
     original_shape = matrix.shape
-    matrix = np.ravel(matrix, order='F')
+    matrix = np.ravel(matrix, order="F")
     matrix[indices] = values
-    return matrix.reshape(original_shape, order='F')
+    return matrix.reshape(original_shape, order="F")
 
 
-def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = 'neq') -> np.ndarray:
+def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "neq") -> np.ndarray:
     """
     Finds the indices of elements in an array that satisfy a given condition.
 
@@ -68,10 +68,10 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = 'ne
 
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
-    if mode == 'neq':
-        arr = np.where(arr.flatten(order='F') != val)[0] + 1  # +1 due to matlab indexing
+    if mode == "neq":
+        arr = np.where(arr.flatten(order="F") != val)[0] + 1  # +1 due to matlab indexing
     else:  # 'eq'
-        arr = np.where(arr.flatten(order='F') == val)[0] + 1  # +1 due to matlab indexing
+        arr = np.where(arr.flatten(order="F") == val)[0] + 1  # +1 due to matlab indexing
     return np.expand_dims(arr, -1)  # compatibility, n => [n, 1]
 
 
@@ -90,13 +90,12 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
     """
 
     if diff is None:
-        return np.expand_dims(arr.ravel(order='F')[mask.ravel(order='F')], axis=-1)  # compatibility, n => [n, 1]
+        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F")], axis=-1)  # compatibility, n => [n, 1]
     else:
-        return np.expand_dims(arr.ravel(order='F')[mask.ravel(order='F') + diff], axis=-1)  # compatibility, n => [n, 1]
+        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F") + diff], axis=-1)  # compatibility, n => [n, 1]
 
 
-def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[
-    Union[int, np.ndarray], ...]:
+def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[Union[int, np.ndarray], ...]:
     """
     Converts a mask array to a tuple of subscript indices for an n-dimensional array.
 
@@ -111,9 +110,9 @@ def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int]
     """
 
     if diff is None:
-        return np.unravel_index(mask.ravel(order='F'), arr.shape, order='F')
+        return np.unravel_index(mask.ravel(order="F"), arr.shape, order="F")
     else:
-        return np.unravel_index(mask.ravel(order='F') + diff, arr.shape, order='F')
+        return np.unravel_index(mask.ravel(order="F") + diff, arr.shape, order="F")
 
 
 def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
@@ -129,7 +128,7 @@ def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
 
     """
 
-    indices = np.unravel_index(ind - 1, array_shape, order='F')
+    indices = np.unravel_index(ind - 1, array_shape, order="F")
     indices = (np.squeeze(index) + 1 for index in indices)
     return indices
 
@@ -155,6 +154,6 @@ def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: 
     results = []
     x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
     for x_i, y_i, z_i in zip(x, y, z):
-        index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order='F')
+        index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order="F")
         results.append(index)
     return np.array(results)
