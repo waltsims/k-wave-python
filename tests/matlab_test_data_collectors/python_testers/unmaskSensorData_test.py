@@ -10,19 +10,19 @@ from kwave.utils.signals import unmask_sensor_data
 
 
 def test_unmask_sensor_data():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/unmaskSensorData')
+    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/unmaskSensorData")
     num_collected_values = len(os.listdir(collected_values_folder))
 
     for i in range(num_collected_values):
         logging.log(logging.INFO, i)
         # Read recorded data
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
+        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
         recorded_data = loadmat(filepath)
 
-        data_dim = recorded_data['data_dim'][0]
-        sensor_mask = recorded_data['sensor_mask']
-        sensor_data = recorded_data['sensor_data']
-        expected_unmasked_sensor_data = recorded_data['unmasked_sensor_data']
+        data_dim = recorded_data["data_dim"][0]
+        sensor_mask = recorded_data["sensor_mask"]
+        sensor_data = recorded_data["sensor_data"]
+        expected_unmasked_sensor_data = recorded_data["unmasked_sensor_data"]
 
         kgrid = Mock()
         kgrid.Nx = data_dim[0]
@@ -41,4 +41,4 @@ def test_unmask_sensor_data():
 
         assert np.allclose(unmasked_sensor_data, expected_unmasked_sensor_data)
 
-    logging.log(logging.INFO, 'unmask_sensor_data(..) works as expected!')
+    logging.log(logging.INFO, "unmask_sensor_data(..) works as expected!")

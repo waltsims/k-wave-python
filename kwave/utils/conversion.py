@@ -68,20 +68,17 @@ def cast_to_type(data: Union[NDArray, kt.NUMERIC], matlab_type: str) -> Any:
     if not isinstance(data, np.ndarray):
         data = np.array(data)
     type_map = {
-        'single': np.float32,
-        'double': np.float64,
-        'uint64': np.uint64,
-        'uint32': np.uint32,
-        'uint16': np.uint16,
+        "single": np.float32,
+        "double": np.float64,
+        "uint64": np.uint64,
+        "uint32": np.uint32,
+        "uint16": np.uint16,
     }
     return data.astype(type_map[matlab_type])
 
 
 @beartype
-def cart2pol(
-    x: Union[kt.NUMERIC, NDArray], 
-    y: Union[kt.NUMERIC, NDArray]
-) -> Tuple[Union[kt.NUMERIC, NDArray], Union[kt.NUMERIC, NDArray]]:
+def cart2pol(x: Union[kt.NUMERIC, NDArray], y: Union[kt.NUMERIC, NDArray]) -> Tuple[Union[kt.NUMERIC, NDArray], Union[kt.NUMERIC, NDArray]]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -94,7 +91,7 @@ def cart2pol(
 
     """
 
-    rho = np.sqrt(x ** 2 + y ** 2)
+    rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
     return phi, rho
 
@@ -134,8 +131,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
 
 
 @beartype
-def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[
-    int, float]:
+def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[int, float]:
     """
     Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.
 
@@ -165,13 +161,15 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
 
 
 @beartype
-def cart2grid(kgrid: kWaveGrid, 
-              cart_data: Union[
-                  NDArray[Shape["1, NumPoints"], Float],
-                  NDArray[Shape["2, NumPoints"], Float],
-                  NDArray[Shape["3, NumPoints"], Float],
-              ], 
-              axisymmetric: bool=False) -> Tuple:
+def cart2grid(
+    kgrid: kWaveGrid,
+    cart_data: Union[
+        NDArray[Shape["1, NumPoints"], Float],
+        NDArray[Shape["2, NumPoints"], Float],
+        NDArray[Shape["3, NumPoints"], Float],
+    ],
+    axisymmetric: bool = False,
+) -> Tuple:
     """
     Interpolates the set of Cartesian points defined by
     cart_data onto a binary matrix defined by the kWaveGrid object
@@ -191,7 +189,7 @@ def cart2grid(kgrid: kWaveGrid,
 
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:
-        raise AssertionError('Axisymmetric flag only supported in 2D.')
+        raise AssertionError("Axisymmetric flag only supported in 2D.")
 
     # detect whether the inputs are for one, two, or three dimensions
     if kgrid.dim == 1:
@@ -207,7 +205,7 @@ def cart2grid(kgrid: kWaveGrid,
 
         # check if the points all lie within the grid
         if data_x.max() > kgrid.Nx or data_x.min() < 1:
-            raise AssertionError('Cartesian points must lie within the grid defined by kgrid.')
+            raise AssertionError("Cartesian points must lie within the grid defined by kgrid.")
 
         # create empty grid
         grid_data = np.zeros((kgrid.Nx, 1))
@@ -242,7 +240,7 @@ def cart2grid(kgrid: kWaveGrid,
 
         # check if the points all lie within the grid
         if data_x.max() >= kgrid.Nx or data_y.max() >= kgrid.Ny or data_x.min() < 0 or data_y.min() < 0:
-            raise AssertionError('Cartesian points must lie within the grid defined by kgrid.')
+            raise AssertionError("Cartesian points must lie within the grid defined by kgrid.")
 
         # create empty grid
         grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny))
@@ -252,13 +250,10 @@ def cart2grid(kgrid: kWaveGrid,
             grid_data[data_x[data_index], data_y[data_index]] = int(data_index)
 
         # extract reordering index
-        reorder_index = grid_data.flatten(order='F')[
-            grid_data.flatten(order='F') != -1
-            ]
+        reorder_index = grid_data.flatten(order="F")[grid_data.flatten(order="F") != -1]
         reorder_index = reorder_index[:, None] + 1  # [N] => [N, 1]
 
     elif kgrid.dim == 3:
-
         # three dimensional
         data_x = cart_data[0, :]
         data_y = cart_data[1, :]
@@ -276,9 +271,14 @@ def cart2grid(kgrid: kWaveGrid,
         data_z = data_z + np.floor(kgrid.Nz // 2).astype(int)
 
         # check if the points all lie within the grid
-        assert 0 <= data_x.min() and 0 <= data_y.min() and 0 <= data_z.min() and \
-               data_x.max() < kgrid.Nx and data_y.max() < kgrid.Ny and data_z.max() < kgrid.Nz, \
-            "Cartesian points must lie within the grid defined by kgrid."
+        assert (
+            0 <= data_x.min()
+            and 0 <= data_y.min()
+            and 0 <= data_z.min()
+            and data_x.max() < kgrid.Nx
+            and data_y.max() < kgrid.Ny
+            and data_z.max() < kgrid.Nz
+        ), "Cartesian points must lie within the grid defined by kgrid."
 
         # create empty grid
         grid_data = -1 * np.ones((kgrid.Nx, kgrid.Ny, kgrid.Nz), dtype=int)
@@ -291,12 +291,10 @@ def cart2grid(kgrid: kWaveGrid,
             grid_data[data_x[data_index], data_y[data_index], data_z[data_index]] = point_index[data_index]
 
         # extract reordering index
-        reorder_index = grid_data.flatten(order='F')[
-            grid_data.flatten(order='F') != -1
-            ]
+        reorder_index = grid_data.flatten(order="F")[grid_data.flatten(order="F") != -1]
         reorder_index = reorder_index[:, None, None]  # [N] => [N, 1, 1]
     else:
-        raise ValueError('Input cart_data must be a 1, 2, or 3 dimensional matrix.')
+        raise ValueError("Input cart_data must be a 1, 2, or 3 dimensional matrix.")
 
     # compute the reverse ordering index (i.e., what is the index of each point
     # in the reordering vector)
@@ -318,13 +316,13 @@ def cart2grid(kgrid: kWaveGrid,
     # thereby reducing the total number of points
     num_discarded_points = cart_data.shape[1] - np.sum(grid_data)
     if num_discarded_points != 0:
-        logging.log(logging.INFO, f'  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points')
+        logging.log(logging.INFO, f"  cart2grid: {num_discarded_points} Cartesian points mapped to overlapping grid points")
     return grid_data.astype(int), order_index, reorder_index
 
 
 @beartype
 def hounsfield2soundspeed(
-    ct_data:  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]
+    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]],
 ) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
@@ -350,9 +348,8 @@ def hounsfield2soundspeed(
 
 @beartype
 def hounsfield2density(
-    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]], 
-    plot_fitting: bool = False
-) ->  Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
+    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]], plot_fitting: bool = False
+) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
     """
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
@@ -374,8 +371,7 @@ def hounsfield2density(
 
     # Part 2: Between 930 and 1098(soft tissue region)
     index_selection = np.logical_and(930 <= ct_data, ct_data <= 1098)
-    density[index_selection] = np.polyval([0.9082709691264, 103.6151457847139],
-                                          ct_data[index_selection])
+    density[index_selection] = np.polyval([0.9082709691264, 103.6151457847139], ct_data[index_selection])
 
     # Part 3: Between 1098 and 1260(between soft tissue and bone)
     index_selection = np.logical_and(1098 < ct_data, ct_data < 1260)
@@ -396,10 +392,10 @@ subs0 = None
 
 @beartype
 def tol_star(
-    tolerance: kt.NUMERIC, 
-    kgrid: kWaveGrid, 
-    point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]], 
-    debug
+    tolerance: kt.NUMERIC,
+    kgrid: kWaveGrid,
+    point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]],
+    debug,
 ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     global tol, subs0
 
@@ -416,9 +412,9 @@ def tol_star(
         if kgrid_dim == 1:
             is0 = lin_ind
         elif kgrid_dim == 2:
-            is0, js0 = np.meshgrid(lin_ind, lin_ind, indexing='ij')
+            is0, js0 = np.meshgrid(lin_ind, lin_ind, indexing="ij")
         elif kgrid_dim == 3:
-            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind, indexing='ij')
+            is0, js0, ks0 = np.meshgrid(lin_ind, lin_ind, lin_ind, indexing="ij")
 
         if kgrid_dim == 1:
             subs0 = [is0]
@@ -492,8 +488,7 @@ def tol_star(
         lin_ind = kgrid.Nx * kgrid.Ny * (ks - 1) + kgrid.Nx * (js - 1) + is_
 
     # TODO: in current form linear indexing matches MATLAB, but might break in 0 indexed python
-    return lin_ind, np.array(is_) - 1, np.array(js) - 1, np.array(
-        ks) - 1  # -1 for mapping from Matlab indexing to Python indexing
+    return lin_ind, np.array(is_) - 1, np.array(js) - 1, np.array(ks) - 1  # -1 for mapping from Matlab indexing to Python indexing
 
 
 @beartype

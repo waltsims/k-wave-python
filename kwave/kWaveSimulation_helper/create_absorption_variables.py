@@ -10,9 +10,9 @@ from kwave.utils.conversion import db2neper
 
 def create_absorption_variables(kgrid: kWaveGrid, medium: kWaveMedium, equation_of_state):
     # define the lossy derivative operators and proportionality coefficients
-    if equation_of_state == 'absorbing':
+    if equation_of_state == "absorbing":
         return create_absorbing_medium_variables(kgrid.k, medium)
-    elif equation_of_state == 'stokes':
+    elif equation_of_state == "stokes":
         return create_stokes_medium_variables(medium)
     else:
         raise NotImplementedError
@@ -41,10 +41,10 @@ def create_stokes_medium_variables(medium: kWaveMedium):
 
 def get_absorbtion(kgrid_k, medium):
     # compute the absorbing fractional Laplacian operator and coefficient
-    if medium.alpha_mode == 'no_absorption':
+    if medium.alpha_mode == "no_absorption":
         return 0, 0
 
-    nabla1 = kgrid_k**(medium.alpha_power - 2)
+    nabla1 = kgrid_k ** (medium.alpha_power - 2)
     nabla1[np.isinf(nabla1)] = 0
     nabla1 = np.fft.ifftshift(nabla1)
     tau = compute_absorbing_coeff(medium)
@@ -53,7 +53,7 @@ def get_absorbtion(kgrid_k, medium):
 
 def get_dispersion(kgrid_k, medium):
     # compute the dispersive fractional Laplacian operator and coefficient
-    if medium.alpha_mode == 'no_dispersion':
+    if medium.alpha_mode == "no_dispersion":
         return 0, 0
     nabla2 = kgrid_k ** (medium.alpha_power - 1)
     nabla2[np.isinf(nabla2)] = 0
@@ -74,7 +74,7 @@ def compute_absorbing_coeff(medium):
 
 
 def compute_dispersive_coeff(medium):
-    eta = 2 * medium.alpha_coeff * medium.sound_speed**(medium.alpha_power) * math.tan(math.pi * medium.alpha_power / 2)
+    eta = 2 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power) * math.tan(math.pi * medium.alpha_power / 2)
 
     # modify the sign of the absorption operator if alpha_sign is defined
     # (this is used for time-reversal photoacoustic image reconstruction
@@ -92,7 +92,7 @@ def apply_alpha_filter(medium, nabla1, nabla2):
         return nabla1, nabla2
 
     # update command line status
-    logging.log(logging.INFO, '  filtering absorption variables...')
+    logging.log(logging.INFO, "  filtering absorption variables...")
 
     # frequency shift the absorption parameters
     nabla1 = np.fft.fftshift(nabla1)

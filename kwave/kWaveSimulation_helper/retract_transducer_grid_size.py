@@ -10,7 +10,6 @@ def retract_transducer_grid_size(source, sensor, retract_size, pml_inside: bool)
     retract_size = np.array(retract_size)
 
     if not pml_inside and (is_source_kwave_transducer or is_sensor_kwave_transducer):
-
         # check if the sensor is a transducer
         if is_sensor_kwave_transducer:
             # retract the transducer mask
@@ -19,6 +18,5 @@ def retract_transducer_grid_size(source, sensor, retract_size, pml_inside: bool)
         # check if the source is a transducer, and if so, and different
         # transducer to the sensor
         if is_source_kwave_transducer and not (is_sensor_kwave_transducer and sensor == source):
-
             # retract the transducer mask
             source.retract_grid(retract_size)

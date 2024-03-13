@@ -17,15 +17,14 @@ from kwave.utils.conversion import db2neper
 from kwave.reconstruction.tools import log_compression, db
 from kwave.reconstruction.beamform import envelope_detection
 
-SENSOR_DATA_GDRIVE_ID = '1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv'
-PHANTOM_DATA_GDRIVE_ID = '1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4'
-PHANTOM_DATA_PATH = 'phantom_data.mat'
+SENSOR_DATA_GDRIVE_ID = "1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv"
+PHANTOM_DATA_GDRIVE_ID = "1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4"
+PHANTOM_DATA_PATH = "phantom_data.mat"
 
 
 def main():
-
     # simulation settings
-    DATA_CAST = 'single'
+    DATA_CAST = "single"
     RUN_SIMULATION = False
 
     pml_size_points = Vector([20, 10, 10])  # [grid points]
@@ -51,7 +50,7 @@ def main():
         sound_speed=None,  # will be set later
         alpha_coeff=0.75,
         alpha_power=1.5,
-        BonA=6
+        BonA=6,
     )
 
     transducer = dotdict()
@@ -59,18 +58,15 @@ def main():
     transducer.element_width = 2  # width of each element [grid points/voxels]
     transducer.element_length = 24  # length of each element [grid points/voxels]
     transducer.element_spacing = 0  # spacing (kerf  width) between the elements [grid points/voxels]
-    transducer.radius = float('inf')  # radius of curvature of the transducer [m]
+    transducer.radius = float("inf")  # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer.number_elements * transducer.element_width + (
-            transducer.number_elements - 1) * transducer.element_spacing
+    transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([
-        1,
-        grid_size_points.y / 2 - transducer_width / 2,
-        grid_size_points.z / 2 - transducer.element_length / 2
-    ])
+    transducer.position = np.round(
+        [1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2]
+    )
 
     transducer = kWaveTransducerSimple(kgrid, **transducer)
 
@@ -80,20 +76,19 @@ def main():
     not_transducer.focus_distance = 20e-3  # focus distance [m]
     not_transducer.elevation_focus_distance = 19e-3  # focus distance in the elevation plane [m]
     not_transducer.steering_angle = 0  # steering angle [degrees]
-    not_transducer.transmit_apodization = 'Hanning'
-    not_transducer.receive_apodization = 'Rectangular'
+    not_transducer.transmit_apodization = "Hanning"
+    not_transducer.receive_apodization = "Rectangular"
     not_transducer.active_elements = np.ones((transducer.number_elements, 1))
     not_transducer.input_signal = input_signal
 
     not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-
     logging.log(logging.INFO, "Fetching phantom data...")
     download_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
 
     phantom = scipy.io.loadmat(PHANTOM_DATA_PATH)
-    sound_speed_map = phantom['sound_speed_map']
-    density_map = phantom['density_map']
+    sound_speed_map = phantom["sound_speed_map"]
+    density_map = phantom["density_map"]
 
     logging.log(logging.INFO, f"RUN_SIMULATION set to {RUN_SIMULATION}")
 
@@ -102,14 +97,12 @@ def main():
     medium_position = 0
 
     for scan_line_index in range(0, number_scan_lines):
-
         # load the current section of the medium
-        medium.sound_speed = \
-            sound_speed_map[:, medium_position:medium_position + grid_size_points.y, :]
-        medium.density = density_map[:, medium_position:medium_position + grid_size_points.y, :]
+        medium.sound_speed = sound_speed_map[:, medium_position : medium_position + grid_size_points.y, :]
+        medium.density = density_map[:, medium_position : medium_position + grid_size_points.y, :]
 
         # set the input settings
-        input_filename = f'example_input_{scan_line_index}.h5'
+        input_filename = f"example_input_{scan_line_index}.h5"
         # set the input settings
         simulation_options = SimulationOptions(
             pml_inside=False,
@@ -118,7 +111,7 @@ def main():
             data_recast=True,
             save_to_disk=True,
             input_filename=input_filename,
-            save_to_disk_exit=False
+            save_to_disk_exit=False,
         )
         # run the simulation
         if RUN_SIMULATION:
@@ -128,30 +121,29 @@ def main():
                 source=not_transducer,
                 sensor=not_transducer,
                 simulation_options=simulation_options,
-                execution_options=SimulationExecutionOptions(is_gpu_simulation=True)
+                execution_options=SimulationExecutionOptions(is_gpu_simulation=True),
             )
 
-            scan_lines[scan_line_index, :] = not_transducer.scan_line(not_transducer.combine_sensor_data(sensor_data['p'].T))
+            scan_lines[scan_line_index, :] = not_transducer.scan_line(not_transducer.combine_sensor_data(sensor_data["p"].T))
 
         # update medium position
         medium_position = medium_position + transducer.element_width
 
     if RUN_SIMULATION:
         simulation_data = scan_lines
-        scipy.io.savemat('sensor_data.mat', {'sensor_data_all_lines': simulation_data})
+        scipy.io.savemat("sensor_data.mat", {"sensor_data_all_lines": simulation_data})
 
     else:
         logging.log(logging.INFO, "Downloading data from remote server...")
-        sensor_data_path = 'sensor_data.mat'
+        sensor_data_path = "sensor_data.mat"
         download_if_does_not_exist(SENSOR_DATA_GDRIVE_ID, sensor_data_path)
 
-        simulation_data = scipy.io.loadmat(sensor_data_path)['sensor_data_all_lines']
+        simulation_data = scipy.io.loadmat(sensor_data_path)["sensor_data_all_lines"]
 
         # temporary fix for dimensionality
     import matplotlib.pyplot as plt
 
     scan_lines = simulation_data
-
 
     # =========================================================================
     # PROCESS THE RESULTS
@@ -161,15 +153,15 @@ def main():
     # Remove Input Signal
     # -----------------------------
     # Trim the delay offset from the scan line data
-    tukey_win, _ = get_win(kgrid.Nt * 2, 'Tukey', False, 0.05)
+    tukey_win, _ = get_win(kgrid.Nt * 2, "Tukey", False, 0.05)
     transmit_len = len(input_signal.squeeze())
-    scan_line_win = np.concatenate((np.zeros([1, transmit_len * 2]), tukey_win.T[:, :kgrid.Nt - transmit_len * 2]), axis=1)
+    scan_line_win = np.concatenate((np.zeros([1, transmit_len * 2]), tukey_win.T[:, : kgrid.Nt - transmit_len * 2]), axis=1)
 
     scan_lines = scan_lines * scan_line_win
 
     # store intermediate results
     scan_lines_no_input = scan_lines[len(scan_lines) // 2, :]
-    
+
     Nt = kgrid.Nt
 
     # -----------------------------
@@ -180,7 +172,7 @@ def main():
     r = c0 * np.arange(1, Nt + 1) * kgrid.dt / 2
 
     # Define absorption value and convert to correct units
-    tgc_alpha_db_cm = medium.alpha_coeff * (tone_burst_freq * 1e-6)**medium.alpha_power
+    tgc_alpha_db_cm = medium.alpha_coeff * (tone_burst_freq * 1e-6) ** medium.alpha_power
     tgc_alpha_np_m = db2neper(tgc_alpha_db_cm) * 100
 
     # Create time gain compensation function
@@ -196,13 +188,13 @@ def main():
     # Frequency Filtering
     # -----------------------------
 
-    scan_lines_fund = gaussian_filter(scan_lines, 1/kgrid.dt, tone_burst_freq, 100)
-    scan_lines_harm = gaussian_filter(scan_lines, 1/kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
+    scan_lines_fund = gaussian_filter(scan_lines, 1 / kgrid.dt, tone_burst_freq, 100)
+    scan_lines_harm = gaussian_filter(scan_lines, 1 / kgrid.dt, 2 * tone_burst_freq, 30)  # plotting was not impl.
 
     # store intermediate results
     scan_lines_fund_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
     # scan_lines_harm_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
-    
+
     # -----------------------------
     # Envelope Detection
     # -----------------------------
@@ -231,12 +223,12 @@ def main():
     # =========================================================================
 
     # Set the desired size of the image
-    image_size = kgrid.size 
+    image_size = kgrid.size
     harm_img = db(scan_lines_harm.T)
     fund_img = db(scan_lines_fund.T)
 
     # Create the axis variables
-    x_axis = [0, image_size[0] * 1e3 * 1.1] # [mm]      
+    x_axis = [0, image_size[0] * 1e3 * 1.1]  # [mm]
     y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
 
     # make plotting non-blocking
@@ -245,38 +237,49 @@ def main():
     plt.figure(figsize=(14, 4))
     # plot the sound speed map
     plt.subplot(1, 3, 1)
-    plt.imshow(sound_speed_map[:, 64:-64, int(grid_size_points.z / 2)], aspect='auto',
-                extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
-    plt.title('Sound Speed')
-    plt.xlabel('Width [mm]')
-    plt.ylabel('Depth [mm]')
+    plt.imshow(sound_speed_map[:, 64:-64, int(grid_size_points.z / 2)], aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.title("Sound Speed")
+    plt.xlabel("Width [mm]")
+    plt.ylabel("Depth [mm]")
     ax = plt.gca()
     ax.set_ylim(40, 5)
     plt.subplot(1, 3, 2)
-    plt.imshow(fund_img, cmap='bone', aspect='auto',  extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
-               vmax=np.max(fund_img), vmin=np.max(fund_img)-40)
-    plt.xlabel('Image width [mm]')
-    plt.title('Fundamental')
+    plt.imshow(
+        fund_img,
+        cmap="bone",
+        aspect="auto",
+        extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
+        vmax=np.max(fund_img),
+        vmin=np.max(fund_img) - 40,
+    )
+    plt.xlabel("Image width [mm]")
+    plt.title("Fundamental")
     ax = plt.gca()
     ax.set_ylim(40, 5)
     plt.yticks([])
     plt.subplot(1, 3, 3)
-    plt.imshow(harm_img, cmap='bone', aspect='auto', vmax=np.max(harm_img), vmin=np.max(harm_img)-40,
-                extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+    plt.imshow(
+        harm_img,
+        cmap="bone",
+        aspect="auto",
+        vmax=np.max(harm_img),
+        vmin=np.max(harm_img) - 40,
+        extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
+    )
     plt.yticks([])
-    plt.xlabel('Image width [mm]')
-    plt.title('Harmonic')
+    plt.xlabel("Image width [mm]")
+    plt.title("Harmonic")
     ax = plt.gca()
     ax.set_ylim(40, 5)
     plt.show()
 
     # Creating a dictionary with the step labels as keys
     processing_steps = {
-        '1. Beamformed Signal': scan_lines_no_input,
-        '2. Time Gain Compensation': scan_lines_tgc,
-        '3. Frequency Filtering': scan_lines_fund_ex,
-        '4. Envelope Detection': scan_lines_fund_env_ex,
-        '5. Log Compression': scan_lines_fund_log_ex    
+        "1. Beamformed Signal": scan_lines_no_input,
+        "2. Time Gain Compensation": scan_lines_tgc,
+        "3. Frequency Filtering": scan_lines_fund_ex,
+        "4. Envelope Detection": scan_lines_fund_env_ex,
+        "5. Log Compression": scan_lines_fund_log_ex,
     }
 
     plt.figure(figsize=(14, 4), tight_layout=True)
@@ -288,16 +291,15 @@ def main():
 
     # Set y-ticks and y-labels
     plt.yticks([offset * i for i in range(5)], list(processing_steps.keys()))
-    plt.xlabel('Time [\u03BCs]')
+    plt.xlabel("Time [\u03BCs]")
     plt.xlim(5e-3 * 2 / c0, t_end)
-    plt.title('Processing Steps Visualization')
+    plt.title("Processing Steps Visualization")
     plt.show()
-    
+
     # sleep for 1 min and then close all figures for CI completion
     plt.pause(60)
-    plt.close('all')
+    plt.close("all")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
