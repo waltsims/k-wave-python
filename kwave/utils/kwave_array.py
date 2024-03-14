@@ -2,13 +2,12 @@ import logging
 import time
 from dataclasses import dataclass
 from math import ceil
-from typing import Iterable, Optional
+from typing import Optional
 
 import numpy as np
 from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
 
-import kwave
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
