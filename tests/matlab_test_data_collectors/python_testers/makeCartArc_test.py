@@ -39,6 +39,9 @@ def test_makeCartArc():
         with pytest.raises(ValueError):
             _ = make_cart_arc(arc_pos, radius, diameter, arc_pos, num_points)
 
+        # test floating point diameter
+        _ = make_cart_arc(arc_pos, radius, float(diameter), focus_pos, num_points)
+
         assert np.allclose(expected_value, cart_arc), "Step {} of {} failed!".format(i, collected_values_file)
 
     logging.log(logging.INFO, "makeCartArc(..) works as expected!")
