@@ -34,7 +34,7 @@ def test_makeCartArc():
             _ = make_cart_arc(arc_pos, radius, -diameter, focus_pos, num_points)
         # if diameter of arc is unphysical
         with pytest.raises(ValueError):
-            _ = make_cart_arc(arc_pos, radius, 2.1 * radius, focus_pos, num_points)
+            _ = make_cart_arc(arc_pos, radius, np.ceil(2.1 * radius).astype(int), focus_pos, num_points)
         # if focus is at same place as middle of arc
         with pytest.raises(ValueError):
             _ = make_cart_arc(arc_pos, radius, diameter, arc_pos, num_points)
