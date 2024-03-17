@@ -135,15 +135,19 @@ def main():
 
     # Plot recorded sensor data
     fig, [ax1, ax2] = plt.subplots(ncols=1, nrows=2)
-    ax1.imshow(sensor_data_point, aspect="auto", cmap=get_color_map())
+    im1 = ax1.imshow(sensor_data_point, aspect="auto", cmap=get_color_map(), interpolation="none")
     ax1.set_xlabel(r"Time [$\mu$s]")
     ax1.set_ylabel("Detector Number")
     ax1.set_title("Cartesian point detectors")
+    fig.colorbar(im1, ax=ax1)
 
-    ax2.imshow(combined_sensor_data, aspect="auto")
+    im2 = ax2.imshow(combined_sensor_data, aspect="auto", cmap=get_color_map(), interpolation="none")
     ax2.set_xlabel(r"Time [$\mu$s]")
     ax2.set_ylabel("Detector Number")
     ax2.set_title("Arc detectors")
+    fig.colorbar(im2, ax=ax2)
+
+    plt.show()
 
     fig.subplots_adjust(hspace=0.5)
 

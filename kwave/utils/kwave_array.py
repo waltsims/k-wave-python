@@ -2,13 +2,13 @@ import logging
 import time
 from dataclasses import dataclass
 from math import ceil
-from typing import Iterable, Optional
+from typing import Optional
 
 import numpy as np
 from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
 
-import kwave
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
@@ -265,7 +265,7 @@ class kWaveArray(object):
             raise ValueError("Input position for rectangular element must be specified as a 2 (2D) or 3 (3D) element array.")
 
         if coord_dim == 3:
-            assert isinstance(theta, (kwave.data.Vector, list, tuple)) and len(theta) == 3, "'theta' must be a list or tuple of length 3"
+            assert isinstance(theta, (Vector, list, tuple)) and len(theta) == 3, "'theta' must be a list or tuple of length 3"
         else:
             assert isinstance(theta, (int, float)), "'theta' must be an integer or float"
 
@@ -294,10 +294,10 @@ class kWaveArray(object):
         )
 
     def add_arc_element(self, position, radius, diameter, focus_pos):
-        assert isinstance(position, Iterable), "'position' must be list, tuple or Vector"
+        assert isinstance(position, (list, tuple, Vector)), "'position' must be list, tuple or Vector"
         assert isinstance(radius, (int, float)), "'radius' must be an integer or float"
         assert isinstance(diameter, (int, float)), "'diameter' must be an integer or float"
-        assert isinstance(focus_pos, Iterable), "'focus_pos' must be list, tuple or Vector"
+        assert isinstance(focus_pos, (list, tuple, Vector)), "'focus_pos' must be list, tuple or Vector"
         assert len(position) == 2, "'position' must have 2 elements"
         assert len(focus_pos) == 2, "'focus_pos' must have 2 elements"
 
