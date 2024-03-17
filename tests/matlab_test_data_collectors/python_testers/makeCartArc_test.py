@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from kwave.data import Vector
 from kwave.utils.mapgen import make_cart_arc
@@ -24,6 +25,22 @@ def test_makeCartArc():
 
         cart_arc = make_cart_arc(arc_pos, radius, diameter, focus_pos, num_points)
         record_reader.increment()
+
+        # if radius of curvature is negative
+        with pytest.raises(ValueError):
+            _ = make_cart_arc(arc_pos, -radius, diameter, focus_pos, num_points)
+        # if diameter of arc is negative
+        with pytest.raises(ValueError):
+            _ = make_cart_arc(arc_pos, radius, -diameter, focus_pos, num_points)
+        # if diameter of arc is unphysical
+        with pytest.raises(ValueError):
+            _ = make_cart_arc(arc_pos, radius, int(np.ceil(2.1 * radius)), focus_pos, num_points)
+        # if focus is at same place as middle of arc
+        with pytest.raises(ValueError):
+            _ = make_cart_arc(arc_pos, radius, diameter, arc_pos, num_points)
+
+        # test floating point diameter
+        _ = make_cart_arc(arc_pos, radius, float(diameter), focus_pos, num_points)
 
         assert np.allclose(expected_value, cart_arc), "Step {} of {} failed!".format(i, collected_values_file)
 
