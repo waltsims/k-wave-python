@@ -40,9 +40,9 @@ bowl_coords = [centre, 0]
 # =========================================================================
 
 # water
-sound_speed = 1500.0 * np.ones((Nx, Nz))
-density = 1000.0 * np.ones((Nx, Nz))
-alpha_coeff = 100.0 * np.ones((Nx, Nz))
+sound_speed = 1500.0 
+density = 1000.0 
+alpha_coeff = 100.0 
 
 # non-dispersive
 alpha_power = 2.0
@@ -110,9 +110,6 @@ kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
 # compute corresponding time stepping
 dt = 1.0 / (ppp * freq)
-
-# compute corresponding time stepping
-dt = (c0_min / c0_max) / (float(ppp) * freq)
 
 dt_stability_limit = check_stability(kgrid, medium)
 
@@ -192,8 +189,8 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 DATA_CAST = 'single'
 DATA_PATH = './'
 
-input_filename = 'ph1_bm5_sc1_input.h5'
-output_filename = 'ph1_bm5_sc1_output.h5'
+input_filename = 'ph1_bm2_sc1_input.h5'
+output_filename = 'ph1_bm2_sc1_output.h5'
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
