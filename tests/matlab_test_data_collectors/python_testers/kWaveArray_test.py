@@ -177,4 +177,4 @@ def test_kwave_array():
     kgrid = kWaveGrid([100, 200], [0.1, 0.3])
     assert kwave_array.dim == 2
     assert np.allclose(kwave_array.get_array_grid_weights(kgrid).shape, reader.expected_value_of("grid_weights").shape)
-    assert np.allclose(kwave_array.get_array_grid_weights(kgrid), reader.expected_value_of("grid_weights"))
+    assert np.allclose(kwave_array.get_array_grid_weights(kgrid), np.squeeze(reader.expected_value_of("grid_weights")))
