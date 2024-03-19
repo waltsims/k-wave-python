@@ -24,12 +24,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py",
-    "scipy",
+    "h5py==3.10.0",
+    "scipy==1.12.0",
     "opencv-python==4.9.0.80",
     "deepdiff==6.7.1",
-    "matplotlib",
-    "numpy==2.0.0b1",
+    "matplotlib==3.8.3",
+    "numpy>=1.22.2,<1.27.0",
     "nptyping==2.5.0",
     "beartype==0.16.4"
 ]
