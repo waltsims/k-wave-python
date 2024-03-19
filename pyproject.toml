@@ -95,7 +95,7 @@ omit = [
 line-length = 140
 # Ruff and nptyping.Shape do not play well together.
 # See the open issue: https://github.com/astral-sh/ruff/issues/6014
-lint.ignore = ["F821"]
+lint.ignore = ["F821", "F722"]
 [tool.ruff.lint.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
 "kwave/ksource.py" = ["F821"]

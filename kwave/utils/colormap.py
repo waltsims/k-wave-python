@@ -39,7 +39,7 @@ def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
 
 
 @beartype
-def hot(m: int) -> Float[np.ndarray, "N, 3"]:
+def hot(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Generate a hot colormap of length m.
     The colormap consists of a progression from black to red, yellow, and white.
@@ -62,7 +62,7 @@ def hot(m: int) -> Float[np.ndarray, "N, 3"]:
 
 
 @beartype
-def bone(m: int) -> Float[np.ndarray, "N, 3"]:
+def bone(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
 
@@ -76,7 +76,7 @@ def bone(m: int) -> Float[np.ndarray, "N, 3"]:
 
 
 @beartype
-def gray(m: int) -> Float[np.ndarray, "N, 3"]:
+def gray(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.
 
