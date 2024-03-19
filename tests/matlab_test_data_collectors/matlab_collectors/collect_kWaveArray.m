@@ -162,4 +162,14 @@ element_pos = kwave_array.getElementPositions();
 recorder.recordVariable('element_pos', element_pos);
 recorder.increment();
 
+% 2D tests
+clear kwave_array karray;
+kwave_array = kWaveArray();
+kwave_array.addLineElement([0, 3], [5, 2]);
+kgrid = kWaveGrid(100, 0.1, 200, 0.3);
+grid_weights = kwave_array.getArrayGridWeights(kgrid);
+recorder.recordObject('kwave_array', kwave_array);
+recorder.recordVariable('grid_weights', grid_weights);
+recorder.increment();
+
 recorder.saveRecordsToDisk();
