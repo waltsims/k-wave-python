@@ -169,3 +169,12 @@ def test_kwave_array():
     element_pos = kwave_array.get_element_positions()
     assert np.allclose(element_pos.squeeze(axis=-1), reader.expected_value_of("element_pos"))
     reader.increment()
+
+    # 2D karray tests
+
+    kwave_array = kWaveArray()
+    kwave_array.add_line_element([0, 3], [5, 2])
+    kgrid = kWaveGrid([100, 200], [0.1, 0.3])
+    assert kwave_array.dim == 2
+    assert np.allclose(kwave_array.get_array_grid_weights(kgrid).shape, reader.expected_value_of("grid_weights").shape)
+    assert np.allclose(kwave_array.get_array_grid_weights(kgrid), reader.expected_value_of("grid_weights"))
