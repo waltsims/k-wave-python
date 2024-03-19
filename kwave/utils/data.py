@@ -2,7 +2,6 @@ from datetime import datetime
 from math import floor
 from beartype.typing import Tuple, Union, Optional
 from beartype import beartype
-from nptyping import NDArray
 
 import numpy as np
 from kwave.data import Vector
@@ -113,7 +112,7 @@ def scale_time(seconds: Union[int, float]) -> str:
 
 
 @beartype
-def scale_SI(x: Union[float, NDArray]) -> Tuple[str, Union[int, float], str, str]:
+def scale_SI(x: Union[float, np.ndarray]) -> Tuple[str, Union[int, float], str, str]:
     """
     Scale a number to the nearest SI unit prefix.
 

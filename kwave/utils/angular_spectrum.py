@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from beartype import beartype
 from beartype.typing import Dict, Union
-from nptyping import NDArray, Float, Shape
+from jaxtyping import Float
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
@@ -16,7 +16,7 @@ from kwave.utils.tictoc import TicToc
 
 @beartype
 def angular_spectrum(
-    input_plane: NDArray[Shape["Dim1, Dim2, Dim3"], Float],
+    input_plane: Float[np.ndarray, "Dim1 Dim2 Dim3"],
     dx: float,
     dt: float,
     z_pos: float,

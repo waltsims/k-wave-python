@@ -31,7 +31,8 @@ dependencies = [
     "matplotlib==3.8.3",
     "numpy>=1.22.2,<1.27.0",
     "nptyping==2.5.0",
-    "beartype==0.16.4"
+    "beartype==0.16.4",
+    "jaxtyping==0.2.25"
 ]
 
 [project.urls]

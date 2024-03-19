@@ -2,7 +2,7 @@ from typing import Optional
 
 import numpy as np
 from beartype import beartype
-from nptyping import NDArray, Float, Shape
+from jaxtyping import Float
 from matplotlib.colors import ListedColormap
 
 
@@ -39,7 +39,7 @@ def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
 
 
 @beartype
-def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
+def hot(m: int) -> Float[np.ndarray, "N, 3"]:
     """
     Generate a hot colormap of length m.
     The colormap consists of a progression from black to red, yellow, and white.
@@ -62,7 +62,7 @@ def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
 
 
 @beartype
-def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
+def bone(m: int) -> Float[np.ndarray, "N, 3"]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
 
@@ -76,7 +76,7 @@ def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
 
 
 @beartype
-def gray(m: int) -> NDArray[Shape["N, 3"], Float]:
+def gray(m: int) -> Float[np.ndarray, "N, 3"]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.
 
