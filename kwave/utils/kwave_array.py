@@ -409,10 +409,17 @@ class kWaveArray(object):
     def get_array_grid_weights(self, kgrid):
         self.check_for_elements()
 
-        grid_weights = np.zeros((kgrid.Nx, kgrid.Ny, max(kgrid.Nz, 1)))
+        if kgrid.Nz >= 1:
+            grid_weights = np.zeros((kgrid.Nx, kgrid.Ny, kgrid.Nz))
+        else:
+            grid_weights = np.zeros((kgrid.Nx, kgrid.Ny))
+
+        assert len(grid_weights.shape) == self.dim, "Grid weights shape must match kArray dimensions."
 
         for ind in range(self.number_elements):
             grid_weights += self.get_off_grid_points(kgrid, ind, False)
+
+        assert len(grid_weights.shape) == self.dim, "Grid weights shape must match kArray dimensions."
 
         return grid_weights
 
