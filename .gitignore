@@ -21,3 +21,4 @@ src/
 *.whl
 *.png
 *.pyc
+kspaceFirstOrder-*_metadata.json
