@@ -73,6 +73,7 @@ URL_DICT = {
     "linux": {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{SPECIFIC_CUDA_FILENAMES[0][0]}"],
         "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{SPECIFIC_OMP_FILENAMES[0][0]}"],
+
     },
     # "darwin": {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
@@ -108,8 +109,8 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         # this is non-kwave windows binary
         # it already exists according to the check above
         return True
-
     existing_metadata_path = os.path.join(BINARY_PATH, f"{binary_name}_metadata.json")
+
     if not os.path.exists(existing_metadata_path):
         # metadata does not exist => binaries may or may not exist
         # Let's play safe and claim they don't exist
@@ -136,6 +137,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
     return True
 
 
+
 def binaries_present() -> bool:
     """
     Check if binaries are present
@@ -149,6 +151,7 @@ def binaries_present() -> bool:
     for binary_type in binary_types:
         for binary_name in URL_DICT[system][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
+
 
     missing_binaries: List[str] = []
 
@@ -191,6 +194,7 @@ def download_binaries(system_os: str, bin_type: str):
 
     """
     for url in URL_DICT[system_os][bin_type]:
+
         # Extract the file name from the GitHub release URL
         binary_version, filename = url.split("/")[-2:]
 
@@ -204,6 +208,7 @@ def download_binaries(system_os: str, bin_type: str):
             binary_filepath = os.path.join(BINARY_PATH, filename)
             urllib.request.urlretrieve(url, binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
+
         except TimeoutError:
             logging.log(
                 logging.WARN,
