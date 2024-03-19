@@ -414,12 +414,12 @@ class kWaveArray(object):
         if not self.dim == 3:
             grid_weights = grid_weights.squeeze()
 
-        assert len(grid_weights.shape) == self.dim, "Gridweights shape must match kArray dimensions."
+        assert len(grid_weights.shape) == self.dim, "Grid weights shape must match kArray dimensions."
 
         for ind in range(self.number_elements):
             grid_weights += self.get_off_grid_points(kgrid, ind, False)
 
-        assert len(grid_weights.shape) == self.dim, "Gridweights shape must match kArray dimensions."
+        assert len(grid_weights.shape) == self.dim, "Grid weights shape must match kArray dimensions."
 
         return grid_weights
 
