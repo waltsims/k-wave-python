@@ -5,7 +5,6 @@ import urllib.request
 from os import environ
 from pathlib import Path
 from typing import List
-import sys
 import hashlib
 import json
 
