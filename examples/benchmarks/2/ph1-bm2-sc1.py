@@ -1,13 +1,10 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.colors as mcolors
 
 from kwave.data import Vector
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.checks import check_stability
-from kwave.utils.mapgen import make_arc
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
