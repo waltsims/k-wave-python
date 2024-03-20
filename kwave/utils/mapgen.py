@@ -9,7 +9,7 @@ import scipy
 from scipy import optimize
 from beartype import beartype
 from beartype.typing import Union, List, Tuple, cast, Optional
-from jaxtyping import Float, Complex, Int
+from jaxtyping import Float, Complex, Int, Real
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -1559,7 +1559,7 @@ def make_bowl(
     grid_size: Vector,
     bowl_pos: Vector,
     radius: Union[int, float],
-    diameter: Union[Number, int, float],
+    diameter: Real,
     focus_pos: Vector,
     binary: bool = False,
     remove_overlap: bool = False,
