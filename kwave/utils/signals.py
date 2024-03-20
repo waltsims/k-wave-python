@@ -16,6 +16,8 @@ from .math import sinc, gaussian
 from .matlab import matlab_mask, unflatten_matlab_mask, rem
 from .matrix import broadcast_axis, num_dim
 
+import kwave.utils.typing as kt
+
 
 def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     """
@@ -55,7 +57,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 @beartype
 def get_win(
-    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
+    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
     type_: str,  # TODO change this to enum in the future
