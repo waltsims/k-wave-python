@@ -93,7 +93,7 @@ def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], Li
 def expand_matrix(
     matrix: Num[np.ndarray, "..."],
     exp_coeff: Shaped[kt.ArrayLike, "dim"],
-    edge_val: Optional[Real] = None,
+    edge_val: Optional[Real[kt.ScalarLike, ""]] = None,
 ):
     """
     Enlarge a matrix by extending the edge values.
