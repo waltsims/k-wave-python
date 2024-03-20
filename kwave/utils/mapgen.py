@@ -2565,7 +2565,7 @@ def make_cart_rect(
     rect_pos,
     Lx: Union[float, int],
     Ly: Union[float, int],
-    theta: Optional[Union[Int[ScalarLike, ""], List, kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]] = None,
+    theta: Optional[Union[Int[kt.ScalarLike, ""], List, kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]] = None,
     num_points: int = 0,
     plot_rect: bool = False,
 ) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
