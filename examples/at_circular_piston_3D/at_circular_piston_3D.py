@@ -210,7 +210,7 @@ ax1.grid()
 fig2, ax2 = plt.subplots(1, 1)
 ax2.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
                1e3 * np.squeeze(kgrid.x_vec),
-               np.flip(source.p_mask[:, :, int(np.ceil(Nz / 2))], axis=0),
+               np.flip(source.p_mask[:, :, Nz // 2], axis=0),
                shading='nearest')
 ax2.set(xlabel='y [mm]',
         ylabel='x [mm]',
