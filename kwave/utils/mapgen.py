@@ -956,10 +956,10 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 @beartype
 def make_line(
     grid_size: Vector,
-    startpoint: Union[Tuple[Int[np.ndarray, ""], Int[np.ndarray, ""]], Int[np.ndarray, "2"]],
-    endpoint: Optional[Union[Tuple[Int[np.ndarray, ""], Int[np.ndarray, ""]], Int[np.ndarray, "2"]]] = None,
-    angle: Optional[Float[np.ndarray, ""]] = None,
-    length: Optional[Int[np.ndarray, ""]] = None,
+    startpoint: Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]],
+    endpoint: Optional[Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]]] = None,
+    angle: Optional[Float[kt.ScalarLike, ""]] = None,
+    length: Optional[Int[kt.ScalarLike, ""]] = None,
 ) -> kt.NP_ARRAY_BOOL_2D:
     """
     Generate a line shape with a given start and end point, angle, or length.
@@ -2565,7 +2565,7 @@ def make_cart_rect(
     rect_pos,
     Lx: Union[float, int],
     Ly: Union[float, int],
-    theta: Optional[Union[int, float, List, kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]] = None,
+    theta: Optional[Union[Int[ScalarLike, ""], List, kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]] = None,
     num_points: int = 0,
     plot_rect: bool = False,
 ) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
