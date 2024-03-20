@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 from scipy.interpolate import interpn, interp1d
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, Optional
 from jaxtyping import Int, Num, Shaped, Real
 import kwave.utils.typing as kt
@@ -11,7 +11,7 @@ from .data import scale_time
 from .tictoc import TicToc
 
 
-@beartype
+@typechecker
 def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], List[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]]]]:
     """
     Create a tight bounding box by removing zeros.
@@ -89,7 +89,7 @@ def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], Li
     return data, ind
 
 
-@beartype
+@typechecker
 def expand_matrix(
     matrix: Num[np.ndarray, "..."],
     exp_coeff: Union[Shaped[kt.ArrayLike, "dim"], List],

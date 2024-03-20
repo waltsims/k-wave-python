@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 from numpy import ndarray
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Tuple, Union
 from jaxtyping import Real, Float, Num
 
@@ -15,7 +15,7 @@ from kwave.utils.matrix import sort_rows
 import kwave.utils.typing as kt
 
 
-@beartype
+@typechecker
 def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -> Real[kt.ArrayLike, "..."]:
     """
     Convert decibels to nepers.
@@ -34,7 +34,7 @@ def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -
     return alpha
 
 
-@beartype
+@typechecker
 def neper2db(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -> Real[kt.ArrayLike, "..."]:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
@@ -53,7 +53,7 @@ def neper2db(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -
     return alpha
 
 
-@beartype
+@typechecker
 def cast_to_type(data: Real[kt.ArrayLike, "..."], matlab_type: str) -> Any:
     """
 
@@ -77,7 +77,7 @@ def cast_to_type(data: Real[kt.ArrayLike, "..."], matlab_type: str) -> Any:
     return data.astype(type_map[matlab_type])
 
 
-@beartype
+@typechecker
 def cart2pol(x: Real[kt.ArrayLike, "..."], y: Real[kt.ArrayLike, "..."]) -> Tuple[Real[kt.ArrayLike, "..."], Real[kt.ArrayLike, "..."]]:
     """
     Convert from cartesian to polar coordinates.
@@ -96,7 +96,7 @@ def cart2pol(x: Real[kt.ArrayLike, "..."], y: Real[kt.ArrayLike, "..."]) -> Tupl
     return phi, rho
 
 
-@beartype
+@typechecker
 def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray, ndarray]:
     """
     Returns the Cartesian coordinates of the non-zero points of a binary grid.
@@ -130,7 +130,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     return cart_data.squeeze(), order_index
 
 
-@beartype
+@typechecker
 def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim: Union[int, Tuple[int]]) -> Tuple[int, float]:
     """
     Convert the given frequency and maximum wavenumber to a wavenumber cutoff and filter size.
@@ -160,7 +160,7 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
     return filter_size, filter_cutoff
 
 
-@beartype
+@typechecker
 def cart2grid(
     kgrid: kWaveGrid,
     cart_data: Union[Float[ndarray, "1 NumPoints"], Float[ndarray, "2 NumPoints"], Float[ndarray, "3 NumPoints"]],
@@ -316,7 +316,7 @@ def cart2grid(
     return grid_data.astype(int), order_index, reorder_index
 
 
-@beartype
+@typechecker
 def hounsfield2soundspeed(
     ct_data: Union[Float[ndarray, "Dim1 Dim2"], Float[ndarray, "Dim1 Dim2 Dim3"]],
 ) -> Union[Float[ndarray, "Dim1 Dim2"], Float[ndarray, "Dim1 Dim2 Dim3"]]:
@@ -342,7 +342,7 @@ def hounsfield2soundspeed(
     return sound_speed
 
 
-@beartype
+@typechecker
 def hounsfield2density(
     ct_data: Union[Float[ndarray, "Dim1 Dim2"], Float[ndarray, "Dim1 Dim2 Dim3"]], plot_fitting: bool = False
 ) -> Union[Float[ndarray, "Dim1 Dim2"], Float[ndarray, "Dim1 Dim2 Dim3"]]:
@@ -386,7 +386,7 @@ tol = None
 subs0 = None
 
 
-@beartype
+@typechecker
 def tol_star(
     tolerance: kt.NUMERIC,
     kgrid: kWaveGrid,
@@ -487,7 +487,7 @@ def tol_star(
     return lin_ind, np.array(is_) - 1, np.array(js) - 1, np.array(ks) - 1  # -1 for mapping from Matlab indexing to Python indexing
 
 
-@beartype
+@typechecker
 def find_closest(array: ndarray, value: Num[kt.ScalarLike, ""]):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()

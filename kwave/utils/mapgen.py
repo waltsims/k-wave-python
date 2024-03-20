@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy import optimize
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, cast, Optional
 from jaxtyping import Float, Complex, Int, Real, Integer
 
@@ -148,7 +148,7 @@ def make_cart_disc(
     return np.squeeze(disc)
 
 
-@beartype
+@typechecker
 def make_cart_bowl(
     bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False
 ) -> Float[np.ndarray, "3 NumPoints"]:
@@ -499,7 +499,7 @@ def water_non_linearity(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_
     return BonA
 
 
-@beartype
+@typechecker
 def make_ball(
     grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False, binary: bool = False
 ) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
@@ -552,7 +552,7 @@ def make_ball(
     return ball
 
 
-@beartype
+@typechecker
 def make_cart_sphere(
     radius: Union[float, int], num_points: int, center_pos: Vector = Vector([0, 0, 0]), plot_sphere: bool = False
 ) -> Float[np.ndarray, "3 NumPoints"]:
@@ -659,7 +659,7 @@ def make_cart_circle(
     return np.squeeze(circle)
 
 
-@beartype
+@typechecker
 def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.NP_ARRAY_BOOL_2D:
     """
     Create a binary map of a filled disc within a 2D grid.
@@ -717,7 +717,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.
     return disc
 
 
-@beartype
+@typechecker
 def make_circle(
     grid_size: Vector, center: Vector, radius: Real[kt.ScalarLike, ""], arc_angle: Optional[float] = None, plot_circle: bool = False
 ) -> kt.NP_ARRAY_INT_2D:
@@ -953,7 +953,7 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
     return nx
 
 
-@beartype
+@typechecker
 def make_line(
     grid_size: Vector,
     startpoint: Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]],
@@ -1321,7 +1321,7 @@ def make_line(
     return line
 
 
-@beartype
+@typechecker
 def make_arc(
     grid_size: Vector, arc_pos: np.ndarray, radius: Real[kt.ScalarLike, ""], diameter: Int[kt.ScalarLike, ""], focus_pos: Vector
 ) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
@@ -1554,7 +1554,7 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
     return pixel_map
 
 
-@beartype
+@typechecker
 def make_bowl(
     grid_size: Vector,
     bowl_pos: Vector,
@@ -2230,7 +2230,7 @@ def make_multi_bowl(
     return bowls, bowls_labelled
 
 
-@beartype
+@typechecker
 def make_multi_arc(
     grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray], diameter: Union[int, np.ndarray], focus_pos: np.ndarray
 ) -> Tuple[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_2D]:
@@ -2322,7 +2322,7 @@ def make_multi_arc(
     return arcs, arcs_labelled
 
 
-@beartype
+@typechecker
 def make_sphere(
     grid_size: Vector, radius: Union[float, int], plot_sphere: bool = False, binary: bool = False
 ) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
@@ -2417,7 +2417,7 @@ def make_sphere(
     return sphere
 
 
-@beartype
+@typechecker
 def make_spherical_section(
     radius: Real[kt.ScalarLike, ""],
     height: Real[kt.ScalarLike, ""],
@@ -2560,7 +2560,7 @@ def make_spherical_section(
     return ss, dist_map
 
 
-@beartype
+@typechecker
 def make_cart_rect(
     rect_pos,
     Lx: Real[kt.ScalarLike, ""],
@@ -2640,7 +2640,7 @@ def make_cart_rect(
     return rect
 
 
-@beartype
+@typechecker
 def focused_bowl_oneil(
     radius: kt.NUMERIC,
     diameter: kt.NUMERIC,
@@ -2695,7 +2695,7 @@ def focused_bowl_oneil(
 
     float_eps = np.finfo(float).eps
 
-    # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
+    # @typechecker  => could not figure out what's wrong with type annotation here, revisit in the future
     def calculate_axial_pressure() -> Tuple[Float[np.ndarray, "N"], Complex[np.ndarray, "N"]]:
         # calculate distances
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
@@ -2716,7 +2716,7 @@ def focused_bowl_oneil(
 
         return axial_pressure, complex_axial_pressure
 
-    @beartype
+    @typechecker
     def calculate_lateral_pressure() -> Float[np.ndarray, "N"]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
@@ -2745,7 +2745,7 @@ def focused_bowl_oneil(
     return p_axial, p_lateral, p_axial_complex
 
 
-@beartype
+@typechecker
 def focused_annulus_oneil(
     radius: float,
     diameter: Union[Float[np.ndarray, "NumElements 2"], Float[np.ndarray, "2 NumElements"]],
@@ -2893,7 +2893,7 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-@beartype
+@typechecker
 def make_cart_arc(
     arc_pos: Float[np.ndarray, "2"],
     radius: Union[float, int],
@@ -3012,7 +3012,7 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
     return R, b
 
 
-@beartype
+@typechecker
 def make_cart_spherical_segment(
     bowl_pos: Float[np.ndarray, "3"],
     radius: Union[float, int],

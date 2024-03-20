@@ -5,7 +5,7 @@ import numpy as np
 import scipy
 from numpy.fft import ifftshift, fft, ifft
 
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Optional, Tuple
 from jaxtyping import Int, Bool
 
@@ -55,7 +55,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     return signal
 
 
-@beartype
+@typechecker
 def get_win(
     N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window

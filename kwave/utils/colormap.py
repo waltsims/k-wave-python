@@ -1,12 +1,12 @@
 from typing import Optional
 
 import numpy as np
-from beartype import beartype
+from beartype import beartype as typechecker
 from jaxtyping import Float
 from matplotlib.colors import ListedColormap
 
 
-@beartype
+@typechecker
 def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
@@ -38,7 +38,7 @@ def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     return ListedColormap(colors)
 
 
-@beartype
+@typechecker
 def hot(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Generate a hot colormap of length m.
@@ -61,7 +61,7 @@ def hot(m: int) -> Float[np.ndarray, "N 3"]:
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
-@beartype
+@typechecker
 def bone(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
@@ -75,7 +75,7 @@ def bone(m: int) -> Float[np.ndarray, "N 3"]:
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
-@beartype
+@typechecker
 def gray(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.

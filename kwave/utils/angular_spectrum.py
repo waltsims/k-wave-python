@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 from matplotlib import pyplot as plt
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Dict, Union
 from jaxtyping import Float
 
@@ -14,7 +14,7 @@ from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
 
 
-@beartype
+@typechecker
 def angular_spectrum(
     input_plane: Float[np.ndarray, "Dim1 Dim2 Dim3"],
     dx: float,
