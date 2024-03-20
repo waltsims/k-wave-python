@@ -163,7 +163,7 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
 @beartype
 def cart2grid(
     kgrid: kWaveGrid,
-    cart_data: Float[ndarray, "{kgrid.dim} NumPoints"],
+    cart_data: Union[Float[ndarray, "1 NumPoints"], Float[ndarray, "2 NumPoints"], Float[ndarray, "3 NumPoints"]],
     axisymmetric: bool = False,
 ) -> Tuple:
     """
