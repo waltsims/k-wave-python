@@ -30,7 +30,6 @@ dependencies = [
     "deepdiff==6.7.1",
     "matplotlib==3.8.3",
     "numpy>=1.22.2,<1.27.0",
-    "nptyping==2.5.0",
     "beartype==0.16.4",
     "jaxtyping==0.2.25"
 ]
@@ -93,9 +92,8 @@ omit = [
 [tool.ruff]
 # Allow lines to be as long as 140 characters.
 line-length = 140
-# Ruff and nptyping.Shape do not play well together.
-# See the open issue: https://github.com/astral-sh/ruff/issues/6014
-lint.ignore = ["F821", "F722"]
+# F722 due to jaxtyping 
+lint.ignore = ["F722"]
 [tool.ruff.lint.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
 "kwave/ksource.py" = ["F821"]
