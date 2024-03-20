@@ -1,6 +1,19 @@
 from beartype.typing import Union
-from jaxtyping import Int, Bool, Float, Complex
+from jaxtyping import Int, Bool, Float, Complex, Shaped
 import numpy as np
+
+
+ArrayLike = Union[
+    np.ndarray,  # NumPy array type
+    np.bool_,
+    np.number,  # NumPy scalar types
+    bool,
+    int,
+    float,
+    complex,  # Python scalar types
+]
+
+ScalarLike = Shaped[ArrayLike, ""]
 
 
 INT = Union[Int, int]
