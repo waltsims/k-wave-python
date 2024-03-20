@@ -70,8 +70,8 @@ grid_size_points = Vector([Nx, Ny, Nz])
 grid_spacing_meters = Vector([dx, dx, dx])
 kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
-# compute points per temporal period. numpy round gives a float, native round gives a int.
-ppp = np.round(ppw / cfl)
+# compute points per temporal period.
+ppp: int = round(ppw / cfl)
 
 # compute corresponding time spacing
 dt = 1.0 / (ppp * source_f0)

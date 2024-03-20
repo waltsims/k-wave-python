@@ -66,7 +66,7 @@ grid_spacing_meters = Vector([dx, dx, dx])
 kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
 # compute points per temporal period
-ppp: int = np.round(ppw / cfl)
+ppp: int = round(ppw / cfl)
 
 # compute corresponding time spacing
 dt: float = 1.0 / (ppp * source_f0)
