@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import interpn, interp1d
 from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, Optional
-from jaxtyping import Int, Num, Shaped, Real
+from jaxtyping import Int, Num, Shaped, Real, Bool
 import kwave.utils.typing as kt
 
 from .data import scale_time
@@ -91,7 +91,7 @@ def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], Li
 
 @typechecker
 def expand_matrix(
-    matrix: Num[np.ndarray, "..."],
+    matrix: Union[Num[np.ndarray, "..."], Bool[np.ndarray, "..."]],
     exp_coeff: Union[Shaped[kt.ArrayLike, "dim"], List],
     edge_val: Optional[Real[kt.ScalarLike, ""]] = None,
 ):
