@@ -181,12 +181,12 @@ x_ref = np.arange(0.0, x_max + delta_x, delta_x)
 Z = source_amp / (c0 * rho0)
 
 # calculate analytical solution
-p_ref_axial, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, int(source_f0), int(c0), int(rho0), axial_positions=x_ref)
+p_ref_axial, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, 
+                                       rho0, axial_positions=x_ref)
 
 # calculate analytical solution at exactly the same points as the simulation
-p_ref_axial_kw, _, _ = focused_bowl_oneil(
-    source_roc, source_diameter, Z, int(source_f0), int(c0), int(rho0), axial_positions=np.squeeze(x_vec)
-)
+p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, 
+                                          rho0, axial_positions=np.squeeze(x_vec))
 
 L2_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=2)
 Linf_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=np.inf)
@@ -214,14 +214,14 @@ fig2, (ax2a, ax2b) = plt.subplots(1, 2)
 ax2a.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(source.p_mask[:, :, int(np.ceil(Nz / 2))], axis=0),
+    np.flip(source.p_mask[:, :, Nz // 2], axis=0),
     shading="nearest",
 )
 ax2a.set(xlabel="y [mm]", ylabel="x [mm]", title="Source Mask")
 ax2b.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(grid_weights[:, :, int(np.ceil(Nz / 2))], axis=0),
+    np.flip(grid_weights[:, :, Nz // 2], axis=0),
     shading="nearest",
 )
 ax2b.set(xlabel="y [mm]", ylabel="x [mm]", title="Off-Grid Source Weights")

@@ -195,14 +195,14 @@ fig2, (ax2a, ax2b) = plt.subplots(1, 2)
 ax2a.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(source.p_mask[:, :, int(np.ceil(Nz / 2))], axis=0),
+    np.flip(source.p_mask[:, :, Nz // 2], axis=0),
     shading="nearest",
 )
 ax2a.set(xlabel="y [mm]", ylabel="x [mm]", title="Source Mask")
 ax2b.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(grid_weights[:, :, int(np.ceil(Nz / 2))], axis=0),
+    np.flip(grid_weights[:, :, Nz // 2], axis=0),
     shading="nearest",
 )
 ax2b.set(xlabel="y [mm]", ylabel="x [mm]", title="Off-Grid Source Weights")
