@@ -1,5 +1,5 @@
 from beartype.typing import Union
-from nptyping import Int, Bool, Float, Complex
+from jaxtyping import Int, Bool, Float, Complex
 import numpy as np
 
 
