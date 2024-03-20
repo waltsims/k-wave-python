@@ -92,7 +92,7 @@ def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], Li
 @beartype
 def expand_matrix(
     matrix: Num[np.ndarray, "..."],
-    exp_coeff: Shaped[kt.ArrayLike, "dim"],
+    exp_coeff: Union[Shaped[kt.ArrayLike, "dim"], List],
     edge_val: Optional[Real[kt.ScalarLike, ""]] = None,
 ):
     """
