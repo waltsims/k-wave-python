@@ -9,7 +9,7 @@ import scipy
 from scipy import optimize
 from beartype import beartype
 from beartype.typing import Union, List, Tuple, cast, Optional
-from jaxtyping import Float, Complex, Int, Real
+from jaxtyping import Float, Complex, Int, Real, Integer
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -2563,9 +2563,9 @@ def make_spherical_section(
 @beartype
 def make_cart_rect(
     rect_pos,
-    Lx: Union[float, int],
-    Ly: Union[float, int],
-    theta: Optional[Union[Int[kt.ScalarLike, ""], List, kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]] = None,
+    Lx: Real[kt.ScalarLike, ""],
+    Ly: Real[kt.ScalarLike, ""],
+    theta: Optional[Union[Real[kt.ScalarLike, ""], List, Integer[np.ndarray, "..."], Float[np.ndarray, "..."]]] = None,
     num_points: int = 0,
     plot_rect: bool = False,
 ) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
