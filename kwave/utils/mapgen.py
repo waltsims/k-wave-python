@@ -9,7 +9,7 @@ import scipy
 from scipy import optimize
 from beartype import beartype
 from beartype.typing import Union, List, Tuple, cast, Optional
-from nptyping import NDArray, Float, Shape, Complex, Int, Number
+from jaxtyping import Float, Complex, Int
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
@@ -151,7 +151,7 @@ def make_cart_disc(
 @beartype
 def make_cart_bowl(
     bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False
-) -> NDArray[Shape["3, NumPoints"], Float]:
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Create evenly distributed Cartesian points covering a bowl.
 
@@ -555,7 +555,7 @@ def make_ball(
 @beartype
 def make_cart_sphere(
     radius: Union[float, int], num_points: int, center_pos: Vector = Vector([0, 0, 0]), plot_sphere: bool = False
-) -> NDArray[Shape["3, NumPoints"], Float]:
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
 
@@ -608,7 +608,7 @@ def make_cart_sphere(
 
 def make_cart_circle(
     radius: float, num_points: int, center_pos: Vector = Vector([0, 0]), arc_angle: float = 2 * np.pi, plot_circle: bool = False
-) -> NDArray[Shape["2, NumPoints"], Float]:
+) -> Float[np.ndarray, "2 NumPoints"]:
     """
     Create a set of points in cartesian coordinates defining a circle or arc.
 
@@ -956,8 +956,8 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 @beartype
 def make_line(
     grid_size: Vector,
-    startpoint: Union[Tuple[Int, Int], NDArray[Shape["2"], Int]],
-    endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape["2"], Int]]] = None,
+    startpoint: Union[Tuple[Int, Int], Int[np.ndarray, "2"]],
+    endpoint: Optional[Union[Tuple[Int, Int], Int[np.ndarray, "2"]]] = None,
     angle: Optional[float] = None,
     length: Optional[int] = None,
 ) -> kt.NP_ARRAY_BOOL_2D:
@@ -2696,7 +2696,7 @@ def focused_bowl_oneil(
     float_eps = np.finfo(float).eps
 
     # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
-    def calculate_axial_pressure() -> Tuple[NDArray[Shape["N"], Float], NDArray[Shape["N"], Complex]]:
+    def calculate_axial_pressure() -> Tuple[Float[np.ndarray, "N"], Complex[np.ndarray, "N"]]:
         # calculate distances
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
         d = B - axial_positions
@@ -2717,7 +2717,7 @@ def focused_bowl_oneil(
         return axial_pressure, complex_axial_pressure
 
     @beartype
-    def calculate_lateral_pressure() -> NDArray[Shape["N"], Float]:
+    def calculate_lateral_pressure() -> Float[np.ndarray, "N"]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
         # TODO: this should work
@@ -2748,9 +2748,9 @@ def focused_bowl_oneil(
 @beartype
 def focused_annulus_oneil(
     radius: float,
-    diameter: Union[NDArray[Shape["NumElements, 2"], Float], NDArray[Shape["2, NumElements"], Float]],
-    amplitude: NDArray[Shape["NumElements"], Float],
-    phase: NDArray[Shape["NumElements"], Float],
+    diameter: Union[Float[np.ndarray, "NumElements 2"], Float[np.ndarray, "2 NumElements"]],
+    amplitude: Float[np.ndarray, "NumElements"],
+    phase: Float[np.ndarray, "NumElements"],
     frequency: kt.NUMERIC,
     sound_speed: kt.NUMERIC,
     density: kt.NUMERIC,
@@ -2895,13 +2895,13 @@ def trim_cart_points(kgrid, points: np.ndarray):
 
 @beartype
 def make_cart_arc(
-    arc_pos: NDArray[Shape["2"], Float],
+    arc_pos: Float[np.ndarray, "2"],
     radius: Union[float, int],
     diameter: Union[float, int],
-    focus_pos: NDArray[Shape["2"], Float],
+    focus_pos: Float[np.ndarray, "2"],
     num_points: int,
     plot_arc: bool = False,
-) -> NDArray[Shape["2, NumPoints"], Float]:
+) -> Float[np.ndarray, "2 NumPoints"]:
     """
     make_cart_arc creates a 2 x num_points array of the Cartesian
     coordinates of points evenly distributed over an arc. The midpoint of
@@ -3014,15 +3014,15 @@ def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector
 
 @beartype
 def make_cart_spherical_segment(
-    bowl_pos: NDArray[Shape["3"], Float],
+    bowl_pos: Float[np.ndarray, "3"],
     radius: Union[float, int],
     inner_diameter: Union[float, int],
     outer_diameter: Union[float, int],
-    focus_pos: NDArray[Shape["3"], Float],
+    focus_pos: Float[np.ndarray, "3"],
     num_points: int,
     plot_bowl: Optional[bool] = False,
     num_points_inner: int = 0,
-) -> NDArray[Shape["3, NumPoints"], Float]:
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Create evenly distributed Cartesian points covering a spherical segment.
 
