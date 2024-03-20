@@ -719,7 +719,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.
 
 @beartype
 def make_circle(
-    grid_size: Vector, center: Vector, radius: Real, arc_angle: Optional[float] = None, plot_circle: bool = False
+    grid_size: Vector, center: Vector, radius: Real[np.ndarray, ""], arc_angle: Optional[float] = None, plot_circle: bool = False
 ) -> kt.NP_ARRAY_INT_2D:
     """
     Create a binary map of a circle within a 2D grid.
@@ -1323,7 +1323,7 @@ def make_line(
 
 @beartype
 def make_arc(
-    grid_size: Vector, arc_pos: np.ndarray, radius: Real, diameter: Int, focus_pos: Vector
+    grid_size: Vector, arc_pos: np.ndarray, radius: Real[np.ndarray, ""], diameter: Int[np.ndarray, ""], focus_pos: Vector
 ) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
@@ -1559,7 +1559,7 @@ def make_bowl(
     grid_size: Vector,
     bowl_pos: Vector,
     radius: Union[int, float],
-    diameter: Real,
+    diameter: Real[np.ndarray, ""],
     focus_pos: Vector,
     binary: bool = False,
     remove_overlap: bool = False,
@@ -2419,9 +2419,9 @@ def make_sphere(
 
 @beartype
 def make_spherical_section(
-    radius: Real,
-    height: Real,
-    width: Optional[Real] = None,
+    radius: Real[np.ndarray, ""],
+    height: Real[np.ndarray, ""],
+    width: Optional[Real[np.ndarray, ""]] = None,
     plot_section: bool = False,
     binary: bool = False,
 ) -> Tuple:
