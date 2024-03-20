@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
 from kwave.utils.kwave_array import kWaveArray
@@ -72,8 +73,17 @@ def test_kwave_array():
     check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
     reader.increment()
 
+    # test list input
     kwave_array = kWaveArray()
     kwave_array.add_arc_element([0, 0.3], 5, 4.3, [1, 5])
+    check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
+    # test tuple input
+    kwave_array = kWaveArray()
+    kwave_array.add_arc_element((0, 0.3), 5, 4.3, (1, 5))
+    check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
+    # test Vector input
+    kwave_array = kWaveArray()
+    kwave_array.add_arc_element(Vector([0, 0.3]), 5, 4.3, Vector([1, 5]))
     check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
     reader.increment()
 
@@ -159,3 +169,12 @@ def test_kwave_array():
     element_pos = kwave_array.get_element_positions()
     assert np.allclose(element_pos.squeeze(axis=-1), reader.expected_value_of("element_pos"))
     reader.increment()
+
+    # 2D karray tests
+
+    kwave_array = kWaveArray()
+    kwave_array.add_line_element([0, 3], [5, 2])
+    kgrid = kWaveGrid([100, 200], [0.1, 0.3])
+    assert kwave_array.dim == 2
+    assert np.allclose(kwave_array.get_array_grid_weights(kgrid).shape, reader.expected_value_of("grid_weights").shape)
+    assert np.allclose(kwave_array.get_array_grid_weights(kgrid), np.squeeze(reader.expected_value_of("grid_weights")))
