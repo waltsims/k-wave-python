@@ -6,7 +6,7 @@ import numpy as np
 from numpy import ndarray
 from beartype import beartype
 from beartype.typing import Tuple, Union
-from nptyping import NDArray, Float, Shape
+from jaxtyping import Real, Float, Num
 
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
@@ -16,7 +16,7 @@ import kwave.utils.typing as kt
 
 
 @beartype
-def db2neper(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDArray, kt.NUMERIC]:
+def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -> Real[kt.ArrayLike, "..."]:
     """
     Convert decibels to nepers.
 
@@ -35,7 +35,7 @@ def db2neper(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDAr
 
 
 @beartype
-def neper2db(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDArray, kt.NUMERIC]:
+def neper2db(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -> Real[kt.ArrayLike, "..."]:
     """
     Converts an attenuation coefficient in units of Nepers / ((rad / s) ^ y m) to units of dB / (MHz ^ y cm).
 
@@ -54,7 +54,7 @@ def neper2db(alpha: Union[NDArray, kt.NUMERIC], y: kt.NUMERIC = 1) -> Union[NDAr
 
 
 @beartype
-def cast_to_type(data: Union[NDArray, kt.NUMERIC], matlab_type: str) -> Any:
+def cast_to_type(data: Real[kt.ArrayLike, "..."], matlab_type: str) -> Any:
     """
 
     Args:
@@ -78,7 +78,7 @@ def cast_to_type(data: Union[NDArray, kt.NUMERIC], matlab_type: str) -> Any:
 
 
 @beartype
-def cart2pol(x: Union[kt.NUMERIC, NDArray], y: Union[kt.NUMERIC, NDArray]) -> Tuple[Union[kt.NUMERIC, NDArray], Union[kt.NUMERIC, NDArray]]:
+def cart2pol(x: Real[kt.ArrayLike, "..."], y: Real[kt.ArrayLike, "..."]) -> Tuple[Real[kt.ArrayLike, "..."], Real[kt.ArrayLike, "..."]]:
     """
     Convert from cartesian to polar coordinates.
 
@@ -163,11 +163,7 @@ def freq2wavenumber(n: int, k_max: float, filter_cutoff: float, c: float, k_dim:
 @beartype
 def cart2grid(
     kgrid: kWaveGrid,
-    cart_data: Union[
-        NDArray[Shape["1, NumPoints"], Float],
-        NDArray[Shape["2, NumPoints"], Float],
-        NDArray[Shape["3, NumPoints"], Float],
-    ],
+    cart_data: Float[ndarray, "{kgrid.dim} NumPoints"],
     axisymmetric: bool = False,
 ) -> Tuple:
     """
@@ -322,8 +318,8 @@ def cart2grid(
 
 @beartype
 def hounsfield2soundspeed(
-    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]],
-) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
+    ct_data: Union[Float[ndarray, ["Dim1 Dim2"]], Float[ndarray, ["Dim1 Dim2 Dim3"]]],
+) -> Union[Float[ndarray, ["Dim1 Dim2"]], Float[ndarray, ["Dim1 Dim2 Dim3"]]]:
     """
     Calculates the sound speed of a medium given a CT (computed tomography) of the medium.
     For soft tissue, the approximate sound speed can also be returned using the empirical relationship
@@ -348,8 +344,8 @@ def hounsfield2soundspeed(
 
 @beartype
 def hounsfield2density(
-    ct_data: Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]], plot_fitting: bool = False
-) -> Union[NDArray[Shape["Dim1, Dim2"], Float], NDArray[Shape["Dim1, Dim2, Dim3"], Float]]:
+    ct_data: Union[Float[ndarray, ["Dim1 Dim2"]], Float[ndarray, ["Dim1 Dim2 Dim3"]]], plot_fitting: bool = False
+) -> Union[Float[ndarray, ["Dim1 Dim2"]], Float[ndarray, ["Dim1 Dim2 Dim3"]]]:
     """
     Convert Hounsfield units in CT data to density values [kg / m ^ 3] based on experimental data.
 
@@ -394,9 +390,9 @@ subs0 = None
 def tol_star(
     tolerance: kt.NUMERIC,
     kgrid: kWaveGrid,
-    point: Union[NDArray[Shape["1"], Float], NDArray[Shape["2"], Float], NDArray[Shape["3"], Float]],
+    point: Union[Float[ndarray, "1"], Float[ndarray, "2"], Float[ndarray, "3"]],
     debug,
-) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
+) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
     global tol, subs0
 
     ongrid_threshold = kgrid.dx * 1e-3
@@ -492,7 +488,7 @@ def tol_star(
 
 
 @beartype
-def find_closest(array: NDArray, value: kt.NUMERIC_WITH_COMPLEX):
+def find_closest(array: ndarray, value: Num[kt.ScalarLike, ""]):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
