@@ -5,9 +5,9 @@ import numpy as np
 import scipy
 from numpy.fft import ifftshift, fft, ifft
 
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Optional, Tuple
-from nptyping import NDArray, Shape, Int, Bool
+from jaxtyping import Int, Bool
 
 from .conversion import freq2wavenumber
 from .data import scale_SI
@@ -15,6 +15,8 @@ from .mapgen import ndgrid
 from .math import sinc, gaussian
 from .matlab import matlab_mask, unflatten_matlab_mask, rem
 from .matrix import broadcast_axis, num_dim
+
+import kwave.utils.typing as kt
 
 
 def add_noise(signal: np.ndarray, snr: float, mode="rms"):
@@ -53,16 +55,16 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     return signal
 
 
-@beartype
+@typechecker
 def get_win(
-    N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
+    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
     type_: str,  # TODO change this to enum in the future
     plot_win: bool = False,
     param: Optional[float] = None,
     rotation: bool = False,
-    symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
+    symmetric: Union[bool, Bool[np.ndarray, "N"]] = True,
     square: bool = False,
 ):
     """
