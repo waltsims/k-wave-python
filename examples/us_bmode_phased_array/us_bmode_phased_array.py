@@ -45,13 +45,15 @@ t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
 kgrid.makeTime(c0, t_end=t_end)
 
 
+# In[ ]:
+
+
 source_strength = 1e6  # [Pa]
 tone_burst_freq = 1e6  # [Hz]
 tone_burst_cycles = 4
 
 input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 input_signal = (source_strength / (c0 * rho0)) * input_signal
-
 
 transducer = dotdict()
 transducer.number_elements = 64  # total number of transducer elements
@@ -113,7 +115,7 @@ medium.density = density_map
 
 
 # Range of steering angles to test
-steering_angles = np.arange(-32, 32, 2)
+steering_angles = np.arange(-32, 33, 2)
 
 # Preallocate the storage
 number_scan_lines = len(steering_angles)
@@ -155,18 +157,23 @@ else:
     scan_lines = scipy.io.loadmat("example_us_phased_array_scan_lines")["scan_lines"]
 
 
+# PROCESS THE RESULTS
+# Remove Input Signal
 # Trim the delay offset from the scan line data
-tukey_win, _ = get_win(kgrid.Nt * 2, "Tukey", False, 0.05)
-transmit_len = len(input_signal.squeeze())
-scan_line_win = np.concatenate((np.zeros([1, transmit_len * 2]), tukey_win.T[:, : kgrid.Nt - transmit_len * 2]), axis=1)
+t0_offset = int(round(len(input_signal.squeeze()) / 2) + (not_transducer.appended_zeros - not_transducer.beamforming_delays_offset))
+
+scan_lines = scan_lines[:, t0_offset:]
+
+Nt = np.shape(scan_lines)[1]
+
+tukey_win, _ = get_win(Nt * 2, "Tukey", False, 0.05)
+scan_line_win = np.concatenate((np.zeros([1, t0_offset * 2]), tukey_win.T[:, : int(len(tukey_win) / 2) - t0_offset * 2]), axis=1)
 
 scan_lines = scan_lines * scan_line_win
-
 # store intermediate results
-scan_lines_no_input = scan_lines[len(scan_lines) // 2, :]
 
-Nt = kgrid.Nt
 
+# Time Gain Compensation
 
 # Create radius variable
 r = c0 * np.arange(1, Nt + 1) * kgrid.dt / 2
@@ -182,12 +189,22 @@ tgc = np.exp(tgc_alpha_np_m * 2 * r)
 scan_lines *= tgc
 
 
+# Frequency Filtering
+
 scan_lines_fund = gaussian_filter(scan_lines, 1 / kgrid.dt, tone_burst_freq, 100)
 scan_lines_harm = gaussian_filter(scan_lines, 1 / kgrid.dt, 2 * tone_burst_freq, 30)
 
 
+# Envelope Detection
+
+
 scan_lines_fund = envelope_detection(scan_lines_fund)
 scan_lines_harm = envelope_detection(scan_lines_harm)
+
+
+# Log Compression
+
+# In[ ]:
 
 
 compression_ratio = 3
@@ -195,6 +212,7 @@ scan_lines_fund = log_compression(scan_lines_fund, compression_ratio, True)
 scan_lines_harm = log_compression(scan_lines_harm, compression_ratio, True)
 
 
+# Visualization
 image_size = [kgrid.Nx * kgrid.dx, kgrid.Ny * kgrid.dy]
 image_res = [256, 256]
 
@@ -211,7 +229,7 @@ plt.ion()
 plt.figure(figsize=(15, 4))
 plt.subplot(131)
 plt.imshow(
-    scan_lines.T, aspect="auto", extent=[y_axis[0], y_axis[1], steering_angles[-1], steering_angles[0]], interpolation="none", cmap="grey"
+    scan_lines.T, aspect="auto", extent=[steering_angles[-1], steering_angles[0], y_axis[1], y_axis[0]], interpolation="none", cmap="grey"
 )
 plt.xlabel("Steering angle [deg]")
 plt.ylabel("Depth [mm]")
@@ -222,7 +240,7 @@ plt.subplot(132)
 plt.imshow(
     scan_lines_fund.T,
     aspect="auto",
-    extent=[y_axis[0], y_axis[1], steering_angles[-1], steering_angles[0]],
+    extent=[steering_angles[-1], steering_angles[0], y_axis[1], y_axis[0]],
     interpolation="none",
     cmap="bone",
 )
@@ -245,13 +263,13 @@ plt.ylabel("Depth [mm]")
 plt.title("Scattering Phantom")
 
 plt.subplot(132)
-plt.imshow(b_mode_fund, cmap="bone", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+plt.imshow(b_mode_fund, cmap="bone", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]], interpolation="none")
 plt.xlabel("Horizontal Position [mm]")
 plt.ylabel("Depth [mm]")
 plt.title("B-Mode Image")
 
 plt.subplot(133)
-plt.imshow(b_mode_harm, cmap="bone", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+plt.imshow(b_mode_harm, cmap="bone", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]], interpolation="none")
 plt.xlabel("Horizontal Position [mm]")
 plt.ylabel("Depth [mm]")
 plt.title("Harmonic Image")
