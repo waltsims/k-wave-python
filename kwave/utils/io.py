@@ -201,12 +201,8 @@ def write_attributes(filename: str, file_description: Optional[str] = None) -> N
         file_description: The description of the file. If not provided, a default description
             will be used.
 
-    Raises:
-        DeprecationWarning: If legacy is set to True, a DeprecationWarning will be raised.
-
     """
 
-    logging.log(logging.WARN, f"{DeprecationWarning.__name__}: Attributes will soon be typed when saved and not saved ")
     # get literals
     h5_literals = get_h5_literals()
 
