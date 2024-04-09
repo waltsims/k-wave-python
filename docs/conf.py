@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "k-Wave-python"
-copyright = "2022, Walter Simson, Farid Yagubbayli"
+copyright = "2024, Walter Simson, Farid Yagubbayli"
 author = "Walter Simson, Farid Yagubbayli"
 version = "0.3.1"
 
