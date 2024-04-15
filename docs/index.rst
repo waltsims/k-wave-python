@@ -5,7 +5,7 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
 
 .. mdinclude:: README.md
    :start-line: 5
-   :end-line: -7
+   :end-line: -3
 
 .. toctree::
    :maxdepth: 2

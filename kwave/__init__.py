@@ -118,8 +118,8 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         return False
     
     # If there is a new binary
-    latest_url = url_dict[system][binary_type][0]
-    if existing_metadata['url'] != latest_url:
+    latest_urls = url_dict[system][binary_type]
+    if existing_metadata['url'] not in latest_urls:
         return False
     
     # No need to check `version` field for now
