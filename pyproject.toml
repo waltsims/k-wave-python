@@ -30,8 +30,8 @@ dependencies = [
     "deepdiff==6.7.1",
     "matplotlib==3.8.3",
     "numpy>=1.22.2,<1.27.0",
-    "nptyping==2.5.0",
-    "beartype==0.16.4"
+    "beartype==0.17.2",
+    "jaxtyping==0.2.28"
 ]
 
 [project.urls]
@@ -42,7 +42,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.4.3",
+        "coverage==7.4.4",
         "phantominator",
         "requests==2.31.0"]
 example = ["gdown==5.1.0"]
@@ -51,7 +51,7 @@ docs = ["m2r2==0.3.2",
     "sphinx-tabs==3.4.4",
     "sphinx-toolbox==3.5.0",
     "furo==2024.1.29"]
-dev = ["pre-commit==3.6.2"]
+dev = ["pre-commit==3.7.0"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
@@ -92,9 +92,8 @@ omit = [
 [tool.ruff]
 # Allow lines to be as long as 140 characters.
 line-length = 140
-# Ruff and nptyping.Shape do not play well together.
-# See the open issue: https://github.com/astral-sh/ruff/issues/6014
-lint.ignore = ["F821"]
+# F821 needed to avoid false-positives in nested functions, F722 due to jaxtyping 
+lint.ignore = ["F821", "F722"]
 [tool.ruff.lint.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
 "kwave/ksource.py" = ["F821"]
