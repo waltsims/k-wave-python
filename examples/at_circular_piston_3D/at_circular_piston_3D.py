@@ -9,13 +9,14 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.filters import extract_amp_phase
-from kwave.utils.math import round_even, L2_error
+from kwave.utils.math import round_even
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 
 # material values
 c0: float       = 1500.0     # sound speed [m/s]
@@ -65,7 +66,7 @@ grid_spacing_meters = Vector([dx, dx, dx])
 kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 
 # compute points per temporal period
-ppp: int = np.round(ppw / cfl)
+ppp: int = round(ppw / cfl)
 
 # compute corresponding time spacing
 dt: float = 1.0 / (ppp * source_f0)
@@ -125,7 +126,7 @@ sensor.mask[1:, :, Nz // 2] = True
 sensor.record = ['p']
 
 # record only the final few periods when the field is in steady state
-sensor.record_start_index: int = kgrid.Nt - (record_periods * ppp) + 1
+sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 
 # --------------------
 # SIMULATION
@@ -187,8 +188,8 @@ r = np.sqrt(x_vec**2 + a**2)
 p_ref_kw = source_amp * np.abs(2.0 * np.sin((k * r - k * x_vec) / 2.0))
 
 # calculate error
-L2_error = L2_error(p_ref_kw, amp_on_axis, ord=2)
-Linf_error = L2_error(p_ref_kw, amp_on_axis, ord=np.inf)
+L2_error = 100 * np.linalg.norm(p_ref_kw - amp_on_axis, ord=2)
+Linf_error = 100 * np.linalg.norm(p_ref_kw -  amp_on_axis, ord=np.inf)
 # =========================================================================
 # VISUALISATION
 # =========================================================================
@@ -207,10 +208,10 @@ ax1.grid()
 
 # plot the source mask (pml is outside the grid in this example)
 fig2, ax2 = plt.subplots(1, 1)
-ax2.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-               1e3 * np.squeeze(kgrid.y_vec),
-               source.p_mask[:, :, int(np.ceil(Nz / 2))].T,
-               shading='gouraud')
+ax2.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+               1e3 * np.squeeze(kgrid.x_vec),
+               np.flip(source.p_mask[:, :, Nz // 2], axis=0),
+               shading='nearest')
 ax2.set(xlabel='y [mm]',
         ylabel='x [mm]',
         title='Source Mask')
