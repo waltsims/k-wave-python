@@ -420,18 +420,3 @@ def compute_linear_transform(pos1, pos2, offset=None):
         offsetPos = 0
 
     return rotMat, offsetPos
-
-
-def L2_error(x: np.ndarray, y: np.ndarray, ord=None) -> float:
-    """
-    L_2 error between two arrays
-    """
-
-    assert x.shape == y.shape
-
-    if (ord == 2) or (ord is None):
-        return 100.0 * np.sqrt(np.vdot(np.ravel(x) - np.ravel(y))) / np.sum(np.vdot(np.ravel(x)))
-    elif np.isposinf(ord):
-        return 100.0 * np.max(np.abs(np.ravel(x) - np.ravel(y))) / np.max(np.ravel(x))
-    else:
-        raise ValueError(f"Invalid norm order: '{ord}'.")
