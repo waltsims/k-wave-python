@@ -7,27 +7,26 @@ from kwave.kgrid import kWaveGrid
 
 @dataclass
 class Recorder(object):
-
     def __init__(self):
         # flags which control which parameters are recorded
-        self.p                  = True     #: time-varying acoustic pressure
-        self.p_max              = False    #: maximum pressure over simulation
-        self.p_min              = False    #: minimum pressure over simulation
-        self.p_rms              = False    #: root-mean-squared pressure over simulation
-        self.p_max_all          = False    #: maximum pressure over simulation at all grid points
-        self.p_min_all          = False    #: minimum pressure over simulation at all grid points
-        self.p_final            = False    #: final pressure field at all grid points
-        self.u                  = False    #: time-varying particle velocity
-        self.u_split_field      = False    #: compressional and shear components of time-varying particle velocity
-        self.u_non_staggered    = False    #: time-varying particle velocity on non-staggered grid
-        self.u_max              = False    #: maximum particle velocity over simulation
-        self.u_min              = False    #: minimum particle velocity over simulation
-        self.u_rms              = False    #: root-mean-squared particle velocity over simulation
-        self.u_max_all          = False    #: maximum particle velocity over simulation at all grid points
-        self.u_min_all          = False    #: minimum particle velocity over simulation at all grid points
-        self.u_final            = False    #: final particle velocity field at all grid points
-        self.I                  = False    #: time-varying acoustic intensity
-        self.I_avg              = False    #: time-averaged acoustic intensity
+        self.p = True  #: time-varying acoustic pressure
+        self.p_max = False  #: maximum pressure over simulation
+        self.p_min = False  #: minimum pressure over simulation
+        self.p_rms = False  #: root-mean-squared pressure over simulation
+        self.p_max_all = False  #: maximum pressure over simulation at all grid points
+        self.p_min_all = False  #: minimum pressure over simulation at all grid points
+        self.p_final = False  #: final pressure field at all grid points
+        self.u = False  #: time-varying particle velocity
+        self.u_split_field = False  #: compressional and shear components of time-varying particle velocity
+        self.u_non_staggered = False  #: time-varying particle velocity on non-staggered grid
+        self.u_max = False  #: maximum particle velocity over simulation
+        self.u_min = False  #: minimum particle velocity over simulation
+        self.u_rms = False  #: root-mean-squared particle velocity over simulation
+        self.u_max_all = False  #: maximum particle velocity over simulation at all grid points
+        self.u_min_all = False  #: minimum particle velocity over simulation at all grid points
+        self.u_final = False  #: final particle velocity field at all grid points
+        self.I = False  #: time-varying acoustic intensity
+        self.I_avg = False  #: time-averaged acoustic intensity
 
         self.cuboid_corners_list = None
 
@@ -49,16 +48,16 @@ class Recorder(object):
         # check the contents of the cell array are valid inputs
         allowed_flags = self.get_allowed_flags(is_elastic_code)
         for record_element in flags_list:
-            assert record_element in allowed_flags, f'{record_element} is not a valid input for sensor.record'
+            assert record_element in allowed_flags, f"{record_element} is not a valid input for sensor.record"
 
-            if record_element == 'p':  # custom logic for 'p'
+            if record_element == "p":  # custom logic for 'p'
                 continue
             else:
                 setattr(self, record_element, True)
 
         # set self.record_p to false if a user input for sensor.record
         # is given and 'p' is not set (default is true)
-        self.p = ('p' in flags_list)
+        self.p = "p" in flags_list
 
     def set_index_variables(self, kgrid: kWaveGrid, pml_size: Vector, is_pml_inside: bool, is_axisymmetric: bool) -> None:
         """
@@ -108,11 +107,27 @@ class Recorder(object):
         Returns:
             List of allowed flags for a given simulation type
         """
-        allowed_flags = ['p', 'p_max', 'p_min', 'p_rms', 'p_max_all', 'p_min_all', 'p_final',
-                         'u', 'u_max', 'u_min', 'u_rms', 'u_max_all', 'u_min_all', 'u_final',
-                         'u_non_staggered', 'I', 'I_avg']
+        allowed_flags = [
+            "p",
+            "p_max",
+            "p_min",
+            "p_rms",
+            "p_max_all",
+            "p_min_all",
+            "p_final",
+            "u",
+            "u_max",
+            "u_min",
+            "u_rms",
+            "u_max_all",
+            "u_min_all",
+            "u_final",
+            "u_non_staggered",
+            "I",
+            "I_avg",
+        ]
         if is_elastic_code:  # pragma: no cover
-            allowed_flags += ['u_split_field']
+            allowed_flags += ["u_split_field"]
         return allowed_flags
 
     def is_set(self, attrs: List[str]) -> List[bool]:

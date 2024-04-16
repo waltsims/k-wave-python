@@ -9,9 +9,7 @@ from kwave.utils.dotdictionary import dotdict
 
 
 class Executor:
-
     def __init__(self, execution_options, simulation_options):
-
         self.execution_options = execution_options
         self.simulation_options = simulation_options
 
@@ -21,20 +19,35 @@ class Executor:
         self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
+        command = (
+            f"{self.execution_options.system_string} "
+            f"{self.execution_options.binary_path} "
+            f"-i {input_filename} "
+            f"-o {output_filename} "
+            f"{options}"
+        )
 
-        command = f'{self.execution_options.system_string} ' \
-                  f'{self.execution_options.binary_path} ' \
-                  f'-i {input_filename} ' \
-                  f'-o {output_filename} ' \
-                  f'{options}'
-
-        stdout = None if self.execution_options.show_sim_log else subprocess.DEVNULL
         try:
-            subprocess.run(command, stdout=stdout, shell=True, check=True)
+            with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True) as proc:
+                stdout, stderr = "", ""
+                if self.execution_options.show_sim_log:
+                    # Stream stdout in real-time
+                    for line in proc.stdout:
+                        print(line, end="")
+                else:
+                    stdout, stderr = proc.communicate()
+
+                proc.wait()  # wait for process to finish before checking return code
+                if proc.returncode != 0:
+                    raise subprocess.CalledProcessError(proc.returncode, command, stdout, stderr)
+
         except subprocess.CalledProcessError as e:
+            # Special handling for MagicMock during testing
             if isinstance(e.returncode, unittest.mock.MagicMock):
-                logging.info('Skipping AssertionError in testing.')
+                logging.info("Skipping AssertionError in testing.")
             else:
+                # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
+                print(e.stdout)
                 raise
 
         sensor_data = self.parse_executable_output(output_filename)
@@ -43,7 +56,6 @@ class Executor:
 
     @staticmethod
     def parse_executable_output(output_filename: str) -> dotdict:
-
         # Load the simulation and pml sizes from the output file
         # with h5py.File(output_filename, 'r') as output_file:
         #     Nx, Ny, Nz = output_file['/Nx'][0].item(), output_file['/Ny'][0].item(), output_file['/Nz'][0].item()
@@ -65,10 +77,10 @@ class Executor:
         #     z1, z2 = 1 + pml_z_size, Nz - pml_z_size if Nz > 1 else (1, Nz)
 
         # Load the C++ data back from disk using h5py
-        with h5py.File(output_filename, 'r') as output_file:
+        with h5py.File(output_filename, "r") as output_file:
             sensor_data = {}
             for key in output_file.keys():
-                sensor_data[key] = output_file[f'/{key}'][0].squeeze()
+                sensor_data[key] = output_file[f"/{key}"][0].squeeze()
         #     if self.simulation_options.cuboid_corners:
         #         sensor_data = [output_file[f'/p/{index}'][()] for index in range(1, len(key['mask']) + 1)]
         #

@@ -38,12 +38,12 @@ def test_ivp_opposing_corners_sensor_mask():
     # create initial pressure distribution using make_disc
     disc_magnitude = 5  # [Pa]
     disc_pos = Vector([50, 50])  # [grid points]
-    disc_radius = 8     # [grid points]
+    disc_radius = 8  # [grid points]
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_magnitude = 3  # [Pa]
     disc_pos = Vector([80, 60])  # [grid points]
-    disc_radius = 5     # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     source = kSource()
@@ -64,22 +64,19 @@ def test_ivp_opposing_corners_sensor_mask():
     rect2_y_end = 90
 
     # assign the list of opposing corners to the sensor mask
-    sensor_mask = np.array([
-        [rect1_x_start, rect1_y_start, rect1_x_end, rect1_y_end],
-        [rect2_x_start, rect2_y_start, rect2_x_end, rect2_y_end],
-    ]).T
+    sensor_mask = np.array(
+        [
+            [rect1_x_start, rect1_y_start, rect1_x_end, rect1_y_end],
+            [rect2_x_start, rect2_y_start, rect2_x_end, rect2_y_end],
+        ]
+    ).T
     sensor = kSensor(sensor_mask)
 
     # input arguments
-    input_filename = 'example_ivp_corn_input.h5'
+    input_filename = "example_ivp_corn_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True)
 
     # run the simulation
     kspaceFirstOrder2DC(
@@ -88,7 +85,7 @@ def test_ivp_opposing_corners_sensor_mask():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_ivp_opposing_corners_sensor_mask', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_ivp_opposing_corners_sensor_mask", input_file_full_path), "Files do not match!"

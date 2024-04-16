@@ -12,6 +12,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
+from kwave.utils.colormap import get_color_map
 
 
 def main():
@@ -48,11 +49,10 @@ def main():
     else:
         ids = np.arange(1, element_num + 1) - (element_num + 1) / 2
 
-    time_delays = -(np.sqrt((ids * element_pitch) ** 2 + source_focus ** 2) - source_focus) / c0
+    time_delays = -(np.sqrt((ids * element_pitch) ** 2 + source_focus**2) - source_focus) / c0
     time_delays = time_delays - min(time_delays)
 
-    source_sig = source_amp * tone_burst(1 / kgrid.dt, source_f0, source_cycles,
-                                         signal_offset=np.round(time_delays / kgrid.dt).astype(int))
+    source_sig = source_amp * tone_burst(1 / kgrid.dt, source_f0, source_cycles, signal_offset=np.round(time_delays / kgrid.dt).astype(int))
     karray = kWaveArray(bli_tolerance=0.05, upsampling_rate=10)
 
     for ind in range(element_num):
@@ -71,31 +71,36 @@ def main():
     # SENSOR
     sensor_mask = np.zeros((Nx, Ny, Nz))
     sensor_mask[:, Ny // 2, :] = 1
-    sensor = kSensor(sensor_mask, record=['p_max'])
+    sensor = kSensor(sensor_mask, record=["p_max"])
 
     # SIMULATION
     simulation_options = SimulationOptions(
         pml_auto=True,
         pml_inside=False,
         save_to_disk=True,
-        data_cast='single',
+        data_cast="single",
     )
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
-    sensor_data = kspaceFirstOrder3DC(kgrid=kgrid, medium=medium, source=source, sensor=sensor,
-                                      simulation_options=simulation_options, execution_options=execution_options)
+    sensor_data = kspaceFirstOrder3DC(
+        kgrid=kgrid, medium=medium, source=source, sensor=sensor, simulation_options=simulation_options, execution_options=execution_options
+    )
 
-    p_max = np.reshape(sensor_data['p_max'], (Nx, Nz), order='F')
+    p_max = np.reshape(sensor_data["p_max"], (Nx, Nz), order="F")
 
     # VISUALISATION
     plt.figure()
-    plt.imshow(1e-6 * p_max, extent=[1e3 * kgrid.x_vec[0][0], 1e3 * kgrid.x_vec[-1][0], 1e3 * kgrid.z_vec[0][0],
-                                     1e3 * kgrid.z_vec[-1][0]], aspect='auto')
-    plt.xlabel('z-position [mm]')
-    plt.ylabel('x-position [mm]')
-    plt.title('Pressure Field')
-    plt.colorbar(label='[MPa]')
+    plt.imshow(
+        1e-6 * p_max,
+        extent=[1e3 * kgrid.x_vec[0][0], 1e3 * kgrid.x_vec[-1][0], 1e3 * kgrid.z_vec[0][0], 1e3 * kgrid.z_vec[-1][0]],
+        aspect="auto",
+        cmap=get_color_map(),
+    )
+    plt.xlabel("z-position [mm]")
+    plt.ylabel("x-position [mm]")
+    plt.title("Pressure Field")
+    plt.colorbar(label="[MPa]")
     plt.show()
 
 

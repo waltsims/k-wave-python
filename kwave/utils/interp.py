@@ -4,7 +4,7 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, Optional
 
 from .conversion import grid2cart
@@ -30,7 +30,7 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
 
     """
 
-    assert len(grid_points) == 3, 'interpolate3D supports only 3D interpolation'
+    assert len(grid_points) == 3, "interpolate3D supports only 3D interpolation"
     assert len(grid_points) == len(interp_locs)
 
     def unpack_and_make_1D(pts):
@@ -47,12 +47,12 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     q_x, q_y, q_z = unpack_and_make_1D(interp_locs)
 
     # 'ij' indexing is crucial for Matlab compatibility
-    queries = np.array(np.meshgrid(q_x, q_y, q_z, indexing='ij'))
+    queries = np.array(np.meshgrid(q_x, q_y, q_z, indexing="ij"))
     # Queries are just a list of 3D points
     queries = queries.reshape(3, -1).T
 
     # Out of bound points will get NaN values
-    result = interpn((g_x, g_y, g_z), grid_values, queries, method='linear', bounds_error=False, fill_value=np.nan)
+    result = interpn((g_x, g_y, g_z), grid_values, queries, method="linear", bounds_error=False, fill_value=np.nan)
     # Go back from list of interpolated values to 3D volume
     result = result.reshape((g_x.size, g_y.size, g_z.size))
     # set values outside of the interpolation range to original values
@@ -60,8 +60,9 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     return result
 
 
-def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray],
-                  method='linear', copy_nans=True) -> np.ndarray:
+def interpolate2d(
+    grid_points: List[np.ndarray], grid_values: np.ndarray, interp_locs: List[np.ndarray], method="linear", copy_nans=True
+) -> np.ndarray:
     """
     Interpolates input grid values at the given locations
     Added by Farid
@@ -79,7 +80,7 @@ def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
 
     """
 
-    assert len(grid_points) == 2, 'interpolate2D supports only 2D interpolation'
+    assert len(grid_points) == 2, "interpolate2D supports only 2D interpolation"
     assert len(grid_points) == len(interp_locs)
 
     def unpack_and_make_1D(pts):
@@ -94,7 +95,7 @@ def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     q_x, q_y = unpack_and_make_1D(interp_locs)
 
     # 'ij' indexing is crucial for Matlab compatibility
-    queries = np.array(np.meshgrid(q_x, q_y, indexing='ij'))
+    queries = np.array(np.meshgrid(q_x, q_y, indexing="ij"))
     # Queries are just a list of 3D points
     queries = queries.reshape(2, -1).T
 
@@ -110,11 +111,7 @@ def interpolate2d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
 
 
 def interpolate2d_with_queries(
-        grid_points: List[np.ndarray],
-        grid_values: np.ndarray,
-        queries: np.ndarray,
-        method='linear',
-        copy_nans=True
+    grid_points: List[np.ndarray], grid_values: np.ndarray, queries: np.ndarray, method="linear", copy_nans=True
 ) -> np.ndarray:
     """
     Interpolates input grid values at the given locations
@@ -132,7 +129,7 @@ def interpolate2d_with_queries(
         queries: Numpy array with shape [N, 2]
 
     """
-    assert len(grid_points) == 2, 'interpolate2D supports only 2D interpolation'
+    assert len(grid_points) == 2, "interpolate2D supports only 2D interpolation"
 
     g_x, g_y = grid_points
 
@@ -150,10 +147,10 @@ def interpolate2d_with_queries(
 
 
 def get_bli(
-        func: np.ndarray,
-        dx: Optional[float] = 1,
-        up_sampling_factor: Optional[int] = 20,
-        plot: Optional[bool] = False,
+    func: np.ndarray,
+    dx: Optional[float] = 1,
+    up_sampling_factor: Optional[int] = 20,
+    plot: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculates the band-limited interpolant of a 1D input function.
@@ -183,7 +180,11 @@ def get_bli(
         k_min = -np.pi / dx
         k_max = np.pi / dx - dk
 
-    k = np.arange(start=k_min, stop=k_max + dk, step=dk, )
+    k = np.arange(
+        start=k_min,
+        stop=k_max + dk,
+        step=dk,
+    )
     x_fine = np.arange(start=0, stop=((nx - 1) * dx) + dx / up_sampling_factor, step=dx / up_sampling_factor)
 
     func_k = fftshift(fft(func)) / nx
@@ -194,36 +195,36 @@ def get_bli(
     return bli, x_fine
 
 
-def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp='nearest'):
+def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp="nearest"):
     """
-     Takes a matrix of time-series data recorded over a set
-     of Cartesian sensor points given by cart_sensor_mask and computes the
-     equivalent time-series at each sensor position on the binary sensor
-     mask binary_sensor_mask using interpolation. The properties of
-     binary_sensor_mask are defined by the k-Wave grid object kgrid.
-     Two and three-dimensional data are supported.
+    Takes a matrix of time-series data recorded over a set
+    of Cartesian sensor points given by cart_sensor_mask and computes the
+    equivalent time-series at each sensor position on the binary sensor
+    mask binary_sensor_mask using interpolation. The properties of
+    binary_sensor_mask are defined by the k-Wave grid object kgrid.
+    Two and three-dimensional data are supported.
 
-     Usage:
-         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
-         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)
+    Usage:
+        binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+        binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp)
 
-     Args:
-         kgrid:                k-Wave grid object returned by kWaveGrid
-         cart_sensor_data:     original sensor data measured over
-                              cart_sensor_mask indexed as
-                              cart_sensor_data(sensor position, time)
-         cart_sensor_mask:     Cartesian sensor mask over which
-                              cart_sensor_data is measured
-         binary_sensor_mask:   binary sensor mask at which equivalent
-                              time-series are computed via interpolation
+    Args:
+        kgrid:                k-Wave grid object returned by kWaveGrid
+        cart_sensor_data:     original sensor data measured over
+                             cart_sensor_mask indexed as
+                             cart_sensor_data(sensor position, time)
+        cart_sensor_mask:     Cartesian sensor mask over which
+                             cart_sensor_data is measured
+        binary_sensor_mask:   binary sensor mask at which equivalent
+                             time-series are computed via interpolation
 
-         interp:               (optional) interpolation mode used to compute the
-                              time-series, both 'nearest' and 'linear'
-                              (two-point) modes are supported
-                              (default = 'nearest')
+        interp:               (optional) interpolation mode used to compute the
+                             time-series, both 'nearest' and 'linear'
+                             (two-point) modes are supported
+                             (default = 'nearest')
 
-     Returns:
-         array of time-series corresponding to the sensor positions given by binary_sensor_mask
+    Returns:
+        array of time-series corresponding to the sensor positions given by binary_sensor_mask
 
     """
 
@@ -237,32 +238,30 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     num_binary_sensor_points = np.sum(binary_sensor_mask.flatten())
 
     # update command line status
-    logging.log(logging.INFO, 'Interpolating Cartesian sensor data...')
-    logging.log(logging.INFO, f'  interpolation mode: {interp}')
-    logging.log(logging.INFO, f'  number of Cartesian sensor points:  {num_cart_data_points}')
-    logging.log(logging.INFO, f'  number of binary sensor points: {num_binary_sensor_points}')
+    logging.log(logging.INFO, "Interpolating Cartesian sensor data...")
+    logging.log(logging.INFO, f"  interpolation mode: {interp}")
+    logging.log(logging.INFO, f"  number of Cartesian sensor points:  {num_cart_data_points}")
+    logging.log(logging.INFO, f"  number of binary sensor points: {num_binary_sensor_points}")
 
     binary_sensor_data = np.zeros((num_binary_sensor_points, num_time_points))
 
     # Check dimensionality of data passed
     if kgrid.dim not in [2, 3]:
-        raise ValueError('Data must be two- or three-dimensional.')
+        raise ValueError("Data must be two- or three-dimensional.")
 
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
 
     # nearest neighbour interpolation of the data points
     for point_index in range(num_binary_sensor_points):
-
         # find the measured data point that is closest
         dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, ord=2, axis=1)
-        if interp == 'nearest':
-
+        if interp == "nearest":
             dist_min_index = np.argmin(dist)
 
             # assign value
             binary_sensor_data[point_index, :] = cart_sensor_data[dist_min_index, :]
 
-        elif interp == 'linear':
+        elif interp == "linear":
             # raise NotImplementedError
             # append the distance information onto the data set
             cart_sensor_data_ro = cart_sensor_data
@@ -273,13 +272,11 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
 
             # linearly interpolate between the two closest points
-            perc = cart_sensor_data_ro[2, new_col_pos] / (
-                    cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
-            binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + \
-                                                 (1 - perc) * cart_sensor_data_ro[2, :]
+            perc = cart_sensor_data_ro[2, new_col_pos] / (cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
+            binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + (1 - perc) * cart_sensor_data_ro[2, :]
 
         else:
-            raise ValueError('Unknown interpolation option.')
+            raise ValueError("Unknown interpolation option.")
 
         # elif interp == 'linear':
         #
@@ -304,26 +301,26 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
         #     raise ValueError('Unknown interpolation option.')
 
     # update command line status
-    logging.log(logging.INFO, f'  computation completed in {scale_time(timer.toc())}')
+    logging.log(logging.INFO, f"  computation completed in {scale_time(timer.toc())}")
     return binary_sensor_data
 
 
 def interpftn(x, sz: tuple, win=None):
     """
-     Resamples an N-D matrix to the size given in sz using Fourier interpolation.
+    Resamples an N-D matrix to the size given in sz using Fourier interpolation.
 
 
-     Args:
-         x:           matrix to interpolate
-         sz:          list or tupple of new size
-         win:         (optional) name of windowing function to use
+    Args:
+        x:           matrix to interpolate
+        sz:          list or tupple of new size
+        win:         (optional) name of windowing function to use
 
-     Returns:
-         Resampled matrix
+    Returns:
+        Resampled matrix
 
-     Examples:
-         >>> y = interpftn(x, sz)
-         >>> y = interpftn(x, sz, win)
+    Examples:
+        >>> y = interpftn(x, sz)
+        >>> y = interpftn(x, sz, win)
 
     """
 
@@ -332,7 +329,7 @@ def interpftn(x, sz: tuple, win=None):
 
     # check enough coefficients have been given
     if sum([x != 1 for x in x_sz]) != len(sz):
-        raise ValueError('The number of scaling coefficients must equal the number of dimensions in x.')
+        raise ValueError("The number of scaling coefficients must equal the number of dimensions in x.")
 
     # interpolate for each matrix dimension (dimensions with no interpolation required are skipped)
     y = x
@@ -343,14 +340,8 @@ def interpftn(x, sz: tuple, win=None):
     return y
 
 
-@beartype
-def get_delta_bli(
-    Nx: int, 
-    dx: float, 
-    x: np.ndarray, 
-    x0: Union[int, float], 
-    include_imag: bool = False
-) -> np.ndarray:
+@typechecker
+def get_delta_bli(Nx: int, dx: float, x: np.ndarray, x0: Union[int, float], include_imag: bool = False) -> np.ndarray:
     """
     Exact BLI of an arbitrarily positioned delta function.
 
@@ -378,7 +369,7 @@ def get_delta_bli(
         include_imag = False
 
     # check whether the grid has even or odd samples per period
-    is_even = (Nx % 2 == 0)
+    is_even = Nx % 2 == 0
 
     # compute BLI
     if is_even:

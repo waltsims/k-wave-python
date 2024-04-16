@@ -60,6 +60,7 @@ class FlexibleVector(object):
 
     WARNING: The class will be deprecated once we refactor the kWaveGrid class to use the Vector class instead!
     """
+
     data: list
 
     def __post_init__(self):

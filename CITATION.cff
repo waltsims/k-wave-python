@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: k-Wave-python
+type: software
+authors:
+  - given-names: Farid
+    family-names: Yagubbbayli
+    email: farid.yagubbayli@tum.de
+  - given-names: David
+    family-names: Sinden
+    affiliation: Fraunhofer Institute for Digital Medicine MEVIS
+    orcid: 'https://orcid.org/0000-0002-8514-8279'
+  - family-names: Simson
+    given-names: Walter
+    email: wsimson@stanford.edu
+    affiliation: Stanford University
+    orcid: 'https://orcid.org/0000-0002-2801-8646'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.10719460
+    description: Zenodo DOI
+repository-code: 'https://github.com/waltsims/k-wave-python'
+license: GPL-3.0

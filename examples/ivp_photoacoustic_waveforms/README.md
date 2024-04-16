@@ -1,5 +1,7 @@
 # Initial Value Problem: Photoacoustic Waveforms in 2D and 3D
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/ivp_photoacoustic_waveforms/ivp_photoacoustic_waveforms.ipynb)
+
 See the k-wave example [here](http://www.k-wave.org/documentation/example_ivp_photoacoustic_waveforms.php), which includes one-dimensional propagation as well. 
 
 > [!WARNING]  

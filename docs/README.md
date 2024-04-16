@@ -1,5 +1,7 @@
 # k-Wave-python
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
 
 This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
@@ -31,7 +33,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-git checkout v0.3.1
+git checkout v0.3.3
 pip install '.[example]' 
 python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
 ```
@@ -46,7 +48,7 @@ This example file steps through the process of:
 This example expects an NVIDIA GPU by default to simulate with k-Wave.
 
 To test the reconstruction on a machine with a GPU,
-set `RUN_SIMULATION` [on line 30 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L30)
+set `RUN_SIMULATION` [on line 29 of `us_bmode_linear_transducer.py`](https://github.com/waltsims/k-wave-python/blob/6d2ee982bece84fc6980da99b23600f5675d2fc5/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py#L29)
 to `True`, and the example will run without the pre-computed data.
 
 ## Development
@@ -66,6 +68,15 @@ found [here](https://k-wave-python.readthedocs.io/en/latest/development/developm
 
 The documentation for k-wave-python can be found [here](https://k-wave-python.readthedocs.io/en/latest/).
 
+## Citation
+```bibtex
+@software{k-Wave-Python,
+author = {Yagubbbayli, Farid and Sinden, David and Simson, Walter},
+license = {GPL-3.0},
+title = {{k-Wave-Python}},
+url = {https://github.com/waltsims/k-wave-python}
+}
+```
 ## Contact
 
 e-mail [wsimson@stanford.edu](mailto:wsimson@stanford.edu).
