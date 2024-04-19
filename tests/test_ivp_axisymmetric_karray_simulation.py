@@ -23,8 +23,8 @@ from kwave.utils.signals import create_cw_signals
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.mapgen import make_disc
-from tests.diff_utils import compare_against_ref
+# from kwave.utils.mapgen import make_disc
+# from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_axisymmetric_karray_simulation():
@@ -105,7 +105,7 @@ def test_ivp_axisymmetric_karray_simulation():
     # set the input settings
     input_filename = "example_ivp_axisymmetric_karray_input.h5"
     pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename)
+    # input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, save_to_disk_exit=True, data_path=pathname)
     execution_options = SimulationExecutionOptions(is_gpu_simulation=False, delete_data=False, verbose_level=2)
 
