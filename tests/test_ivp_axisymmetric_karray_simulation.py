@@ -30,7 +30,9 @@ from tests.diff_utils import compare_against_ref
 def test_ivp_axisymmetric_karray_simulation():
 
     # create the computational grid
-    grid_size = Vector([128, 64])  # [grid points]
+    Nx = 128
+    Ny = 64
+    grid_size = Vector([Nx, Ny])  # [grid points]
     dx = 0.1e-3
     grid_spacing = Vector([dx, dx])  # [m]
     kgrid = kWaveGrid(grid_size, grid_spacing)
