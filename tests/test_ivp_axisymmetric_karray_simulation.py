@@ -26,7 +26,7 @@ from tests.diff_utils import compare_against_ref
 
 
 def test_ivp_axisymmetric_karray_simulation():
-    
+
     # create the computational grid
     grid_size = Vector([128, 64])  # [grid points]
     dx = 0.1e-3
@@ -49,6 +49,13 @@ def test_ivp_axisymmetric_karray_simulation():
     source_mag = np.array([1e6])
     # phase [rad]
     source_phase = np.array([0.0])
+
+    ppw             = 4        # number of points per wavelength
+    t_end           = 40e-6    # total compute time [s] (this must be long enough to reach steady state)
+    record_periods  = 1        # number of periods to record
+    cfl             = 0.05     # CFL number
+    bli_tolerance   = 0.05     # tolerance for truncation of the off-grid source points
+    upsampling_rate = 10       # density of integration points relative to grid
 
     # compute points per period
     ppp = round(ppw / cfl)
