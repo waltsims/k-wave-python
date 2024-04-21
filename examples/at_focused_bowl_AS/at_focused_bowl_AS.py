@@ -207,7 +207,7 @@ x_ref = np.arange(0.0, x_max + delta_x, delta_x)
 # calculate analytical solution
 p_ref_axial, _, _ = focused_bowl_oneil(source_roc,
                                  source_diameter,
-                                 source_amp / (c0 * rho0),
+                                 source_amp[0] / (c0 * rho0),
                                  source_f0,
                                  c0,
                                  rho0,
@@ -216,7 +216,7 @@ p_ref_axial, _, _ = focused_bowl_oneil(source_roc,
 # calculate analytical solution at exactly the same points as k-Wave
 p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc,
                                           source_diameter,
-                                          source_amp / (c0 * rho0),
+                                          source_amp[0] / (c0 * rho0),
                                           source_f0,
                                           c0,
                                           rho0,
@@ -244,24 +244,24 @@ grid_weights = karray.get_array_grid_weights(kgrid)
 
 # plot the source mask (pml is outside the grid in this example)
 fig2, (ax2a, ax2b) = plt.subplots(1, 2)
-ax2a.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-                1e3 * np.squeeze(kgrid.y_vec),
-                source.p_mask[:, :].T,
+ax2a.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+                1e3 * np.squeeze(kgrid.x_vec),
+                source.p_mask[:, :],
                 shading='gouraud')
 ax2a.set(xlabel='y [mm]',
          ylabel='x [mm]',
          title='Source Mask')
-ax2b.pcolormesh(1e3 * np.squeeze(kgrid.x_vec),
-                1e3 * np.squeeze(kgrid.y_vec),
-                grid_weights[:, :].T,
+ax2b.pcolormesh(1e3 * np.squeeze(kgrid.y_vec),
+                1e3 * np.squeeze(kgrid.x_vec),
+                grid_weights[:, :],
                 shading='gouraud')
-ax2b.set(xlabel='$y$ [mm]',
-         ylabel='$x$ [mm]',
+ax2b.set(xlabel='y [mm]',
+         ylabel='x [mm]',
          title='Off-Grid Source Weights')
 
 # define axis vectors for plotting
 yvec = np.squeeze(kgrid.y_vec) - kgrid.y_vec[0].item()
-y_vec = 1e3 * np.hstack((-np.flip(yvec)[:-1], yvec))
+y_vec = np.hstack((-np.flip(yvec)[:-1], yvec))
 x_vec = np.squeeze(kgrid.x_vec[(source_x_offset + 1):, :] - kgrid.x_vec[source_x_offset])
 
 data = np.hstack((np.fliplr(amp[:, :-1]), amp)) / 1e6
@@ -270,13 +270,15 @@ gw = np.hstack((np.fliplr(grid_weights[:, :])[:, :-1], grid_weights))
 
 # plot the pressure field
 fig3, ax3 = plt.subplots(1, 1)
-ax3.pcolormesh(1e3 * np.squeeze(y_vec),
+im3 = ax3.pcolormesh(1e3 * np.squeeze(y_vec),
                1e3 * np.squeeze(x_vec),
                data,
                shading='gouraud')
 ax3.set(xlabel='Lateral Position [mm]',
         ylabel='Axial Position [mm]',
         title='Pressure Field')
+cbar3 = fig3.colorbar(im3, ax=ax3)
+_ = cbar3.ax.set_title('[MPa]', fontsize='small')
 ax3.invert_yaxis()
 
 # show figures
