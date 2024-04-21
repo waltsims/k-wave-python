@@ -25,7 +25,7 @@ from kwave.ksensor import kSensor
 from kwave.utils.signals import create_cw_signals
 from kwave.utils.filters import extract_amp_phase
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 # medium parameters
@@ -156,6 +156,7 @@ sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
+    simulation_type = SimulationType.AXISYMMETRIC,
     pml_auto=True,
     save_to_disk=True,
     save_to_disk_exit=False,

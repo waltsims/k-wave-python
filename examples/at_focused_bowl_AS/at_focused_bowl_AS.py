@@ -16,7 +16,7 @@ from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
 
-from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 verbose: bool = False
@@ -153,6 +153,7 @@ DATA_PATH = 'data/'
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
+    simulation_type=SimulationType.AXISYMMETRIC,
     data_cast=DATA_CAST,
     data_recast=False,
     save_to_disk=True,
