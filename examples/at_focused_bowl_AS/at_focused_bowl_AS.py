@@ -16,7 +16,8 @@ from kwave.utils.signals import create_cw_signals
 
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
 
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 verbose: bool = False
 
