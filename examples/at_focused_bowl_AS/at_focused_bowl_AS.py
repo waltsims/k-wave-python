@@ -136,20 +136,7 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 # SIMULATION
 # --------------------
 
-simulation_options = SimulationOptions(pml_auto=True,
-                                       data_recast=True,
-                                       save_to_disk=True,
-                                       save_to_disk_exit=False,
-                                       pml_inside=False)
-
-execution_options = SimulationExecutionOptions(is_gpu_simulation=False,
-                                               delete_data=False,
-                                               verbose_level=2)
-input_filename = 'axi_input.h5'
-output_filename = 'axi_output.h5'
-
 DATA_CAST = 'single'
-DATA_PATH = 'data/'
 
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
@@ -157,10 +144,7 @@ simulation_options = SimulationOptions(
     data_cast=DATA_CAST,
     data_recast=False,
     save_to_disk=True,
-    input_filename=input_filename,
-    output_filename=output_filename,
     save_to_disk_exit=False,
-    data_path=DATA_PATH,
     pml_inside=False)
 
 execution_options = SimulationExecutionOptions(
