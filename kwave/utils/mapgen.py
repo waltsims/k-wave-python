@@ -1010,313 +1010,101 @@ def make_line(
     # =========================================================================
 
     if linetype == "AtoB":
-        # a and b must be different points
         if np.all(a == b):
             raise ValueError("The first and last points cannot be the same.")
-
-        # end point must be a two-element row vector
         if len(b) != 2:
-            raise ValueError("endpoint should be a two-element vector.")
-
-        # a and b must be within the grid
-        xx = np.array([a[0], b[0]], dtype=int)
-        yy = np.array([a[1], b[1]], dtype=int)
-        if np.any(a < 0) or np.any(b < 0) or np.any(xx > grid_size.x - 1) or np.any(yy > grid_size.y - 1):
+            raise ValueError("Endpoint should be a two-element vector.")
+        
+        # Ensure a and b are within the grid bounds
+        if np.any(np.array(a) < 0) or np.any(np.array(b) < 0) or \
+        np.any(np.array([a[0], b[0]]) >= grid_size.x) or \
+        np.any(np.array([a[1], b[1]]) >= grid_size.y):
             raise ValueError("Both the start and end points must lie within the grid.")
 
     if linetype == "angled":
-        # angle must lie between -np.pi and np.pi
-        angle = angle % (2 * np.pi)
-        if angle > np.pi:
-            angle = angle - (2 * np.pi)
-        elif angle < -np.pi:
-            angle = angle + (2 * np.pi)
+        # Normalize the angle to be within -np.pi and np.pi
+        angle = (angle + np.pi) % (2 * np.pi) - np.pi
 
     # =========================================================================
     # CALCULATE A LINE FROM A TO B
     # =========================================================================
 
     if linetype == "AtoB":
-        # define an empty grid to hold the line
-        line = np.zeros(grid_size, dtype=bool)
+        line = np.zeros(grid_size, dtype=bool)  # Initialize the grid
+        m = (b[1] - a[1]) / (b[0] - a[0])  # Calculate the gradient
+        c = a[1] - m * a[0]  # Calculate the y-intercept
 
-        # find the equation of the line
-        m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
-        c = a[1] - m * a[0]  # where the line crosses the y axis
-
-        if abs(m) < 1:
-            # start at the end with the smallest value of x
-            if a[0] < b[0]:
-                x, y = a
-                x_end = b[0]
+        def get_point_sequence(start, end, horizontal=True):
+            points = []
+            if horizontal:
+                x, y = start
+                x_end = end[0]
+                while x != x_end:
+                    y = round(m * x + c)
+                    points.append((x, y))
+                    x += 1 if x < x_end else -1
             else:
-                x, y = b
-                x_end = a[0]
+                x, y = start
+                y_end = end[1]
+                while y != y_end:
+                    x = round((y - c) / m)
+                    points.append((x, y))
+                    y += 1 if y < y_end else -1
+            return points
 
-            # fill in the first point
-            line[x, y] = 1
+        # Determine the direction based on slope
+        if np.isinf(m):
+            smaller, larger = sorted([a, b], key=lambda p: p[1])  # Sort by y value
+            points = get_point_sequence(smaller, larger, horizontal=False)
+        elif abs(m) < 1:
+            smaller, larger = sorted([a, b], key=lambda p: p[0])  # Sort by x value
+            points = get_point_sequence(smaller, larger, horizontal=True)
+        else:
+            smaller, larger = sorted([a, b], key=lambda p: p[1])  # Sort by y value for steep slopes
+            points = get_point_sequence(smaller, larger, horizontal=False)
 
-            while x < x_end:
-                # next points to try are
-                poss_x = [x, x, x + 1, x + 1, x + 1]
-                poss_y = [y - 1, y + 1, y - 1, y, y + 1]
-
-                # find the point closest to the line
-                true_y = m * poss_x + c
-                diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-        elif not np.isinf(abs(m)):
-            # start at the end with the smallest value of y
-            if a[1] < b[1]:
-                x = a[0]
-                y = a[1]
-                y_end = b[1]
-            else:
-                x = b[0]
-                y = b[1]
-                y_end = a[1]
-
-            # fill in the first point
-            line[x, y] = 1
-
-            while y < y_end:
-                # next points to try are
-                poss_y = [y, y, y + 1, y + 1, y + 1]
-                poss_x = [x - 1, x + 1, x - 1, x, x + 1]
-
-                # find the point closest to the line
-                true_x = (poss_y - c) / m
-                diff = (poss_x - true_x) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # add the point to the line
-                line[x, y] = 1
-
-        else:  # m = +-Inf
-            # start at the end with the smallest value of y
-            if a[1] < b[1]:
-                x = a[0]
-                y = a[1]
-                y_end = b[1]
-            else:
-                x = b[0]
-                y = b[1]
-                y_end = a[1]
-
-            # fill in the first point
-            line[x, y] = 1
-
-            while y < y_end:
-                # next point
-                y = y + 1
-
-                # add the point to the line
-                line[x, y] = 1
+        # Plot the points on the line
+        for x, y in points:
+            line[x, y] = True  # Set grid position to True to mark the line
 
     # =========================================================================
     # CALCULATE AN ANGLED LINE
     # =========================================================================
 
     elif linetype == "angled":
-        # define an empty grid to hold the line
-        line = np.zeros(grid_size, dtype=bool)
+        line = np.zeros(grid_size, dtype=bool)  # Initialize the grid
+        x, y = startpoint  # Start point
 
-        # start at the atart
-        x, y = startpoint
-
-        # fill in the first point
-        line[x - 1, y - 1] = 1
-
-        # initialise the current length of the line
+        line[x-1, y-1] = True  # Set the first point
         line_length = 0
 
+        # Directional increments based on the angle
+        dx, dy = 0, 0
         if abs(angle) == np.pi:
-            while line_length < linelength:
-                # next point
-                y = y + 1
+            dy = 1
+        elif angle == np.pi / 2 or angle == -np.pi / 2:
+            dx = -1 if angle == np.pi / 2 else 1
+        elif (angle < np.pi and angle > np.pi / 2) or (angle < -np.pi / 2 and angle > -np.pi):
+            m = -np.tan(angle - np.sign(angle) * np.pi / 2)  # Gradient of the line
+            c = y - m * x  # Y-intercept of the line
+            dx, dy = (1 if angle < 0 else -1), round(m)
+        elif (angle < np.pi / 2 and angle > 0) or (angle < 0 and angle > -np.pi / 2):
+            m = np.tan(np.pi / 2 - abs(angle))  # Gradient of the line
+            c = y - m * x  # Y-intercept of the line
+            dx, dy = (-1 if angle > 0 else 1), round(m)
 
-                # stop the points incrementing at the edges
-                if y > grid_size.y:
-                    break
+        # Draw the line according to the specified angle
+        while line_length < linelength:
+            x += dx
+            y += dy
 
-                # add the point to the line
-                line[x - 1, y - 1] = 1
+            # Check boundary conditions
+            if not (0 <= x < grid_size.x and 0 <= y < grid_size.y):
+                break
 
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
+            line[x-1, y-1] = True  # Set point
+            line_length = np.sqrt((x - startpoint[0])**2 + (y - startpoint[1])**2)  # Update line length
 
-        elif (angle < np.pi) and (angle > np.pi / 2):
-            # define the equation of the line
-            m = -np.tan(angle - np.pi / 2)  # gradient of the line
-            c = y - m * x  # where the line crosses the y axis
-
-            while line_length < linelength:
-                # next points to try are
-                poss_x = np.array([x - 1, x - 1, x])
-                poss_y = np.array([y, y + 1, y + 1])
-
-                # find the point closest to the line
-                true_y = m * poss_x + c
-                diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # stop the points incrementing at the edges
-                if (x < 0) or (y > grid_size.y - 1):
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif angle == np.pi / 2:
-            while line_length < linelength:
-                # next point
-                x = x - 1
-
-                # stop the points incrementing at the edges
-                if x < 1:
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif (angle < np.pi / 2) and (angle > 0):
-            # define the equation of the line
-            m = np.tan(np.pi / 2 - angle)  # gradient of the line
-            c = y - m * x  # where the line crosses the y axis
-
-            while line_length < linelength:
-                # next points to try are
-                poss_x = np.array([x - 1, x - 1, x])
-                poss_y = np.array([y, y - 1, y - 1])
-
-                # find the point closest to the line
-                true_y = m * poss_x + c
-                diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # stop the points incrementing at the edges
-                if (x < 1) or (y < 1):
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif angle == 0:
-            while line_length < linelength:
-                # next point
-                y = y - 1
-
-                # stop the points incrementing at the edges
-                if y < 1:
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif (angle < 0) and (angle > -np.pi / 2):
-            # define the equation of the line
-            m = -np.tan(np.pi / 2 + angle)  # gradient of the line
-            c = y - m * x  # where the line crosses the y axis
-
-            while line_length < linelength:
-                # next points to try are
-                poss_x = np.array([x + 1, x + 1, x])
-                poss_y = np.array([y, y - 1, y - 1])
-
-                # find the point closest to the line
-                true_y = m * poss_x + c
-                diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # stop the points incrementing at the edges
-                if (x > grid_size.x) or (y < 1):
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif angle == -np.pi / 2:
-            while line_length < linelength:
-                # next point
-                x = x + 1
-
-                # stop the points incrementing at the edges
-                if x > grid_size.x:
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
-        elif (angle < -np.pi / 2) and (angle > -np.pi):
-            # define the equation of the line
-            m = np.tan(-angle - np.pi / 2)  # gradient of the line
-            c = y - m * x  # where the line crosses the y axis
-
-            while line_length < linelength:
-                # next points to try are
-                poss_x = np.array([x + 1, x + 1, x])
-                poss_y = np.array([y, y + 1, y + 1])
-
-                # find the point closest to the line
-                true_y = m * poss_x + c
-                diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
-
-                # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
-
-                # stop the points incrementing at the edges
-                if (x > grid_size.x) or (y > grid_size.y):
-                    break
-
-                # add the point to the line
-                line[x - 1, y - 1] = 1
-
-                # calculate the current length of the line
-                line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
     return line
 
