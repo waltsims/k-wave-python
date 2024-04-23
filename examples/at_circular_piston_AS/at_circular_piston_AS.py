@@ -29,14 +29,14 @@ from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 # medium parameters
-c0              = 1500.0     # sound speed [m/s]
-rho0            = 1000.0     # density [kg/m^3]
+c0 = 1500.0  # sound speed [m/s]
+rho0 = 1000.0  # density [kg/m^3]
 
 # piston diameter [m]
-source_diam     = 10e-3
+source_diam = 10e-3
 
 # source frequency [Hz]
-source_f0       = 1e6
+source_f0 = 1e6
 
 # source pressure [Pa]
 source_mag = np.array([1e6])
@@ -45,16 +45,16 @@ source_mag = np.array([1e6])
 source_phase = np.array([0.0])
 
 # grid parameters
-axial_size      = 32e-3    # total grid size in the axial dimension [m]
-lateral_size    = 8e-3     # total grid size in the lateral dimension [m]
+axial_size = 32e-3  # total grid size in the axial dimension [m]
+lateral_size = 8e-3  # total grid size in the lateral dimension [m]
 
 # computational parameters
-ppw             = 4        # number of points per wavelength
-t_end           = 40e-6    # total compute time [s] (this must be long enough to reach steady state)
-record_periods  = 1        # number of periods to record
-cfl             = 0.05     # CFL number
-bli_tolerance   = 0.05     # tolerance for truncation of the off-grid source points
-upsampling_rate = 10       # density of integration points relative to grid
+ppw = 4  # number of points per wavelength
+t_end = 40e-6  # total compute time [s] (this must be long enough to reach steady state)
+record_periods = 1  # number of periods to record
+cfl = 0.05  # CFL number
+bli_tolerance = 0.05  # tolerance for truncation of the off-grid source points
+upsampling_rate = 10  # density of integration points relative to grid
 
 # =========================================================================
 # RUN SIMULATION
@@ -65,7 +65,7 @@ upsampling_rate = 10       # density of integration points relative to grid
 # --------------------
 
 # grid resolution
-dx = c0 / (ppw * source_f0)   # [m]
+dx = c0 / (ppw * source_f0)  # [m]
 
 # compute the size of the grid
 Nx = round_even(axial_size / dx)
@@ -93,21 +93,14 @@ kgrid.setTime(Nt, dt)
 # --------------------
 
 # create time varying continuous wave source
-source_sig = create_cw_signals(np.squeeze(kgrid.t_array),
-                               source_f0,
-                               source_mag,
-                               source_phase)
+source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, source_mag, source_phase)
 
 # create empty kWaveArray this specfies the transducer properties in
 # axisymmetric coordinate system
-karray = kWaveArray(axisymmetric=True,
-                    bli_tolerance=bli_tolerance,
-                    upsampling_rate=upsampling_rate,
-                    single_precision=True)
+karray = kWaveArray(axisymmetric=True, bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate, single_precision=True)
 
 # add line shaped element for transducer
-karray.add_line_element([kgrid.x_vec[0].item(), - source_diam / 2.0],
-                        [kgrid.x_vec[0].item(), source_diam / 2.0])
+karray.add_line_element([kgrid.x_vec[0].item(), -source_diam / 2.0], [kgrid.x_vec[0].item(), source_diam / 2.0])
 
 
 # make a source object
@@ -125,10 +118,7 @@ source.p = karray.get_distributed_source_signal(kgrid, source_sig)
 # --------------------
 
 # water
-medium = kWaveMedium(
-    sound_speed=c0,
-    density=rho0
-)
+medium = kWaveMedium(sound_speed=c0, density=rho0)
 
 # --------------------
 # SENSOR
@@ -143,7 +133,7 @@ sensor = kSensor()
 sensor.mask = np.ones((Nx, Ny), dtype=bool)
 
 # set the record type: record the pressure waveform
-sensor.record = ['p']
+sensor.record = ["p"]
 
 # record only the final few periods when the field is in steady state
 sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
@@ -153,19 +143,12 @@ sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
 # =========================================================================
 
 
-
 # options for writing to file, but not doing simulations
 simulation_options = SimulationOptions(
-    simulation_type = SimulationType.AXISYMMETRIC,
-    pml_auto=True,
-    save_to_disk=True,
-    save_to_disk_exit=False,
-    pml_inside=False)
+    simulation_type=SimulationType.AXISYMMETRIC, pml_auto=True, save_to_disk=True, save_to_disk_exit=False, pml_inside=False
+)
 
-execution_options = SimulationExecutionOptions(
-    is_gpu_simulation=False,
-    delete_data=False,
-    verbose_level=2)
+execution_options = SimulationExecutionOptions(is_gpu_simulation=False, delete_data=False, verbose_level=2)
 
 # =========================================================================
 # RUN THE SIMULATION
@@ -177,15 +160,14 @@ sensor_data = kspaceFirstOrderASC(
     source=deepcopy(source),
     sensor=sensor,
     simulation_options=simulation_options,
-    execution_options=execution_options)
+    execution_options=execution_options,
+)
 
 # extract amplitude from the sensor data
-amp, _, _  = extract_amp_phase(sensor_data['p'].T, 1.0 / kgrid.dt, source_f0,
-                               dim=1, fft_padding=1, window='Rectangular')
+amp, _, _ = extract_amp_phase(sensor_data["p"].T, 1.0 / kgrid.dt, source_f0, dim=1, fft_padding=1, window="Rectangular")
 
 # reshape data
-# amp = np.reshape(amp, (Nx - 1, Ny), order='F')
-amp = np.reshape(amp, (Nx, Ny), order='F')
+amp = np.reshape(amp, (Nx, Ny), order="F")
 
 # extract pressure on axis
 amp_on_axis = amp[:, 0]
@@ -230,26 +212,22 @@ sp = np.hstack((np.fliplr(source.p_mask[:, :])[:, :-1], source.p_mask))
 
 # plot the pressure along the focal axis of the piston
 fig1, ax1 = plt.subplots(1, 1)
-ax1.plot(1e3 * x_ref, 1e-6 * p_ref, 'k-', label='Exact')
-ax1.plot(x_vec, 1e-6 * amp_on_axis, 'b.', label='k-Wave')
+ax1.plot(1e3 * x_ref, 1e-6 * p_ref, "k-", label="Exact")
+ax1.plot(x_vec, 1e-6 * amp_on_axis, "b.", label="k-Wave")
 ax1.legend()
-ax1.set(xlabel='Axial Position [mm]',
-        ylabel='Pressure [MPa]',
-        title='Axial Pressure')
+ax1.set(xlabel="Axial Position [mm]", ylabel="Pressure [MPa]", title="Axial Pressure")
 ax1.grid()
 
 # plot the source mask
 fig2, ax2 = plt.subplots(1, 1)
-ax2.pcolormesh(y_vec, x_vec, sp[:, :], shading='nearest')
-ax2.set(xlabel='y [mm]',
-        ylabel='x [mm]',
-        title='Source Mask')
+ax2.pcolormesh(y_vec, x_vec, sp[:, :], shading="nearest")
+ax2.set(xlabel="y [mm]", ylabel="x [mm]", title="Source Mask")
 ax2.invert_yaxis()
 
 fig3, ax3 = plt.subplots(1, 1)
-im3 = ax3.pcolormesh(y_vec, x_vec, data, shading='gouraud')
+im3 = ax3.pcolormesh(y_vec, x_vec, data, shading="gouraud")
 cbar3 = fig3.colorbar(im3, ax=ax3)
-_ = cbar3.ax.set_title('[MPa]', fontsize='small')
+_ = cbar3.ax.set_title("[MPa]", fontsize="small")
 ax3.invert_yaxis()
 
 plt.show()
