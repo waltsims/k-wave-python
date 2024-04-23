@@ -25,7 +25,6 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Focused bowl transducer (axisymmetric)](at_focused_bowl_AS/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading6), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_bowl_AS/at_focused_bowl_AS.ipynb))
 
 
-
 - [Focused annular array](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_annular_array_3D/at_focused_annular_array_3D.ipynb))
 
 
