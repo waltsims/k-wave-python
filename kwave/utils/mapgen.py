@@ -959,114 +959,31 @@ def make_line_straight(
     startpoint: Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]],
     endpoint: Optional[Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]]] = None,
 ) -> kt.NP_ARRAY_BOOL_2D:
-    a, b = startpoint, endpoint
+    a, b = np.array(startpoint) - 1, np.array(endpoint) - 1  # Adjust for zero-based indexing
 
-    # Addition => Fix Matlab2Python indexing
-    a -= 1
-    b -= 1
-
-     # a and b must be different points
     if np.all(a == b):
         raise ValueError("The first and last points cannot be the same.")
-
-    # end point must be a two-element row vector
     if len(b) != 2:
-        raise ValueError("endpoint should be a two-element vector.")
-
-    # a and b must be within the grid
-    xx = np.array([a[0], b[0]], dtype=int)
-    yy = np.array([a[1], b[1]], dtype=int)
-    if np.any(a < 0) or np.any(b < 0) or np.any(xx > grid_size.x - 1) or np.any(yy > grid_size.y - 1):
+        raise ValueError("Endpoint should be a two-element vector.")
+    if not (0 <= a).all() or not (b < grid_size).all():
         raise ValueError("Both the start and end points must lie within the grid.")
-    
-    # define an empty grid to hold the line
-    line = np.zeros(grid_size, dtype=bool)
 
-    # find the equation of the line
-    m = (b[1] - a[1]) / (b[0] - a[0])  # gradient of the line
-    c = a[1] - m * a[0]  # where the line crosses the y axis
+    line = np.zeros(grid_size, dtype=bool)  # Initialize the grid to hold the line
+    m = (b[1] - a[1]) / (b[0] - a[0]) if b[0] != a[0] else np.inf  # Calculate gradient, handle vertical line
+    c = a[1] - m * a[0] if np.isfinite(m) else 0  # Calculate y-intercept if m is finite
 
-    if abs(m) < 1:
-        # start at the end with the smallest value of x
-        if a[0] < b[0]:
-            x, y = a
-            x_end = b[0]
-        else:
-            x, y = b
-            x_end = a[0]
+    # Generate line points based on slope
+    if abs(m) < 1 or np.isinf(m):  # Handle more horizontal or perfectly vertical lines
+        x_start, x_end = sorted([a[0], b[0]])
+        for x in range(x_start, x_end + 1):
+            y = round(m * x + c) if np.isfinite(m) else a[1]
+            line[x, y] = True
+    else:  # Handle more vertical lines
+        y_start, y_end = sorted([a[1], b[1]])
+        for y in range(y_start, y_end + 1):
+            x = round((y - c) / m)
+            line[x, y] = True
 
-        # fill in the first point
-        line[x, y] = 1
-
-        while x < x_end:
-            # next points to try are
-            poss_x = [x, x, x + 1, x + 1, x + 1]
-            poss_y = [y - 1, y + 1, y - 1, y, y + 1]
-
-            # find the point closest to the line
-            true_y = m * poss_x + c
-            diff = (poss_y - true_y) ** 2
-            index = matlab_find(diff == min(diff))[0]
-
-            # the next point
-            x = poss_x[index[0] - 1]
-            y = poss_y[index[0] - 1]
-
-            # add the point to the line
-            line[x - 1, y - 1] = 1
-
-    elif not np.isinf(abs(m)):
-        # start at the end with the smallest value of y
-        if a[1] < b[1]:
-            x = a[0]
-            y = a[1]
-            y_end = b[1]
-        else:
-            x = b[0]
-            y = b[1]
-            y_end = a[1]
-
-        # fill in the first point
-        line[x, y] = 1
-
-        while y < y_end:
-            # next points to try are
-            poss_y = [y, y, y + 1, y + 1, y + 1]
-            poss_x = [x - 1, x + 1, x - 1, x, x + 1]
-
-            # find the point closest to the line
-            true_x = (poss_y - c) / m
-            diff = (poss_x - true_x) ** 2
-            index = matlab_find(diff == min(diff))[0]
-
-            # the next point
-            x = poss_x[index[0] - 1]
-            y = poss_y[index[0] - 1]
-
-            # add the point to the line
-            line[x, y] = 1
-
-    else:  # m = +-Inf
-        # start at the end with the smallest value of y
-        if a[1] < b[1]:
-            x = a[0]
-            y = a[1]
-            y_end = b[1]
-        else:
-            x = b[0]
-            y = b[1]
-            y_end = a[1]
-
-        # fill in the first point
-        line[x, y] = 1
-
-        while y < y_end:
-            # next point
-            y = y + 1
-
-            # add the point to the line
-            line[x, y] = 1
-    
     return line
 
 
@@ -1099,20 +1016,14 @@ def make_line_angled(
     line_length = 0
 
     if abs(angle) == np.pi:
-        while line_length < linelength:
-            # next point
-            y = y + 1
+        # Calculate and draw the line to the maximum allowed y position within the grid and line length constraints
+        max_y = min(y + linelength, grid_size.y)
+        line[x - 1, y:max_y - 1] = True
 
-            # stop the points incrementing at the edges
-            if y > grid_size.y:
-                break
-
-            # add the point to the line
-            line[x - 1, y - 1] = 1
-
-            # calculate the current length of the line
-            line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
-
+        # Update y to the last position and calculate the actual length of the line
+        y = max_y - 1
+        line_length = np.hypot(x - startpoint[0], y - startpoint[1])
+        
     elif (angle < np.pi) and (angle > np.pi / 2):
         # define the equation of the line
         m = -np.tan(angle - np.pi / 2)  # gradient of the line
