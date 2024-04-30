@@ -17,6 +17,20 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))
 - [Phased array B-mode](us_bmode_phased_array/)
 ([original example](http://www.k-wave.org/documentation/example_us_bmode_phased_array.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_phased_array/us_bmode_phased_array.ipynb))
+- [Circular piston transducer](at_circular_piston_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading3), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_circular_piston_3D/at_circular_piston_3D.ipynb))
+
+- [Circular piston transducer (axisymmetric)](at_circular_piston_AS/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading4), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_circular_piston_AS/at_circular_piston_AS.ipynb))
+
+- [Focused bowl transducer](at_focused_bowl_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading5), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_bowl_3D/at_focused_bowl_3D.ipynb))
+
+- [Focused bowl transducer (axisymmetric)](at_focused_bowl_AS/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading6), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_bowl_AS/at_focused_bowl_AS.ipynb))
+
+
+- [Focused annular array](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_annular_array_3D/at_focused_annular_array_3D.ipynb))
+
+
+ 
+
 
 ## Contributing new examples
 

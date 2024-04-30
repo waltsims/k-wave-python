@@ -54,7 +54,7 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     # Out of bound points will get NaN values
     result = interpn((g_x, g_y, g_z), grid_values, queries, method="linear", bounds_error=False, fill_value=np.nan)
     # Go back from list of interpolated values to 3D volume
-    result = result.reshape((g_x.size, g_y.size, g_z.size))
+    result = result.reshape((q_x.size, q_y.size, q_z.size))
     # set values outside of the interpolation range to original values
     result[np.isnan(result)] = grid_values[np.isnan(result)]
     return result
