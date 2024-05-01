@@ -229,7 +229,7 @@ plt.ion()
 plt.figure(figsize=(15, 4))
 plt.subplot(131)
 plt.imshow(
-    scan_lines.T, aspect="auto", extent=[steering_angles[-1], steering_angles[0], y_axis[1], y_axis[0]], interpolation="none", cmap="grey"
+    scan_lines.T, aspect="auto", extent=[steering_angles[-1], steering_angles[0], y_axis[1], y_axis[0]], interpolation="none", cmap="gray"
 )
 plt.xlabel("Steering angle [deg]")
 plt.ylabel("Depth [mm]")
