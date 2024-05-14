@@ -1,7 +1,7 @@
 # Examples
 
 Many examples from k-wave-python are Python mirrors of the [large collection of great examples](http://www.k-wave.org/documentation/k-wave_examples.php) from the original k-wave project.
-All examples are included as python files or notebooks in a subdirectory of the example directory.
+All examples are included as python files or notebooks in a subdirectory of the example directory. When running the examples in Google Colab, remember to select a GPU runtime for GPU simulations.
 Every example has a short readme.md file which briefly describes the purpose of the example.
 
 ## List of Examples
