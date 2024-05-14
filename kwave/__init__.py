@@ -37,33 +37,27 @@ BINARY_PATH = os.path.join(Path(__file__).parent, "bin", system)
 environ["KWAVE_BINARY_PATH"] = BINARY_PATH
 
 
-COMMON_FILENAMES = [
-    ("cufft64_10.dll", None),
-    ("hdf5.dll", None),
-    ("hdf5_hl.dll", None),
-    ("libiomp5md.dll", None),
-    ("libmmd.dll", None),
-    ("msvcp140.dll", None),
-    ("svml_dispmd.dll", None),
-    ("szip.dll", None),
-    ("vcruntime140.dll", None),
-    ("zlib.dll", None),
+WINDOWS_DLLS = [
+    "cufft64_10.dll",
+    "hdf5.dll",
+    "hdf5_hl.dll" "libiomp5md.dll",
+    "libmmd.dll",
+    "msvcp140.dll",
+    "svml_dispmd.dll",
+    "szip.dll",
+    "vcruntime140.dll",
+    "zlib.dll",
 ]
 
-SPECIFIC_OMP_FILENAMES = [("kspaceFirstOrder-OMP", "cpu")]
-SPECIFIC_CUDA_FILENAMES = [("kspaceFirstOrder-CUDA", "cuda")]
+OMP_EXECUTABLE_FILE = "kspaceFirstOrder-OMP"
+CUDA_EXECUTABLE_FILE = "kspaceFirstOrder-CUDA"
 
 
 def get_windows_release_urls(version: str, system_type: str) -> list:
-    if version == "OMP":
-        specific_filenames = [(SPECIFIC_OMP_FILENAMES[0][0] + ".exe", "cpu")]
-    elif version == "CUDA":
-        specific_filenames = [(SPECIFIC_CUDA_FILENAMES[0][0] + ".exe", "cuda")]
-    else:
-        specific_filenames = []
-
+    specific_filenames = [OMP_EXECUTABLE_FILE + ".exe" if version == "OMP" else CUDA_EXECUTABLE_FILE + ".exe"]
+    specific_filenames = WINDOWS_DLLS + specific_filenames
     release_urls = []
-    for filename, _ in COMMON_FILENAMES + specific_filenames:
+    for filename in specific_filenames:
         release_urls.append(PREFIX.format(version, system_type) + filename)
     return release_urls
 
@@ -71,9 +65,8 @@ def get_windows_release_urls(version: str, system_type: str) -> list:
 # GitHub release URLs
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{SPECIFIC_CUDA_FILENAMES[0][0]}"],
-        "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{SPECIFIC_OMP_FILENAMES[0][0]}"],
-
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{CUDA_EXECUTABLE_FILE}"],
+        "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{OMP_EXECUTABLE_FILE}"],
     },
     # "darwin": {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
@@ -125,7 +118,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
 
     # If there is a new binary
     latest_urls = url_dict[system][binary_type]
-    if existing_metadata['url'] not in latest_urls:
+    if existing_metadata["url"] not in latest_urls:
         return False
 
     # No need to check `version` field for now
@@ -135,7 +128,6 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
     #       --> if the version in the config file is updated, we should update the local binary
     #       -->
     return True
-
 
 
 def binaries_present() -> bool:
@@ -152,10 +144,9 @@ def binaries_present() -> bool:
         for binary_name in URL_DICT[system][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
-
     missing_binaries: List[str] = []
 
-    for binary_name, binary_type in binary_list[system]:
+    for binary_name, binary_type in binary_list:
         if not _is_binary_present(binary_name, binary_type):
             missing_binaries.append(binary_name)
 
@@ -194,7 +185,6 @@ def download_binaries(system_os: str, bin_type: str):
 
     """
     for url in URL_DICT[system_os][bin_type]:
-
         # Extract the file name from the GitHub release URL
         binary_version, filename = url.split("/")[-2:]
 
