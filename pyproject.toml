@@ -46,7 +46,7 @@ test = ["pytest",
         "phantominator",
         "requests==2.31.0"]
 example = ["gdown==5.2.0"]
-docs = ["m2r2==0.3.2",
+docs = ["sphinx-mdinclude==0.6.0",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.4",
     "sphinx-toolbox==3.5.0",
