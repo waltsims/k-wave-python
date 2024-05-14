@@ -48,13 +48,10 @@ WINDOWS_DLLS = [
 EXECUTABLE_PREFIX = "kspaceFirstOrder-"
 
 
-def get_windows_release_urls(version: str) -> list:
+def get_windows_release_urls(architecture: str) -> list:
     system_type = "windows"
-    specific_filenames = [EXECUTABLE_PREFIX + version + ".exe"]
-    specific_filenames = WINDOWS_DLLS + specific_filenames
-    release_urls = []
-    for filename in specific_filenames:
-        release_urls.append(PREFIX.format(version.upper(), system_type.lower()) + filename)
+    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"] + WINDOWS_DLLS
+    release_urls = [PREFIX.format(architecture.upper(), system_type.lower()) + filename for filename in specific_filenames]
     return release_urls
 
 
