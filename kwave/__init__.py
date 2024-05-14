@@ -46,6 +46,7 @@ WINDOWS_DLLS = [
 ]
 
 EXECUTABLE_PREFIX = "kspaceFirstOrder-"
+ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
@@ -64,7 +65,7 @@ URL_DICT = {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
     #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
     # },
-    "windows": {binary_type: get_windows_release_urls(binary_type) for binary_type in ["cuda", "omp"]},
+    "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
 
 
@@ -126,10 +127,9 @@ def binaries_present() -> bool:
         bool, True if binaries are present, False otherwise
 
     """
-    binary_types = ["omp", "cuda"]
 
     binary_list = []
-    for binary_type in binary_types:
+    for binary_type in ARCHITECTURES:
         for binary_name in URL_DICT[OPERATING_SYSTEM][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
@@ -207,7 +207,7 @@ def download_binaries(system_os: str, bin_type: str):
 
 
 def install_binaries():
-    for binary_type in ["cpu", "cuda"]:
+    for binary_type in ARCHITECTURES:
         download_binaries(OPERATING_SYSTEM, binary_type)
 
 
