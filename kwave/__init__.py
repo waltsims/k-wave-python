@@ -53,12 +53,13 @@ OMP_EXECUTABLE_FILE = "kspaceFirstOrder-OMP"
 CUDA_EXECUTABLE_FILE = "kspaceFirstOrder-CUDA"
 
 
-def get_windows_release_urls(version: str, system_type: str) -> list:
+def get_windows_release_urls(version: str) -> list:
+    system_type = "windows"
     specific_filenames = [OMP_EXECUTABLE_FILE + ".exe" if version == "OMP" else CUDA_EXECUTABLE_FILE + ".exe"]
     specific_filenames = WINDOWS_DLLS + specific_filenames
     release_urls = []
     for filename in specific_filenames:
-        release_urls.append(PREFIX.format(version, system_type) + filename)
+        release_urls.append(PREFIX.format(version.upper(), system_type.lower()) + filename)
     return release_urls
 
 
@@ -72,10 +73,7 @@ URL_DICT = {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
     #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
     # },
-    "windows": {
-        "cuda": get_windows_release_urls("CUDA", "windows"),
-        "cpu": get_windows_release_urls("OMP", "windows"),
-    },
+    "windows": {binary_type: get_windows_release_urls(binary_type) for binary_type in ["cuda", "cpu"]},
 }
 
 
