@@ -208,7 +208,7 @@ def download_binaries(system_os: str, bin_type: str):
 
 def install_binaries():
     for binary_type in ["cpu", "cuda"]:
-        download_binaries(system, binary_type)
+        download_binaries(OPERATING_SYSTEM, binary_type)
 
 
 if not binaries_present():
