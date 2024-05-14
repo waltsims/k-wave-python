@@ -206,10 +206,12 @@ def kspaceFirstOrderAS(
     pml_x_size, pml_y_size = options.pml_x_size, options.pml_y_size
     c_ref = k_sim.c_ref
 
-    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1, False)
-    k_sim.pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True and options.use_sg, 1, False)
-    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 2, True)
-    k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, True and options.use_sg, 2, True)
+    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, staggered=False, dimension=1, axisymmetric=False)
+    k_sim.pml_x_sgx = get_pml(
+        Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, staggered=True and options.use_sg, dimension=1, axisymmetric=False
+    )
+    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, staggered=False, dimension=2, axisymmetric=True)
+    k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, staggered=True and options.use_sg, dimension=2, axisymmetric=True)
 
     # define the k-space, derivative, and shift operators
     # for the x (axial) direction, the operators are the same as normal
