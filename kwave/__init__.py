@@ -11,9 +11,6 @@ import json
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
 VERSION = "0.3.3"
-# Set environment variable to binaries to get rid of user warning
-# This code is a crutch and should be removed when kspaceFirstOrder
-# is refactored
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
@@ -22,8 +19,6 @@ PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSIO
 BINARY_PATH = Path(__file__).parent / "bin"
 PLATFORM = sys.platform
 
-# TODO: workflow -> get binary list for current system -> if installed check if they match json file -> if they don't match json file, download them, if they do match, don't download them
-# TODO: workflow -> if not installed, download them
 if PLATFORM.startswith("linux"):
     system = "linux"
 elif PLATFORM.startswith(("win", "cygwin")):
@@ -40,7 +35,8 @@ environ["KWAVE_BINARY_PATH"] = BINARY_PATH
 WINDOWS_DLLS = [
     "cufft64_10.dll",
     "hdf5.dll",
-    "hdf5_hl.dll" "libiomp5md.dll",
+    "hdf5_hl.dll",
+    "libiomp5md.dll",
     "libmmd.dll",
     "msvcp140.dll",
     "svml_dispmd.dll",
@@ -49,13 +45,12 @@ WINDOWS_DLLS = [
     "zlib.dll",
 ]
 
-OMP_EXECUTABLE_FILE = "kspaceFirstOrder-OMP"
-CUDA_EXECUTABLE_FILE = "kspaceFirstOrder-CUDA"
+EXECUTABLE_PREFIX = "kspaceFirstOrder-"
 
 
 def get_windows_release_urls(version: str) -> list:
     system_type = "windows"
-    specific_filenames = [OMP_EXECUTABLE_FILE + ".exe" if version == "OMP" else CUDA_EXECUTABLE_FILE + ".exe"]
+    specific_filenames = [EXECUTABLE_PREFIX + version + ".exe"]
     specific_filenames = WINDOWS_DLLS + specific_filenames
     release_urls = []
     for filename in specific_filenames:
@@ -66,8 +61,8 @@ def get_windows_release_urls(version: str) -> list:
 # GitHub release URLs
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{CUDA_EXECUTABLE_FILE}"],
-        "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{OMP_EXECUTABLE_FILE}"],
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
+        "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     # "darwin": {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
