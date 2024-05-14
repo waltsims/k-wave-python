@@ -68,7 +68,7 @@ URL_DICT = {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
     #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
     # },
-    "windows": {binary_type: get_windows_release_urls(binary_type) for binary_type in ["cuda", "cpu"]},
+    "windows": {binary_type: get_windows_release_urls(binary_type) for binary_type in ["cuda", "omp"]},
 }
 
 
