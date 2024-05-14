@@ -22,7 +22,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "m2r2",
+    "sphinx_mdinclude",
 ]
 
 source_suffix = [".rst", ".md"]
