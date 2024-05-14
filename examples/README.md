@@ -1,7 +1,7 @@
 # Examples
 
 Many examples from k-wave-python are Python mirrors of the [large collection of great examples](http://www.k-wave.org/documentation/k-wave_examples.php) from the original k-wave project.
-All examples are included as python files or notebooks in a subdirectory of the example directory.
+All examples are included as python files or notebooks in a subdirectory of the example directory. When running the examples in Google Colab, remember to select a GPU runtime for GPU simulations.
 Every example has a short readme.md file which briefly describes the purpose of the example.
 
 ## List of Examples
@@ -13,7 +13,8 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Photoacoustic Waveforms](ivp_photoacoustic_waveforms/) ([original example](http://www.k-wave.org/documentation/example_ivp_photoacoustic_waveforms.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/ivp_photoacoustic_waveforms/ivp_photoacoustic_waveforms.ipynb))
 - [Controlling the PML](na_controlling_the_pml/)
 ([original example](http://www.k-wave.org/documentation/example_na_controlling_the_pml.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/na_controlling_the_pml/na_controlling_the_pml.ipynb))
-- [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))    
+- [Defining An Ultrasound Transducer Example](us_defining_transducer) ([original example](http://www.k-wave.org/documentation/example_us_defining_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_defining_transducer/us_defining_transducer.ipynb))
+- [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))
 - [Phased array B-mode](us_bmode_phased_array/)
 ([original example](http://www.k-wave.org/documentation/example_us_bmode_phased_array.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_phased_array/us_bmode_phased_array.ipynb))
 - [Circular piston transducer](at_circular_piston_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading3), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_circular_piston_3D/at_circular_piston_3D.ipynb))
