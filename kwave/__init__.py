@@ -20,15 +20,15 @@ BINARY_PATH = Path(__file__).parent / "bin"
 PLATFORM = sys.platform
 
 if PLATFORM.startswith("linux"):
-    system = "linux"
+    OPERATING_SYSTEM = "linux"
 elif PLATFORM.startswith(("win", "cygwin")):
-    system = "windows"
+    OPERATING_SYSTEM = "windows"
 elif PLATFORM.startswith("darwin"):
-    system = "darwin"
+    OPERATING_SYSTEM = "darwin"
     raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
-BINARY_PATH = os.path.join(Path(__file__).parent, "bin", system)
+BINARY_PATH = os.path.join(Path(__file__).parent, "bin", OPERATING_SYSTEM)
 environ["KWAVE_BINARY_PATH"] = BINARY_PATH
 
 
@@ -49,17 +49,16 @@ EXECUTABLE_PREFIX = "kspaceFirstOrder-"
 
 
 def get_windows_release_urls(architecture: str) -> list:
-    system_type = "windows"
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"] + WINDOWS_DLLS
-    release_urls = [PREFIX.format(architecture.upper(), system_type.lower()) + filename for filename in specific_filenames]
+    release_urls = [PREFIX.format(architecture.upper(), OPERATING_SYSTEM.lower()) + filename for filename in specific_filenames]
     return release_urls
 
 
 # GitHub release URLs
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{system}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
-        "cpu": [URL_BASE + f"kspaceFirstOrder-OMP-{system}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{OPERATING_SYSTEM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
+        "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{OPERATING_SYSTEM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     # "darwin": {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
@@ -107,7 +106,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         return False
 
     # If there is a new binary
-    latest_urls = URL_DICT[system][binary_type]
+    latest_urls = URL_DICT[OPERATING_SYSTEM][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
 
@@ -127,11 +126,11 @@ def binaries_present() -> bool:
         bool, True if binaries are present, False otherwise
 
     """
-    binary_types = ["cpu", "cuda"]
+    binary_types = ["omp", "cuda"]
 
     binary_list = []
     for binary_type in binary_types:
-        for binary_name in URL_DICT[system][binary_type]:
+        for binary_name in URL_DICT[OPERATING_SYSTEM][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
     missing_binaries: List[str] = []
