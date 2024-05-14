@@ -115,7 +115,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         return False
 
     # If there is a new binary
-    latest_urls = url_dict[system][binary_type]
+    latest_urls = URL_DICT[system][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
 
