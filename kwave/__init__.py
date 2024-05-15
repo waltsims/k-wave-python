@@ -51,16 +51,11 @@ def get_windows_release_urls(architecture: str) -> list:
     return release_urls
 
 
-# GitHub release URLs
 URL_DICT = {
     "linux": {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
-    # "darwin": {
-    #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
-    #     "cpu": [url_base + "kspaceFirstOrder-OMP-linux/releases/download/v1.3.0/kspaceFirstOrder-OMP"],
-    # },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
 
@@ -119,7 +114,6 @@ def binaries_present() -> bool:
         bool, True if binaries are present, False otherwise
 
     """
-
     binary_list = []
     for binary_type in ARCHITECTURES:
         for binary_name in URL_DICT[PLATFORM][binary_type]:
