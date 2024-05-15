@@ -28,7 +28,7 @@ elif PLATFORM.startswith("darwin"):
     raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
-BINARY_PATH = os.path.join(Path(__file__).parent, "bin", OPERATING_SYSTEM)
+BINARY_PATH = Path(__file__).parent / "bin" / OPERATING_SYSTEM
 environ["KWAVE_BINARY_PATH"] = BINARY_PATH
 
 
