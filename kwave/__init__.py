@@ -26,6 +26,8 @@ elif PLATFORM.startswith(("win", "cygwin")):
 elif PLATFORM.startswith("darwin"):
     OPERATING_SYSTEM = "darwin"
     raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
+else:
+    raise NotImplementedError(f"Unsupported operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
 BINARY_PATH = Path(__file__).parent / "bin" / OPERATING_SYSTEM
@@ -113,10 +115,6 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
 
     # No need to check `version` field for now
     # because we version is already present in the URL
-    # TODO: Workflow should be that the config file is shipped with the release
-    #       --> working assumption is the config is **always** present
-    #       --> if the version in the config file is updated, we should update the local binary
-    #       -->
     return True
 
 
