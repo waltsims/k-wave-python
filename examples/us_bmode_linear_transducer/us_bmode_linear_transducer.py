@@ -230,7 +230,7 @@ image_size = kgrid.size
 
 # Create the axis variables
 x_axis = [0, image_size[0] * 1e3 * 1.1]  # [mm]
-y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
+y_axis = [-0.5 * image_size[1] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
 
 # make plotting non-blocking
 plt.ion()
