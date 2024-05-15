@@ -88,7 +88,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         # this is non-kwave windows binary
         # it already exists according to the check above
         return True
-    existing_metadata_path = os.path.join(BINARY_PATH, f"{binary_name}_metadata.json")
+    existing_metadata_path = BINARY_PATH / f"{binary_name}_metadata.json"
 
     if not os.path.exists(existing_metadata_path):
         # metadata does not exist => binaries may or may not exist
@@ -149,7 +149,7 @@ def _record_binary_metadata(binary_version: str, binary_filepath: str, binary_ur
     # However, let's record it anyway. Maybe it will be useful in the future.
     metadata = {"url": binary_url, "version": binary_version, "file_hash": _hash_file(binary_filepath)}
     metadata_filename = f"{filename}_metadata.json"
-    metadata_filepath = os.path.join(BINARY_PATH, metadata_filename)
+    metadata_filepath = BINARY_PATH / metadata_filename
     with open(metadata_filepath, "w") as outfile:
         json.dump(metadata, outfile, indent=4)
 
