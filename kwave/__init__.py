@@ -83,7 +83,7 @@ def _hash_file(filepath: str) -> str:
 
 
 def _is_binary_present(binary_name: str, binary_type: str) -> bool:
-    binary_filepath = os.path.join(BINARY_PATH, binary_name)
+    binary_filepath = BINARY_PATH / binary_name
     binary_file_exists = os.path.exists(binary_filepath)
     if not binary_file_exists:
         return False
