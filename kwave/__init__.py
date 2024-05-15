@@ -1,6 +1,6 @@
 import logging
 import os
-import sys
+import platform
 import urllib.request
 from os import environ
 from pathlib import Path
@@ -16,21 +16,15 @@ VERSION = "0.3.3"
 URL_BASE = "https://github.com/waltsims/"
 BINARY_VERSION = "v1.3.0"
 PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
-BINARY_PATH = Path(__file__).parent / "bin"
-PLATFORM = sys.platform
+PLATFORM = platform.system().lower()
 
-if PLATFORM.startswith("linux"):
-    OPERATING_SYSTEM = "linux"
-elif PLATFORM.startswith(("win", "cygwin")):
-    OPERATING_SYSTEM = "windows"
-elif PLATFORM.startswith("darwin"):
-    OPERATING_SYSTEM = "darwin"
+if PLATFORM == "darwin":
     raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
-else:
-    raise NotImplementedError(f"Unsupported operating system: {PLATFORM}.")
+elif PLATFORM not in ["linux", "windows"]:
+    raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
-BINARY_PATH = Path(__file__).parent / "bin" / OPERATING_SYSTEM
+BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
 environ["KWAVE_BINARY_PATH"] = str(BINARY_PATH)
 
 
@@ -53,15 +47,15 @@ ARCHITECTURES = ["omp", "cuda"]
 
 def get_windows_release_urls(architecture: str) -> list:
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"] + WINDOWS_DLLS
-    release_urls = [PREFIX.format(architecture.upper(), OPERATING_SYSTEM.lower()) + filename for filename in specific_filenames]
+    release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
     return release_urls
 
 
 # GitHub release URLs
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{OPERATING_SYSTEM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
-        "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{OPERATING_SYSTEM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
+        "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     # "darwin": {
     #     "cuda": [url_base + "kspaceFirstOrder-CUDA-linux/releases/download/v1.3/kspaceFirstOrder-CUDA"],
@@ -109,7 +103,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         return False
 
     # If there is a new binary
-    latest_urls = URL_DICT[OPERATING_SYSTEM][binary_type]
+    latest_urls = URL_DICT[PLATFORM][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
 
@@ -128,7 +122,7 @@ def binaries_present() -> bool:
 
     binary_list = []
     for binary_type in ARCHITECTURES:
-        for binary_name in URL_DICT[OPERATING_SYSTEM][binary_type]:
+        for binary_name in URL_DICT[PLATFORM][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
     missing_binaries: List[str] = []
@@ -206,7 +200,7 @@ def download_binaries(system_os: str, bin_type: str):
 
 def install_binaries():
     for binary_type in ARCHITECTURES:
-        download_binaries(OPERATING_SYSTEM, binary_type)
+        download_binaries(PLATFORM, binary_type)
 
 
 if not binaries_present():
