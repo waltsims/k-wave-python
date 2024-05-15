@@ -29,7 +29,7 @@ elif PLATFORM.startswith("darwin"):
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
 BINARY_PATH = Path(__file__).parent / "bin" / OPERATING_SYSTEM
-environ["KWAVE_BINARY_PATH"] = BINARY_PATH
+environ["KWAVE_BINARY_PATH"] = str(BINARY_PATH)
 
 
 WINDOWS_DLLS = [
