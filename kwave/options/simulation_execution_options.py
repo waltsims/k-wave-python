@@ -55,7 +55,7 @@ class SimulationExecutionOptions:
         if self._is_windows:
             self.binary_name += ".exe"
 
-        self.binary_path = BINARY_PATH
+        self.binary_path = BINARY_PATH / self.binary_name
 
     def validate(self):
         if isinstance(self.num_threads, int):
