@@ -41,6 +41,7 @@ class SimulationExecutionOptions:
     def __post_init__(self):
         self.validate()
 
+        # TODO(walter): depricate these private member variables
         self._is_linux = PLATFORM == "linux"
         self._is_windows = PLATFORM == "windows"
         self._is_darwin = PLATFORM == "darwin"
