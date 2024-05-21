@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
+from numba import cuda
 
 
 @dataclass
@@ -64,6 +65,11 @@ class SimulationExecutionOptions:
         self.binary_path = path_to_kwave / "bin" / binary_folder / self.binary_name
 
     def validate(self):
+        if self.is_gpu_simulation:
+            # validate that cuda is available
+            if not cuda.is_available():
+                raise ValueError("CUDA is not available. Please ensure CUDA toolkit is propperly installed for GPU simulations.")
+
         if isinstance(self.num_threads, int):
             assert self.num_threads > 0 and self.num_threads != float("inf")
         else:
