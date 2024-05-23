@@ -34,8 +34,8 @@ class Executor:
                     # Stream stdout in real-time
                     for line in proc.stdout:
                         print(line, end="")
-                else:
-                    stdout, stderr = proc.communicate()
+
+                stdout, stderr = proc.communicate()
 
                 proc.wait()  # wait for process to finish before checking return code
                 if proc.returncode != 0:
@@ -48,6 +48,7 @@ class Executor:
             else:
                 # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
                 print(e.stdout)
+                print(e.stderr)
                 raise
 
         sensor_data = self.parse_executable_output(output_filename)
