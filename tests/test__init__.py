@@ -6,4 +6,3 @@ def test__init():
     with pytest.raises(NotImplementedError):
         with patch("platform.system", lambda: "Darwin"):
             import kwave  # noqa: F401
-        pass
