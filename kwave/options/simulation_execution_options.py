@@ -42,15 +42,16 @@ class SimulationExecutionOptions:
         self.validate()
 
         if self.binary_name is None:
-            if self.is_gpu_simulation:
-                self.binary_name = "kspaceFirstOrder-CUDA"
-            else:
-                self.binary_name = "kspaceFirstOrder-OMP"
+            if self.binary_name is None:
+                if self.is_gpu_simulation:
+                    self.binary_name = "kspaceFirstOrder-CUDA"
+                else:
+                    self.binary_name = "kspaceFirstOrder-OMP"
 
         if PLATFORM == "windows":
             self.binary_name += ".exe"
 
-        self.binary_path = BINARY_PATH / self.binary_name
+        self.binary_path = self.binary_path / self.binary_name
 
     def validate(self):
         if isinstance(self.num_threads, int):
