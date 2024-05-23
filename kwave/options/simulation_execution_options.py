@@ -48,7 +48,7 @@ class SimulationExecutionOptions:
                 else:
                     self.binary_name = "kspaceFirstOrder-OMP"
 
-        if PLATFORM == "windows":
+        if self.binary_name is None and PLATFORM == "windows":
             self.binary_name += ".exe"
 
         self.binary_path = self.binary_path / self.binary_name
