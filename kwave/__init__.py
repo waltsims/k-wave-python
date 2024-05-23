@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 import urllib.request
-from os import environ
 from pathlib import Path
 from typing import List
 import hashlib
@@ -25,7 +24,6 @@ elif PLATFORM not in ["linux", "windows"]:
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
 BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
-environ["KWAVE_BINARY_PATH"] = str(BINARY_PATH)
 
 
 WINDOWS_DLLS = [
