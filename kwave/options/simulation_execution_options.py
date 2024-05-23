@@ -39,9 +39,6 @@ class SimulationExecutionOptions:
     show_sim_log: bool = True
 
     def __post_init__(self):
-        if PLATFORM == "darwin":
-            raise NotImplementedError("k-wave-python does not support macOS.")
-
         self.validate()
 
         if self.binary_name is None:
