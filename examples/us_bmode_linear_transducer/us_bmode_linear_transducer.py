@@ -27,7 +27,6 @@ PHANTOM_DATA_PATH = "phantom_data.mat"
 # simulation settings
 DATA_CAST = "single"
 RUN_SIMULATION = False
-SHOW_PLOT = True
 
 pml_size_points = Vector([20, 10, 10])  # [grid points]
 grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
@@ -233,8 +232,7 @@ x_axis = [0, image_size[0] * 1e3 * 1.1]  # [mm]
 y_axis = [-0.5 * image_size[1] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
 
 # make plotting non-blocking
-if not SHOW_PLOT:
-    plt.ion()
+plt.ion()
 # Plot the data before and after scan conversion
 plt.figure(figsize=(14, 4))
 # plot the sound speed map
@@ -260,7 +258,6 @@ plt.title("Harmonic")
 ax = plt.gca()
 ax.set_ylim(40, 5)
 plt.tight_layout()
-plt.show()
 
 
 # In[ ]:
@@ -287,4 +284,4 @@ plt.yticks([offset * i for i in range(5)], list(processing_steps.keys()))
 plt.xlabel("Time [\u03BCs]")
 plt.xlim(5e-3 * 2 / c0, t_end)
 plt.title("Processing Steps Visualization")
-plt.show()
+plt.pause(120)  # Display plots for 120 seconds for CI/CD to complete
