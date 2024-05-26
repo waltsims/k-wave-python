@@ -1,12 +1,12 @@
 from typing import Optional
 
 import numpy as np
-from beartype import beartype
-from nptyping import NDArray, Float, Shape
+from beartype import beartype as typechecker
+from jaxtyping import Float
 from matplotlib.colors import ListedColormap
 
 
-@beartype
+@typechecker
 def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
@@ -38,8 +38,8 @@ def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     return ListedColormap(colors)
 
 
-@beartype
-def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
+@typechecker
+def hot(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Generate a hot colormap of length m.
     The colormap consists of a progression from black to red, yellow, and white.
@@ -54,15 +54,15 @@ def hot(m: int) -> NDArray[Shape["N, 3"], Float]:
 
     n = int(np.fix(3 / 8 * m))
 
-    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m-n)])
-    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m-2*n)])
-    b = np.concatenate([np.zeros(2*n), np.arange(1, m-2*n + 1)/(m-2*n)])
+    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m - n)])
+    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m - 2 * n)])
+    b = np.concatenate([np.zeros(2 * n), np.arange(1, m - 2 * n + 1) / (m - 2 * n)])
 
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
-@beartype
-def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
+@typechecker
+def bone(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
 
@@ -75,8 +75,8 @@ def bone(m: int) -> NDArray[Shape["N, 3"], Float]:
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
-@beartype
-def gray(m: int) -> NDArray[Shape["N, 3"], Float]:
+@typechecker
+def gray(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.
 

@@ -11,7 +11,15 @@ To correctly set up your development environment for this repository, clone the 
 
     git clone https://github.com/waltsims/k-wave-python
     cd k-wave-python
-    pip install -e '.[test,dev]'
+    pip install -e '.[dev,test]' 
+
+This installs all the dependencies for development, and testing.
+
+Ensure pre-commit is configured by running the following command:
+
+.. code-block:: bash
+
+    pre-commit install
 
 Test References
 =======================
@@ -26,7 +34,7 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
  
 .. note::
     If you do not have MATLAB installed to generate the reference files, you can download recently generated reference file outputs from the GitHub CI and place them in the ``python_testers/collectedValues/`` directory.
-    The latest reference files can be found in the artifacts of the latest CI run of ``pytest.yml`` (e.g. [here](https://github.com/waltsims/k-wave-python/actions/runs/7770639710/artifacts/1217868112)).
+    The latest reference files can be found in the artifacts of the latest CI run of ``pytest.yml`` (e.g. `here <https://github.com/waltsims/k-wave-python/actions/runs/7770639710/artifacts/1217868112>`_).
 
 - **Integration testing**: k-Wave-python tests output .h5 files that are passed to the k-Wave binaries and ensures that they match the output of the original k-Wave.
   This testing compares the output for many of the example scripts from the original k-Wave package.

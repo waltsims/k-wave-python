@@ -9,11 +9,11 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_compute_linear_transform():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/computeLinearTransform.mat')
+    test_record_path = os.path.join(Path(__file__).parent, "collectedValues/computeLinearTransform.mat")
     reader = TestRecordReader(test_record_path)
 
     for i in range(len(reader)):
-        params = reader.expected_value_of('params')
+        params = reader.expected_value_of("params")
         if len(params) == 2:
             pos1, pos2 = params
             pos1, pos2 = pos1.astype(float), pos2.astype(float)
@@ -23,8 +23,8 @@ def test_compute_linear_transform():
             pos1, pos2, offset = pos1.astype(float), pos2.astype(float), float(offset)
             rot_mat, offset_pos = compute_linear_transform(pos1, pos2, offset)
 
-        assert np.allclose(rot_mat, reader.expected_value_of('rotMat'), equal_nan=True)
-        assert np.allclose(offset_pos, reader.expected_value_of('offsetPos'), equal_nan=True)
+        assert np.allclose(rot_mat, reader.expected_value_of("rotMat"), equal_nan=True)
+        assert np.allclose(offset_pos, reader.expected_value_of("offsetPos"), equal_nan=True)
         reader.increment()
 
-    logging.log(logging.INFO, 'compute_linear_transform(..) works as expected!')
+    logging.log(logging.INFO, "compute_linear_transform(..) works as expected!")

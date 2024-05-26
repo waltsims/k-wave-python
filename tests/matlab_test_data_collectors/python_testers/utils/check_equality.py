@@ -9,13 +9,13 @@ from kwave.utils.kwave_array import kWaveArray, Element
 def recursive_getattr(obj, attr, *args):
     def _getattr(obj, attr):
         return getattr(obj, attr, *args)
-    return functools.reduce(_getattr, [obj] + attr.split('.'))
+
+    return functools.reduce(_getattr, [obj] + attr.split("."))
 
 
 def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
     are_totally_equal = True
     for key, expected_value in expected_kgrid_dict.items():
-
         matlab_to_python_mapping = {
             "kx_vec": "k_vec.x",
             "ky_vec": "k_vec.y",
@@ -38,14 +38,33 @@ def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
             "dyudyn_sgy": "dudn_sg.y",
             "dzudzn_sgz": "dudn_sg.z",
             "yn_vec_sgy": "n_vec_sg.y",
-            "zn_vec_sgz": "n_vec_sg.z"
+            "zn_vec_sgz": "n_vec_sg.z",
         }
 
         mapped_key = matlab_to_python_mapping.get(key, key)
-        if mapped_key in ["k_vec.y", "k_vec.z", "k_max.y", "k_max.z", "n_vec.y", "n_vec.z",
-                          "n_vec_sg.y", "n_vec_sg.z", "dudn.y", "dudn.z", "dudn.z",
-                          "dudn_sg.y", "dudn_sg.z", "n_vec_sg.y", "n_vec_sg.z",
-                          'y_vec', 'z_vec', 'ky', 'kz', 'yn', 'zn']:
+        if mapped_key in [
+            "k_vec.y",
+            "k_vec.z",
+            "k_max.y",
+            "k_max.z",
+            "n_vec.y",
+            "n_vec.z",
+            "n_vec_sg.y",
+            "n_vec_sg.z",
+            "dudn.y",
+            "dudn.z",
+            "dudn.z",
+            "dudn_sg.y",
+            "dudn_sg.z",
+            "n_vec_sg.y",
+            "n_vec_sg.z",
+            "y_vec",
+            "z_vec",
+            "ky",
+            "kz",
+            "yn",
+            "zn",
+        ]:
             ignore_if_nan = True
         else:
             ignore_if_nan = False
@@ -61,13 +80,13 @@ def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
         elif np.size(actual_value) >= 2 or np.size(expected_value) >= 2:
             are_equal = np.allclose(actual_value, expected_value)
         else:
-            are_equal = (actual_value == expected_value)
+            are_equal = actual_value == expected_value
 
         if not are_equal:
-            logging.log(logging.INFO, 'Following property does not match:')
-            logging.log(logging.INFO, f'\tkey: {key}, mapped_key: {mapped_key}')
-            logging.log(logging.INFO, f'\t\texpected: {expected_value}')
-            logging.log(logging.INFO, f'\t\tactual: {actual_value}')
+            logging.log(logging.INFO, "Following property does not match:")
+            logging.log(logging.INFO, f"\tkey: {key}, mapped_key: {mapped_key}")
+            logging.log(logging.INFO, f"\t\texpected: {expected_value}")
+            logging.log(logging.INFO, f"\t\tactual: {actual_value}")
             are_totally_equal = False
 
     assert are_totally_equal
@@ -77,9 +96,7 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
     are_totally_equal = True
 
     for key, expected_value in expected_kwave_array_dict.items():
-
-        matlab_to_python_mapping = {
-        }
+        matlab_to_python_mapping = {}
 
         mapped_key = matlab_to_python_mapping.get(key, key)
         if mapped_key in []:
@@ -89,7 +106,7 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
 
         actual_value = recursive_getattr(kwave_array_object, mapped_key, None)
 
-        if key == 'elements':
+        if key == "elements":
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
             elif isinstance(expected_value, np.ndarray):
@@ -115,14 +132,13 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
                 if isinstance(actual_value, float) and isinstance(expected_value, float):
                     are_equal = np.isclose(actual_value, expected_value)
                 else:
-                    are_equal = (actual_value == expected_value)
-
+                    are_equal = actual_value == expected_value
 
         if not are_equal:
-            logging.log(logging.INFO, 'Following property does not match:')
-            logging.log(logging.INFO, f'\tkey: {key}, mapped_key: {mapped_key}')
-            logging.log(logging.INFO, f'\t\texpected: {expected_value}')
-            logging.log(logging.INFO, f'\t\tactual: {actual_value}')
+            logging.log(logging.INFO, "Following property does not match:")
+            logging.log(logging.INFO, f"\tkey: {key}, mapped_key: {mapped_key}")
+            logging.log(logging.INFO, f"\t\texpected: {expected_value}")
+            logging.log(logging.INFO, f"\t\tactual: {actual_value}")
             are_totally_equal = False
 
     assert are_totally_equal
