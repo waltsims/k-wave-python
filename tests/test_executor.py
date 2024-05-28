@@ -38,7 +38,7 @@ class TestExecutor(unittest.TestCase):
 
         # Mock Popen object
         self.mock_proc = MagicMock()
-        self.mock_proc.communicate.return_value = ("stdout", "stderr")
+        self.mock_proc.communicate.return_value = ("stdout content", "stderr content")
         self.mock_popen.return_value.__enter__.return_value = self.mock_proc
 
     def tearDown(self):
@@ -93,8 +93,8 @@ class TestExecutor(unittest.TestCase):
             stderr_output = mock_stderr.getvalue()
 
             # Assert that stdout and stderr are printed
-            self.assertIn("stdout", stdout_output)
-            self.assertIn("stderr", stderr_output)
+            self.assertIn("stdout content", stdout_output)
+            self.assertIn("stderr content", stderr_output)
 
     def test_parse_executable_output(self):
         """Test parsing the executable output correctly."""
@@ -117,7 +117,3 @@ class TestExecutor(unittest.TestCase):
         mock_dataset.__getitem__.return_value.squeeze.assert_called_once()
         self.assertIn("data", result)
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
-
-
-if __name__ == "__main__":
-    unittest.main(exit=False)

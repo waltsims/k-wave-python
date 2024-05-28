@@ -1,5 +1,6 @@
 import stat
 import subprocess
+import sys
 
 import h5py
 
@@ -42,7 +43,7 @@ class Executor:
         except subprocess.CalledProcessError as e:
             # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
             print(e.stdout)
-            print(e.stderr)
+            print(e.stderr, file=sys.stderr)
             raise
 
         sensor_data = self.parse_executable_output(output_filename)
