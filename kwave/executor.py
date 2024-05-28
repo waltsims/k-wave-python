@@ -1,7 +1,5 @@
-import logging
 import stat
 import subprocess
-import unittest.mock
 
 import h5py
 
@@ -42,14 +40,10 @@ class Executor:
                     raise subprocess.CalledProcessError(proc.returncode, command, stdout, stderr)
 
         except subprocess.CalledProcessError as e:
-            # Special handling for MagicMock during testing
-            if isinstance(e.returncode, unittest.mock.MagicMock):
-                logging.info("Skipping AssertionError in testing.")
-            else:
-                # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
-                print(e.stdout)
-                print(e.stderr)
-                raise
+            # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
+            print(e.stdout)
+            print(e.stderr)
+            raise
 
         sensor_data = self.parse_executable_output(output_filename)
 

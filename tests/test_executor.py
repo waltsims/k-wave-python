@@ -4,6 +4,8 @@ from pathlib import Path
 import subprocess
 import stat
 import numpy as np
+import io
+import os
 
 from kwave.executor import Executor
 from kwave.utils.dotdictionary import dotdict
@@ -65,13 +67,10 @@ class TestExecutor(unittest.TestCase):
         with patch.object(executor, "parse_executable_output", return_value=dotdict()):
             sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
 
-        self.mock_popen.assert_called_once_with(
-            "fake_system /fake/path/to/binary -i input.h5 -o output.h5 options",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            text=True,
-        )
+        normalized_path = os.path.normpath(self.execution_options.binary_path)
+        expected_command = f"{self.execution_options.system_string} " f"{normalized_path} " f"-i input.h5 " f"-o output.h5 " f"options"
+
+        self.mock_popen.assert_called_once_with(expected_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
         self.mock_proc.communicate.assert_called_once()
         self.assertEqual(sensor_data, dotdict())
 
@@ -79,13 +78,23 @@ class TestExecutor(unittest.TestCase):
         """Test handling a simulation failure."""
         self.mock_proc.returncode = 1
 
-        # Instantiate the Executor
-        executor = Executor(self.execution_options, self.simulation_options)
+        # Capture the printed output
+        with patch("sys.stdout", new=io.StringIO()) as mock_stdout, patch("sys.stderr", new=io.StringIO()) as mock_stderr:
+            # Instantiate the Executor
+            executor = Executor(self.execution_options, self.simulation_options)
 
-        # Mock the parse_executable_output method
-        with patch.object(executor, "parse_executable_output", return_value=dotdict()):
-            with self.assertRaises(subprocess.CalledProcessError):
-                executor.run_simulation("input.h5", "output.h5", "options")
+            # Mock the parse_executable_output method
+            with patch.object(executor, "parse_executable_output", return_value=dotdict()):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    executor.run_simulation("input.h5", "output.h5", "options")
+
+            # Get the printed output
+            stdout_output = mock_stdout.getvalue()
+            stderr_output = mock_stderr.getvalue()
+
+            # Assert that stdout and stderr are printed
+            self.assertIn("stdout", stdout_output)
+            self.assertIn("stderr", stderr_output)
 
     def test_parse_executable_output(self):
         """Test parsing the executable output correctly."""
@@ -96,7 +105,7 @@ class TestExecutor(unittest.TestCase):
         mock_file.__getitem__.return_value = mock_dataset
 
         # Mock the squeeze method on the mock dataset
-        mock_dataset.__getitem__.return_value.squeeze.return_value = np.ones((10, 10, 1))
+        mock_dataset.__getitem__.return_value.squeeze.return_value = np.ones((10, 10))
 
         # Call the method with a fake file path
         result = Executor.parse_executable_output("/fake/output.h5")
@@ -107,7 +116,7 @@ class TestExecutor(unittest.TestCase):
         mock_dataset.__getitem__.assert_called_once_with(0)
         mock_dataset.__getitem__.return_value.squeeze.assert_called_once()
         self.assertIn("data", result)
-        self.assertTrue(np.all(result["data"] == np.ones((10, 10, 1)).squeeze()))
+        self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
 
 
 if __name__ == "__main__":
