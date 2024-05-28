@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock, call
 from pathlib import Path
 import subprocess
 import stat
@@ -55,6 +55,35 @@ class TestExecutor(unittest.TestCase):
 
         # Assert chmod was called with the correct parameters
         self.mock_chmod.assert_called_once_with(self.mock_stat_result.st_mode | stat.S_IEXEC)
+
+    @patch("builtins.print")
+    def test_run_simulation_show_sim_log(self, mock_print):
+        """Test handling real-time output when show_sim_log is True."""
+        self.execution_options.show_sim_log = True
+
+        # Create a generator to simulate real-time output
+        def mock_stdout_gen():
+            yield "line 1\n"
+            yield "line 2\n"
+            yield "line 3\n"
+
+        # Create a mock Popen object with stdout as a generator
+        self.mock_proc.stdout = mock_stdout_gen()
+        self.mock_proc.returncode = 0
+
+        # Instantiate the Executor
+        executor = Executor(self.execution_options, self.simulation_options)
+
+        # Mock the parse_executable_output method
+        with patch.object(executor, "parse_executable_output", return_value=dotdict()):
+            sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
+
+        # Assert that the print function was called with the expected lines
+        expected_calls = [call("line 1\n", end=""), call("line 2\n", end=""), call("line 3\n", end="")]
+        mock_print.assert_has_calls(expected_calls, any_order=False)
+
+        # Check that sensor_data is returned correctly
+        self.assertEqual(sensor_data, dotdict())
 
     def test_run_simulation_success(self):
         """Test running the simulation successfully."""
