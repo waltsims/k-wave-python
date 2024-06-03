@@ -29,7 +29,7 @@ params = { ...
         250, ...              % Source frequency
         'Dim', 3, ...         % Optional parameter: dimension
         'FFTPadding', 5, ...  % Optional parameter: FFT padding
-        'Window', 'Hann'      % Optional parameter: window type
+        'Window', 'Hanning'      % Optional parameter: window type
     }, ...
     {
         randn(100, 100, 100, 10), ... % 4D data
