@@ -10,7 +10,9 @@ from kwave.utils.data import scale_SI
 from kwave.utils.mapgen import make_disc, make_ball
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-from kwave.options import SimulationOptions, SimulationExecutionOptions
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
+
 
 # number of grid points in the x (row) direction
 Nx: int = 64
