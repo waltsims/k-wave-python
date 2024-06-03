@@ -10,7 +10,9 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_extract_amp_phase():
-    reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/extract_amp_phase.mat"))
+    reader = TestRecordReader(
+        os.path.join(Path(__file__).parent, "matlab_test_data_collectors/python_testers/collectedValues/extract_amp_phase.mat")
+    )
 
     for _ in range(len(reader)):
         data, Fs, source_freq, dim, fft_padding, window = reader.expected_value_of("params")
