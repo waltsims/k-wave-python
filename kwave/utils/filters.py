@@ -162,7 +162,7 @@ def spect(
 
 
 def extract_amp_phase(
-    data: np.ndarray, Fs: float, source_freq: float, dim: str = "auto", fft_padding: int = 3, window: str = "hann"
+    data: np.ndarray, Fs: float, source_freq: float, dim: str = "auto", fft_padding: int = 3, window: str = "Hanning"
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """
     Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
