@@ -8,7 +8,7 @@ from scipy.signal import lfilter, convolve
 
 from .checks import is_number
 from .data import scale_SI
-from .math import find_closest, sinc, next_pow2, norm_var, gaussian
+from .math import sinc, next_pow2, norm_var, gaussian
 from .matrix import num_dim, num_dim2
 from .signals import get_win
 from ..kgrid import kWaveGrid
@@ -162,14 +162,10 @@ def spect(
 
 
 def extract_amp_phase(
-    data: np.ndarray, Fs: float, source_freq: float, dim: Tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    data: np.ndarray, Fs: float, source_freq: float, dim: str = "auto", fft_padding: int = 3, window: str = "hann"
+) -> Tuple[np.ndarray, np.ndarray, float]:
     """
     Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
-
-    The amplitude and phase are extracted from the frequency spectrum, which is calculated using a windowed and zero
-    padded FFT. The values are extracted at the frequency closest to source_freq. By default, the time dimension is set
-    to the highest non-singleton dimension.
 
     Args:
         data: Matrix of time signals [s]
@@ -181,10 +177,8 @@ def extract_amp_phase(
 
     Returns:
         A tuple of the amplitude, phase and frequency of the extracted signal.
-
     """
-
-    # check for the dim input
+    # Automatic detection of time dimension
     if dim == "auto":
         dim = num_dim(data)
         if dim == 2 and data.shape[1] == 1:
@@ -194,10 +188,9 @@ def extract_amp_phase(
     # input data
     win, coherent_gain = get_win(data.shape[dim], window)
     # this list magic in Python comes from the use of ones in MATLAB
-    # TODO: simplify this
-    win = np.reshape(win, [1] * (dim - 1) + [len(win)])
+    win = np.reshape(win, [dim - 1, len(win)])
 
-    # apply window to time dimension of input data
+    # Apply window to time dimension of input data
     data = win * data
 
     # compute amplitude and phase spectra
@@ -701,7 +694,6 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    from .signals import get_win
 
     win, _ = get_win(grid_size, type_=window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
