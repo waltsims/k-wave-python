@@ -26,7 +26,7 @@ classifiers = [
 dependencies = [
     "h5py==3.11.0",
     "scipy==1.13.1",
-    "opencv-python==4.9.0.80",
+    "opencv-python==4.10.0.82",
     "deepdiff==7.0.1",
     "matplotlib==3.9.0",
     "numpy>=1.22.2,<1.27.0",
@@ -44,7 +44,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 test = ["pytest",
         "coverage==7.5.2",
         "phantominator",
-        "requests==2.32.2"]
+        "requests==2.32.3"]
 example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.1",
     "sphinx-copybutton==0.5.2",
