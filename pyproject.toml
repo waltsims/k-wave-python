@@ -44,7 +44,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 test = ["pytest",
         "coverage==7.5.2",
         "phantominator",
-        "requests==2.32.2"]
+        "requests==2.32.3"]
 example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.1",
     "sphinx-copybutton==0.5.2",
