@@ -386,11 +386,12 @@ def compute_linear_transform(pos1, pos2, offset=None):
 
     magnitude = np.linalg.norm(beam_vec)
 
-    # TODO: it seems matlab behaviour is to return nans when positions are the same.
-    #       we should open an issue and change our behaviour once matlab is fixed.
-    # if magnitude == 0:
-    #     # "pos1 and pos2 are the same"
-    #     return np.eye(3), 0 if offset is None else offset
+    #  matlab behaviour is to return nans when positions are the same.
+    #  we choose to return the identity matrix and the offset in this case.
+    #  TODO: we should open an issue and change our behaviour once matlab is fixed.
+    if magnitude == 0:
+        # "pos1 and pos2 are the same"
+        return np.eye(3), 0 if offset is None else offset
 
     # Normalise to give unit beam vector
     beam_vec = beam_vec / magnitude
