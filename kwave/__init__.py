@@ -17,9 +17,7 @@ BINARY_VERSION = "v1.3.0"
 PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
 PLATFORM = platform.system().lower()
 
-if PLATFORM == "darwin":
-    raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
-elif PLATFORM not in ["linux", "windows"]:
+if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
@@ -53,6 +51,10 @@ URL_DICT = {
     "linux": {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
+    },
+    "darwin": {
+        "cuda": [],
+        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc2/{EXECUTABLE_PREFIX}OMP"],
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }

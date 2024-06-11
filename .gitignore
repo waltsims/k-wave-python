@@ -20,8 +20,7 @@ build/
 src/
 transfer_temp/
 docs/_build/
-kwave/bin/windows
-kwave/bin/linux
+kwave/bin/
 
 # Package manager files
 Pipfile.lock
