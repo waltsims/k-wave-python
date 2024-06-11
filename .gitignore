@@ -35,6 +35,7 @@ tests/reference_outputs
 
 # Data and output files
 *.mat
+*.mp4
 *.h5
 *.png
 *.tar.gz
