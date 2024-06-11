@@ -232,8 +232,8 @@ x_axis = [0, image_size[0] * 1e3 * 1.1]  # [mm]
 y_axis = [-0.5 * image_size[1] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
 
 # make plotting non-blocking
-if not SHOW_PLOT:
-    plt.ion()
+plt.ion()
+
 # Plot the data before and after scan conversion
 plt.figure(figsize=(14, 4))
 # plot the sound speed map
