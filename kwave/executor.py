@@ -1,7 +1,6 @@
-import logging
 import stat
 import subprocess
-import unittest.mock
+import sys
 
 import h5py
 
@@ -34,21 +33,18 @@ class Executor:
                     # Stream stdout in real-time
                     for line in proc.stdout:
                         print(line, end="")
-                else:
-                    stdout, stderr = proc.communicate()
+
+                stdout, stderr = proc.communicate()
 
                 proc.wait()  # wait for process to finish before checking return code
                 if proc.returncode != 0:
                     raise subprocess.CalledProcessError(proc.returncode, command, stdout, stderr)
 
         except subprocess.CalledProcessError as e:
-            # Special handling for MagicMock during testing
-            if isinstance(e.returncode, unittest.mock.MagicMock):
-                logging.info("Skipping AssertionError in testing.")
-            else:
-                # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
-                print(e.stdout)
-                raise
+            # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
+            print(e.stdout)
+            print(e.stderr, file=sys.stderr)
+            raise
 
         sensor_data = self.parse_executable_output(output_filename)
 
