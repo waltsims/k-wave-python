@@ -89,7 +89,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
             simulation_options = SimulationOptions(pml_inside=False, pml_size=PML_size, data_cast=DATA_CAST, save_to_disk=True, data_recast=True)
             _ = kspaceFirstOrder2D(kgrid=kgrid, medium=medium, source=source, sensor=sensor, simulation_options=simulation_options, execution_options=ExecutionOptions(is_gpu_simulation=True))
 
-            assert mock_Executor.called_once()
+            assert mock_Executor.assert_called_once()
 
 
 if __name__ == '__main__':
