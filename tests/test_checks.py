@@ -10,6 +10,7 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.signals import tone_burst
+from kwave.utils.matlab import rem
 
 
 class TestUltrasoundSimulation(unittest.TestCase):
@@ -62,7 +63,6 @@ class TestUltrasoundSimulation(unittest.TestCase):
             (self.pitch * (np.arange(1, self.N_active_tx + 1) - (self.N_active_tx + 1) / 2), np.zeros(self.N_active_tx))
         )
         self.pitch_n = round(self.pitch / self.dx)
-        from kwave.utils.matlab import rem
 
         self.pitch_n_temp = self.pitch_n - 1 if not rem(self.pitch_n, 2) else self.pitch_n
 
@@ -115,9 +115,21 @@ class TestUltrasoundSimulation(unittest.TestCase):
         mock_run_simulation.assert_called_once()
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
-    def test_simulation_gpu(self, mock_run_simulation):
+    def test_simulation_cpu_none(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self.run_simulation(is_gpu_simulation=True, binary_name=None)
+        mock_run_simulation.assert_called_once()
+
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_gpu_cuda(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
+        mock_run_simulation.assert_called_once()
+
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_cpu_omp(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self.run_simulation(is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
         mock_run_simulation.assert_called_once()
 
 
