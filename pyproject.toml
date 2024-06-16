@@ -78,9 +78,9 @@ exclude = [
 [tools.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = [
-    "error::DeprecationWarning"
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning"
 ]
-
 [tool.coverage.run]
 branch = true
 command_line = "-m pytest"
