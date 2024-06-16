@@ -75,7 +75,7 @@ exclude = [
     "*.mat",
 ]
 
-[tools.pytest.ini_options]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = [
     "error::DeprecationWarning",
