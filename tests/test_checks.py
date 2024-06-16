@@ -103,7 +103,3 @@ class TestUltrasoundSimulation(unittest.TestCase):
             )
 
             mock_run_simulation.assert_called_once()
-
-
-if __name__ == "__main__":
-    unittest.main(exit=False)
