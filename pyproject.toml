@@ -77,6 +77,9 @@ exclude = [
 
 [tools.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "error::DeprecationWarning"
+]
 
 [tool.coverage.run]
 branch = true
