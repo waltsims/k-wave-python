@@ -11,13 +11,14 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.signals import tone_burst
 
-class TestUltrasoundSimulation(unittest.TestCase):
 
-    @patch('kwave.kspaceFirstOrder2D.Executor')
-    def test_simulation(self, mock_Executor):
+class TestUltrasoundSimulation(unittest.TestCase):
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
 
         # Parameters
-        steering_angle = np.arange(-45,-40, 5)
+        steering_angle = np.arange(-45, -40, 5)
         n_steering_angle = len(steering_angle)
 
         # Initialize
@@ -25,7 +26,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
         sensor = kSensor()
 
         # Simulation settings
-        DATA_CAST = 'single'  # Use float32 for GPU computations
+        DATA_CAST = "single"  # Use float32 for GPU computations
 
         # Create the computational grid
         ROIx = 120e-3  # ROI [m]
@@ -52,7 +53,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
         # Create the time array
         t_end = (Nx * dx) * 2.5 / c0_exact  # [s]
         dt = 1 / 62.5e6 / 2  # Sampling time [s]
-        cfl = (dt * c0_exact / dx)  # Default: 0.3
+        cfl = dt * c0_exact / dx  # Default: 0.3
         kgrid.makeTime(c0_exact, cfl, t_end)
 
         # Define the input signal
@@ -64,7 +65,8 @@ class TestUltrasoundSimulation(unittest.TestCase):
         el_pos_cart = np.column_stack((pitch * (np.arange(1, N_active_tx + 1) - (N_active_tx + 1) / 2), np.zeros(N_active_tx)))
         pitch_n = round(pitch / dx)
         from kwave.utils.matlab import rem
-        pitch_n_temp = pitch_n - 1 if not rem(pitch_n,  2) else pitch_n
+
+        pitch_n_temp = pitch_n - 1 if not rem(pitch_n, 2) else pitch_n
 
         for n_input_signal in range(n_steering_angle):
             num_elements = N_active_tx
@@ -72,7 +74,9 @@ class TestUltrasoundSimulation(unittest.TestCase):
             tone_burst_offset = element_pos_x * np.sin(steering_angle[n_input_signal] * np.pi / 180) / (c0_exact * dt)
             offset_time = np.min(tone_burst_offset)
             tone_burst_offset = np.round(-(offset_time) + tone_burst_offset)
-            pulse_waveform = (source_strength / (c0_exact * rho0)) * tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles, signal_offset=tone_burst_offset.astype(np.int32), signal_length=kgrid.Nt)
+            pulse_waveform = (source_strength / (c0_exact * rho0)) * tone_burst(
+                1 / kgrid.dt, tone_burst_freq, tone_burst_cycles, signal_offset=tone_burst_offset.astype(np.int32), signal_length=kgrid.Nt
+            )
 
             source.ux = np.empty((num_elements * pitch_n_temp, kgrid.Nt))
             source.u_mask = np.zeros((Nx, Ny))
@@ -83,14 +87,23 @@ class TestUltrasoundSimulation(unittest.TestCase):
                 start_idx = round(source_y_pos - (pitch_n_temp - 1) / 2)
                 stop_idx = round(source_y_pos + (pitch_n_temp - 1) / 2) + 1
                 source.u_mask[0, start_idx:stop_idx] = 1
-                source.ux[n * pitch_n_temp:(n + 1) * pitch_n_temp, :] = np.tile(tx_apodization[n] * pulse_waveform[n], (pitch_n_temp, 1))
+                source.ux[n * pitch_n_temp : (n + 1) * pitch_n_temp, :] = np.tile(tx_apodization[n] * pulse_waveform[n], (pitch_n_temp, 1))
 
             sensor.mask = source.u_mask
-            simulation_options = SimulationOptions(pml_inside=False, pml_size=PML_size, data_cast=DATA_CAST, save_to_disk=True, data_recast=True)
-            _ = kspaceFirstOrder2D(kgrid=kgrid, medium=medium, source=source, sensor=sensor, simulation_options=simulation_options, execution_options=ExecutionOptions(is_gpu_simulation=True))
+            simulation_options = SimulationOptions(
+                pml_inside=False, pml_size=PML_size, data_cast=DATA_CAST, save_to_disk=True, data_recast=True
+            )
+            _ = kspaceFirstOrder2D(
+                kgrid=kgrid,
+                medium=medium,
+                source=source,
+                sensor=sensor,
+                simulation_options=simulation_options,
+                execution_options=ExecutionOptions(is_gpu_simulation=True),
+            )
 
-            assert mock_Executor.assert_called_once()
+            mock_run_simulation.assert_called_once()
 
 
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    unittest.main(exit=False)
