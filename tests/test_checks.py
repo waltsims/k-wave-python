@@ -99,7 +99,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
                 source=source,
                 sensor=sensor,
                 simulation_options=simulation_options,
-                execution_options=ExecutionOptions(is_gpu_simulation=True),
+                execution_options=ExecutionOptions(),
             )
 
             mock_run_simulation.assert_called_once()
