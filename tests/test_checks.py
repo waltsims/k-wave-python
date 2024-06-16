@@ -103,3 +103,15 @@ class TestUltrasoundSimulation(unittest.TestCase):
             )
 
             mock_run_simulation.assert_called_once()
+            mock_run_simulation.reset_mock()
+
+            _ = kspaceFirstOrder2D(
+                kgrid=kgrid,
+                medium=medium,
+                source=source,
+                sensor=sensor,
+                simulation_options=simulation_options,
+                execution_options=ExecutionOptions(is_gpu_simulation=True),
+            )
+
+            mock_run_simulation.assert_called_once()
