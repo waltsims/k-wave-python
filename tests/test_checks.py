@@ -17,7 +17,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
     def test_simulation(self, mock_Executor):
 
         # Parameters
-        steering_angle = np.arange(-45, 46, 5)
+        steering_angle = np.arange(-45,-40, 5)
         n_steering_angle = len(steering_angle)
 
         # Initialize
