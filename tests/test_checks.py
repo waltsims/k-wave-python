@@ -20,8 +20,6 @@ class TestUltrasoundSimulation(unittest.TestCase):
         steering_angle = np.arange(-45, 46, 5)
         n_steering_angle = len(steering_angle)
 
-        focus = 0e-3
-
         # Initialize
         source = kSource()
         sensor = kSensor()
