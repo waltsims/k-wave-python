@@ -66,7 +66,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
 
         self.pitch_n_temp = self.pitch_n - 1 if not rem(self.pitch_n, 2) else self.pitch_n
 
-    def run_simulation(self, is_gpu_simulation):
+    def run_simulation(self, is_gpu_simulation, binary_name="kspaceFirstOrder-OMP"):
         num_elements = self.N_active_tx
         element_pos_x = self.el_pos_cart[:, 0]
         tone_burst_offset = element_pos_x * np.sin(self.steering_angle * np.pi / 180) / (self.c0_exact * self.kgrid.dt)
@@ -97,7 +97,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
         simulation_options = SimulationOptions(
             pml_inside=False, pml_size=self.PML_size, data_cast=self.DATA_CAST, save_to_disk=True, data_recast=True
         )
-        execution_options = ExecutionOptions(is_gpu_simulation=is_gpu_simulation)
+        execution_options = ExecutionOptions(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
 
         _ = kspaceFirstOrder2D(
             kgrid=self.kgrid,
@@ -111,13 +111,13 @@ class TestUltrasoundSimulation(unittest.TestCase):
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self.run_simulation(is_gpu_simulation=False)
+        self.run_simulation(is_gpu_simulation=False, binary_name=None)
         mock_run_simulation.assert_called_once()
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_gpu(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self.run_simulation(is_gpu_simulation=True)
+        self.run_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
         mock_run_simulation.assert_called_once()
 
 
