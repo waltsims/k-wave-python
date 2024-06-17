@@ -112,7 +112,7 @@ def get_win(
     # Check if N is either `int` or `list of ints`
     # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
     N = np.array(N, dtype=int)
-    N = N if np.size(N) > 1 else int(N)
+    N = N if np.size(N) > 1 else N.item()
 
     # Check if symmetric is either `bool` or `list of bools`
     # assert isinstance(symmetric, int) or isinstance(symmetric, list)
