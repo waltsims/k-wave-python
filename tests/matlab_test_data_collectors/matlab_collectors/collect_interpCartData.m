@@ -4,7 +4,8 @@ all_params = {
     {1500, 40, 300, 0.5e-4}
     };
 
-output_folder = 'collectedValues/interpCartData/';
+
+recorder = utils.TestRecorder('collectedValues/interpCartData.mat');
 
 k = 0;
 for idx=1:length(all_params)
@@ -34,8 +35,6 @@ for idx=1:length(all_params)
         sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
 
 
-
-        
         % define the properties of the propagation medium
         medium_sound_speed = params{1};	% [m/s]
         if dim == 2
@@ -52,7 +51,6 @@ for idx=1:length(all_params)
             binary_sensor_mask = makeSphere(kgrid.Nx, kgrid.Ny, kgrid.Nz, sensor_radius_grid_points);
         end
 
-
         % create the time array
         kgrid.makeTime(medium_sound_speed);
         % mock the simulation
@@ -60,21 +58,17 @@ for idx=1:length(all_params)
         % smooth the initial pressure distribution and restore the magnitude
         p0 = smooth(p0_binary, true);
 
-
         % interpolate data to remove the gaps and assign to time reversal data
         trbd = interpCartData(kgrid, sensor_data, sensor_mask, binary_sensor_mask);
-        warning('off','all')
-        kgrid = struct(kgrid);
-        warning('on','all')
+        recorder.recordVariable('trbd', trbd); 
+        recorder.recordVariable('sensor_data', sensor_data);
+        recorder.recordVariable('sensor_mask', sensor_mask);
+        recorder.recordVariable('binary_sensor_mask', binary_sensor_mask);
+        recorder.recordObject('kgrid', kgrid);
 
-        idx_padded = sprintf('%06d', k );
-        if ~exist(output_folder, 'dir')
-            mkdir(output_folder);
-        end
-        filename = [output_folder idx_padded '.mat'];
-        save(filename, 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd');
-
-
+        recorder.increment();
     end
 end
+
+recorder.saveRecordsToDisk();
 
