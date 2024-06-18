@@ -201,7 +201,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
         else:
             # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
-            dt_stability_limit = 2 / (c_ref * kmax) * np.asin(c_ref / medium.sound_speed.max())
+            dt_stability_limit = 2 / (c_ref * kmax) * np.arcsin(c_ref / medium.sound_speed.max()) 
 
     else:
         # =====================================================================
