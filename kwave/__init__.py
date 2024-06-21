@@ -45,13 +45,10 @@ ARCHITECTURES = ["omp", "cuda"]
 
 def get_windows_release_urls(architecture: str) -> list:
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
+    if architecture == "omp":
+        specific_filenames += WINDOWS_DLLS
     release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
     return release_urls
-
-
-def get_windows_dll_urls() -> list:
-    dll_urls = [PREFIX.format("OMP", PLATFORM.lower()) + filename for filename in WINDOWS_DLLS]
-    return dll_urls
 
 
 URL_DICT = {
@@ -59,7 +56,7 @@ URL_DICT = {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
-    "windows": {"omp": get_windows_release_urls("omp"), "cuda": get_windows_release_urls("cuda"), "dll": get_windows_dll_urls()},
+    "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
 
 
@@ -101,8 +98,7 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
         return False
 
     # If there is a new binary
-    latest_urls = [urls for urls in URL_DICT[PLATFORM].values()]
-    latest_urls = [url for sublist in latest_urls for url in sublist]
+    latest_urls = URL_DICT[PLATFORM][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
 
@@ -119,8 +115,8 @@ def binaries_present() -> bool:
 
     """
     binary_list = []
-    for binary_type, binary_names in URL_DICT[PLATFORM].items():
-        for binary_name in binary_names:
+    for binary_type in ARCHITECTURES:
+        for binary_name in URL_DICT[PLATFORM][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
     missing_binaries: List[str] = []
@@ -199,8 +195,6 @@ def download_binaries(system_os: str, bin_type: str):
 def install_binaries():
     for binary_type in ARCHITECTURES:
         download_binaries(PLATFORM, binary_type)
-    if PLATFORM == "windows":
-        download_binaries(PLATFORM, "dll")
 
 
 if not binaries_present():
