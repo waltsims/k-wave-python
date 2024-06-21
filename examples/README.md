@@ -29,14 +29,12 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Focused annular array](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_annular_array_3D/at_focused_annular_array_3D.ipynb))
 
 
- 
-
-
 ## Contributing new examples
 
 When adding a new example notebook, follow these steps:
 
-1. Search the open issues to see if a related example has already been requested. If not add an example issue and assign yourself to the issue.
+1. Search the [list of examples](https://docs.google.com/spreadsheets/d/1-x13iIez84AEyjjHMOe2GoC8FSyzUFHoy9R7VKttTlo/edit?usp=sharing) to find an open example.
+1. Claim your example by opening an "Example" issue on GitHub.
 3. Fork and clone the repository and create a branch for your new example.
 2. Create an example sub-directory using the name from the hyperlink of the original k-wave example if it exists (e.g. for http://www.k-wave.org/documentation/example_ivp_loading_external_image.php name the directory "ivp_loading_external_image).
 3. Add your example notebook to your example directory.
