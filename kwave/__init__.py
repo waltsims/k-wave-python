@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+from urllib.request import urlretrieve
 from pathlib import Path
 from typing import List
 import hashlib
@@ -174,7 +175,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Download the binary file
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
-            urllib.request.urlretrieve(url, binary_filepath)
+            urlretrieve(url, binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
