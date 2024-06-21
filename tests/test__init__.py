@@ -1,7 +1,6 @@
 import pytest
 import importlib
-import tempfile
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 @pytest.mark.parametrize("platform_name", ["Darwin"])
@@ -19,19 +18,28 @@ def mock_windows_platform():
         yield mock
 
 
-@pytest.fixture
-def mock_temp_file():
-    with tempfile.NamedTemporaryFile() as temp_file:
-        yield temp_file.name
+def test_windows_dll_download_once(mock_windows_platform):
+    def side_effect(url, filename):
+        with open(filename, "wb") as f:
+            f.write(b"Dummy file contents")
 
-
-def test_windows_dll_download_once(mock_windows_platform, mock_temp_file):
-    # Mock the urllib.request.urlretrieve to return the path to the temporary file
-    with patch("kwave.urllib.request.urlretrieve", return_value=(mock_temp_file, MagicMock())) as mock_urlretrieve:
+    # Mock the urllib.request.urlretrieve where it is used in the kwave module
+    with patch("urllib.request.urlretrieve", side_effect=side_effect) as mock_urlretrieve:
+        # First import to simulate initial download
         import kwave
 
-        # Reload kwave and assert that urlretrieve is not called again
         importlib.reload(kwave)
+
+        # Assert urlretrieve was called during the initial import
+        mock_urlretrieve.assert_called()
+
+        # Reset mock to clear previous call history
+        mock_urlretrieve.reset_mock()
+
+        # Reload kwave to check if urlretrieve is not called again
+        importlib.reload(kwave)
+
+        # Assert urlretrieve was not called again
         mock_urlretrieve.assert_not_called()
 
 
