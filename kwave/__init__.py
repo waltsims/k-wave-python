@@ -1,7 +1,6 @@
 import logging
 import os
 import platform
-import urllib.request
 from pathlib import Path
 from typing import List
 import hashlib
@@ -48,18 +47,18 @@ def get_windows_release_urls(architecture: str) -> list:
     release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
     return release_urls
 
+
 def get_windows_dll_urls() -> list:
     dll_urls = [PREFIX.format("OMP", PLATFORM.lower()) + filename for filename in WINDOWS_DLLS]
     return dll_urls
+
 
 URL_DICT = {
     "linux": {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
-    "windows": {"omp": get_windows_release_urls("omp"),
-                "cuda": get_windows_release_urls("cuda"),
-                "dll": get_windows_dll_urls()},
+    "windows": {"omp": get_windows_release_urls("omp"), "cuda": get_windows_release_urls("cuda"), "dll": get_windows_dll_urls()},
 }
 
 
