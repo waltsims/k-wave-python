@@ -42,6 +42,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
+        "pyfakefs==5.5.0",
         "coverage==7.5.3",
         "phantominator",
         "requests==2.32.3"]
