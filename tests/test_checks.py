@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 import numpy as np
+import pytest
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -134,4 +135,4 @@ class TestUltrasoundSimulation(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main([__file__])
