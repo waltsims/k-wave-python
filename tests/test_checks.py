@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
 import numpy as np
+import pytest
+import kwave
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -111,19 +113,19 @@ class TestUltrasoundSimulation(unittest.TestCase):
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self._test_simulation(is_gpu_simulation=False, binary_name=None)
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=False, binary_name=None)
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_none(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self._test_simulation(is_gpu_simulation=True, binary_name=None)
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name=None)
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_gpu_cuda(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self._test_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
 
-    def _test_simulation(self, is_gpu_simulation, binary_name):
+    def _test_simulation(self, mock_run_simulation, is_gpu_simulation, binary_name):
         try:
             self.run_simulation(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
         except ValueError as e:
@@ -137,8 +139,8 @@ class TestUltrasoundSimulation(unittest.TestCase):
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):
         mock_run_simulation.return_value = None
-        self._test_simulation(is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main([__file__])
