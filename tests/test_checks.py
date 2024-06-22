@@ -125,21 +125,19 @@ class TestUltrasoundSimulation(unittest.TestCase):
         mock_run_simulation.return_value = None
         self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
 
-    def _test_simulation(self, mock_run_simulation, is_gpu_simulation, binary_name):
-        try:
-            self.run_simulation(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
-        except ValueError as e:
-            # Handle the expected failure on MacOS (Darwin)
-            if kwave.PLATFORM == "darwin":
-                return
-            else:
-                raise e
-        mock_run_simulation.assert_called_once()
-
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self._test_simulation(mock_run_simulation, is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
+
+    def _test_simulation(self, mock_run_simulation, is_gpu_simulation, binary_name):
+        if kwave.PLATFORM == "darwin" and is_gpu_simulation:
+            with pytest.raises(ValueError, match="GPU simulations are currently not supported on MacOS"):
+                self.run_simulation(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
+
+        else:
+            self.run_simulation(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
+            mock_run_simulation.assert_called_once()
 
 
 if __name__ == "__main__":
