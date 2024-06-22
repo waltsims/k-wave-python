@@ -20,7 +20,7 @@ class Executor:
             self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
         except FileNotFoundError:
             if kwave.PLATFORM == "darwin" and self.execution_options.is_gpu_simulation:
-                raise ValueError("GPU simulations are currently not supported on MacOS")
+                raise ValueError("GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False.")
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
         command = (
