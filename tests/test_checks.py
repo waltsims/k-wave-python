@@ -130,8 +130,9 @@ class TestUltrasoundSimulation(unittest.TestCase):
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_gpu_cuda_failure_darwin(self, mock_run_simulation):
         mock_run_simulation.return_value = None
+        expected_error_msg = "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
         with patch("kwave.PLATFORM", "darwin"):
-            with pytest.raises(ValueError, match="GPU simulations are currently not supported on MacOS"):
+            with pytest.raises(ValueError, match=expected_error_msg):
                 self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
