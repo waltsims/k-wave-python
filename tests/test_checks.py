@@ -1,6 +1,5 @@
 import unittest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import numpy as np
 import pytest
 import kwave
@@ -128,8 +127,6 @@ class TestUltrasoundSimulation(unittest.TestCase):
     def test_simulation_gpu_cuda(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
-
- 
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):
