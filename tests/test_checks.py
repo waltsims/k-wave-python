@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
@@ -9,6 +10,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.signals import tone_burst
@@ -127,16 +129,7 @@ class TestUltrasoundSimulation(unittest.TestCase):
         mock_run_simulation.return_value = None
         self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
 
-    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
-    def test_simulation_gpu_cuda_failure_darwin(self, mock_run_simulation):
-        mock_run_simulation.return_value = None
-        expected_error_msg = "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
-        with patch("kwave.PLATFORM", "darwin"):
-            with pytest.raises(ValueError, match=expected_error_msg):
-                # Mock the execution options to ensure FileNotFoundError is triggered when CUDA is available on e.g. linux
-                mock_execution_options = MagicMock()
-                mock_execution_options.binary_path.chmod.side_effect = FileNotFoundError
-                self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
+ 
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):

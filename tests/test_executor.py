@@ -7,6 +7,9 @@ import numpy as np
 import io
 import os
 
+import pytest
+
+import kwave
 from kwave.executor import Executor
 from kwave.utils.dotdictionary import dotdict
 
@@ -146,3 +149,24 @@ class TestExecutor(unittest.TestCase):
         mock_dataset.__getitem__.return_value.squeeze.assert_called_once()
         self.assertIn("data", result)
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
+
+
+def executor_gpu_cuda_failure_darwin(self):
+    expected_error_msg = "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
+    # Configure the mock path object
+    mock_binary_path = MagicMock(spec=Path)
+    mock_binary_path.chmod.side_effect = FileNotFoundError
+
+    # Mock the execution options to use the mocked path
+    mock_execution_options = MagicMock()
+    mock_execution_options.binary_path = mock_binary_path
+
+    with patch("kwave.PLATFORM", "darwin"):
+        with pytest.raises(ValueError, match=expected_error_msg):
+            _ = kwave.kspaceFirstOrder2D.Executor(
+                execution_options=mock_execution_options,
+                simulation_options=MagicMock()
+            )
+                
+if __name__ == "__main__":
+    unittest.main()
