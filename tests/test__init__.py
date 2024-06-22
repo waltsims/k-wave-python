@@ -1,6 +1,9 @@
+import shutil
 import pytest
 import importlib
 from unittest.mock import patch
+
+import kwave
 
 
 @pytest.mark.parametrize("platform_name", ["Darwin"])
@@ -41,6 +44,14 @@ def test_windows_dll_download_once(mock_windows_platform):
 
         # Assert urlretrieve was not called again
         mock_urlretrieve.assert_not_called()
+
+
+# Clean up the bin directory after tests
+def test_clean_up():
+    try:
+        shutil.rmtree(kwave.BINARY_PATH)
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == "__main__":
