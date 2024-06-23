@@ -102,7 +102,6 @@ class TestUltrasoundSimulation(unittest.TestCase):
         )
         execution_options = ExecutionOptions(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
 
-        mock_run_simulation.return_value = None
         _ = kspaceFirstOrder2D(
             kgrid=self.kgrid,
             medium=self.medium,
@@ -111,7 +110,6 @@ class TestUltrasoundSimulation(unittest.TestCase):
             simulation_options=simulation_options,
             execution_options=execution_options,
         )
-
 
     @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_none(self, mock_run_simulation):
