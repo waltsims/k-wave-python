@@ -150,6 +150,21 @@ class TestExecutor(unittest.TestCase):
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
 
 
+def test_executor_file_not_found_on_non_darwin():
+    # Configure the mock path object
+    mock_binary_path = MagicMock(spec=Path)
+    mock_binary_path.chmod.side_effect = FileNotFoundError
+
+    # Mock the execution options to use the mocked path
+    mock_execution_options = MagicMock()
+    mock_execution_options.binary_path = mock_binary_path
+    mock_execution_options.is_gpu_simulation = False
+
+    with patch("kwave.PLATFORM", "windows"):
+        with pytest.raises(FileNotFoundError):
+            _ = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
+
+
 def test_executor_gpu_cuda_failure_darwin():
     expected_error_msg = (
         "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
