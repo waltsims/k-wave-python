@@ -12,6 +12,16 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.signals import tone_burst
 from kwave.utils.matlab import rem
+import sys
+import kwave
+import os
+
+print("Python version:", sys.version)
+print("sys.path:", sys.path)
+print("Current working directory:", os.getcwd())
+print("kwave module:", kwave)
+print("kwave attributes:", dir(kwave))
+print("kspaceFirstOrder2D module:", kwave.kspaceFirstOrder2D)
 
 
 class TestUltrasoundSimulation(unittest.TestCase):
@@ -109,25 +119,25 @@ class TestUltrasoundSimulation(unittest.TestCase):
             execution_options=execution_options,
         )
 
-    @patch("kwave.executor.Executor.run_simulation")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=False, binary_name=None)
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.executor.Executor.run_simulation")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_none(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=True, binary_name=None)
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.executor.Executor.run_simulation")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_gpu_cuda(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.executor.Executor.run_simulation")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
