@@ -3,11 +3,9 @@ import pytest
 from unittest.mock import patch
 
 
-@pytest.mark.parametrize("platform_name", ["Darwin"])
-@pytest.mark.usefixtures("fs")
-def test_not_implemented_error(platform_name):
+def test__init():
     with pytest.raises(NotImplementedError):
-        with patch("platform.system", return_value=platform_name):
+        with patch("platform.system", lambda: "Darwin"):
             import kwave
 
             importlib.reload(kwave)
