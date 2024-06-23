@@ -9,21 +9,21 @@ on:
       - 'pyproject.toml'
 
 jobs:
-  test_install:
-    strategy:
-      matrix:
-        os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
-        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
-        extra_requirements: [ "test", "examples", "docs", "dev", "all" ]
-    runs-on: ${{matrix.os}}
-    steps:
-      - uses: actions/checkout@v4
-      # Pull the cache based on the hash value
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          pip install '.[${{ matrix.extra_requirements }}]'
+    test_install:
+        strategy:
+            matrix:
+                os: [ "windows-latest", "ubuntu-latest" , "macos-latest"]
+                python-version: [ "3.9", "3.10", "3.11", "3.12" ]
+                extra_requirements: [ "test", "examples", "docs", "dev", "all" ]
+        runs-on: ${{matrix.os}}
+        steps:
+            - uses: actions/checkout@v4
+            # Pull the cache based on the hash value
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  cache: 'pip'
+            - name: Install dependencies
+              run: |
+                  pip install '.[${{ matrix.extra_requirements }}]'
