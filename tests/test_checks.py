@@ -109,25 +109,25 @@ class TestUltrasoundSimulation(unittest.TestCase):
             execution_options=execution_options,
         )
 
-    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    @patch("kwave.executor.Executor.run_simulation")
     def test_simulation_cpu(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=False, binary_name=None)
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    @patch("kwave.executor.Executor.run_simulation")
     def test_simulation_cpu_none(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=True, binary_name=None)
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    @patch("kwave.executor.Executor.run_simulation")
     def test_simulation_gpu_cuda(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
         mock_run_simulation.assert_called_once()
 
-    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    @patch("kwave.executor.Executor.run_simulation")
     def test_simulation_cpu_omp(self, mock_run_simulation):
         mock_run_simulation.return_value = None
         self.run_simulation(is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
