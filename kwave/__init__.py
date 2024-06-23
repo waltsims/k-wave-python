@@ -1,7 +1,7 @@
 import logging
 import os
 import platform
-import urllib.request
+from urllib.request import urlretrieve
 from pathlib import Path
 from typing import List
 import hashlib
@@ -42,7 +42,9 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
-    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"] + WINDOWS_DLLS
+    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
+    if architecture == "omp":
+        specific_filenames += WINDOWS_DLLS
     release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
     return release_urls
 
@@ -171,7 +173,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Download the binary file
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
-            urllib.request.urlretrieve(url, binary_filepath)
+            urlretrieve(url, binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
