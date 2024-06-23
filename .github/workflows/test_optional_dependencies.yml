@@ -6,7 +6,7 @@ jobs:
     test_install:
         strategy:
             matrix:
-                os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
+                os: [ "windows-latest", "ubuntu-latest" , "macos-latest"]
                 python-version: [ "3.9", "3.10", "3.11", "3.12" ]
                 extra_requirements: [ "test", "examples", "docs", "dev", "all" ]
         runs-on: ${{matrix.os}}
