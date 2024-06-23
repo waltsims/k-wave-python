@@ -2,12 +2,14 @@ import unittest
 from unittest.mock import patch
 import numpy as np
 import pytest
+import kwave
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.signals import tone_burst
@@ -100,29 +102,42 @@ class TestUltrasoundSimulation(unittest.TestCase):
         )
         execution_options = ExecutionOptions(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
 
-        with patch("kwave.kspaceFirstOrder2D.Executor.run_simulation") as mock_run_simulation:
-            mock_run_simulation.return_value = None
-            _ = kspaceFirstOrder2D(
-                kgrid=self.kgrid,
-                medium=self.medium,
-                source=self.source,
-                sensor=self.sensor,
-                simulation_options=simulation_options,
-                execution_options=execution_options,
-            )
-            mock_run_simulation.assert_called_once()
+        mock_run_simulation.return_value = None
+        _ = kspaceFirstOrder2D(
+            kgrid=self.kgrid,
+            medium=self.medium,
+            source=self.source,
+            sensor=self.sensor,
+            simulation_options=simulation_options,
+            execution_options=execution_options,
+        )
 
-    def test_simulation_cpu(self):
-        self.run_simulation(is_gpu_simulation=False, binary_name=None)
 
-    def test_simulation_cpu_none(self):
-        self.run_simulation(is_gpu_simulation=True, binary_name=None)
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_cpu_none(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=False, binary_name=None)
 
-    def test_simulation_gpu_cuda(self):
-        self.run_simulation(is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
+    @pytest.mark.skipif(kwave.PLATFORM == "darwin", reason="GPU simulations are currently not supported on MacOS")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_gpu_none(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name=None)
 
-    def test_simulation_cpu_omp(self):
-        self.run_simulation(is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
+    @pytest.mark.skipif(kwave.PLATFORM == "darwin", reason="GPU simulations are currently not supported on MacOS")
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_gpu_cuda(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=True, binary_name="kspaceFirstOrder-CUDA")
+
+    @patch("kwave.kspaceFirstOrder2D.Executor.run_simulation")
+    def test_simulation_cpu_omp(self, mock_run_simulation):
+        mock_run_simulation.return_value = None
+        self._test_simulation(mock_run_simulation, is_gpu_simulation=False, binary_name="kspaceFirstOrder-OMP")
+
+    def _test_simulation(self, mock_run_simulation, is_gpu_simulation, binary_name):
+        self.run_simulation(is_gpu_simulation=is_gpu_simulation, binary_name=binary_name)
+        mock_run_simulation.assert_called_once()
 
 
 if __name__ == "__main__":
