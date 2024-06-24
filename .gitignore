@@ -1,24 +1,46 @@
+# IDE specific files
 .idea/
-difference.py
-transfer_temp/
-test_local.sh
-.DS_Store
-tests/reference_outputs
-/.coverage
-/docs/_build/
-Pipfile.lock
-build/
-kwave/bin/windows
-kwave/bin/linux
-/k_Wave_python.egg-info/
-*.mat
-examples/__pycache__/
-src/
 .vscode/
-*.asv
+
+# Virtual environments
+.venv/
+
+# Compiled files
+*.pyc
+examples/__pycache__/
+
+# System files
+.DS_Store
+
+# Python egg files
+/k_Wave_python.egg-info/
+
+# Build directories
+build/
+src/
+transfer_temp/
+docs/_build/
+kwave/bin/
+
+# Package manager files
+Pipfile.lock
+
+# Coverage reports
+/.coverage
+
+# Test and temporary files
+difference.py
+test_local.sh
+tests/reference_outputs
+
+# Data and output files
+*.mat
+*.mp4
 *.h5
+*.png
 *.tar.gz
 *.whl
-*.png
-*.pyc
+*.asv
 kspaceFirstOrder-*_metadata.json
+
+

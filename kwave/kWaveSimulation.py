@@ -8,7 +8,6 @@ from kwave.kWaveSimulation_helper import (
     display_simulation_params,
     set_sound_speed_ref,
     expand_grid_matrices,
-    create_storage_variables,
     create_absorption_variables,
     scale_source_terms_func,
 )
@@ -1359,36 +1358,6 @@ class kWaveSimulation(object):
             else:
                 # set the sensor mask index variable to be empty
                 self.sensor_mask_index = []
-
-        # run subscript to create storage variables if not saving to disk
-        # TODO (Walter): this case is very broken but save to disk is currently always true!
-        if self.use_sensor and not self.options.save_to_disk:
-            result = create_storage_variables(
-                self.kgrid,
-                self.sensor,
-                self.options,
-                dotdict(
-                    {
-                        "binary_sensor_mask": self.binary_sensor_mask,
-                        "time_rev": self.time_rev,
-                        "blank_sensor": self.blank_sensor,
-                        "record_u_split_field": self.record_u_split_field,
-                        "axisymmetric": self.options.simulation_type.is_axisymmetric(),
-                        "reorder_data": self.reorder_data,
-                    }
-                ),
-                dotdict(
-                    {
-                        "sensor_x": self.sensor.x,
-                        "sensor_mask_index": self.sensor.mask_index,
-                        "record": self.record,
-                        "sensor_data_buffer_size": self.sensor.data_buffer_size,
-                    }
-                ),
-            )
-            self.binary_sensor_mask = result.binary_sensor_mask
-            self.reorder_data = result.reorder_data
-            self.transducer_receive_elevation_focus = result.transducer_receive_elevation_focus
 
     def create_absorption_vars(self) -> None:
         """

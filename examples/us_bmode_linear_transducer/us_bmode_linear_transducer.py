@@ -28,7 +28,6 @@ PHANTOM_DATA_PATH = "phantom_data.mat"
 DATA_CAST = "single"
 RUN_SIMULATION = False
 
-
 pml_size_points = Vector([20, 10, 10])  # [grid points]
 grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
 grid_size_meters = 40e-3  # [m]
@@ -230,7 +229,7 @@ image_size = kgrid.size
 
 # Create the axis variables
 x_axis = [0, image_size[0] * 1e3 * 1.1]  # [mm]
-y_axis = [-0.5 * image_size[0] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
+y_axis = [-0.5 * image_size[1] * 1e3, 0.5 * image_size[1] * 1e3]  # [mm]
 
 # make plotting non-blocking
 plt.ion()
@@ -245,13 +244,8 @@ plt.ylabel("Depth [mm]")
 ax = plt.gca()
 ax.set_ylim(40, 5)
 plt.subplot(1, 3, 2)
-plt.imshow(
-    scan_lines_fund.T,
-    cmap="grey",
-    aspect="auto",
-    extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]],
-)
-plt.xlabel("Image width [mm]")
+plt.imshow(scan_lines_fund.T, cmap="grey", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
+plt.xlabel("Width [mm]")
 plt.title("Fundamental")
 ax = plt.gca()
 ax.set_ylim(40, 5)
@@ -259,11 +253,11 @@ plt.yticks([])
 plt.subplot(1, 3, 3)
 plt.imshow(scan_lines_harm.T, cmap="grey", aspect="auto", extent=[y_axis[0], y_axis[1], x_axis[1], x_axis[0]])
 plt.yticks([])
-plt.xlabel("Image width [mm]")
+plt.xlabel("Width [mm]")
 plt.title("Harmonic")
 ax = plt.gca()
 ax.set_ylim(40, 5)
-plt.show()
+plt.tight_layout()
 
 
 # In[ ]:
@@ -290,4 +284,4 @@ plt.yticks([offset * i for i in range(5)], list(processing_steps.keys()))
 plt.xlabel("Time [\u03BCs]")
 plt.xlim(5e-3 * 2 / c0, t_end)
 plt.title("Processing Steps Visualization")
-plt.show()
+plt.pause(120)  # Display plots for 120 seconds for CI/CD to complete

@@ -25,13 +25,13 @@ classifiers = [
 ]
 dependencies = [
     "h5py==3.11.0",
-    "scipy==1.13.0",
-    "opencv-python==4.9.0.80",
+    "scipy==1.13.1",
+    "opencv-python==4.10.0.84",
     "deepdiff==7.0.1",
-    "matplotlib==3.8.4",
+    "matplotlib==3.9.0",
     "numpy>=1.22.2,<1.27.0",
-    "beartype==0.18.2",
-    "jaxtyping==0.2.28"
+    "beartype==0.18.5",
+    "jaxtyping==0.2.30"
 ]
 
 [project.urls]
@@ -42,15 +42,15 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.5.1",
+        "coverage==7.5.3",
         "phantominator",
-        "requests==2.31.0"]
-example = ["gdown==5.1.0"]
-docs = ["m2r2==0.3.2",
+        "requests==2.32.3"]
+example = ["gdown==5.2.0"]
+docs = [ "sphinx-mdinclude==0.6.1",
     "sphinx-copybutton==0.5.2",
-    "sphinx-tabs==3.4.4",
+    "sphinx-tabs==3.4.5",
     "sphinx-toolbox==3.5.0",
-    "furo==2024.1.29"]
+    "furo==2024.5.6"]
 dev = ["pre-commit==3.7.1"]
 
 [tool.hatch.version]

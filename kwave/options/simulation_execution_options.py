@@ -1,9 +1,7 @@
-import os
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Union
 
+from kwave import PLATFORM, BINARY_PATH
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
 
@@ -15,7 +13,7 @@ class SimulationExecutionOptions:
     is_gpu_simulation: bool = False
 
     # user defined location for the binary
-    binary_path: Optional[str] = os.getenv("KWAVE_BINARY_PATH")
+    binary_path: Optional[str] = BINARY_PATH
     # user defined location for the binary
     binary_name: Optional[str] = None
     # user defined number of threads
@@ -45,23 +43,15 @@ class SimulationExecutionOptions:
 
         if self.binary_name is None:
             if self.is_gpu_simulation:
-                self.binary_name = "kspaceFirstOrder-CUDA" if is_unix() else "kspaceFirstOrder-CUDA.exe"
+                self.binary_name = "kspaceFirstOrder-CUDA"
             else:
-                self.binary_name = "kspaceFirstOrder-OMP" if is_unix() else "kspaceFirstOrder-OMP.exe"
+                self.binary_name = "kspaceFirstOrder-OMP"
 
-        self._is_linux = sys.platform.startswith("linux")
-        self._is_windows = sys.platform.startswith(("win", "cygwin"))
-        self._is_darwin = sys.platform.startswith("darwin")
+        if PLATFORM == "windows":
+            if not self.binary_name.endswith(".exe"):
+                self.binary_name += ".exe"
 
-        if self._is_linux:
-            binary_folder = "linux"
-        elif self._is_windows:
-            binary_folder = "windows"
-        elif self._is_darwin:
-            raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
-
-        path_to_kwave = Path(__file__).parent.parent.resolve()
-        self.binary_path = path_to_kwave / "bin" / binary_folder / self.binary_name
+        self.binary_path = self.binary_path / self.binary_name
 
     def validate(self):
         if isinstance(self.num_threads, int):
