@@ -1,7 +1,7 @@
 import logging
 import os
 import platform
-import urllib.request
+from urllib.request import urlretrieve
 from pathlib import Path
 from typing import List
 import hashlib
@@ -17,9 +17,7 @@ BINARY_VERSION = "v1.3.0"
 PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
 PLATFORM = platform.system().lower()
 
-if PLATFORM == "darwin":
-    raise NotImplementedError("k-wave-python is currently unsupported on MacOS.")
-elif PLATFORM not in ["linux", "windows"]:
+if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
@@ -44,7 +42,9 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
-    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"] + WINDOWS_DLLS
+    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
+    if architecture == "omp":
+        specific_filenames += WINDOWS_DLLS
     release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
     return release_urls
 
@@ -53,6 +53,10 @@ URL_DICT = {
     "linux": {
         "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
+    },
+    "darwin": {
+        "cuda": [],
+        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc2/{EXECUTABLE_PREFIX}OMP"],
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
@@ -169,7 +173,7 @@ def download_binaries(system_os: str, bin_type: str):
         # Download the binary file
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
-            urllib.request.urlretrieve(url, binary_filepath)
+            urlretrieve(url, binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
