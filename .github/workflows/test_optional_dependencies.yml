@@ -1,6 +1,12 @@
 name: test_optional_requirements
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'pyproject.toml'
+  pull_request:
+    paths:
+      - 'pyproject.toml'
 
 jobs:
     test_install:
