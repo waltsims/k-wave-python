@@ -963,8 +963,6 @@ def make_line_straight(
 
     if np.all(a == b):
         raise ValueError("The first and last points cannot be the same.")
-    if len(b) != 2:
-        raise ValueError("Endpoint should be a two-element vector.")
     if not (0 <= a).all() or not (b < grid_size).all():
         raise ValueError("Both the start and end points must lie within the grid.")
 
@@ -1018,12 +1016,12 @@ def make_line_angled(
     if abs(angle) == np.pi:
         # Calculate and draw the line to the maximum allowed y position within the grid and line length constraints
         max_y = min(y + linelength, grid_size.y)
-        line[x - 1, y:max_y - 1] = True
+        line[x - 1, y : max_y - 1] = True
 
         # Update y to the last position and calculate the actual length of the line
         y = max_y - 1
         line_length = np.hypot(x - startpoint[0], y - startpoint[1])
-        
+
     elif (angle < np.pi) and (angle > np.pi / 2):
         # define the equation of the line
         m = -np.tan(angle - np.pi / 2)  # gradient of the line
@@ -1226,18 +1224,9 @@ def make_line(
         ValueError("The starting point must lie within the grid, between [1 1] and [grid_size.x grid_size.y].")
 
     if endpoint is not None:
-        return make_line_straight(
-            grid_size=grid_size, 
-            startpoint=startpoint, 
-            endpoint=endpoint
-        )
+        return make_line_straight(grid_size=grid_size, startpoint=startpoint, endpoint=endpoint)
     else:
-        return make_line_angled(
-            grid_size=grid_size, 
-            startpoint=startpoint, 
-            angle=angle, 
-            length=length
-        )
+        return make_line_angled(grid_size=grid_size, startpoint=startpoint, angle=angle, length=length)
 
 
 @typechecker
