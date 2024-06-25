@@ -34,6 +34,7 @@ def test_makeBowl():
         bowl = make_bowl(grid_size, bowl_pos, radius, diameter, focus_pos, binary=binary, remove_overlap=remove_overlap)
 
         assert np.allclose(expected_bowl, bowl)
+        reader.increment()
 
     logging.log(logging.INFO, "make_bowl(..) works as expected!")
 
