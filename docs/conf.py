@@ -9,7 +9,7 @@
 project = "k-Wave-python"
 copyright = "2024, Walter Simson, Farid Yagubbayli"
 author = "Walter Simson, Farid Yagubbayli"
-version = "0.3.3"
+version = "0.3.4.dev0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
