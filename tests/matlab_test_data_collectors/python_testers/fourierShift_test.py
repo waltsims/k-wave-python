@@ -29,6 +29,8 @@ def test_fourier_shift():
         # Check correctness
         assert np.allclose(shifted_data, expected_shifted_data)
 
+        reader.increment()
+
     logging.log(logging.INFO, "fourier_shift(..) works as expected!")
 
 
