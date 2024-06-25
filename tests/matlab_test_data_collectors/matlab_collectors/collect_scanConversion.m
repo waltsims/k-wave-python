@@ -18,4 +18,6 @@ recorder.recordVariable('resolution', resolution);
 b_mode = scanConversion(scan_lines, steering_angles, image_size, c0, dt, resolution);
 recorder.recordVariable('b_mode', b_mode);
 
+recorder.increment()
+
 recorder.saveRecordsToDisk();
