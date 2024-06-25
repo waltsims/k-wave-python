@@ -30,7 +30,7 @@ def test_makeArc():
         arc = make_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_arc, arc)
-
+        reader.increment()
     logging.log(logging.INFO, "make_arc(..) works as expected!")
 
 
