@@ -1,7 +1,8 @@
 all_params = {
-    {1600, 10, 64, 0.2e-3},...
-    {1540, 20, 128, 0.1e-3},...
-    {1500, 40, 300, 0.5e-4}
+    {1600, 10, 64, 0.2e-3, 'nearest'},...
+    {1540, 20, 128, 0.1e-3, 'nearest'},...
+    {1500, 40, 300, 0.5e-4, 'nearest'},...
+    {1500, 40, 300, 0.5e-4, 'linear'}
     };
 
 
@@ -50,7 +51,7 @@ for idx=1:length(all_params)
             p0_binary = ball_magnitude * makeBall(Nx, Ny, Nz, ball_x_pos, ball_y_pos, ball_z_pos, ball_radius);
             binary_sensor_mask = makeSphere(kgrid.Nx, kgrid.Ny, kgrid.Nz, sensor_radius_grid_points);
         end
-
+        interp_method = params{end};
         % create the time array
         kgrid.makeTime(medium_sound_speed);
         % mock the simulation
@@ -64,6 +65,7 @@ for idx=1:length(all_params)
         recorder.recordVariable('sensor_data', sensor_data);
         recorder.recordVariable('sensor_mask', sensor_mask);
         recorder.recordVariable('binary_sensor_mask', binary_sensor_mask);
+        recorder.recordVariable('interp_method', interp_method);
         recorder.recordObject('kgrid', kgrid);
 
         recorder.increment();

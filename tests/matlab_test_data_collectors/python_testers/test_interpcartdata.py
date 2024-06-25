@@ -5,6 +5,8 @@ from pathlib import Path
 import numpy as np
 import os
 
+import pytest
+
 from kwave.utils.interp import interp_cart_data
 from kwave.kgrid import kWaveGrid
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
@@ -34,11 +36,14 @@ def test_interpcartdata():
         sensor_data = reader.expected_value_of("sensor_data")
         sensor_mask = reader.expected_value_of("sensor_mask")
         binary_sensor_mask = reader.expected_value_of("binary_sensor_mask")
+        interp_method = reader.expected_value_of("interp_method")
 
         kgrid = kGridMock()
         kgrid.set_props(kgrid_props)
 
-        trbd_py = interp_cart_data(kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask)
+        trbd_py = interp_cart_data(
+            kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask, interp=interp_method
+        )
 
         assert np.allclose(trbd, trbd_py)
         reader.increment()
@@ -46,5 +51,20 @@ def test_interpcartdata():
     logging.log(logging.INFO, "cart2grid(..) works as expected!")
 
 
+def test_unknown_interp_method():
+    with pytest.raises(ValueError):
+        reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/interpCartData.mat"))
+        kprops = reader.expected_value_of("kgrid")
+        kgrid = kGridMock()
+        kgrid.set_props(kprops)
+        interp_cart_data(
+            kgrid,
+            cart_sensor_data=reader.expected_value_of("sensor_data"),
+            cart_sensor_mask=reader.expected_value_of("sensor_mask"),
+            binary_sensor_mask=reader.expected_value_of("binary_sensor_mask"),
+            interp="unknown",
+        )
+
+
 if __name__ == "__main__":
-    test_interpcartdata()
+    pytest.main([__file__])
