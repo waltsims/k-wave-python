@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from kwave.utils.math import fourier_shift
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
@@ -18,6 +19,7 @@ def test_fourier_shift():
         data = reader.expected_value_of("data")
         shift = reader.expected_value_of("shift")
         try:
+            # - 1 TODO: subtract 1 from dimension here to make fourier_shift use python dimensions
             shift_dim = reader.expected_value_of("shift_dim")
         except KeyError:
             shift_dim = None
@@ -35,4 +37,4 @@ def test_fourier_shift():
 
 
 if __name__ == "__main__":
-    test_fourier_shift()
+    pytest.main([__file__])
