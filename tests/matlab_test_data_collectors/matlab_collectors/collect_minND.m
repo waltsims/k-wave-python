@@ -7,6 +7,8 @@ matrix_sizes = { ...
 }; 
 
 % 
+output_file = 'collectedValues/minND.mat';
+recorder = utils.TestRecorder(output_file);
 
 for idx=1:length(matrix_sizes)
     matrix_size = matrix_sizes{idx};
@@ -14,10 +16,12 @@ for idx=1:length(matrix_sizes)
    
     [min_val, ind] = minND(matrix);
     
-    idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues/minND/' idx_padded '.mat'];
-    save(filename, 'matrix', 'min_val', 'ind');
+    recorder.recordVariable('matrix', matrix);
+    recorder.recordVariable('min_val', min_val);
+    recorder.recordVariable('ind', ind);
+    recorder.increment();
 end
+recorder.saveRecordsToDisk();
 
 
 

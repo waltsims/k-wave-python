@@ -2,24 +2,23 @@ from kwave.data import Vector
 from kwave.utils.mapgen import make_disc
 
 import logging
-from scipy.io import loadmat
 import numpy as np
 import os
 from pathlib import Path
 
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
 
 def test_makeDisc():
-    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/makeDisc")
-    num_collected_values = len(os.listdir(collected_values_folder))
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/makeDisc.mat")
+    reader = TestRecordReader(collected_values_file)
 
-    for i in range(num_collected_values):
+    for i in range(len(reader)):
         logging.log(logging.INFO, i)
-        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
-        recorded_data = loadmat(filepath)
 
-        Nx, Ny, cx, cy, radius, plot_disc = recorded_data["params"][0]
+        Nx, Ny, cx, cy, radius, plot_disc = reader.expected_value_of("params")
         Nx, Ny, cx, cy, radius, plot_disc = int(Nx), int(Ny), int(cx), int(cy), int(radius), bool(plot_disc)
-        expected_disc = recorded_data["disc"]
+        expected_disc = reader.expected_value_of("disc")
 
         grid_size = Vector([Nx, Ny])
         center = Vector([cx, cy])

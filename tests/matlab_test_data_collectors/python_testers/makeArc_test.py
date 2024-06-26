@@ -1,29 +1,28 @@
+import os
+from pathlib import Path
+import pytest
 from kwave.data import Vector
 from kwave.utils.mapgen import make_arc
 
 import logging
-from scipy.io import loadmat
 import numpy as np
-import os
-from pathlib import Path
+
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_makeArc():
-    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/makeArc")
-    num_collected_values = len(os.listdir(collected_values_folder))
+    reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/makeArc.mat"))
 
-    for i in range(num_collected_values):
+    for i in range(len(reader)):
         logging.log(logging.INFO, i)
-        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
-        recorded_data = loadmat(filepath)
 
-        grid_size, arc_pos, radius, diameter, focus_pos = recorded_data["params"][0]
-        grid_size, arc_pos, diameter, focus_pos = grid_size[0], arc_pos[0], int(diameter), focus_pos[0]
+        grid_size, arc_pos, radius, diameter, focus_pos = reader.expected_value_of("params")
+        grid_size, arc_pos, diameter, focus_pos = grid_size, arc_pos, int(diameter), focus_pos
         try:
             radius = int(radius)
         except OverflowError:
             radius = float(radius)
-        expected_arc = recorded_data["arc"]
+        expected_arc = reader.expected_value_of("arc")
 
         grid_size = Vector(grid_size)
         arc_pos = Vector(arc_pos)
@@ -31,5 +30,9 @@ def test_makeArc():
         arc = make_arc(grid_size, arc_pos, radius, diameter, focus_pos)
 
         assert np.allclose(expected_arc, arc)
-
+        reader.increment()
     logging.log(logging.INFO, "make_arc(..) works as expected!")
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

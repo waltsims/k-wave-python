@@ -4,6 +4,7 @@ params = { ...
     [10e6, 0.5e6, 1, 100], ...
 }; 
 
+recorder = utils.TestRecorder('collectedValues/gaussianFilter.mat');
 for param_idx = 1:length(params)
     fs = params{param_idx}(1);
     fc = params{param_idx}(2);
@@ -11,9 +12,12 @@ for param_idx = 1:length(params)
     bw = params{param_idx}(4);
     input_signal = toneBurst(fs, fc, n_cycles);
     output_signal = gaussianFilter(input_signal, fs, fc, bw);
-    idx_padded = sprintf('%06d', param_idx - 1);
-    filename = ['collectedValues/gaussianFilter/' idx_padded '.mat'];
-    save(filename, 'fs', 'fc', 'n_cycles', 'bw', 'input_signal', 'output_signal');
+    recorder.recordVariable('input_signal', input_signal);
+    recorder.recordVariable('output_signal', output_signal);
+    recorder.recordVariable('fs', fs);
+    recorder.recordVariable('fc', fc);
+    recorder.recordVariable('bw', bw);
+    recorder.increment();
 end
-
+recorder.saveRecordsToDisk();
 disp('Done.')

@@ -6,13 +6,18 @@ all_params = { ...
     {40, 50, 60, 27, 33, 20, 13, false, true}, ...
 }; 
 
+recorder = utils.TestRecorder('collectedValues/makeBall.mat');
+
 for idx=1:length(all_params)
     disp(idx);
     params = all_params{idx};
     
     ball = makeBall(params{:});
+
+    recorder.recordVariable('ball', ball);
+    recorder.recordVariable('params', params);
+    recorder.increment()
     
-    idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues/makeBall/' idx_padded '.mat'];
-    save(filename, 'params', 'ball');
 end
+
+recorder.saveRecordsToDisk();
