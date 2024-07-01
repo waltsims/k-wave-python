@@ -5,15 +5,12 @@ from kwave.kWaveSimulation import kWaveSimulation
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_time, scale_SI
-from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import gaussian_filter
-from kwave.utils.matlab import rem
-from kwave.utils.mapgen import make_arc
 from kwave.utils.pml import get_pml
-from kwave.utils.signals import tone_burst, reorder_sensor_data
+from kwave.utils.signals import reorder_sensor_data
 from kwave.utils.tictoc import TicToc
 
-from kwave.options.simulation_options import SimulationOptions, SimulationType
+from kwave.options.simulation_options import SimulationOptions
 
 from kwave.kWaveSimulation_helper import extract_sensor_data
 
@@ -1071,10 +1068,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # run subscript to compute and save intensity values
     if (options.use_sensor and (not options.elastic_time_rev) and (options.record_I or options.record_I_avg)):
-        save_intensity_matlab_code = True
-        pass
+        # save_intensity_matlab_code = True
         # kspaceFirstOrder_saveIntensity;
-
+        pass
 
     # reorder the sensor points if a binary sensor mask was used for Cartesian
     # sensor mask nearest neighbour interpolation (this is performed after

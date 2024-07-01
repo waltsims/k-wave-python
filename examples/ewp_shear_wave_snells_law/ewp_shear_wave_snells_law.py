@@ -11,7 +11,6 @@ from kwave.ksource import kSource
 from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.pstdElastic2D import pstd_elastic_2d
-from kwave.kWaveSimulation import kWaveSimulation
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
@@ -88,9 +87,9 @@ density = rho1 * np.ones((Nx, Ny))
 alpha_coeff = alpha0_p1 * np.ones((Nx, Ny))
 alpha_power = 2.0
 
-sound_speed[slab == 1] = cp2
-density[slab == 1] = rho2
-alpha_coeff[slab == 1] = alpha0_p2
+sound_speed[slab] = cp2
+density[slab] = rho2
+alpha_coeff[slab] = alpha0_p2
 
 medium = kWaveMedium(sound_speed,
                         density=density,
@@ -154,11 +153,11 @@ density = rho1 * np.ones((Nx, Ny))
 alpha_coeff_compression = alpha0_p1 * np.ones((Nx, Ny))
 alpha_coeff_shear  = alpha0_s1 * np.ones((Nx, Ny))
 
-sound_speed_compression[slab == 1] = cp2
-sound_speed_shear[slab == 1] = cs2
-density[slab == 1] = rho2
-alpha_coeff_compression[slab == 1] = alpha0_p2
-alpha_coeff_shear[slab == 1] = alpha0_s2
+sound_speed_compression[slab] = cp2
+sound_speed_shear[slab] = cs2
+density[slab] = rho2
+alpha_coeff_compression[slab] = alpha0_p2
+alpha_coeff_shear[slab] = alpha0_s2
 
 medium_e = kWaveMedium(sound_speed_compression,
                        sound_speed_compression=sound_speed_compression,
@@ -187,7 +186,7 @@ simulation_options_e = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                          hdf_compression_level='lzf')
 
 # run the elastic simulation
-sensor_data_elastic = pstd_elastic_2D(kgrid=deepcopy(kgrid),
+sensor_data_elastic = pstd_elastic_2d(kgrid=deepcopy(kgrid),
                                       source=deepcopy(source_e),
                                       sensor=deepcopy(sensor),
                                       medium=deepcopy(medium_e),
