@@ -527,7 +527,6 @@ class kWaveSimulation(object):
         Returns:
             None
         """
-        assert not calling_func_name.startswith(("pstdElastic", "kspaceElastic")), "Elastic simulation is not supported."
 
         if calling_func_name == "kspaceFirstOrder1D":
             assert kgrid_dim == 1, f"kgrid has the wrong dimensionality for {calling_func_name}."
@@ -548,9 +547,9 @@ class kWaveSimulation(object):
             None
         """
         if is_elastic_code:  # pragma: no cover
-            logging.log(logging.INFO, "Running k-Wave elastic simulation...")
+            logging.log(logging.INFO, "Running k-Wave elastic simulation ...")
         else:
-            logging.log(logging.INFO, "Running k-Wave simulation...")
+            logging.log(logging.INFO, "Running k-Wave acoustic simulation ...")
         logging.log(logging.INFO, f"  start time: {get_date_string()}")
 
     def set_index_data_type(self) -> None:
