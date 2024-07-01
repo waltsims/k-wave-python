@@ -1,22 +1,17 @@
 import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from operator import not_
 from copy import deepcopy
-from typing import Union
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ksensor import kSensor
-from kwave.ktransducer import NotATransducer
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.pstdElastic2D import pstd_elastic_2d
 from kwave.kWaveSimulation import kWaveSimulation
-
-from kwave.recorder import Recorder
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions

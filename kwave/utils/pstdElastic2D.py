@@ -1,3 +1,22 @@
+import numpy as np
+from scipy.interpolate import interpn
+
+from kwave.kWaveSimulation import kWaveSimulation
+
+from kwave.utils.conversion import db2neper
+from kwave.utils.data import scale_time, scale_SI
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import gaussian_filter
+from kwave.utils.matlab import rem
+from kwave.utils.mapgen import make_arc
+from kwave.utils.pml import get_pml
+from kwave.utils.signals import tone_burst, reorder_sensor_data
+from kwave.utils.tictoc import TicToc
+
+from kwave.options.simulation_options import SimulationOptions, SimulationType
+
+from kwave.kWaveSimulation_helper import extract_sensor_data
+
 def pstd_elastic_2d(kgrid: kWaveGrid,
         source: kSource,
         sensor: Union[NotATransducer, kSensor],
@@ -377,19 +396,13 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium,
                             simulation_options=simulation_options)
 
-    k_sim.input_checking("myname")
+    k_sim.input_checking("pstdElastic2D")
 
     k_sim.rho0 = np.atleast_1d(k_sim.rho0)
 
     m_rho0 : int = np.squeeze(k_sim.rho0).ndim
     m_mu : int = np.squeeze(_mu).ndim
     m_eta : int = np.squeeze(eta).ndim
-
-    grid_points = (kgrid.x, kgrid.y)
-    grid_shape = (kgrid.Nx, kgrid.Ny)
-
-    sg_x = (kgrid.x + kgrid.dx / 2.0, kgrid.y)
-    sg_y = (kgrid.x, kgrid.y + kgrid.dy / 2.0)
 
     # assign the lame parameters
     _mu     = medium.sound_speed_shear**2 * medium.density
@@ -930,7 +943,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             file_index = t_index - sensor.record_start_index + 1
 
             # run sub-function to extract the required data
-            sensor_data = extract_sensor_data(2, sensor_data, file_index, sensor_mask_index, options, record, p, ux_sgx, uy_sgy, []);
+            sensor_data = extract_sensor_data(2, sensor_data, file_index, sensor_mask_index, options, record, p, ux_sgx, uy_sgy)
 
 
 
@@ -939,7 +952,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         if (t_index == ESTIMATE_SIM_TIME_STEPS):
 
             # print estimated simulation time
-            print('  estimated simulation time ', scale_time(etime(clock, loop_start_time) * index_end / t_index), '...');
+            print('  estimated simulation time ', scale_time(etime(clock, loop_start_time) * index_end / t_index), '...')
 
             # check memory usage
             # kspaceFirstOrder_checkMemoryUsage;
@@ -1052,20 +1065,23 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # run subscript to cast variables back to double precision if required
     if options.data_recast:
-        kspaceFirstOrder_dataRecast;
+        #kspaceFirstOrder_dataRecast;
+        pass
 
 
     # run subscript to compute and save intensity values
     if (options.use_sensor and (not options.elastic_time_rev) and (options.record_I or options.record_I_avg)):
         save_intensity_matlab_code = True
-        kspaceFirstOrder_saveIntensity;
+        pass
+        # kspaceFirstOrder_saveIntensity;
 
 
     # reorder the sensor points if a binary sensor mask was used for Cartesian
     # sensor mask nearest neighbour interpolation (this is performed after
     # recasting as the GPU toolboxes do not all support this subscript)
     if (options.use_sensor and options.reorder_data):
-        kspaceFirstOrder_reorderCartData;
+        # kspaceFirstOrder_reorderCartData;
+        pass
 
 
     # filter the recorded time domain pressure signals if transducer filter
@@ -1096,7 +1112,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
 
     # update command line status
-    print('  total computation time ', scale_time(etime(clock, start_time)));
+    print('  total computation time ', scale_time(etime(clock, start_time)))
 
     # switch off log
     # if options.create_log:
