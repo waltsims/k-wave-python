@@ -1,5 +1,4 @@
 import logging
-from scipy.io import loadmat
 import numpy as np
 import os
 from pathlib import Path
@@ -7,22 +6,21 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 from kwave.utils.colormap import get_color_map
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_get_color_map():
     matplotlib.use("Agg")
 
-    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/getColorMap")
-    num_collected_values = len(os.listdir(collected_values_folder))
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/getColorMap.mat")
+    reader = TestRecordReader(collected_values_file)
 
-    for i in range(num_collected_values):
+    for i in range(len(reader)):
         logging.log(logging.INFO, i)
         # Read recorded data
-        filepath = os.path.join(collected_values_folder, f"{i:06d}.mat")
-        recorded_data = loadmat(filepath)
 
-        num_colors = int(recorded_data["num_colors"])
-        expected_color_map = recorded_data["color_map"]
+        num_colors = reader.expected_value_of("num_colors")
+        expected_color_map = reader.expected_value_of("color_map")
 
         # Execute implementation
         color_map = get_color_map(num_colors)
