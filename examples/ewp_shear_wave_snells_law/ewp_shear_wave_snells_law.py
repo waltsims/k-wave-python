@@ -12,6 +12,10 @@ from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.pstdElastic2D import pstd_elastic_2d
 
+from kwave.utils.mapgen import make_arc
+from kwave.utils.matlab import rem
+from kwave.utils.signals import tone_burst
+
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
@@ -92,9 +96,9 @@ density[slab] = rho2
 alpha_coeff[slab] = alpha0_p2
 
 medium = kWaveMedium(sound_speed,
-                        density=density,
-                        alpha_coeff=alpha_coeff,
-                        alpha_power=alpha_power)
+                     density=density,
+                     alpha_coeff=alpha_coeff,
+                     alpha_power=alpha_power)
 
 # define the sensor to record the maximum particle velocity everywhere
 sensor = kSensor()
@@ -107,8 +111,8 @@ source.p_mask = source_mask
 source.p = source_strength * signal
 
 # set the input settings
-input_filename_p = './data_p_input.h5'
-output_filename_p = './data_p_output.h5'
+input_filename_p = 'data_p_input.h5'
+output_filename_p = 'data_p_output.h5'
 
 DATA_CAST: str = 'single'
 

@@ -21,7 +21,7 @@ def display_simulation_params(kgrid: kWaveGrid, medium: kWaveMedium, elastic_cod
     _, scale, _, _ = scale_SI(np.min(k_size[k_size != 0]))
 
     print_grid_size(kgrid, scale)
-    print_max_supported_freq(kgrid, c_min)
+    print_max_supported_freq(kgrid, c_min, c_min_comp, c_min_shear)
 
 
 def get_min_sound_speed(medium, is_elastic_code):
@@ -31,9 +31,10 @@ def get_min_sound_speed(medium, is_elastic_code):
         c_min = np.min(medium.sound_speed)
         return c_min, None, None
     else:  # pragma: no cover
+        c_min = np.min(medium.sound_speed)
         c_min_comp = np.min(medium.sound_speed_compression)
         c_min_shear = np.min(medium.sound_speed_shear[medium.sound_speed_shear != 0])
-        return None, c_min_comp, c_min_shear
+        return c_min, c_min_comp, c_min_shear
 
 
 def print_grid_size(kgrid, scale):
@@ -61,7 +62,7 @@ def print_grid_size(kgrid, scale):
     logging.log(logging.INFO, f"  input grid size: {grid_size_str} grid points ({grid_scale_str} m)")
 
 
-def print_max_supported_freq(kgrid, c_min):
+def print_max_supported_freq(kgrid, c_min, c_min_comp, c_min_shear):
     # display the grid size and maximum supported frequency
     k_max, k_max_all = kgrid.k_max, kgrid.k_max_all
 
@@ -95,3 +96,35 @@ def print_max_supported_freq(kgrid, c_min):
                 f"{scale_SI(k_max.y * c_min / (2*np.pi))[0]}Hz by "
                 f"{scale_SI(k_max.z * c_min / (2*np.pi))[0]}Hz",
             )
+
+    if (c_min_comp is not None and c_min_shear is not None):
+        if kgrid.dim == 1:
+            # display maximum supported frequency
+            logging.log(logging.INFO, "  maximum supported shear frequency: ", scale_SI(k_max_all * c_min_shear / (2 * np.pi))[0], "Hz")
+
+        elif kgrid.dim == 2:
+            # display maximum supported frequency
+            if k_max.x == k_max.y:
+                logging.log(logging.INFO, "  maximum supported shear frequency: ", scale_SI(k_max_all * c_min_shear / (2 * np.pi))[0], "Hz")
+            else:
+                logging.log(
+                    logging.INFO,
+                    "  maximum supported shear frequency: ",
+                    scale_SI(k_max.x * c_min_shear / (2 * np.pi))[0],
+                    "Hz by ",
+                    scale_SI(k_max.y * c_min_shear / (2 * np.pi))[0],
+                    "Hz",
+                )
+
+        elif kgrid.dim == 3:
+            # display maximum supported frequency
+            if k_max.x == k_max.z and k_max.x == k_max.y:
+                logging.log(logging.INFO, "  maximum supported shear frequency: ", f"{scale_SI(k_max_all * c_min / (2*np.pi))[0]}Hz")
+            else:
+                logging.log(
+                    logging.INFO,
+                    "  maximum supported shear frequency: ",
+                    f"{scale_SI(k_max.x * c_min_shear / (2*np.pi))[0]}Hz by "
+                    f"{scale_SI(k_max.y * c_min_shear / (2*np.pi))[0]}Hz by "
+                    f"{scale_SI(k_max.z * c_min_shear / (2*np.pi))[0]}Hz",
+                )

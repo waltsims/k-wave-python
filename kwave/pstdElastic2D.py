@@ -1,11 +1,20 @@
 import numpy as np
 from scipy.interpolate import interpn
 
+from typing import Union
+
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+from kwave.ksource import kSource
 from kwave.kWaveSimulation import kWaveSimulation
+
+from kwave.ktransducer import NotATransducer
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_time, scale_SI
 from kwave.utils.filters import gaussian_filter
+from kwave.utils.matlab import rem
 from kwave.utils.pml import get_pml
 from kwave.utils.signals import reorder_sensor_data
 from kwave.utils.tictoc import TicToc
@@ -398,8 +407,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     k_sim.rho0 = np.atleast_1d(k_sim.rho0)
 
     m_rho0 : int = np.squeeze(k_sim.rho0).ndim
-    m_mu : int = np.squeeze(_mu).ndim
-    m_eta : int = np.squeeze(eta).ndim
 
     # assign the lame parameters
     _mu     = medium.sound_speed_shear**2 * medium.density
@@ -410,6 +417,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         eta = 2.0 * k_sim.rho0 * medium.sound_speed_shear**3 * db2neper(medium.alpha_coeff_shear, 2)
         chi = 2.0 * k_sim.rho0 * medium.sound_speed_compression**3 * db2neper(medium.alpha_coeff_compression, 2) - 2.0 * eta
 
+    m_mu : int = np.squeeze(_mu).ndim
+    m_eta : int = np.squeeze(eta).ndim
 
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
@@ -546,6 +555,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         myType = 'np.single'
     else:
         myType = 'np.double'
+
+    grid_shape = (kgrid.Nx, kgrid.Ny)
 
     # preallocate the loop variables
     ux_split_x = np.zeros((kgrid.Nx, kgrid.Ny))

@@ -44,11 +44,13 @@ class kSource(object):
     s_mask = None  #: Stress source mask
     s_mode = None  #: Stress source mode
 
+
     def is_p0_empty(self) -> bool:
         """
         Check if the `p0` field is set and not empty
         """
         return self.p0 is None or len(self.p0) == 0 or (np.sum(self.p0 != 0) == 0)
+
 
     @property
     def p0(self):
@@ -57,14 +59,18 @@ class kSource(object):
         """
         return self._p0
 
+
     @p0.setter
     def p0(self, val):
-        # check size and contents
+        """
+        check size and contents
+        """
         if len(val) == 0 or np.sum(val != 0) == 0:
             # if the initial pressure is empty, remove field
             self._p0 = None
         else:
             self._p0 = val
+
 
     def validate(self, kgrid: kWaveGrid) -> None:
         """
@@ -132,6 +138,8 @@ class kSource(object):
             # check if the mask is binary or labelled
             p_unique = np.unique(self.p_mask)
 
+            print("shape p_mask", np.shape(self.p_mask), np.shape(self.p))
+
             # create a second indexing variable
             if p_unique.size <= 2 and p_unique.sum() == 1:
                 # if more than one time series is given, check the number of time
@@ -153,6 +161,7 @@ class kSource(object):
 
         # check for time varying velocity source input and set source flag
         if any([(getattr(self, k) is not None) for k in ["ux", "uy", "uz", "u_mask"]]):
+
             # force u_mask to be given
             assert self.u_mask is not None
 
@@ -258,41 +267,47 @@ class kSource(object):
         if any([(getattr(self, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]):
 
             # force s_mask to be given
-            enforce_fields(self, "s_mask")
+            assert hasattr(self, "s_mask")
 
             # check mask is the correct size
-            if (source.s_mask.ndim != kgrid.dim) or (np.shape(source.s_mask) != np.shape(kgrid.k)):
+            if (self.s_mask.ndim != kgrid.dim) or (np.shape(self.s_mask) != np.shape(kgrid.k)):
                 raise ValueError("source.s_mask must be the same size as the computational grid.")
 
             # check mask is not empty
-            assert np.asarray(self.source.s_mask).sum() != 0, "source.s_mask must be a binary grid with at least one element set to 1."
+            assert np.asarray(self.s_mask).sum() != 0, "s_mask must be a binary grid with at least one element set to 1."
 
             # check the source mode input is valid
-            if hasattr(self, 's_mode'):
+            if hasattr(self, 's_mode') and (self.s_mode is not None):
+                print("s_mode:", self.s_mode)
                 assert self.s_mode in ["additive", "dirichlet"], "source.s_mode must be set to ''additive'' or ''dirichlet''."
             else:
                 self.s_mode = 'additive'
 
+            print("sxx:", np.size(self.sxx), np.shape(self.sxx))
+            print(np.shape(self.s_mask))
+
             # set source flgs to the length of the sources, this allows the
             # inputs to be defined independently and be of any length
-            if self.sxx is not None and self.sxx > kgrid.Nt:
+            if self.sxx is not None and np.size(self.sxx) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxx has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.syy is not None and self.syy > kgrid.Nt:
+            if self.syy is not None and np.size(self.syy) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.syy has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.szz is not None and self.szz > kgrid.Nt:
+            if self.szz is not None and np.size(self.szz) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.szz has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.sxy is not None and self.sxy > kgrid.Nt:
+            if self.sxy is not None and np.size(self.sxy) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxy has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.sxz is not None and self.sxz > kgrid.Nt:
+            if self.sxz is not None and np.size(self.sxz) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxz has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.syz is not None and self.syz > kgrid.Nt:
+            if self.syz is not None and np.size(self.syz) > kgrid.Nt:
                 logging.log(logging.WARN, "  source.syz has more time points than kgrid.Nt," " remaining time points will not be used.")
 
             # create an indexing variable corresponding to the location of all the source elements
-            raise NotImplementedError
+            # raise NotImplementedError
 
-            # check if the mask is binary or labelled
+            # check if the mask is binary or labelled: if binary then only (0,1) so sum is 1
             s_unique = np.unique(self.s_mask)
+
+            print('s_unique:', np.size(s_unique), np.sum(s_unique), s_unique)
 
             # create a second indexing variable
             if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
@@ -300,20 +315,22 @@ class kSource(object):
 
                 # if more than one time series is given, check the number of time series given matches the number of source elements
                 if (
-                    (self.source_sxx and np.size(self.sxx[:, 0]) > 1) or
-                    (self.source_syy and np.size(self.syy[:, 0]) > 1) or 
-                    (self.source_szz and np.size(self.szz[:, 0]) > 1) or 
-                    (self.source_sxy and np.size(self.sxy[:, 0]) > 1) or
-                    (self.source_sxz and np.size(self.sxz[:, 0]) > 1) or
-                    (self.source_syz and np.size(self.syz[:, 0]) > 1)) and ((self.source_sxx and np.size(self.sxx[:, 0]) != s_mask_sum) or
-                     (self.source_syy and np.size(self.syy[:, 0]) != s_mask_sum) or
-                     (self.source_szz and np.size(self.szz[:, 0]) != s_mask_sum) or
-                     (self.source_sxy and np.size(self.sxy[:, 0]) != s_mask_sum) or
-                     (self.source_sxz and np.size(self.sxz[:, 0]) != s_mask_sum) or
-                     (self.source_syz and np.size(self.syz[:, 0]) != s_mask_sum)):
+                    (self.sxx is not None and np.size(self.sxx[:, 0]) > 1) or
+                    (self.syy is not None and any(self.syy) != 0 and np.size(self.syy[:, 0]) > 1) or
+                    (self.szz is not None and np.size(self.szz[:, 0]) > 1) or
+                    (self.sxy is not None and np.size(self.sxy[:, 0]) > 1) or
+                    (self.sxz is not None and np.size(self.sxz[:, 0]) > 1) or
+                    (self.syz is not None and np.size(self.syz[:, 0]) > 1)) and \
+                    ((self.sxx is not None and np.size(self.sxx[:, 0]) != s_mask_sum) or
+                     (self.syy is not None and np.size(self.syy[:, 0]) != s_mask_sum) or
+                     (self.szz is not None and np.size(self.szz[:, 0]) != s_mask_sum) or
+                     (self.sxy is not None and np.size(self.sxy[:, 0]) != s_mask_sum) or
+                     (self.sxz is not None and np.size(self.sxz[:, 0]) != s_mask_sum) or
+                     (self.syz is not None and np.size(self.syz[:, 0]) != s_mask_sum)):
                         raise ValueError("The number of time series in source.sxx (etc) must match the number of source elements in source.s_mask.")
 
             else:
+                print("AM HERE")
                 # check the source labels are monotonic, and start from 1
                 if np.sum(s_unique[1:-1] - s_unique[0:-2]) != (np.size(s_unique) - 1) or (not (s_unique == 0).any()):
                     raise ValueError("If using a labelled source.s_mask, the source labels must be monotonically increasing and start from 0.")
@@ -321,12 +338,12 @@ class kSource(object):
                 numel_s_unique: int = np.size(s_unique) - 1
 
                 # if more than one time series is given, check the number of time series given matches the number of source elements
-                if ((self.source_sxx and np.shape(self.sxx)[0] != numel_s_unique) or
-                    (self.source_syy and np.shape(self.syy)[0] != numel_s_unique) or
-                    (self.source_szz and np.shape(self.szz)[0] != numel_s_unique) or
-                    (self.source_sxy and np.shape(self.sxy)[0] != numel_s_unique) or
-                    (self.source_sxz and np.shape(self.sxz)[0] != numel_s_unique) or
-                    (self.source_syz and np.shape(self.syz)[0] != numel_s_unique)):
+                if ((self.sxx and np.shape(self.sxx)[0] != numel_s_unique) or
+                    (self.syy and np.shape(self.syy)[0] != numel_s_unique) or
+                    (self.szz and np.shape(self.szz)[0] != numel_s_unique) or
+                    (self.sxy and np.shape(self.sxy)[0] != numel_s_unique) or
+                    (self.sxz and np.shape(self.sxz)[0] != numel_s_unique) or
+                    (self.syz and np.shape(self.syz)[0] != numel_s_unique)):
                     raise ValueError("The number of time series in source.sxx (etc) must match the number of labelled source elements in source.u_mask.")
 
     @property

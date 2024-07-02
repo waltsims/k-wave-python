@@ -506,7 +506,9 @@ class kWaveSimulation(object):
         self.create_sensor_variables()
         self.create_absorption_vars()
         self.assign_pseudonyms(self.medium, self.kgrid)
+
         self.scale_source_terms(opt.scale_source_terms)
+
         self.create_pml_indices(
             kgrid_dim=self.kgrid.dim,
             kgrid_N=Vector(self.kgrid.N),
@@ -595,6 +597,7 @@ class kWaveSimulation(object):
             medium.check_fields(kgrid_k.shape)
         return user_medium_density_input
 
+
     def check_sensor(self, kgrid_dim) -> None:
         """
         Check the Sensor properties for correctness and validity
@@ -605,9 +608,11 @@ class kWaveSimulation(object):
         Returns:
             None
         """
+
         # =========================================================================
         # CHECK SENSOR STRUCTURE INPUTS
         # =========================================================================
+
         # check sensor fields
         if self.sensor is not None:
             # check the sensor input is valid
@@ -787,10 +792,10 @@ class kWaveSimulation(object):
                             # append the reordering data
                             new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
                             sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
-        
+
                             # reorder p0 based on the order_index
                             sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
-        
+
                             # remove the reordering data
                             sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
                             """
@@ -840,10 +845,10 @@ class kWaveSimulation(object):
 
             """
                 check allowable source types
-                
-                Depending on the kgrid dimensionality and the simulation type, 
+
+                Depending on the kgrid dimensionality and the simulation type,
                     following fields are allowed & might be use:
-                
+
                 kgrid.dim == 1:
                     non-elastic code:
                         ['p0', 'p', 'p_mask', 'p_mode', 'p_frequency_ref', 'ux', 'u_mask', 'u_mode', 'u_frequency_ref']
@@ -919,27 +924,36 @@ class kWaveSimulation(object):
 
             # check for time varying stress source input and set source flag
             if any([(getattr(self.source, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]):
-                # create an indexing variable corresponding to the location of all
-                # the source elements
-                raise NotImplementedError
-                "s_source_pos_index = find(source.s_mask != 0);"
+
+                # check the source mode input is valid
+                if self.source.s_mode is None:
+                    self.source.s_mode = self.SOURCE_S_MODE_DEF
+
+                # create an indexing variable corresponding to the location of all the source elements
+                self.s_source_pos_index = np.where(self.source.s_mask != 0)
+
+                print("shape:", np.shape(self.s_source_pos_index) )
 
                 # check if the mask is binary or labelled
-                "s_unique = unique(source.s_mask);"
+                s_unique = np.unique(self.source.s_mask)
 
                 # create a second indexing variable
-                if eng.eval("numel(s_unique) <= 2 && sum(s_unique) == 1"):  # noqa: F821
+                if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
                     # set signal index to all elements
-                    eng.workspace["s_source_sig_index"] = ":"  # noqa: F821
-
+                    self.s_source_sig_index = ":"
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    s_source_sig_index = source.s_mask(source.s_mask != 0)  # noqa
+                    self.s_source_sig_index = self.source.s_mask[self.source.s_mask != 0]
 
-                f"s_source_pos_index = {self.index_data_type}(s_source_pos_index);"
+                self.s_source_pos_index = np.asarray(self.s_source_pos_index )
+                for i in range(np.shape(self.s_source_pos_index)[0]):
+                    self.s_source_pos_index[i] = cast_to_type(self.s_source_pos_index[i], self.index_data_type)
+
+                print("shape:", np.shape(self.s_source_pos_index) )
+
                 if self.source_s_labelled:
-                    f"s_source_sig_index = {self.index_data_type}(s_source_sig_index);"
+                    self.s_source_sig_index = cast_to_type(self.s_source_sig_index, self.index_data_type)
 
         else:
             # ----------------------
@@ -1404,10 +1418,12 @@ class kWaveSimulation(object):
         except AttributeError:
             p_source_pos_index = None
 
+        print("this ok?", self.s_source_pos_index)
         try:
             s_source_pos_index = self.s_source_pos_index
         except AttributeError:
             s_source_pos_index = None
+        print('confirm:', s_source_pos_index)
 
         try:
             u_source_pos_index = self.u_source_pos_index
