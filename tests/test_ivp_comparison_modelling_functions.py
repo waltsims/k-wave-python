@@ -11,7 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium

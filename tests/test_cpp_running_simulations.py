@@ -14,7 +14,7 @@ import numpy as np
 
 # noinspection PyUnresolvedReferences
 from kwave.data import Vector
-import setup_test  # noqa: F401
+
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
