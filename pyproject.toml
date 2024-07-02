@@ -75,9 +75,12 @@ exclude = [
     "*.mat",
 ]
 
-[tools.pytest.ini_options]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
-
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning"
+]
 [tool.coverage.run]
 branch = true
 command_line = "-m pytest"

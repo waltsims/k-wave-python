@@ -3,18 +3,19 @@ all_params = { ...
     {17, 23, 10, 4, false, false}, ...
     {3, 4, 5, 1, false, true}, ...
 };
-output_folder = 'collectedValues/makeSphere/';
+output_file = 'collectedValues/makeSphere.mat';
+
+recorder = utils.TestRecorder(output_file);
 
 for idx=1:length(all_params)
     disp(idx);
     params = all_params{idx};
     
     sphere = makeSphere(params{:});
+
+    recorder.recordVariable('params', params);
+    recorder.recordVariable('sphere', sphere);
+    recorder.increment();
     
-    idx_padded = sprintf('%06d', idx - 1);
-    if ~exist(output_folder, 'dir')
-        mkdir(output_folder);
-    end
-    filename = [output_folder idx_padded '.mat'];
-    save(filename, 'params', 'sphere');
 end
+recorder.saveRecordsToDisk();
