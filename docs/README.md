@@ -35,7 +35,7 @@ After installation, run the B-mode reconstruction example in the `examples` dire
 ```bash
 git clone https://github.com/waltsims/k-wave-python
 cd k-wave-python
-git checkout v0.3.3
+git checkout v0.3.4
 pip install '.[example]' 
 python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
 ```
