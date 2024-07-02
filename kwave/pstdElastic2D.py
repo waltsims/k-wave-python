@@ -404,6 +404,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     k_sim.input_checking("pstdElastic2D")
 
+    # =========================================================================
+    # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
+    # =========================================================================
+
+    options = k_sim.options
+
     k_sim.rho0 = np.atleast_1d(k_sim.rho0)
 
     m_rho0 : int = np.squeeze(k_sim.rho0).ndim
@@ -411,20 +417,13 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # assign the lame parameters
     _mu     = medium.sound_speed_shear**2 * medium.density
     _lambda = medium.sound_speed_compression**2 * medium.density - 2.0 * _mu
+    m_mu : int = np.squeeze(_mu).ndim
 
     # assign the viscosity coefficients
     if options.kelvin_voigt_model:
-        eta = 2.0 * k_sim.rho0 * medium.sound_speed_shear**3 * db2neper(medium.alpha_coeff_shear, 2)
-        chi = 2.0 * k_sim.rho0 * medium.sound_speed_compression**3 * db2neper(medium.alpha_coeff_compression, 2) - 2.0 * eta
-
-    m_mu : int = np.squeeze(_mu).ndim
-    m_eta : int = np.squeeze(eta).ndim
-
-    # =========================================================================
-    # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
-    # =========================================================================
-
-    options = k_sim.options
+        eta = 2.0 * k_sim.rho0 * k_sim.medium.sound_speed_shear**3 * db2neper(k_sim.medium.alpha_coeff_shear, 2)
+        chi = 2.0 * k_sim.rho0 * k_sim.medium.sound_speed_compression**3 * db2neper(k_sim.medium.alpha_coeff_compression, 2) - 2.0 * eta
+        m_eta : int = np.squeeze(eta).ndim
 
     # calculate the values of the density at the staggered grid points
     # using the arithmetic average [1, 2], where sgx  = (x + dx/2, y) and
@@ -432,8 +431,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     if (m_rho0 == 2 and options.use_sg):
 
         # rho0 is heterogeneous and staggered grids are used
-        rho0_sgx = interpn(kgrid.x, kgrid.y, k_sim.rho0, kgrid.x + kgrid.dx/2, kgrid.y, 'linear')
-        rho0_sgy = interpn(kgrid.x, kgrid.y, k_sim.rho0, kgrid.x, kgrid.y + kgrid.dy/2, 'linear')
+        points = (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec))
+        mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx/2, np.squeeze(k_sim.kgrid.y_vec))
+        interp_points = np.moveaxis(mg, 0, -1)
+
+        # print(np.asarray(points).shape)
+        rho0_sgx = interpn(points, k_sim.rho0, interp_points, bounds_error=False)
+
+
+
+        rho0_sgy = interpn(points, k_sim.rho0, (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy/2), method='linear')
 
         # set values outside of the interpolation range to original values
         rho0_sgx[np.isnan(rho0_sgx)] = k_sim.rho0[np.isnan(rho0_sgx)]
@@ -459,7 +466,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     if (m_mu == 2 and options.use_sg):
 
         # mu is heterogeneous and staggered grids are used
-        mu_sgxy  = 1.0 / interpn(kgrid.x, kgrid.y, 1.0 / _mu, kgrid.x + kgrid.dx/2, kgrid.y + kgrid.dy/2, 'linear')
+        z = (kgrid.x_vec, kgrid.y_vec)
+        zi = (kgrid.x_vec + kgrid.dx/2, kgrid.y_vec + kgrid.dy/2)
+        mu_sgxy  = 1.0 / interpn(z, 1.0 / _mu, zi, 'linear')
 
         # set values outside of the interpolation range to original values
         mu_sgxy[np.isnan(mu_sgxy)] = _mu[np.isnan(mu_sgxy)]
@@ -476,7 +485,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         if (m_eta == 2 and options.use_sg):
 
             # eta is heterogeneous and staggered grids are used
-            eta_sgxy  = 1.0 / interpn(kgrid.x, kgrid.y, 1./eta, kgrid.x + kgrid.dx/2, kgrid.y + kgrid.dy/2, 'linear')
+            z = (kgrid.x_vec, kgrid.y_vec)
+            zi = (kgrid.x_vec + kgrid.dx/2, kgrid.y_vec + kgrid.dy/2)
+            eta_sgxy  = 1.0 / interpn(z, 1.0 / eta, zi, 'linear')
 
             # set values outside of the interpolation range to original values
             eta_sgxy[np.isnan(eta_sgxy)] = eta[np.isnan(eta_sgxy)]

@@ -82,6 +82,7 @@ class SimulationOptions(object):
         pml_x_size: PML Size for x-axis
         pml_y_size: PML Size for y-axis
         pml_z_size: PML Size for z-axis
+        kelvin_voigt_model: setting for elastic code
     """
 
     simulation_type: SimulationType = SimulationType.FLUID
@@ -118,6 +119,9 @@ class SimulationOptions(object):
     pml_x_size: Optional[int] = None
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
+    kelvin_voigt_model: bool = False
+    # time_rev: bool = False
+
 
     def __post_init__(self):
         assert self.cartesian_interp in [

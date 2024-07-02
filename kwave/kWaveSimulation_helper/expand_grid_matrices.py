@@ -82,6 +82,8 @@ def expand_kgrid(kgrid, is_axisymmetric, pml_size):
     # re-assign original time array
     kgrid.setTime(Nt_temp, dt_temp)
 
+    print("NEW KGRID")
+
     return kgrid
 
 
@@ -115,6 +117,20 @@ def expand_medium(medium: kWaveMedium, expand_size):
 
     # for key in ['alpha_coeff', 'alpha_coeff_compression', 'alpha_coeff_shear', 'BonA']:
     for key in ["alpha_coeff", "BonA"]:
+        # enlarge the grid of medium[key] if given
+        attr = getattr(medium, key)
+        if attr is not None and np.atleast_1d(attr).size > 1:
+            attr = expand_matrix(np.atleast_1d(attr), expand_size)
+            setattr(medium, key, attr)
+
+    for key in ["sound_speed_shear", "sound_speed_compression"]:
+        # enlarge the grid of medium[key] if given
+        attr = getattr(medium, key)
+        if attr is not None and np.atleast_1d(attr).size > 1:
+            attr = expand_matrix(np.atleast_1d(attr), expand_size)
+            setattr(medium, key, attr)
+
+    for key in ["alpha_coeff_shear", "alpha_coeff_compression"]:
         # enlarge the grid of medium[key] if given
         attr = getattr(medium, key)
         if attr is not None and np.atleast_1d(attr).size > 1:
