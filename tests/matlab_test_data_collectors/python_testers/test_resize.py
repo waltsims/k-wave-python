@@ -20,7 +20,12 @@ def test_resize():
 
         resized_volume = resize(volume, new_size, interp_mode=method)
 
+        print(i)
         assert np.allclose(expected_resized_volume, resized_volume), f"Results do not match for {i + 1} dimensional case."
         reader.increment()
 
     logging.log(logging.INFO, "resize(..) works as expected!")
+
+
+if __name__ == "__main__":
+    test_resize()
