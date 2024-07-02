@@ -38,4 +38,3 @@ for data_dim_idx=1:size(dims, 2)
 end
 
 recorder.saveRecordsToDisk();
-

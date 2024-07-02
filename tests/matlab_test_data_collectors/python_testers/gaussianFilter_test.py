@@ -6,8 +6,10 @@ from kwave.utils.filters import gaussian_filter
 
 
 def test_gaussianFilter():
-    collected_values_folder = os.path.join(Path(__file__).parent, "collectedValues/gaussianFilter")
-    record_reader = TestRecordReader(collected_values_folder)
+
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/gaussianFilter.mat")
+
+    record_reader = TestRecordReader(collected_values_file)
 
     for _ in range(len(record_reader)):
         fs = record_reader.expected_value_of("fs")
