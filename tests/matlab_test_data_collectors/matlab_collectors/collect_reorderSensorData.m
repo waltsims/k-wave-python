@@ -9,7 +9,7 @@ for i=1:20
     mask(randi(mask_size(1)), randi(mask_size(2))) = 1;
 end
 sensor = struct('mask', mask);
-
+sensor_data = rand(sensor_data_size);
 kgrid = kWaveGrid(kgrid_size(1), kgrid_dx_dy, kgrid_size(2), kgrid_dx_dy);
 reordered_sensor_data = reorderSensorData(kgrid, sensor, sensor_data);
 
