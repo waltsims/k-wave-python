@@ -9,6 +9,7 @@ dz = 1.0;
 
 idx = 0;
 
+recorder = utils.TestRecorder('collectedValues/cart2grid.mat');
 for dim = dims
     
     if dim == 2
@@ -58,14 +59,17 @@ for dim = dims
 
             [grid_data, order_index, reorder_index] = cart2grid(kgrid, cart_data, is_axisymmetric);
 
-            idx_padded = sprintf('%06d', idx);
-            filename = ['collectedValues/cart2grid/' idx_padded '.mat'];
-            save(filename, 'kgrid', 'cart_data', 'grid_data', ...
-                            'order_index', 'reorder_index', 'is_axisymmetric');
-            idx = idx + 1;
+            recorder.recordObject('kgrid', kgrid);
+            recorder.recordVariable('cart_data', cart_data);
+            recorder.recordVariable('grid_data', grid_data);
+            recorder.recordVariable('order_index', order_index);
+            recorder.recordVariable('reorder_index', reorder_index);
+            recorder.recordVariable('is_axisymmetric', is_axisymmetric);
+            recorder.increment();
 
         end
     end
     
 end
+recorder.saveRecordsToDisk();
 disp('Done.')
