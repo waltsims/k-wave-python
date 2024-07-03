@@ -254,7 +254,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     # nearest neighbour interpolation of the data points
     for point_index in range(num_binary_sensor_points):
         # find the measured data point that is closest
-        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, ord=2, axis=1)
+        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask[: kgrid.dim, :].T, ord=2, axis=1)
         if interp == "nearest":
             dist_min_index = np.argmin(dist)
 
