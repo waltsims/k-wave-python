@@ -29,6 +29,21 @@ recorder.recordObject('kgrid', kgrid);
 recorder.recordObject('medium', medium);    
 recorder.recordVariable('dt', dt_stability_limit);
 recorder.increment();
+medium.alpha_mode = 'no_dispersion';
+medium.sound_speed_ref = 'mean';
+dt_stability_limit = checkStability(kgrid, medium);
+recorder.recordObject('kgrid', kgrid);
+recorder.recordObject('medium', medium);    
+recorder.recordVariable('dt', dt_stability_limit);
+recorder.increment();
+medium.alpha_mode = 'no_absorption';
+medium.sound_speed_ref = 'min';
+dt_stability_limit = checkStability(kgrid, medium);
+recorder.recordObject('kgrid', kgrid);
+recorder.recordObject('medium', medium);    
+recorder.recordVariable('dt', dt_stability_limit);
+recorder.increment();
+
     
 
 recorder.saveRecordsToDisk();   

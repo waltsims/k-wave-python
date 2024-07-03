@@ -1,4 +1,5 @@
 import logging
+import numbers
 import platform
 from copy import deepcopy
 from typing import List, TYPE_CHECKING, Any
@@ -178,7 +179,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
     if medium.sound_speed_ref is not None:
         ss_ref = medium.sound_speed_ref
-        if np.isscalar(ss_ref):
+        if isinstance(ss_ref, numbers.Number):
             c_ref = ss_ref
         else:
             try:
@@ -216,13 +217,13 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
         if medium.alpha_mode != "no_absorption":
             absorb_tau = -2.0 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1.0)
         else:
-            absorb_tau = 0
+            absorb_tau = np.array([0])
 
         # calculate the dispersion constant
         if medium.alpha_mode != "no_dispersion":
             absorb_eta = 2.0 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power) * np.tan(np.pi * medium.alpha_power / 2.0)
         else:
-            absorb_eta = 0
+            absorb_eta = np.array([0])
 
         # estimate the timestep required for stability in the absorbing case by
         # assuming the k-space correction factor, kappa = 1 (note that
@@ -239,13 +240,13 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
         # first define the function to iterate
         def kappa(dt):
-            return sinc(c_ref * kmax * dt / 2)
+            return sinc(c_ref * kmax * dt / 2.0)
 
         def temp3(dt):
             return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax ** (medium.alpha_power - 1)
 
         def func_to_solve(dt):
-            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2 + 4 * temp2)) / (temp2 * kmax * kappa(dt) * medium.sound_speed.max())
+            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2.0 + 4.0 * temp2)) / (temp2 * kmax * kappa(dt) * medium.sound_speed.max())
 
         # run the fixed point iteration
         dt_stability_limit = dt_estimate

@@ -30,6 +30,33 @@ def test_stability_check():
     dt = check_stability(kgrid, medium)
     expected_dt = reader.expected_value_of("dt")
     assert np.allclose(dt, expected_dt), f"Stability check failed, expected {expected_dt}, got {dt}."
+    reader.increment()
+    medium_vals = reader.expected_value_of("medium")
+    medium = kWaveMedium(
+        sound_speed=medium_vals["sound_speed"],
+        density=medium_vals["density"],
+        alpha_coeff=medium_vals["alpha_coeff"],
+        alpha_power=medium_vals["alpha_power"],
+        sound_speed_ref=medium_vals["sound_speed_ref"],
+        alpha_mode=medium_vals["alpha_mode"],
+    )
+    dt = check_stability(kgrid, medium)
+    expected_dt = reader.expected_value_of("dt")
+    assert np.allclose(dt, expected_dt), f"Stability check failed, expected {expected_dt}, got {dt}."
+    reader.increment()
+    medium_vals = reader.expected_value_of("medium")
+    medium = kWaveMedium(
+        sound_speed=medium_vals["sound_speed"],
+        density=medium_vals["density"],
+        alpha_coeff=medium_vals["alpha_coeff"],
+        alpha_power=medium_vals["alpha_power"],
+        sound_speed_ref=medium_vals["sound_speed_ref"],
+        alpha_mode=medium_vals["alpha_mode"],
+    )
+    dt = check_stability(kgrid, medium)
+    expected_dt = reader.expected_value_of("dt")
+    assert np.allclose(dt, expected_dt), f"Stability check failed, expected {expected_dt}, got {dt}."
+
     pass
 
 
