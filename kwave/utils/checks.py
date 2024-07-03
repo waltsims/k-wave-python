@@ -201,7 +201,7 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
 
         else:
             # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
-            dt_stability_limit = 2 / (c_ref * kmax) * np.arcsin(c_ref / medium.sound_speed.max()) 
+            dt_stability_limit = 2.0 / (c_ref * kmax) * np.arcsin(c_ref / medium.sound_speed.max())
 
     else:
         # =====================================================================
@@ -212,16 +212,17 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
         medium.alpha_coeff = db2neper(medium.alpha_coeff, medium.alpha_power)
 
         # calculate the absorption constant
-        if medium.alpha_mode == "no_absorption":
-            absorb_tau = -2 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1)
+        # calculate the absorption constant
+        if medium.alpha_mode != "no_absorption":
+            absorb_tau = -2.0 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1.0)
         else:
-            absorb_tau = np.array([0])
+            absorb_tau = 0
 
         # calculate the dispersion constant
-        if medium.alpha_mode == "no_dispersion":
-            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed**medium.alpha_power * np.tan(np.pi * medium.alpha_power / 2)
+        if medium.alpha_mode != "no_dispersion":
+            absorb_eta = 2.0 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power) * np.tan(np.pi * medium.alpha_power / 2.0)
         else:
-            absorb_eta = np.array([0])
+            absorb_eta = 0
 
         # estimate the timestep required for stability in the absorbing case by
         # assuming the k-space correction factor, kappa = 1 (note that
