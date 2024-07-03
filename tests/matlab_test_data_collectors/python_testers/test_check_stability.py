@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -56,6 +57,23 @@ def test_stability_check():
     dt = check_stability(kgrid, medium)
     expected_dt = reader.expected_value_of("dt")
     assert np.allclose(dt, expected_dt), f"Stability check failed, expected {expected_dt}, got {dt}."
+
+    pass
+
+
+def test_stability_check_fail():
+    kgrid = Mock()
+    kgrid.k.max().return_value = 0.5
+    medium = kWaveMedium(
+        sound_speed=1500,
+        density=1600,
+        alpha_coeff=0.5,
+        alpha_power=1.5,
+        sound_speed_ref="blah",
+    )
+
+    with pytest.raises(NotImplementedError):
+        check_stability(kgrid, medium)
 
     pass
 
