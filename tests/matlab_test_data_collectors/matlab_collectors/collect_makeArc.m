@@ -18,13 +18,19 @@ all_params = { ...
     {[40, 30], [20, 15], inf, 21, [24, 24]}, ...
 }; 
 
+recorder = utils.TestRecorder('collectedValues/makeArc.mat');
 for idx=1:length(all_params)
     disp(idx);
+
     params = all_params{idx};
+
+    recorder.recordVariable('params', params);
     
     arc = makeArc(params{:});
+
+    recorder.recordVariable('arc', arc);
     
-    idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues/makeArc/' idx_padded '.mat'];
-    save(filename, 'params', 'arc');
+    recorder.increment()
 end
+
+recorder.saveRecordsToDisk();

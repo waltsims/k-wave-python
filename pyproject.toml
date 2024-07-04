@@ -26,12 +26,12 @@ classifiers = [
 dependencies = [
     "h5py==3.11.0",
     "scipy==1.13.1",
-    "opencv-python==4.10.0.82",
+    "opencv-python==4.10.0.84",
     "deepdiff==7.0.1",
     "matplotlib==3.9.0",
     "numpy>=1.22.2,<2.1.0",
     "beartype==0.18.5",
-    "jaxtyping==0.2.29"
+    "jaxtyping==0.2.31"
 ]
 
 [project.urls]
@@ -42,14 +42,14 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.5.3",
+        "coverage==7.5.4",
         "phantominator",
         "requests==2.32.3"]
 example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.1",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.5",
-    "sphinx-toolbox==3.5.0",
+    "sphinx-toolbox==3.6.0",
     "furo==2024.5.6"]
 dev = ["pre-commit==3.7.1"]
 
@@ -75,9 +75,12 @@ exclude = [
     "*.mat",
 ]
 
-[tools.pytest.ini_options]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
-
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning"
+]
 [tool.coverage.run]
 branch = true
 command_line = "-m pytest"

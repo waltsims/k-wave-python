@@ -9,13 +9,15 @@ all_params = { ...
     {[40, 40, 40], [32, 2, 3], 10, 11, [17, 18, 5], 'Binary', false, 'RemoveOverlap', true}, ...
 }; 
 
+recorder = utils.TestRecorder('collectedValues/makeBowl.mat');
 for idx=1:length(all_params)
     disp(idx);
     params = all_params{idx};
      
     bowl = makeBowl(params{:});
-    
-    idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues/makeBowl/' idx_padded '.mat'];
-    save(filename, 'params', 'bowl');
+
+    recorder.recordVariable('bowl', bowl);
+    recorder.recordVariable('params', params);
+    recorder.increment()
 end
+recorder.saveRecordsToDisk();

@@ -231,8 +231,6 @@ def cart2grid(
         data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
         if not axisymmetric:
             data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
-        else:
-            data_y = data_y
 
         # check if the points all lie within the grid
         if data_x.max() >= kgrid.Nx or data_y.max() >= kgrid.Ny or data_x.min() < 0 or data_y.min() < 0:

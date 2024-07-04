@@ -6,15 +6,13 @@ recorder = utils.TestRecorder(output_file);
 interp_methods = {'nearest', 'linear'};
 
 % Generate a random 3D volume with dimensions Nx x Ny x Nz
-Nx = randi([10,20]);
-Ny = randi([10,20]);
-Nz = randi([10,20]);
-volume = rand([Nx, Ny, Nz]);
-
-% Specify the desired new size of the volume
-new_size = [randi([10,20]), randi([10,20]), randi([10,20])];
+sizes =  [32, 32, 32; 48, 48, 48; 56, 56, 56];
+new_sizes = [16, 16, 16; 32, 32, 32; 48, 48, 48]; 
 
 
+for i = length(sizes)
+    new_size = new_sizes(i,:);
+    volume = rand(sizes(i,:));
 % Loop through each interpolation method
 for method = interp_methods
     % Use the current interpolation method to resize the volume
@@ -26,5 +24,6 @@ for method = interp_methods
     recorder.recordVariable('method', method)
     recorder.increment();
 
+end
 end
 recorder.saveRecordsToDisk(); 
