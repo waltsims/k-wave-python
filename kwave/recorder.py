@@ -34,6 +34,7 @@ class Recorder(object):
         self.y1_inside, self.y2_inside = None, None
         self.z1_inside, self.z2_inside = None, None
 
+
     def set_flags_from_list(self, flags_list: List[str], is_elastic_code: bool) -> None:
         """
         Set Recorder flags that are present in the string list to True
@@ -48,7 +49,7 @@ class Recorder(object):
         # check the contents of the cell array are valid inputs
         allowed_flags = self.get_allowed_flags(is_elastic_code)
         for record_element in flags_list:
-            assert record_element in allowed_flags, f"{record_element} is not a valid input for sensor.record"
+            assert record_element in allowed_flags, f"{record_element} is not a valid input for recording"
 
             if record_element == "p":  # custom logic for 'p'
                 continue
@@ -58,6 +59,7 @@ class Recorder(object):
         # set self.record_p to false if a user input for sensor.record
         # is given and 'p' is not set (default is true)
         self.p = "p" in flags_list
+
 
     def set_index_variables(self, kgrid: kWaveGrid, pml_size: Vector, is_pml_inside: bool, is_axisymmetric: bool) -> None:
         """
@@ -73,28 +75,29 @@ class Recorder(object):
             None
         """
         if not is_pml_inside:
-            self.x1_inside = pml_size.x + 1.0
-            self.x2_inside = kgrid.Nx - pml_size.x
+            self.x1_inside: int = pml_size.x + 1
+            self.x2_inside: int = kgrid.Nx - pml_size.x
             if kgrid.dim == 2:
                 if is_axisymmetric:
-                    self.y1_inside = 1
+                    self.y1_inside: int = 1
                 else:
-                    self.y1_inside = pml_size.y + 1.0
-                self.y2_inside = kgrid.Ny - pml_size.y
+                    self.y1_inside: int = pml_size.y + 1
+                self.y2_inside: int = kgrid.Ny - pml_size.y
             elif kgrid.dim == 3:
-                self.y1_inside = pml_size.y + 1.0
-                self.y2_inside = kgrid.Ny - pml_size.y
-                self.z1_inside = pml_size.z + 1.0
-                self.z2_inside = kgrid.Nz - pml_size.z
+                self.y1_inside: int = pml_size.y + 1
+                self.y2_inside: int = kgrid.Ny - pml_size.y
+                self.z1_inside: int = pml_size.z + 1
+                self.z2_inside: int = kgrid.Nz - pml_size.z
         else:
-            self.x1_inside = 1.0
-            self.x2_inside = kgrid.Nx
+            self.x1_inside: int = 1.0
+            self.x2_inside: int = kgrid.Nx
             if kgrid.dim == 2:
-                self.y1_inside = 1.0
-                self.y2_inside = kgrid.Ny
+                self.y1_inside: int = 1.0
+                self.y2_inside: int = kgrid.Ny
             if kgrid.dim == 3:
-                self.z1_inside = 1.0
-                self.z2_inside = kgrid.Nz
+                self.z1_inside: int = 1.0
+                self.z2_inside: int = kgrid.Nz
+
 
     @staticmethod
     def get_allowed_flags(is_elastic_code):
@@ -102,7 +105,7 @@ class Recorder(object):
         Get the list of allowed flags for a given simulation type
 
         Args:
-            is_elastic_code: Whether the simulation is axisymmetric
+            is_elastic_code: Whether the simulation is elastic
 
         Returns:
             List of allowed flags for a given simulation type

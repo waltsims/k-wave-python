@@ -5,3 +5,9 @@ from kwave.kWaveSimulation_helper.retract_transducer_grid_size import retract_tr
 from kwave.kWaveSimulation_helper.save_to_disk_func import save_to_disk_func
 from kwave.kWaveSimulation_helper.scale_source_terms_func import scale_source_terms_func
 from kwave.kWaveSimulation_helper.set_sound_speed_ref import set_sound_speed_ref
+from kwave.kWaveSimulation_helper.extract_sensor_data import extract_sensor_data
+from kwave.kWaveSimulation_helper.create_storage_variables import gridDataFast2D, \
+  gridDataFast3D, OutputSensor, create_storage_variables, set_flags, get_num_of_sensor_points, \
+  get_num_recorded_time_points, create_shift_operators, create_normalized_wavenumber_vectors, \
+  create_sensor_variables, create_transducer_buffer, compute_triangulation_points, \
+  calculate_all_vars_size

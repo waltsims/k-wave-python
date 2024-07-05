@@ -138,8 +138,6 @@ class kSource(object):
             # check if the mask is binary or labelled
             p_unique = np.unique(self.p_mask)
 
-            print("shape p_mask", np.shape(self.p_mask), np.shape(self.p))
-
             # create a second indexing variable
             if p_unique.size <= 2 and p_unique.sum() == 1:
                 # if more than one time series is given, check the number of time
@@ -278,13 +276,9 @@ class kSource(object):
 
             # check the source mode input is valid
             if hasattr(self, 's_mode') and (self.s_mode is not None):
-                print("s_mode:", self.s_mode)
                 assert self.s_mode in ["additive", "dirichlet"], "source.s_mode must be set to ''additive'' or ''dirichlet''."
             else:
                 self.s_mode = 'additive'
-
-            print("sxx:", np.size(self.sxx), np.shape(self.sxx))
-            print(np.shape(self.s_mask))
 
             # set source flgs to the length of the sources, this allows the
             # inputs to be defined independently and be of any length
@@ -307,8 +301,6 @@ class kSource(object):
             # check if the mask is binary or labelled: if binary then only (0,1) so sum is 1
             s_unique = np.unique(self.s_mask)
 
-            print('s_unique:', np.size(s_unique), np.sum(s_unique), s_unique)
-
             # create a second indexing variable
             if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
                 s_mask_sum = np.array(self.s_mask).sum()
@@ -330,7 +322,6 @@ class kSource(object):
                         raise ValueError("The number of time series in source.sxx (etc) must match the number of source elements in source.s_mask.")
 
             else:
-                print("AM HERE")
                 # check the source labels are monotonic, and start from 1
                 if np.sum(s_unique[1:-1] - s_unique[0:-2]) != (np.size(s_unique) - 1) or (not (s_unique == 0).any()):
                     raise ValueError("If using a labelled source.s_mask, the source labels must be monotonically increasing and start from 0.")

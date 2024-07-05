@@ -3,6 +3,7 @@ from numpy.fft import ifftshift
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
+from kwave.recorder import Recorder
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
 
@@ -54,31 +55,34 @@ def gridDataFast3D(x, y, z, xi, yi, zi):
     return tri.points[indices, :], bc
 
 
-class Record(object):
+class OutputSensor(object):
     """
     Class which holds information about which spatial locations are used to save data
     """
     flags = None
     x_shift_neg = None
+    p = None
 
-
-# Note from Farid: This function/file is very suspicios. I'm pretty sure that the implementation is not correct.
-# Full test-coverage is required for bug-fixes!
 
 def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
-                             values: dotdict, flags: dotdict):
+                             values: dotdict, flags: dotdict, record: Recorder):
     """
-    Creates the storage variable
+    Creates the storage variable sensor
     """
 
     # =========================================================================
     # PREPARE DATA MASKS AND STORAGE VARIABLES
     # =========================================================================
 
-    record = Record()
+    sensor_data = OutputSensor()
 
-    # this
+    print("unset flags:")
+    for k, v in flags.items():
+        print(k, v)
     flags = set_flags(flags, values.sensor_x, sensor.mask, opt.cartesian_interp)
+    print("set flags:")
+    for k, v in flags.items():
+        print(k, v)
 
     # preallocate output variables
     if flags.time_rev:
@@ -104,13 +108,13 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
     sensor_data = create_sensor_variables(values.record, kgrid, num_sensor_points, num_recorded_time_points,
                                           all_vars_size)
 
-    create_transducer_buffer(values.transducer_sensor, values.transducer_receive_elevation_focus, sensor,
+    create_transducer_buffer(flags.transducer_sensor, values.transducer_receive_elevation_focus, sensor,
                              num_sensor_points, num_recorded_time_points, values.sensor_data_buffer_size,
                              flags, sensor_data)
 
     record = compute_triangulation_points(flags, kgrid, record, sensor.mask)
 
-    return flags
+    return flags, record, sensor_data
 
 
 def set_flags(flags: dotdict, sensor_x, sensor_mask, is_cartesian_interp):
@@ -191,7 +195,7 @@ def get_num_recorded_time_points(kgrid_dim, Nt, stream_to_disk, record_start_ind
     return num_recorded_time_points, stream_data_index
 
 
-def create_shift_operators(record: dotdict, record_old: dotdict, kgrid: kWaveGrid, is_use_sg: bool):
+def create_shift_operators(record: Recorder, record_old: Recorder, kgrid: kWaveGrid, is_use_sg: bool):
     """
     create shift operators used for calculating the components of the
     particle velocity field on the non-staggered grids (these are used
@@ -222,7 +226,7 @@ def create_shift_operators(record: dotdict, record_old: dotdict, kgrid: kWaveGri
     return record
 
 
-def create_normalized_wavenumber_vectors(record: dotdict, kgrid: kWaveGrid, is_record_u_split_field):
+def create_normalized_wavenumber_vectors(record: Recorder, kgrid: kWaveGrid, is_record_u_split_field):
     """
     create normalised wavenumber vectors for k-space dyadics used to
     split the particule velocity into compressional and shear components
@@ -249,13 +253,13 @@ def create_normalized_wavenumber_vectors(record: dotdict, kgrid: kWaveGrid, is_r
     return record
 
 
-def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_recorded_time_points, all_vars_size):
+def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_recorded_time_points, all_vars_size) -> dotdict:
     """
     create storage and scaling variables - all variables are saved as
-    fields of a structure called sensor_data
+    fields of a container called sensor_data
     """
 
-    # allocate empty sensor structure
+    # allocate empty sensor
     sensor_data = dotdict()
 
     # if only p is being stored (i.e., if no user input is given for
@@ -268,15 +272,15 @@ def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_r
 
     # maximum pressure
     if record_old.p_max:
-        sensor_data.p_max = np.zeros([num_sensor_points, 1])
+        sensor_data.p_max = np.zeros([num_sensor_points,])
 
     # minimum pressure
     if record_old.p_min:
-        sensor_data.p_min = np.zeros([num_sensor_points, 1])
+        sensor_data.p_min = np.zeros([num_sensor_points,])
 
     # rms pressure
     if record_old.p_rms:
-        sensor_data.p_rms = np.zeros([num_sensor_points, 1])
+        sensor_data.p_rms = np.zeros([num_sensor_points,])
 
     # maximum pressure over all grid points
     if record_old.p_max_all:
@@ -302,46 +306,44 @@ def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_r
     # maximum particle velocity
     if record_old.u_max:
 
-        # pre-allocate the velocity fields based on the number of
-        # dimensions in the simulation
+        # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 1:
-            sensor_data.ux_max = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_max = np.zeros([num_sensor_points,])
         if kgrid.dim == 2:
-            sensor_data.ux_max = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_max = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_max = np.zeros([num_sensor_points,])
+            sensor_data.uy_max = np.zeros([num_sensor_points,])
         if kgrid.dim == 3:
-            sensor_data.ux_max = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_max = np.zeros([num_sensor_points, 1])
-            sensor_data.uz_max = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_max = np.zeros([num_sensor_points,])
+            sensor_data.uy_max = np.zeros([num_sensor_points,])
+            sensor_data.uz_max = np.zeros([num_sensor_points,])
 
     # minimum particle velocity
     if record_old.u_min:
-        # pre-allocate the velocity fields based on the number of
-        # dimensions in the simulation
+        # pre-allocate the velocity fields based on the number of dimensions in the simulation
 
         if kgrid.dim == 1:
-            sensor_data.ux_min = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_min = np.zeros([num_sensor_points,])
         if kgrid.dim == 2:
-            sensor_data.ux_min = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_min = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_min = np.zeros([num_sensor_points,])
+            sensor_data.uy_min = np.zeros([num_sensor_points,])
         if kgrid.dim == 3:
-            sensor_data.ux_min = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_min = np.zeros([num_sensor_points, 1])
-            sensor_data.uz_min = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_min = np.zeros([num_sensor_points,])
+            sensor_data.uy_min = np.zeros([num_sensor_points,])
+            sensor_data.uz_min = np.zeros([num_sensor_points,])
 
     # rms particle velocity
     if record_old.u_rms:
-        # pre-allocate the velocity fields based on the number of  dimensions in the simulation
+        # pre-allocate the velocity fields based on the number of dimensions in the simulation
 
         if kgrid.dim == 1:
-            sensor_data.ux_rms = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_rms = np.zeros([num_sensor_points,])
         if kgrid.dim == 2:
-            sensor_data.ux_rms = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_rms = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_rms = np.zeros([num_sensor_points,])
+            sensor_data.uy_rms = np.zeros([num_sensor_points,])
         if kgrid.dim == 3:
-            sensor_data.ux_rms = np.zeros([num_sensor_points, 1])
-            sensor_data.uy_rms = np.zeros([num_sensor_points, 1])
-            sensor_data.uz_rms = np.zeros([num_sensor_points, 1])
+            sensor_data.ux_rms = np.zeros([num_sensor_points,])
+            sensor_data.uy_rms = np.zeros([num_sensor_points,])
+            sensor_data.uz_rms = np.zeros([num_sensor_points,])
 
     # maximum particle velocity over all grid points
     if record_old.u_max_all:
@@ -371,8 +373,7 @@ def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_r
             sensor_data.uy_min_all = np.zeros(all_vars_size)
             sensor_data.uz_min_all = np.zeros(all_vars_size)
 
-    # time history of the acoustic particle velocity on the
-    # non-staggered grid points
+    # time history of the acoustic particle velocity on the non-staggered grid points
     if record_old.u_non_staggered or record_old.I or record_old.I_avg:
 
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
@@ -386,8 +387,7 @@ def create_sensor_variables(record_old: dotdict, kgrid, num_sensor_points, num_r
             sensor_data.uy_non_staggered = np.zeros([num_sensor_points, num_recorded_time_points])
             sensor_data.uz_non_staggered = np.zeros([num_sensor_points, num_recorded_time_points])
 
-    # time history of the acoustic particle velocity split into
-    # compressional and shear components
+    # time history of the acoustic particle velocity split into compressional and shear components
     if record_old.u_split_field:
 
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
@@ -429,6 +429,8 @@ def create_transducer_buffer(is_transducer_sensor, is_transducer_receive_elevati
         # the grid points can be summed on the fly and so the
         # sensor is the size of the number of active elements
         sensor_data.transducer = np.zeros([int(sensor.number_active_elements), num_recorded_time_points])
+    else:
+        pass
 
 
 def compute_triangulation_points(flags, kgrid, record, mask):
@@ -439,9 +441,8 @@ def compute_triangulation_points(flags, kgrid, record, mask):
     """
 
     if kgrid.dim == 1:
-        # align sensor data as a column vector to be the
-        # same as kgrid.x_vec so that calls to interp
-        # return data in the correct dimension
+        # align sensor data as a column vector to be the same as kgrid.x_vec
+        # so that calls to interp return data in the correct dimension
         sensor_x = np.reshape((mask, (-1, 1)))
 
     elif kgrid.dim == 2:

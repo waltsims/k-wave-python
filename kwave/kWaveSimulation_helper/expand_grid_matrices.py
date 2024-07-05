@@ -82,8 +82,6 @@ def expand_kgrid(kgrid, is_axisymmetric, pml_size):
     # re-assign original time array
     kgrid.setTime(Nt_temp, dt_temp)
 
-    print("NEW KGRID")
-
     return kgrid
 
 

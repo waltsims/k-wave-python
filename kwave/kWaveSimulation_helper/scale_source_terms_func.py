@@ -35,19 +35,13 @@ def scale_source_terms_func(c0, dt, kgrid: kWaveGrid, source, p_source_pos_index
 
     apply_pressure_source_correction(flags.source_p, flags.use_w_source_correction_p, source, dt)
 
-    print("p", np.shape(source.p), np.shape(p_source_pos_index))
-
     scale_pressure_source(flags.source_p, source, kgrid, N, c0, dx, dt, p_source_pos_index, flags.nonuniform_grid)
-
-    print("again:", np.shape(source.p), np.shape(p_source_pos_index))
 
     # =========================================================================
     # STRESS SOURCES
     # =========================================================================
 
-    print("entry:", s_source_pos_index)
     scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index)
-    print("exit:", s_source_pos_index)
 
     # =========================================================================
     # VELOCITY SOURCES
@@ -114,7 +108,6 @@ def scale_pressure_source(is_source_p, source, kgrid, N, c0, dx, dt, p_source_po
     Returns:
 
     """
-    print("this function: 0")
     if not is_source_p:
         return
 
@@ -129,7 +122,6 @@ def scale_pressure_source(is_source_p, source, kgrid, N, c0, dx, dt, p_source_po
 
 
 def scale_pressure_source_dirichlet(source_p, c0, N, p_source_pos_index):
-    print("this function: 1")
     if c0.size == 1:
         # compute the scale parameter based on the homogeneous
         # sound speed
@@ -147,7 +139,6 @@ def scale_pressure_source_dirichlet(source_p, c0, N, p_source_pos_index):
 
 
 def scale_pressure_source_nonuniform_grid(source_p, kgrid, c0, N, dt, p_source_pos_index):
-    print("this function: 2")
     x = kgrid.x
     xn = kgrid.xn
     yn = kgrid.yn
@@ -187,15 +178,14 @@ def scale_pressure_source_nonuniform_grid(source_p, kgrid, c0, N, dt, p_source_p
 
 
 def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_index):
-    print("this function: 3")
+
     if c0.size == 1:
-        # compute the scale parameter based on the homogeneous
-        # sound speed
+        # compute the scale parameter based on the homogeneous sound speed
         source_p = source_p * (2 * dt / (N * c0 * dx))
 
     else:
-        # compute the scale parameter seperately for each source
-        # position based on the sound speed at that position
+        # compute the scale parameter seperately for each source position based on the
+        # sound speed at that position
         ind = range(source_p[:, 0].size)
         mask = p_source_pos_index.flatten("F")[ind]
         scale = (2.0 * dt) / (N * np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1) * dx)
@@ -222,7 +212,6 @@ def scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index):
 
     """
 
-    print('Hope not none:', s_source_pos_index)
     source.sxx = scale_stress_source(source, c0, flags.source_sxx, flags.source_p0, source.sxx, dt, N, dx, s_source_pos_index)
     source.syy = scale_stress_source(source, c0, flags.source_syy, flags.source_p0, source.syy, dt, N, dx, s_source_pos_index)
     source.szz = scale_stress_source(source, c0, flags.source_szz, flags.source_p0, source.szz, dt, N, dx, s_source_pos_index)

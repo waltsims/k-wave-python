@@ -120,7 +120,7 @@ class SimulationOptions(object):
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
     kelvin_voigt_model: bool = False
-    # time_rev: bool = False
+    time_rev: bool = False
 
 
     def __post_init__(self):

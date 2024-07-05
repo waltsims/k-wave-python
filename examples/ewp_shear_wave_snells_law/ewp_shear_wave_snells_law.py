@@ -79,7 +79,8 @@ if (np.isclose(rem(diameter_pos, 2), 0.0) ):
 source_mask = make_arc(Vector([Nx, Ny]), np.asarray(arc_pos), radius_pos, diameter_pos, Vector(focus_pos))
 
 fs = 1.0 / kgrid.dt
-signal = tone_burst(fs, source_freq, source_cycles, envelope="Gaussian", plot_signal=False, signal_length=0, signal_offset=0)
+signal = tone_burst(fs, source_freq, source_cycles, envelope="Gaussian", plot_signal=False,
+                    signal_length=0, signal_offset=0)
 
 # =========================================================================
 # FLUID SIMULATION
@@ -196,6 +197,7 @@ sensor_data_elastic = pstd_elastic_2d(kgrid=deepcopy(kgrid),
                                       medium=deepcopy(medium_e),
                                       simulation_options=deepcopy(simulation_options_e))
 
+
 # =========================================================================
 # VISUALISATION
 # =========================================================================
@@ -205,16 +207,38 @@ x_vec = kgrid.x_vec * 1e3
 y_vec = kgrid.y_vec * 1e3
 
 # calculate square of velocity magnitude for fluid and elastic simulations
-u_f = sensor_data_fluid.ux_max_all**2 + sensor_data_fluid.uy_max_all**2
+u_f = sensor_data_fluid['ux_max_all']**2 + sensor_data_fluid['uy_max_all']**2
+pml_x: int = 10
+u_f = u_f[pml_x:-(pml_x), pml_x:-(pml_x),]
 log_f = 20.0 * np.log10(u_f / np.max(u_f))
+
 u_e = sensor_data_elastic.ux_max_all**2 + sensor_data_elastic.uy_max_all**2
 log_e = 20.0 * np.log10(u_e / np.max(u_e))
+log_e = np.transpose(log_e)
 
-# plot layout
+# plot layout of simulation
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
-_ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T, np.logical_or(slab, source_mask), cmap='gray_r', shading='gouraud', alpha=0.5)
+_ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T, np.logical_or(slab, source_mask).T, cmap='gray_r', shading='gouraud', alpha=1)
+ax1.invert_yaxis()
+ax1.set_xlabel('y [mm]')
+ax1.set_ylabel('x [mm]')
 
 # plot velocities
 fig2, (ax2a, ax2b) = plt.subplots(nrows=2, ncols=1)
-_ = ax2a.pcolormesh(kgrid.y.T, kgrid.x.T, log_f, cmap='viridis', shading='gouraud', alpha=0.5)
-_ = ax2b.pcolormesh(kgrid.y.T, kgrid.x.T, log_e, cmap='viridis', shading='gouraud', alpha=0.5)
+pcm2a = ax2a.pcolormesh(kgrid.y.T, kgrid.x.T, log_f, shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
+ax2a.invert_yaxis()
+cb2a = fig2.colorbar(pcm2a, ax=ax2a)
+ax2a.set_xlabel('y [mm]')
+ax2a.set_ylabel('x [mm]')
+cb2a.ax.set_ylabel('[dB]', rotation=90)
+ax2a.set_title('Fluid Model')
+
+pcm2b = ax2b.pcolormesh(kgrid.y.T, kgrid.x.T, log_e, shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
+ax2b.invert_yaxis()
+cb2b = fig2.colorbar(pcm2b, ax=ax2b)
+ax2b.set_xlabel('y [mm]')
+ax2b.set_ylabel('x [mm]')
+cb2b.ax.set_ylabel('[dB]', rotation=90)
+ax2b.set_title('Elastic Model')
+
+plt.show()
