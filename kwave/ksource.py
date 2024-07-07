@@ -4,7 +4,7 @@ import logging
 import numpy as np
 
 from kwave.kgrid import kWaveGrid
-from kwave.utils.checks import enforce_fields
+#from kwave.utils.checks import enforce_fields
 from kwave.utils.matrix import num_dim2
 
 

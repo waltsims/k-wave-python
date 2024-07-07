@@ -3,7 +3,6 @@ from scipy.interpolate import interpn
 import scipy.io as sio
 from tqdm import tqdm
 from typing import Union
-from copy import deepcopy
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -14,9 +13,10 @@ from kwave.kWaveSimulation import kWaveSimulation
 from kwave.ktransducer import NotATransducer
 
 from kwave.utils.conversion import db2neper
-from kwave.utils.data import scale_time, scale_SI
+from kwave.utils.data import scale_time
+# from kwave.utils.data import scale_SI
 from kwave.utils.filters import gaussian_filter
-from kwave.utils.matlab import rem
+# from kwave.utils.matlab import rem
 from kwave.utils.pml import get_pml
 from kwave.utils.signals import reorder_sensor_data
 from kwave.utils.tictoc import TicToc
@@ -1360,13 +1360,13 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                                'record_I_avg': k_sim.record.I_avg,
                                'record_binary_sensor_mask': k_sim.binary_sensor_mask,
                                'record_p': k_sim.record.p,
-                               'record_p_min': k_sim.record.p_min,
+                               'record_p_max': k_sim.record.p_max,
                                'record_p_min': k_sim.record.p_min,
                                'record_p_rms': k_sim.record.p_rms,
                                'record_p_max_all': k_sim.record.p_max_all,
                                'record_p_min_all': k_sim.record.p_min_all,
                                'record_u': k_sim.record.u,
-                               'record_u_min': k_sim.record.u_min,
+                               'record_u_max': k_sim.record.u_max,
                                'record_u_min': k_sim.record.u_min,
                                'record_u_rms': k_sim.record.u_rms,
                                'record_u_max_all': k_sim.record.u_max_all,
@@ -1393,7 +1393,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             if t_index == 0:
                 clock1 = TicToc()
                 clock1.tic()
-                loop_start_time = clock1.start_time
+                # loop_start_time = clock1.start_time
 
 
     # update command line status
