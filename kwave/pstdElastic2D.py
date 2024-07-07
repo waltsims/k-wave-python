@@ -47,7 +47,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         source: kSource,
         sensor: Union[NotATransducer, kSensor],
         medium: kWaveMedium,
-        simulation_options: SimulationOptions):
+        simulation_options: SimulationOptions, verbose: bool = False):
     """
     2D time-domain simulation of elastic wave propagation.
 
@@ -424,10 +424,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     k_sim.input_checking("pstdElastic2D")
 
-
-    # print('..............', k_sim.source_sxx)
-    # print('..............', k_sim.source_syy)
-
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
     # =========================================================================
@@ -464,15 +460,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         rho0_sgx = interpn(points, k_sim.rho0, interp_points, method='linear', bounds_error=False)
         rho0_sgx = np.transpose(rho0_sgx)
 
-        # print(np.shape(rho0_sgx), np.shape(k_sim.rho0), np.isnan(rho0_sgx).shape, np.asarray(mg).shape, interp_points.shape )
-
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy/2)
         interp_points = np.moveaxis(mg, 0, -1)
         rho0_sgy = interpn(points, k_sim.rho0, interp_points, method='linear', bounds_error=False)
         rho0_sgy = np.transpose(rho0_sgy)
-
-        # set values outside of the interpolation range to original values
-        # print(np.shape(rho0_sgy), np.shape(k_sim.rho0), np.isnan(rho0_sgy).shape, np.asarray(mg).shape, interp_points.shape )
 
         rho0_sgx[np.isnan(rho0_sgx)] = k_sim.rho0[np.isnan(rho0_sgx)]
         rho0_sgy[np.isnan(rho0_sgy)] = k_sim.rho0[np.isnan(rho0_sgy)]
@@ -502,27 +493,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx/2, np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy/2)
         interp_points = np.moveaxis(mg, 0, -1)
 
-        # temp = copy.deepcop(_mu)
-        # temp[np.abs(_mu) <= 1E-6] = np.nan
-        # temp[np.abs(_mu) > 1E-6] = 1.0 / _mu
-
-        # nans, x = nan_helper(1.0 / _mu)
-        # y[nans] = np.interp(x(nans), x(~nans), y[~nans])
-
-
         with np.errstate(divide='ignore', invalid='ignore'):
-            temp = interpn(points, 1.0 / _mu, interp_points, method='linear', bounds_error=False)
-        # temp = np.transpose(temp)
+            mu_sgxy = 1.0 / interpn(points, 1.0 / _mu, interp_points, method='linear', bounds_error=False)
 
-        # print( np.shape(temp), np.shape(mu_sgxy), np.shape(interp_points))
-
-        # mu_sgxy[np.abs(temp) <= 1E-6] == _mu[np.abs(temp) <= 1E-6]
-        # mu_sgxy[np.abs(temp) > 1E-6] == 1.0 / temp[np.abs(temp) > 1E-6]
-
-        mu_sgxy = 1.0 / temp
         mu_sgxy = np.transpose(mu_sgxy)
-
-        # print(np.isnan(mu_sgxy).sum())
 
         # set values outside of the interpolation range to original values
         mu_sgxy[np.isnan(mu_sgxy)] = _mu[np.isnan(mu_sgxy)]
@@ -541,10 +515,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             # eta is heterogeneous and staggered grids are used
             mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx/2, np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy/2)
             interp_points = np.moveaxis(mg, 0, -1)
-            eta_sgxy = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
+            with np.errstate(divide='ignore', invalid='ignore'):
+                eta_sgxy = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
             eta_sgxy = np.transpose(eta_sgxy)
-
-            #print(np.isnan(mu_sgxy).sum())
 
             # set values outside of the interpolation range to original values
             eta_sgxy[np.isnan(eta_sgxy)] = eta[np.isnan(eta_sgxy)]
@@ -792,7 +765,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # print("u_e: ", u_e.dtype)
 
     tol: float = 10E-5
-    print(sorted(mat_contents.keys()))
+    if verbose:
+        print(sorted(mat_contents.keys()))
     mat_dsxxdx = mat_contents['dsxxdx']
     mat_dsyydy = mat_contents['dsyydy']
     mat_dsxydx = mat_contents['dsxydx']
@@ -1230,10 +1204,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             else:
                 # AM HERE
 
-                myt_index = t_index+1
+                # myt_index = t_index+1
 
                 # add the source values to the existing field values
-                ind_x, ind_y = np.unravel_index(np.squeeze(k_sim.s_source_pos_index), sxx_split_x.shape, order='F')
+                # ind_x, ind_y = np.unravel_index(np.squeeze(k_sim.s_source_pos_index), sxx_split_x.shape, order='F')
 
                 k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
                 mask = np.squeeze(sxx_split_x.flatten("F")[k_sim.s_source_pos_index])
@@ -1243,19 +1217,17 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
                 sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
 
-                if (t_index == load_index):
-                    for i, j in enumerate(k_sim.s_source_pos_index):
-                        print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
-                        np.ravel(sxx_split_x, order="F")[j] += np.squeeze(k_sim.source.sxx)[t_index]
-                        temp = deepcopy(np.ravel(sxx_split_x, order="F")[j] )
-                        sxx_split_x.ravel(order="F")[j] = temp + np.squeeze(k_sim.source.sxx)[t_index]
-                        print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
+                # if (t_index == load_index):
+                #     for i, j in enumerate(k_sim.s_source_pos_index):
+                #         print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
+                #         np.ravel(sxx_split_x, order="F")[j] += np.squeeze(k_sim.source.sxx)[t_index]
+                #         temp = deepcopy(np.ravel(sxx_split_x, order="F")[j] )
+                #         sxx_split_x.ravel(order="F")[j] = temp + np.squeeze(k_sim.source.sxx)[t_index]
+                #         print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
 
                 #sxx_split_x[k_sim.s_source_pos_index] = sxx_split_x[k_sim.s_source_pos_index] + np.squeeze(source.sxx)[t_index] * np.ones_like(mask)
 
-
                 mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
-
                 sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
 
 
@@ -1272,8 +1244,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             else:
 
-                if (t_index == load_index):
-                    print("pre:", t_index, syy_split_x.ravel(order="F")[k_sim.s_source_pos_index], np.squeeze(k_sim.source.syy)[t_index])
+                # if (t_index == load_index):
+                #     print("pre:", t_index, syy_split_x.ravel(order="F")[k_sim.s_source_pos_index], np.squeeze(k_sim.source.syy)[t_index])
 
                 # add the source values to the existing field values
                 mask = syy_split_x.flatten("F")[k_sim.s_source_pos_index]
@@ -1283,8 +1255,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 mask = syy_split_y.flatten("F")[k_sim.s_source_pos_index]
                 #syy_split_y.ravel(order="F")[k_sim.s_source_pos_index] = syy_split_y.ravel(order="F")[k_sim.s_source_pos_index] + np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
 
-                if (t_index == load_index):
-                    print("post:", syy_split_x.ravel(order="F")[k_sim.s_source_pos_index])
+                # if (t_index == load_index):
+                #     print("post:", syy_split_x.ravel(order="F")[k_sim.s_source_pos_index])
 
                 syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
                 syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
@@ -1306,20 +1278,13 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 # sxy_split_y[k_sim.s_source_pos_index] = sxy_split_y[k_sim.s_source_pos_index] + source.sxy[k_sim.s_source_sig_index, t_index]
 
                 mask = np.squeeze(sxy_split_x.flatten("F")[k_sim.s_source_pos_index])
-                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxy)[t_index] * np.ones_like(mask)
                 mask = np.squeeze(syy_split_y.flatten("F")[k_sim.s_source_pos_index])
-                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxy)[t_index] * np.ones_like(mask)
 
 
 
         if (t_index == load_index):
-            print(k_sim.s_source_pos_index)
-            mask = np.squeeze(syy_split_x.flatten("F")[k_sim.s_source_pos_index])
-            print(mask)
-            print(np.ones_like(mask))
-            print(np.squeeze(k_sim.source.syy))
-            print(np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask))
-            print(syy_split_x.flatten("F")[k_sim.s_source_pos_index])
             diff = np.abs(mat_syy_split_x - syy_split_x)
             if (diff.sum() > tol):
                 print("sxx_split_x diff.sum()", diff.sum())

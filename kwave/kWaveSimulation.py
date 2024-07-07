@@ -560,8 +560,6 @@ class kWaveSimulation(object):
                                                                        values,
                                                                        flags,
                                                                        self.record)
-            # print("record:", self.record)
-            # print("sensor_data:", sensor_data)
 
         self.create_pml_indices(
             kgrid_dim=self.kgrid.dim,
@@ -734,8 +732,6 @@ class kWaveSimulation(object):
                         kgrid_dim != 3 and (self.sensor.mask.shape == self.kgrid.k.shape)
                     ):
 
-                        # print("DEBUG 0")
-
                         # check the grid is binary
                         assert self.sensor.mask.sum() == (
                             self.sensor.mask.size - (self.sensor.mask == 0).sum()
@@ -745,8 +741,6 @@ class kWaveSimulation(object):
                         assert self.sensor.mask.sum() != 0, "sensor.mask must be a binary grid with at least one element set to 1."
 
                     elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
-
-                        # print("DEBUG 1")
 
                         # make sure the points are integers
                         assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
@@ -808,8 +802,6 @@ class kWaveSimulation(object):
                                     cuboid_corners_list[2, cuboid_index] : cuboid_corners_list[5, cuboid_index],
                                 ] = 1
                     else:
-
-                        # print("DEBUG 2")
 
                         # check the Cartesian sensor mask is the correct size
                         # (1 x N, 2 x N, 3 x N)
@@ -1000,9 +992,6 @@ class kWaveSimulation(object):
 
                 # create an indexing variable corresponding to the location of all the source elements
                 self.s_source_pos_index = matlab_find(self.source.s_mask) #np.where(self.source.s_mask != 0)
-
-                print(self.s_source_pos_index)
-                print('---------->', np.shape(self.source.s_mask), np.where(self.source.s_mask != 0) )
 
                 # check if the mask is binary or labelled
                 s_unique = np.unique(self.source.s_mask)
@@ -1363,18 +1352,7 @@ class kWaveSimulation(object):
                 ),
             )
 
-            if self.s_source_pos_index is not None:
-                print('before expand_results:', np.squeeze(self.s_source_pos_index))
             self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, self.s_source_pos_index = expand_results
-            if self.s_source_pos_index is not None:
-                print('after expand_results:', np.squeeze(self.s_source_pos_index))
-
-            if self.s_source_pos_index is not None:
-                print(self.medium.density.shape, np.unravel_index(np.squeeze(self.s_source_pos_index), self.medium.density.shape, order='F'))
-                print(self.medium.density.shape, np.unravel_index(np.squeeze(self.s_source_pos_index), self.medium.density.shape, order='C'))
-
-
-
 
         # get maximum prime factors
         if self.options.simulation_type.is_axisymmetric():
@@ -1586,7 +1564,5 @@ class kWaveSimulation(object):
         # the _final and _all output variables if 'PMLInside' is set to false
         # if self.record is None:
         #     self.record = Recorder()
-
-        # print(pml_size, pml_inside, is_axisymmetric)
 
         self.record.set_index_variables(self.kgrid, pml_size, pml_inside, is_axisymmetric)

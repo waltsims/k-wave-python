@@ -88,39 +88,6 @@ signal = tone_burst(fs, source_freq, source_cycles, envelope="Gaussian", plot_si
 # FLUID SIMULATION
 # =========================================================================
 
-
-# mat_contents = sio.loadmat('data/mu_sgxy_pre.mat')
-# mat_mu_sgxy = mat_contents['mu_sgxy']
-# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
-# ax0.imshow(mat_mu_sgxy)
-# ax0.invert_yaxis()
-# ax0.set_xlabel('y [mm]')
-# ax0.set_ylabel('x [mm]')
-# mat_contents = sio.loadmat('data/mu_sgxy_post.mat')
-# mat_mu_sgxy = mat_contents['mu_sgxy']
-# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
-# ax0.imshow(mat_mu_sgxy)
-# ax0.invert_yaxis()
-# ax0.set_xlabel('y [mm]')
-# ax0.set_ylabel('x [mm]')
-
-# mat_contents = sio.loadmat('data/eta_sgxy_pre.mat')
-# mat_eta_sgxy = mat_contents['eta_sgxy']
-# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
-# ax0.imshow(mat_eta_sgxy)
-# ax0.invert_yaxis()
-# ax0.set_xlabel('y [mm]')
-# ax0.set_ylabel('x [mm]')
-# mat_contents = sio.loadmat('data/eta_sgxy_post.mat')
-# mat_eta_sgxy = mat_contents['eta_sgxy']
-# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
-# ax0.imshow(mat_eta_sgxy)
-# ax0.invert_yaxis()
-# ax0.set_xlabel('y [mm]')
-# ax0.set_ylabel('x [mm]')
-
-# plt.show()
-
 # assign the medium properties
 sound_speed = cp1 * np.ones((Nx, Ny))
 density = rho1 * np.ones((Nx, Ny))
