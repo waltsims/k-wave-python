@@ -308,7 +308,7 @@ class kSource(object):
                 # if more than one time series is given, check the number of time series given matches the number of source elements
                 if (
                     (self.sxx is not None and np.size(self.sxx[:, 0]) > 1) or
-                    (self.syy is not None and any(self.syy) != 0 and np.size(self.syy[:, 0]) > 1) or
+                    (self.syy is not None and np.size(self.syy[:, 0]) > 1) or
                     (self.szz is not None and np.size(self.szz[:, 0]) > 1) or
                     (self.sxy is not None and np.size(self.sxy[:, 0]) > 1) or
                     (self.sxz is not None and np.size(self.sxz[:, 0]) > 1) or

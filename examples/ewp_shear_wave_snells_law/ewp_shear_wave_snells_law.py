@@ -19,6 +19,8 @@ from kwave.utils.signals import tone_burst
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
+import scipy.io as sio
+
 # change scale to 2 to reproduce higher resolution figures in help file
 scale: int = 1
 
@@ -85,6 +87,39 @@ signal = tone_burst(fs, source_freq, source_cycles, envelope="Gaussian", plot_si
 # =========================================================================
 # FLUID SIMULATION
 # =========================================================================
+
+
+# mat_contents = sio.loadmat('data/mu_sgxy_pre.mat')
+# mat_mu_sgxy = mat_contents['mu_sgxy']
+# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
+# ax0.imshow(mat_mu_sgxy)
+# ax0.invert_yaxis()
+# ax0.set_xlabel('y [mm]')
+# ax0.set_ylabel('x [mm]')
+# mat_contents = sio.loadmat('data/mu_sgxy_post.mat')
+# mat_mu_sgxy = mat_contents['mu_sgxy']
+# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
+# ax0.imshow(mat_mu_sgxy)
+# ax0.invert_yaxis()
+# ax0.set_xlabel('y [mm]')
+# ax0.set_ylabel('x [mm]')
+
+# mat_contents = sio.loadmat('data/eta_sgxy_pre.mat')
+# mat_eta_sgxy = mat_contents['eta_sgxy']
+# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
+# ax0.imshow(mat_eta_sgxy)
+# ax0.invert_yaxis()
+# ax0.set_xlabel('y [mm]')
+# ax0.set_ylabel('x [mm]')
+# mat_contents = sio.loadmat('data/eta_sgxy_post.mat')
+# mat_eta_sgxy = mat_contents['eta_sgxy']
+# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
+# ax0.imshow(mat_eta_sgxy)
+# ax0.invert_yaxis()
+# ax0.set_xlabel('y [mm]')
+# ax0.set_ylabel('x [mm]')
+
+# plt.show()
 
 # assign the medium properties
 sound_speed = cp1 * np.ones((Nx, Ny))
@@ -176,7 +211,7 @@ medium_e = kWaveMedium(sound_speed_compression,
 source_e = kSource()
 source_e.s_mask = source_mask
 source_e.sxx = -source_strength * signal
-source_e.syy = source.sxx
+source_e.syy = source_e.sxx
 
 simulation_options_e = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                          data_cast=DATA_CAST,
@@ -213,8 +248,9 @@ u_f = u_f[pml_x:-(pml_x), pml_x:-(pml_x),]
 log_f = 20.0 * np.log10(u_f / np.max(u_f))
 
 u_e = sensor_data_elastic.ux_max_all**2 + sensor_data_elastic.uy_max_all**2
+u_e = np.transpose(u_e)
+print(np.max(u_e))
 log_e = 20.0 * np.log10(u_e / np.max(u_e))
-log_e = np.transpose(log_e)
 
 # plot layout of simulation
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
@@ -240,5 +276,14 @@ ax2b.set_xlabel('y [mm]')
 ax2b.set_ylabel('x [mm]')
 cb2b.ax.set_ylabel('[dB]', rotation=90)
 ax2b.set_title('Elastic Model')
+
+fig3, ax3 = plt.subplots(nrows=1, ncols=1)
+pcm3 = ax3.pcolormesh(kgrid.y.T, kgrid.x.T, u_e, shading='gouraud', cmap=plt.colormaps['jet'])
+ax3.invert_yaxis()
+cb3 = fig3.colorbar(pcm3, ax=ax3)
+ax3.set_xlabel('y [mm]')
+ax3.set_ylabel('x [mm]')
+cb3.ax.set_ylabel('[dB]', rotation=90)
+ax3.set_title('Elastic Model')
 
 plt.show()

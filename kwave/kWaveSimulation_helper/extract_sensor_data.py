@@ -464,17 +464,17 @@ def extract_sensor_data(dim, sensor_data, file_index, sensor_mask_index, flags, 
                 if file_index == 1:
                     sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside]
                 else:
-                    sensor_data.ux_max_all = np.max([sensor_data.ux_max_all, ux_sgx[record.x1_inside:record.x2_inside]])
+                    sensor_data.ux_max_all = np.maximum(sensor_data.ux_max_all, ux_sgx[record.x1_inside:record.x2_inside])
 
             case 2:
                 if file_index == 1:
                     sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
                     sensor_data.uy_max_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
                 else:
-                    sensor_data.ux_max_all = np.max([sensor_data.ux_max_all,
-                                                     ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]], axis=0)
-                    sensor_data.uy_max_all = np.max([sensor_data.uy_max_all,
-                                                     uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]], axis=0)
+                    sensor_data.ux_max_all = np.maximum(sensor_data.ux_max_all,
+                                                     ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
+                    sensor_data.uy_max_all = np.maximum(sensor_data.uy_max_all,
+                                                     uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
 
             case 3:
                 if file_index == 1:
@@ -482,12 +482,12 @@ def extract_sensor_data(dim, sensor_data, file_index, sensor_mask_index, flags, 
                     sensor_data.uy_max_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
                     sensor_data.uz_max_all = uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
                 else:
-                    sensor_data.ux_max_all = np.max([sensor_data.ux_max_all,
-                                                     ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]])
-                    sensor_data.uy_max_all = np.max([sensor_data.uy_max_all,
-                                                     uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]])
-                    sensor_data.uz_max_all = np.max([sensor_data.uz_max_all,
-                                                     uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]])
+                    sensor_data.ux_max_all = np.maximum(sensor_data.ux_max_all,
+                                                     ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                    sensor_data.uy_max_all = np.maximum(sensor_data.uy_max_all,
+                                                     uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                    sensor_data.uz_max_all = np.maximum(sensor_data.uz_max_all,
+                                                     uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
 
 
     # store the minimum particle velocity over all the grid elements

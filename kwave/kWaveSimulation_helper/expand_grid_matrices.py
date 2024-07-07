@@ -233,11 +233,11 @@ def expand_velocity_sources(
 def expand_stress_sources(source, expand_size, flags, index_data_type, s_source_pos_index):
     # enlarge the stress source mask if given
     if flags.source_sxx or flags.source_syy or flags.source_szz or flags.source_sxy or flags.source_sxz or flags.source_syz:
-        # enlarge the velocity source mask
+        # enlarge the stress source mask
         source.s_mask = expand_matrix(source.s_mask, expand_size, 0)
 
         # create an indexing variable corresponding to the source elements
-        s_source_pos_index = matlab_find(source.s_mask != 0)
+        s_source_pos_index = matlab_find(source.s_mask)
 
         # convert the data type deping on the number of indices
         s_source_pos_index = s_source_pos_index.astype(index_data_type)
