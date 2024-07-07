@@ -12,6 +12,7 @@ for idx=1:length(files)
         mkdir(collected_value_dir)
         % run value collector
         run(fullfile(directory, files{idx}));
+        clearvars -except idx files directory
 end
 
 if ~isRunningInCI()
