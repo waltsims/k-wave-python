@@ -80,7 +80,7 @@ def extract_sensor_data(dim, sensor_data, file_index, sensor_mask_index, flags, 
             if file_index == 1:
                 sensor_data.p_min = p[sensor_mask_index]
             else:
-                sensor_data.p_min = np.minimum(sensor_data.p_min, p[sensor_mask_index]])
+                sensor_data.p_min = np.minimum(sensor_data.p_min, p[sensor_mask_index])
 
         # store the rms acoustic pressure
         if flags.record_p_rms:
