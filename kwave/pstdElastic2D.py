@@ -702,8 +702,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     print('\tprecomputation completed in', scale_time(timer.toc()))
     print('\tstarting time loop...')
 
-    # restart timing variables
-    loop_start_time = timer.tic()
+    # # restart timing variables
+    # loop_start_time = timer.tic()
 
     # end at this point - but nothing is saved to disk.
     if options.save_to_disk_exit:
@@ -793,8 +793,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     mat_sxx_split_y = mat_contents['sxx_split_y']
     mat_syy_split_x = mat_contents['syy_split_x']
     mat_syy_split_y = mat_contents['syy_split_y']
-    mat_sxy_split_x = mat_contents['sxy_split_x']
-    mat_sxy_split_y = mat_contents['sxy_split_y']
+    # mat_sxy_split_x = mat_contents['sxy_split_x']
+    # mat_sxy_split_y = mat_contents['sxy_split_y']
 
     mat_p = mat_contents['p']
     mat_sensor_data = mat_contents['sensor_data']

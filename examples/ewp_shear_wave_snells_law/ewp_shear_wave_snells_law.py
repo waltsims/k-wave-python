@@ -19,8 +19,6 @@ from kwave.utils.signals import tone_burst
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
-import scipy.io as sio
-
 # change scale to 2 to reproduce higher resolution figures in help file
 scale: int = 1
 
@@ -216,7 +214,6 @@ log_f = 20.0 * np.log10(u_f / np.max(u_f))
 
 u_e = sensor_data_elastic.ux_max_all**2 + sensor_data_elastic.uy_max_all**2
 u_e = np.transpose(u_e)
-print(np.max(u_e))
 log_e = 20.0 * np.log10(u_e / np.max(u_e))
 
 # plot layout of simulation
