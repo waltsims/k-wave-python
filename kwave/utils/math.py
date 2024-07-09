@@ -68,8 +68,14 @@ def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = Non
             # row vector
             shift_dim = 0
     else:
-        # subtract 1 in order to keep function interface compatible with matlab
         shift_dim -= 1
+        if not (0 <= shift_dim <= 3):
+            raise ValueError("Input dim must be 0, 1, 2 or 3.")
+        else:
+            # subtract 1 in order to keep function interface compatible with matlab
+            if shift_dim >= data.ndim:
+                Warning(f"Shift dimension {shift_dim}is greater than the number of dimensions in the input array {data.ndim}.")
+                shift_dim = data.ndim - 1
 
     N = data.shape[shift_dim]
 
@@ -84,19 +90,15 @@ def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = Non
     # series doesn't give exactly zero
     k_vec[N // 2] = 0
 
-    # put the wavenumber vector in the correct orientation for use with bsxfun
     reshape_dims_to = [1] * data.ndim
-    if 0 <= shift_dim <= 3:
-        reshape_dims_to[shift_dim] = -1
-        k_vec = np.reshape(k_vec, reshape_dims_to)
-    else:
-        raise ValueError("Input dim must be 0, 1, 2 or 3.")
+    reshape_dims_to[shift_dim] = -1
+    k_vec = np.reshape(k_vec, reshape_dims_to)
 
     # shift the input using a Fourier interpolant
-    part_1 = ifftshift(np.exp(1j * k_vec * shift))
-    part_2 = fft(data, axis=shift_dim)
-    part_1_times_2 = part_1 * part_2
-    result = ifft(part_1_times_2, axis=shift_dim).real
+    phase_shift = ifftshift(np.exp(1j * k_vec * shift))
+    kdata = fft(data, axis=shift_dim)
+    shifted_kdata = kdata * phase_shift
+    result = ifft(shifted_kdata, axis=shift_dim).real
     return result
 
 
@@ -389,7 +391,9 @@ def compute_linear_transform(pos1, pos2, offset=None):
     #  matlab behaviour is to return nans when positions are the same.
     #  we choose to return the identity matrix and the offset in this case.
     #  TODO: we should open an issue and change our behaviour once matlab is fixed.
+
     # if np.isclose(magnitude, 0):
+
     #     # "pos1 and pos2 are the same"
     #     if (shape1 := np.shape(pos1)) == (shape2 := np.shape(pos2)):
     #         raise ValueError(f"pos1 and pos2 must have the same shape. Received shapes: {shape1} and {shape2}")

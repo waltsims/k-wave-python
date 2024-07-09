@@ -24,3 +24,7 @@ def test_resize():
         reader.increment()
 
     logging.log(logging.INFO, "resize(..) works as expected!")
+
+
+if __name__ == "__main__":
+    test_resize()
