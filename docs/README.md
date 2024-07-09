@@ -37,12 +37,6 @@ pip install k-wave-python
 
 After installing the Python package, the required binaries will be downloaded and installed the first time you run a
 simulation.
-### Requirements
-This example expects an NVIDIA GPU by default to simulate with k-Wave.
-
-To test the reconstruction on a machine with a GPU,
-set `RUN_SIMULATION` [on line 29 of `us_bmode_linear_transducer.py`](https://github.com/waltsims/k-wave-python/blob/6d2ee982bece84fc6980da99b23600f5675d2fc5/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py#L29)
-to `True`, and the example will run without the pre-computed data.
 
 ## Development
 
