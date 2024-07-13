@@ -7,6 +7,7 @@ from typing import Optional
 import numpy as np
 from numpy import arcsin, pi, cos, size, array
 from numpy.linalg import linalg
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -15,6 +16,179 @@ from kwave.utils.interp import get_delta_bli
 from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_spherical_segment
 from kwave.utils.math import sinc, get_affine_matrix
 from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
+
+
+class Group:
+    def __init__(self, id, name=None):
+        self.id = id
+        # self.name = name
+        self.elements = []
+
+    def add_element(self, element):
+        self.elements.append(element)
+        element.group = self
+
+    @property
+    def num_elements(self):
+        return len(self.elements)
+
+    def __len__(self):
+        return self.num_elements
+
+    def __getitem__(self, index):
+        return self.elements[index]
+
+
+@dataclass
+class BaseElement:
+    group_id: int = 0
+    dim: int = 0
+    active: bool = True
+    element_number: int = 0
+
+    def get_integration_points(self, m_integration):
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @property
+    def measure(self):
+        raise NotImplementedError("Subclasses must implement this method")
+
+
+class AnnulusElement(BaseElement):
+    def __init__(self, position, radius_of_curvature, inner_diameter, outer_diameter, focus_position, **kwargs):
+        super().__init__(**kwargs)
+        self.dim = 2
+        self.position = np.array(position)
+        self.radius_of_curvature = radius_of_curvature
+        self.inner_diameter = inner_diameter
+        self.outer_diameter = outer_diameter
+        self.focus_position = np.array(focus_position)
+
+    @property
+    def measure(self):
+        varphi_min = arcsin(self.inner_diameter / (2 * self.radius_of_curvature))
+        varphi_max = arcsin(self.outer_diameter / (2 * self.radius_of_curvature))
+
+        return 2 * pi * self.radius_of_curvature**2 * (1 - cos(varphi_max)) - 2 * pi * self.radius_of_curvature**2 * (1 - cos(varphi_min))
+
+    def get_integration_points(self, m_integration):
+        return make_cart_spherical_segment(
+            self.position, self.radius_of_curvature, self.inner_diameter, self.outer_diameter, self.focus_position, m_integration
+        )
+
+
+class BowlElement(BaseElement):
+    def __init__(self, position, radius, diameter, focus_position, **kwargs):
+        super().__init__(**kwargs)
+        self.dim = 2  # TODO: check if this should be 3
+        self.position = np.array(position)
+        self.radius_of_curvature = radius
+        self.diameter = diameter
+        self.focus_position = np.array(focus_position)
+
+    def get_integration_points(self, m_integration):
+        return make_cart_bowl(self.position, self.radius_of_curvature, self.diameter, self.focus_position, m_integration)
+
+    @property
+    def measure(self):
+        varphi_max = arcsin(self.diameter / (2 * self.radius_of_curvature))
+        return 2 * pi * self.radius_of_curvature**2 * (1 - cos(varphi_max))
+
+
+class RectElement(BaseElement):
+    def __init__(self, position, Lx, Ly, theta, **kwargs):
+        super().__init__(**kwargs)
+        self.dim = 2 if len(position) == 2 else 3
+        self.coord_dim = self.dim
+        self.theta_length = 3 if len(position) == 3 else 1
+        self.position = np.array(position)
+        self.length = Lx
+        self.width = Ly
+        self.orientation = np.array(theta) if len(position) == 3 else theta
+
+    def get_integration_points(self, m_integration):
+        return make_cart_rect(self.position, self.length, self.width, self.orientation, m_integration)
+
+    @property
+    def measure(self):
+        return self.length * self.width
+
+
+class ArcElement(BaseElement):
+    def __init__(self, position, radius, diameter, focus_position, **kwargs):
+        super().__init__(**kwargs)
+        self.position = np.array(position)
+        self.dim = 1
+        self.radius_of_curvature = radius
+        self.diameter = diameter
+        self.focus_position = np.array(focus_position)
+
+    def get_integration_points(self, m_integration):
+        return make_cart_arc(self.position, self.radius_of_curvature, self.diameter, self.focus_position, m_integration)
+
+    @property
+    def measure(self):
+        varphi_max = arcsin(self.diameter / (2 * self.radius_of_curvature))
+        return 2 * self.radius_of_curvature * varphi_max
+
+
+class DiscElement(BaseElement):
+    def __init__(self, position, diameter, focus_position=None, **kwargs):
+        super().__init__(**kwargs)
+        if (dim := len(position)) not in [2, 3]:
+            raise ValueError(f"Input position for disc element must be specified as a 2 (2D) or 3 (3D) element array. Got {dim}")
+        else:
+            self.dim = dim
+        self.position = np.array(position)
+        self.diameter = diameter
+        if self.dim == 3 and focus_position is None:
+            raise ValueError("Focus position must be provided for 3D disc element.")
+
+        self.focus_position = np.array(focus_position)
+
+    def get_integration_points(self, m_integration):
+        return make_cart_disc(self.position, self.diameter, self.focus_position, m_integration)
+
+    @property
+    def measure(self):
+        return pi * (self.diameter / 2) ** 2
+
+
+class LineElement(BaseElement):
+    def __init__(self, start_point, end_point, **kwargs):
+        super().__init__(**kwargs)
+        self.start_point = np.array(start_point)
+        self.end_point = np.array(end_point)
+        self.dim = 1
+
+    def get_integration_points(self, m_integration):
+        raise NotImplementedError("Integration points for line elements are not yet implemented.")
+
+    @property
+    def measure(self):
+        return linalg.norm(self.end_point - self.start_point)
+
+
+class CustomElement(BaseElement):
+    def __init__(self, integration_points, measure, element_dim, label, **kwargs):
+        super().__init__(**kwargs)
+        self.integration_points = np.array(integration_points, dtype=float)
+        self.dim = element_dim
+        self.element_dim = element_dim
+        self.label = label
+        self.user_generated_measure = measure
+
+    def get_integration_points(self):
+        return self.integration_points
+
+    @property
+    def measure(self):
+        return self.user_generated_measure
+
+
+@dataclass
+class ElementArray:
+    group_type: str
 
 
 @dataclass
@@ -111,6 +285,53 @@ class kWaveArray(object):
         self.use_spiral_disc_points = 0
         self.num_arc_plot_points = 100
         self.element_plot_colour = np.array([0, 158, 194], dtype=float) / 255
+
+    def add_element(self, **kwargs):
+        element_type = self._infer_element_type(**kwargs)
+        element = self._create_element(element_type, **kwargs)
+        self.elements.append(element)
+        self.number_elements += 1
+        return element
+
+    def add_array(self, **kwargs):
+        # element_type = self._infer_element_type(**kwargs)
+        pass
+
+    def _create_element(self, element_type, **kwargs):
+        if element_type == "annulus":
+            return AnnulusElement(**kwargs)
+        elif element_type == "bowl":
+            return BowlElement(**kwargs)
+        elif element_type == "rect":
+            return RectElement(**kwargs)
+        elif element_type == "arc":
+            return ArcElement(**kwargs)
+        elif element_type == "disc":
+            return DiscElement(**kwargs)
+        elif element_type == "line":
+            return LineElement(**kwargs)
+        elif element_type == "custom":
+            return CustomElement(**kwargs)
+        else:
+            raise ValueError(f"Unknown element type: {element}")
+
+    def _infer_element_type(self, **kwargs):
+        if "inner_diameter" in kwargs and "outer_diameter" in kwargs and "focus_position" in kwargs:
+            return "annulus"
+        elif "radius_of_curvature" in kwargs and "diameter" in kwargs:
+            return "bowl"
+        elif "length" in kwargs and "width" in kwargs:
+            return "rect"
+        elif "radius_of_curvature" in kwargs and "diameter" in kwargs:
+            return "arc"
+        elif "diameter" in kwargs:
+            return "disc"
+        elif "start_point" in kwargs and "end_point" in kwargs:
+            return "line"
+        elif "integration_points" in kwargs:
+            return "custom"
+        else:
+            raise ValueError("Could not infer element type from provided arguments.")
 
     def add_annular_array(self, position, radius, diameters, focus_pos):
         assert isinstance(position, (list, tuple)), "'position' must be list or tuple"
@@ -586,7 +807,7 @@ class kWaveArray(object):
             )
 
             # keep points in the positive y domain
-            grid_weights = grid_weights[:, kgrid.Ny:]
+            grid_weights = grid_weights[:, kgrid.Ny :]
 
         else:
             # remove integration points which are outside grid
@@ -877,3 +1098,7 @@ def off_grid_points(
         if display_wait_bar and (point_ind % wait_bar_update_freq == 0):
             tqdm.update(wait_bar_update_freq)
     return mask
+
+
+if __name__ == "__main__":
+    pytest.main(["-v", __file__])
