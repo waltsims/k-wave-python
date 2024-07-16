@@ -113,11 +113,11 @@ class RectElement(BaseElement):
 
 
 class ArcElement(BaseElement):
-    def __init__(self, position, radius, diameter, focus_position, **kwargs):
+    def __init__(self, position, radius_of_curvature, diameter, focus_position, **kwargs):
         super().__init__(**kwargs)
         self.position = np.array(position)
         self.dim = 1
-        self.radius_of_curvature = radius
+        self.radius_of_curvature = radius_of_curvature
         self.diameter = diameter
         self.focus_position = np.array(focus_position)
 
@@ -292,22 +292,21 @@ class kWaveArray(object):
         return element
 
     def _infer_legacy_element_type(self, element: BaseElement) -> str:
-        if isinstance(element, AnnulusElement):
-            return "annulus"
-        elif isinstance(element, BowlElement):
-            return "bowl"
-        elif isinstance(element, RectElement):
-            return "rect"
-        elif isinstance(element, ArcElement):
-            return "arc"
-        elif isinstance(element, DiscElement):
-            return "disc"
-        elif isinstance(element, LineElement):
-            return "line"
-        elif isinstance(element, CustomElement):
-            return "custom"
+        accepted_types = {"annulus", "bowl", "rect", "arc", "disc", "line", "custom"}
+        suffix = "Element"
+
+        # Retrieve the class name of the element and remove the suffix "Element"
+        element_type = element.__class__.__name__
+        if element_type.endswith(suffix):
+            element_name = element_type[: -len(suffix)].lower()
         else:
-            raise ValueError(f"Unknown element type: {element}")
+            raise ValueError("Element class name does not follow expected format.")
+
+        # Validate that the derived name is an accepted type
+        if element_name not in accepted_types:
+            raise ValueError(f"Unknown element type: {element_name}")
+
+        return element_name
 
     def _convert_to_legacy_element(self, element: BaseElement) -> Element:
         """
@@ -349,11 +348,9 @@ class kWaveArray(object):
         if "inner_diameter" in kwargs and "outer_diameter" in kwargs and "focus_position" in kwargs:
             return "annulus"
         elif "radius_of_curvature" in kwargs and "diameter" in kwargs:
-            return "bowl"
+            return "arc" if len(kwargs.get("position")) == 2 else "bowl"
         elif "length" in kwargs and "width" in kwargs:
             return "rect"
-        elif "radius_of_curvature" in kwargs and "diameter" in kwargs:
-            return "arc"
         elif "diameter" in kwargs:
             return "disc"
         elif "start_point" in kwargs and "end_point" in kwargs:
@@ -508,25 +505,8 @@ class kWaveArray(object):
         if self.dim != 2:
             raise ValueError(f"2D arc element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        varphi_max = arcsin(diameter / (2 * radius))
-
-        length = 2 * radius * varphi_max
-
-        self.elements.append(
-            Element(
-                group_id=0,
-                type="arc",
-                dim=1,
-                position=array(position),
-                radius_of_curvature=radius,
-                diameter=diameter,
-                focus_position=array(focus_pos),
-                active=True,
-                measure=length,
-            )
-        )
+        kwargs = {"position": position, "radius_of_curvature": radius, "diameter": diameter, "focus_position": focus_pos}
+        self.add_element(**kwargs)
 
     def add_disc_element(self, position, diameter, focus_pos=None):
         assert isinstance(position, (list, tuple)), "'position' must be a list or tuple"
