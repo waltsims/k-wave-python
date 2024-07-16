@@ -44,7 +44,7 @@ class BaseElement:
     group_id: int = 0
     dim: int = 0
     active: bool = True
-    element_number: int = 0
+    element_number: int = None
 
     def get_integration_points(self, m_integration):
         raise NotImplementedError("Subclasses must implement this method")
@@ -78,11 +78,11 @@ class AnnulusElement(BaseElement):
 
 
 class BowlElement(BaseElement):
-    def __init__(self, position, radius, diameter, focus_position, **kwargs):
+    def __init__(self, position, radius_of_curvature, diameter, focus_position, **kwargs):
         super().__init__(**kwargs)
         self.dim = 2  # TODO: check if this should be 3
         self.position = np.array(position)
-        self.radius_of_curvature = radius
+        self.radius_of_curvature = radius_of_curvature
         self.diameter = diameter
         self.focus_position = np.array(focus_position)
 
@@ -96,14 +96,12 @@ class BowlElement(BaseElement):
 
 
 class RectElement(BaseElement):
-    def __init__(self, position, Lx, Ly, theta, **kwargs):
+    def __init__(self, position, length, width, theta, **kwargs):
         super().__init__(**kwargs)
         self.dim = 2 if len(position) == 2 else 3
-        self.coord_dim = self.dim
-        self.theta_length = 3 if len(position) == 3 else 1
         self.position = np.array(position)
-        self.length = Lx
-        self.width = Ly
+        self.length = length
+        self.width = width
         self.orientation = np.array(theta) if len(position) == 3 else theta
 
     def get_integration_points(self, m_integration):
@@ -170,20 +168,19 @@ class LineElement(BaseElement):
 
 
 class CustomElement(BaseElement):
-    def __init__(self, integration_points, measure, element_dim, label, **kwargs):
+    def __init__(self, integration_points, measure, dim, label, **kwargs):
         super().__init__(**kwargs)
-        self.integration_points = np.array(integration_points, dtype=float)
-        self.dim = element_dim
-        self.element_dim = element_dim
+        self.integration_points = integration_points
+        self.dim = dim
         self.label = label
-        self.user_generated_measure = measure
+        self._user_generated_measure = measure
 
     def get_integration_points(self):
         return self.integration_points
 
     @property
     def measure(self):
-        return self.user_generated_measure
+        return self._user_generated_measure
 
 
 @dataclass
@@ -289,9 +286,42 @@ class kWaveArray(object):
     def add_element(self, **kwargs):
         element_type = self._infer_element_type(**kwargs)
         element = self._create_element(element_type, **kwargs)
+        element = self._convert_to_legacy_element(element)
         self.elements.append(element)
         self.number_elements += 1
         return element
+
+    def _infer_legacy_element_type(self, element: BaseElement) -> str:
+        if isinstance(element, AnnulusElement):
+            return "annulus"
+        elif isinstance(element, BowlElement):
+            return "bowl"
+        elif isinstance(element, RectElement):
+            return "rect"
+        elif isinstance(element, ArcElement):
+            return "arc"
+        elif isinstance(element, DiscElement):
+            return "disc"
+        elif isinstance(element, LineElement):
+            return "line"
+        elif isinstance(element, CustomElement):
+            return "custom"
+        else:
+            raise ValueError(f"Unknown element type: {element}")
+
+    def _convert_to_legacy_element(self, element: BaseElement) -> Element:
+        """
+        Convert a new-style element to the legacy format for compatibility.
+        """
+        element_dict = element.__dict__
+        legacy_type = self._infer_legacy_element_type(element)
+        element_dict["type"] = legacy_type
+        element_dict["measure"] = element.measure
+        if legacy_type == "custom":
+            element_dict.pop("_user_generated_measure")
+
+        legacy_element = Element(**element_dict)
+        return legacy_element
 
     def add_array(self, **kwargs):
         # element_type = self._infer_element_type(**kwargs)
@@ -313,7 +343,7 @@ class kWaveArray(object):
         elif element_type == "custom":
             return CustomElement(**kwargs)
         else:
-            raise ValueError(f"Unknown element type: {element}")
+            raise ValueError(f"Unknown element type: {element_type}")
 
     def _infer_element_type(self, **kwargs):
         if "inner_diameter" in kwargs and "outer_diameter" in kwargs and "focus_position" in kwargs:
@@ -391,27 +421,14 @@ class kWaveArray(object):
         if self.dim != 3:
             raise ValueError(f"3D annular array cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        varphi_min = arcsin(diameters[0] / (2 * radius))
-        varphi_max = arcsin(diameters[1] / (2 * radius))
-
-        area = 2 * pi * radius**2 * (1 - cos(varphi_max)) - 2 * pi * radius**2 * (1 - cos(varphi_min))
-
-        self.elements.append(
-            Element(
-                group_id=0,
-                type="annulus",
-                dim=2,
-                position=array(position),
-                radius_of_curvature=radius,
-                inner_diameter=diameters[0],
-                outer_diameter=diameters[1],
-                focus_position=array(focus_pos),
-                active=True,
-                measure=area,
-            )
-        )
+        kwargs = {
+            "position": position,
+            "radius_of_curvature": radius,
+            "inner_diameter": diameters[0],
+            "outer_diameter": diameters[1],
+            "focus_position": focus_pos,
+        }
+        self.add_element(**kwargs)
 
     def add_bowl_element(self, position, radius, diameter, focus_pos):
         assert isinstance(position, (list, tuple)), "'position' must be list or tuple"
@@ -427,30 +444,13 @@ class kWaveArray(object):
         if self.dim != 3:
             raise ValueError(f"3D bowl element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
+        kwargs = {"position": position, "radius_of_curvature": radius, "diameter": diameter, "focus_position": focus_pos}
+        self.add_element(**kwargs)
 
-        varphi_max = arcsin(diameter / (2 * radius))
-
-        area = 2 * pi * radius**2 * (1 - cos(varphi_max))
-
-        self.elements.append(
-            Element(
-                group_id=0,
-                type="bowl",
-                dim=2,
-                position=array(position),
-                radius_of_curvature=radius,
-                diameter=diameter,
-                focus_position=array(focus_pos),
-                active=True,
-                measure=area,
-            )
-        )
-
-    def add_custom_element(self, integration_points, measure, element_dim, label):
+    def add_custom_element(self, integration_points, measure, dim, label):
         assert isinstance(integration_points, (np.ndarray)), "'integration_points' must be a numpy array"
         assert isinstance(measure, (int, float)), "'measure' must be an integer or float"
-        assert isinstance(element_dim, (int)) and element_dim in [1, 2, 3], "'element_dim' must be an integer and either 1, 2 or 3"
+        assert isinstance(dim, (int)) and dim in [1, 2, 3], "'dim' must be an integer and either 1, 2 or 3"
         assert isinstance(label, (str)), "'label' must be a string"
 
         # check the dimensionality of the integration points
@@ -467,13 +467,8 @@ class kWaveArray(object):
         if self.dim != input_dim:
             raise ValueError(f"{input_dim}D custom element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        self.elements.append(
-            Element(
-                group_id=0, type="custom", dim=element_dim, label=label, integration_points=integration_points, active=True, measure=measure
-            )
-        )
+        kwargs = {"integration_points": integration_points, "measure": measure, "dim": dim, "label": label}
+        self.add_element(**kwargs)
 
     def add_rect_element(self, position, Lx, Ly, theta):
         assert isinstance(position, (list, tuple)), "'position' must be a list or tuple"
@@ -496,23 +491,8 @@ class kWaveArray(object):
         if self.dim != coord_dim:
             raise ValueError(f"{coord_dim}D rectangular element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        area = Lx * Ly
-
-        self.elements.append(
-            Element(
-                group_id=0,
-                type="rect",
-                dim=2,
-                position=array(position),
-                length=Lx,
-                width=Ly,
-                orientation=array(theta) if coord_dim == 3 else theta,
-                active=True,
-                measure=area,
-            )
-        )
+        kwargs = {"position": position, "length": Lx, "width": Ly, "theta": theta}
+        self.add_element(**kwargs)
 
     def add_arc_element(self, position, radius, diameter, focus_pos):
         assert isinstance(position, (list, tuple, Vector)), "'position' must be list, tuple or Vector"
@@ -568,22 +548,8 @@ class kWaveArray(object):
         if self.dim != coord_dim:
             raise ValueError(f"{coord_dim}D disc element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        area = pi * (diameter / 2) ** 2
-
-        self.elements.append(
-            Element(
-                group_id=0,
-                type="disc",
-                dim=2,
-                position=array(position),
-                diameter=diameter,
-                focus_position=array(focus_pos),
-                active=True,
-                measure=area,
-            )
-        )
+        kwargs = {"position": position, "diameter": diameter, "focus_position": focus_pos}
+        self.add_element(**kwargs)
 
     def remove_element(self, element_num):
         if element_num > self.number_elements:
@@ -611,15 +577,8 @@ class kWaveArray(object):
         if self.dim != input_dim:
             raise ValueError(f"{input_dim}D line element cannot be added to an array with {self.dim}D elements.")
 
-        self.number_elements += 1
-
-        line_length = linalg.norm(array(end_point) - array(start_point))
-
-        self.elements.append(
-            Element(
-                group_id=0, type="line", dim=1, start_point=array(start_point), end_point=array(end_point), active=True, measure=line_length
-            )
-        )
+        kwargs = {"start_point": start_point, "end_point": end_point}
+        self.add_element(**kwargs)
 
     def get_element_grid_weights(self, kgrid, element_num):
         return self.get_off_grid_points(kgrid, element_num, False)

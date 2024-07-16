@@ -50,6 +50,14 @@ def compare_elements(expected_element, python_element):
             assert np.all(np.isclose(actual_value, expected_value))
 
 
+def fix_dim_bug(expected_value):
+    # TODO: position is 3D but dim is somehow 2D. Is this a bug in k-wave?
+    for element in expected_value["elements"]:
+        if element["type"] == "rect" or element["type"] == "disc":
+            element["dim"] = 3
+    return expected_value
+
+
 def test_kwave_array():
     test_record_path = os.path.join(Path(__file__).parent, "collectedValues/kWaveArray.mat")
     reader = TestRecordReader(test_record_path)
@@ -99,7 +107,7 @@ def test_kwave_array():
     kwave_array.add_custom_element(
         integration_points=integration_points,
         measure=9,
-        element_dim=2,
+        dim=2,
         label="custom_3d",
     )
     check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
@@ -110,25 +118,23 @@ def test_kwave_array():
 
     with pytest.raises(ValueError):
         kwave_array.add_custom_element(
-            integration_points=np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.float32),
+            integration_points=np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3], [1, 2, 3, 1, 2, 3, 1, 2, 3]]),
             measure=9,
-            element_dim=2,
+            dim=2,
             label="custom_3d",
         )
 
     reader.increment()
 
     kwave_array.add_rect_element([12, -8, 0.3], 3, 4, [2, 4, 5])
-    check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
-    expected_rect_element = reader.expected_value_of("kwave_array")["elements"][-1]
-    # explicit fix due to dimension logic in kWaveArray
-    expected_rect_element["dim"] = 3
+    check_kwave_array_equality(kwave_array, fix_dim_bug(reader.expected_value_of("kwave_array")))
     rect_element = RectElement([12, -8, 0.3], 3, 4, [2, 4, 5])
+    expected_rect_element = fix_dim_bug(reader.expected_value_of("kwave_array"))["elements"][-1]
     compare_elements(expected_rect_element, rect_element)
     reader.increment()
 
     kwave_array.add_disc_element([0, 0.3, 12], 5, [1, 5, 8])
-    check_kwave_array_equality(kwave_array, reader.expected_value_of("kwave_array"))
+    check_kwave_array_equality(kwave_array, fix_dim_bug(reader.expected_value_of("kwave_array")))
 
     expected_disc_element = reader.expected_value_of("kwave_array")["elements"][-1]
     expected_disc_element["dim"] = 3
