@@ -459,6 +459,11 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
         raise ValueError("The sensor must be defined as a binary mask.")
 
     # find the coordinates of the sensor points
+
+    x_sensor = unflatten_matlab_mask(kgrid.x, sensor.mask == 1)
+
+    x_sensor = kgrid.x[sensor.mask == 1]
+
     x_sensor = matlab_mask(kgrid.x, sensor.mask == 1)
     x_sensor = np.squeeze(x_sensor)
     y_sensor = matlab_mask(kgrid.y, sensor.mask == 1)
@@ -466,14 +471,20 @@ def reorder_sensor_data(kgrid, sensor, sensor_data: np.ndarray) -> np.ndarray:
 
     # find the angle of each sensor point (from the centre)
     angle = np.arctan2(-x_sensor, -y_sensor)
+
+    # print(np.shape(angle))
     angle[angle < 0] = 2 * np.pi + angle[angle < 0]
+    # print(np.shape(angle))
 
     # sort the sensor points in order of increasing angle
     indices_new = np.argsort(angle, kind="stable")
+    # print(np.shape(indices_new))
 
     # reorder the measure time series so that adjacent time series correspond
     # to adjacent sensor points.
     reordered_sensor_data = sensor_data[indices_new]
+    # print(np.shape(reordered_sensor_data), np.shape(sensor_data))
+
     return reordered_sensor_data
 
 

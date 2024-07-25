@@ -76,13 +76,13 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
 
     sensor_data = OutputSensor()
 
-    print("unset flags:")
-    for k, v in flags.items():
-        print(k, v)
+    # print("unset flags:")
+    # for k, v in flags.items():
+    #     print("\t", k, v)
     flags = set_flags(flags, values.sensor_x, sensor.mask, opt.cartesian_interp)
-    print("set flags:")
-    for k, v in flags.items():
-        print(k, v)
+    # print("set flags:")
+    # for k, v in flags.items():
+    #     print("\t", k, v)
 
     # preallocate output variables
     if flags.time_rev:
@@ -108,11 +108,17 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
     sensor_data = create_sensor_variables(values.record, kgrid, num_sensor_points, num_recorded_time_points,
                                           all_vars_size)
 
+    # print(np.shape(sensor_data.p))
+
     create_transducer_buffer(flags.transducer_sensor, values.transducer_receive_elevation_focus, sensor,
                              num_sensor_points, num_recorded_time_points, values.sensor_data_buffer_size,
                              flags, sensor_data)
 
+    # print("may act on record here")
     record = compute_triangulation_points(flags, kgrid, record, sensor.mask)
+
+    # print(np.shape(sensor_data.p))
+    # print("must act on record here", record.tri)
 
     return flags, record, sensor_data
 
@@ -268,6 +274,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # time history of the acoustic pressure
     if record_old.p or record_old.I or record_old.I_avg:
+        # print("create storage:", num_sensor_points, num_recorded_time_points, np.shape(sensor_data.p) )
         sensor_data.p = np.zeros([num_sensor_points, num_recorded_time_points])
 
     # maximum pressure
@@ -305,7 +312,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # maximum particle velocity
     if record_old.u_max:
-
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 1:
             sensor_data.ux_max = np.zeros([num_sensor_points,])
@@ -320,7 +326,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
     # minimum particle velocity
     if record_old.u_min:
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
-
         if kgrid.dim == 1:
             sensor_data.ux_min = np.zeros([num_sensor_points,])
         if kgrid.dim == 2:
@@ -334,7 +339,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
     # rms particle velocity
     if record_old.u_rms:
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
-
         if kgrid.dim == 1:
             sensor_data.ux_rms = np.zeros([num_sensor_points,])
         if kgrid.dim == 2:
@@ -347,7 +351,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # maximum particle velocity over all grid points
     if record_old.u_max_all:
-
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 1:
             sensor_data.ux_max_all = np.zeros(all_vars_size)
@@ -361,7 +364,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # minimum particle velocity over all grid points
     if record_old.u_min_all:
-
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 1:
             sensor_data.ux_min_all = np.zeros(all_vars_size)
@@ -375,7 +377,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # time history of the acoustic particle velocity on the non-staggered grid points
     if record_old.u_non_staggered or record_old.I or record_old.I_avg:
-
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 1:
             sensor_data.ux_non_staggered = np.zeros([num_sensor_points, num_recorded_time_points])
@@ -389,7 +390,6 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # time history of the acoustic particle velocity split into compressional and shear components
     if record_old.u_split_field:
-
         # pre-allocate the velocity fields based on the number of dimensions in the simulation
         if kgrid.dim == 2:
             sensor_data.ux_split_p = np.zeros([num_sensor_points, num_recorded_time_points])
@@ -403,6 +403,9 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
             sensor_data.uy_split_s = np.zeros([num_sensor_points, num_recorded_time_points])
             sensor_data.uz_split_p = np.zeros([num_sensor_points, num_recorded_time_points])
             sensor_data.uz_split_s = np.zeros([num_sensor_points, num_recorded_time_points])
+
+    # print("done allocation")
+    # print(dir(record_old), "\n", record_old.u_max_all, record_old.u, record_old.u_max, "\n", np.shape(sensor_data.p))
 
     return sensor_data
 

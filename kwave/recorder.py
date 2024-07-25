@@ -54,6 +54,7 @@ class Recorder(object):
             if record_element == "p":  # custom logic for 'p'
                 continue
             else:
+                # print(record_element)
                 setattr(self, record_element, True)
 
         # set self.record_p to false if a user input for sensor.record

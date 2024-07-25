@@ -43,6 +43,8 @@ class kWaveSimulation(object):
         self.sensor = sensor
         self.options = simulation_options
 
+        self.sensor_data = None
+
         # =========================================================================
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
@@ -545,21 +547,22 @@ class kWaveSimulation(object):
                 self.record_u_split_field = self.record.u_split_field
 
             flags = dotdict({"blank_sensor": self.blank_sensor,
-                            "binary_sensor_mask": self.binary_sensor_mask,
-                            "record_u_split_field": self.record.u_split_field,
-                            "time_rev": self.time_rev,
-                            "reorder_data": self.reorder_data,
-                            "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
-                            "axisymmetric": opt.simulation_type.is_axisymmetric(),
-                            "transducer_sensor": self.transducer_sensor})
+                             "binary_sensor_mask": self.binary_sensor_mask,
+                             "record_u_split_field": self.record.u_split_field,
+                             "time_rev": self.time_rev,
+                             "reorder_data": self.reorder_data,
+                             "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
+                             "axisymmetric": opt.simulation_type.is_axisymmetric(),
+                             "transducer_sensor": self.transducer_sensor})
 
             # this creates the storage variables by determining the spatial locations of the data which is in record.
-            flags, self.record, sensor_data = create_storage_variables(self.kgrid,
+            flags, self.record, self.sensor_data = create_storage_variables(self.kgrid,
                                                                        self.sensor,
                                                                        opt,
                                                                        values,
                                                                        flags,
                                                                        self.record)
+            # print("has it been created?", flags, self.record, self.sensor_data, np.shape(self.sensor_data.p))
 
         self.create_pml_indices(
             kgrid_dim=self.kgrid.dim,
@@ -671,6 +674,7 @@ class kWaveSimulation(object):
 
         # check sensor fields
         if self.sensor is not None:
+
             # check the sensor input is valid
             # TODO FARID move this check as a type checking
             assert isinstance(
@@ -679,7 +683,10 @@ class kWaveSimulation(object):
 
             # check if sensor is a transducer, otherwise check input fields
             if not isinstance(self.sensor, NotATransducer):
+
+
                 if kgrid_dim == 2:
+
                     # check for sensor directivity input and set flag
                     directivity = self.sensor.directivity
                     if directivity is not None and self.sensor.directivity.angle is not None:
@@ -705,7 +712,7 @@ class kWaveSimulation(object):
                 if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
 
-                # check for sensor.record and set usage flgs - if no flgs are
+                # check for sensor.record and set usage flgs - if no flags are
                 # given, the time history of the acoustic pressure is recorded by
                 # default
                 if self.sensor.record is not None:
@@ -717,6 +724,7 @@ class kWaveSimulation(object):
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
 
                     # check the sensor record flgs
+                    # print("inputs:", self.sensor.record, self.options.simulation_type.is_elastic_simulation())
                     self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic_simulation())
 
                 # enforce the sensor.mask field unless just recording the max_all
@@ -728,10 +736,15 @@ class kWaveSimulation(object):
                 # check if sensor mask is a binary grid, a set of cuboid corners,
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
+
+                    # print("HERE")
+
+                    # binary grid
                     if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
                         kgrid_dim != 3 and (self.sensor.mask.shape == self.kgrid.k.shape)
                     ):
 
+                        # print("binary")
                         # check the grid is binary
                         assert self.sensor.mask.sum() == (
                             self.sensor.mask.size - (self.sensor.mask == 0).sum()
@@ -740,7 +753,10 @@ class kWaveSimulation(object):
                         # check the grid is not empty
                         assert self.sensor.mask.sum() != 0, "sensor.mask must be a binary grid with at least one element set to 1."
 
+                    # cuboid corners
                     elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
+
+                        print("cuboid")
 
                         # make sure the points are integers
                         assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
@@ -801,7 +817,11 @@ class kWaveSimulation(object):
                                     cuboid_corners_list[1, cuboid_index] : cuboid_corners_list[4, cuboid_index],
                                     cuboid_corners_list[2, cuboid_index] : cuboid_corners_list[5, cuboid_index],
                                 ] = 1
+
+                    # cartesian sensor
                     else:
+
+                        # print("cartesian sensor")
 
                         # check the Cartesian sensor mask is the correct size
                         # (1 x N, 2 x N, 3 x N)

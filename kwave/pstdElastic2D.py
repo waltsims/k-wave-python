@@ -52,7 +52,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     2D time-domain simulation of elastic wave propagation.
 
     DESCRIPTION:
-        pstdElastic2D simulates the time-domain propagation of elastic waves
+        pstd_elastic_2d simulates the time-domain propagation of elastic waves
         through a two-dimensional homogeneous or heterogeneous medium given
         four input structures: kgrid, medium, source, and sensor. The
         computation is based on a pseudospectral time domain model which
@@ -142,7 +142,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         entire grid and are always indexed as sensor_data.p_final(nx, ny),
         regardless of the type of sensor mask.
 
-        pstdElastic2D may also be used for time reversal image reconstruction
+        pstd_elastic_2d may also be used for time reversal image reconstruction
         by assigning the time varying pressure recorded over an arbitrary
         sensor surface to the input field sensor.time_reversal_boundary_data.
         This data is then enforced in time reversed order as a time varying
@@ -159,7 +159,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         required, the source input can be replaced with an empty array [].
 
     USAGE:
-        sensor_data = pstdElastic2D(kWaveGrid, kWaveMedium, kSource, kSensor)
+        sensor_data = pstd_elastic_2d(kWaveGrid, kWaveMedium, kSource, kSensor)
 
 
     INPUTS:
@@ -422,7 +422,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium,
                             simulation_options=simulation_options)
 
-    k_sim.input_checking("pstdElastic2D")
+    # this will create the sensor_data dotdict
+    k_sim.input_checking("pstd_elastic_2d")
+
+    sensor_data = k_sim.sensor_data
+    # print("HERE is a the sensor data object", sensor_data)
 
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
@@ -726,9 +730,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     pml_y = np.squeeze(pml_y)
     pml_y = np.expand_dims(pml_y, axis=0)
 
-    # this is empty.
-    sensor_data = dotdict()
-
     # print("---------------")
 
     # print("pml_x.shape: ", pml_x.shape)
@@ -746,10 +747,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # print("---------------")
 
+    checking: bool = False
 
     #mat_contents = sio.loadmat('data/oneStep.mat')
 
-    mat_contents = sio.loadmat('data/twoStep.mat')
+    # mat_contents = sio.loadmat('data/twoStep.mat')
 
     load_index: int = 1
 
@@ -764,40 +766,40 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # print("u_e: ", u_e.size)
     # print("u_e: ", u_e.dtype)
 
-    tol: float = 10E-5
-    if verbose:
-        print(sorted(mat_contents.keys()))
-    mat_dsxxdx = mat_contents['dsxxdx']
-    mat_dsyydy = mat_contents['dsyydy']
-    mat_dsxydx = mat_contents['dsxydx']
-    mat_dsxydy = mat_contents['dsxydy']
+    # tol: float = 10E-5
+    # if verbose:
+    #     print(sorted(mat_contents.keys()))
+    # mat_dsxxdx = mat_contents['dsxxdx']
+    # mat_dsyydy = mat_contents['dsyydy']
+    # mat_dsxydx = mat_contents['dsxydx']
+    # mat_dsxydy = mat_contents['dsxydy']
 
-    mat_dduxdxdt = mat_contents['dduxdxdt']
-    mat_dduxdydt = mat_contents['dduxdydt']
-    mat_dduydxdt = mat_contents['dduydxdt']
-    mat_dduydydt = mat_contents['dduydydt']
+    # mat_dduxdxdt = mat_contents['dduxdxdt']
+    # mat_dduxdydt = mat_contents['dduxdydt']
+    # mat_dduydxdt = mat_contents['dduydxdt']
+    # mat_dduydydt = mat_contents['dduydydt']
 
-    mat_duxdx = mat_contents['duxdx']
-    mat_duxdy = mat_contents['duxdy']
-    mat_duydx = mat_contents['duydx']
-    mat_duydy = mat_contents['duydy']
+    # mat_duxdx = mat_contents['duxdx']
+    # mat_duxdy = mat_contents['duxdy']
+    # mat_duydx = mat_contents['duydx']
+    # mat_duydy = mat_contents['duydy']
 
-    mat_ux_sgx = mat_contents['ux_sgx']
-    mat_ux_split_x = mat_contents['ux_split_x']
-    mat_ux_split_y = mat_contents['ux_split_y']
-    mat_uy_sgy = mat_contents['uy_sgy']
-    mat_uy_split_x = mat_contents['uy_split_x']
-    mat_uy_split_y = mat_contents['uy_split_y']
+    # mat_ux_sgx = mat_contents['ux_sgx']
+    # mat_ux_split_x = mat_contents['ux_split_x']
+    # mat_ux_split_y = mat_contents['ux_split_y']
+    # mat_uy_sgy = mat_contents['uy_sgy']
+    # mat_uy_split_x = mat_contents['uy_split_x']
+    # mat_uy_split_y = mat_contents['uy_split_y']
 
-    mat_sxx_split_x = mat_contents['sxx_split_x']
-    mat_sxx_split_y = mat_contents['sxx_split_y']
-    mat_syy_split_x = mat_contents['syy_split_x']
-    mat_syy_split_y = mat_contents['syy_split_y']
-    # mat_sxy_split_x = mat_contents['sxy_split_x']
-    # mat_sxy_split_y = mat_contents['sxy_split_y']
+    # mat_sxx_split_x = mat_contents['sxx_split_x']
+    # mat_sxx_split_y = mat_contents['sxx_split_y']
+    # mat_syy_split_x = mat_contents['syy_split_x']
+    # mat_syy_split_y = mat_contents['syy_split_y']
+    # # mat_sxy_split_x = mat_contents['sxy_split_x']
+    # # mat_sxy_split_y = mat_contents['sxy_split_y']
 
-    mat_p = mat_contents['p']
-    mat_sensor_data = mat_contents['sensor_data']
+    # mat_p = mat_contents['p']
+    # mat_sensor_data = mat_contents['sensor_data']
 
     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index )
 
@@ -813,44 +815,48 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         # print("----------------", sxx_split_x.shape, sxx_split_y.shape, temp.shape, ddx_k_shift_pos.shape)
         dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(sxx_split_x + sxx_split_y, axis=0), axis=0))
         # print(dsxxdx.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_dsxxdx - dsxxdx).sum() > tol):
-                print("dsxxdx is not correct!")
-            else:
-                pass
-                # print("dsxxdx is correct!")
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_dsxxdx - dsxxdx).sum() > tol):
+                    print("dsxxdx is not correct!")
+                else:
+                    pass
+                    # print("dsxxdx is correct!")
 
         #dsyydy = real( ifft( bsxfun(@times, ddy_k_shift_pos, fft(syy_split_x + syy_split_y, [], 2)), [], 2) );
         dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(syy_split_x + syy_split_y, axis=1), axis=1))
         # print(dsyydy.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_dsyydy - dsyydy).sum() > tol):
-                print("dsyydy is not correct!")
-            else:
-                pass
-                # print("dsyydy is correct!")
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_dsyydy - dsyydy).sum() > tol):
+                    print("dsyydy is not correct!")
+                else:
+                    pass
+                    # print("dsyydy is correct!")
 
         #dsxydx = real( ifft( bsxfun(@times, ddx_k_shift_neg, fft(sxy_split_x + sxy_split_y, [], 1)), [], 1) );
         # print("----------------", sxy_split_x.shape, sxy_split_y.shape, ddx_k_shift_neg.shape)
         dsxydx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=0), axis=0))
         # print(dsxydx.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_dsxydx - dsxydx).sum() > tol):
-                print("dsxydx is not correct!")
-            else:
-                pass
-                # print("dsxydx is correct!")
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_dsxydx - dsxydx).sum() > tol):
+                    print("dsxydx is not correct!")
+                else:
+                    pass
+                    # print("dsxydx is correct!")
 
 
         #dsxydy = real( ifft( bsxfun(@times, ddy_k_shift_neg, fft(sxy_split_x + sxy_split_y, [], 2)), [], 2) );
         dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=1), axis=1))
         # print(dsxydy.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_dsxydy - dsxydy).sum() > tol):
-                print("dsxydy is not correct!")
-            else:
-                pass
-                # print("dsxydy is correct!")
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_dsxydy - dsxydy).sum() > tol):
+                    print("dsxydy is not correct!")
+                else:
+                    pass
+                    # print("dsxydy is correct!")
 
         # calculate the split-field components of ux_sgx and uy_sgy at the next
         # time step using the components of the stress at the current time step
@@ -869,11 +875,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         d = pml_x_sgx * c
         # print(d.shape, pml_x_sgx.shape)
         ux_split_x = mpml_y * d
-        if (t_index == load_index):
-            if (np.abs(mat_ux_split_x - ux_split_x).sum() > tol):
-                print("ux_split_x is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_ux_split_x - ux_split_x).sum() > tol):
+                    print("ux_split_x is not correct!")
+                else:
+                    pass
 
         # print("finish ux_split_x:", ux_split_x.shape)
 
@@ -891,11 +898,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         d = pml_y * c
         # print(d.shape, mpml_x_sgx.shape)
         ux_split_y = d * mpml_x_sgx
-        if (t_index == load_index):
-            if (np.abs(mat_ux_split_y - ux_split_y).sum() > tol):
-                print("ux_split_y is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_ux_split_y - ux_split_y).sum() > tol):
+                    print("ux_split_y is not correct!")
+                else:
+                    pass
         # print("finish ux_split_y:", ux_split_y.shape)
 
         # uy_split_x = bsxfun(@times, mpml_y_sgy,
@@ -909,11 +917,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         c = b + kgrid.dt * rho0_sgy_inv * dsxydx
         d = pml_x * c
         uy_split_x = mpml_y_sgy * d
-        if (t_index == load_index):
-            if (np.abs(mat_uy_split_x - uy_split_x).sum() > tol):
-                print("uy_split_x is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_uy_split_x - uy_split_x).sum() > tol):
+                    print("uy_split_x is not correct!")
+                else:
+                    pass
         # print("finish uy_split_x:", uy_split_x.shape)
 
         # uy_split_y = bsxfun(@times, mpml_x,
@@ -926,11 +935,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         c = b + kgrid.dt * rho0_sgy_inv * dsyydy
         d = pml_y_sgy * c
         uy_split_y = mpml_x * d
-        if (t_index == load_index):
-            if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
-                print("uy_split_y is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
+                    print("uy_split_y is not correct!")
+                else:
+                    pass
 
         # add in the pre-scaled velocity source terms
         if (k_sim.source_ux > t_index):
@@ -967,17 +977,19 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         # combine split field components (these variables do not necessarily
         # need to be stored, they could be computed when needed)
         ux_sgx = ux_split_x + ux_split_y
-        if (t_index == load_index):
-            if (np.abs(mat_ux_sgx - ux_sgx).sum() > tol):
-                print("ux_sgx is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_ux_sgx - ux_sgx).sum() > tol):
+                    print("ux_sgx is not correct!")
+                else:
+                    pass
         uy_sgy = uy_split_x + uy_split_y
-        if (t_index == load_index):
-            if (np.abs(mat_uy_sgy - uy_sgy).sum() > tol):
-                print("uy_sgy is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_uy_sgy - uy_sgy).sum() > tol):
+                    print("uy_sgy is not correct!")
+                else:
+                    pass
 
         # calculate the velocity gradients (these variables do not necessarily
         # need to be stored, they could be computed when needed)
@@ -986,38 +998,42 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         # print("inputs:", ux_sgx.shape, ddx_k_shift_neg.shape)
         duxdx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(ux_sgx, axis=0), axis=0))
         # print("duxdx.shape", duxdx.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_duxdx - duxdx).sum() > tol):
-                print("duxdx is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_duxdx - duxdx).sum() > tol):
+                    print("duxdx is not correct!")
+                else:
+                    pass
 
         # duxdy = real( ifft( bsxfun(@times, ddy_k_shift_pos, fft(ux_sgx, [], 2)), [], 2));
         # print(ux_sgx.shape, ddx_k_shift_pos.shape, np.fft.fft(ux_sgx, axis=1).shape)
         duxdy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1), axis=1))
         # print("duxdy.shape", duxdy.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_duxdy - duxdy).sum() > tol):
-                print("duxdy is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_duxdy - duxdy).sum() > tol):
+                    print("duxdy is not correct!")
+                else:
+                    pass
 
         # duydx = real( ifft( bsxfun(@times, ddx_k_shift_pos, fft(uy_sgy, [], 1)), [], 1));
         duydx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(uy_sgy, axis=0), axis=0))
         # print("duydx.shape", duydx.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_duydx - duydx).sum() > tol):
-                print("duydx is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_duydx - duydx).sum() > tol):
+                    print("duydx is not correct!")
+                else:
+                    pass
         # duydy = real( ifft( bsxfun(@times, ddy_k_shift_neg, fft(uy_sgy, [], 2)), [], 2));
         duydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(uy_sgy, axis=1), axis=1))
         # print("duydy.shape", duydy.shape)
-        if (t_index == load_index):
-            if (np.abs(mat_duydy - duydy).sum() > tol):
-                print("duydy is not correct!")
-            else:
-                pass
+        if checking:
+            if (t_index == load_index):
+                if (np.abs(mat_duydy - duydy).sum() > tol):
+                    print("duydy is not correct!")
+                else:
+                    pass
 
         # update the normal components and shear components of stress tensor
         # using a split field pml
@@ -1031,31 +1047,33 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             temp = (dsxxdx + dsxydy) * rho0_sgx_inv
             dduxdxdt = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(temp, axis=0), axis=0))
             dduxdydt = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=1), axis=1))
-            if (t_index == load_index):
-                if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
-                    print("dduxdxdt is not correct!")
-                else:
-                    pass
-            if (t_index == load_index):
-                if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
-                    print("dduxdydt is not correct!")
-                else:
-                    pass
+            if checking:
+                if (t_index == load_index):
+                    if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
+                        print("dduxdxdt is not correct!")
+                    else:
+                        pass
+                if (t_index == load_index):
+                    if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
+                        print("dduxdydt is not correct!")
+                    else:
+                        pass
             #dduydydt = real(ifft( bsxfun(@times, ddy_k_shift_neg, fft( (dsyydy + dsxydx) .* rho0_sgy_inv , [], 2 )), [], 2));
             #dduydxdt = real(ifft( bsxfun(@times, ddx_k_shift_pos, fft( (dsyydy + dsxydx) .* rho0_sgy_inv , [], 1 )), [], 1));
             temp = (dsyydy + dsxydx) * rho0_sgy_inv
             dduydydt = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(temp, axis=1), axis=1))
             dduydxdt = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
-            if (t_index == load_index):
-                if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
-                    print("dduydxdt is not correct!")
-                else:
-                    pass
-            if (t_index == load_index):
-                if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
-                    print("dduydydt is not correct!")
-                else:
-                    pass
+            if checking:
+                if (t_index == load_index):
+                    if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
+                        print("dduydxdt is not correct!")
+                    else:
+                        pass
+                if (t_index == load_index):
+                    if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
+                        print("dduydydt is not correct!")
+                    else:
+                        pass
 
             # update the normal shear components of the stress tensor using a
             # Kelvin-Voigt model with a split-field multi-axial pml
@@ -1284,64 +1302,65 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
 
 
-        if (t_index == load_index):
-            diff = np.abs(mat_syy_split_x - syy_split_x)
-            if (diff.sum() > tol):
-                print("sxx_split_x diff.sum()", diff.sum())
-                print("time point:", load_index)
-                print("k_sim.source.sxx)[t_index]:", np.squeeze(k_sim.source.sxx)[t_index])
-                print("diff:", np.max(diff), np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                print("matlab max:", np.max(mat_sxx_split_x), np.max(sxx_split_x))
-                print("matlab argmax:", np.argmax(mat_sxx_split_x), np.argmax(sxx_split_x))
-                print("min:", np.min(mat_sxx_split_x), np.min(sxx_split_x))
-                print("argmin:", np.argmin(mat_sxx_split_x), np.argmin(sxx_split_x))
-            else:
-                pass
-        if (t_index == load_index):
-            diff = np.abs(mat_sxx_split_y - sxx_split_y)
-            if (np.abs(mat_sxx_split_y - sxx_split_y).sum() > tol):
-                print("sxx_split_y is not correct!")
-                if (diff.sum() > tol):
-                    print("sxx_split_y is not correct!", diff.sum())
-                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print(np.max(diff))
-            else:
-                pass
-        if (t_index == load_index):
-            diff = np.abs(mat_sxx_split_x - syy_split_x)
-            if (np.abs(mat_syy_split_x - syy_split_x).sum() > tol):
-                print("syy_split_x is not correct!")
-                if (diff.sum() > tol):
-                    print("sxx_split_y is not correct!", diff.sum())
-                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print(np.max(diff))
-            else:
-                pass
-        if (t_index == load_index):
-            diff = np.abs(mat_syy_split_y - syy_split_y)
-            if (np.abs(mat_syy_split_y - syy_split_y).sum() > tol):
-                print("syy_split_y is not correct!")
-                if (diff.sum() > tol):
-                    print("sxx_split_y is not correct!", diff.sum())
-                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print(np.max(diff))
-            else:
-                pass
+        # if (t_index == load_index):
+        #     diff = np.abs(mat_syy_split_x - syy_split_x)
+        #     if (diff.sum() > tol):
+        #         print("sxx_split_x diff.sum()", diff.sum())
+        #         print("time point:", load_index)
+        #         print("k_sim.source.sxx)[t_index]:", np.squeeze(k_sim.source.sxx)[t_index])
+        #         print("diff:", np.max(diff), np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+        #         print("matlab max:", np.max(mat_sxx_split_x), np.max(sxx_split_x))
+        #         print("matlab argmax:", np.argmax(mat_sxx_split_x), np.argmax(sxx_split_x))
+        #         print("min:", np.min(mat_sxx_split_x), np.min(sxx_split_x))
+        #         print("argmin:", np.argmin(mat_sxx_split_x), np.argmin(sxx_split_x))
+        #     else:
+        #         pass
+        # if (t_index == load_index):
+        #     diff = np.abs(mat_sxx_split_y - sxx_split_y)
+        #     if (np.abs(mat_sxx_split_y - sxx_split_y).sum() > tol):
+        #         print("sxx_split_y is not correct!")
+        #         if (diff.sum() > tol):
+        #             print("sxx_split_y is not correct!", diff.sum())
+        #             print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+        #             print(np.max(diff))
+        #     else:
+        #         pass
+        # if (t_index == load_index):
+        #     diff = np.abs(mat_sxx_split_x - syy_split_x)
+        #     if (np.abs(mat_syy_split_x - syy_split_x).sum() > tol):
+        #         print("syy_split_x is not correct!")
+        #         if (diff.sum() > tol):
+        #             print("sxx_split_y is not correct!", diff.sum())
+        #             print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+        #             print(np.max(diff))
+        #     else:
+        #         pass
+        # if (t_index == load_index):
+        #     diff = np.abs(mat_syy_split_y - syy_split_y)
+        #     if (np.abs(mat_syy_split_y - syy_split_y).sum() > tol):
+        #         print("syy_split_y is not correct!")
+        #         if (diff.sum() > tol):
+        #             print("sxx_split_y is not correct!", diff.sum())
+        #             print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+        #             print(np.max(diff))
+        #     else:
+        #         pass
 
         # compute pressure from normal components of the stress
         p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / 2.0
-        if (t_index == load_index):
-            diff = np.abs(mat_p - p)
-            if (diff.sum() > tol):
-                print("p is not correct!")
+        if checking:
+            if (t_index == load_index):
+                diff = np.abs(mat_p - p)
                 if (diff.sum() > tol):
-                    print("p is not correct!", diff.sum())
-                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print(np.max(p), np.argmax(p), np.min(p), np.argmin(p))
-                    print(np.max(mat_p), np.argmax(mat_p), np.min(mat_p), np.argmin(mat_p))
-                    print(np.max(diff), np.argmax(diff), np.min(diff), np.argmin(diff))
-            else:
-                pass
+                    print("p is not correct!")
+                    if (diff.sum() > tol):
+                        print("p is not correct!", diff.sum())
+                        print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+                        print(np.max(p), np.argmax(p), np.min(p), np.argmin(p))
+                        print(np.max(mat_p), np.argmax(mat_p), np.min(mat_p), np.argmin(mat_p))
+                        print(np.max(diff), np.argmax(diff), np.min(diff), np.argmin(diff))
+                else:
+                    pass
 
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
@@ -1358,7 +1377,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                                'record_u_split_field': k_sim.record.u_split_field,
                                'record_I': k_sim.record.I,
                                'record_I_avg': k_sim.record.I_avg,
-                               'record_binary_sensor_mask': k_sim.binary_sensor_mask,
+                               'binary_sensor_mask': k_sim.binary_sensor_mask,
                                'record_p': k_sim.record.p,
                                'record_p_max': k_sim.record.p_max,
                                'record_p_min': k_sim.record.p_min,
@@ -1371,6 +1390,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                                'record_u_rms': k_sim.record.u_rms,
                                'record_u_max_all': k_sim.record.u_max_all,
                                'record_u_min_all': k_sim.record.u_min_all,
+                               'compute_directivity': False
                                })
 
             # print(k_sim.record.y1_inside, k_sim.record.x1_inside, file_index, t_index, sensor.record_start_index)
@@ -1378,15 +1398,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             sensor_data = extract_sensor_data(2, sensor_data, file_index, k_sim.sensor_mask_index,
                                               options, k_sim.record, p, ux_sgx, uy_sgy)
 
-            if (t_index == load_index):
-                if (np.abs(mat_sensor_data[0].item()[0] - sensor_data.ux_max_all).sum() > tol):
-                    print("ux_max_all is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sensor_data[0].item()[1] - sensor_data.uy_max_all).sum() > tol):
-                    print("uy_max_all is not correct!")
-                else:
-                    pass
+            if checking:
+                if (t_index == load_index):
+                    if (np.abs(mat_sensor_data[0].item()[0] - sensor_data.ux_max_all).sum() > tol):
+                        print("ux_max_all is not correct!")
+                    else:
+                        pass
+                    if (np.abs(mat_sensor_data[0].item()[1] - sensor_data.uy_max_all).sum() > tol):
+                        print("uy_max_all is not correct!")
+                    else:
+                        pass
 
             # update variable used for timing variable to exclude the first
             # time step if plotting is enabled
