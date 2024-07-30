@@ -1209,9 +1209,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         if (k_sim.source_sxx is not False and t_index < np.size(source.sxx)):
 
-            if isinstance(k_sim.s_source_sig_index, str):
-                if k_sim.s_source_sig_index == ':':
-                    s_source_sig_index = np.shape(source.sxx)[0]
+            if hasattr(k_sim, 's_source_sig_index'):
+                if isinstance(k_sim.s_source_sig_index, str):
+                    if k_sim.s_source_sig_index == ':':
+                        s_source_sig_index = np.shape(source.sxx)[0]
 
             if (source.s_mode == 'dirichlet'):
 
@@ -1220,34 +1221,28 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 sxx_split_y[k_sim.s_source_pos_index] = source.sxx[0:s_source_sig_index, t_index]
 
             else:
-                # AM HERE
 
-                # myt_index = t_index+1
+                if np.ndim(np.squeeze(k_sim.s_source_pos_index)) != 0:
+                    n_pos = np.shape(np.squeeze(k_sim.s_source_pos_index))[0]
+                else:
+                    n_pos = None
 
-                # add the source values to the existing field values
-                # ind_x, ind_y = np.unravel_index(np.squeeze(k_sim.s_source_pos_index), sxx_split_x.shape, order='F')
+                if np.shape(np.squeeze(source.sxx)) == (n_pos, k_sim.kgrid.Nt):
+                    sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), :]
 
-                k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                mask = np.squeeze(sxx_split_x.flatten("F")[k_sim.s_source_pos_index])
+                elif np.shape(np.squeeze(source.sxx)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
+                    if t_index == 0:
+                        sxx_split_x = k_sim.source.sxx
 
-                # print(mask.size, mask.shape, sxx_split_x.shape, source.sxx.shape, np.squeeze(source.sxx)[t_index].shape)
-                # sxx_split_x.flatten("F")[k_sim.s_source_pos_index] = sxx_split_x.flatten("F")[k_sim.s_source_pos_index] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+                elif np.shape(np.squeeze(source.sxx)) == k_sim.kgrid.Nt:
 
-                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+                    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
+                    mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
+                    sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
 
-                # if (t_index == load_index):
-                #     for i, j in enumerate(k_sim.s_source_pos_index):
-                #         print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
-                #         np.ravel(sxx_split_x, order="F")[j] += np.squeeze(k_sim.source.sxx)[t_index]
-                #         temp = deepcopy(np.ravel(sxx_split_x, order="F")[j] )
-                #         sxx_split_x.ravel(order="F")[j] = temp + np.squeeze(k_sim.source.sxx)[t_index]
-                #         print(t_index, i, j, np.ravel(sxx_split_x, order="F")[j], np.squeeze(k_sim.source.sxx)[t_index])
+                else:
 
-                #sxx_split_x[k_sim.s_source_pos_index] = sxx_split_x[k_sim.s_source_pos_index] + np.squeeze(source.sxx)[t_index] * np.ones_like(mask)
-
-                mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
-                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
-
+                    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
 
         if (k_sim.source_syy is not False and t_index < np.size(source.syy)):
 

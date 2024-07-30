@@ -126,6 +126,37 @@ sensor_data_reordered.p = reorder_sensor_data(kgrid, sensor, sensor_data.p)
 # VISUALISATION
 # =========================================================================
 
+
+
+# Normalize frames based on the maximum value over all frames
+max_value = np.max(sensor_data_reordered.p)
+normalized_frames = sensor_data_reordered.p / max_value
+
+cmap = get_color_map()
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Create an empty image with the first normalized frame
+image = ax.imshow(normalized_frames[0], cmap=cmap, norm=colors.Normalize(vmin=0, vmax=1))
+
+# Function to update the image for each frame
+def update(frame):
+    image.set_data(normalized_frames[frame])
+    ax.set_title(f"Frame {frame + 1}/{kgrid.Nt}")
+    return [image]
+
+# Create the animation
+ani = FuncAnimation(fig, update, frames=kgrid.Nt, interval=100)  # Adjust interval as needed (in milliseconds)
+
+# Save the animation as a video file (e.g., MP4)
+video_filename = "output_video1.mp4"
+ani.save("./" + video_filename, writer="ffmpeg", fps=30)  # Adjust FPS as needed
+
+# Show the animation (optional)
+plt.show()
+
+
 # plot layout of simulation
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
 _ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T,

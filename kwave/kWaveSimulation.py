@@ -244,6 +244,7 @@ class kWaveSimulation(object):
     ##############
     # flags which control the types of source used
     ##############
+
     @property
     def source_p0(self):
         """
@@ -267,8 +268,12 @@ class kWaveSimulation(object):
             Whether initial pressure source is present in the elastic code (default=False)
 
         """
-        # Not clear where this flag is set
-        return False
+        flag: bool = False
+        if not isinstance(self.source, NotATransducer) and self.source.p0 is not None \
+          and self.options.simulation_type.is_elastic_simulation():
+            # set flag
+            flag = True
+        return flag
 
     @property
     def source_p(self):
@@ -528,7 +533,6 @@ class kWaveSimulation(object):
         self.assign_pseudonyms(self.medium, self.kgrid)
 
         self.scale_source_terms(opt.scale_source_terms)
-
 
         # a copy of record is passed through, and use to update the
         if is_elastic_code:
@@ -947,8 +951,37 @@ class kWaveSimulation(object):
 
             self.source.validate(self.kgrid)
 
+            # check for initial pressure input
+            if self.source.p0 is not None:
+
+                # check size and contents
+                if np.allclose(np.abs(self.source.p0), np.zeros_like(self.source.p0)):
+
+                    # if the initial pressure is empty or zero, remove field
+                    del self.source.p0
+                    raise RuntimeWarning('All entries in source.p0 are close to zero')
+
+                if np.any(np.size(np.squeeze(self.source.p0)) != np.size(np.squeeze(self.kgrid.k))):
+
+                    # throw an error if p0 is not the correct size
+                    raise RuntimeError('source.p0 must be the same size as the computational grid')
+
+                # if using the elastic code, reformulate source.p0 in terms of the
+                # stress source terms using the fact that source.p = [0.5 0.5] /
+                # (2*CFL) is the same as source.p0 = 1
+                if self.options.simulation_type.is_elastic_simulation():
+
+                    self.source.sxx = self.source.p0 / 2.0
+                    self.source.syy = self.source.p0 / 2.0
+
+                    if self.kgrid.dim == 3:
+                        self.source.szz = np.empty_like(self.source.sxx)
+
+
+
             # check for a time varying pressure source input
             if self.source.p is not None:
+
                 # check the source mode input is valid
                 if self.source.p_mode is None:
                     self.source.p_mode = self.SOURCE_P_MODE_DEF
@@ -975,6 +1008,7 @@ class kWaveSimulation(object):
                 self.p_source_pos_index = cast_to_type(self.p_source_pos_index, self.index_data_type)
                 if self.source_p_labelled:
                     self.p_source_sig_index = cast_to_type(self.p_source_sig_index, self.index_data_type)
+
 
             # check for time varying velocity source input and set source flag
             if any([(getattr(self.source, k) is not None) for k in ["ux", "uy", "uz", "u_mask"]]):
@@ -1003,9 +1037,10 @@ class kWaveSimulation(object):
                 if self.source_u_labelled:
                     self.u_source_sig_index = cast_to_type(self.u_source_sig_index, self.index_data_type)
 
-            # check for time varying stress source input and set source flag
-            if any([(getattr(self.source, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]):
 
+            # check for time varying stress source input and set source flag
+            if any([(getattr(self.source, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]) and \
+              not self.source_p0_elastic:
                 # check the source mode input is valid
                 if self.source.s_mode is None:
                     self.source.s_mode = self.SOURCE_S_MODE_DEF
@@ -1015,6 +1050,8 @@ class kWaveSimulation(object):
 
                 # check if the mask is binary or labelled
                 s_unique = np.unique(self.source.s_mask)
+                print(np.size(self.source.s_mask), np.shape(self.source.s_mask))
+                print(np.size(s_unique), np.shape(s_unique))
 
                 # create a second indexing variable
                 if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
@@ -1362,6 +1399,7 @@ class kWaveSimulation(object):
                         "source_uy": self.source_uy,
                         "source_uz": self.source_uz,
                         "transducer_source": self.transducer_source,
+                        "source_p0_elastic": self.source_p0_elastic,
                         "source_sxx": self.source_sxx,
                         "source_syy": self.source_syy,
                         "source_szz": self.source_szz,

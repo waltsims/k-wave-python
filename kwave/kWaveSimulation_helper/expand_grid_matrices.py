@@ -12,7 +12,8 @@ from kwave.utils.matlab import matlab_find
 from kwave.utils.matrix import expand_matrix
 
 
-def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor, opt: SimulationOptions, values: dotdict, flags: dotdict):
+def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor,
+                         opt: SimulationOptions, values: dotdict, flags: dotdict):
     # update command line status
     logging.log(logging.INFO, "  expanding computational grid...")
 
@@ -231,6 +232,12 @@ def expand_velocity_sources(
 
 
 def expand_stress_sources(source, expand_size, flags, index_data_type, s_source_pos_index):
+
+    if flags.source_p0_elastic:
+        source.sxx = expand_matrix(source.sxx, expand_size, 0)
+        source.syy = expand_matrix(source.syy, expand_size, 0)
+        return None
+
     # enlarge the stress source mask if given
     if flags.source_sxx or flags.source_syy or flags.source_szz or flags.source_sxy or flags.source_sxz or flags.source_syz:
         # enlarge the stress source mask
