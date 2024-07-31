@@ -216,7 +216,6 @@ cb5 = fig5.colorbar(pcm5, ax=ax5)
 ax5.set_ylabel('Sensor Position')
 ax5.set_xlabel('Time Step')
 
-
 fig6, ax6 = plt.subplots(nrows=1, ncols=1)
 pcm6 = ax6.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
 ax6.invert_yaxis()
