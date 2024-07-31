@@ -1,7 +1,8 @@
-import os
+
 import numpy as np
 import matplotlib.pyplot as plt
-from operator import not_
+# from matplotlib import colors
+# from matplotlib.animation import FuncAnimation
 from copy import deepcopy
 
 from kwave.data import Vector
@@ -14,10 +15,11 @@ from kwave.pstdElastic2D import pstd_elastic_2d
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.mapgen import make_disc, make_circle
 from kwave.utils.signals import reorder_sensor_data
-from kwave.utils.matlab import matlab_mask
+
+from kwave.utils.colormap import get_color_map
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
+
 
 """
 Explosive Source In A Layered Medium Example
@@ -99,8 +101,6 @@ source.p0 = disc_magnitude * make_disc(Vector([Nx, Ny]), Vector([disc_x_pos, dis
 # define a circular sensor or radius 20 grid points, centred at origin
 sensor = kSensor()
 sensor.mask = make_circle(Vector([Nx, Ny]), Vector([Nx // 2, Ny // 2]), 20)
-
-# prehaps this helps
 sensor.record = ['p']
 
 # define a custom display mask showing the position of the interface from
@@ -126,38 +126,45 @@ sensor_data_reordered.p = reorder_sensor_data(kgrid, sensor, sensor_data.p)
 # VISUALISATION
 # =========================================================================
 
+# # Normalize frames based on the maximum value over all frames
+# max_value = np.max(sensor_data_reordered.p)
+# normalized_frames = sensor_data_reordered.p / max_value
 
+# cmap = get_color_map()
 
-# Normalize frames based on the maximum value over all frames
-max_value = np.max(sensor_data_reordered.p)
-normalized_frames = sensor_data_reordered.p / max_value
+# # Create a figure and axis
+# fig0, ax0 = plt.subplots()
 
-cmap = get_color_map()
+# # Create an empty image with the first normalized frame
+# image = ax0.imshow(normalized_frames[0], cmap=cmap, norm=colors.Normalize(vmin=0, vmax=1))
 
-# Create a figure and axis
-fig, ax = plt.subplots()
+# # Function to update the image for each frame
+# def update(frame):
+#     image.set_data(normalized_frames[frame])
+#     ax0.set_title(f"Frame {frame + 1}/{kgrid.Nt}")
+#     return [image]
 
-# Create an empty image with the first normalized frame
-image = ax.imshow(normalized_frames[0], cmap=cmap, norm=colors.Normalize(vmin=0, vmax=1))
+# # Create the animation
+# ani = FuncAnimation(fig, update, frames=kgrid.Nt, interval=100)  # Adjust interval as needed (in milliseconds)
 
-# Function to update the image for each frame
-def update(frame):
-    image.set_data(normalized_frames[frame])
-    ax.set_title(f"Frame {frame + 1}/{kgrid.Nt}")
-    return [image]
+# # Save the animation as a video file (e.g., MP4)
+# video_filename = "output_video1.mp4"
+# ani.save("./" + video_filename, writer="ffmpeg", fps=30)  # Adjust FPS as needed
 
-# Create the animation
-ani = FuncAnimation(fig, update, frames=kgrid.Nt, interval=100)  # Adjust interval as needed (in milliseconds)
-
-# Save the animation as a video file (e.g., MP4)
-video_filename = "output_video1.mp4"
-ani.save("./" + video_filename, writer="ffmpeg", fps=30)  # Adjust FPS as needed
-
-# Show the animation (optional)
-plt.show()
+# # Show the animation (optional)
+# plt.show()
 
 
 # plot layout of simulation
+# fig0, ax0 = plt.subplots(nrows=1, ncols=1)
+# _ = ax0.imshow(kgrid.y.T, kgrid.x.T,
+#                    np.logical_or(np.logical_or(source.p0, sensor.mask), display_mask).T,
+#                    cmap='gray_r', interpolation='flat', alpha=1)
+# ax0.invert_yaxis()
+# ax0.set_xlabel('y [mm]')
+# ax0.set_ylabel('x [mm]')
+
+
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
 _ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T,
                    np.logical_or(np.logical_or(source.p0, sensor.mask), display_mask).T,
@@ -168,22 +175,53 @@ ax1.set_ylabel('x [mm]')
 
 # plot velocities
 fig2, ax2 = plt.subplots(nrows=1, ncols=1)
-pcm2 = ax2.pcolormesh(sensor_data.p, shading='gouraud', cmap=plt.colormaps['jet'])
+pcm2 = ax2.imshow(sensor_data.p, cmap=get_color_map(), alpha=1)
 cb2 = fig2.colorbar(pcm2, ax=ax2)
 ax2.set_xlabel('Sensor Position')
 ax2.set_ylabel('Time Step')
 
 fig3, ax3 = plt.subplots(nrows=1, ncols=1)
-pcm3 = ax3.imshow(sensor_data.p)
+pcm3 = ax3.imshow(sensor_data_reordered.p, cmap=get_color_map(), alpha=1)
 cb3 = fig3.colorbar(pcm3, ax=ax3)
 ax3.set_xlabel('Sensor Position')
 ax3.set_ylabel('Time Step')
 
-fig3, ax3 = plt.subplots(nrows=1, ncols=1)
-pcm3 = ax3.imshow(sensor_data_reordered.p)
-cb3 = fig3.colorbar(pcm3, ax=ax3)
-ax3.set_xlabel('Sensor Position')
-ax3.set_ylabel('Time Step')
+# time vector
+t_array = np.arange(0, int(kgrid.Nt))
+# number of sensors in grid
+n: int = int(np.size(sensor_data_reordered.p) / int(kgrid.Nt))
+#sensor vector
+sensors = np.arange(0, int(n))
 
+max_value = np.max(sensor_data_reordered.p)
+min_value = np.min(sensor_data_reordered.p)
+p = 2.0 * (sensor_data_reordered.p - min_value) / (max_value - min_value) - 1.0
+
+fig4, ax4 = plt.subplots(nrows=1, ncols=1)
+pcm4 = ax4.pcolormesh(t_array, sensors, p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
+ax4.invert_yaxis()
+cb4 = fig4.colorbar(pcm4, ax=ax4)
+ax4.set_ylabel('Sensor Position')
+ax4.set_xlabel('Time Step')
+
+
+max_value = np.max(sensor_data.p)
+min_value = np.min(sensor_data.p)
+p = 2.0 * (sensor_data.p - min_value) / (max_value - min_value) - 1.0
+
+fig5, ax5 = plt.subplots(nrows=1, ncols=1)
+pcm5 = ax5.pcolormesh(t_array, sensors, p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
+ax5.invert_yaxis()
+cb5 = fig5.colorbar(pcm5, ax=ax5)
+ax5.set_ylabel('Sensor Position')
+ax5.set_xlabel('Time Step')
+
+
+fig6, ax6 = plt.subplots(nrows=1, ncols=1)
+pcm6 = ax6.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
+ax6.invert_yaxis()
+cb6 = fig6.colorbar(pcm6, ax=ax6)
+ax6.set_ylabel('Sensor Position')
+ax6.set_xlabel('Time Step')
 
 plt.show()
