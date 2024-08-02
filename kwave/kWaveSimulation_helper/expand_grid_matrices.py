@@ -38,6 +38,7 @@ def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor,
     # expand the computational grid, replacing the original grid
     kgrid = expand_kgrid(kgrid, flags.axisymmetric, pml_size)
 
+    # calculate the size of the expanded kgrid to pass
     expand_size = calculate_expand_size(kgrid, flags.axisymmetric, pml_size)
 
     # update the data type in case adding the PML requires additional index precision
@@ -95,6 +96,7 @@ def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
         if is_axisymmetric:
             expand_size = [pml_size[0], pml_size[0], 0, pml_size[1]]
         else:
+            # print("expand_size =", pml_size)
             expand_size = pml_size
     elif kgrid.dim == 3:
         expand_size = pml_size
@@ -207,22 +209,48 @@ def expand_velocity_sources(
 
     """
     if is_source_ux or is_source_uy or is_source_uz or is_transducer_source:
+
+        # print('expand u')
+
         # update the source indexing variable
         if isinstance(source, NotATransducer):
+            # print('NotATransducer')
             # check if the sensor is also the same transducer, if so, don't expand the grid again
             if not is_source_sensor_same:
                 # expand the transducer mask
                 source.expand_grid(expand_size)
-
             # get the new active elements mask
             active_elements_mask = source.active_elements_mask
-
             # update the indexing variable corresponding to the active elements
             u_source_pos_index = matlab_find(active_elements_mask)
         else:
-            # enlarge the velocity source mask
-            source.u_mask = expand_matrix(source.u_mask, expand_size, 0)
+            # print('not NotATransducer')
+            # print("source.u_mask:", np.shape(source.u_mask), np.size(source.u_mask) )
+            # print("expand_size:", expand_size)
+            exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2), (expand_size[1]//2, expand_size[1]//2)) )
 
+            # print(np.shape(source.u_mask)[0] + 2 * expand_size[0],
+            #       np.shape(source.u_mask)[1] + 2 * expand_size[1], )
+
+            # if np.max(matlab_find(source.u_mask)) == np.size(source.ux):
+            #     print("CHANGING ux")
+            #     source.ux = np.pad(source.ux, pad_width=exp_size)
+
+            # if np.max(matlab_find(source.u_mask)) == np.size(source.uy):
+            #     source.uy = np.pad(source.uy, pad_width=exp_size)
+            # else:
+            #     print("NOT CHANGING")
+
+            source.u_mask = np.pad(source.u_mask, pad_width=exp_size)
+
+
+
+            # enlarge the velocity source mask
+            #exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2), (expand_size[1]//2, expand_size[1]//2)) )
+            #source.u_mask = expand_matrix(source.u_mask, exp_size, 0, True)
+
+            #print("updated source.u_mask:", np.shape(source.u_mask), np.size(source.u_mask) )
+            #print("temp:", np.shape(temp), np.size(temp) )
             # create an indexing variable corresponding to the source elements
             u_source_pos_index = matlab_find(source.u_mask)
 

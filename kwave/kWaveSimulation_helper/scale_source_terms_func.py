@@ -1,5 +1,4 @@
 import logging
-import math
 
 import numpy as np
 
@@ -271,7 +270,7 @@ def apply_velocity_source_corrections(
 
 
 def apply_source_correction(source_val, frequency_ref, dt):
-    return source_val * math.cos(2 * math.pi * frequency_ref * dt / 2)
+    return source_val * np.cos(np.pi * frequency_ref * dt)
 
 
 def scale_velocity_sources(flags, source, kgrid, c0, dt, dx, dy, dz, u_source_pos_index):
@@ -322,12 +321,12 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
 
     if c0.size == 1:
         # compute the scale parameter based on the homogeneous sound speed
-        source_val = source_val * (2 * c0 * dt / d_direction)
+        source_val = source_val * (2.0 * c0 * dt / d_direction)
     else:
         # compute the scale parameter seperately for each source position
         # based on the sound speed at that position
         u_index = range(source_val.size[0])
-        source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
+        source_val[u_index, :] = source_val[u_index, :] * (2.0 * c0[u_source_pos_index[u_index]] * dt / d_direction)
     return source_val
 
 

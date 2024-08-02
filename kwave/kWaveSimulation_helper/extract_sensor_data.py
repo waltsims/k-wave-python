@@ -64,6 +64,8 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
     if flags.binary_sensor_mask:
 
+        # print('Second')
+
         # store the time history of the acoustic pressure
         if (flags.record_p or flags.record_I or flags.record_I_avg):
             if not flags.compute_directivity:
@@ -94,8 +96,11 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
             if (dim ==1):
                 sensor_data.ux[:, file_index] = ux_sgx[sensor_mask_index]
             elif (dim == 2):
-                sensor_data.ux[:, file_index] = ux_sgx[sensor_mask_index]
-                sensor_data.uy[:, file_index] = uy_sgy[sensor_mask_index]
+                # print("\n" + str(np.shape(sensor_data.ux[:, file_index])), sensor_data.ux[:, file_index])
+                # print(np.shape(sensor_mask_index), np.max(sensor_mask_index), sensor_mask_index)
+                # print(np.shape(ux_sgx), np.unravel_index(np.squeeze(sensor_mask_index), ux_sgx.shape, order='F'))
+                sensor_data.ux[:, file_index] = ux_sgx[np.unravel_index(np.squeeze(sensor_mask_index), ux_sgx.shape, order='F')]
+                sensor_data.uy[:, file_index] = uy_sgy[np.unravel_index(np.squeeze(sensor_mask_index), uy_sgy.shape, order='F')]
             elif (dim == 3):
                 sensor_data.ux[:, file_index] = ux_sgx[sensor_mask_index]
                 sensor_data.uy[:, file_index] = uy_sgy[sensor_mask_index]

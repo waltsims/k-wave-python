@@ -204,7 +204,6 @@ cb4 = fig4.colorbar(pcm4, ax=ax4)
 ax4.set_ylabel('Sensor Position')
 ax4.set_xlabel('Time Step')
 
-
 max_value = np.max(sensor_data.p)
 min_value = np.min(sensor_data.p)
 p = 2.0 * (sensor_data.p - min_value) / (max_value - min_value) - 1.0

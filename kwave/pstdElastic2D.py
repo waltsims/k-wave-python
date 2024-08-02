@@ -417,14 +417,34 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     timer = TicToc()
     timer.tic()
 
+    #print("........"+str(np.shape(source.u_source_pos_index)))
+
     # run subscript to check inputs
     k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium,
                             simulation_options=simulation_options)
 
+    #print("........"+str(np.max(k_sim.u_source_pos_index)))
+
     # this will create the sensor_data dotdict
     k_sim.input_checking("pstd_elastic_2d")
 
+    # if hasattr(k_sim, 'u_source_pos_index'):
+    #     print("________"+str(np.shape(k_sim.u_source_pos_index)) + " and " + str(np.max(k_sim.u_source_pos_index)))
+    # if hasattr(k_sim, 'u_source_sig_index'):
+    #     print("________"+str(np.shape(k_sim.u_source_sig_index)) + " and " + str(np.max(k_sim.u_source_sig_index)))
+
+    # if hasattr(k_sim.source, 'source_ux'):
+    #     print(k_sim.source.source_ux)
+    # if hasattr(k_sim.source, 'source_uy'):
+    #     print(k_sim.source.source_uy)
+
+    # if hasattr(k_sim.source, 'flag_sxx'):
+    #     print(k_sim.source.flag_sxx)
+    # if hasattr(k_sim.source, 'flag_syy'):
+    #     print(k_sim.source.flag_syy)
+
     sensor_data = k_sim.sensor_data
+
     # print("HERE is a the sensor data object", sensor_data)
 
     # =========================================================================
@@ -529,8 +549,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             # eta is homogeneous or staggered grids are not used
             eta_sgxy = eta
-
-
 
     # [1] Moczo, P., Kristek, J., Vavry?uk, V., Archuleta, R. J., & Halada, L.
     # (2002). 3D heterogeneous staggered-grid finite-difference modeling of
@@ -702,8 +720,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # =========================================================================
 
     # update command line status
-    print('\tprecomputation completed in', scale_time(timer.toc()))
-    print('\tstarting time loop...')
+    t0 = timer.toc()
+    t0_scale = scale_time(t0)
+    print('\tprecomputation completed in', t0_scale)
+    # print('\tstarting time loop...')
 
     # # restart timing variables
     # loop_start_time = timer.tic()
@@ -800,7 +820,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # mat_p = mat_contents['p']
     # mat_sensor_data = mat_contents['sensor_data']
 
-    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index )
+    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
+    k_sim.u_source_pos_index = np.squeeze(k_sim.u_source_pos_index)
+
+    # k_sim.source.ux = np.reshape
 
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
@@ -949,7 +972,31 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             else:
                 # add the source values to the existing field values
-                ux_split_x[k_sim.u_source_pos_index] = ux_split_x[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
+
+                # print("\n" + "np.shape(ux_split_x): " + str(np.shape(ux_split_x)))
+                # print("np.size(k_sim.source.ux):", np.size(k_sim.source.ux))
+                # print("np.shape(k_sim.source.ux):", np.shape(k_sim.source.ux))
+                # print("np.shape(k_sim.u_source_pos_index):", np.shape(k_sim.u_source_pos_index))
+                # print("max value elastic_2d:", np.max(k_sim.u_source_pos_index))
+                # #print("np.shape(k_sim.u_source_sig_index): ", np.shape(k_sim.u_source_sig_index))
+                # #print("np.shape(k_sim.source.ux[k_sim.u_source_pos_index, t_index]): ", np.shape(k_sim.source.ux[k_sim.u_source_pos_index, t_index]))
+                # ind = np.unravel_index(np.squeeze(k_sim.u_source_pos_index), ux_split_x.shape, order='F')
+                # print("\tshape ind:", np.shape(ind))
+                # print("\tmax ind*:", np.max(ind[0][:]) )
+                # print("\tmax *ind:", np.max(ind[:][0]) )
+                # ind0 = np.transpose(np.unravel_index(np.squeeze(k_sim.u_source_pos_index), ux_split_x.shape, order='F'))
+                # print("\tshape ind:", np.shape(ind0))
+                # print("\tmax ind0:", np.max(ind0[:, 0]), np.max(ind0[:, 1]))
+
+                # print("first:", np.shape(ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')]))
+
+                # print("other:", np.shape(np.squeeze(k_sim.source.ux[k_sim.u_source_pos_index, :])))
+
+                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] = \
+                  ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] + \
+                  np.squeeze(k_sim.source.ux[k_sim.u_source_sig_index, :])
+
+                #ux_split_x[k_sim.u_source_pos_index] = ux_split_x[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
         # if (t_index == load_index):
         #     if (np.abs(mat_ux_split_x - uy_split_x).sum() > tol):
         #         print("uy_split_y is not correct!")
@@ -963,7 +1010,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             else:
                 # add the source values to the existing field values
-                uy_split_y[k_sim.u_source_pos_index] = uy_split_y[k_sim.u_source_pos_index] + source.uy[k_sim.u_source_sig_index, t_index]
+                # uy_split_y[k_sim.u_source_pos_index] = uy_split_y[k_sim.u_source_pos_index] + source.uy[k_sim.u_source_sig_index, t_index]
+
+                uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] = \
+                  ux_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] + \
+                  np.squeeze(k_sim.source.uy[k_sim.u_source_sig_index, :])
+
         # if (t_index == load_index):
         #     if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
         #         print("uy_split_y is not correct!")
@@ -1217,7 +1269,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         else:
             n_pos = None
 
-
         if (k_sim.source_sxx is not False and t_index < np.size(source.sxx)):
 
             if (source.s_mode == 'dirichlet'):
@@ -1242,7 +1293,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                         sxx_split_y = k_sim.source.sxx
 
                 # spatially uniform but temporally varying stress source
-                elif np.shape(np.squeeze(source.sxx)) == k_sim.kgrid.Nt:
+                else: #np.shape(np.squeeze(source.sxx)) == k_sim.kgrid.Nt:
                     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
                     mask = sxx_split_x.flatten("F")[k_sim.s_source_pos_index]
                     sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
@@ -1251,8 +1302,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
                       np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
 
-                else:
-                    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
+                #else:
+                #    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
 
         if (k_sim.source_syy is not False and t_index < np.size(source.syy)):
 
@@ -1274,7 +1325,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                         syy_split_x = k_sim.source.syy
                         syy_split_y = k_sim.source.syy
                 # spatially uniform but temporally varying stress source
-                elif np.shape(np.squeeze(source.syy)) == k_sim.kgrid.Nt:
+                else:
                     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
                     mask = syy_split_x.flatten("F")[k_sim.s_source_pos_index]
                     syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
@@ -1282,8 +1333,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     mask = syy_split_y.flatten("F")[k_sim.s_source_pos_index]
                     syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
                       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                else:
-                    raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
+                #else:
+                #    raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
 
         if (k_sim.source_sxy is not False):
             if (source.s_mode == 'dirichlet'):
@@ -1362,6 +1413,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         # compute pressure from normal components of the stress
         p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / 2.0
+
         if checking:
             if (t_index == load_index):
                 diff = np.abs(mat_p - p)
@@ -1432,7 +1484,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
 
     # update command line status
-    print('\tsimulation completed in', scale_time(timer.toc()))
+    t1 = timer.toc()
+    t1_scale = scale_time(t1)
+    print('\tsimulation completed in', t1_scale)
 
     # =========================================================================
     # CLEAN UP
@@ -1513,6 +1567,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         sensor_data = sensor_data.p
 
     # update command line status
-    print('\ttotal computation time HERE') # , scale_time(etime(clock, start_time)))
+    t_total = t0 + t1
+    print('\ttotal computation time', scale_time(t_total))
 
     return sensor_data

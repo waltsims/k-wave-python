@@ -161,7 +161,7 @@ class kSource(object):
         if any([(getattr(self, k) is not None) for k in ["ux", "uy", "uz", "u_mask"]]):
 
             # force u_mask to be given
-            assert self.u_mask is not None
+            assert self.u_mask is not None, "source.u_mask must be defined"
 
             # check mask is the correct size
             assert (
@@ -183,7 +183,7 @@ class kSource(object):
             if self.u_frequency_ref is not None:
                 # check frequency is a scalar, positive number
                 u_frequency_ref = self.u_frequency_ref
-                assert np.isscalar(u_frequency_ref) and u_frequency_ref > 0
+                assert np.isscalar(u_frequency_ref) and u_frequency_ref > 0, "source.u_frequency_ref must be a scalar greater than zero"
 
                 # check frequency is within range
                 assert self.u_frequency_ref <= (
@@ -194,6 +194,7 @@ class kSource(object):
                 self.u_mode = "additive-no-correction"
 
             if self.ux is not None:
+                # print("diagnostics:", np.shape(self.ux), np.size(self.ux))
                 if self.flag_ux > kgrid.Nt:
                     logging.log(logging.WARN, "  source.ux has more time points than kgrid.Nt, " "remaining time points will not be used.")
             if self.uy is not None:
@@ -210,7 +211,7 @@ class kSource(object):
             if u_unique.size <= 2 and u_unique.sum() == 1:
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                ux_size = self.ux[:, 0].size
+                ux_size = self.ux[:, 0].size if (self.ux is not None) else None
                 uy_size = self.uy[:, 0].size if (self.uy is not None) else None
                 uz_size = self.uz[:, 0].size if (self.uz is not None) else None
                 u_sum = np.sum(self.u_mask)
@@ -232,30 +233,32 @@ class kSource(object):
                         or (self.flag_uy and (uy_size != u_sum))
                         or (self.flag_uz and (uz_size != u_sum))
                     ):
+
+                        print("flag_ux:", self.flag_ux)
+                        print(ux_size != u_sum, ux_size, u_sum)
+
                         raise ValueError(
                             "The number of time series in source.ux (etc) " "must match the number of source elements in source.u_mask."
                         )
             else:
-                raise NotImplementedError
+                #raise NotImplementedError
 
                 # check the source labels are monotonic, and start from 1
                 # if (sum(u_unique(2:end) - u_unique(1:end-1)) != (numel(u_unique) - 1)) or (~any(u_unique == 1))
-                if eng.eval("(sum(u_unique(2:end) - " "u_unique(1:end-1)) ~= " "(numel(u_unique) - 1)) " "|| " "(~any(u_unique == 1))"):
+                if np.sum(u_unique[1:] - u_unique[:-2]) != np.size(u_unique) or not np.any(u_unique == 1):
                     raise ValueError(
                         "If using a labelled source.u_mask, " "the source labels must be monotonically increasing and start from 1."
                     )
 
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                # if (flgs.source_ux and (size(source.ux, 1) != (numel(u_unique) - 1))) or
-                #   (flgs.source_uy and (size(source.uy, 1) != (numel(u_unique) - 1))) or
-                #   (flgs.source_uz and (size(source.uz, 1) != (numel(u_unique) - 1)))
-                if eng.eval(
-                    "(flgs.source_ux && (size(source.ux, 1) ~= (numel(u_unique) - 1))) "
-                    "|| (flgs.source_uy && (size(source.uy, 1) ~= (numel(u_unique) - 1))) "
-                    "|| "
-                    "(flgs.source_uz && (size(source.uz, 1) ~= (numel(u_unique) - 1)))"
-                ):
+                if (self.flag.source_ux and np.size(source.ux)[0] != np.size(u_unique) or \
+                    self.flag.source_uy and np.size(source.uy)[0] != np.size(u_unique) or \
+                    self.flag.source_uz and np.size(source.uz)[0] != np.size(u_unique)):
+
+                    print("diagnostics 2:", self.flag.source_ux)
+                    print(np.size(source.ux)[0] != np.size(u_unique), np.size(source.ux)[0], np.size(u_unique))
+
                     raise ValueError(
                         "The number of time series in source.ux (etc) "
                         "must match the number of labelled source elements in source.u_mask."

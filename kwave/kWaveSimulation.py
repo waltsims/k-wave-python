@@ -306,7 +306,7 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_ux(self) -> bool:
+    def source_ux(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in X-direction
@@ -320,7 +320,7 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_uy(self) -> bool:
+    def source_uy(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in Y-direction
@@ -334,7 +334,7 @@ class kWaveSimulation(object):
         return flag
 
     @property
-    def source_uz(self) -> bool:
+    def source_uz(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in Z-direction
@@ -524,7 +524,9 @@ class kWaveSimulation(object):
         # run subscript to display time step, max supported frequency etc.
         display_simulation_params(self.kgrid, self.medium, is_elastic_code)
 
+        # print("---------------------SMOOTH AND ENLARGE---------------------")
         self.smooth_and_enlarge(self.source, k_dim, Vector(self.kgrid.N), opt)
+        # print("---------------------SMOOTH AND ENLARGE---------------------")
 
         self.create_sensor_variables()
 
@@ -760,7 +762,7 @@ class kWaveSimulation(object):
                     # cuboid corners
                     elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
 
-                        print("cuboid")
+                        # print("cuboid")
 
                         # make sure the points are integers
                         assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
@@ -1017,16 +1019,29 @@ class kWaveSimulation(object):
                     self.source.u_mode = self.SOURCE_U_MODE_DEF
 
                 # create an indexing variable corresponding to the location of all
-                # the source elements
-                self.u_source_pos_index = matlab_find(self.source.u_mask)
+                # the source elements. The domain has not yet been enlarged. minus one to get python indexing
+                self.u_source_pos_index = matlab_find(self.source.u_mask) - 1
+                # print("max value _pos_ kWaveSimulation 0:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
 
                 # check if the mask is binary or labelled
                 u_unique = np.unique(self.source.u_mask)
 
-                # create a second indexing variable
+                # create a second indexing variable. This is u_source_sig_index. The signal index.
+                # If binary.
                 if u_unique.size <= 2 and u_unique.sum() == 1:
                     # set signal index to all elements
-                    self.u_source_sig_index = ":"
+                    if self.source.ux is not None and self.source.uy is not None and np.shape(self.source.ux) != np.shape(self.source.uy):
+                        raise RuntimeError('Sizes are wrong')
+                    if self.source.ux is not None:
+                        self.u_source_sig_index = np.arange(0, np.shape(self.source.ux)[0])
+                    elif self.source.uy is not None:
+                        self.u_source_sig_index = np.arange(0, np.shape(self.source.uy)[0])
+
+                    # print(u_unique.size <= 2, u_unique.size)
+                    # print(u_unique.sum() == 1, u_unique.sum())
+                    # print(self.u_source_sig_index)
+                    # print("Nx:", self.kgrid.Nx, "Ny:", self.kgrid.Ny, "Nx*Ny:", self.kgrid.Nx * self.kgrid.Ny)
+                    # print("max value _pos_ kWaveSimulation 1:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
@@ -1034,6 +1049,8 @@ class kWaveSimulation(object):
 
                 # convert the data type depending on the number of indices
                 self.u_source_pos_index = cast_to_type(self.u_source_pos_index, self.index_data_type)
+                # print("max value _pos_ kWaveSimulation 2:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
+
                 if self.source_u_labelled:
                     self.u_source_sig_index = cast_to_type(self.u_source_sig_index, self.index_data_type)
 
@@ -1050,8 +1067,6 @@ class kWaveSimulation(object):
 
                 # check if the mask is binary or labelled
                 s_unique = np.unique(self.source.s_mask)
-                print(np.size(self.source.s_mask), np.shape(self.source.s_mask))
-                print(np.size(s_unique), np.shape(s_unique))
 
                 # create a second indexing variable
                 if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
@@ -1105,6 +1120,7 @@ class kWaveSimulation(object):
             # create indexing variable corresponding to the active elements
             # and convert the data type depending on the number of indices
             self.u_source_pos_index = matlab_find(active_elements_mask).astype(self.index_data_type)
+            # print("max value kWaveSimulation ?:", np.max(self.u_source_pos_index))
 
             # convert the delay mask to an indexing variable (this doesn't need to
             # be modified if the grid is expanded) which tells each point in the
@@ -1374,6 +1390,7 @@ class kWaveSimulation(object):
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
         if opt.pml_inside is False:
+            # print("pre:", np.max(self.u_source_pos_index) )
             expand_results = expand_grid_matrices(
                 self.kgrid,
                 self.medium,
@@ -1411,6 +1428,8 @@ class kWaveSimulation(object):
             )
 
             self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, self.s_source_pos_index = expand_results
+
+        # print("post:", np.max(self.u_source_pos_index))
 
         # get maximum prime factors
         if self.options.simulation_type.is_axisymmetric():

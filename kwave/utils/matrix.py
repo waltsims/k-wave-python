@@ -93,7 +93,7 @@ def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], Li
 def expand_matrix(
     matrix: Union[Num[np.ndarray, "..."], Bool[np.ndarray, "..."]],
     exp_coeff: Union[Shaped[kt.ArrayLike, "dim"], List],
-    edge_val: Optional[Real[kt.ScalarLike, ""]] = None,
+    edge_val: Optional[Real[kt.ScalarLike, ""]] = None, verbose: bool = False
 ):
     """
     Enlarge a matrix by extending the edge values.
@@ -134,7 +134,10 @@ def expand_matrix(
 
     exp_coeff = np.array(exp_coeff).astype(int).squeeze()
     n_coeff = exp_coeff.size
-    assert n_coeff > 0
+    assert n_coeff > 0, "exp_coeff must be well-defined"
+
+    if verbose:
+        print(n_coeff, len(matrix.shape), exp_coeff)
 
     if n_coeff == 1:
         opts["pad_width"] = exp_coeff
@@ -143,7 +146,7 @@ def expand_matrix(
         opts["pad_width"] = exp_coeff
     elif len(matrix.shape) == 2:
         if n_coeff == 2:
-            opts["pad_width"] = exp_coeff
+            opts["pad_width"] = np.asarray(exp_coeff.astype(int))
         if n_coeff == 4:
             opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:
@@ -152,7 +155,19 @@ def expand_matrix(
         if n_coeff == 6:
             opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3]), (exp_coeff[4], exp_coeff[5])]
 
-    return np.pad(matrix, **opts)
+    if verbose:
+        print("\toptions:", opts, opts["pad_width"] )
+        print("\tmatrix shape:", np.shape(matrix))
+
+    if verbose:
+        new_matrix = np.pad(matrix, pad_width=[30, 2], mode='constant', constant_values=0.0)
+    else:
+        new_matrix = np.pad(matrix, **opts)
+
+    if verbose:
+        print("\tnew matrix shape", np.shape(new_matrix))
+
+    return new_matrix
 
 
 def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = "linear") -> np.ndarray:
