@@ -1,32 +1,56 @@
+# import numpy as np
+
+# from typing import Union
+
+# from kwave.data import Vector
+# from kwave.kWaveSimulation_helper import display_simulation_params, set_sound_speed_ref, \
+#   expand_grid_matrices, create_storage_variables, create_absorption_variables, \
+#     scale_source_terms_func
+# from kwave.kgrid import kWaveGrid
+# from kwave.kmedium import kWaveMedium
+# from kwave.ksensor import kSensor
+# from kwave.ksource import kSource
+# from kwave.ktransducer import NotATransducer
+# from kwave.options.simulation_options import SimulationOptions, SimulationType
+# from kwave.recorder import Recorder
+# from kwave.utils.checks import check_stability
+# from kwave.utils.colormap import get_color_map
+# from kwave.utils.conversion import cast_to_type, cart2grid, db2neper
+# from kwave.utils.data import get_smallest_possible_type, get_date_string, scale_time, scale_SI
+# from kwave.utils.dotdictionary import dotdict
+# from kwave.utils.filters import smooth, gaussian_filter
+# from kwave.utils.matlab import matlab_find, matlab_mask
+# from kwave.utils.matrix import num_dim2
+# from kwave.utils.pml import get_pml
+# from kwave.utils.tictoc import TicToc
+
 import numpy as np
-
+from scipy.interpolate import interpn
+from tqdm import tqdm
 from typing import Union
+import cupy as cp
 
-from kwave.data import Vector
-from kwave.kWaveSimulation_helper import display_simulation_params, set_sound_speed_ref, expand_grid_matrices, \
-    create_storage_variables, create_absorption_variables, scale_source_terms_func
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
+from kwave.kWaveSimulation import kWaveSimulation
+
 from kwave.ktransducer import NotATransducer
-from kwave.options.simulation_options import SimulationOptions, SimulationType
-from kwave.recorder import Recorder
-from kwave.utils.checks import check_stability
-from kwave.utils.colormap import get_color_map
-from kwave.utils.conversion import cast_to_type, cart2grid, db2neper
-from kwave.utils.data import get_smallest_possible_type, get_date_string, scale_time, scale_SI
-from kwave.utils.dotdictionary import dotdict
-from kwave.utils.filters import smooth, gaussian_filter
-from kwave.utils.matlab import matlab_find, matlab_mask
-from kwave.utils.matrix import num_dim2
+
+from kwave.utils.conversion import db2neper
+from kwave.utils.data import scale_time
+# from kwave.utils.data import scale_SI
+from kwave.utils.filters import gaussian_filter
+# from kwave.utils.matlab import rem
 from kwave.utils.pml import get_pml
+from kwave.utils.signals import reorder_sensor_data
 from kwave.utils.tictoc import TicToc
+from kwave.utils.dotdictionary import dotdict
 
+from kwave.options.simulation_options import SimulationOptions
 
-
-
-
+from kwave.kWaveSimulation_helper import extract_sensor_data
 
 
 @jit(nopython=True)
@@ -46,7 +70,7 @@ def compute_stress_grad_3(sxx_split_x, sxx_split_y, sxx_split_z, ddx_k_shift_pos
 
 def compute_stress_grad_2(sxx_split_x, sxx_split_y, ddx_k_shift_pos, axis=0):
     temp = sxx_split_x + sxx_split_y
-    rteurn = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=axis), axis=axis))
+    return np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=axis), axis=axis))
 
 
 @jit(nopython=True)
@@ -66,7 +90,7 @@ def compute_sxx_split_x(mpml_z, mpml_y, pml_x, sxx_split_x, dt, mu, lame_lambda,
 
 
 @jit
-def accelerated_fft_operation(ddx_k_shift_pos, temp):
+def jit_accelerated_fft_operation(ddx_k_shift_pos, temp):
     """
     Perform FFT, manipulate and inverse FFT
     """
@@ -75,8 +99,6 @@ def accelerated_fft_operation(ddx_k_shift_pos, temp):
     result_ifft = np.fft.ifft(result_fft, axis=0)
     result_real = np.real(result_ifft)
     return result_real
-
-import cupy as cp
 
 # Assuming ddx_k_shift_pos and temp are numpy arrays, convert them to cupy arrays
 ddx_k_shift_pos_gpu = cp.asarray(ddx_k_shift_pos)
@@ -91,7 +113,7 @@ result_real_gpu = cp.real(result_ifft_gpu)
 # Convert the result back to a NumPy array if necessary
 result_real = cp.asnumpy(result_real_gpu)
 
-def accelerated_fft_operation(ddx_k_shift_pos, x):
+def xp_accelerated_fft_operation(ddx_k_shift_pos, x):
     xp = cp.get_array_module(x)
     x_fft = xp.fft.fft(x, axis=0)
     result_fft = xp.multiply(ddx_k_shift_pos, x_fft)
@@ -150,7 +172,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         with the same dimensions as the computational grid) representing the
         grid points within the computational grid that will collect the data.
         (2) As the grid coordinates of two opposing corners of a cuboid in
-        the form [x1; y1; z1; x2; y2; z2]. This is equivalent to using a
+        the form [x1 y1 z1 x2 y2 z2]. This is equivalent to using a
         binary sensor mask covering the same region, however, the output is
         indexed differently as discussed below. (3) As a series of Cartesian
         coordinates within the grid which specify the location of the
@@ -179,7 +201,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         By default, the recorded acoustic pressure field is passed directly
         to the output sensor_data. However, other acoustic parameters can
         also be recorded by setting sensor.record to a cell array of the form
-        {'p', 'u', 'p_max', ...}. For example, both the particle velocity and
+        {'p', 'u', 'p_max', \}. For example, both the particle velocity and
         the acoustic pressure can be returned by setting sensor.record =
         {'p', 'u'}. If sensor.record is given, the output sensor_data is
         returned as a structure with the different outputs appended as
@@ -220,7 +242,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     USAGE:
         sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor)
-        sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor, ...)
+        sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor, \)
 
     INPUTS:
     The minimum fields that must be assigned to run an initial value problem
@@ -263,7 +285,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                 the time varying stress source distributions
         source.s_mode          - optional input to control whether the input
                                 stress is injected as a mass source or
-                                enforced as a dirichlet boundary condition;
+                                enforced as a dirichlet boundary condition
                                 valid inputs are 'additive' (the default) or
                                 'dirichlet'
         source.ux              - time varying particle velocity in the
@@ -280,7 +302,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                 distribution
         source.u_mode          - optional input to control whether the input
                                 velocity is applied as a force source or
-                                enforced as a dirichlet boundary condition;
+                                enforced as a dirichlet boundary condition
                                 valid inputs are 'additive' (the default) or
                                 'dirichlet'
 
@@ -289,7 +311,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                 time-step
         sensor.record          - cell array of the acoustic parameters to
                                 record in the form sensor.record = {'p',
-                                'u', ...}; valid inputs are:
+                                'u', \} valid inputs are:
 
             'p' (acoustic pressure)
             'p_max' (maximum pressure)
@@ -519,18 +541,12 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     either version 3 of the License, or (at your option) any later version.
 
     k-Wave is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    WARRANTY without even the implied warranty of MERCHANTABILITY or FITNESS
     FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
     more details.
 
     You should have received a copy of the GNU Lesser General Public License
     along with k-Wave. If not, see <http://www.gnu.org/licenses/>.
-
-    # suppress mlint warnings that arise from using subscripts
-    ##ok<*NASGU>
-    ##ok<*COLND>
-    ##ok<*NODEF>
-    ##ok<*INUSL>
     """
 
 # =========================================================================
@@ -540,9 +556,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # start the timer and store the start time
     TicToc.tic()
 
-    # set the name of the simulation code
-    MFILE = mfilename
-
     k_sim = kWaveSimulation(
         kgrid=kgrid,
         source=source,
@@ -550,16 +563,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         medium=medium,
         simulation_options=simulation_options
     )
-    # k_sim.input_checking('kspaceFirstOrder3D')
 
-
-    # get the number of inputs and outputs (nargin and nargout can't be used in
-    # subscripts in MATLAB 2016b or later)
-    num_inputs  = nargin
-    num_outputs = nargout
-
-    # run subscript to check inputs
-    kspaceFirstOrder_inputChecking
+    # run helper script to check inputs
+    k_sim.input_checking('pstd_elastic_3d')
 
     # assign the lame parameters
     mu = medium.sound_speed_shear**2 * medium.density
@@ -588,20 +594,16 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # calculate the values of the density at the staggered grid points
     # using the arithmetic average [1, 2], where sgx  = (x + dx/2, y),
     # sgy  = (x, y + dy/2) and sgz = (x, y, z + dz/2)
-    if (numDim(rho0) == 3 and (flags.use_sg)):
-
+    if (m_rho0 == 3 and (flags.use_sg)):
         # rho0 is heterogeneous and staggered grids are used
-        rho0_sgx = scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), rho0, (kgrid.x + kgrid.dx / 2.0, kgrid.y, kgrid.z), 'linear');
-        rho0_sgy = scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), rho0, (kgrid.x, kgrid.y + kgrid.dy / 2.0, kgrid.z), 'linear');
-        rho0_sgz = scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), rho0, (kgrid.x, kgrid.y, kgrid.z + kgrid.dz / 2.0), 'linear');
-
+        rho0_sgx = interpn(grid, rho0, sg_x, 'linear')
+        rho0_sgy = interpn(grid, rho0, sg_y, 'linear')
+        rho0_sgz = interpn(grid, rho0, sg_z, 'linear')
         # set values outside of the interpolation range to original values
         rho0_sgx[np.isnan(rho0_sgx)] = rho0[np.isnan(rho0_sgx)]
         rho0_sgy[np.isnan(rho0_sgy)] = rho0[np.isnan(rho0_sgy)]
         rho0_sgz[np.isnan(rho0_sgz)] = rho0[np.isnan(rho0_sgz)]
-
     else:
-
         # rho0 is homogeneous or staggered grids are not used
         rho0_sgx = rho0
         rho0_sgy = rho0
@@ -619,19 +621,18 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         del rho0_sgy
         del rho0_sgz
 
-    grid = (kgrid.x, kgrid.y, kgrid.z)
 
     # calculate the values of mu at the staggered grid points using the
     # harmonic average [1, 2], where sgxy = (x + dx/2, y + dy/2, z), etc
-    if (numDim(mu) == 3 and flags.use_sg):
+    if (m_mu == 3 and flags.use_sg):
 
         # mu is heterogeneous and staggered grids are used
-        mu_sgxy  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z),
+        mu_sgxy  = 1.0 / interpn((kgrid.x, kgrid.y, kgrid.z),
                                             1.0 / mu,
                                             (kgrid.x + kgrid.dx / 2.0, kgrid.y + kgrid.dy / 2.0, kgrid.z),
                                             'linear')
-        mu_sgxz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / mu, (kgrid.x + kgrid.dx / 2.0, kgrid.y, kgrid.z + kgrid.dz / 2.0), 'linear');
-        mu_sgyz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / mu, (kgrid.x, kgrid.y + kgrid.dy / 2.0, kgrid.z + kgrid.dz / 2.0), 'linear');
+        mu_sgxz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / mu, (kgrid.x + kgrid.dx / 2.0, kgrid.y, kgrid.z + kgrid.dz / 2.0), 'linear')
+        mu_sgyz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / mu, (kgrid.x, kgrid.y + kgrid.dy / 2.0, kgrid.z + kgrid.dz / 2.0), 'linear')
 
         # set values outside of the interpolation range to original values
         mu_sgxy[np.isnan(mu_sgxy)] = mu[np.isnan(mu_sgxy)]
@@ -649,12 +650,12 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # calculate the values of eta at the staggered grid points using the
     # harmonic average [1, 2], where sgxy = (x + dx/2, y + dy/2, z) etc
     if flags.kelvin_voigt_model:
-        if numDim(eta) == 3 and flags.use_sg:
+        if m_eta == 3 and flags.use_sg:
 
             # eta is heterogeneous and staggered grids are used
-            eta_sgxy  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x + kgrid.dx / 2.0, kgrid.y + kgrid.dy / 2.0, kgrid.z), 'linear');
-            eta_sgxz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x + kgrid.dx / 2.0, kgrid.y, kgrid.z + kgrid.dz / 2.0), 'linear');
-            eta_sgyz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x, kgrid.y + kgrid.dy / 2.0, kgrid.z + kgrid.dz / 2.0), 'linear');
+            eta_sgxy  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x + kgrid.dx / 2.0, kgrid.y + kgrid.dy / 2.0, kgrid.z), 'linear')
+            eta_sgxz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x + kgrid.dx / 2.0, kgrid.y, kgrid.z + kgrid.dz / 2.0), 'linear')
+            eta_sgyz  = 1.0 / scipy.interpolate.interpn((kgrid.x, kgrid.y, kgrid.z), 1.0 / eta, (kgrid.x, kgrid.y + kgrid.dy / 2.0, kgrid.z + kgrid.dz / 2.0), 'linear')
 
             # set values outside of the interpolation range to original values
             eta_sgxy[np.isnan(eta_sgxy)] = eta[np.isnan(eta_sgxy)]
@@ -686,38 +687,38 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # =========================================================================
 
     # get the regular PML operators based on the reference sound speed and PML settings
-    pml_x     = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, pml_x_alpha, False, 0);
-    pml_x_sgx = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, pml_x_alpha, (True and flags.use_sg), 0);
-    pml_y     = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, pml_y_alpha, False, 1);
-    pml_y_sgy = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, pml_y_alpha, (True and flags.use_sg), 1);
-    pml_z     = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, pml_z_alpha, False, 2);
-    pml_z_sgz = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, pml_z_alpha, (True and flags.use_sg), 2);
+    pml_x     = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, pml_x_alpha, False, 0)
+    pml_x_sgx = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, pml_x_alpha, (True and flags.use_sg), 0)
+    pml_y     = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, pml_y_alpha, False, 1)
+    pml_y_sgy = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, pml_y_alpha, (True and flags.use_sg), 1)
+    pml_z     = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, pml_z_alpha, False, 2)
+    pml_z_sgz = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, pml_z_alpha, (True and flags.use_sg), 2)
 
     # get the multi-axial PML operators
-    mpml_x     = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, False, 0);
-    mpml_x_sgx = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, (True and flags.use_sg), 0);
-    mpml_y     = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, False, 1);
-    mpml_y_sgy = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, (True and flags.use_sg), 1);
-    mpml_z     = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, False, 2);
-    mpml_z_sgz = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, (True and flags.use_sg), 2);
+    mpml_x     = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, False, 0)
+    mpml_x_sgx = get_pml(kgrid.Nx, kgrid.dx, kgrid.dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, (True and flags.use_sg), 0)
+    mpml_y     = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, False, 1)
+    mpml_y_sgy = get_pml(kgrid.Ny, kgrid.dy, kgrid.dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, (True and flags.use_sg), 1)
+    mpml_z     = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, False, 2)
+    mpml_z_sgz = get_pml(kgrid.Nz, kgrid.dz, kgrid.dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, (True and flags.use_sg), 2)
 
     # define the k-space derivative operators, multiply by the staggered
     # grid shift operators, and then re-order using  np.fft.ifftshift (the option
     # flags.use_sg exists for debugging)
     if flags.use_sg:
-        ddx_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kx_vec * np.exp( 1j * kgrid.kx_vec * kgrid.dx / 2.0) );
-        ddx_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kx_vec * np.exp(-1j * kgrid.kx_vec * kgrid.dx / 2.0) );
-        ddy_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.ky_vec * np.exp( 1j * kgrid.ky_vec * kgrid.dy / 2.0) );
-        ddy_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.ky_vec * np.exp(-1j * kgrid.ky_vec * kgrid.dy / 2.0) );
-        ddz_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kz_vec * np.exp( 1j * kgrid.kz_vec * kgrid.dz / 2.0) );
-        ddz_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kz_vec * np.exp(-1j * kgrid.kz_vec * kgrid.dz / 2.0) );
+        ddx_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kx_vec * np.exp( 1j * kgrid.kx_vec * kgrid.dx / 2.0) )
+        ddx_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kx_vec * np.exp(-1j * kgrid.kx_vec * kgrid.dx / 2.0) )
+        ddy_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.ky_vec * np.exp( 1j * kgrid.ky_vec * kgrid.dy / 2.0) )
+        ddy_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.ky_vec * np.exp(-1j * kgrid.ky_vec * kgrid.dy / 2.0) )
+        ddz_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kz_vec * np.exp( 1j * kgrid.kz_vec * kgrid.dz / 2.0) )
+        ddz_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kz_vec * np.exp(-1j * kgrid.kz_vec * kgrid.dz / 2.0) )
     else:
-        ddx_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kx_vec );
-        ddx_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kx_vec );
-        ddy_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.ky_vec );
-        ddy_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.ky_vec );
-        ddz_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kz_vec );
-        ddz_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kz_vec );
+        ddx_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kx_vec )
+        ddx_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kx_vec )
+        ddy_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.ky_vec )
+        ddy_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.ky_vec )
+        ddz_k_shift_pos =  np.fft.ifftshift( 1j * kgrid.kz_vec )
+        ddz_k_shift_neg =  np.fft.ifftshift( 1j * kgrid.kz_vec )
 
     # force the derivative and shift operators to be in the correct direction
     # for use with BSXFUN
@@ -849,7 +850,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # # pre-compute suitable axes scaling factor
     # if (flags.plot_layout or flags.plot_sim):
-    #     x_sc, scale, prefix = scaleSI(np.max([kgrid.x_vec; kgrid.y_vec; kgrid.z_vec])); ##ok<ASGLU>
+    #     x_sc, scale, prefix = scaleSI(np.max([kgrid.x_vec kgrid.y_vec kgrid.z_vec])) ##ok<ASGLU>
 
 
     # # throw error for currently unsupported plot layout feature
@@ -871,21 +872,21 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # =========================================================================
 
     # update command line status
-    print('  precomputation completed in ', scale_time(TicToc.toc()))
-    print('  starting time loop...')
+    print('\tprecomputation completed in ', scale_time(TicToc.toc()))
+    print('\tstarting time loop ...')
 
-    # restart timing variables
-    loop_start_time = TicToc.tic()
+    # # restart timing variables
+    # loop_start_time = TicToc.tic()
 
     # Define the function with jit decorator for acceleration
     @jit(nopython=True)
     def compute_u_split(a, b, c, x, dt, rho, ds):
         return a * b * c * (a * b * c * x + dt * rho * ds)
 
-    result = compute_u_split(mpml_y, mpml_x, pml_z_sgz, uz_split_z, kgrid.dt, rho0_sgz_inv, dszzdz)
+    # result = compute_u_split(mpml_y, mpml_x, pml_z_sgz, uz_split_z, kgrid.dt, rho0_sgz_inv, dszzdz)
 
     # start time loop
-    for t_index in np.arange(index_start, index_step, index_end):
+    for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
 
         # compute the gradients of the stress tensor (these variables do not
         # necessaily need to be stored, they could be computed as needed)
@@ -925,9 +926,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         #                                          bsxfun(times, mpml_y, b
         #                                                 bsxfun(times, pml_x_sgx, ux_split_x))) + kgrid.dt * rho0_sgx_inv * dsxxdx))) a,c
 
-        # ux_split_y = bsxfun(@times, mpml_x_sgx, bsxfun(@times, mpml_z,     bsxfun(@times, pml_y, ...
-        #             bsxfun(@times, mpml_x_sgx, bsxfun(@times, mpml_z,     bsxfun(@times, pml_y, ux_split_y))) ...
-        #             + kgrid.dt .* rho0_sgx_inv .* dsxydy)));
+        # ux_split_y = bsxfun(@times, mpml_x_sgx, bsxfun(@times, mpml_z,     bsxfun(@times, pml_y, \
+        #             bsxfun(@times, mpml_x_sgx, bsxfun(@times, mpml_z,     bsxfun(@times, pml_y, ux_split_y))) \
+        #             + kgrid.dt * rho0_sgx_inv * dsxydy)))
 
         a = pml_y * ux_split_y
         b = mpml_z * a
@@ -937,9 +938,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         e = mpml_z * d
         ux_split_y = mpml_x_sgx * e
 
-        # ux_split_z = bsxfun(@times, mpml_y,     bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z, ...
-        #             bsxfun(@times, mpml_y,     bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z, ux_split_z))) ...
-        #             + kgrid.dt .* rho0_sgx_inv .* dsxzdz)));
+        # ux_split_z = bsxfun(@times, mpml_y,     bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z, \
+        #             bsxfun(@times, mpml_y,     bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z, ux_split_z))) \
+        #             + kgrid.dt * rho0_sgx_inv * dsxzdz)))
         a = pml_z * ux_split_z
         b = mpml_x_sgx * a
         c = mpml_y * b
@@ -949,9 +950,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         ux_split_z = mpml_y * e
 
 
-        # uy_split_x = bsxfun(@times, mpml_z,     bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x, ...
-        #             bsxfun(@times, mpml_z,     bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x, uy_split_x))) ...
-        #             + kgrid.dt .* rho0_sgy_inv .* dsxydx)));
+        # uy_split_x = bsxfun(@times, mpml_z,     bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x, \
+        #             bsxfun(@times, mpml_z,     bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x, uy_split_x))) \
+        #             + kgrid.dt * rho0_sgy_inv * dsxydx)))
         a = pml_x * uy_split_x
         b = mpml_y_sgy * a
         c = mpml_z * b
@@ -960,9 +961,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         e = mpml_y_sgy * d
         uy_split_x = mpml_z * e
 
-        # uy_split_y = bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z, bsxfun(@times, pml_y_sgy, ...
-        #             bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z, bsxfun(@times, pml_y_sgy, uy_split_y))) ...
-        #             + kgrid.dt .* rho0_sgy_inv .* dsyydy)));
+        # uy_split_y = bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z, bsxfun(@times, pml_y_sgy, \
+        #             bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z, bsxfun(@times, pml_y_sgy, uy_split_y))) \
+        #             + kgrid.dt * rho0_sgy_inv * dsyydy)))
         a = pml_y_sgy * uy_split_y
         b = mpml_z * a
         c = mpml_x * b
@@ -973,11 +974,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         # uy_split_z = bsxfun(@times, mpml_y_sgy,
         #               bsxfun(@times, mpml_x,
-        #                 bsxfun(@times, pml_z, ...
+        #                 bsxfun(@times, pml_z, \
         #                   bsxfun(@times, mpml_y_sgy,
         #                     bsxfun(@times, mpml_x,
-        #                       bsxfun(@times, pml_z, uy_split_z))) ...
-        #                           + kgrid.dt .* rho0_sgy_inv .* dsyzdz)));
+        #                       bsxfun(@times, pml_z, uy_split_z))) \
+        #                           + kgrid.dt * rho0_sgy_inv * dsyzdz)))
         a = pml_z * uy_split_z
         b = mpml_x * a
         c = mpml_y_sgy * b
@@ -986,9 +987,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         e = mpml_x * d
         uy_split_z = mpml_y_sgy * e
 
-        # uz_split_x = bsxfun(@times, mpml_z_sgz, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-        #             bsxfun(@times, mpml_z_sgz, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, uz_split_x))) ...
-        #             + kgrid.dt .* rho0_sgz_inv .* dsxzdx)));
+        # uz_split_x = bsxfun(@times, mpml_z_sgz, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+        #             bsxfun(@times, mpml_z_sgz, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, uz_split_x))) \
+        #             + kgrid.dt * rho0_sgz_inv * dsxzdx)))
         a = pml_x * uz_split_x
         b = mpml_y * a
         c = mpml_z_sgz * b
@@ -997,9 +998,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         e = mpml_y * d
         uz_split_x = mpml_z_sgz * e
 
-        # uz_split_y = bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y, ...
-        #             bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y, uz_split_y))) ...
-        #             + kgrid.dt .* rho0_sgz_inv .* dsyzdy)));
+        # uz_split_y = bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y, \
+        #             bsxfun(@times, mpml_x,     bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y, uz_split_y))) \
+        #             + kgrid.dt * rho0_sgz_inv * dsyzdy)))
         a = pml_y * uz_split_y
         b = mpml_z_sgz * a
         c = mpml_x * b
@@ -1008,9 +1009,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         e = mpml_z_sgz * d
         uz_split_y = mpml_x * e
 
-        # uz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z_sgz, ...
-        #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z_sgz, uz_split_z))) ...
-        #             + kgrid.dt .* rho0_sgz_inv .* dszzdz)));
+        # uz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z_sgz, \
+        #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z_sgz, uz_split_z))) \
+        #             + kgrid.dt * rho0_sgz_inv * dszzdz)))
         a = pml_y * pml_z_sgz
         b = mpml_x * a
         c = mpml_y * b
@@ -1053,12 +1054,12 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             if (source.u_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                uz_split_z[u_source_pos_index] = source.uz[u_source_sig_index, t_index];
+                uz_split_z[u_source_pos_index] = source.uz[u_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                uz_split_z[u_source_pos_index] = uz_split_z[u_source_pos_index] + source.uz[u_source_sig_index, t_index];
+                uz_split_z[u_source_pos_index] = uz_split_z[u_source_pos_index] + source.uz[u_source_sig_index, t_index]
 
 
 
@@ -1119,19 +1120,15 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
             # sxx_split_x = bsxfun(@times, mpml_z,
             #                 bsxfun(@times, mpml_y,
-            #                   bsxfun(@times, pml_x, ...
+            #                   bsxfun(@times, pml_x, \
             #                     bsxfun(@times, mpml_z,
             #                       bsxfun(@times, mpml_y,
-            #                         bsxfun(@times, pml_x, sxx_split_x))) ...
-            #                           + kgrid.dt * (2.0 * mu + lame_lambda) * duxdx + kgrid.dt * (2.0 * eta + chi) * dduxdxdt)));
+            #                         bsxfun(@times, pml_x, sxx_split_x))) \
+            #                           + kgrid.dt * (2.0 * mu + lame_lambda) * duxdx + kgrid.dt * (2.0 * eta + chi) * dduxdxdt)))
 
-            sxx_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * sxx_split_x))  +
-                                  kgrid.dt * (2.0 * mu + lame_lambda) * duxdx + kgrid.dt * (2.0 * eta + chi) * dduxdxdt) ) )
-
-            sxx_split_x = mpml_z * mpml_y * pml_x * (
-                mpml_z * mpml_y * pml_x * sxx_split_x +
-                kgrid.dt * (2.0 * mu + lame_lambda) * duxdx +
-                kgrid.dt * (2.0 * eta + chi) * dduxdxdt)
+            sxx_split_x = mpml_z * (mpml_y * pml_x * (mpml_z * mpml_y * (pml_x * sxx_split_x) + \
+                                                      kgrid.dt * (2.0 * mu + lame_lambda) * duxdx + \
+                                                      kgrid.dt * (2.0 * eta + chi) * dduxdxdt))
 
             # @jit(nopython=True)
             # def compute_sxx_split_x(mpml_z, mpml_y, pml_x, sxx_split_x, dt, mu, lame_lambda, duxdx, eta, chi, dduxdxdt):
@@ -1143,225 +1140,304 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             # result = compute_sxx_split_x(mpml_z, mpml_y, pml_x, sxx_split_x, kgrid.dt, mu, lame_lambda, duxdx, eta, chi, dduxdxdt)
 
 
-            # sxx_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) ...
-            #             + kgrid.dt .* lame_lambda .* duydy ...
-            #             + kgrid.dt .* chi .* dduydydt)));
-            sxx_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * sxx_split_y) ) ) +
-                                    kgrid.dt * lame_lambda * duydy + kgrid.dt * chi * dduydydt) )
+            # sxx_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) \
+            #             + kgrid.dt * lame_lambda * duydy \
+            #             + kgrid.dt * chi * dduydydt)))
+            sxx_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * sxx_split_y))) +
+                                    kgrid.dt * lame_lambda * duydy + kgrid.dt * chi * dduydydt))
 
-            # sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) ...
-            #             + kgrid.dt .* lame_lambda .* duzdz ...
-            #             + kgrid.dt .* chi .* dduzdzdt)));
-            sxx_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * sxx_split_z) ) ) +
-                        kgrid.dt * lame_lambda * duzdz + kgrid.dt * chi * dduzdzdt) )
+            # sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) \
+            #             + kgrid.dt * lame_lambda * duzdz \
+            #             + kgrid.dt * chi * dduzdzdt)))
+            sxx_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * sxx_split_z))) +
+                        kgrid.dt * lame_lambda * duzdz + kgrid.dt * chi * dduzdzdt))
 
-            syy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, syy_split_x))) ...
-                        + kgrid.dt .* lame_lambda .* duxdx ...
-                        + kgrid.dt .* chi .* dduxdxdt)));
-            syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) ...
-                        + kgrid.dt .* (2 .* mu + lame_lambda) .* duydy ...
-                        + kgrid.dt .* (2 .* eta + chi) .* dduydydt)));
-            syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) ...
-                        + kgrid.dt .* lame_lambda .* duzdz ...
-                        + kgrid.dt .* chi .* dduzdzdt)));
+            # syy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, syy_split_x))) \
+            #             + kgrid.dt * (lame_lambda * duxdx + kgrid.dt * chi * dduxdxdt) )))
+            syy_split_x = mpml_z * mpml_y * pml_x * (
+                mpml_z * mpml_y * pml_x * syy_split_x +
+                kgrid.dt * (lame_lambda * duxdx + kgrid.dt * chi * dduxdxdt))
 
-            szz_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, szz_split_x))) ...
-                        + kgrid.dt .* lame_lambda .* duxdx...
-                        + kgrid.dt .* chi .* dduxdxdt)));
-            szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) ...
-                        + kgrid.dt .* lame_lambda .* duydy ...
-                        + kgrid.dt .* chi .* dduydydt)));
-            szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) ...
-                        + kgrid.dt .* (2 .* mu + lame_lambda) .* duzdz ...
-                        + kgrid.dt .* (2 .* eta + chi) .* dduzdzdt)));
+            # syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #               bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) \
+            #             + kgrid.dt * (2 * mu + lame_lambda) * duydy \
+            #             + kgrid.dt * (2 * eta + chi) * dduydydt )))
+            syy_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * syy_split_y))) + \
+                                               kgrid.dt * (2.0 * mu + lame_lambda) * duydy + \
+                                               kgrid.dt * (2.0 * eta + chi) * dduydydt))
 
-            sxy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, sxy_split_x))) ...
-                        + kgrid.dt .* mu_sgxy .* duydx ...
-                        + kgrid.dt .* eta_sgxy .* dduydxdt)));
-            sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) ...
-                        + kgrid.dt .* mu_sgxy .* duxdy ...
-                        + kgrid.dt .* eta_sgxy .* dduxdydt)));
+            # syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) \
+            #             + kgrid.dt * lame_lambda * duzdz \
+            #             + kgrid.dt * chi * dduzdzdt) ))
+            syy_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * syy_split_z))) +\
+                                               kgrid.dt * lame_lambda * duzdz + \
+                                               kgrid.dt * chi * dduzdzdt))
 
-            sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) ...
-                        + kgrid.dt .* mu_sgxz .* duzdx ...
-                        + kgrid.dt .* eta_sgxz .* dduzdxdt)));
-            sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) ...
-                        + kgrid.dt .* mu_sgxz .* duxdz ...
-                        + kgrid.dt .* eta_sgxz .* dduxdzdt)));
+            # szz_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, szz_split_x))) \
+            #             + kgrid.dt * lame_lambda * duxdx\
+            #             + kgrid.dt * chi * dduxdxdt)))
+            szz_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * szz_split_x))) + \
+                                               kgrid.dt * lame_lambda * duxdx + \
+                                               kgrid.dt * chi * dduxdxdt))
 
-            syz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, syz_split_y))) ...
-                        + kgrid.dt .* mu_sgyz .* duzdy ...
-                        + kgrid.dt .* eta_sgyz .* dduzdydt)));
-            syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) ...
-                        + kgrid.dt .* mu_sgyz .* duydz ...
-                        + kgrid.dt .* eta_sgyz .* dduydzdt)));
+            # szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) \
+            #             + kgrid.dt * lame_lambda * duydy \
+            #             + kgrid.dt * chi * dduydydt)))
+            szz_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * szz_split_y))) + \
+                                               kgrid.dt * lame_lambda * duydy + \
+                                               kgrid.dt * chi * dduydydt))
+
+            # szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) \
+            #             + kgrid.dt * (2 * mu + lame_lambda) * duzdz \
+            #             + kgrid.dt * (2 * eta + chi) * dduzdzdt)))
+            szz_split_z = mpml_y * (mpml_x * (pml_z * ( mpml_y * (mpml_x * (pml_z * szz_split_z))) + \
+                                               kgrid.dt * (2.0 * mu + lame_lambda) * duzdz + \
+                                               kgrid.dt * (2.0 * eta + chi) * dduzdzdt))
+
+            # sxy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, sxy_split_x))) \
+            #             + kgrid.dt * mu_sgxy * duydx \
+            #             + kgrid.dt * eta_sgxy * dduydxdt)))
+            sxy_split_x = mpml_z * (mpml_y_sgy * (pml_x_sgx * (mpml_z * (mpml_y_sgy * (pml_x_sgx * sxy_split_x))) + \
+                                               kgrid.dt * mu_sgxy * duydx + \
+                                               kgrid.dt * eta_sgxy * dduydxdt))
+
+            # sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) \
+            #             + kgrid.dt * mu_sgxy * duxdy \
+            #             + kgrid.dt * eta_sgxy * dduxdydt)))
+            sxy_split_y = mpml_z * (mpml_x_sgx * (pml_y_sgy * (mpml_z * (mpml_x_sgx * (pml_y_sgy * sxy_split_y))) + \
+                                               kgrid.dt * mu_sgxy * duxdy + \
+                                               kgrid.dt * eta_sgxy * dduxdydt))
+
+            # sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) \
+            #             + kgrid.dt * mu_sgxz * duzdx \
+            #             + kgrid.dt * eta_sgxz * dduzdxdt)))
+            sxz_split_x = mpml_y * (mpml_z_sgz * (pml_x_sgx * (mpml_y * (mpml_z_sgz * (pml_x_sgx * sxz_split_x))) + \
+                                               kgrid.dt * mu_sgxz * duzdx + \
+                                               kgrid.dt * eta_sgxz * dduzdxdt))
+
+            # sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) \
+            #             + kgrid.dt * mu_sgxz * duxdz \
+            #             + kgrid.dt * eta_sgxz * dduxdzdt)))
+            sxz_split_z = mpml_y * (mpml_x_sgx * (pml_z_sgz * (mpml_y * (mpml_x_sgx * (pml_z_sgz * sxz_split_z))) + \
+                                               kgrid.dt * mu_sgxz * duxdz + \
+                                               kgrid.dt * eta_sgxz * dduxdzdt))
+
+            # syz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, syz_split_y))) \
+            #             + kgrid.dt * mu_sgyz * duzdy \
+            #             + kgrid.dt * eta_sgyz * dduzdydt)))
+            syz_split_y = mpml_x * (mpml_z_sgz * (pml_y_sgy * (mpml_x * (mpml_z_sgz * (pml_y_sgy * syz_split_y))) + \
+                                               kgrid.dt * mu_sgyz * duzdy + \
+                                               kgrid.dt * eta_sgxz * dduzdydt))
+
+            # syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) \
+            #             + kgrid.dt * mu_sgyz * duydz \
+            #             + kgrid.dt * eta_sgyz * dduydzdt)))
+            syz_split_z = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z))) + \
+                                               kgrid.dt * mu_sgyz * duzdz + \
+                                               kgrid.dt * eta_sgxz * dduydzdt))
 
         else:
 
+            temp = 2.0 * mu + lame_lambda
+
             # update the normal and shear components of the stress tensor using
             # a lossless elastic model with a split-field multi-axial pml
-            sxx_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, sxx_split_x))) ...
-                        + kgrid.dt .* (2 .* mu + lame_lambda) .* duxdx )));
-            sxx_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) ...
-                        + kgrid.dt .* lame_lambda .* duydy )));
-            sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) ...
-                        + kgrid.dt .* lame_lambda .* duzdz )));
+            # sxx_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, sxx_split_x))) \
+            #             + kgrid.dt * (2 * mu + lame_lambda) * duxdx ) ))
+            sxx_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * sxx_split_x) ) + \
+                                               kgrid.dt * (2.0 * mu + lame_lambda) * duxdx ) ) )
+            # sxx_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) \
+            #             + kgrid.dt * lame_lambda * duydy )))
+            sxx_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * sxx_split_y) ) + \
+                                               kgrid.dt * lame_lambda * duydy ) ) )
+            # sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) \
+            #             + kgrid.dt * lame_lambda * duzdz )))
+            sxx_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * sxx_split_z) ) + \
+                                               kgrid.dt * lame_lambda * duzdz ) ) )
 
-            syy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, syy_split_x))) ...
-                        + kgrid.dt .* lame_lambda .* duxdx)));
-            syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) ...
-                        + kgrid.dt .* (2 .* mu + lame_lambda) .* duydy )));
-            syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) ...
-                        + kgrid.dt .* lame_lambda .* duzdz )));
+            # syy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, syy_split_x))) \
+            #             + kgrid.dt * lame_lambda * duxdx)))
+            syy_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * syy_split_x) ) + \
+                                               kgrid.dt * lame_lambda * duzdz ) ) )
+            # syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) \
+            #             + kgrid.dt * (2 * mu + lame_lambda) * duydy )))
+            syy_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * syy_split_y) ) + \
+                                               kgrid.dt * (2.0 * mu + lame_lambda) * duydy ) ) )
+            # syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) \
+            #             + kgrid.dt * lame_lambda * duzdz )))
+            syy_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * syy_split_z) ) + \
+                                               kgrid.dt * lame_lambda * duzdz ) ) )
 
-            szz_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, szz_split_x))) ...
-                        + kgrid.dt .* lame_lambda .* duxdx)));
-            szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) ...
-                        + kgrid.dt .* lame_lambda .* duydy )));
-            szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) ...
-                        + kgrid.dt .* (2 .* mu + lame_lambda) .* duzdz )));
+            # szz_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, szz_split_x))) \
+            #             + kgrid.dt * lame_lambda * duxdx)))
+            szz_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * szz_split_x) ) + \
+                                               kgrid.dt * lame_lambda * duxdx ) ) )
+            # szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) \
+            #             + kgrid.dt * lame_lambda * duydy )))
+            szz_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * szz_split_y) ) + \
+                                               kgrid.dt * lame_lambda * duydy ) ) )
+            # szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) \
+            #             + kgrid.dt * (2 * mu + lame_lambda) * duzdz )))
+            szz_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * szz_split_z) ) + \
+                                               kgrid.dt * (2.0 * mu + lame_lambda) * duzdz ) ) )
 
-            sxy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, sxy_split_x))) ...
-                        + kgrid.dt .* mu_sgxy .* duydx)));
-            sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, ...
-                        bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) ...
-                        + kgrid.dt .* mu_sgxy .* duxdy)));
+            # sxy_split_x = bsxfun(@times, mpml_z,
+            #                      bsxfun(@times, mpml_y_sgy,
+            #                             bsxfun(@times, pml_x_sgx, \
+            #                                    bsxfun(@times, mpml_z,
+            #                                           bsxfun(@times, mpml_y_sgy,
+            #                                                  bsxfun(@times, pml_x_sgx, sxy_split_x))) +\
+            #                                                  kgrid.dt * mu_sgxy * duydx)))
+            sxy_split_x = mpml_z * (mpml_y_sgy * (pml_x_sgx * (mpml_z * (mpml_y_sgy * (pml_x_sgx * sxy_split_x)) + \
+                                                               kgrid.dt * mu_sgxy * duydx)))
+            # sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, \
+            #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) \
+            #             + kgrid.dt * mu_sgxy * duxdy)))
+            sxy_split_y = mpml_z * (mpml_x_sgx * (pml_y_sgy * (mpml_z * (mpml_x_sgx * (pml_y_sgy * sxy_split_y)) + \
+                                                               kgrid.dt * mu_sgxy * duxdy)))
+            # sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) \
+            #             + kgrid.dt * mu_sgxz * duzdx)))
+            sxz_split_x = mpml_y * (mpml_z_sgz * (pml_x_sgx * (mpml_y * (mpml_z_sgz * (pml_x_sgx * sxz_split_x)) + \
+                                                               kgrid.dt * mu_sgxz * duzdx)))
+            # sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, \
+            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) \
+            #             + kgrid.dt * mu_sgxz * duxdz)))
+            sxz_split_z = mpml_y * (mpml_x_sgx * (pml_z_sgz * (mpml_y * (mpml_x_sgx * (pml_z_sgz * sxz_split_z)) + \
+                                                               kgrid.dt * mu_sgxz * duxdz)))
 
-            sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) ...
-                        + kgrid.dt .* mu_sgxz .* duzdx)));
-            sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, ...
-                        bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) ...
-                        + kgrid.dt .* mu_sgxz .* duxdz)));
+            # syz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, syz_split_y))) \
+            #             + kgrid.dt * mu_sgyz * duzdy)))
+            syz_split_y = mpml_x * (mpml_z_sgz * (pml_y_sgy * (mpml_x * (mpml_z_sgz * (pml_y_sgy * syz_split_y)) + \
+                                                               kgrid.dt * mu_sgyz * duzdy)))
 
-            syz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, syz_split_y))) ...
-                        + kgrid.dt .* mu_sgyz .* duzdy)));
-            syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, ...
-                        bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) ...
-                        + kgrid.dt .* mu_sgyz .* duydz)));
+            # syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, \
+            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) \
+            #             + kgrid.dt * mu_sgyz * duydz)))
+            syz_split_z = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z)) + \
+                                                               kgrid.dt * mu_sgyz * duydz)))
 
-            syz_split_z = mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + kgrid.dt * mu_sgyz * duydz)
-            result = compute_syz_split_z(mpml_x, mpml_y_sgy, pml_z_sgz, syz_split_z, kgrid.dt, mu_sgyz, duydz)
+            # syz_split_z = mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + kgrid.dt * mu_sgyz * duydz)
+            # result = compute_syz_split_z(mpml_x, mpml_y_sgy, pml_z_sgz, syz_split_z, kgrid.dt, mu_sgyz, duydz)
 
         # add in the pre-scaled stress source terms
         if flags.source_sxx >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                sxx_split_x[s_source_pos_index] = source.sxx[s_source_sig_index, t_index];
-                sxx_split_y[s_source_pos_index] = source.sxx[s_source_sig_index, t_index];
-                sxx_split_z[s_source_pos_index] = source.sxx[s_source_sig_index, t_index];
+                sxx_split_x[s_source_pos_index] = source.sxx[s_source_sig_index, t_index]
+                sxx_split_y[s_source_pos_index] = source.sxx[s_source_sig_index, t_index]
+                sxx_split_z[s_source_pos_index] = source.sxx[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                sxx_split_x[s_source_pos_index] = sxx_split_x[s_source_pos_index] + source.sxx[s_source_sig_index, t_index];
-                sxx_split_y[s_source_pos_index] = sxx_split_y[s_source_pos_index] + source.sxx[s_source_sig_index, t_index];
-                sxx_split_z[s_source_pos_index] = sxx_split_z[s_source_pos_index] + source.sxx[s_source_sig_index, t_index];
+                sxx_split_x[s_source_pos_index] = sxx_split_x[s_source_pos_index] + source.sxx[s_source_sig_index, t_index]
+                sxx_split_y[s_source_pos_index] = sxx_split_y[s_source_pos_index] + source.sxx[s_source_sig_index, t_index]
+                sxx_split_z[s_source_pos_index] = sxx_split_z[s_source_pos_index] + source.sxx[s_source_sig_index, t_index]
 
 
         if flags.source_syy >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                syy_split_x[s_source_pos_index] = source.syy[s_source_sig_index, t_index];
-                syy_split_y[s_source_pos_index] = source.syy[s_source_sig_index, t_index];
-                syy_split_z[s_source_pos_index] = source.syy[s_source_sig_index, t_index];
+                syy_split_x[s_source_pos_index] = source.syy[s_source_sig_index, t_index]
+                syy_split_y[s_source_pos_index] = source.syy[s_source_sig_index, t_index]
+                syy_split_z[s_source_pos_index] = source.syy[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                syy_split_x[s_source_pos_index] = syy_split_x[s_source_pos_index] + source.syy[s_source_sig_index, t_index];
-                syy_split_y[s_source_pos_index] = syy_split_y[s_source_pos_index] + source.syy[s_source_sig_index, t_index];
-                syy_split_z[s_source_pos_index] = syy_split_z[s_source_pos_index] + source.syy[s_source_sig_index, t_index];
+                syy_split_x[s_source_pos_index] = syy_split_x[s_source_pos_index] + source.syy[s_source_sig_index, t_index]
+                syy_split_y[s_source_pos_index] = syy_split_y[s_source_pos_index] + source.syy[s_source_sig_index, t_index]
+                syy_split_z[s_source_pos_index] = syy_split_z[s_source_pos_index] + source.syy[s_source_sig_index, t_index]
 
 
         if flags.source_szz >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                szz_split_x[s_source_pos_index] = source.szz[s_source_sig_index, t_index];
-                szz_split_y[s_source_pos_index] = source.szz[s_source_sig_index, t_index];
-                szz_split_z[s_source_pos_index] = source.szz[s_source_sig_index, t_index];
+                szz_split_x[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
+                szz_split_y[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
+                szz_split_z[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                szz_split_x[s_source_pos_index] = szz_split_x[s_source_pos_index] + source.szz[s_source_sig_index, t_index];
-                szz_split_y[s_source_pos_index] = szz_split_y[s_source_pos_index] + source.szz[s_source_sig_index, t_index];
-                szz_split_z[s_source_pos_index] = szz_split_z[s_source_pos_index] + source.szz[s_source_sig_index, t_index];
+                szz_split_x[s_source_pos_index] = szz_split_x[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
+                szz_split_y[s_source_pos_index] = szz_split_y[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
+                szz_split_z[s_source_pos_index] = szz_split_z[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
 
 
         if flags.source_sxy >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                sxy_split_x[s_source_pos_index] = source.sxy[s_source_sig_index, t_index];
-                sxy_split_y[s_source_pos_index] = source.sxy[s_source_sig_index, t_index];
+                sxy_split_x[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
+                sxy_split_y[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                sxy_split_x[s_source_pos_index] = sxy_split_x[s_source_pos_index] + source.sxy[s_source_sig_index, t_index];
-                sxy_split_y[s_source_pos_index] = sxy_split_y[s_source_pos_index] + source.sxy[s_source_sig_index, t_index];
+                sxy_split_x[s_source_pos_index] = sxy_split_x[s_source_pos_index] + source.sxy[s_source_sig_index, t_index]
+                sxy_split_y[s_source_pos_index] = sxy_split_y[s_source_pos_index] + source.sxy[s_source_sig_index, t_index]
 
 
         if flags.source_sxz >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                sxz_split_x[s_source_pos_index] = source.sxz[s_source_sig_index, t_index];
-                sxz_split_z[s_source_pos_index] = source.sxz[s_source_sig_index, t_index];
+                sxz_split_x[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
+                sxz_split_z[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                sxz_split_x[s_source_pos_index] = sxz_split_x[s_source_pos_index] + source.sxz[s_source_sig_index, t_index];
-                sxz_split_z[s_source_pos_index] = sxz_split_z[s_source_pos_index] + source.sxz[s_source_sig_index, t_index];
+                sxz_split_x[s_source_pos_index] = sxz_split_x[s_source_pos_index] + source.sxz[s_source_sig_index, t_index]
+                sxz_split_z[s_source_pos_index] = sxz_split_z[s_source_pos_index] + source.sxz[s_source_sig_index, t_index]
 
 
         if flags.source_syz >= t_index:
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                syz_split_y[s_source_pos_index] = source.syz[s_source_sig_index, t_index];
-                syz_split_z[s_source_pos_index] = source.syz[s_source_sig_index, t_index];
+                syz_split_y[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
+                syz_split_z[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
 
             else:
 
                 # add the source values to the existing field values
-                syz_split_y[s_source_pos_index] = syz_split_y[s_source_pos_index] + source.syz[s_source_sig_index, t_index];
-                syz_split_z[s_source_pos_index] = syz_split_z[s_source_pos_index] + source.syz[s_source_sig_index, t_index];
+                syz_split_y[s_source_pos_index] = syz_split_y[s_source_pos_index] + source.syz[s_source_sig_index, t_index]
+                syz_split_z[s_source_pos_index] = syz_split_z[s_source_pos_index] + source.syz[s_source_sig_index, t_index]
 
 
 
         # compute pressure from normal components of the stress
-        p = -(sxx_split_x + sxx_split_y + sxx_split_z + syy_split_x + syy_split_y + syy_split_z + szz_split_x + szz_split_y + szz_split_z) / 3.0
+        p = -(sxx_split_x + sxx_split_y + sxx_split_z + syy_split_x + syy_split_y + syy_split_z +\
+               szz_split_x + szz_split_y + szz_split_z) / 3.0
 
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
@@ -1373,10 +1449,31 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
             # store the acoustic pressure if using a transducer object
             if flags.transducer_sensor:
-                raise TypeError('Using a kWaveTransducer for output is not currently supported.');
+                raise TypeError('Using a kWaveTransducer for output is not currently supported.')
+
+            options = dotdict({'record_u_non_staggered': k_sim.record.u_non_staggered,
+                               'record_u_split_field': k_sim.record.u_split_field,
+                               'record_I': k_sim.record.I,
+                               'record_I_avg': k_sim.record.I_avg,
+                               'binary_sensor_mask': k_sim.binary_sensor_mask,
+                               'record_p': k_sim.record.p,
+                               'record_p_max': k_sim.record.p_max,
+                               'record_p_min': k_sim.record.p_min,
+                               'record_p_rms': k_sim.record.p_rms,
+                               'record_p_max_all': k_sim.record.p_max_all,
+                               'record_p_min_all': k_sim.record.p_min_all,
+                               'record_u': k_sim.record.u,
+                               'record_u_max': k_sim.record.u_max,
+                               'record_u_min': k_sim.record.u_min,
+                               'record_u_rms': k_sim.record.u_rms,
+                               'record_u_max_all': k_sim.record.u_max_all,
+                               'record_u_min_all': k_sim.record.u_min_all,
+                               'compute_directivity': False
+                               })
 
             # run sub-function to extract the required data
-            sensor_data = extract_sensor_data(3, sensor_data, file_index, sensor_mask_index, flags, record, p, ux_sgx, uy_sgy, uz_sgz)
+            sensor_data = extract_sensor_data(3, sensor_data, file_index, sensor_mask_index, options, \
+                                              k_sim.record, p, ux_sgx, uy_sgy, uz_sgz)
 
             # check stream to disk option
             if flags.stream_to_disk:
@@ -1387,46 +1484,46 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         # if t_index == ESTIMATE_SIM_TIME_STEPS:
 
         #     # display estimated simulation time
-        #     print('  estimated simulation time ', scale_time(etime(clock, loop_start_time) * index_end / t_index), '...');
+        #     print('  estimated simulation time ', scale_time(etime(clock, loop_start_time) * index_end / t_index), '\')
 
         #     # check memory usage
-        #     kspaceFirstOrder_checkMemoryUsage;
+        #     kspaceFirstOrder_checkMemoryUsage
 
 
         # # plot data if required
         # if flags.plot_sim and (rem(t_index, plot_freq) == 0 or t_index == 1 or t_index == index_end):
 
         #     # update progress bar
-        #     waitbar(t_index/kgrid.Nt, pbar);
-        #     drawnow;
+        #     waitbar(t_index/kgrid.Nt, pbar)
+        #     drawnow
 
         #     # ensure p is cast as a CPU variable and remove the PML from the
         #     # plot if required
         #     if (data_cast == 'gpuArray'):
-        #         sii_plot = double(gather(p(x1:x2, y1:y2, z1:z2)));
-        #         sij_plot = double(gather((...
-        #         sxy_split_x(x1:x2, y1:y2, z1:z2) + sxy_split_y(x1:x2, y1:y2, z1:z2) + ...
-        #         sxz_split_x(x1:x2, y1:y2, z1:z2) + sxz_split_z(x1:x2, y1:y2, z1:z2) + ...
-        #         syz_split_y(x1:x2, y1:y2, z1:z2) + syz_split_z(x1:x2, y1:y2, z1:z2) )/3));
+        #         sii_plot = double(gather(p(x1:x2, y1:y2, z1:z2)))
+        #         sij_plot = double(gather((\
+        #         sxy_split_x(x1:x2, y1:y2, z1:z2) + sxy_split_y(x1:x2, y1:y2, z1:z2) + \
+        #         sxz_split_x(x1:x2, y1:y2, z1:z2) + sxz_split_z(x1:x2, y1:y2, z1:z2) + \
+        #         syz_split_y(x1:x2, y1:y2, z1:z2) + syz_split_z(x1:x2, y1:y2, z1:z2) )/3))
         #     else:
-        #         sii_plot = double(p(x1:x2, y1:y2, z1:z2));
-        #         sij_plot = double((...
-        #         sxy_split_x(x1:x2, y1:y2, z1:z2) + sxy_split_y(x1:x2, y1:y2, z1:z2) + ...
-        #         sxz_split_x(x1:x2, y1:y2, z1:z2) + sxz_split_z(x1:x2, y1:y2, z1:z2) + ...
-        #         syz_split_y(x1:x2, y1:y2, z1:z2) + syz_split_z(x1:x2, y1:y2, z1:z2) )/3);
+        #         sii_plot = double(p(x1:x2, y1:y2, z1:z2))
+        #         sij_plot = double((\
+        #         sxy_split_x(x1:x2, y1:y2, z1:z2) + sxy_split_y(x1:x2, y1:y2, z1:z2) + \
+        #         sxz_split_x(x1:x2, y1:y2, z1:z2) + sxz_split_z(x1:x2, y1:y2, z1:z2) + \
+        #         syz_split_y(x1:x2, y1:y2, z1:z2) + syz_split_z(x1:x2, y1:y2, z1:z2) )/3)
 
 
         #     # update plot scale if set to automatic or log
         #     if flags.plot_scale_auto or flags.plot_scale_log:
-        #         kspaceFirstOrder_adjustPlotScale;
+        #         kspaceFirstOrder_adjustPlotScale
 
         #     # add display mask onto plot
         #     if (display_mask == 'default'):
-        #         sii_plot(sensor.mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(2);
-        #         sij_plot(sensor.mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(end);
+        #         sii_plot(sensor.mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(2)
+        #         sij_plot(sensor.mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(end)
         #     elif not (display_mask == 'off'):
-        #         sii_plot(display_mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(2);
-        #         sij_plot(display_mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(end);
+        #         sii_plot(display_mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(2)
+        #         sij_plot(display_mask(x1:x2, y1:y2, z1:z2) != 0) = plot_scale(end)
 
 
         #     # update plot
@@ -1437,27 +1534,27 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         #               sij_plot, '',
         #               plot_scale,
         #               prefix,
-        #               COLOR_MAP);
+        #               COLOR_MAP)
 
         #     # save movie frames if required
         #     if flags.record_movie:
 
         #         # set background color to white
-        #         set(gcf, 'Color', [1 1 1]);
+        #         set(gcf, 'Color', [1 1 1])
 
         #         # save the movie frame
-        #         writeVideo(video_obj, getframe(gcf));
+        #         writeVideo(video_obj, getframe(gcf))
 
 
 
             # # update variable used for timing variable to exclude the first
             # # time step if plotting is enabled
             # if t_index == 0:
-            #     loop_start_time = clock;
+            #     loop_start_time = clock
 
 
     # update command line status
-    # print('  simulation completed in ', scale_time(TicToc.toc()))
+    print('\tsimulation completed in ', scale_time(TicToc.toc()))
 
     # =========================================================================
     # CLEAN UP
@@ -1465,9 +1562,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # # clean up used figures
     # if flags.plot_sim:
-    #     close(img);
-    #     close(pbar);
-    #     drawnow;
+    #     close(img)
+    #     close(pbar)
+    #     drawnow
 
 
     # # save the movie frames to disk
@@ -1485,7 +1582,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
         sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
         sensor_data.uz_final = uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-
     # # run subscript to cast variables back to double precision if required
     # if flags.data_recast:
     #     kspaceFirstOrder_dataRecast
@@ -1493,26 +1589,26 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # # run subscript to compute and save intensity values
     # if flags.use_sensor and not flags.elastic_time_rev and (flags.record_I or flags.record_I_avg):
-    #     save_intensity_matlab_code = True;
-    #     kspaceFirstOrder_saveIntensity;
+    #     save_intensity_matlab_code = True
+    #     kspaceFirstOrder_saveIntensity
 
     # # reorder the sensor points if a binary sensor mask was used for Cartesian
     # # sensor mask nearest neighbour interpolation (this is performed after
     # # recasting as the GPU toolboxes do not all support this subscript)
-    # if flags.use_sensor and flags.reorder_data:
-    #     kspaceFirstOrder_reorderCartData;
+    if flags.use_sensor and flags.reorder_data:
+        sensor_data = reorder_sensor_data(kgrid, sensor, sensor_data)
 
 
     # filter the recorded time domain pressure signals if transducer filter
     # parameters are given
-    if flags.use_sensor and (not flags.elastic_time_rev) and isfield(sensor, 'frequency_response'):
+    if flags.use_sensor and (not flags.elastic_time_rev) and hasattr(sensor, 'frequency_response'):
         sensor_data.p = gaussian_filter(sensor_data.p, 1.0 / kgrid.dt, sensor.frequency_response[0], sensor.frequency_response[1])
 
 
     # reorder the sensor points if cuboid corners is used (outputs are indexed
     # as [X, Y, Z, T] or [X, Y, Z] rather than [sensor_index, time_index]
     if flags.cuboid_corners:
-        # kspaceFirstOrder_reorderCuboidCorners;
+        # kspaceFirstOrder_reorderCuboidCorners
         raise NotImplementedError('sorry')
 
 
@@ -1520,25 +1616,21 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         # if computing time reversal, reassign sensor_data.p_final to sensor_data
         sensor_data = sensor_data.p_final
         raise NotImplementedError()
-
     elif not flags.use_sensor:
         # if sensor is not used, return empty sensor data
         sensor_data = None
-
-    elif (not isfield(sensor, 'record') and (not flags.cuboid_corners)):
+    elif (not hasattr(sensor, 'record') and (not flags.cuboid_corners)):
         # if sensor.record is not given by the user, reassign sensor_data.p to sensor_data
         sensor_data = sensor_data.p
-
     else:
         pass
 
-
     # update command line status
-    # print('  total computation time ', scale_time(TicToc.toc() ) );
+    print('\ttotal computation time ', scale_time(TicToc.toc() ) )
 
     # # switch off log
     # if flags.create_log:
-    #     diary off;
+    #     diary off
 
     return sensor_data
 
@@ -1549,31 +1641,31 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 #     """
 
 #     # plot normal stress
-#     subplot(2, 3, 1);
-#     imagesc(y_vec, x_vec, squeeze(s_normal_plot(:, :, round(end/2))), plot_scale(1:2));
-#     title('Normal Stress (x-y plane)'), axis image;
+#     subplot(2, 3, 1)
+#     imagesc(y_vec, x_vec, squeeze(s_normal_plot(:, :, round(end/2))), plot_scale(1:2))
+#     title('Normal Stress (x-y plane)'), axis image
 
-#     subplot(2, 3, 2);
-#     imagesc(z_vec, x_vec, squeeze(s_normal_plot(:, round(end/2), :)), plot_scale(1:2));
-#     title('Normal Stress  (x-z plane)'), axis image;
+#     subplot(2, 3, 2)
+#     imagesc(z_vec, x_vec, squeeze(s_normal_plot(:, round(end/2), :)), plot_scale(1:2))
+#     title('Normal Stress  (x-z plane)'), axis image
 
-#     subplot(2, 3, 3);
-#     imagesc(z_vec, y_vec, squeeze(s_normal_plot(round(end/2), :, :)), plot_scale(1:2));
-#     title('Normal Stress  (y-z plane)'), axis image;
+#     subplot(2, 3, 3)
+#     imagesc(z_vec, y_vec, squeeze(s_normal_plot(round(end/2), :, :)), plot_scale(1:2))
+#     title('Normal Stress  (y-z plane)'), axis image
 
 #     # plot shear stress
-#     subplot(2, 3, 4);
-#     imagesc(y_vec, x_vec, squeeze(s_shear_plot(:, :, round(end/2))), plot_scale(end - 1:end));
-#     title('Shear Stress (x-y plane)'), axis image;
+#     subplot(2, 3, 4)
+#     imagesc(y_vec, x_vec, squeeze(s_shear_plot(:, :, round(end/2))), plot_scale(end - 1:end))
+#     title('Shear Stress (x-y plane)'), axis image
 
-#     subplot(2, 3, 5);
-#     imagesc(z_vec, x_vec, squeeze(s_shear_plot(:, round(end/2), :)), plot_scale(end - 1:end));
-#     title('Shear Stress (x-z plane)'), axis image;
+#     subplot(2, 3, 5)
+#     imagesc(z_vec, x_vec, squeeze(s_shear_plot(:, round(end/2), :)), plot_scale(end - 1:end))
+#     title('Shear Stress (x-z plane)'), axis image
 
-#     subplot(2, 3, 6);
-#     imagesc(z_vec, y_vec, squeeze(s_shear_plot(round(end/2), :, :)), plot_scale(end - 1:end));
-#     title('Shear Stress (y-z plane)'), axis image;
+#     subplot(2, 3, 6)
+#     imagesc(z_vec, y_vec, squeeze(s_shear_plot(round(end/2), :, :)), plot_scale(end - 1:end))
+#     title('Shear Stress (y-z plane)'), axis image
 
-#     xlabel(['(All axes in ' prefix 'm)']);
-#     colormap(color_map);
-#     drawnow;
+#     xlabel(['(All axes in ' prefix 'm)'])
+#     colormap(color_map)
+#     drawnow

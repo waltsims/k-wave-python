@@ -1459,8 +1459,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                                'compute_directivity': False
                                })
 
-            # print(k_sim.record.y1_inside, k_sim.record.x1_inside, file_index, t_index, sensor.record_start_index)
-
             sensor_data = extract_sensor_data(2, sensor_data, file_index, k_sim.sensor_mask_index,
                                               options, k_sim.record, p, ux_sgx, uy_sgy)
 
