@@ -1020,7 +1020,7 @@ class kWaveSimulation(object):
 
                 # create an indexing variable corresponding to the location of all
                 # the source elements. The domain has not yet been enlarged. minus one to get python indexing
-                self.u_source_pos_index = matlab_find(self.source.u_mask) - 1
+                self.u_source_pos_index = matlab_find(self.source.u_mask)
                 # print("max value _pos_ kWaveSimulation 0:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
 
                 # check if the mask is binary or labelled
