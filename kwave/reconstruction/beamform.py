@@ -41,12 +41,12 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     # filter_positions
     positions = [position for position in positions if (position != np.nan).any()]
-    assert len(positions) == kgrid.dim
+    assert len(positions) == kgrid.dim, "positions have wrong dimensions"
     positions = np.array(positions)
 
     if isinstance(focus_position, list):
         focus_position = np.array(focus_position)
-    assert isinstance(focus_position, np.ndarray)
+    assert isinstance(focus_position, np.ndarray), "focus_position is not an np.array"
 
     dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
 
@@ -62,7 +62,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
 
     logging.log(
-        logging.WARN, f"{PendingDeprecationWarning.__name__}: " "This method is not fully migrated, might be depricated and is untested."
+        logging.WARN, f"PendingDeprecationWarning {__name__}: " "This method is not fully migrated, might be depricated and is untested."
     )
 
     return signal_mat

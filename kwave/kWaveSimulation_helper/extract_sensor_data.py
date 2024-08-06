@@ -64,8 +64,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
     if flags.binary_sensor_mask:
 
-        # print('Second')
-
         # store the time history of the acoustic pressure
         if (flags.record_p or flags.record_I or flags.record_I_avg):
             if not flags.compute_directivity:
@@ -96,9 +94,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
             if (dim ==1):
                 sensor_data.ux[:, file_index] = ux_sgx[sensor_mask_index]
             elif (dim == 2):
-                # print("\n" + str(np.shape(sensor_data.ux[:, file_index])), sensor_data.ux[:, file_index])
-                # print(np.shape(sensor_mask_index), np.max(sensor_mask_index), sensor_mask_index)
-                # print(np.shape(ux_sgx), np.unravel_index(np.squeeze(sensor_mask_index), ux_sgx.shape, order='F'))
                 sensor_data.ux[:, file_index] = ux_sgx[np.unravel_index(np.squeeze(sensor_mask_index), ux_sgx.shape, order='F')]
                 sensor_data.uy[:, file_index] = uy_sgy[np.unravel_index(np.squeeze(sensor_mask_index), uy_sgy.shape, order='F')]
             elif (dim == 3):
@@ -135,26 +130,14 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
                 sensor_data.ux_split_p[:, file_index] = split_field[sensor_mask_index]
 
                 # ux shear
-                # split_field = real(ifftn( ...
-                #     + (1 - record.kx_norm**2)          .* ux_k ...
-                #     - record.kx_norm .* record.ky_norm .* uy_k ...
-                #     ));
                 split_field = np.real(np.fft.ifftn((1.0 - record.kx_norm**2) * ux_k - record.kx_norm * record.ky_norm * uy_k))
                 sensor_data.ux_split_s[:, file_index] = split_field[sensor_mask_index]
 
                 # uy compressional
-                # split_field = real(ifftn( ...
-                #     + record.ky_norm .* record.kx_norm .* ux_k ...
-                #     + record.ky_norm**2                .* uy_k ...
-                #     ));
                 split_field = np.real(np.fft.ifftn(record.ky_norm * record.kx_norm * ux_k + record.ky_norm **2 * uy_k))
                 sensor_data.uy_split_p[:, file_index] = split_field[sensor_mask_index]
 
                 # uy shear
-                # split_field = real(ifftn( ...
-                #     - record.ky_norm .* record.kx_norm .* ux_k ...
-                #     + (1 - record.ky_norm**2)          .* uy_k ...
-                #     ));
                 split_field = np.real(np.fft.ifftn(record.ky_norm * record.kx_norm * ux_k + (1.0 - record.ky_norm**2) * uy_k))
                 sensor_data.uy_split_s[:, file_index] = split_field[sensor_mask_index]
 
@@ -423,7 +406,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
                 sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 1) + (np.sum(uy_sgy[record.tri] * record.bc, axis=1))**2) / file_index)
                 sensor_data.uz_rms[:] = np.sqrt((sensor_data.uz_rms[:]**2 * (file_index - 1) + (np.sum(uz_sgz[record.tri] * record.bc, axis=1))**2) / file_index)
             else:
-                # print(flags.record_u_rms, flags.record_u_rms, dim)
                 raise RuntimeError("Wrong dimensions")
 
     # =========================================================================
@@ -442,14 +424,19 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
             if file_index == 1:
                 sensor_data.p_max_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
-                sensor_data.p_max_all = np.maximum(sensor_data.p_max_all, p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
+                sensor_data.p_max_all = np.maximum(sensor_data.p_max_all, p[record.x1_inside:record.x2_inside,
+                                                                            record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
             if file_index == 1:
-                sensor_data.p_max_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+                sensor_data.p_max_all = p[record.x1_inside:record.x2_inside,
+                                          record.y1_inside:record.y2_inside,
+                                          record.z1_inside:record.z2_inside]
             else:
                 sensor_data.p_max_all = np.maximum(sensor_data.p_max_all,
-                                                p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                p[record.x1_inside:record.x2_inside,
+                                                  record.y1_inside:record.y2_inside,
+                                                  record.z1_inside:record.z2_inside])
         else:
             raise RuntimeError("Wrong dimensions")
 
@@ -465,14 +452,19 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
             if file_index == 1:
                 sensor_data.p_min_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
-                sensor_data.p_min_all = np.minimum(sensor_data.p_min_all, p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
+                sensor_data.p_min_all = np.minimum(sensor_data.p_min_all, p[record.x1_inside:record.x2_inside,
+                                                                            record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
             if file_index == 1:
-                sensor_data.p_min_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+                sensor_data.p_min_all = p[record.x1_inside:record.x2_inside,
+                                          record.y1_inside:record.y2_inside,
+                                          record.z1_inside:record.z2_inside]
             else:
                 sensor_data.p_min_all = np.minimum(sensor_data.p_min_all,
-                                                p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                p[record.x1_inside:record.x2_inside,
+                                                  record.y1_inside:record.y2_inside,
+                                                  record.z1_inside:record.z2_inside])
         else:
             raise RuntimeError("Wrong dimensions")
 
@@ -496,16 +488,28 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         elif (dim == 3):
             if file_index == 1:
-                sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-                sensor_data.uy_max_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-                sensor_data.uz_max_all = uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+                sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
+                sensor_data.uy_max_all = uy_sgy[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
+                sensor_data.uz_max_all = uz_sgz[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
             else:
                 sensor_data.ux_max_all = np.maximum(sensor_data.ux_max_all,
-                                                  ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  ux_sgx[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
                 sensor_data.uy_max_all = np.maximum(sensor_data.uy_max_all,
-                                                  uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  uy_sgy[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
                 sensor_data.uz_max_all = np.maximum(sensor_data.uz_max_all,
-                                                  uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  uz_sgz[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
 
         else:
             raise RuntimeError("Wrong dimensions")
@@ -530,16 +534,28 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         elif (dim == 3):
             if file_index == 1:
-                sensor_data.ux_min_all = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-                sensor_data.uy_min_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-                sensor_data.uz_min_all = uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+                sensor_data.ux_min_all = ux_sgx[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
+                sensor_data.uy_min_all = uy_sgy[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
+                sensor_data.uz_min_all = uz_sgz[record.x1_inside:record.x2_inside,
+                                                record.y1_inside:record.y2_inside,
+                                                record.z1_inside:record.z2_inside]
             else:
                 sensor_data.ux_min_all = np.minimum(sensor_data.ux_min_all,
-                                                  ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  ux_sgx[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
                 sensor_data.uy_min_all = np.minimum(sensor_data.uy_min_all,
-                                                  uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  uy_sgy[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
                 sensor_data.uz_min_all = np.minimum(sensor_data.uz_min_all,
-                                                  uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside])
+                                                  uz_sgz[record.x1_inside:record.x2_inside,
+                                                         record.y1_inside:record.y2_inside,
+                                                         record.z1_inside:record.z2_inside])
         else:
             raise RuntimeError("Wrong dimensions")
 

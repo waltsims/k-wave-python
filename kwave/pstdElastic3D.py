@@ -28,6 +28,7 @@ import numpy as np
 from scipy.interpolate import interpn
 from tqdm import tqdm
 from typing import Union
+from termcolor import colored
 # import cupy as cp
 
 from kwave.kgrid import kWaveGrid
@@ -754,7 +755,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     pml_x_size, pml_y_size, pml_z_size = options.pml_x_size, options.pml_y_size, options.pml_z_size
 
     multi_axial_PML_ratio = options.multi_axial_PML_ratio
-    print(options.multi_axial_PML_ratio)
+    print("\noptions.multi_axial_PML_ratio: " + colored(str(options.multi_axial_PML_ratio), 'blue') + '\n')
     multi_axial_PML_ratio: float = 1.0
     c_ref = k_sim.c_ref
 

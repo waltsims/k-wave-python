@@ -524,9 +524,7 @@ class kWaveSimulation(object):
         # run subscript to display time step, max supported frequency etc.
         display_simulation_params(self.kgrid, self.medium, is_elastic_code)
 
-        # print("---------------------SMOOTH AND ENLARGE---------------------")
         self.smooth_and_enlarge(self.source, k_dim, Vector(self.kgrid.N), opt)
-        # print("---------------------SMOOTH AND ENLARGE---------------------")
 
         self.create_sensor_variables()
 
@@ -536,6 +534,7 @@ class kWaveSimulation(object):
 
         self.scale_source_terms(opt.scale_source_terms)
 
+        # move all this inside create_storage_variables?
         # a copy of record is passed through, and use to update the
         if is_elastic_code:
             record_old = copy.deepcopy(self.record)
@@ -563,20 +562,17 @@ class kWaveSimulation(object):
 
             # this creates the storage variables by determining the spatial locations of the data which is in record.
             flags, self.record, self.sensor_data = create_storage_variables(self.kgrid,
-                                                                       self.sensor,
-                                                                       opt,
-                                                                       values,
-                                                                       flags,
-                                                                       self.record)
-            # print("has it been created?", flags, self.record, self.sensor_data, np.shape(self.sensor_data.p))
+                                                                            self.sensor,
+                                                                            opt,
+                                                                            values,
+                                                                            flags,
+                                                                            self.record)
 
-        self.create_pml_indices(
-            kgrid_dim=self.kgrid.dim,
-            kgrid_N=Vector(self.kgrid.N),
-            pml_size=pml_size,
-            pml_inside=opt.pml_inside,
-            is_axisymmetric=opt.simulation_type.is_axisymmetric(),
-        )
+        self.create_pml_indices(kgrid_dim=self.kgrid.dim,
+                                kgrid_N=Vector(self.kgrid.N),
+                                pml_size=pml_size,
+                                pml_inside=opt.pml_inside,
+                                is_axisymmetric=opt.simulation_type.is_axisymmetric())
 
 
     @staticmethod
@@ -729,7 +725,6 @@ class kWaveSimulation(object):
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
 
                     # check the sensor record flgs
-                    # print("inputs:", self.sensor.record, self.options.simulation_type.is_elastic_simulation())
                     self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic_simulation())
 
                 # enforce the sensor.mask field unless just recording the max_all
@@ -742,13 +737,10 @@ class kWaveSimulation(object):
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
 
-                    # print("HERE")
-
                     # binary grid
                     if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
                         kgrid_dim != 3 and (np.shape(self.sensor.mask) == self.kgrid.k.shape)):
 
-                        # print("binary")
                         # check the grid is binary
                         assert self.sensor.mask.sum() == (
                             self.sensor.mask.size - (self.sensor.mask == 0).sum()
@@ -759,8 +751,6 @@ class kWaveSimulation(object):
 
                     # cuboid corners
                     elif np.shape(self.sensor.mask)[0] == 2 * kgrid_dim:
-
-                        print("cuboid")
 
                         # make sure the points are integers
                         assert np.all(np.asarray(self.sensor.mask) % 1 == 0), "sensor.mask cuboid corner indices must be integers."
@@ -808,9 +798,6 @@ class kWaveSimulation(object):
                         # TODO FARID mask should be option_factory in sensor not here
                         self.sensor.mask = np.zeros_like(self.kgrid.k, dtype=bool)
                         cuboid_corners_list = np.asarray(self.record.cuboid_corners_list)
-                        print("\t0", cuboid_corners_list)
-                        print("\t1", np.shape(cuboid_corners_list))
-                        print("\t2", np.shape(cuboid_corners_list)[1])
                         for cuboid_index in range(np.shape(cuboid_corners_list)[1]):
                             if self.kgrid.dim == 1:
                                 self.sensor.mask[cuboid_corners_list[0, cuboid_index] : cuboid_corners_list[1, cuboid_index]] = 1
@@ -829,11 +816,8 @@ class kWaveSimulation(object):
                     # cartesian sensor
                     else:
 
-                        # print("cartesian sensor")
-
                         # check the Cartesian sensor mask is the correct size
                         # (1 x N, 2 x N, 3 x N)
-                        print(np.shape(self.sensor.mask))
                         assert (
                             np.shape(self.sensor.mask)[0] == kgrid_dim and num_dim2(self.sensor.mask) <= 2
                         ), f"Cartesian sensor.mask for a {kgrid_dim}D simulation must be given as a {kgrid_dim} by N array."
@@ -1024,7 +1008,6 @@ class kWaveSimulation(object):
                 # create an indexing variable corresponding to the location of all
                 # the source elements. The domain has not yet been enlarged. minus one to get python indexing
                 self.u_source_pos_index = matlab_find(self.source.u_mask)
-                # print("max value _pos_ kWaveSimulation 0:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
 
                 # check if the mask is binary or labelled
                 u_unique = np.unique(self.source.u_mask)
@@ -1040,11 +1023,6 @@ class kWaveSimulation(object):
                     elif self.source.uy is not None:
                         self.u_source_sig_index = np.arange(0, np.shape(self.source.uy)[0])
 
-                    # print(u_unique.size <= 2, u_unique.size)
-                    # print(u_unique.sum() == 1, u_unique.sum())
-                    # print(self.u_source_sig_index)
-                    # print("Nx:", self.kgrid.Nx, "Ny:", self.kgrid.Ny, "Nx*Ny:", self.kgrid.Nx * self.kgrid.Ny)
-                    # print("max value _pos_ kWaveSimulation 1:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
@@ -1052,7 +1030,6 @@ class kWaveSimulation(object):
 
                 # convert the data type depending on the number of indices
                 self.u_source_pos_index = cast_to_type(self.u_source_pos_index, self.index_data_type)
-                # print("max value _pos_ kWaveSimulation 2:", np.min(self.u_source_pos_index), np.max(self.u_source_pos_index))
 
                 if self.source_u_labelled:
                     self.u_source_sig_index = cast_to_type(self.u_source_sig_index, self.index_data_type)
@@ -1123,7 +1100,7 @@ class kWaveSimulation(object):
             # create indexing variable corresponding to the active elements
             # and convert the data type depending on the number of indices
             self.u_source_pos_index = matlab_find(active_elements_mask).astype(self.index_data_type)
-            # print("max value kWaveSimulation ?:", np.max(self.u_source_pos_index))
+
 
             # convert the delay mask to an indexing variable (this doesn't need to
             # be modified if the grid is expanded) which tells each point in the
@@ -1393,50 +1370,36 @@ class kWaveSimulation(object):
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user
         if opt.pml_inside is False:
-            # print("pre:", np.max(self.u_source_pos_index) )
-            expand_results = expand_grid_matrices(
-                self.kgrid,
-                self.medium,
-                self.source,
-                self.sensor,
-                self.options,
-                dotdict( # values
-                    {
-                        "p_source_pos_index": self.p_source_pos_index,
-                        "u_source_pos_index": self.u_source_pos_index,
-                        "s_source_pos_index": self.s_source_pos_index,
-                        "cuboid_corners_list": self.record.cuboid_corners_list
-                    }
-                ),
-                dotdict( # flags
-                    {
-                        "axisymmetric": self.options.simulation_type.is_axisymmetric(),
-                        "use_sensor": self.use_sensor,
-                        "blank_sensor": self.blank_sensor,
-                        "cuboid_corners": self.cuboid_corners,
-                        "source_p0": self.source_p0,
-                        "source_p": self.source_p,
-                        "source_ux": self.source_ux,
-                        "source_uy": self.source_uy,
-                        "source_uz": self.source_uz,
-                        "transducer_source": self.transducer_source,
-                        "source_p0_elastic": self.source_p0_elastic,
-                        "source_sxx": self.source_sxx,
-                        "source_syy": self.source_syy,
-                        "source_szz": self.source_szz,
-                        "source_sxy": self.source_sxy,
-                        "source_sxz": self.source_sxz,
-                        "source_syz": self.source_syz,
-                    }
-                ),
-            )
+            values = dotdict({"p_source_pos_index": self.p_source_pos_index,
+                              "u_source_pos_index": self.u_source_pos_index,
+                              "s_source_pos_index": self.s_source_pos_index,
+                              "cuboid_corners_list": self.record.cuboid_corners_list})
+            flags = dotdict({"axisymmetric": self.options.simulation_type.is_axisymmetric(),
+                             "use_sensor": self.use_sensor,
+                             "blank_sensor": self.blank_sensor,
+                             "cuboid_corners": self.cuboid_corners,
+                             "source_p0": self.source_p0,
+                             "source_p": self.source_p,
+                             "source_ux": self.source_ux,
+                             "source_uy": self.source_uy,
+                             "source_uz": self.source_uz,
+                             "transducer_source": self.transducer_source,
+                             "source_p0_elastic": self.source_p0_elastic,
+                             "source_sxx": self.source_sxx,
+                             "source_syy": self.source_syy,
+                             "source_szz": self.source_szz,
+                             "source_sxy": self.source_sxy,
+                             "source_sxz": self.source_sxz,
+                             "source_syz": self.source_syz})
+
+            expand_results = expand_grid_matrices(self.kgrid, self.medium, self.source,
+                                                  self.sensor, self.options, values, flags)
 
             self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, \
               self.s_source_pos_index, cuboid_corners_list = expand_results
 
             self.record.cuboid_corners_list = cuboid_corners_list
 
-        # print("post:", np.max(self.u_source_pos_index))
 
         # get maximum prime factors
         if self.options.simulation_type.is_axisymmetric():
@@ -1479,7 +1442,6 @@ class kWaveSimulation(object):
 
                     # loop through the list of cuboid corners, and extract the
                     # sensor mask indices for each cube
-                    print(self.record.cuboid_corners_list)
                     for cuboid_index in range(self.record.cuboid_corners_list.shape[1]):
                         # create empty binary mask
                         temp_mask = np.zeros_like(self.kgrid.k, dtype=bool)
@@ -1510,9 +1472,8 @@ class kWaveSimulation(object):
                     del temp_mask
 
                 else:
-                    # create mask indices (this works for both normal sensor and
-                    # transducer inputs)
-                    self.sensor_mask_index = np.where(self.sensor.mask.flatten(order="F") != 0)[0] + 1  # +1 due to matlab indexing
+                    # create mask indices (this works for both normal sensor and transducer inputs)
+                    self.sensor_mask_index = np.where(self.sensor.mask.flatten(order="F") != 0)[0] + 1  # +1 due to matlab indexing. Use matlab_find?
                     self.sensor_mask_index = np.expand_dims(self.sensor_mask_index, -1)  # compatibility, n => [n, 1]
 
                 # convert the data type depending on the number of indices (this saves

@@ -313,7 +313,7 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         u_source_pos_index:
         d_direction:
 
-    Returns:
+    Returns: scaled source_val
 
     """
     if not is_source or source_u_mode == "dirichlet":
@@ -331,12 +331,6 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         scale = 2.0 * np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1) * dt / d_direction
         source_val[u_index, :] *= scale
 
-
-        # compute the scale parameter seperately for each source position
-        # based on the sound speed at that position
-        # print(source_val.size)
-        # u_index = range(source_val.size[0])
-        # source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
     return source_val
 
 

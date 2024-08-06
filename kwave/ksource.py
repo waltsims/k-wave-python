@@ -194,7 +194,6 @@ class kSource(object):
                 self.u_mode = "additive-no-correction"
 
             if self.ux is not None:
-                # print("diagnostics:", np.shape(self.ux), np.size(self.ux))
                 if self.flag_ux > kgrid.Nt:
                     logging.log(logging.WARN, "  source.ux has more time points than kgrid.Nt, " "remaining time points will not be used.")
             if self.uy is not None:
@@ -233,10 +232,6 @@ class kSource(object):
                         or (self.flag_uy and (uy_size != u_sum))
                         or (self.flag_uz and (uz_size != u_sum))
                     ):
-
-                        # print("flag_ux:", self.flag_ux)
-                        # print(ux_size != u_sum, ux_size, u_sum)
-
                         raise ValueError(
                             "The number of time series in source.ux (etc) " "must match the number of source elements in source.u_mask."
                         )
@@ -255,10 +250,6 @@ class kSource(object):
                 if (self.flag.source_ux and np.size(self.ux)[0] != np.size(u_unique) or \
                     self.flag.source_uy and np.size(self.uy)[0] != np.size(u_unique) or \
                     self.flag.source_uz and np.size(self.uz)[0] != np.size(u_unique)):
-
-                    # print("diagnostics 2:", self.flag.source_ux)
-                    # print(np.size(self.ux)[0] != np.size(u_unique), np.size(self.ux)[0], np.size(u_unique))
-
                     raise ValueError(
                         "The number of time series in source.ux (etc) "
                         "must match the number of labelled source elements in source.u_mask."
