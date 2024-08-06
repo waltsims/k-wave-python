@@ -78,7 +78,7 @@ class kWaveSimulation(object):
             self.binary_sensor_mask = True
 
             # check if the sensor mask is defined as a list of cuboid corners
-            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            if self.sensor.mask is not None and np.shape(sensor.mask)[-1] == (2 * self.kgrid.dim):
                 self.userarg_cuboid_corners = True
             else:
                 self.userarg_cuboid_corners = False
@@ -237,7 +237,7 @@ class kWaveSimulation(object):
             Whether the sensor.mask is a list of cuboid corners
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.blank_sensor and self.sensor.mask.shape[0] == 2 * self.kgrid.dim:
+            if not self.blank_sensor and np.shape(self.sensor.mask)[-1] == 2 * self.kgrid.dim:
                 return True
         return self.userarg_cuboid_corners
 
@@ -690,7 +690,6 @@ class kWaveSimulation(object):
             # check if sensor is a transducer, otherwise check input fields
             if not isinstance(self.sensor, NotATransducer):
 
-
                 if kgrid_dim == 2:
 
                     # check for sensor directivity input and set flag
@@ -701,7 +700,7 @@ class kWaveSimulation(object):
 
                         # check sensor.directivity.pattern and sensor.mask have the same size
                         assert (
-                            directivity.angle.shape == self.sensor.mask.shape
+                            directivity.angle.shape == np.shape(self.sensor.mask)
                         ), "sensor.directivity.angle and sensor.mask must be the same size."
 
                         # check if directivity size input exists, otherwise make it
@@ -747,8 +746,7 @@ class kWaveSimulation(object):
 
                     # binary grid
                     if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
-                        kgrid_dim != 3 and (self.sensor.mask.shape == self.kgrid.k.shape)
-                    ):
+                        kgrid_dim != 3 and (np.shape(self.sensor.mask) == self.kgrid.k.shape)):
 
                         # print("binary")
                         # check the grid is binary
@@ -759,57 +757,61 @@ class kWaveSimulation(object):
                         # check the grid is not empty
                         assert self.sensor.mask.sum() != 0, "sensor.mask must be a binary grid with at least one element set to 1."
 
-                    # cuboid corners
-                    elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
+                    # cuboid corners - should this be np.shape(self.sensor.mask)[-1]
+                    elif np.shape(self.sensor.mask)[-1] == 2 * kgrid_dim:
 
-                        # print("cuboid")
+                        print("cuboid")
 
                         # make sure the points are integers
-                        assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
+                        assert np.all(np.asarray(self.sensor.mask) % 1 == 0), "sensor.mask cuboid corner indices must be integers."
 
                         # store a copy of the cuboid corners
                         self.record.cuboid_corners_list = self.sensor.mask
 
                         # check the list makes sense
-                        if np.any(self.sensor.mask[self.kgrid.dim :, :] - self.sensor.mask[: self.kgrid.dim, :] < 0):
+                        if np.any(np.asarray(self.sensor.mask)[self.kgrid.dim:, :] - np.asarray(self.sensor.mask)[:self.kgrid.dim, :] < 0):
                             if kgrid_dim == 1:
                                 raise ValueError("sensor.mask cuboid corners must be defined " "as [x1, x2; ...]." " where x2 => x1, etc.")
                             elif kgrid_dim == 2:
                                 raise ValueError(
-                                    "sensor.mask cuboid corners must be defined " "as [x1, y1, x2, y2; ...]." " where x2 => x1, etc."
+                                    "sensor.mask cuboid corners must be defined " "as [[x1, y1, x2, y2], [... ] ...]." " where x2 => x1, etc."
                                 )
                             elif kgrid_dim == 3:
                                 raise ValueError(
                                     "sensor.mask cuboid corners must be defined"
-                                    " as [x1, y1, z1, x2, y2, z2; ...]."
+                                    " as [[x1, y1, z1, x2, y2, z2], [...], ...]."
                                     " where x2 => x1, etc."
                                 )
 
                         # check the list are within bounds
-                        if np.any(self.sensor.mask < 1):
+                        if np.any(np.asarray(self.sensor.mask) < 1):
                             raise ValueError("sensor.mask cuboid corners must be within the grid.")
                         else:
                             if kgrid_dim == 1:
-                                if np.any(self.sensor.mask > self.kgrid.Nx):
+                                if np.any(np.asarray(self.sensor.mask) > self.kgrid.Nx):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
                             elif kgrid_dim == 2:
-                                if np.any(self.sensor.mask[[0, 2], :] > self.kgrid.Nx) or np.any(
-                                    self.sensor.mask[[1, 3], :] > self.kgrid.Ny
+                                if np.any(np.asarray(self.sensor.mask)[[0, 2], :] > self.kgrid.Nx) or np.any(
+                                    np.asarray(self.sensor.mask)[[1, 3], :] > self.kgrid.Ny
                                 ):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
                             elif kgrid_dim == 3:
+                                mask = np.transpose(np.asarray(self.sensor.mask))
                                 if (
-                                    np.any(self.sensor.mask[[0, 3], :] > self.kgrid.Nx)
-                                    or np.any(self.sensor.mask[[1, 4], :] > self.kgrid.Ny)
-                                    or np.any(self.sensor.mask[[2, 5], :] > self.kgrid.Nz)
+                                    np.any(mask[[0, 3], :] > self.kgrid.Nx)
+                                    or np.any(mask[[1, 4], :] > self.kgrid.Ny)
+                                    or np.any(mask[[2, 5], :] > self.kgrid.Nz)
                                 ):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
 
                         # create a binary mask for display from the list of corners
                         # TODO FARID mask should be option_factory in sensor not here
                         self.sensor.mask = np.zeros_like(self.kgrid.k, dtype=bool)
-                        cuboid_corners_list = self.record.cuboid_corners_list
-                        for cuboid_index in range(cuboid_corners_list.shape[1]):
+                        cuboid_corners_list = np.asarray(self.record.cuboid_corners_list).T
+                        print("\t0", cuboid_corners_list)
+                        print("\t1", np.shape(cuboid_corners_list))
+                        print("\t2", np.shape(cuboid_corners_list)[1])
+                        for cuboid_index in range(np.shape(cuboid_corners_list)[1]):
                             if self.kgrid.dim == 1:
                                 self.sensor.mask[cuboid_corners_list[0, cuboid_index] : cuboid_corners_list[1, cuboid_index]] = 1
                             if self.kgrid.dim == 2:
@@ -832,7 +834,7 @@ class kWaveSimulation(object):
                         # check the Cartesian sensor mask is the correct size
                         # (1 x N, 2 x N, 3 x N)
                         assert (
-                            self.sensor.mask.shape[0] == kgrid_dim and num_dim2(self.sensor.mask) <= 2
+                            np.shape(self.sensor.mask)[-1] == kgrid_dim and num_dim2(self.sensor.mask) <= 2
                         ), f"Cartesian sensor.mask for a {kgrid_dim}D simulation must be given as a {kgrid_dim} by N array."
 
                         # set Cartesian mask flag (this is modified in
@@ -1397,14 +1399,15 @@ class kWaveSimulation(object):
                 self.source,
                 self.sensor,
                 self.options,
-                dotdict(
+                dotdict( # values
                     {
                         "p_source_pos_index": self.p_source_pos_index,
                         "u_source_pos_index": self.u_source_pos_index,
                         "s_source_pos_index": self.s_source_pos_index,
+                        "cuboid_corners_list": self.record.cuboid_corners_list
                     }
                 ),
-                dotdict(
+                dotdict( # flags
                     {
                         "axisymmetric": self.options.simulation_type.is_axisymmetric(),
                         "use_sensor": self.use_sensor,
@@ -1427,7 +1430,10 @@ class kWaveSimulation(object):
                 ),
             )
 
-            self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, self.s_source_pos_index = expand_results
+            self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, \
+              self.s_source_pos_index, cuboid_corners_list = expand_results
+
+            self.record.cuboid_corners_list = cuboid_corners_list
 
         # print("post:", np.max(self.u_source_pos_index))
 
@@ -1472,6 +1478,7 @@ class kWaveSimulation(object):
 
                     # loop through the list of cuboid corners, and extract the
                     # sensor mask indices for each cube
+                    print(self.record.cuboid_corners_list)
                     for cuboid_index in range(self.record.cuboid_corners_list.shape[1]):
                         # create empty binary mask
                         temp_mask = np.zeros_like(self.kgrid.k, dtype=bool)
@@ -1494,6 +1501,8 @@ class kWaveSimulation(object):
 
                         # extract mask indices
                         self.sensor_mask_index.append(matlab_find(temp_mask))
+
+                    # convert to numpy array
                     self.sensor_mask_index = np.array(self.sensor_mask_index)
 
                     # cleanup unused variables

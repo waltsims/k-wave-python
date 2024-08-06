@@ -46,13 +46,13 @@ alpha0_p2 = 1.0  # compressional absorption [dB/(MHz^2 cm)]
 alpha0_s2 = 1.0  # shear absorption [dB/(MHz^2 cm)]
 
 # create the time array
-cfl = 0.1
-t_end = 60e-6
+cfl: float = 0.1
+t_end: float = 60e-6
 kgrid.makeTime(cp1, cfl, t_end)
 
 # define position of heterogeneous slab
 slab = np.zeros((Nx, Ny), dtype=bool)
-slab[Nx // 2 : -1, :] = True
+slab[Nx // 2 - 1:, :] = True
 
 # define the source geometry in SI units (where 0, 0 is the grid center)
 arc_pos = [-15e-3, -25e-3]  # [m]
@@ -66,10 +66,10 @@ source_strength = 1e6  # [Pa]
 source_cycles = 3      # number of tone burst cycles
 
 # convert the source parameters to grid points
-arc_pos = np.rint(np.asarray(arc_pos) / dx) + np.asarray([Nx / 2, Ny / 2]).astype(int)
-focus_pos = np.rint(np.asarray(focus_pos) / dx) + np.asarray([Nx / 2, Ny / 2]).astype(int)
-radius_pos = int(round(radius / dx))
-diameter_pos = int(round(diameter / dx))
+arc_pos = np.rint(np.asarray(arc_pos) / dx) - 1 + np.asarray([Nx // 2 - 1, Ny // 2 -1]).astype(int)
+focus_pos = np.rint(np.asarray(focus_pos) / dx) - 1 + np.asarray([Nx // 2 - 1, Ny // 2 - 1]).astype(int)
+radius_pos = int(round(radius / dx)) - 1
+diameter_pos = int(round(diameter / dx)) - 1
 
 # force the diameter to be odd
 if (np.isclose(rem(diameter_pos, 2), 0.0) ):

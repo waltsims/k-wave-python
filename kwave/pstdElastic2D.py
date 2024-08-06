@@ -1274,8 +1274,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             if (source.s_mode == 'dirichlet'):
 
                 # enforce the source values as a dirichlet boundary condition
-                sxx_split_x[k_sim.s_source_pos_index] = source.sxx[0:s_source_sig_index, t_index]
-                sxx_split_y[k_sim.s_source_pos_index] = source.sxx[0:s_source_sig_index, t_index]
+                sxx_split_x[k_sim.s_source_pos_index] = k_sim.source.sxx[0:s_source_sig_index, t_index]
+                sxx_split_y[k_sim.s_source_pos_index] = k_sim.source.sxx[0:s_source_sig_index, t_index]
 
             else:
 
@@ -1305,12 +1305,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 #else:
                 #    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
 
-        if (k_sim.source_syy is not False and t_index < np.size(source.syy)):
+        if (k_sim.source_syy is not False and t_index < np.size(k_sim.source.syy)):
 
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                syy_split_x[k_sim.s_source_pos_index] = source.syy[0:s_source_sig_index, t_index]
-                syy_split_y[k_sim.s_source_pos_index] = source.syy[0:s_source_sig_index, t_index]
+                syy_split_x[k_sim.s_source_pos_index] = k_sim.source.syy[0:s_source_sig_index, t_index]
+                syy_split_y[k_sim.s_source_pos_index] = k_sim.source.syy[0:s_source_sig_index, t_index]
 
             else:
                 # spatially and temporally varying source
@@ -1507,14 +1507,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # save the final acoustic pressure if required
     if (options.record_p_final or k_sim.elastic_time_rev):
         print("record_p_final")
-        sensor_data.p_final = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
+        sensor_data.p_final = p[record.x1_inside:record.x2_inside,
+                                record.y1_inside:record.y2_inside,
+                                record.z1_inside:record.z2_inside]
 
 
     # save the final particle velocity if required
     if options.record_u_final:
         print("record_u_final")
-        sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
-        sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
+        sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+        sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
 
 
     # run subscript to cast variables back to double precision if required

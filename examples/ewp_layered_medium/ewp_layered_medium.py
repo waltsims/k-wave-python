@@ -70,9 +70,9 @@ sound_speed_shear = np.zeros((Nx, Ny))                # [m/s]
 density = 1000.0 * np.ones((Nx, Ny))                  # [kg/m^3]
 
 # define the properties of the lower layer of the propagation medium
-sound_speed_compression[Nx // 2: -1, :] = 2000.0  # [m/s]
-sound_speed_shear[Nx // 2: -1, :] = 800.0         # [m/s]
-density[Nx // 2: -1, :] = 1200.0                  # [kg/m^3]
+sound_speed_compression[Nx // 2 - 1: , :] = 2000.0  # [m/s]
+sound_speed_shear[Nx // 2 - 1: , :] = 800.0         # [m/s]
+density[Nx // 2 - 1:, :] = 1200.0                  # [kg/m^3]
 
 # define the absorption properties
 alpha_coeff_compression = 0.1  # [dB/(MHz^2 cm)]
@@ -92,21 +92,24 @@ kgrid.makeTime(np.max(medium.sound_speed_compression.flatten()), cfl, t_end)
 
 # create initial pressure distribution using make_disc
 disc_magnitude: float = 5.0  # [Pa]
-disc_x_pos: int = 30         # [grid points]
-disc_y_pos: int = 64         # [grid points]
+disc_x_pos: int = 29         # [grid points]
+disc_y_pos: int = 63         # [grid points]
 disc_radius: int = 5         # [grid points]
 source = kSource()
 source.p0 = disc_magnitude * make_disc(Vector([Nx, Ny]), Vector([disc_x_pos, disc_y_pos]), disc_radius)
 
 # define a circular sensor or radius 20 grid points, centred at origin
 sensor = kSensor()
-sensor.mask = make_circle(Vector([Nx, Ny]), Vector([Nx // 2, Ny // 2]), 20)
+sensor_x_pos: int = Nx // 2 - 1  # [grid points]
+sensor_y_pos: int = Ny // 2 - 1  # [grid points]
+sensor_radius: int = 20          # [grid points]
+sensor.mask = make_circle(Vector([Nx, Ny]), Vector([sensor_x_pos, sensor_y_pos]), sensor_radius)
 sensor.record = ['p']
 
 # define a custom display mask showing the position of the interface from
 # the fluid side
 display_mask = np.zeros((Nx, Ny), dtype=bool)
-display_mask[Nx//2 - 1, :] = True
+display_mask[Nx // 2 - 2, :] = True
 
 # run the simulation
 simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
@@ -168,55 +171,24 @@ sensor_data_reordered.p = reorder_sensor_data(kgrid, sensor, sensor_data.p)
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
 _ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T,
                    np.logical_or(np.logical_or(source.p0, sensor.mask), display_mask).T,
-                   cmap='gray_r', shading='gouraud', alpha=1)
+                   cmap='gray_r', shading='nearest', alpha=1)
 ax1.invert_yaxis()
 ax1.set_xlabel('y [mm]')
 ax1.set_ylabel('x [mm]')
 
-# plot velocities
-fig2, ax2 = plt.subplots(nrows=1, ncols=1)
-pcm2 = ax2.imshow(sensor_data.p, cmap=get_color_map(), alpha=1)
-cb2 = fig2.colorbar(pcm2, ax=ax2)
-ax2.set_xlabel('Sensor Position')
-ax2.set_ylabel('Time Step')
-
-fig3, ax3 = plt.subplots(nrows=1, ncols=1)
-pcm3 = ax3.imshow(sensor_data_reordered.p, cmap=get_color_map(), alpha=1)
-cb3 = fig3.colorbar(pcm3, ax=ax3)
-ax3.set_xlabel('Sensor Position')
-ax3.set_ylabel('Time Step')
 
 # time vector
 t_array = np.arange(0, int(kgrid.Nt))
+
 # number of sensors in grid
 n: int = int(np.size(sensor_data_reordered.p) / int(kgrid.Nt))
-#sensor vector
+
+# sensor vector
 sensors = np.arange(0, int(n))
 
-max_value = np.max(sensor_data_reordered.p)
-min_value = np.min(sensor_data_reordered.p)
-p = 2.0 * (sensor_data_reordered.p - min_value) / (max_value - min_value) - 1.0
-
-fig4, ax4 = plt.subplots(nrows=1, ncols=1)
-pcm4 = ax4.pcolormesh(t_array, sensors, p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
-ax4.invert_yaxis()
-cb4 = fig4.colorbar(pcm4, ax=ax4)
-ax4.set_ylabel('Sensor Position')
-ax4.set_xlabel('Time Step')
-
-max_value = np.max(sensor_data.p)
-min_value = np.min(sensor_data.p)
-p = 2.0 * (sensor_data.p - min_value) / (max_value - min_value) - 1.0
-
-fig5, ax5 = plt.subplots(nrows=1, ncols=1)
-pcm5 = ax5.pcolormesh(t_array, sensors, p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
-ax5.invert_yaxis()
-cb5 = fig5.colorbar(pcm5, ax=ax5)
-ax5.set_ylabel('Sensor Position')
-ax5.set_xlabel('Time Step')
-
 fig6, ax6 = plt.subplots(nrows=1, ncols=1)
-pcm6 = ax6.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(), shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
+pcm6 = ax6.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(),
+                      shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
 ax6.invert_yaxis()
 cb6 = fig6.colorbar(pcm6, ax=ax6)
 ax6.set_ylabel('Sensor Position')

@@ -48,7 +48,7 @@ def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor,
     expand_sensor(sensor, expand_size, flags.use_sensor, flags.blank_sensor)
 
     # TODO why it is not self.record ? "self"
-    record = expand_cuboid_corner_list(flags.cuboid_corners, kgrid, pml_size)  # noqa: F841
+    cuboid_corners = expand_cuboid_corner_list(flags.cuboid_corners, values.cuboid_corners_list, kgrid, pml_size)
 
     expand_medium(medium, expand_size)
 
@@ -60,7 +60,7 @@ def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor,
 
     print_grid_size(kgrid)
 
-    return kgrid, index_data_type, p_source_pos_index, u_source_pos_index, s_source_pos_index
+    return kgrid, index_data_type, p_source_pos_index, u_source_pos_index, s_source_pos_index, cuboid_corners
 
 
 def expand_kgrid(kgrid, is_axisymmetric, pml_size):
@@ -88,7 +88,7 @@ def expand_kgrid(kgrid, is_axisymmetric, pml_size):
 
 
 def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
-    # set the PML size for use with expandMatrix, don't expand the inner radial
+    # set the PML size for use with expand_matrix, don't expand the inner radial
     # dimension if using the axisymmetric code
     if kgrid.dim == 1:
         expand_size = pml_size[0]
@@ -106,12 +106,12 @@ def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
 
 
 def expand_medium(medium: kWaveMedium, expand_size):
-    # enlarge the sound speed grids by exting the edge values into the expanded grid
+    # enlarge the sound speed grids by extending the edge values into the expanded grid
     medium.sound_speed = np.atleast_1d(medium.sound_speed)
     if medium.sound_speed.size > 1:
         medium.sound_speed = expand_matrix(medium.sound_speed, expand_size)
 
-    # enlarge the grid of density by exting the edge values into the expanded grid
+    # enlarge the grid of density by extending the edge values into the expanded grid
     medium.density = np.atleast_1d(medium.density)
     if medium.density.size > 1:
         medium.density = expand_matrix(medium.density, expand_size)
@@ -224,11 +224,18 @@ def expand_velocity_sources(
             # update the indexing variable corresponding to the active elements
             u_source_pos_index = matlab_find(active_elements_mask)
         else:
-            # print('not NotATransducer')
-            # print("source.u_mask:", np.shape(source.u_mask), np.size(source.u_mask) )
-            # print("expand_size:", expand_size)
-            exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2), (expand_size[1]//2, expand_size[1]//2)) )
-
+            print('not NotATransducer')
+            print("source.u_mask:", np.shape(source.u_mask), np.size(source.u_mask), source.u_mask.ndim )
+            print("expand_size:", expand_size)
+            if source.u_mask.ndim == 1:
+                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),) )
+            elif source.u_mask.ndim == 2:
+                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
+                                        (expand_size[1]//2, expand_size[1]//2)) )
+            elif source.u_mask.ndim == 3:
+                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
+                                        (expand_size[1]//2, expand_size[1]//2),
+                                        (expand_size[2]//2, expand_size[2]//2), ) )
             # print(np.shape(source.u_mask)[0] + 2 * expand_size[0],
             #       np.shape(source.u_mask)[1] + 2 * expand_size[1], )
 
@@ -317,7 +324,7 @@ def print_grid_size(kgrid):
         logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "by", int(k_Ny), "by", int(k_Nz), "grid points")
 
 
-def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):
+def expand_cuboid_corner_list(is_cuboid_corners, cuboid_corners_list, kgrid, pml_size: Vector):
     """
         add the PML size to cuboid corner indices if using a cuboid sensor mask
     Args:
@@ -327,20 +334,31 @@ def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):
     Returns:
 
     """
-    if not is_cuboid_list:
+    if not is_cuboid_corners or cuboid_corners_list is None:
         return
 
+    print(cuboid_corners_list)
+    print(np.shape(cuboid_corners_list))
+
+    cuboid_corners_list = np.transpose(np.asarray(cuboid_corners_list))
+
+    print(cuboid_corners_list)
+    print(np.shape(cuboid_corners_list))
+    print(cuboid_corners_list[0, :])
+    print(cuboid_corners_list[[0, 3], :])
+
     record = dotdict()
+    record.cuboid_corners_list = cuboid_corners_list
     if kgrid.dim == 1:
-        record.cuboid_corners_list = record.cuboid_corners_list + pml_size.x
+        record.cuboid_corners_list = cuboid_corners_list + pml_size.x
     elif kgrid.dim == 2:
-        record.cuboid_corners_list[[0, 2], :] = record.cuboid_corners_list[[0, 2], :] + pml_size.x
-        record.cuboid_corners_list[[1, 3], :] = record.cuboid_corners_list[[1, 3], :] + pml_size.y
+        record.cuboid_corners_list[[0, 2], :] = cuboid_corners_list[[0, 2], :] + pml_size.x
+        record.cuboid_corners_list[[1, 3], :] = cuboid_corners_list[[1, 3], :] + pml_size.y
     elif kgrid.dim == 3:
-        record.cuboid_corners_list[[0, 3], :] = record.cuboid_corners_list[[0, 3], :] + pml_size.x
-        record.cuboid_corners_list[[1, 4], :] = record.cuboid_corners_list[[1, 4], :] + pml_size.y
-        record.cuboid_corners_list[[2, 5], :] = record.cuboid_corners_list[[2, 5], :] + pml_size.z
-    return record
+        record.cuboid_corners_list[[0, 3], :] = cuboid_corners_list[[0, 3], :] + pml_size.x
+        record.cuboid_corners_list[[1, 4], :] = cuboid_corners_list[[1, 4], :] + pml_size.y
+        record.cuboid_corners_list[[2, 5], :] = cuboid_corners_list[[2, 5], :] + pml_size.z
+    return record.cuboid_corners_list
 
 
 def expand_sensor(sensor, expand_size, is_use_sensor, is_blank_sensor):

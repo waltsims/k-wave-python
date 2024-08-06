@@ -323,10 +323,20 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         # compute the scale parameter based on the homogeneous sound speed
         source_val = source_val * (2 * c0 * dt / d_direction)
     else:
+
+        # compute the scale parameter seperately for each source position based on the
+        # sound speed at that position
+        u_index = range(source_val[:, 0].size)
+        mask = u_source_pos_index.flatten("F")[u_index]
+        scale = 2.0 * np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1) * dt / d_direction
+        source_val[u_index, :] *= scale
+
+
         # compute the scale parameter seperately for each source position
         # based on the sound speed at that position
-        u_index = range(source_val.size[0])
-        source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
+        # print(source_val.size)
+        # u_index = range(source_val.size[0])
+        # source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
     return source_val
 
 

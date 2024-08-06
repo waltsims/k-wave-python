@@ -234,8 +234,8 @@ class kSource(object):
                         or (self.flag_uz and (uz_size != u_sum))
                     ):
 
-                        print("flag_ux:", self.flag_ux)
-                        print(ux_size != u_sum, ux_size, u_sum)
+                        # print("flag_ux:", self.flag_ux)
+                        # print(ux_size != u_sum, ux_size, u_sum)
 
                         raise ValueError(
                             "The number of time series in source.ux (etc) " "must match the number of source elements in source.u_mask."
@@ -252,12 +252,12 @@ class kSource(object):
 
                 # if more than one time series is given, check the number of time
                 # series given matches the number of source elements
-                if (self.flag.source_ux and np.size(source.ux)[0] != np.size(u_unique) or \
-                    self.flag.source_uy and np.size(source.uy)[0] != np.size(u_unique) or \
-                    self.flag.source_uz and np.size(source.uz)[0] != np.size(u_unique)):
+                if (self.flag.source_ux and np.size(self.ux)[0] != np.size(u_unique) or \
+                    self.flag.source_uy and np.size(self.uy)[0] != np.size(u_unique) or \
+                    self.flag.source_uz and np.size(self.uz)[0] != np.size(u_unique)):
 
-                    print("diagnostics 2:", self.flag.source_ux)
-                    print(np.size(source.ux)[0] != np.size(u_unique), np.size(source.ux)[0], np.size(u_unique))
+                    # print("diagnostics 2:", self.flag.source_ux)
+                    # print(np.size(self.ux)[0] != np.size(u_unique), np.size(self.ux)[0], np.size(u_unique))
 
                     raise ValueError(
                         "The number of time series in source.ux (etc) "
