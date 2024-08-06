@@ -328,8 +328,10 @@ def expand_cuboid_corner_list(is_cuboid_corners, cuboid_corners_list, kgrid, pml
     """
         add the PML size to cuboid corner indices if using a cuboid sensor mask
     Args:
-        is_cuboid_list:
-        kgrid:
+        is_cuboid_list: boolean which says whether expanded
+        cuboid_corners_list: the cuboid corners
+        kgrid: the grid, which contains the dimension
+        pml_size: the size of the pml
 
     Returns:
 
@@ -337,15 +339,7 @@ def expand_cuboid_corner_list(is_cuboid_corners, cuboid_corners_list, kgrid, pml
     if not is_cuboid_corners or cuboid_corners_list is None:
         return
 
-    print(cuboid_corners_list)
-    print(np.shape(cuboid_corners_list))
-
-    cuboid_corners_list = np.transpose(np.asarray(cuboid_corners_list))
-
-    print(cuboid_corners_list)
-    print(np.shape(cuboid_corners_list))
-    print(cuboid_corners_list[0, :])
-    print(cuboid_corners_list[[0, 3], :])
+    cuboid_corners_list = np.asarray(cuboid_corners_list)
 
     record = dotdict()
     record.cuboid_corners_list = cuboid_corners_list

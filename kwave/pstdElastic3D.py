@@ -1402,7 +1402,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         # add in the pre-scaled stress source terms
 
-
         if hasattr(k_sim, 's_source_sig_index'):
             if isinstance(k_sim.s_source_sig_index, str):
                 if k_sim.s_source_sig_index == ':':

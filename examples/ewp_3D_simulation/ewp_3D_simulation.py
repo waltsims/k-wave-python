@@ -118,8 +118,7 @@ source.ux = focus(kgrid, source.ux, source.u_mask, [0, 0, 0], c0)
 # mask is defined using the xyz coordinates of two opposing corners in the
 # form [x1, y1, z1, x2, y2, z2].'
 sensor = kSensor()
-sensor.mask = [[pml_size, pml_size, Nz // 2,
-               Nx - pml_size, Ny - pml_size, Nz // 2]]
+sensor.mask = np.array([[pml_size, pml_size, Nz // 2, Nx - pml_size, Ny - pml_size, Nz // 2]]).T
 
 # record the maximum pressure in the plane
 sensor.record = ['p_max']
