@@ -165,10 +165,11 @@ alpha_coeff_compression[slab] = alpha0_p2
 alpha_coeff_shear[slab] = alpha0_s2
 
 medium_e = kWaveMedium(sound_speed_compression,
-                       sound_speed_compression=sound_speed_compression,
-                       density=density,
                        alpha_coeff=alpha_coeff_compression,
                        alpha_power=2.0,
+                       density=density,
+                       sound_speed_compression=sound_speed_compression,
+                       alpha_coeff_compression=alpha_coeff_compression,
                        sound_speed_shear=sound_speed_shear,
                        alpha_coeff_shear=alpha_coeff_shear)
 

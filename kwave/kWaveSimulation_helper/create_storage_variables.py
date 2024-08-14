@@ -120,7 +120,7 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
     # print(np.shape(sensor_data.p))
     # print("must act on record here", record.tri)
 
-    return flags, record, sensor_data
+    return flags, record, sensor_data, num_recorded_time_points
 
 
 def set_flags(flags: dotdict, sensor_x, sensor_mask, is_cartesian_interp):
@@ -267,6 +267,9 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
     # allocate empty sensor
     sensor_data = dotdict()
+
+    # print('In create_sensor_variables')
+    # print(record_old, num_sensor_points, num_recorded_time_points,)
 
     # if only p is being stored (i.e., if no user input is given for
     # sensor.record), then sensor_data.p is copied to sensor_data at the

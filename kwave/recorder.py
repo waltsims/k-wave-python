@@ -90,13 +90,15 @@ class Recorder(object):
                 self.z1_inside: int = pml_size.z + 1
                 self.z2_inside: int = kgrid.Nz - pml_size.z
         else:
-            self.x1_inside: int = 1.0
+            self.x1_inside: int = 1
             self.x2_inside: int = kgrid.Nx
             if kgrid.dim == 2:
-                self.y1_inside: int = 1.0
+                self.y1_inside: int = 1
                 self.y2_inside: int = kgrid.Ny
             if kgrid.dim == 3:
-                self.z1_inside: int = 1.0
+                self.y1_inside: int = 1
+                self.y2_inside: int = kgrid.Ny
+                self.z1_inside: int = 1
                 self.z2_inside: int = kgrid.Nz
 
 

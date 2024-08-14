@@ -119,8 +119,16 @@ class SimulationOptions(object):
     pml_x_size: Optional[int] = None
     pml_y_size: Optional[int] = None
     pml_z_size: Optional[int] = None
-    kelvin_voigt_model: bool = False
+    kelvin_voigt_model: bool = True
     time_rev: bool = False
+
+
+    use_sensor: Optional = None
+
+    blank_sensor: Optional = None
+    cuboid_corners: Optional = None
+    nonuniform_grid: Optional = None
+    elastic_time_rev: Optional = None
 
 
     def __post_init__(self):

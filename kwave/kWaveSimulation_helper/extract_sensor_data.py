@@ -74,9 +74,9 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the maximum acoustic pressure
         if flags.record_p_max:
             if file_index == 1:
-                sensor_data.p_max = p[sensor_mask_index]
+                sensor_data.p_max = p[np.unravel_index(sensor_mask_index, np.shape(p), order='F')]
             else:
-                sensor_data.p_max = np.maximum(sensor_data.p_max, p[sensor_mask_index])
+                sensor_data.p_max = np.maximum(sensor_data.p_max, p[np.unravel_index(sensor_mask_index, np.shape(p), order='F')])
 
         # store the minimum acoustic pressure
         if flags.record_p_min:

@@ -138,6 +138,8 @@ class kWaveSimulation(object):
         self.c0 = None  #: Alias to medium.sound_speed
         self.index_data_type = None
 
+        self.num_recorded_time_points = None
+
         self.record_u_split_field: bool = False
 
     @property
@@ -175,14 +177,14 @@ class kWaveSimulation(object):
             return False
         return False
 
-    @property
-    def kelvin_voigt_model(self):
-        """
-        Returns:
-            Whether the simulation is elastic with absorption
+    # @property
+    # def kelvin_voigt_model(self):
+    #     """
+    #     Returns:
+    #         Whether the simulation is elastic with absorption
 
-        """
-        return False
+    #     """
+    #     return False
 
     @property
     def nonuniform_grid(self):
@@ -500,6 +502,15 @@ class kWaveSimulation(object):
 
         # check optional inputs
         self.options = SimulationOptions.option_factory(self.kgrid, self.options)
+
+        # add options which are properties of the class
+        self.options.use_sensor = self.use_sensor
+        # self.options.kelvin_voigt_model = self.kelvin_voigt_model
+        self.options.blank_sensor = self.blank_sensor
+        self.options.cuboid_corners = self.cuboid_corners
+        self.options.nonuniform_grid = self.nonuniform_grid
+        self.options.elastic_time_rev = self.elastic_time_rev
+
         opt = self.options
 
         # TODO(Walter): clean this up with getters in simulation options pml size
@@ -561,7 +572,7 @@ class kWaveSimulation(object):
                              "transducer_sensor": self.transducer_sensor})
 
             # this creates the storage variables by determining the spatial locations of the data which is in record.
-            flags, self.record, self.sensor_data = create_storage_variables(self.kgrid,
+            flags, self.record, self.sensor_data, self.num_recorded_time_points = create_storage_variables(self.kgrid,
                                                                             self.sensor,
                                                                             opt,
                                                                             values,
@@ -1101,7 +1112,6 @@ class kWaveSimulation(object):
             # and convert the data type depending on the number of indices
             self.u_source_pos_index = matlab_find(active_elements_mask).astype(self.index_data_type)
 
-
             # convert the delay mask to an indexing variable (this doesn't need to
             # be modified if the grid is expanded) which tells each point in the
             # source mask which point in the input_signal should be used
@@ -1275,8 +1285,8 @@ class kWaveSimulation(object):
 
         # check the record start time is within range
         record_start_index = self.sensor.record_start_index
-        if self.use_sensor and ((record_start_index > self.kgrid.Nt) or (record_start_index < 1)):
-            raise ValueError("sensor.record_start_index must be between 1 and the number of time steps.")
+        if self.use_sensor and ((record_start_index > self.kgrid.Nt) or (record_start_index < 0)):
+            raise ValueError("sensor.record_start_index must be between 0 and the number of time steps.")
 
         # ensure 'WSWA' symmetry if using axisymmetric code with 'SaveToDisk'
         if is_axisymmetric and self.options.radial_symmetry != "WSWA" and isinstance(self.options.save_to_disk, str):
@@ -1443,35 +1453,40 @@ class kWaveSimulation(object):
                     # loop through the list of cuboid corners, and extract the
                     # sensor mask indices for each cube
                     for cuboid_index in range(self.record.cuboid_corners_list.shape[1]):
+
                         # create empty binary mask
                         temp_mask = np.zeros_like(self.kgrid.k, dtype=bool)
 
                         if self.kgrid.dim == 1:
-                            self.sensor.mask[
+                            temp_mask[
                                 self.record.cuboid_corners_list[0, cuboid_index] : self.record.cuboid_corners_list[1, cuboid_index]
-                            ] = 1
+                            ] = True
                         if self.kgrid.dim == 2:
-                            self.sensor.mask[
+                            temp_mask[
                                 self.record.cuboid_corners_list[0, cuboid_index] : self.record.cuboid_corners_list[2, cuboid_index],
                                 self.record.cuboid_corners_list[1, cuboid_index] : self.record.cuboid_corners_list[3, cuboid_index],
-                            ] = 1
+                            ] = True
                         if self.kgrid.dim == 3:
-                            self.sensor.mask[
+                            temp_mask[
                                 self.record.cuboid_corners_list[0, cuboid_index] : self.record.cuboid_corners_list[3, cuboid_index],
                                 self.record.cuboid_corners_list[1, cuboid_index] : self.record.cuboid_corners_list[4, cuboid_index],
                                 self.record.cuboid_corners_list[2, cuboid_index] : self.record.cuboid_corners_list[5, cuboid_index],
-                            ] = 1
+                            ] = True
 
                         # extract mask indices
-                        self.sensor_mask_index.append(matlab_find(temp_mask))
+                        temp_mask = np.where(temp_mask.flatten(order="F"))[0]
+                        self.sensor_mask_index.append(temp_mask)
+
+                        #self.sensor_mask_index.append(matlab_find(temp_mask))
 
                     # convert to numpy array
-                    self.sensor_mask_index = np.array(self.sensor_mask_index)
+                    self.sensor_mask_index = np.squeeze(np.array(self.sensor_mask_index))
 
                     # cleanup unused variables
                     del temp_mask
 
                 else:
+
                     # create mask indices (this works for both normal sensor and transducer inputs)
                     self.sensor_mask_index = np.where(self.sensor.mask.flatten(order="F") != 0)[0] + 1  # +1 due to matlab indexing. Use matlab_find?
                     self.sensor_mask_index = np.expand_dims(self.sensor_mask_index, -1)  # compatibility, n => [n, 1]

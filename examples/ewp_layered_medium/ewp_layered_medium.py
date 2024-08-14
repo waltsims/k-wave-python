@@ -70,8 +70,8 @@ sound_speed_shear = np.zeros((Nx, Ny))                # [m/s]
 density = 1000.0 * np.ones((Nx, Ny))                  # [kg/m^3]
 
 # define the properties of the lower layer of the propagation medium
-sound_speed_compression[Nx // 2 - 1: , :] = 2000.0  # [m/s]
-sound_speed_shear[Nx // 2 - 1: , :] = 800.0         # [m/s]
+sound_speed_compression[Nx // 2 - 1:, :] = 2000.0  # [m/s]
+sound_speed_shear[Nx // 2 - 1:, :] = 800.0         # [m/s]
 density[Nx // 2 - 1:, :] = 1200.0                  # [kg/m^3]
 
 # define the absorption properties
@@ -113,7 +113,7 @@ display_mask[Nx // 2 - 2, :] = True
 
 # run the simulation
 simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                       pml_inside=False)
+                                       pml_inside=True)
 
 sensor_data = pstd_elastic_2d(kgrid=deepcopy(kgrid),
                               source=deepcopy(source),
@@ -176,7 +176,6 @@ ax1.invert_yaxis()
 ax1.set_xlabel('y [mm]')
 ax1.set_ylabel('x [mm]')
 
-
 # time vector
 t_array = np.arange(0, int(kgrid.Nt))
 
@@ -186,12 +185,12 @@ n: int = int(np.size(sensor_data_reordered.p) / int(kgrid.Nt))
 # sensor vector
 sensors = np.arange(0, int(n))
 
-fig6, ax6 = plt.subplots(nrows=1, ncols=1)
-pcm6 = ax6.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(),
+fig2, ax2 = plt.subplots(nrows=1, ncols=1)
+pcm2 = ax2.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(),
                       shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
-ax6.invert_yaxis()
-cb6 = fig6.colorbar(pcm6, ax=ax6)
-ax6.set_ylabel('Sensor Position')
-ax6.set_xlabel('Time Step')
+ax2.invert_yaxis()
+cb2 = fig2.colorbar(pcm2, ax=ax2)
+ax2.set_ylabel('Sensor Position')
+ax2.set_xlabel('Time Step')
 
 plt.show()

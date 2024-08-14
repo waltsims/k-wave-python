@@ -16,7 +16,6 @@ from kwave.utils.math import find_closest
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 
-
 """
 Plane Wave Absorption Example
 #
@@ -79,8 +78,8 @@ sensor = kSensor()
 sensor.mask = np.zeros((Nx, Ny), dtype=bool)
 pos1: int = 44  # [grid points]
 pos2: int = 64  # [grid points]
-sensor.mask[pos1, Ny // 2] = True
-sensor.mask[pos2, Ny // 2] = True
+sensor.mask[pos1, Ny // 2 - 1] = True
+sensor.mask[pos2, Ny // 2 - 1] = True
 
 # set sensor to record to particle velocity
 sensor.record = ["u"]
@@ -109,13 +108,13 @@ source.u_mask = source_mask
 ux = np.zeros((Nx, Ny))
 ux[source_pos, :] = 1.0
 ux = smooth(ux, restore_max=True)
-# is a column vector
+# consistent shape
 source.ux = 1e-6 * np.reshape(ux, (-1, 1))
 
 # set end time
 t_end = 3.5e-6
 
-# create the time array
+# create a time array
 c_max = np.max([medium.sound_speed_compression, medium.sound_speed_shear])
 kgrid.makeTime(c_max, cfl, t_end)
 
@@ -133,7 +132,6 @@ sensor_data_comp = pstd_elastic_2d(kgrid=deepcopy(kgrid),
 
 # calculate the amplitude spectrum at the two sensor positions
 fs = 1.0 / kgrid.dt
-data = np.expand_dims(sensor_data_comp.ux[0, :], axis=0)
 _, as1, _ = spect(np.expand_dims(sensor_data_comp.ux[0, :], axis=0), fs)
 f_comp, as2, _ = spect(np.expand_dims(sensor_data_comp.ux[1, :], axis=0), fs)
 
@@ -166,7 +164,7 @@ source.uy = np.reshape(uy, (-1, 1))
 # set end time
 t_end: float = 4e-6
 
-# create the time array
+# create a time array
 c_max = np.max([medium.sound_speed_compression, medium.sound_speed_shear])
 kgrid.makeTime(c_max, cfl, t_end)
 
@@ -179,8 +177,8 @@ sensor_data_shear = pstd_elastic_2d(kgrid=deepcopy(kgrid),
 
 # calculate the amplitude at the two sensor positions
 fs = 1.0 / kgrid.dt
-_, as1, _ = spect(np.expand_dims(sensor_data_comp.uy[0, :], axis=0), fs)
-f_shear, as2, _ = spect(np.expand_dims(sensor_data_comp.uy[1, :], axis=0), fs)
+_, as1, _ = spect(np.expand_dims(sensor_data_shear.uy[0, :], axis=0), fs)
+f_shear, as2, _ = spect(np.expand_dims(sensor_data_shear.uy[1, :], axis=0), fs)
 
 # calculate the attenuation from the amplitude spectrums
 attenuation_shear = -20.0 * np.log10(as2 / as1) / d_cm
@@ -194,6 +192,7 @@ f_max_shear = medium.sound_speed_shear / (2.0 * dx)
 # find the maximum frequency in the frequency vector
 _, f_max_shear_index = find_closest(f_shear, f_max_shear)
 
+
 # =========================================================================
 # VISUALISATION
 # =========================================================================
@@ -205,9 +204,11 @@ fig1, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1)
 t_axis_comp = np.arange(np.shape(sensor_data_comp.ux)[1]) * kgrid.dt * 1e6
 ax1.plot(t_axis_comp, sensor_data_comp.ux[0, :], 'k-')
 ax1.plot(t_axis_comp, sensor_data_comp.ux[1, :], 'r-')
+# ax1.set_xlim(0, t_axis_comp[-1])
+# ax1.set_ylim(0, np.max(sensor_data_comp.ux))
 ax1.set_xlabel(r'Time [$\mu$s]')
 ax1.set_ylabel('Particle Velocity')
-ax1.set_title('Compressional Wave')
+ax1.set_title('Compressional Wave', fontweight='bold')
 
 # plot compressional wave absorption
 ax2.plot(f_comp * 1e-6, np.squeeze(attenuation_comp), 'ko',
@@ -221,9 +222,11 @@ ax2.set_ylabel(r'$\alpha$ [dB/cm]')
 t_axis_shear = np.arange(np.shape(sensor_data_shear.uy)[1]) * kgrid.dt * 1e6
 ax3.plot(t_axis_shear, sensor_data_shear.uy[0, :], 'k-')
 ax3.plot(t_axis_shear, sensor_data_shear.uy[1, :], 'r-')
+#ax3.set_xlim(0, t_axis_comp[-1])
+#ax3.set_ylim(0, np.max(sensor_data_shear.uy))
 ax3.set_xlabel(r'Time [$\mu$s]')
 ax3.set_ylabel('Particle Velocity')
-ax3.set_title('Shear Wave')
+ax3.set_title('Shear Wave', fontweight='bold')
 
 # plot shear wave absorption
 ax4.plot(f_shear * 1e-6, np.squeeze(attenuation_shear), 'ko',

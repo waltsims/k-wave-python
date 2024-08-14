@@ -50,6 +50,17 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
 
+    # calculate the distance from every point in the source mask to the focus position
+    if kgrid.dim == 1:
+        dist = np.abs(kgrid.x[source_mask == 1] - focus_position[0])
+    elif kgrid.dim == 2:
+        dist = np.sqrt((kgrid.x[source_mask == 1] - focus_position[0])**2 +
+                       (kgrid.y[source_mask == 1] - focus_position[1])**2 )
+    elif kgrid.dim == 3:
+        dist = np.sqrt((kgrid.x[source_mask == 1] - focus_position[0])**2 +
+                       (kgrid.y[source_mask == 1] - focus_position[1])**2 +
+                       (kgrid.z[source_mask == 1] - focus_position[2])**2 )
+
     # distance to delays
     delay = int(np.round(dist / (kgrid.dt * sound_speed)))
     max_delay = np.max(delay)
@@ -57,9 +68,12 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     signal_mat = np.zeros((rel_delay.size, input_signal.size + max_delay))
 
-    # for src_idx, delay in enumerate(rel_delay):
-    #     signal_mat[src_idx, delay:max_delay - delay] = input_signal
-    # signal_mat[rel_delay, delay:max_delay - delay] = input_signal
+    # assign the input signal
+    for source_index in np.arange(len(dist)):
+        delay = dist[source_index]
+        signal_mat[source_index, :] = np.array([np.zeros((delay,)),
+                                                np.squeeze(input_signal),
+                                                np.zeros((max_delay - delay,))])
 
     logging.log(
         logging.WARN, f"PendingDeprecationWarning {__name__}: " "This method is not fully migrated, might be depricated and is untested."

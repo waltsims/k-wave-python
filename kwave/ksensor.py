@@ -12,7 +12,7 @@ class kSensor(object):
         self.record = record
         # record the time series from the beginning by default
         # time index at which the sensor should start recording the data specified by sensor.record
-        self._record_start_index = 1
+        self._record_start_index = 0
 
         # Directivity of the individiual sensor points
         self.directivity = None

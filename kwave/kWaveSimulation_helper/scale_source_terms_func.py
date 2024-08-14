@@ -274,9 +274,11 @@ def apply_source_correction(source_val, frequency_ref, dt):
 
 
 def scale_velocity_sources(flags, source, kgrid, c0, dt, dx, dy, dz, u_source_pos_index):
-    source.ux = scale_velocity_source_x(
-        flags.source_ux, source.u_mode, source.ux, kgrid, c0, dt, dx, u_source_pos_index, flags.nonuniform_grid
-    )
+    # source.ux = scale_velocity_source_x(
+    #     flags.source_ux, source.u_mode, source.ux, kgrid, c0, dt, dx, u_source_pos_index, flags.nonuniform_grid
+    # )
+
+    source.ux = scale_velocity_source(flags.source_ux, source.u_mode, source.ux, c0, dt, u_source_pos_index, dx)
     source.uy = scale_velocity_source(flags.source_uy, source.u_mode, source.uy, c0, dt, u_source_pos_index, dy)
     source.uz = scale_velocity_source(flags.source_uz, source.u_mode, source.uz, c0, dt, u_source_pos_index, dz)
 
