@@ -53,10 +53,10 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     # filter_positions
     positions = [position for position in positions if (position != np.nan).any()]
     assert len(positions) == kgrid.dim, "positions have wrong dimensions"
-    positions = np.array(positions)
+    positions = np.array(positions, order='F')
 
     if isinstance(focus_position, list):
-        focus_position = np.array(focus_position)
+        focus_position = np.array(focus_position, order='F')
     assert isinstance(focus_position, np.ndarray), "focus_position is not an np.array"
 
     #dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
@@ -72,18 +72,20 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
                        (kgrid.y[source_mask == 1] - focus_position[1])**2 +
                        (kgrid.z[source_mask == 1] - focus_position[2])**2 )
 
-    # distance to delays
-    dist = np.round(dist / (kgrid.dt * sound_speed)).astype(int)
+    # convert distances to time delays
+    delays = np.round(dist / (kgrid.dt * sound_speed)).astype(int)
 
-    # convert time points to relative delays
-    dist = -(dist - dist.max())
-    max_delay = np.max(dist)
+    # convert time points to delays relative to the maximum delays
+    relative_delays = delays.max() - delays
 
-    signal_mat = np.zeros((dist.size, input_signal.size + max_delay))
+    # largest time delay
+    max_delay = np.max(relative_delays)
+
+    signal_mat = np.zeros((relative_delays.size, input_signal.size + max_delay), order='F')
 
     # assign the input signal
-    for source_index in np.arange(len(dist)):
-        delay = dist[source_index]
+    for source_index in np.arange(len(relative_delays)):
+        delay = relative_delays[source_index]
         signal_mat[source_index, :] = np.hstack([np.zeros((delay,)),
                                                  np.squeeze(input_signal),
                                                  np.zeros((max_delay - delay,))])
@@ -199,11 +201,11 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
     cells = [("triangle", faces)]
     mesh = meshio.Mesh(verts, cells)
     mesh.write("foo2.vtk")
-    dataset = pyvista.read('foo2.vtk')
+    dataset = pv.read('foo2.vtk')
 
-    pv_x = np.linspace(0, (self.Nx - 1.0) * self.dx, self.Nx)
-    pv_y = np.linspace(0, (self.Ny - 1.0) * self.dy, self.Ny)
-    pv_z = np.linspace(0, (self.Nz - 1.0) * self.dz, self.Nz)
+    pv_x = np.linspace(0, (kgrid.Nx - 1.0) * kgrid.dx, kgrid.Nx)
+    pv_y = np.linspace(0, (kgrid.Ny - 1.0) * kgrid.dy, kgrid.Ny)
+    pv_z = np.linspace(0, (kgrid.Nz - 1.0) * kgrid.dz, kgrid.Nz)
 
     islands = dataset.connectivity(largest=False)
     split_islands = islands.split_bodies(label=True)
@@ -218,7 +220,6 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
             xx[i][j, 1] = pntdata.GetPoint(j)[1]
             xx[i][j, 2] = pntdata.GetPoint(j)[2]
 
-    # transducer plane
     tx_plane = [pv_x[tx_plane_coords[0]],
                 pv_y[tx_plane_coords[1]],
                 pv_z[tx_plane_coords[2]]]
@@ -233,38 +234,42 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
     single_slice_tx = pv_grid.slice(origin=tx_plane, normal=[1, 0, 0])
 
     # formatting of colorbar
-    sargs = dict(title='Pressure [Pa]',
-                  height=0.90,
-                  vertical=True,
-                  position_x=0.90,
-                  position_y=0.05,
-                  title_font_size=20,
-                  label_font_size=16,
-                  shadow=False,
-                  n_labels=6,
-                  italic=False,
-                  fmt="%.1e",
-                  font_family="arial")
+    sargs = dict(interactive=True,
+                 title='Pressure [Pa]',
+                 height=0.90,
+                 vertical=True,
+                 position_x=0.90,
+                 position_y=0.05,
+                 title_font_size=20,
+                 label_font_size=16,
+                 shadow=False,
+                 n_labels=6,
+                 italic=False,
+                 fmt="%.5e",
+                 font_family="arial")
 
     # dictionary for annotations of colorbar
     ratio = 10**(-6 / 20.0) * max_pressure
-    annotations = {ratio: "-6 dB"}
+    print(ratio)
+    #annotations = {float(ratio): "-6dB"}
+
+    annotations = dict([(float(ratio), "-6dB")])
 
     # plotter object
-    plotter = pyvista.Plotter()
+    plotter = pv.Plotter()
 
     # slice data
     _ = plotter.add_mesh(single_slice_x,
-                          cmap='turbo',
-                          clim=[min_pressure, max_pressure],
-                          opacity=0.5,
-                          scalar_bar_args=sargs,
-                          annotations=annotations)
+                         cmap='turbo',
+                         clim=[min_pressure, max_pressure],
+                         opacity=0.5,
+                         scalar_bar_args=sargs,
+                         annotations=annotations)
     _ = plotter.add_mesh(single_slice_y, cmap='turbo', clim=[min_pressure, max_pressure], opacity=0.5, show_scalar_bar=False)
     _ = plotter.add_mesh(single_slice_z, cmap='turbo', clim=[min_pressure, max_pressure], opacity=0.5, show_scalar_bar=False)
 
     # transducer plane
-    _ = plotter.add_mesh(single_slice_tx, cmap='turbo', clim=[min_pressure, max_pressure], opacity=0.5, show_scalar_bar=False)
+    _ = plotter.add_mesh(single_slice_tx, cmap='spring', clim=[min_pressure, max_pressure], opacity=1, show_scalar_bar=False)
 
     # full width half maximum
     _ = plotter.add_mesh(region[0], color='red', opacity=0.75, label='-6 dB')
@@ -276,17 +281,20 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
                             color='black',
                             minor_ticks=False,
                             padding=0.0,
-                            show_xaxis=True, show_xlabels=True, xtitle='', n_xlabels=5,
+                            show_xaxis=True,
+                            show_xlabels=True,
+                            xtitle='',
+                            n_xlabels=5,
                             ytitle="",
                             ztitle="")
 
-    # _ = plotter.add_axes(color='pink', labels_off=False)
-    plotter.camera_position = 'yz'
+    _ = plotter.add_axes(color='pink', labels_off=False)
+    # plotter.camera_position = 'yz'
 
-    # plotter.camera.elevation = 45
-    plotter.camera.roll = 0
-    plotter.camera.azimuth = 125
-    plotter.camera.elevation = 5
+    # # plotter.camera.elevation = 45
+    # plotter.camera.roll = 0
+    # plotter.camera.azimuth = 125
+    # plotter.camera.elevation = 5
 
     # # extensions = ("svg", "eps", "ps", "pdf", "tex")
     # fname = "fwhm" + "." + "svg"
@@ -385,9 +393,11 @@ source_cycles = 3      # []
 source_mag = 1e-6      # [m/s]
 fs = 1.0 / kgrid.dt    # [Hz]
 ux = source_mag * tone_burst(fs, source_freq, source_cycles)
+print(np.shape(ux))
 
 # set source focus
 source.ux = focus(kgrid, ux, source.u_mask, [0, 0, 0], c0)
+print(np.shape(source.ux))
 
 # define sensor mask in x-y plane using cuboid corners, where a rectangular
 # mask is defined using the xyz coordinates of two opposing corners in the
@@ -395,20 +405,14 @@ source.ux = focus(kgrid, ux, source.u_mask, [0, 0, 0], c0)
 # In this case the sensor mask in the slice through the xy-plane at z = Nz // 2 - 1
 # cropping the pml
 sensor = kSensor()
-sensor.mask = np.array([[pml_size, pml_size, Nz // 2 - 1,
-                         Nx - pml_size, Ny - pml_size, Nz // 2]]).T
+# sensor.mask = np.array([[pml_size, pml_size, Nz // 2 - 1, Nx - pml_size, Ny - pml_size, Nz // 2]]).T
+
+sensor.mask = np.ones((Nx, Ny, Nz), order=myOrder)
 
 # record the maximum pressure in the sensor.mask plane
 sensor.record = ['p_max']
 
 # define input arguments
-
-        # self.options.use_sensor = self.use_sensor
-        # self.options.kelvin_voigt_model = self.kelvin_voigt_model
-        # self.options.blank_sensor = self.blank_sensor
-        # self.options.cuboid_corners = self.cuboid_corners
-        # self.options.nonuniform_grid = self.nonuniform_grid
-        # self.options.elastic_time_rev = self.elastic_time_rev
 simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                        kelvin_voigt_model=True,
                                        use_sensor=True,
@@ -433,10 +437,13 @@ y_vec = np.squeeze(kgrid.y_vec) * 1000.0
 x_vec = x_vec[pml_size:Nx - pml_size]
 y_vec = y_vec[pml_size:Ny - pml_size]
 
-p_max_f = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='F')
-p_max_c = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='C')
+# p_max_f = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='F')
+# p_max_c = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='C')
 
-print(np.max(p_max_c), np.max(p_max_f))
+sensor_data.p_max = np.reshape(sensor_data.p_max, (Nx, Ny, Nz), order='F')
+
+p_max_f = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='F')
+p_max_c = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='C')
 
 # plot
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
@@ -455,4 +462,12 @@ ax2.set_xlabel('$y$ [mm]')
 
 plt.show()
 
-plot3D(kgrid, sensor_data[0].p_max, source.u_mask)
+# indices of transducer location
+coordinates = np.argwhere(source.u_mask == 1)
+coordinates = np.reshape(coordinates, (-1,3))
+
+# convert to list of tuples
+coordinates_list = [tuple(coord) for coord in coordinates]
+
+# 3D plotting
+plot3D(kgrid, sensor_data.p_max, coordinates[0] )

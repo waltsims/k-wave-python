@@ -27,7 +27,7 @@
 import numpy as np
 from scipy.interpolate import interpn
 import scipy.io as sio
-# from tqdm import tqdm
+from tqdm import tqdm
 from typing import Union
 # from termcolor import colored
 # import cupy as cp
@@ -616,7 +616,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                          np.squeeze(k_sim.kgrid.y_vec),
                          np.squeeze(k_sim.kgrid.z_vec), indexing='ij',)
         interp_points = np.moveaxis(mg, 0, -1)
-        rho0_sgx_a = interpn(points, k_sim.rho0, interp_points,  method='linear', bounds_error=False)
+        rho0_sgx = interpn(points, k_sim.rho0, interp_points,  method='linear', bounds_error=False)
 
         # mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
         #                  np.squeeze(k_sim.kgrid.y_vec),
@@ -653,10 +653,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         #rho0_sgz = np.transpose(rho0_sgz)
 
         # set values outside of the interpolation range to original values
-        rho0_sgx_a[np.isnan(rho0_sgx_a)] = rho0[np.isnan(rho0_sgx_a)]
-        # rho0_sgx_a[np.isnan(rho0_sgx_a)] = rho0[np.isnan(rho0_sgx_a)]
-        # rho0_sgx_a[np.isnan(rho0_sgx_a)] = rho0[np.isnan(rho0_sgx_a)]
-        # rho0_sgx_a[np.isnan(rho0_sgx_a)] = rho0[np.isnan(rho0_sgx_a)]
+        rho0_sgx[np.isnan(rho0_sgx)] = rho0[np.isnan(rho0_sgx)]
         rho0_sgy[np.isnan(rho0_sgy)] = rho0[np.isnan(rho0_sgy)]
         rho0_sgz[np.isnan(rho0_sgz)] = rho0[np.isnan(rho0_sgz)]
     else:
@@ -664,8 +661,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         rho0_sgx = rho0
         rho0_sgy = rho0
         rho0_sgz = rho0
-
-    rho0_sgx = rho0_sgx_a
 
     # elementwise reciprocal of rho0 so it doesn't have to be done each time step
     rho0_sgx_inv = 1.0 / rho0_sgx
@@ -691,7 +686,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         # mu is heterogeneous and staggered grids are used
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
                          np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2,
-                         np.squeeze(k_sim.kgrid.z_vec), indexing='ij', )
+                         np.squeeze(k_sim.kgrid.z_vec),
+                         indexing='ij')
         interp_points = np.moveaxis(mg, 0, -1)
         with np.errstate(divide='ignore', invalid='ignore'):
             mu_sgxy = 1.0 / interpn(points, 1.0 / mu, interp_points, method='linear', bounds_error=False)
@@ -699,7 +695,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
                          np.squeeze(k_sim.kgrid.y_vec),
-                         np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2, indexing='ij',)
+                         np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2,
+                         indexing='ij')
         interp_points = np.moveaxis(mg, 0, -1)
         with np.errstate(divide='ignore', invalid='ignore'):
             mu_sgxz = 1.0 / interpn(points, 1.0 / mu, interp_points, method='linear', bounds_error=False)
@@ -707,7 +704,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec),
                          np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2,
-                         np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2, indexing='ij',)
+                         np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2,
+                         indexing='ij')
         interp_points = np.moveaxis(mg, 0, -1)
         with np.errstate(divide='ignore', invalid='ignore'):
             mu_sgyz = 1.0 / interpn(points, 1.0 / mu, interp_points, method='linear', bounds_error=False)
@@ -735,21 +733,24 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             # eta is heterogeneous and staggered grids are used
             mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2.0,
                              np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2.0,
-                             np.squeeze(k_sim.kgrid.z_vec), indexing='ij',)
+                             np.squeeze(k_sim.kgrid.z_vec),
+                             indexing='ij')
             interp_points = np.moveaxis(mg, 0, -1)
             with np.errstate(divide='ignore', invalid='ignore'):
                 eta_sgxy = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
 
             mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2.0,
                              np.squeeze(k_sim.kgrid.y_vec),
-                             np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2.0, indexing='ij',)
+                             np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2.0,
+                             indexing='ij')
             interp_points = np.moveaxis(mg, 0, -1)
             with np.errstate(divide='ignore', invalid='ignore'):
                 eta_sgxz = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
 
             mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec),
                              np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2.0,
-                             np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2.0, indexing='ij',)
+                             np.squeeze(k_sim.kgrid.z_vec) + k_sim.kgrid.dz / 2.0,
+                             indexing='ij')
             interp_points = np.moveaxis(mg, 0, -1)
             with np.errstate(divide='ignore', invalid='ignore'):
                 eta_sgyz = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
@@ -856,7 +857,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     ddy_k_shift_neg = np.reshape(ddy_k_shift_neg, ddy_k_shift_neg.shape, order='F')
     ddz_k_shift_pos = np.reshape(ddz_k_shift_pos, ddz_k_shift_pos.shape, order='F')
     ddz_k_shift_neg = np.reshape(ddz_k_shift_neg, ddz_k_shift_neg.shape, order='F')
-    # ddz_k_shift_neg = np.transpose(ddz_k_shift_neg, axes=[1, 2, 0])
 
     pml_x = np.transpose(pml_x)
     pml_x_sgx = np.transpose(pml_x_sgx)
@@ -878,9 +878,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     mpml_z = np.expand_dims(mpml_z, axis=0)
     mpml_z_sgz = np.expand_dims(mpml_z_sgz, axis=0)
 
-    # print('pml_x', np.shape(pml_x), np.shape(pml_x_sgx), np.shape(mpml_x), np.shape(mpml_x_sgx) )
-    # print('pml_y', np.shape(pml_y), np.shape(pml_y_sgy), np.shape(mpml_y), np.shape(mpml_y_sgy) )
-    # print('pml_z', np.shape(pml_z), np.shape(pml_z_sgz), np.shape(mpml_z), np.shape(mpml_z_sgz) )
+    print('pml_x', np.shape(pml_x), np.shape(pml_x_sgx), np.shape(mpml_x), np.shape(mpml_x_sgx))
+    print('pml_y', np.shape(pml_y), np.shape(pml_y_sgy), np.shape(mpml_y), np.shape(mpml_y_sgy))
+    print('pml_z', np.shape(pml_z), np.shape(pml_z_sgz), np.shape(mpml_z), np.shape(mpml_z_sgz))
 
     # print("ddx_k_shift", np.shape(ddx_k_shift_pos), np.shape(ddx_k_shift_neg))
     # print("ddy_k_shift", np.shape(ddy_k_shift_pos), np.shape(ddy_k_shift_neg))
@@ -976,8 +976,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     checking: bool = True
     verbose: bool = False
-    mat_contents = sio.loadmat('data/3DtwoStep.mat')
-    load_index: int = 1
+    mat_contents = sio.loadmat('data/3DthreeStep.mat')
+    load_index: int = 2
     error_number: int = 0
 
     tol: float = 10E-12
@@ -1245,7 +1245,34 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             print(line + "ddx_k_shift_pos is not correct!")
         else:
             pass
-            # print("squeeze works!")
+        if (np.abs(np.squeeze(mat_ddx_k_shift_neg) - np.squeeze(ddx_k_shift_neg)).sum() > tol):
+            error_number =+ 1
+            print(line + "ddx_k_shift_pos is not correct!")
+        else:
+            pass
+
+        if (np.abs(np.squeeze(mat_ddy_k_shift_pos) - np.squeeze(ddy_k_shift_pos)).sum() > tol):
+            error_number =+ 1
+            print(line + "ddx_k_shift_pos is not correct!")
+        else:
+            pass
+        if (np.abs(np.squeeze(mat_ddy_k_shift_neg) - np.squeeze(ddy_k_shift_neg)).sum() > tol):
+            error_number =+ 1
+            print(line + "ddy_k_shift_pos is not correct!")
+        else:
+            pass
+
+        if (np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos)).sum() > tol):
+            error_number =+ 1
+            print(line + "ddz_k_shift_pos is not correct!")
+        else:
+            pass
+
+        if (np.abs(np.squeeze(mat_ddz_k_shift_neg) - np.squeeze(ddz_k_shift_neg)).sum() > tol):
+            error_number =+ 1
+            print(line + "ddz_k_shift_neg is not correct!")
+        else:
+            pass
 
         # if (np.abs(mat_ddx_k_shift_pos - ddx_k_shift_pos).sum() > tol):
         #     error_number =+ 1
@@ -1397,6 +1424,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     if hasattr(k_sim, 'p_source_sig_index') and k_sim.p_source_sig_index is not None:
         k_sim.p_source_sig_index = np.squeeze(k_sim.p_source_sig_index) - int(1)
 
+    if hasattr(k_sim, 'sensor_mask_index') and k_sim.sensor_mask_index is not None:
+        k_sim.sensor_mask_index = np.squeeze(k_sim.sensor_mask_index) - int(1)
+
     # These should be zero indexed. Note the x2, y2 and z2 indices do not need to be shifted
     record.x1_inside = int(record.x1_inside - 1)
     record.y1_inside = int(record.y1_inside - 1)
@@ -1408,13 +1438,13 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # start time loop
     #for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
-    for t_index in np.arange(0,12):
+    for t_index in tqdm(np.arange(0, 12)):
 
         # compute the gradients of the stress tensor (these variables do not
         # necessaily need to be stored, they could be computed as needed)
-        dsxxdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(sxx_split_x + sxx_split_y + sxx_split_z, axis=0), order='F'), axis=0))
-        dsyydy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(syy_split_x + syy_split_y + syy_split_z, axis=1), order='F'), axis=1))
-        dszzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_pos, np.fft.fft(szz_split_x + szz_split_y + szz_split_z, axis=2), order='F'), axis=2))
+        dsxxdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(sxx_split_x + sxx_split_y + sxx_split_z, axis=0), order='F'), axis=0)) #
+        dsyydy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(syy_split_x + syy_split_y + syy_split_z, axis=1), order='F'), axis=1)) #
+        dszzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_pos, np.fft.fft(szz_split_x + szz_split_y + szz_split_z, axis=2), order='F'), axis=2)) #
 
         dsxydx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_neg, np.fft.fft(sxy_split_x + sxy_split_y, axis=0), order='F'), axis=0))
         dsxydy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_neg, np.fft.fft(sxy_split_x + sxy_split_y, axis=1), order='F'), axis=1))
@@ -1698,15 +1728,18 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 if (np.abs(mat_ux_sgx - ux_sgx).sum() > tol):
                     print("ux_sgx is NOT correct!")
                 else:
-                    print("ux_sgx is correct!", np.abs(mat_ux_sgx - ux_sgx).sum(), np.max(np.abs(mat_ux_sgx - ux_sgx)))
+                    pass
+                    # print("ux_sgx is correct!", np.abs(mat_ux_sgx - ux_sgx).sum(), np.max(np.abs(mat_ux_sgx - ux_sgx)))
                 if (np.abs(mat_uy_sgy - uy_sgy).sum() > tol):
                     print("uy_sgy is NOT correct!")
                 else:
-                    print("uy_sgy is correct!", np.abs(mat_uy_sgy - uy_sgy).sum(), np.max(np.abs(mat_uy_sgy - uy_sgy)))
+                    pass
+                    #print("uy_sgy is correct!", np.abs(mat_uy_sgy - uy_sgy).sum(), np.max(np.abs(mat_uy_sgy - uy_sgy)))
                 if (np.abs(mat_uz_sgz - uz_sgz).sum() > tol):
                     print("uz_sgz is NOT correct!")
                 else:
-                    print("uz_sgx is correct!", np.abs(mat_uz_sgz - uz_sgz).sum(), np.max(np.abs(mat_uz_sgz - uz_sgz)))
+                    pass
+                    #print("uz_sgx is correct!", np.abs(mat_uz_sgz - uz_sgz).sum(), np.max(np.abs(mat_uz_sgz - uz_sgz)))
 
 
         # calculate the velocity gradients (these variables do not necessarily
@@ -1717,13 +1750,13 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         # changed here! ux_sgy -> uy_sgy
         duydx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uy_sgy, axis=0), order='F'), axis=0))
-        duydy = np.real(np.fft.ifft(np.multiply(ddx_k_shift_neg, np.fft.fft(uy_sgy, axis=1), order='F'), axis=1))
-        duydz = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uy_sgy, axis=2), order='F'), axis=2))
+        duydy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_neg, np.fft.fft(uy_sgy, axis=1), order='F'), axis=1)) #
+        duydz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_pos, np.fft.fft(uy_sgy, axis=2), order='F'), axis=2)) #
 
         # changed here! ux_sgz -> uz_sgz
         duzdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uz_sgz, axis=0), order='F'), axis=0))
-        duzdy = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uz_sgz, axis=1), order='F'), axis=1))
-        duzdz = np.real(np.fft.ifft(np.multiply(ddx_k_shift_neg, np.fft.fft(uz_sgz, axis=2), order='F'), axis=2))
+        duzdy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(uz_sgz, axis=1), order='F'), axis=1))
+        duzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(uz_sgz, axis=2), order='F'), axis=2))
 
         if checking:
             if (t_index == load_index):
@@ -1734,7 +1767,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "a_x is not correct!", tol, np.abs(mat_a_x - a_x).sum(), np.abs(mat_a_x).sum(), np.abs(a_x).sum(),
                     np.max(np.abs(mat_a_x)), np.max(np.abs(a_x)) )
                 else:
-                    print(line + "a_x is correct!", np.abs(mat_a_x - a_x).sum(), np.max(np.abs(mat_a_x - a_x)))
+                    pass
+                    # print(line + "a_x is correct!", np.abs(mat_a_x - a_x).sum(), np.max(np.abs(mat_a_x - a_x)))
 
                 #b_x = np.expand_dims(ddx_k_shift_neg, axis=-1) * np.fft.fft(ux_sgx, axis=0)
                 #print(b_x.shape)
@@ -1749,7 +1783,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                           "\n\t", np.max(np.abs(mat_b_x)),
                           "\n\t", np.max(np.abs(b_x)) )
                 else:
-                    print(line + "b_x is correct!")
+                    pass
+                    # print(line + "b_x is correct!")
 
                 c_x = np.fft.ifft(b_x, axis=0)
                 if (np.abs(mat_c_x - c_x).sum() > tol):
@@ -1757,7 +1792,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "c_x is not correct!", np.abs(mat_c_x - c_x).sum(), np.abs(mat_c_x).sum(), np.abs(c_x).sum(),
                     np.max(np.abs(mat_c_x)), np.max(np.abs(c_x)) )
                 else:
-                    print(line + "c_x is correct!")
+                    pass
+                    # print(line + "c_x is correct!")
 
                 a_y = np.fft.fft(ux_sgx, axis=1)
                 if (np.abs(mat_a_y - a_y).sum() > tol):
@@ -1765,7 +1801,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "a_y is not correct!", tol, np.abs(mat_a_y - a_y).sum(), np.abs(mat_a_y).sum(), np.abs(a_y).sum(),
                     np.max(np.abs(mat_a_y)), np.max(np.abs(a_y)) )
                 else:
-                    print(line + "a_y is correct!")
+                    # print(line + "a_y is correct!")
+                    pass
 
                 b_y = ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1)
                 if (np.abs(mat_b_y - b_y).sum() > tol):
@@ -1773,7 +1810,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "b_y is not correct!", np.abs(mat_b_y - b_y).sum(), np.abs(mat_b_y).sum(), np.abs(b_y).sum(),
                     np.max(np.abs(mat_b_y)), np.max(np.abs(b_y)) )
                 else:
-                    print(line + "b_y is correct!")
+                    # print(line + "b_y is correct!")
+                    pass
 
                 c_y = np.fft.ifft(ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1), axis=1)
                 if (np.abs(mat_c_y - c_y).sum() > tol):
@@ -1781,7 +1819,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "c_y is not correct!", np.abs(mat_c_y - c_y).sum(), np.abs(mat_c_y).sum(), np.abs(c_y).sum(),
                     np.max(np.abs(mat_c_y)), np.max(np.abs(c_y)) )
                 else:
-                    print(line + "c_y is correct!")
+                    # print(line + "c_y is correct!")
+                    pass
 
 
 
@@ -1797,8 +1836,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                     print(line + "duxdx is not correct!", np.abs(mat_duxdx - duxdx).sum(), np.abs(mat_duxdx).sum(), np.abs(duxdx).sum(),
                     np.max(np.abs(mat_duxdx)), np.max(np.abs(duxdx)) )
                 else:
-                    print(line + "duxdx is correct!", np.abs(mat_duxdx - duxdx).sum(), np.abs(mat_duxdx).sum(), np.abs(duxdx).sum(),
-                    np.max(np.abs(mat_duxdx)), np.max(np.abs(duxdx)) )
+                    pass
+                    # print(line + "duxdx is correct!", np.abs(mat_duxdx - duxdx).sum(), np.abs(mat_duxdx).sum(), np.abs(duxdx).sum(),
+                    # np.max(np.abs(mat_duxdx)), np.max(np.abs(duxdx)) )
                 if (np.abs(mat_duxdy - duxdy).sum() > tol):
                     error_number =+ 1
                     print(line + "duxdy is not correct!" + "\tdiff:", np.abs(mat_duxdy - duxdy).sum(), np.abs(mat_duxdy).sum(), np.abs(duxdy).sum(),
@@ -1923,20 +1963,21 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) \
             #             + kgrid.dt * lame_lambda * duydy \
             #             + kgrid.dt * chi * dduydydt)))
-            temp0 = np.copy(sxx_split_y)
-            temp0 = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * temp0)) +
-                                    kgrid.dt * np.multiply(lame_lambda, duydy, order='F') + kgrid.dt * np.multiply(chi, dduydydt, order='F') )))
-            temp1 = np.copy(sxx_split_y)
-            temp1 = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * temp1)) +
-                                    kgrid.dt * lame_lambda * duydy + kgrid.dt * chi * dduydydt)))
-            temp2 = np.copy(sxx_split_y)
-            a = np.multiply(pml_y, temp2, order='F')
+            # temp0 = np.copy(sxx_split_y)
+            # temp0 = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * temp0)) +
+            #                         kgrid.dt * np.multiply(lame_lambda, duydy, order='F') + kgrid.dt * np.multiply(chi, dduydydt, order='F') )))
+            # temp1 = np.copy(sxx_split_y)
+            # temp1 = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * temp1)) +
+            #                         kgrid.dt * lame_lambda * duydy + kgrid.dt * chi * dduydydt)))
+            # temp2 = np.copy(sxx_split_y)
+
+            a = np.multiply(pml_y, sxx_split_y, order='F')
             b = np.multiply(mpml_z, a, order='F')
             c = np.multiply(mpml_x, b, order='F')
             c = c + kgrid.dt * np.multiply(lame_lambda, duydy, order='F') + kgrid.dt * np.multiply(chi, dduydydt, order='F')
             d = np.multiply(pml_y, c, order='F')
             e = np.multiply(mpml_z, d, order='F')
-            temp2 = np.multiply(mpml_x, e, order='F')
+            sxx_split_y = np.multiply(mpml_x, e, order='F')
             # print(np.abs(temp0).sum(), np.abs(temp1).sum(), np.abs(temp2).sum() )
             # print(np.max(np.abs(temp0)), np.max(np.abs(temp0)), np.max(np.abs(temp0)) )
             # print(np.min(np.abs(temp0)), np.min(np.abs(temp0)), np.min(np.abs(temp0)) )
@@ -1954,7 +1995,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             + kgrid.dt * (lame_lambda * duxdx + kgrid.dt * chi * dduxdxdt) )))
             syy_split_x = mpml_z * mpml_y * pml_x * (
                 mpml_z * mpml_y * pml_x * syy_split_x +
-                kgrid.dt * (lame_lambda * duxdx + kgrid.dt * chi * dduxdxdt))
+                kgrid.dt * (lame_lambda * duxdx + chi * dduxdxdt))
 
             # syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
             #               bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) \
@@ -2041,8 +2082,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             + kgrid.dt * mu_sgyz * duydz \
             #             + kgrid.dt * eta_sgyz * dduydzdt)))
             syz_split_z = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z)) + \
-                                                               kgrid.dt * mu_sgyz * duzdz + \
+                                                               kgrid.dt * mu_sgyz * duydz + \
                                                                kgrid.dt * eta_sgxz * dduydzdt)))
+
 
         else:
 
@@ -2168,12 +2210,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         #     n_pos = np.shape(np.squeeze(k_sim.s_source_pos_index))[0]
         # else:
         #     n_pos = None
-
         if (k_sim.source_sxx is not False and t_index < np.size(source.sxx)):
             print('sxx')
-
             if (source.s_mode == 'dirichlet'):
-
                 # enforce the source values as a dirichlet boundary condition
                 # sxx_split_x[s_source_pos_index] = source.sxx[s_source_sig_index, t_index]
                 # sxx_split_y[s_source_pos_index] = source.sxx[s_source_sig_index, t_index]
@@ -2183,7 +2222,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 sxx_split_z[np.unravel_index(k_sim.s_source_pos_index, sxx_split_z.shape, order='F')] = k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_z.shape, order='F'), t_index]
 
             else:
-
                 # add the source values to the existing field values
                 # sxx_split_x[s_source_pos_index] = sxx_split_x[s_source_pos_index] + source.sxx[s_source_sig_index, t_index]
                 # sxx_split_y[s_source_pos_index] = sxx_split_y[s_source_pos_index] + source.sxx[s_source_sig_index, t_index]
@@ -2198,7 +2236,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         if (k_sim.source_syy is not False and t_index < np.size(source.syy)):
             print('syy')
             if (source.s_mode == 'dirichlet'):
-
                 # enforce the source values as a dirichlet boundary condition
                 # syy_split_x[s_source_pos_index] = source.syy[s_source_sig_index, t_index]
                 # syy_split_y[s_source_pos_index] = source.syy[s_source_sig_index, t_index]
@@ -2207,9 +2244,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_y.shape, order='F'), t_index]
                 syy_split_z[np.unravel_index(k_sim.s_source_pos_index, syy_split_z.shape, order='F')] = k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_z.shape, order='F'), t_index]
 
-
             else:
-
                 # add the source values to the existing field values
                 # syy_split_x[s_source_pos_index] = syy_split_x[s_source_pos_index] + source.syy[s_source_sig_index, t_index]
                 # syy_split_y[s_source_pos_index] = syy_split_y[s_source_pos_index] + source.syy[s_source_sig_index, t_index]
@@ -2224,19 +2259,16 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         if (k_sim.source_szz is not False and t_index < np.size(source.syy)):
             print('szz')
             if (source.s_mode == 'dirichlet'):
-
                 # enforce the source values as a dirichlet boundary condition
                 szz_split_x[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
                 szz_split_y[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
                 szz_split_z[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
 
             else:
-
                 # # add the source values to the existing field values
                 # szz_split_x[s_source_pos_index] = szz_split_x[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
                 # szz_split_y[s_source_pos_index] = szz_split_y[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
                 # szz_split_z[s_source_pos_index] = szz_split_z[s_source_pos_index] + source.szz[s_source_sig_index, t_index]
-
                 szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] = szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] + \
                   k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_x.shape, order='F'), t_index]
                 szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] = szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] + \
@@ -2245,19 +2277,16 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                   k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_z.shape, order='F'), t_index]
 
         if (k_sim.source_sxy is not False and t_index < np.size(source.sxy)):
-            print('sxy')
-            if (source.s_mode == 'dirichlet'):
 
+            if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 sxy_split_x[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
                 sxy_split_y[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
 
             else:
-
                 # add the source values to the existing field values
                 # sxy_split_x[s_source_pos_index] = sxy_split_x[s_source_pos_index] + source.sxy[s_source_sig_index, t_index]
                 # sxy_split_y[s_source_pos_index] = sxy_split_y[s_source_pos_index] + source.sxy[s_source_sig_index, t_index]
-
                 sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
                   k_sim.source.sxy[np.unravel_index(k_sim.s_source_sig_index, sxy_split_x.shape, order='F'), t_index]
                 sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
@@ -2266,13 +2295,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         if (k_sim.source_sxz is not False and t_index < np.size(source.sxz)):
             print('sxz')
             if (source.s_mode == 'dirichlet'):
-
                 # enforce the source values as a dirichlet boundary condition
                 sxz_split_x[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
                 sxz_split_z[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
 
             else:
-
                 # add the source values to the existing field values
                 # sxz_split_x[s_source_pos_index] = sxz_split_x[s_source_pos_index] + source.sxz[s_source_sig_index, t_index]
                 # sxz_split_z[s_source_pos_index] = sxz_split_z[s_source_pos_index] + source.sxz[s_source_sig_index, t_index]
@@ -2284,13 +2311,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         if (k_sim.source_syz is not False and t_index < np.size(source.syz)):
             print('syz')
             if (source.s_mode == 'dirichlet'):
-
                 # enforce the source values as a dirichlet boundary condition
                 syz_split_y[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
                 syz_split_z[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
 
             else:
-
                 # add the source values to the existing field values
                 # syz_split_y[s_source_pos_index] = syz_split_y[s_source_pos_index] + source.syz[s_source_sig_index, t_index]
                 # syz_split_z[s_source_pos_index] = syz_split_z[s_source_pos_index] + source.syz[s_source_sig_index, t_index]
@@ -2415,15 +2440,15 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             if options.stream_to_disk:
                 raise TypeError('"StreamToDisk" input is not currently supported.')
 
-            if checking:
-                if (t_index == load_index):
-                    if hasattr(sensor_data, 'p_max'):
-                        temp = np.squeeze(np.array(mat_sensor_data[0][0].tolist()))
-                        temp = np.reshape(temp, np.squeeze(np.asarray(sensor_data.p_max)).shape)
-                        if (np.abs(temp - np.squeeze(np.asarray(sensor_data.p_max))).sum() > tol):
-                            print("p_max is not correct!")
-                        else:
-                            pass
+            # if checking:
+            #     if (t_index == load_index):
+            #         if hasattr(sensor_data, 'p_max'):
+            #             temp = np.squeeze(np.array(mat_sensor_data[0][0].tolist()))
+            #             temp = np.reshape(temp, np.squeeze(np.asarray(sensor_data.p_max)).shape)
+            #             if (np.abs(temp - np.squeeze(np.asarray(sensor_data.p_max))).sum() > tol):
+            #                 print("p_max is not correct!")
+            #             else:
+            #                 pass
 
         # # estimate the time to run the simulation
         # if t_index == ESTIMATE_SIM_TIME_STEPS:

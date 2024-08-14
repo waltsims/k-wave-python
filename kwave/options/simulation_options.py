@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from tempfile import gettempdir
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Union
 
 import numpy as np
 
@@ -123,9 +123,9 @@ class SimulationOptions(object):
     time_rev: bool = False
 
 
-    use_sensor: Optional = None
+    use_sensor: Optional[Union[int, bool]] = None
 
-    blank_sensor: Optional = None
+    blank_sensor: Optional[bool] = None
     cuboid_corners: Optional = None
     nonuniform_grid: Optional = None
     elastic_time_rev: Optional = None
