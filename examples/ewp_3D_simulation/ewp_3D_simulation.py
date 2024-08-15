@@ -22,6 +22,7 @@ from skimage import measure
 def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     """
     focus Create input signal based on source mask and focus position.
+
     focus takes a single input signal and a source mask and creates an
     input signal matrix (with one input signal for each source point).
     The appropriate time delays required to focus the signals at a given

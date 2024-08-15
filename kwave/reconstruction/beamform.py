@@ -62,7 +62,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
                        (kgrid.z[source_mask == 1] - focus_position[2])**2 )
 
     # distance to delays
-    delay = int(np.round(dist / (kgrid.dt * sound_speed)))
+    delay = np.round(dist / (kgrid.dt * sound_speed)).astype(int)
     max_delay = np.max(delay)
     rel_delay = -(delay - max_delay)
 
