@@ -1474,13 +1474,14 @@ class kWaveSimulation(object):
                             ] = True
 
                         # extract mask indices
-                        temp_mask = np.where(temp_mask.flatten(order="F"))[0]
+                        temp_mask = np.squeeze(np.where(temp_mask.flatten(order="F"))) + 1 # due to matlab indexing
+
                         self.sensor_mask_index.append(temp_mask)
 
-                        #self.sensor_mask_index.append(matlab_find(temp_mask))
+                    self.sensor_mask_index = np.concatenate(self.sensor_mask_index)
 
                     # convert to numpy array
-                    self.sensor_mask_index = np.squeeze(np.array(self.sensor_mask_index))
+                    self.sensor_mask_index = np.squeeze(np.asarray(self.sensor_mask_index))
 
                     # cleanup unused variables
                     del temp_mask

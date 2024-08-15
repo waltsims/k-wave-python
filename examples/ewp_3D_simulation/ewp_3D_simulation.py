@@ -15,6 +15,7 @@ from kwave.utils.colormap import get_color_map
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 
+from io import BytesIO
 import pyvista as pv
 import meshio
 from skimage import measure
@@ -49,19 +50,6 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
     assert isinstance(sound_speed, float), "sound_speed must be a scalar."
 
-    positions = [kgrid.x.flatten(), kgrid.y.flatten(), kgrid.z.flatten()]
-
-    # filter_positions
-    positions = [position for position in positions if (position != np.nan).any()]
-    assert len(positions) == kgrid.dim, "positions have wrong dimensions"
-    positions = np.array(positions, order='F')
-
-    if isinstance(focus_position, list):
-        focus_position = np.array(focus_position, order='F')
-    assert isinstance(focus_position, np.ndarray), "focus_position is not an np.array"
-
-    #dist = np.linalg.norm(positions[:, source_mask.flatten() == 1] - focus_position[:, np.newaxis])
-
     # calculate the distance from every point in the source mask to the focus position
     if kgrid.dim == 1:
         dist = np.abs(kgrid.x[source_mask == 1] - focus_position[0])
@@ -85,8 +73,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     signal_mat = np.zeros((relative_delays.size, input_signal.size + max_delay), order='F')
 
     # assign the input signal
-    for source_index in np.arange(len(relative_delays)):
-        delay = relative_delays[source_index]
+    for source_index, delay in enumerate(relative_delays):
         signal_mat[source_index, :] = np.hstack([np.zeros((delay,)),
                                                  np.squeeze(input_signal),
                                                  np.zeros((max_delay - delay,))])
@@ -95,32 +82,36 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
 
 def get_focus(p):
-    """Gets value of maximum pressure and the indices of the location"""
+    """
+    Gets value of maximum pressure and the indices of the location
+    """
     max_pressure = np.max(p)
     mx, my, mz = np.unravel_index(np.argmax(p, axis=None), p.shape)
     return max_pressure, [mx, my, mz]
 
 
 def getPVImageData(kgrid, p, order='F'):
+    """Create the pyvista image data container with data label hardwired"""
     pv_grid = pv.ImageData()
     pv_grid.dimensions = (kgrid.Nx, kgrid.Ny, kgrid.Nz)
     pv_grid.origin = (0, 0, 0)
     pv_grid.spacing = (kgrid.dx, kgrid.dy, kgrid.dz)
-    pv_grid.point_data["pressure"] = p.flatten(order=order)
+    pv_grid.point_data["p_max"] = p.flatten(order=order)
     pv_grid.deep_copy = False
     return pv_grid
 
 
 def getIsoVolume(kgrid, p, dB=-6):
     """"Returns a triangulation of a volume, warning: may not be connected or closed"""
+
     max_pressure, _ = get_focus(p)
     ratio = 10**(dB / 20.0) * max_pressure
     verts, faces, _, _ = measure.marching_cubes(p, level=ratio, spacing=[kgrid.dx, kgrid.dy, kgrid.dz])
     return verts, faces
 
-def getFWHM(kgrid, p, fname: str = "fwhm.vtk"):
-    """"Gets volume of -6dB field"""
 
+def getFWHM(kgrid, p):
+    """"Gets volume of -6dB field"""
     verts, faces = getIsoVolume(kgrid, p)
 
     totalArea: float = 0.0
@@ -201,8 +192,17 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
 
     cells = [("triangle", faces)]
     mesh = meshio.Mesh(verts, cells)
-    mesh.write("foo2.vtk")
-    dataset = pv.read('foo2.vtk')
+
+    buffer = BytesIO()
+
+    mesh.write(buffer, file_format="ply")
+
+    buffer.seek(0)
+    # Read the buffer with PyVista
+    dataset = pv.read(buffer)
+
+    # mesh.write("foo2.vtk")
+    # dataset = pv.read('foo2.vtk')
 
     pv_x = np.linspace(0, (kgrid.Nx - 1.0) * kgrid.dx, kgrid.Nx)
     pv_y = np.linspace(0, (kgrid.Ny - 1.0) * kgrid.dy, kgrid.Ny)
@@ -251,8 +251,6 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
 
     # dictionary for annotations of colorbar
     ratio = 10**(-6 / 20.0) * max_pressure
-    print(ratio)
-    #annotations = {float(ratio): "-6dB"}
 
     annotations = dict([(float(ratio), "-6dB")])
 

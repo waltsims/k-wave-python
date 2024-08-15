@@ -61,19 +61,23 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
                        (kgrid.y[source_mask == 1] - focus_position[1])**2 +
                        (kgrid.z[source_mask == 1] - focus_position[2])**2 )
 
-    # distance to delays
-    delay = np.round(dist / (kgrid.dt * sound_speed)).astype(int)
-    max_delay = np.max(delay)
-    rel_delay = -(delay - max_delay)
+    # convert distances to time delays
+    delays = np.round(dist / (kgrid.dt * sound_speed)).astype(int)
 
-    signal_mat = np.zeros((rel_delay.size, input_signal.size + max_delay))
+    # convert time points to delays relative to the maximum delays
+    relative_delays = delays.max() - delays
+
+    # largest time delay
+    max_delay = np.max(relative_delays)
+
+    # allocate array
+    signal_mat = np.zeros((relative_delays.size, input_signal.size + max_delay), order='F')
 
     # assign the input signal
-    for source_index in np.arange(len(dist)):
-        delay = dist[source_index]
-        signal_mat[source_index, :] = np.array([np.zeros((delay,)),
-                                                np.squeeze(input_signal),
-                                                np.zeros((max_delay - delay,))])
+    for source_index, delay in enumerate(relative_delays):
+        signal_mat[source_index, :] = np.hstack([np.zeros((delay,)),
+                                                 np.squeeze(input_signal),
+                                                 np.zeros((max_delay - delay,))])
 
     logging.log(
         logging.WARN, f"PendingDeprecationWarning {__name__}: " "This method is not fully migrated, might be depricated and is untested."
