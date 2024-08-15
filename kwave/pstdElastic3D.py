@@ -882,9 +882,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     print('pml_y', np.shape(pml_y), np.shape(pml_y_sgy), np.shape(mpml_y), np.shape(mpml_y_sgy))
     print('pml_z', np.shape(pml_z), np.shape(pml_z_sgz), np.shape(mpml_z), np.shape(mpml_z_sgz))
 
-    # print("ddx_k_shift", np.shape(ddx_k_shift_pos), np.shape(ddx_k_shift_neg))
-    # print("ddy_k_shift", np.shape(ddy_k_shift_pos), np.shape(ddy_k_shift_neg))
-    # print("ddz_k_shift", np.shape(ddz_k_shift_pos), np.shape(ddz_k_shift_neg))
+    print("ddx_k_shift", np.shape(ddx_k_shift_pos), np.shape(ddx_k_shift_neg))
+    print("ddy_k_shift", np.shape(ddy_k_shift_pos), np.shape(ddy_k_shift_neg))
+    print("ddz_k_shift", np.shape(ddz_k_shift_pos), np.shape(ddz_k_shift_neg))
 
 
 
@@ -976,11 +976,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     checking: bool = True
     verbose: bool = False
-    mat_contents = sio.loadmat('data/3DthreeStep.mat')
-    load_index: int = 2
+    mat_contents = sio.loadmat('data/3DtwoStep.mat')
+    load_index: int = 1
     error_number: int = 0
 
-    tol: float = 10E-12
+    tol: float = 10E-13
     if verbose:
         print(sorted(mat_contents.keys()))
 
@@ -1063,7 +1063,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     mat_rho0_sgy_inv = mat_contents['rho0_sgy_inv']
     mat_rho0_sgz_inv = mat_contents['rho0_sgz_inv']
 
-    mat_sensor_data = mat_contents['sensor_data']
+    # mat_sensor_data = mat_contents['sensor_data']
 
     mat_source_ux = mat_contents['sux']
 
@@ -1086,14 +1086,14 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # CREATE INDEX VARIABLES
     # =========================================================================
 
-    # # setup the time index variable
-    # if not options.time_rev:
-    #     index_start: int = 0
-    #     index_step: int = 1
-    #     index_end: int = k_sim.kgrid.Nt
-    # else:
-    #     # throw error for unsupported feature
-    #     raise TypeError('Time reversal using sensor.time_reversal_boundary_data is not currently supported.')
+    # setup the time index variable
+    if not options.time_rev:
+        index_start: int = 0
+        index_step: int = 1
+        index_end: int = k_sim.kgrid.Nt
+    else:
+        # throw error for unsupported feature
+        raise TypeError('Time reversal using sensor.time_reversal_boundary_data is not currently supported.')
 
     if checking:
         mu_tol = 5e-3
@@ -1247,24 +1247,28 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             pass
         if (np.abs(np.squeeze(mat_ddx_k_shift_neg) - np.squeeze(ddx_k_shift_neg)).sum() > tol):
             error_number =+ 1
-            print(line + "ddx_k_shift_pos is not correct!")
+            print(line + "ddx_k_shift_neg is not correct!")
         else:
             pass
 
         if (np.abs(np.squeeze(mat_ddy_k_shift_pos) - np.squeeze(ddy_k_shift_pos)).sum() > tol):
             error_number =+ 1
-            print(line + "ddx_k_shift_pos is not correct!")
+            print(line + "ddy_k_shift_pos is not correct!")
         else:
             pass
         if (np.abs(np.squeeze(mat_ddy_k_shift_neg) - np.squeeze(ddy_k_shift_neg)).sum() > tol):
             error_number =+ 1
-            print(line + "ddy_k_shift_pos is not correct!")
+            print(line + "ddy_k_shift_neg is not correct!")
         else:
             pass
 
         if (np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos)).sum() > tol):
             error_number =+ 1
-            print(line + "ddz_k_shift_pos is not correct!")
+            print(line + "ddz_k_shift_pos is not correct!",
+                  np.sum(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
+                  np.max(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
+                  np.argmax(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
+                  np.squeeze(mat_ddz_k_shift_pos)[15], np.squeeze(ddz_k_shift_pos)[15]  )
         else:
             pass
 
@@ -1437,8 +1441,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     print('\tstarting time loop ...')
 
     # start time loop
-    #for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
-    for t_index in tqdm(np.arange(0, 12)):
+    for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
+    #for t_index in tqdm(np.arange(0, 12)):
 
         # compute the gradients of the stress tensor (these variables do not
         # necessaily need to be stored, they could be computed as needed)
@@ -1671,7 +1675,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
 
         # add in the velocity source terms
-        if k_sim.source_ux is not False and k_sim.source_ux >= t_index:
+        if k_sim.source_ux is not False and k_sim.source_ux > t_index:
 
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
@@ -1690,7 +1694,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                   np.squeeze(k_sim.source.ux[k_sim.u_source_sig_index, t_index])
 
 
-        if k_sim.source_uy is not False and k_sim.source_uy >= t_index:
+        if k_sim.source_uy is not False and k_sim.source_uy > t_index:
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 #uy_split_y[k_sim.u_source_pos_index] = source.uy[k_sim.u_source_sig_index, t_index]
@@ -1703,7 +1707,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                   np.squeeze(k_sim.source.uy[k_sim.u_source_sig_index, t_index])
 
 
-        if k_sim.source_uz is not False and k_sim.source_uz >= t_index:
+        if k_sim.source_uz is not False and k_sim.source_uz > t_index:
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 #uz_split_z[u_source_pos_index] = source.uz[u_source_sig_index, t_index]
@@ -1987,8 +1991,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) \
             #             + kgrid.dt * lame_lambda * duzdz \
             #             + kgrid.dt * chi * dduzdzdt)))
-            sxx_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * sxx_split_z)) +
-                        kgrid.dt * lame_lambda * duzdz + kgrid.dt * chi * dduzdzdt)))
+            sxx_split_z = mpml_y * mpml_x * pml_z * (mpml_y * mpml_x * pml_z * sxx_split_z +
+                        kgrid.dt * lame_lambda * duzdz + kgrid.dt * chi * dduzdzdt)
 
             # syy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
             #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, syy_split_x))) \
@@ -2001,89 +2005,89 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #               bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) \
             #             + kgrid.dt * (2 * mu + lame_lambda) * duydy \
             #             + kgrid.dt * (2 * eta + chi) * dduydydt )))
-            syy_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * syy_split_y)) + \
+            syy_split_y = mpml_x * mpml_z * pml_y * (mpml_x * mpml_z * pml_y * syy_split_y + \
                                                kgrid.dt * (2.0 * mu + lame_lambda) * duydy + \
-                                               kgrid.dt * (2.0 * eta + chi) * dduydydt)))
+                                               kgrid.dt * (2.0 * eta + chi) * dduydydt)
 
             # syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
-            #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) \
+            #               bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) \
             #             + kgrid.dt * lame_lambda * duzdz \
             #             + kgrid.dt * chi * dduzdzdt) ))
-            syy_split_z = mpml_y * (mpml_x * (pml_z * (mpml_y * (mpml_x * (pml_z * syy_split_z)) +\
+            syy_split_z = mpml_y * mpml_x * pml_z * (mpml_y * mpml_x * pml_z * syy_split_z +\
                                                kgrid.dt * lame_lambda * duzdz + \
-                                               kgrid.dt * chi * dduzdzdt)))
+                                               kgrid.dt * chi * dduzdzdt)
 
             # szz_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, \
             #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y, bsxfun(@times, pml_x, szz_split_x))) \
             #             + kgrid.dt * lame_lambda * duxdx\
             #             + kgrid.dt * chi * dduxdxdt)))
-            szz_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * szz_split_x)) + \
+            szz_split_x = mpml_z * mpml_y * pml_x * (mpml_z * mpml_y * pml_x * szz_split_x + \
                                                kgrid.dt * lame_lambda * duxdx + \
-                                               kgrid.dt * chi * dduxdxdt)))
+                                               kgrid.dt * chi * dduxdxdt)
 
             # szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) \
             #             + kgrid.dt * lame_lambda * duydy \
             #             + kgrid.dt * chi * dduydydt)))
-            szz_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * szz_split_y)) + \
+            szz_split_y = mpml_x * mpml_z * pml_y * (mpml_x * mpml_z * pml_y * szz_split_y + \
                                                kgrid.dt * lame_lambda * duydy + \
-                                               kgrid.dt * chi * dduydydt)))
+                                               kgrid.dt * chi * dduydydt)
 
             # szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) \
             #             + kgrid.dt * (2 * mu + lame_lambda) * duzdz \
             #             + kgrid.dt * (2 * eta + chi) * dduzdzdt)))
-            szz_split_z = mpml_y * (mpml_x * (pml_z * ( mpml_y * (mpml_x * (pml_z * szz_split_z)) + \
+            szz_split_z = mpml_y * mpml_x * pml_z * (mpml_y * mpml_x * pml_z * szz_split_z + \
                                                kgrid.dt * (2.0 * mu + lame_lambda) * duzdz + \
-                                               kgrid.dt * (2.0 * eta + chi) * dduzdzdt)))
+                                               kgrid.dt * (2.0 * eta + chi) * dduzdzdt)
 
             # sxy_split_x = bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, \
             #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_x_sgx, sxy_split_x))) \
             #             + kgrid.dt * mu_sgxy * duydx \
             #             + kgrid.dt * eta_sgxy * dduydxdt)))
-            sxy_split_x = mpml_z * (mpml_y_sgy * (pml_x_sgx * (mpml_z * (mpml_y_sgy * (pml_x_sgx * sxy_split_x)) + \
-                                                               kgrid.dt * mu_sgxy * duydx + \
-                                                               kgrid.dt * eta_sgxy * dduydxdt)))
+            sxy_split_x = mpml_z * mpml_y_sgy * pml_x_sgx * (mpml_z * mpml_y_sgy * pml_x_sgx * sxy_split_x + \
+                                                             kgrid.dt * mu_sgxy * duydx + \
+                                                             kgrid.dt * eta_sgxy * dduydxdt)
 
             # sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, \
             #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) \
             #             + kgrid.dt * mu_sgxy * duxdy \
             #             + kgrid.dt * eta_sgxy * dduxdydt)))
-            sxy_split_y = mpml_z * (mpml_x_sgx * (pml_y_sgy * (mpml_z * (mpml_x_sgx * (pml_y_sgy * sxy_split_y)) + \
+            sxy_split_y = mpml_z * mpml_x_sgx * pml_y_sgy * (mpml_z * mpml_x_sgx * pml_y_sgy * sxy_split_y + \
                                                kgrid.dt * mu_sgxy * duxdy + \
-                                               kgrid.dt * eta_sgxy * dduxdydt)))
+                                               kgrid.dt * eta_sgxy * dduxdydt)
 
             # sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) \
             #             + kgrid.dt * mu_sgxz * duzdx \
             #             + kgrid.dt * eta_sgxz * dduzdxdt)))
-            sxz_split_x = mpml_y * (mpml_z_sgz * (pml_x_sgx * (mpml_y * (mpml_z_sgz * (pml_x_sgx * sxz_split_x)) + \
+            sxz_split_x = mpml_y * mpml_z_sgz * pml_x_sgx * (mpml_y * mpml_z_sgz * pml_x_sgx * sxz_split_x + \
                                                                kgrid.dt * mu_sgxz * duzdx + \
-                                                               kgrid.dt * eta_sgxz * dduzdxdt)))
+                                                               kgrid.dt * eta_sgxz * dduzdxdt)
 
             # sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) \
             #             + kgrid.dt * mu_sgxz * duxdz \
             #             + kgrid.dt * eta_sgxz * dduxdzdt)))
-            sxz_split_z = mpml_y * (mpml_x_sgx * (pml_z_sgz * (mpml_y * (mpml_x_sgx * (pml_z_sgz * sxz_split_z)) + \
+            sxz_split_z = mpml_y * mpml_x_sgx * pml_z_sgz * (mpml_y * mpml_x_sgx * pml_z_sgz * sxz_split_z + \
                                                                kgrid.dt * mu_sgxz * duxdz + \
-                                                               kgrid.dt * eta_sgxz * dduxdzdt)))
+                                                               kgrid.dt * eta_sgxz * dduxdzdt)
 
             # syz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_y_sgy, syz_split_y))) \
             #             + kgrid.dt * mu_sgyz * duzdy \
             #             + kgrid.dt * eta_sgyz * dduzdydt)))
-            syz_split_y = mpml_x * (mpml_z_sgz * (pml_y_sgy * (mpml_x * (mpml_z_sgz * (pml_y_sgy * syz_split_y)) + \
+            syz_split_y = mpml_x * mpml_z_sgz * pml_y_sgy * (mpml_x * mpml_z_sgz * pml_y_sgy * syz_split_y + \
                                                                kgrid.dt * mu_sgyz * duzdy + \
-                                                               kgrid.dt * eta_sgxz * dduzdydt)))
+                                                               kgrid.dt * eta_sgyz * dduzdydt)
 
             # syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) \
             #             + kgrid.dt * mu_sgyz * duydz \
             #             + kgrid.dt * eta_sgyz * dduydzdt)))
-            syz_split_z = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z)) + \
+            syz_split_z = mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + \
                                                                kgrid.dt * mu_sgyz * duydz + \
-                                                               kgrid.dt * eta_sgxz * dduydzdt)))
+                                                               kgrid.dt * eta_sgyz * dduydzdt)
 
 
         else:
@@ -2191,17 +2195,17 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 if k_sim.s_source_sig_index == ':':
                     print("converting s_source_sig_index")
                     if (k_sim.source_sxx is not False):
-                        s_source_sig_index = np.shape(source.sxx)[0]
+                        k_sim.s_source_sig_index = np.shape(source.sxx)[0]
                     elif (k_sim.source_syy is not False):
-                        s_source_sig_index = np.shape(source.syy)[0]
+                        k_sim.s_source_sig_index = np.shape(source.syy)[0]
                     elif (k_sim.source_szz is not False):
-                        s_source_sig_index = np.shape(source.szz)[0]
+                        k_sim.s_source_sig_index = np.shape(source.szz)[0]
                     elif (k_sim.source_sxy is not False):
-                        s_source_sig_index = np.shape(source.sxy)[0]
+                        k_sim.s_source_sig_index = np.shape(source.sxy)[0]
                     elif (k_sim.source_sxy is not False):
-                        s_source_sig_index = np.shape(source.sxz)[0]
+                        k_sim.s_source_sig_index = np.shape(source.sxz)[0]
                     elif (k_sim.source_syz is not False):
-                        s_source_sig_index = np.shape(source.syz)[0]
+                        k_sim.s_source_sig_index = np.shape(source.syz)[0]
                     else:
                         raise RuntimeError('Need to set s_source_sig_index')
 
@@ -2260,9 +2264,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             print('szz')
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                szz_split_x[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
-                szz_split_y[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
-                szz_split_z[s_source_pos_index] = source.szz[s_source_sig_index, t_index]
+                szz_split_x[k_sim.s_source_pos_index] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
+                szz_split_y[k_sim.s_source_pos_index] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
+                szz_split_z[k_sim.s_source_pos_index] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
 
             else:
                 # # add the source values to the existing field values
@@ -2280,8 +2284,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxy_split_x[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
-                sxy_split_y[s_source_pos_index] = source.sxy[s_source_sig_index, t_index]
+                sxy_split_x[k_sim.s_source_pos_index] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[k_sim.s_source_pos_index] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
 
             else:
                 # add the source values to the existing field values
@@ -2296,8 +2300,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             print('sxz')
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxz_split_x[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
-                sxz_split_z[s_source_pos_index] = source.sxz[s_source_sig_index, t_index]
+                sxz_split_x[k_sim.s_source_pos_index] = k_sim.source.sxz[k_sim.s_source_sig_index, t_index]
+                sxz_split_z[k_sim.s_source_pos_index] = k_sim.source.sxz[k_sim.s_source_sig_index, t_index]
 
             else:
                 # add the source values to the existing field values
@@ -2312,8 +2316,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             print('syz')
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                syz_split_y[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
-                syz_split_z[s_source_pos_index] = source.syz[s_source_sig_index, t_index]
+                syz_split_y[k_sim.s_source_pos_index] = k_sim.source.syz[k_sim.s_source_sig_index, t_index]
+                syz_split_z[k_sim.s_source_pos_index] = k_sim.source.syz[k_sim.s_source_sig_index, t_index]
 
             else:
                 # add the source values to the existing field values
