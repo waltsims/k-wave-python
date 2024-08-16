@@ -1,6 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 from copy import deepcopy
 
@@ -198,24 +199,22 @@ f_max_shear = medium.sound_speed_shear / (2.0 * dx)
 # find the maximum frequency in the frequency vector
 _, f_max_shear_index = find_closest(f_shear, f_max_shear)
 
-print(np.max(sensor_data_comp.ux[0, :]))
-print(np.max(sensor_data_comp.ux[1, :]))
-print(np.max(sensor_data_shear.uy[0, :]))
-print(np.max(sensor_data_shear.uy[1, :]))
 
 # =========================================================================
 # VISUALISATION
 # =========================================================================
 
-# plot layout of simulation
-fig1, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1)
+# plot layout of simulation, with padding between compressional and shear plots
+gs = gridspec.GridSpec(5, 1, height_ratios=[1, 1, 0.3, 1, 1])
+ax1 = plt.subplot(gs[0])
+ax2 = plt.subplot(gs[1])
+ax3 = plt.subplot(gs[3])
+ax4 = plt.subplot(gs[4])
 
 # plot compressional wave traces
 t_axis_comp = np.arange(np.shape(sensor_data_comp.ux)[1]) * kgrid.dt * 1e6
 ax1.plot(t_axis_comp, sensor_data_comp.ux[1, :], 'r-')
 ax1.plot(t_axis_comp, sensor_data_comp.ux[0, :], 'k--')
-ax1.set_xlim(0, t_axis_comp[-1])
-ax1.set_ylim(0, np.max(sensor_data_comp.ux[1, :]))
 ax1.set_xlabel(r'Time [$\mu$s]')
 ax1.set_ylabel('Particle Velocity')
 ax1.set_title('Compressional Wave', fontweight='bold')
@@ -233,8 +232,6 @@ ax2.set_ylabel(r'$\alpha$ [dB/cm]')
 t_axis_shear = np.arange(np.shape(sensor_data_shear.uy)[1]) * kgrid.dt * 1e6
 ax3.plot(t_axis_shear, sensor_data_shear.uy[1, :], 'r-')
 ax3.plot(t_axis_shear, sensor_data_shear.uy[0, :], 'k--')
-ax3.set_xlim(0, t_axis_shear[-1])
-ax3.set_ylim(0, np.max(sensor_data_shear.uy[1, :]))
 ax3.set_xlabel(r'Time [$\mu$s]')
 ax3.set_ylabel('Particle Velocity')
 ax3.set_title('Shear Wave', fontweight='bold')

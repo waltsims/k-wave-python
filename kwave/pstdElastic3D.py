@@ -2410,7 +2410,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         if ((options.use_sensor is not False) and (not options.elastic_time_rev) and (t_index >= k_sim.sensor.record_start_index)):
 
             # update index for data storage
-            file_index: int = t_index - sensor.record_start_index + 1
+            file_index: int = t_index - sensor.record_start_index
 
             # store the acoustic pressure if using a transducer object
             if k_sim.transducer_sensor:

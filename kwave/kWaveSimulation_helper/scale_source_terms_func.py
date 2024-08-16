@@ -257,7 +257,6 @@ def apply_velocity_source_corrections(
 
     """
     if not use_w_source_correction_u:
-        print("do nothing with use_w_source_correction_u")
         return
 
     if is_ux_exists:
@@ -320,7 +319,6 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
 
     """
     if not is_source or source_u_mode == "dirichlet":
-        print("Nothing here")
         return source_val
 
     if c0.size == 1:

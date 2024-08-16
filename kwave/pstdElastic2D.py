@@ -428,12 +428,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     sensor_data = k_sim.sensor_data
     options = k_sim.options
 
-    if np.ndim(k_sim.source.uy) > 0:
-        print(np.shape(k_sim.source.uy), np.ndim(k_sim.source.uy))
-        print(k_sim.source.uy[0:5])
-        print(np.max(k_sim.source.uy), np.argmax(k_sim.source.uy) )
-
-
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
     # =========================================================================
@@ -610,10 +604,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     ddx_k_shift_neg = np.expand_dims(ddx_k_shift_neg, axis=1)
     ddy_k_shift_pos = np.expand_dims(np.squeeze(ddy_k_shift_pos), axis=0)
     ddy_k_shift_neg = np.expand_dims(np.squeeze(ddy_k_shift_neg), axis=0)
-
-    print(ddx_k_shift_pos.shape, ddx_k_shift_neg.shape)
-    print(ddy_k_shift_pos.shape, ddy_k_shift_neg.shape)
-    # print("---------------->", ddx_k_shift_pos.shape, ddx_k_shift_neg.shape)
 
     # =========================================================================
     # DATA CASTING
@@ -854,7 +844,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
                     # print("dsxydx is correct!")
 
-
         #dsxydy = real( ifft( bsxfun(@times, ddy_k_shift_neg, fft(sxy_split_x + sxy_split_y, [], 2)), [], 2) );
         dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=1), axis=1))
         # print(dsxydy.shape)
@@ -951,10 +940,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         # add in the pre-scaled velocity source terms
         if (k_sim.source_ux > t_index):
-            print("\nux", k_sim.source_ux > t_index, k_sim.source_ux, t_index, source.u_mode)
+            # print("\nux", k_sim.source_ux > t_index, k_sim.source_ux, t_index, source.u_mode)
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                ux_split_x[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] = \
+                  k_sim.source.ux[k_sim.u_source_sig_index, t_index]
 
             else:
                 # add the source values to the existing field values
@@ -971,19 +961,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         if (k_sim.source_uy > t_index):
 
-            if (t_index == load_index):
-                if (np.abs(mat_pre - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-                    print("PRE uy_split_y is not correct!")
-                else:
-                    pass
-
-            print("\nuy", k_sim.source_uy > t_index, k_sim.source_uy, t_index, source.u_mode,
-                  np.shape(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
-                  np.shape(k_sim.source.uy[k_sim.u_source_sig_index, t_index]) )
+            if checking:
+                if (t_index == load_index):
+                    if (np.abs(mat_pre - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
+                        print("PRE uy_split_y is not correct!")
+                    else:
+                        pass
 
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                uy_split_y[k_sim.u_source_pos_index] = source.uy[k_sim.u_source_sig_index, t_index]
+                uy_split_y[k_sim.u_source_pos_index] = k_sim.source.uy[k_sim.u_source_sig_index, t_index]
 
             else:
                 # add the source values to the existing field values
@@ -992,17 +979,18 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                   uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] + \
                   k_sim.source.uy[k_sim.u_source_sig_index, t_index]
 
-            if (t_index == load_index):
-                if (np.abs(mat_post - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-                    print("POST uy_split_y is not correct!",
-                          np.max(mat_post),
-                          np.max(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
-                          mat_post[0:5],
-                          uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')],
-                          mat_post[0:5] - uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')])
-                    #uy_split_y = np.reshape(mat_post, uy_split_y.shape, order='F')
-                else:
-                    pass
+            if checking:
+                if (t_index == load_index):
+                    if (np.abs(mat_post - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
+                        print("POST uy_split_y is not correct!",
+                              np.max(mat_post),
+                              np.max(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
+                              mat_post[0:5],
+                              uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')],
+                              mat_post[0:5] - uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')])
+                        #uy_split_y = np.reshape(mat_post, uy_split_y.shape, order='F')
+                    else:
+                        pass
 
         # if (t_index == load_index):
         #     if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
@@ -1064,8 +1052,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         # using a split field pml
         if options.kelvin_voigt_model:
 
-            # compute additional gradient terms needed for the Kelvin-Voigt
-            # model
+            # compute additional gradient terms needed for the Kelvin-Voigt model
 
             #dduxdxdt = real(ifft( bsxfun(@times, ddx_k_shift_neg, fft( (dsxxdx + dsxydy) .* rho0_sgx_inv , [], 1 )), [], 1));
             #dduxdydt = real(ifft( bsxfun(@times, ddy_k_shift_pos, fft( (dsxxdx + dsxydy) .* rho0_sgx_inv , [], 2 )), [], 2));
@@ -1098,6 +1085,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             # update the normal shear components of the stress tensor using a
             # Kelvin-Voigt model with a split-field multi-axial pml
+
             # sxx_split_x = bsxfun(@times, mpml_y,
             #                      bsxfun(@times, pml_x,
             #                             bsxfun(@times, mpml_y,
@@ -1160,9 +1148,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             sxy_split_y = mpml_x_sgx * d
 
         else:
-
             # update the normal and shear components of the stress tensor using
             # a lossless elastic model with a split-field multi-axial pml
+
             # sxx_split_x = bsxfun(@times, mpml_y,
             #                      bsxfun(@times, pml_x,
             #                             bsxfun(@times, mpml_y,
@@ -1222,8 +1210,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             c = b + dt * mu_sgxy * duxdy
             d = pml_y_sgy * c
             sxy_split_y = mpml_x_sgx * d
-
-
 
         # add in the pre-scaled stress source terms
         if hasattr(k_sim, 's_source_sig_index'):
@@ -1398,12 +1384,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         if ((k_sim.use_sensor is not False) and (not k_sim.elastic_time_rev) and (t_index >= sensor.record_start_index)):
 
             # update index for data storage
-            file_index: int = t_index - sensor.record_start_index + 1
-            # print("file_index:", file_index, t_index, sensor.record_start_index, t_index - sensor.record_start_index + 1)
+            file_index: int = t_index - sensor.record_start_index
 
             # run sub-function to extract the required data
-
-            options = dotdict({'record_u_non_staggered': k_sim.record.u_non_staggered,
+            extract_options = dotdict({'record_u_non_staggered': k_sim.record.u_non_staggered,
                                'record_u_split_field': k_sim.record.u_split_field,
                                'record_I': k_sim.record.I,
                                'record_I_avg': k_sim.record.I_avg,
@@ -1424,7 +1408,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                                })
 
             sensor_data = extract_sensor_data(2, sensor_data, file_index, k_sim.sensor_mask_index,
-                                              options, k_sim.record, p, ux_sgx, uy_sgy)
+                                              extract_options, k_sim.record, p, ux_sgx, uy_sgy)
 
             if checking:
                 if (t_index == load_index):
@@ -1473,28 +1457,26 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
 
     # save the final acoustic pressure if required
-    if (options.record_p_final or k_sim.elastic_time_rev):
-        print("record_p_final")
+    if (k_sim.record.p_final or k_sim.elastic_time_rev):
         sensor_data.p_final = p[record.x1_inside:record.x2_inside,
                                 record.y1_inside:record.y2_inside,
                                 record.z1_inside:record.z2_inside]
 
 
     # save the final particle velocity if required
-    if options.record_u_final:
-        print("record_u_final")
+    if k_sim.record.u_final:
         sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
         sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
 
 
-    # run subscript to cast variables back to double precision if required
-    if options.data_recast:
-        #kspaceFirstOrder_dataRecast;
-        pass
+    # # run subscript to cast variables back to double precision if required
+    # if options.data_recast:
+    #     #kspaceFirstOrder_dataRecast;
+    #     pass
 
 
     # run subscript to compute and save intensity values
-    if (k_sim.use_sensor is not False and (not k_sim.elastic_time_rev) and (options.record_I or options.record_I_avg)):
+    if (k_sim.use_sensor is not False and (not k_sim.elastic_time_rev) and (k_sim.record.I or k_sim.record.I_avg)):
         # save_intensity_matlab_code = True
         # kspaceFirstOrder_saveIntensity;
         pass
@@ -1503,14 +1485,15 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # reorder the sensor points if a binary sensor mask was used for Cartesian
     # sensor mask nearest neighbour interpolation (this is performed after
     # recasting as the GPU toolboxes do not all support this subscript)
-    if (k_sim.use_sensor is not False and options.reorder_data):
+    if (k_sim.use_sensor is not False and k_sim.reorder_data):
         # kspaceFirstOrder_reorderCartData;
         pass
 
 
     # filter the recorded time domain pressure signals if transducer filter
     # parameters are given
-    if (k_sim.use_sensor is not False and not k_sim.elastic_time_rev and hasattr(sensor, 'frequency_response') and sensor.frequency_response is not None):
+    if (k_sim.use_sensor is not False and not k_sim.elastic_time_rev and hasattr(sensor, 'frequency_response') and
+        sensor.frequency_response is not None):
         fs = 1.0 / kgrid.dt
         sensor_data.p = gaussian_filter(sensor_data.p, fs, sensor.frequency_response[0], sensor.frequency_response[1])
 
@@ -1526,7 +1509,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         sensor_data = sensor_data.p_final
 
     elif (k_sim.use_sensor is False):
-        print("k_sim.use_sensor:", k_sim.use_sensor)
         # if sensor is not used, return empty sensor data
         sensor_data = None
 
@@ -1536,6 +1518,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # update command line status
     t_total = t0 + t1
-    print('\ttotal computation time', scale_time(t_total))
+    print('\ttotal computation time', scale_time(t_total), '\n')
 
     return sensor_data

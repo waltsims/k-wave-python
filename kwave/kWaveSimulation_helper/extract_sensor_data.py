@@ -73,21 +73,21 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         # store the maximum acoustic pressure
         if flags.record_p_max:
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_max = p[np.unravel_index(sensor_mask_index, np.shape(p), order='F')]
             else:
                 sensor_data.p_max = np.maximum(sensor_data.p_max, p[np.unravel_index(sensor_mask_index, np.shape(p), order='F')])
 
         # store the minimum acoustic pressure
         if flags.record_p_min:
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_min = p[sensor_mask_index]
             else:
                 sensor_data.p_min = np.minimum(sensor_data.p_min, p[sensor_mask_index])
 
         # store the rms acoustic pressure
         if flags.record_p_rms:
-            sensor_data.p_rms = np.sqrt((sensor_data.p_rms**2 * (file_index - 1) + p[sensor_mask_index]**2) / file_index )
+            sensor_data.p_rms = np.sqrt((sensor_data.p_rms**2 * (file_index - 0) + p[sensor_mask_index]**2) / (file_index +1) )
 
         # store the time history of the particle velocity on the staggered grid
         if flags.record_u:
@@ -188,7 +188,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         # store the maximum particle velocity
         if flags.record_u_max:
-            if file_index == 1:
+            if file_index == 0:
                 if (dim == 1):
                     sensor_data.ux_max = ux_sgx[sensor_mask_index]
                 elif (dim == 2):
@@ -216,7 +216,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         # store the minimum particle velocity
         if flags.record_u_min:
-            if file_index == 1:
+            if file_index == 0:
                 if (dim == 1):
                     sensor_data.ux_min = ux_sgx[sensor_mask_index]
                 elif (dim == 2):
@@ -246,14 +246,14 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the rms particle velocity
         if flags.record_u_rms:
             if (dim ==1):
-                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 1) + ux_sgx[sensor_mask_index]**2) / file_index)
+                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 0) + ux_sgx[sensor_mask_index]**2) / (file_index +1))
             elif (dim == 2):
-                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 1) + ux_sgx[sensor_mask_index]**2) / file_index)
-                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 1) + uy_sgy[sensor_mask_index]**2) / file_index)
+                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 0) + ux_sgx[sensor_mask_index]**2) / (file_index +1))
+                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 0) + uy_sgy[sensor_mask_index]**2) / (file_index +1))
             elif (dim == 3):
-                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 1) + ux_sgx[sensor_mask_index]**2) / file_index)
-                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 1) + uy_sgy[sensor_mask_index]**2) / file_index)
-                sensor_data.uz_rms[:] = np.sqrt((sensor_data.uz_rms[:]**2 * (file_index - 1) + uz_sgz[sensor_mask_index]**2) / file_index)
+                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 0) + ux_sgx[sensor_mask_index]**2) / (file_index +1))
+                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 0) + uy_sgy[sensor_mask_index]**2) / (file_index +1))
+                sensor_data.uz_rms[:] = np.sqrt((sensor_data.uz_rms[:]**2 * (file_index - 0) + uz_sgz[sensor_mask_index]**2) / (file_index +1))
 
 
     # =========================================================================
@@ -274,13 +274,13 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the maximum acoustic pressure
         if flags.record_p_max:
             if dim == 1:
-                if file_index == 1:
+                if file_index == 0:
                     sensor_data.p_max = np.interp(record.grid_x, p, record.sensor_x)
                 else:
                     sensor_data.p_max = np.maximum(sensor_data.p_max, np.interp(record.grid_x, p, record.sensor_x))
 
             else:
-                if file_index == 1:
+                if file_index == 0:
                     sensor_data.p_max = np.sum(p[record.tri] * record.bc, axis=1)
                 else:
                     sensor_data.p_max = np.maximum(sensor_data.p_max, np.sum(p[record.tri] * record.bc, axis=1))
@@ -289,13 +289,13 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the minimum acoustic pressure
         if flags.record_p_min:
             if dim == 1:
-                if file_index == 1:
+                if file_index == 0:
                     sensor_data.p_min = np.interp(record.grid_x, p, record.sensor_x)
                 else:
                     sensor_data.p_min = np.minimum(sensor_data.p_min, np.interp(record.grid_x, p, record.sensor_x))
 
             else:
-                if file_index == 1:
+                if file_index == 0:
                     sensor_data.p_min = np.sum(p[record.tri] * record.bc, axis=1)
                 else:
                     sensor_data.p_min = np.minimum(sensor_data.p_min, np.sum(p[record.tri] * record.bc, axis=1))
@@ -304,9 +304,9 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the rms acoustic pressure
         if flags.record_p_rms:
             if dim == 1:
-                sensor_data.p_rms = np.sqrt((sensor_data.p_rms**2 * (file_index - 1) + (np.interp(record.grid_x, p, record.sensor_x))**2) / file_index)
+                sensor_data.p_rms = np.sqrt((sensor_data.p_rms**2 * (file_index - 0) + (np.interp(record.grid_x, p, record.sensor_x))**2) / (file_index +1))
             else:
-                sensor_data.p_rms[:] = np.sqrt((sensor_data.p_rms[:]**2 * (file_index - 1) + (np.sum(p[record.tri] * record.bc, axis=1))**2) / file_index)
+                sensor_data.p_rms[:] = np.sqrt((sensor_data.p_rms[:]**2 * (file_index - 0) + (np.sum(p[record.tri] * record.bc, axis=1))**2) / (file_index +1))
 
 
         # store the time history of the particle velocity on the staggered grid
@@ -341,7 +341,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         # store the maximum particle velocity
         if flags.record_u_max:
-            if file_index == 1:
+            if file_index == 0:
                 if (dim ==1):
                     sensor_data.ux_max = np.interp(record.grid_x, ux_sgx, record.sensor_x)
                 elif (dim == 2):
@@ -369,7 +369,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
         # store the minimum particle velocity
         if flags.record_u_min:
-            if file_index == 1:
+            if file_index == 0:
                 if (dim == 1):
                     sensor_data.ux_min = np.interp(record.grid_x, ux_sgx, record.sensor_x)
                 elif (dim == 2):
@@ -397,14 +397,14 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
         # store the rms particle velocity
         if flags.record_u_rms:
             if (dim == 1):
-                sensor_data.ux_rms = np.sqrt((sensor_data.ux_rms**2 * (file_index - 1) + (np.interp(record.grid_x, ux_sgx, record.sensor_x))**2) / file_index)
+                sensor_data.ux_rms = np.sqrt((sensor_data.ux_rms**2 * (file_index - 0) + (np.interp(record.grid_x, ux_sgx, record.sensor_x))**2) / (file_index +1))
             elif (dim == 2):
-                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 1) + (np.sum(ux_sgx[record.tri] * record.bc, axis=1))**2) / file_index)
-                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 1) + (np.sum(uy_sgy[record.tri] * record.bc, axis=1))**2) / file_index)
+                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 0) + (np.sum(ux_sgx[record.tri] * record.bc, axis=1))**2) / (file_index +1))
+                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 0) + (np.sum(uy_sgy[record.tri] * record.bc, axis=1))**2) / (file_index +1))
             elif (dim == 3):
-                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 1) + (np.sum(ux_sgx[record.tri] * record.bc, axis=1))**2) / file_index)
-                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 1) + (np.sum(uy_sgy[record.tri] * record.bc, axis=1))**2) / file_index)
-                sensor_data.uz_rms[:] = np.sqrt((sensor_data.uz_rms[:]**2 * (file_index - 1) + (np.sum(uz_sgz[record.tri] * record.bc, axis=1))**2) / file_index)
+                sensor_data.ux_rms[:] = np.sqrt((sensor_data.ux_rms[:]**2 * (file_index - 0) + (np.sum(ux_sgx[record.tri] * record.bc, axis=1))**2) / (file_index +1))
+                sensor_data.uy_rms[:] = np.sqrt((sensor_data.uy_rms[:]**2 * (file_index - 0) + (np.sum(uy_sgy[record.tri] * record.bc, axis=1))**2) / (file_index +1))
+                sensor_data.uz_rms[:] = np.sqrt((sensor_data.uz_rms[:]**2 * (file_index - 0) + (np.sum(uz_sgz[record.tri] * record.bc, axis=1))**2) / (file_index +1))
             else:
                 raise RuntimeError("Wrong dimensions")
 
@@ -415,20 +415,20 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
     # store the maximum acoustic pressure over all the grid elements
     if flags.record_p_max_all:
         if (dim ==1):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_max_all = p[record.x1_inside:record.x2_inside]
             else:
                 sensor_data.p_max_all = np.maximum(sensor_data.p_max_all, p[record.x1_inside:record.x2_inside])
 
         elif (dim == 2):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_max_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
                 sensor_data.p_max_all = np.maximum(sensor_data.p_max_all, p[record.x1_inside:record.x2_inside,
                                                                             record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_max_all = p[record.x1_inside:record.x2_inside,
                                           record.y1_inside:record.y2_inside,
                                           record.z1_inside:record.z2_inside]
@@ -443,20 +443,20 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
     # store the minimum acoustic pressure over all the grid elements
     if flags.record_p_min_all:
         if (dim ==1):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_min_all = p[record.x1_inside:record.x2_inside]
             else:
                 sensor_data.p_min_all = np.minimum(sensor_data.p_min_all, p[record.x1_inside:record.x2_inside])
 
         elif (dim == 2):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_min_all = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
                 sensor_data.p_min_all = np.minimum(sensor_data.p_min_all, p[record.x1_inside:record.x2_inside,
                                                                             record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.p_min_all = p[record.x1_inside:record.x2_inside,
                                           record.y1_inside:record.y2_inside,
                                           record.z1_inside:record.z2_inside]
@@ -471,13 +471,13 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
     # store the maximum particle velocity over all the grid elements
     if flags.record_u_max_all:
         if (dim == 1):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside]
             else:
                 sensor_data.ux_max_all = np.maximum(sensor_data.ux_max_all, ux_sgx[record.x1_inside:record.x2_inside])
 
         elif (dim == 2):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
                 sensor_data.uy_max_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
@@ -487,7 +487,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
                                                   uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_max_all = ux_sgx[record.x1_inside:record.x2_inside,
                                                 record.y1_inside:record.y2_inside,
                                                 record.z1_inside:record.z2_inside]
@@ -517,13 +517,13 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
     # store the minimum particle velocity over all the grid elements
     if flags.record_u_min_all:
         if (dim == 1):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_min_all = ux_sgx[record.x1_inside:record.x2_inside]
             else:
                 sensor_data.ux_min_all = np.minimum(sensor_data.ux_min_all, ux_sgx[record.x1_inside:record.x2_inside])
 
         elif (dim == 2):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_min_all = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
                 sensor_data.uy_min_all = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside]
             else:
@@ -533,7 +533,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
                                                   uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside])
 
         elif (dim == 3):
-            if file_index == 1:
+            if file_index == 0:
                 sensor_data.ux_min_all = ux_sgx[record.x1_inside:record.x2_inside,
                                                 record.y1_inside:record.y2_inside,
                                                 record.z1_inside:record.z2_inside]
