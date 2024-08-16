@@ -15,9 +15,9 @@ from kwave.utils.colormap import get_color_map
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 
-from io import BytesIO
+# from io import BytesIO
 import pyvista as pv
-import meshio
+# import meshio
 from skimage import measure
 
 def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
@@ -106,6 +106,7 @@ def getIsoVolume(kgrid, p, dB=-6):
 
     max_pressure, _ = get_focus(p)
     ratio = 10**(dB / 20.0) * max_pressure
+    # don't need normals or values
     verts, faces, _, _ = measure.marching_cubes(p, level=ratio, spacing=[kgrid.dx, kgrid.dy, kgrid.dz])
     return verts, faces
 
@@ -190,19 +191,23 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
 
     verts, faces = getFWHM(kgrid, p)
 
-    cells = [("triangle", faces)]
-    mesh = meshio.Mesh(verts, cells)
+    # cells = [("triangle", faces)]
+    # mesh = meshio.Mesh(verts, cells)
 
-    buffer = BytesIO()
+    # buffer = BytesIO()
 
-    mesh.write(buffer, file_format="ply")
+    # mesh.write(buffer, file_format="ply")
 
-    buffer.seek(0)
-    # Read the buffer with PyVista
-    dataset = pv.read(buffer)
-
+    # buffer.seek(0)
+    # # Read the buffer with PyVista
+    # dataset = pv.read(buffer.seek(0), file_format='ply')
     # mesh.write("foo2.vtk")
     # dataset = pv.read('foo2.vtk')
+
+    num_faces = faces.shape[0]
+    faces_pv = np.hstack([np.full((num_faces, 1), 3), faces])
+
+    dataset = pv.PolyData(verts, faces_pv)
 
     pv_x = np.linspace(0, (kgrid.Nx - 1.0) * kgrid.dx, kgrid.Nx)
     pv_y = np.linspace(0, (kgrid.Ny - 1.0) * kgrid.dy, kgrid.Ny)
@@ -392,11 +397,9 @@ source_cycles = 3      # []
 source_mag = 1e-6      # [m/s]
 fs = 1.0 / kgrid.dt    # [Hz]
 ux = source_mag * tone_burst(fs, source_freq, source_cycles)
-print(np.shape(ux))
 
 # set source focus
 source.ux = focus(kgrid, ux, source.u_mask, [0, 0, 0], c0)
-print(np.shape(source.ux))
 
 # define sensor mask in x-y plane using cuboid corners, where a rectangular
 # mask is defined using the xyz coordinates of two opposing corners in the
@@ -404,9 +407,9 @@ print(np.shape(source.ux))
 # In this case the sensor mask in the slice through the xy-plane at z = Nz // 2 - 1
 # cropping the pml
 sensor = kSensor()
-# sensor.mask = np.array([[pml_size, pml_size, Nz // 2 - 1, Nx - pml_size, Ny - pml_size, Nz // 2]]).T
+sensor.mask = np.array([[pml_size, pml_size, Nz // 2 - 1, Nx - pml_size, Ny - pml_size, Nz // 2]]).T
 
-sensor.mask = np.ones((Nx, Ny, Nz), order=myOrder)
+# sensor.mask = np.ones((Nx, Ny, Nz), order=myOrder)
 
 # record the maximum pressure in the sensor.mask plane
 sensor.record = ['p_max']
@@ -439,34 +442,25 @@ y_vec = y_vec[pml_size:Ny - pml_size]
 # p_max_f = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='F')
 # p_max_c = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='C')
 
-sensor_data.p_max = np.reshape(sensor_data.p_max, (Nx, Ny, Nz), order='F')
+# sensor_data.p_max = np.reshape(sensor_data.p_max, (Nx, Ny, Nz), order='F')
 
-p_max_f = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='F')
-p_max_c = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='C')
+# p_max = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='F')
+
+p_max = np.reshape(sensor_data.p_max, (x_vec.size, y_vec.size), order='F')
 
 # plot
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
-pcm1 = ax1.pcolormesh(x_vec, y_vec, p_max_f,
+pcm1 = ax1.pcolormesh(x_vec, y_vec, p_max,
                       cmap = get_color_map(), shading='gouraud', alpha=1.0, vmin=0, vmax=6)
 cb1 = fig1.colorbar(pcm1, ax=ax1)
 ax1.set_ylabel('$x$ [mm]')
 ax1.set_xlabel('$y$ [mm]')
 
-fig2, ax2 = plt.subplots(nrows=1, ncols=1)
-pcm2 = ax2.pcolormesh(x_vec, y_vec, p_max_c,
-                      cmap = get_color_map(), shading='gouraud', alpha=1.0, vmin=0, vmax=6)
-cb2 = fig2.colorbar(pcm2, ax=ax2)
-ax2.set_ylabel('$x$ [mm]')
-ax2.set_xlabel('$y$ [mm]')
-
 plt.show()
 
-# indices of transducer location
-coordinates = np.argwhere(source.u_mask == 1)
-coordinates = np.reshape(coordinates, (-1,3))
+# # indices of transducer location
+# coordinates = np.argwhere(source.u_mask == 1)
+# coordinates = np.reshape(coordinates, (-1, 3))
 
-# convert to list of tuples
-coordinates_list = [tuple(coord) for coord in coordinates]
-
-# 3D plotting
-plot3D(kgrid, sensor_data.p_max, coordinates[0] )
+# # 3D plotting
+# plot3D(kgrid, sensor_data.p_max, coordinates[0])

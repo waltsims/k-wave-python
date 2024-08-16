@@ -257,6 +257,7 @@ def apply_velocity_source_corrections(
 
     """
     if not use_w_source_correction_u:
+        print("do nothing with use_w_source_correction_u")
         return
 
     if is_ux_exists:
@@ -283,22 +284,22 @@ def scale_velocity_sources(flags, source, kgrid, c0, dt, dx, dy, dz, u_source_po
     source.uz = scale_velocity_source(flags.source_uz, source.u_mode, source.uz, c0, dt, u_source_pos_index, dz)
 
 
-def scale_velocity_source_x(is_source_ux, source_u_mode, source_val, kgrid, c0, dt, dx, u_source_pos_index, is_nonuniform_grid):
-    """
-    if source.u_mode is not set to 'dirichlet', scale the x-direction
-    velocity source terms by 2*dt*c0/dx to account for the time step and
-    convert to units of [m/s^2]
-    Returns:
+# def scale_velocity_source_x(is_source_ux, source_u_mode, source_val, kgrid, c0, dt, dx, u_source_pos_index, is_nonuniform_grid):
+#     """
+#     if source.u_mode is not set to 'dirichlet', scale the x-direction
+#     velocity source terms by 2*dt*c0/dx to account for the time step and
+#     convert to units of [m/s^2]
+#     Returns:
 
-    """
-    if not is_source_ux or source_u_mode == "dirichlet":
-        return
+#     """
+#     if not is_source_ux or source_u_mode == "dirichlet":
+#         return
 
-    if is_nonuniform_grid:
-        source_val = scale_velocity_source_nonuniform(is_source_ux, source_u_mode, kgrid, source_val, c0, dt, u_source_pos_index)
-    else:
-        source_val = scale_velocity_source(is_source_ux, source_u_mode, source_val, c0, dt, u_source_pos_index, dx)
-    return source_val
+#     if is_nonuniform_grid:
+#         source_val = scale_velocity_source_nonuniform(is_source_ux, source_u_mode, kgrid, source_val, c0, dt, u_source_pos_index)
+#     else:
+#         source_val = scale_velocity_source(is_source_ux, source_u_mode, source_val, c0, dt, u_source_pos_index, dx)
+#     return source_val
 
 
 def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source_pos_index, d_direction):
@@ -319,6 +320,7 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
 
     """
     if not is_source or source_u_mode == "dirichlet":
+        print("Nothing here")
         return source_val
 
     if c0.size == 1:

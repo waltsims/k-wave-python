@@ -233,7 +233,8 @@ class kSource(object):
                         or (self.flag_uz and (uz_size != u_sum))
                     ):
                         raise ValueError(
-                            "The number of time series in source.ux (etc) " "must match the number of source elements in source.u_mask."
+                            "The number of time series in source.ux (etc) " "must match the number of source elements in source.u_mask." +
+                            str(ux_size) + ", " + str(u_sum)
                         )
             else:
                 #raise NotImplementedError
@@ -252,7 +253,7 @@ class kSource(object):
                     self.flag.source_uz and np.size(self.uz)[0] != np.size(u_unique)):
                     raise ValueError(
                         "The number of time series in source.ux (etc) "
-                        "must match the number of labelled source elements in source.u_mask."
+                        "must match the number of labelled source elements in source.u_mask.", np.size(self.ux)[0], np.size(u_unique)
                     )
 
         # check for time varying stress source input and set source flag

@@ -122,13 +122,13 @@ class SimulationOptions(object):
     kelvin_voigt_model: bool = True
     time_rev: bool = False
 
-
     use_sensor: Optional[Union[int, bool]] = None
 
     blank_sensor: Optional[bool] = None
-    cuboid_corners: Optional = None
-    nonuniform_grid: Optional = None
-    elastic_time_rev: Optional = None
+    cuboid_corners: Optional[Union[bool, np.ndarray]] = None
+    nonuniform_grid: Optional[bool] = None
+    elastic_time_rev: Optional[bool] = None
+    binary_sensor_mask: Optional[bool] = None
 
 
     def __post_init__(self):
