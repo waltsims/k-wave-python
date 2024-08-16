@@ -213,8 +213,8 @@ ax4 = plt.subplot(gs[4])
 
 # plot compressional wave traces
 t_axis_comp = np.arange(np.shape(sensor_data_comp.ux)[1]) * kgrid.dt * 1e6
-ax1.plot(t_axis_comp, sensor_data_comp.ux[1, :], 'r-')
-ax1.plot(t_axis_comp, sensor_data_comp.ux[0, :], 'k--')
+ax1.plot(t_axis_comp, sensor_data_comp.ux[1, :], 'k-')
+ax1.plot(t_axis_comp, sensor_data_comp.ux[0, :], 'k-')
 ax1.set_xlabel(r'Time [$\mu$s]')
 ax1.set_ylabel('Particle Velocity')
 ax1.set_title('Compressional Wave', fontweight='bold')
@@ -230,8 +230,8 @@ ax2.set_ylabel(r'$\alpha$ [dB/cm]')
 
 # plot shear wave traces
 t_axis_shear = np.arange(np.shape(sensor_data_shear.uy)[1]) * kgrid.dt * 1e6
-ax3.plot(t_axis_shear, sensor_data_shear.uy[1, :], 'r-')
-ax3.plot(t_axis_shear, sensor_data_shear.uy[0, :], 'k--')
+ax3.plot(t_axis_shear, sensor_data_shear.uy[1, :], 'k-')
+ax3.plot(t_axis_shear, sensor_data_shear.uy[0, :], 'k-')
 ax3.set_xlabel(r'Time [$\mu$s]')
 ax3.set_ylabel('Particle Velocity')
 ax3.set_title('Shear Wave', fontweight='bold')
@@ -246,3 +246,4 @@ ax4.set_xlabel('Frequency [MHz]')
 ax4.set_ylabel(r'$\alpha$ [dB/cm]')
 
 plt.show()
+

@@ -15,9 +15,7 @@ from kwave.utils.colormap import get_color_map
 
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 
-# from io import BytesIO
 import pyvista as pv
-# import meshio
 from skimage import measure
 
 def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
