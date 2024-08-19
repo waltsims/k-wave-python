@@ -103,7 +103,6 @@ def getPVImageData(kgrid, p, order='F'):
 
 def getIsoVolume(kgrid, p, dB=-6):
     """"Returns a triangulation of a volume, warning: may not be connected or closed"""
-
     max_pressure, _ = get_focus(p)
     ratio = 10**(dB / 20.0) * max_pressure
     # don't need normals or values
@@ -281,16 +280,6 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
                             ztitle="")
 
     _ = plotter.add_axes(color='pink', labels_off=False)
-    # plotter.camera_position = 'yz'
-
-    # # plotter.camera.elevation = 45
-    # plotter.camera.roll = 0
-    # plotter.camera.azimuth = 125
-    # plotter.camera.elevation = 5
-
-    # # extensions = ("svg", "eps", "ps", "pdf", "tex")
-    # fname = "fwhm" + "." + "svg"
-    # plotter.save_graphic(fname, title="PyVista Export", raster=True, painter=True)
 
     plotter.show()
 
@@ -329,11 +318,13 @@ along with k-Wave. If not, see <http://www.gnu.org/licenses/>.
 # SIMULATION
 # =========================================================================
 
+# Fortran ordering
 myOrder = 'F'
 
-# create the computational grid
+# set size of perfectly matched layer
 pml_size: int = 10
 
+# set grid properties
 Nx: int = 64
 Ny: int = 64
 Nz: int = 64
@@ -343,8 +334,8 @@ dz: float = 0.1e-3
 kgrid = kWaveGrid(Vector([Nx, Ny, Nz]), Vector([dx, dy, dz]))
 
 # define the properties of the upper layer of the propagation medium
-c0: float = 1500.0
-rho0: float = 1000.0
+c0: float = 1500.0    # [m/s]
+rho0: float = 1000.0  # [kg/m^3]
 sound_speed_compression = c0 * np.ones((Nx, Ny, Nz), order=myOrder)  # [m/s]
 sound_speed_shear = np.zeros((Nx, Ny, Nz), order=myOrder)            # [m/s]
 density = rho0 * np.ones((Nx, Ny, Nz), order=myOrder)                # [kg/m^3]
@@ -396,8 +387,6 @@ source.ux = focus(kgrid, ux, source.u_mask, [0, 0, 0], c0)
 # cropping the pml
 sensor = kSensor()
 sensor.mask = np.array([[pml_size, pml_size, Nz // 2 - 1, Nx - pml_size, Ny - pml_size, Nz // 2]]).T
-
-# sensor.mask = np.ones((Nx, Ny, Nz), order=myOrder)
 
 # record the maximum pressure in the sensor.mask plane
 sensor.record = ['p_max']
