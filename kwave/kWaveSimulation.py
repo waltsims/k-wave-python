@@ -1030,14 +1030,14 @@ class kWaveSimulation(object):
                     if self.source.ux is not None and self.source.uy is not None and np.shape(self.source.ux) != np.shape(self.source.uy):
                         raise RuntimeError('Sizes are wrong')
                     if self.source.ux is not None:
-                        self.u_source_sig_index = np.arange(0, np.shape(self.source.ux)[0])
+                        self.u_source_sig_index = np.arange(0, np.shape(self.source.ux)[0]) + 1
                     elif self.source.uy is not None:
-                        self.u_source_sig_index = np.arange(0, np.shape(self.source.uy)[0])
+                        self.u_source_sig_index = np.arange(0, np.shape(self.source.uy)[0]) + 1
 
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    self.u_source_sig_index = self.source.u_mask[self.source.u_mask != 0]
+                    self.u_source_sig_index = self.source.u_mask[self.source.u_mask != 0] + 1
 
                 # convert the data type depending on the number of indices
                 self.u_source_pos_index = cast_to_type(self.u_source_pos_index, self.index_data_type)

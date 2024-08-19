@@ -277,17 +277,17 @@ class kSource(object):
 
             # set source flgs to the length of the sources, this allows the
             # inputs to be defined independently and be of any length
-            if self.sxx is not None and np.size(self.sxx) > kgrid.Nt:
+            if self.sxx is not None and np.size(self.sxx) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxx has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.syy is not None and np.size(self.syy) > kgrid.Nt:
+            if self.syy is not None and np.size(self.syy) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.syy has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.szz is not None and np.size(self.szz) > kgrid.Nt:
+            if self.szz is not None and np.size(self.szz) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.szz has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.sxy is not None and np.size(self.sxy) > kgrid.Nt:
+            if self.sxy is not None and np.size(self.sxy) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxy has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.sxz is not None and np.size(self.sxz) > kgrid.Nt:
+            if self.sxz is not None and np.size(self.sxz) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.sxz has more time points than kgrid.Nt," " remaining time points will not be used.")
-            if self.syz is not None and np.size(self.syz) > kgrid.Nt:
+            if self.syz is not None and np.size(self.syz) >= kgrid.Nt:
                 logging.log(logging.WARN, "  source.syz has more time points than kgrid.Nt," " remaining time points will not be used.")
 
             # create an indexing variable corresponding to the location of all the source elements

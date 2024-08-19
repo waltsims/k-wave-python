@@ -23,9 +23,9 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 scale: int = 1
 
 # create the computational grid
-PML_size: int = 10                    # [grid points]
-Nx: int = 128 * scale - 2 * PML_size  # [grid points]
-Ny: int = 192 * scale - 2 * PML_size  # [grid points]
+pml_size: int = 10                    # [grid points]
+Nx: int = 128 * scale - 2 * pml_size  # [grid points]
+Ny: int = 192 * scale - 2 * pml_size  # [grid points]
 dx: float = 0.5e-3 / float(scale)     # [m]
 dy: float = 0.5e-3 / float(scale)     # [m]
 
@@ -130,7 +130,7 @@ simulation_options = SimulationOptions(data_cast=DATA_CAST,
                                        save_to_disk_exit=not_(RUN_SIMULATION),
                                        data_path=DATA_PATH,
                                        pml_inside=False,
-                                       pml_size=PML_size,
+                                       pml_size=pml_size,
                                        hdf_compression_level='lzf')
 
 execution_options = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False)
@@ -188,7 +188,7 @@ simulation_options_e = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                          save_to_disk_exit=not_(RUN_SIMULATION),
                                          data_path=DATA_PATH,
                                          pml_inside=False,
-                                         pml_size=PML_size,
+                                         pml_size=pml_size,
                                          hdf_compression_level='lzf')
 
 # run the elastic simulation
@@ -203,14 +203,13 @@ sensor_data_elastic = pstd_elastic_2d(kgrid=deepcopy(kgrid),
 # VISUALISATION
 # =========================================================================
 
-# define plot vector- convert to cm
+# define plotting vectors: convert to cm
 x_vec = kgrid.x_vec * 1e3
 y_vec = kgrid.y_vec * 1e3
 
 # calculate square of velocity magnitude for fluid and elastic simulations
 u_f = sensor_data_fluid['ux_max_all']**2 + sensor_data_fluid['uy_max_all']**2
-pml_x: int = 10
-u_f = u_f[pml_x:-(pml_x), pml_x:-(pml_x),]
+u_f = u_f[pml_size:-pml_size, pml_size:-pml_size,]
 log_f = 20.0 * np.log10(u_f / np.max(u_f))
 
 u_e = sensor_data_elastic.ux_max_all**2 + sensor_data_elastic.uy_max_all**2
@@ -219,14 +218,16 @@ log_e = 20.0 * np.log10(u_e / np.max(u_e))
 
 # plot layout of simulation
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)
-_ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T, np.logical_or(slab, source_mask).T, cmap='gray_r', shading='gouraud', alpha=1)
+_ = ax1.pcolormesh(kgrid.y.T, kgrid.x.T, np.logical_or(slab, source_mask).T,
+                   cmap='gray_r', shading='gouraud', alpha=1)
 ax1.invert_yaxis()
 ax1.set_xlabel('y [mm]')
 ax1.set_ylabel('x [mm]')
 
 # plot velocities
 fig2, (ax2a, ax2b) = plt.subplots(nrows=2, ncols=1)
-pcm2a = ax2a.pcolormesh(kgrid.y.T, kgrid.x.T, log_f, shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
+pcm2a = ax2a.pcolormesh(kgrid.y.T, kgrid.x.T, log_f,
+                        shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
 ax2a.invert_yaxis()
 cb2a = fig2.colorbar(pcm2a, ax=ax2a)
 ax2a.set_xlabel('y [mm]')
@@ -234,7 +235,8 @@ ax2a.set_ylabel('x [mm]')
 cb2a.ax.set_ylabel('[dB]', rotation=90)
 ax2a.set_title('Fluid Model')
 
-pcm2b = ax2b.pcolormesh(kgrid.y.T, kgrid.x.T, log_e, shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
+pcm2b = ax2b.pcolormesh(kgrid.y.T, kgrid.x.T, log_e,
+                        shading='gouraud', cmap=plt.colormaps['jet'], clim=(-50.0, 0))
 ax2b.invert_yaxis()
 cb2b = fig2.colorbar(pcm2b, ax=ax2b)
 ax2b.set_xlabel('y [mm]')
@@ -243,7 +245,8 @@ cb2b.ax.set_ylabel('[dB]', rotation=90)
 ax2b.set_title('Elastic Model')
 
 fig3, ax3 = plt.subplots(nrows=1, ncols=1)
-pcm3 = ax3.pcolormesh(kgrid.y.T, kgrid.x.T, u_e, shading='gouraud', cmap=plt.colormaps['jet'])
+pcm3 = ax3.pcolormesh(kgrid.y.T, kgrid.x.T, u_e,
+                      shading='gouraud', cmap=plt.colormaps['jet'])
 ax3.invert_yaxis()
 cb3 = fig3.colorbar(pcm3, ax=ax3)
 ax3.set_xlabel('y [mm]')

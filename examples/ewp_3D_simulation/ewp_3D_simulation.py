@@ -17,6 +17,8 @@ from kwave.options.simulation_options import SimulationOptions, SimulationType
 
 import pyvista as pv
 from skimage import measure
+# import xarray as xa
+
 
 def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
     """
@@ -109,7 +111,7 @@ def getIsoVolume(kgrid, p, dB=-6):
     return verts, faces
 
 
-def getFWHM(kgrid, p):
+def getFWHM(kgrid, p, verbose: bool = False):
     """"Gets volume of -6dB field"""
     verts, faces = getIsoVolume(kgrid, p)
 
@@ -167,7 +169,8 @@ def getFWHM(kgrid, p):
     totalVolume = np.sum(volume)
 
     # display volume to screen
-    print('\n\tTotal volume of FWHM {vol:8.5e} [m^3]'.format(vol=totalVolume))
+    if verbose:
+        print('\n\tTotal volume of FWHM {vol:8.5e} [m^3]'.format(vol=totalVolume))
 
     return verts, faces
 
@@ -188,19 +191,6 @@ def plot3D(kgrid, p, tx_plane_coords, verbose=False):
         print(pv_grid)
 
     verts, faces = getFWHM(kgrid, p)
-
-    # cells = [("triangle", faces)]
-    # mesh = meshio.Mesh(verts, cells)
-
-    # buffer = BytesIO()
-
-    # mesh.write(buffer, file_format="ply")
-
-    # buffer.seek(0)
-    # # Read the buffer with PyVista
-    # dataset = pv.read(buffer.seek(0), file_format='ply')
-    # mesh.write("foo2.vtk")
-    # dataset = pv.read('foo2.vtk')
 
     num_faces = faces.shape[0]
     faces_pv = np.hstack([np.full((num_faces, 1), 3), faces])
@@ -430,6 +420,23 @@ sensor_data = pstd_elastic_3d(kgrid=deepcopy(kgrid),
 # =========================================================================
 # VISUALISATION
 # =========================================================================
+
+# data = xa.DataArray(sensor_data.p_max,
+#                     dims=("x", "y", "z"),
+#                     coords={"x": [10, 20]}
+#                     attrs={'units':'Pa', 'spatial_units':'m', 'temporal_units':'s'})
+
+# sz = list(params.coords.sizes.values())
+# p_max = xa.DataArray(output['p_max'].reshape(sz, order='F'),
+#                       coords=params.coords,
+#                       name='p_max',
+#                       attrs={'units':'Pa', 'long_name':'PPP'})
+
+
+
+# ds = xa.Dataset({'p_max':p_max,
+#                  'fwhm':fwhm,
+#                  'beamaxis': beamaxis})
 
 # define axes
 x_vec = np.squeeze(kgrid.x_vec) * 1000.0
