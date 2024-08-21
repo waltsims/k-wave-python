@@ -19,6 +19,7 @@ class kSensor(object):
 
         # time varying pressure enforced as a Dirichlet boundary condition over sensor.mask
         self.time_reversal_boundary_data = None
+
         # two element array specifying the center frequency and percentage bandwidth
         # of a frequency domain Gaussian filter applied to the sensor_data
         self.frequency_response = None
@@ -45,7 +46,8 @@ class kSensor(object):
         Returns:
             None
         """
-        self.mask = expand_matrix(self.mask, expand_size, 0)
+        if self.mask is not None:
+            self.mask = expand_matrix(self.mask, expand_size, 0)
 
     @property
     def record_start_index(self):

@@ -78,6 +78,8 @@ class kWaveSimulation(object):
             self.binary_sensor_mask = True
 
             # check if the sensor mask is defined as a list of cuboid corners
+            print(self.sensor.mask)
+            print(self.sensor.mask is not None)
             if self.sensor.mask is not None and np.shape(self.sensor.mask)[0] == (2 * self.kgrid.dim):
                 self.userarg_cuboid_corners = True
             else:
@@ -172,9 +174,26 @@ class kWaveSimulation(object):
             True if sensor.mask is not defined but _max_all or _final variables are still recorded
 
         """
-        fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
-        if not any(self.record.is_set(fields)) and not self.time_rev:
-            return False
+
+        # fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max",
+        #           "u_min", "u_rms", "I", "I_avg"]
+        field_max_all = ["p_max_all", "p_min_all", "p_final", "u_max_all", "u_min_all", "u_final"]
+        # print("IN BLANK SENSOR:")
+        # print(any(self.record.is_set(fields)), self.record)
+        # print(not any(self.record.is_set(fields)) )
+        # print(not self.time_rev)
+        # print("CLAUS:", not any(self.record.is_set(fields)) and (not self.time_rev))
+
+        # cond1: bool = self.sensor.mask is None
+        # cond2: bool = any(self.record.is_set(fields))
+
+        # cond3: bool = cond1 and cond2
+        # print(cond1, cond2, cond3)
+        if any(self.record.is_set(field_max_all)) and self.sensor.mask is None:
+            return True
+
+        # if not any(self.record.is_set(fields)) and (not self.time_rev):
+        #     return True
         return False
 
     # @property
@@ -239,8 +258,9 @@ class kWaveSimulation(object):
             Whether the sensor.mask is a list of cuboid corners
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.blank_sensor and np.shape(self.sensor.mask)[0] == 2 * self.kgrid.dim:
-                return True
+            if self.sensor.mask is not None:
+                if not self.blank_sensor and np.shape(np.asarray(self.sensor.mask))[0] == 2 * self.kgrid.dim:
+                    return True
         return self.userarg_cuboid_corners
 
     ##############
@@ -507,7 +527,7 @@ class kWaveSimulation(object):
         self.options.use_sensor = self.use_sensor
         # self.options.kelvin_voigt_model = self.kelvin_voigt_model
         self.options.blank_sensor = self.blank_sensor
-        self.options.cuboid_corners = self.cuboid_corners
+        self.options.cuboid_corners = self.cuboid_corners # there is the userarg_ values as well
         self.options.nonuniform_grid = self.nonuniform_grid
         self.options.elastic_time_rev = self.elastic_time_rev
 
@@ -552,7 +572,7 @@ class kWaveSimulation(object):
             if not self.blank_sensor:
                 sensor_x = self.sensor.mask[0, :]
             else:
-                sensor_x = self.sensor_x
+                sensor_x = None
 
             values = dotdict({"sensor_x": sensor_x,
                               "sensor_mask_index": self.sensor_mask_index,
@@ -562,7 +582,8 @@ class kWaveSimulation(object):
             if self.record.u_split_field:
                 self.record_u_split_field = self.record.u_split_field
 
-            flags = dotdict({"blank_sensor": self.blank_sensor,
+            flags = dotdict({"use_sensor": self.use_sensor,
+                             "blank_sensor": self.blank_sensor,
                              "binary_sensor_mask": self.binary_sensor_mask,
                              "record_u_split_field": self.record.u_split_field,
                              "time_rev": self.time_rev,
@@ -747,6 +768,7 @@ class kWaveSimulation(object):
                 # check if sensor mask is a binary grid, a set of cuboid corners,
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
+                    print(not self.blank_sensor, self.blank_sensor)
 
                     # binary grid
                     if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
@@ -1445,7 +1467,11 @@ class kWaveSimulation(object):
 
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
-            if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
+            print('\tuse_sensor:', self.use_sensor)
+            if (not self.blank_sensor) or isinstance(self.options.save_to_disk, str):
+                print('\tblank_sensor:', self.blank_sensor)
+                print("\tsave_to_disk:", isinstance(self.options.save_to_disk, str))
+                print("\tCONDITION:", (not self.blank_sensor) or isinstance(self.options.save_to_disk, str))
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
@@ -1498,7 +1524,7 @@ class kWaveSimulation(object):
 
             else:
                 # set the sensor mask index variable to be empty
-                self.sensor_mask_index = []
+                self.sensor_mask_index = None
 
 
     def create_absorption_vars(self) -> None:
