@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from operator import not_
@@ -117,7 +116,7 @@ output_filename_p = 'data_p_output.h5'
 
 DATA_CAST: str = 'single'
 
-DATA_PATH = 'data' + os.sep
+DATA_PATH = '.'
 
 RUN_SIMULATION = True
 

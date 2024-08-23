@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from scipy.interpolate import interpn
 import scipy.io as sio
@@ -109,10 +107,10 @@ from kwave.kWaveSimulation_helper import extract_sensor_data, reorder_cuboid_cor
 
 
 def pstd_elastic_3d(kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions):
+                    source: kSource,
+                    sensor: Union[NotATransducer, kSensor],
+                    medium: kWaveMedium,
+                    simulation_options: SimulationOptions):
     """
     pstd_elastic_3d 3D time-domain simulation of elastic wave propagation.
 
@@ -909,123 +907,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # could be replaced with a small number of temporary variables that are
     # reused several times during the time loop.
 
-    ############################################################################
-    # CHECKING SETTINGS
-    ############################################################################
-
-    checking: bool = True
-    verbose: bool = False
-    mat_contents = sio.loadmat('data/3DtwoStep.mat')
-    load_index: int = 1
-    error_number: int = 0
-
-    tol: float = 10E-13
-    if verbose:
-        print(sorted(mat_contents.keys()))
-
-    if error_number > 0:
-        line = ''
-    else:
-        line = "\n"
-
-    mat_dsxxdx = mat_contents['dsxxdx']
-    mat_dsyydy = mat_contents['dsyydy']
-    mat_dszzdz = mat_contents['dszzdz']
-
-    mat_dsxydx = mat_contents['dsxydx']
-    mat_dsxydy = mat_contents['dsxydy']
-
-    mat_dsxzdx = mat_contents['dsxzdx']
-    mat_dsxzdz = mat_contents['dsxzdz']
-
-    mat_dsyzdy = mat_contents['dsyzdy']
-    mat_dsyzdz = mat_contents['dsyzdz']
-
-    mat_dduxdxdt = mat_contents['dduxdxdt']
-    mat_dduxdydt = mat_contents['dduxdydt']
-    mat_dduxdzdt = mat_contents['dduxdzdt']
-    mat_dduydxdt = mat_contents['dduydxdt']
-    mat_dduydydt = mat_contents['dduydydt']
-    mat_dduydzdt = mat_contents['dduydzdt']
-    mat_dduzdxdt = mat_contents['dduzdxdt']
-    mat_dduzdydt = mat_contents['dduzdydt']
-    mat_dduzdzdt = mat_contents['dduzdzdt']
-
-    mat_duxdx = mat_contents['duxdx']
-    mat_duxdy = mat_contents['duxdy']
-    mat_duxdz = mat_contents['duxdz']
-    mat_duydx = mat_contents['duydx']
-    mat_duydy = mat_contents['duydy']
-    mat_duydz = mat_contents['duydz']
-    mat_duzdx = mat_contents['duzdx']
-    mat_duzdy = mat_contents['duzdy']
-    mat_duzdz = mat_contents['duzdz']
-
-    mat_ux_sgx = mat_contents['ux_sgx']
-    mat_ux_split_x = mat_contents['ux_split_x']
-    mat_ux_split_y = mat_contents['ux_split_y']
-    mat_ux_split_z = mat_contents['ux_split_z']
-    mat_uy_sgy = mat_contents['uy_sgy']
-    mat_uy_split_x = mat_contents['uy_split_x']
-    mat_uy_split_y = mat_contents['uy_split_y']
-    mat_uy_split_z = mat_contents['uy_split_z']
-    mat_uz_sgz = mat_contents['uz_sgz']
-    mat_uz_split_x = mat_contents['uz_split_x']
-    mat_uz_split_y = mat_contents['uz_split_y']
-    mat_uz_split_z = mat_contents['uz_split_z']
-
-    mat_sxx_split_x = mat_contents['sxx_split_x']
-    mat_sxx_split_y = mat_contents['sxx_split_y']
-    mat_sxx_split_z = mat_contents['sxx_split_z']
-    mat_syy_split_x = mat_contents['syy_split_x']
-    mat_syy_split_y = mat_contents['syy_split_y']
-    mat_syy_split_z = mat_contents['syy_split_z']
-    mat_szz_split_x = mat_contents['szz_split_x']
-    mat_szz_split_y = mat_contents['szz_split_y']
-    mat_szz_split_z = mat_contents['szz_split_z']
-    mat_sxy_split_x = mat_contents['sxy_split_x']
-    mat_sxy_split_y = mat_contents['sxy_split_y']
-    mat_sxz_split_x = mat_contents['sxz_split_x']
-    mat_sxz_split_z = mat_contents['sxz_split_z']
-    mat_syz_split_y = mat_contents['syz_split_y']
-    mat_syz_split_z = mat_contents['syz_split_z']
-
-    mat_p = mat_contents['p']
-
-    mat_mu_sgxy = mat_contents['mu_sgxy']
-    mat_mu_sgxz = mat_contents['mu_sgxz']
-    mat_mu_sgyz = mat_contents['mu_sgyz']
-    mat_eta_sgxy = mat_contents['eta_sgxy']
-    mat_eta_sgxz = mat_contents['eta_sgxz']
-    mat_eta_sgyz = mat_contents['eta_sgyz']
-    mat_rho0_sgx_inv = mat_contents['rho0_sgx_inv']
-    mat_rho0_sgy_inv = mat_contents['rho0_sgy_inv']
-    mat_rho0_sgz_inv = mat_contents['rho0_sgz_inv']
-
-    # mat_sensor_data = mat_contents['sensor_data']
-
-    mat_source_ux = mat_contents['sux']
-
-    mat_ddx_k_shift_pos = mat_contents['ddx_k_shift_pos']
-    mat_ddy_k_shift_pos = mat_contents['ddy_k_shift_pos']
-    mat_ddz_k_shift_pos = mat_contents['ddz_k_shift_pos']
-    mat_ddx_k_shift_neg = mat_contents['ddx_k_shift_neg']
-    mat_ddy_k_shift_neg = mat_contents['ddy_k_shift_neg']
-    mat_ddz_k_shift_neg = mat_contents['ddz_k_shift_neg']
-
-    mat_a_x = mat_contents['a_x']
-    mat_b_x = mat_contents['b_x']
-    mat_c_x = mat_contents['c_x']
-
-    mat_a_y = mat_contents['a_y']
-    mat_b_y = mat_contents['b_y']
-    mat_c_y = mat_contents['c_y']
-
-    mat_eta = mat_contents['eta']
-    mat_mu = mat_contents['mu']
-    mat_lambda = mat_contents['lambda']
-    mat_chi = mat_contents['chi']
-
 
     # =========================================================================
     # CREATE INDEX VARIABLES
@@ -1039,221 +920,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     else:
         # throw error for unsupported feature
         raise TypeError('Time reversal using sensor.time_reversal_boundary_data is not currently supported.')
-
-    if checking:
-        mu_tol = 5e-3
-        if (np.abs(mat_mu_sgxy - mu_sgxy).sum() > mu_tol):
-            error_number =+ 1
-            print(line + "mu_sgxy is not correct!", np.abs(mat_mu_sgxy - mu_sgxy).sum())
-            print(mu_sgxy.shape, mat_mu_sgxy.shape)
-            print("mat:", mat_mu_sgxy[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", mu_sgxy[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_mu_sgxy - mu_sgxy)),
-                  "\tmat:", mat_mu_sgxy[np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mat_mu_sgxy.shape, order='F')],
-                  "\tpy:",      mu_sgxy[np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mu_sgxy.shape, order='F')],
-                   "\t",  mat_mu_sgxy[33,33,0], mu_sgxy[33,33,0])
-            print("max diff:", np.max(np.abs(mat_mu_sgxy - mu_sgxy)),
-                  "\tmat:", mat_mu_sgxy[np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mat_mu_sgxy.shape, order='C')],
-                  "\tpy:",      mu_sgxy[np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mu_sgxy.shape, order='C')],
-                   "\t",  mat_mu_sgxy[0, 33, 33], mu_sgxy[0, 33, 33])
-            print("arg max:", np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mu_sgxy.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mat_mu_sgxy.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mu_sgxy.shape, order='C'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxy - mu_sgxy)), mat_mu_sgxy.shape, order='C'))
-        else:
-            pass
-        if (np.abs(mat_mu_sgxz - mu_sgxz).sum() > mu_tol):
-            error_number =+ 1
-            print(line + "mu_sgxz is not correct!")
-            print(mu_sgxz.shape, mat_mu_sgxz.shape)
-            print("mat:", mat_mu_sgxz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", mu_sgxz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_mu_sgxz - mu_sgxz)),
-                  "\tmat:", mat_mu_sgxz[np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mat_mu_sgxz.shape, order='F')],
-                  "\tpy:",      mu_sgxz[np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mu_sgxz.shape, order='F')],
-                   "\t",  mat_mu_sgxz[33,33,0], mu_sgxz[33,33,0])
-            print("max diff:", np.max(np.abs(mat_mu_sgxz - mu_sgxz)),
-                  "\tmat:", mat_mu_sgxz[np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mat_mu_sgxz.shape, order='C')],
-                  "\tpy:",      mu_sgxz[np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mu_sgxz.shape, order='C')],
-                   "\t",  mat_mu_sgxz[0, 33, 33], mu_sgxz[0, 33, 33])
-            print("arg max:", np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mu_sgxz.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mat_mu_sgxz.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mu_sgxz.shape, order='C'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgxz - mu_sgxz)), mat_mu_sgxz.shape, order='C'))
-        else:
-            pass
-        if (np.abs(mat_mu_sgyz - mu_sgyz).sum() > mu_tol):
-            error_number =+ 1
-            print(line + "mu_sgyz is not correct!")
-            print(mu_sgyz.shape, mat_mu_sgyz.shape)
-            print("mat:", mat_mu_sgyz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", mu_sgyz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_mu_sgyz - mu_sgyz)),
-                  "\tmat:", mat_mu_sgyz[np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mat_mu_sgyz.shape, order='F')],
-                  "\tpy:",      mu_sgyz[np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mu_sgyz.shape, order='F')],
-                   "\t",  mat_mu_sgyz[33,33,0], mu_sgyz[33,33,0])
-            print("max diff:", np.max(np.abs(mat_mu_sgyz - mu_sgyz)),
-                  "\tmat:", mat_mu_sgyz[np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mat_mu_sgyz.shape, order='C')],
-                  "\tpy:",      mu_sgyz[np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mu_sgyz.shape, order='C')],
-                   "\t",  mat_mu_sgyz[0, 33, 33], mu_sgyz[0, 33, 33])
-            print("arg max:", np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mu_sgyz.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mat_mu_sgyz.shape, order='F'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mu_sgyz.shape, order='C'),
-                  np.unravel_index(np.argmax(np.abs(mat_mu_sgyz - mu_sgyz)), mat_mu_sgyz.shape, order='C'))
-        else:
-            pass
-
-
-        if (np.abs(mat_eta_sgxy - eta_sgxy).sum() > tol):
-            error_number =+ 1
-            print(line + "eta_sgxy is not correct!")
-            print("mat:", mat_eta_sgxy[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", eta_sgxy[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_eta_sgxy - eta_sgxy)))
-            print("arg max:", np.argmax(np.abs(mat_eta_sgxy - eta_sgxy)),
-                  np.unravel_index(np.argmax(np.abs(mat_eta_sgxy - eta_sgxy)), eta_sgxy.shape, order='F'))
-        else:
-            pass
-
-        if (np.abs(mat_eta_sgxz - eta_sgxz).sum() > tol):
-            error_number =+ 1
-            print(line + "eta_sgxz is not correct!")
-            print("mat:", mat_eta_sgxz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", eta_sgxz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_eta_sgxz - eta_sgxz)))
-            print("arg max:", np.argmax(np.abs(mat_eta_sgxz - eta_sgxz)),
-                  np.unravel_index(np.argmax(np.abs(mat_eta_sgxz - eta_sgxz)), eta_sgxz.shape, order='F'))
-        else:
-            pass
-        if (np.abs(mat_eta_sgyz - eta_sgyz).sum() > tol):
-            error_number =+ 1
-            print(line + "eta_sgyz is not correct!")
-            print("mat:", mat_eta_sgyz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", eta_sgyz[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_eta_sgyz - eta_sgyz)))
-            print("arg max:", np.argmax(np.abs(mat_eta_sgyz - eta_sgyz)),
-                  np.unravel_index(np.argmax(np.abs(mat_eta_sgyz - eta_sgyz)), eta_sgxy.shape, order='F'))
-        else:
-            pass
-        if (np.abs(mat_rho0_sgx_inv - rho0_sgx_inv).sum() > tol):
-            error_number =+ 1
-            print(line + "rho0_sgx_inv is not correct!")
-            print("mat:", mat_rho0_sgx_inv[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", rho0_sgx_inv[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_rho0_sgx_inv - rho0_sgx_inv)))
-            print("arg max:", np.argmax(np.abs(mat_rho0_sgx_inv - rho0_sgx_inv)),
-                  np.unravel_index(np.argmax(np.abs(mat_rho0_sgx_inv - rho0_sgx_inv)), rho0_sgx_inv.shape, order='F'))
-        else:
-            pass
-            # print("rho0_sgx_inv IS CORRECT")
-        if (np.abs(mat_rho0_sgy_inv - rho0_sgy_inv).sum() > tol):
-            error_number =+ 1
-            print(line + "rho0_sgy_inv is not correct!")
-            print("mat:", mat_rho0_sgy_inv[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", rho0_sgy_inv[Nx // 2 - 3: Nx //2 +3 , 0, 0])
-            print("max diff:", np.max(np.abs(mat_rho0_sgy_inv - rho0_sgy_inv)))
-            print("arg max:", np.argmax(np.abs(mat_rho0_sgy_inv - rho0_sgy_inv)),
-                  np.unravel_index(np.argmax(np.abs(mat_rho0_sgy_inv - rho0_sgy_inv)), rho0_sgy_inv.shape, order='F'))
-        else:
-            pass
-        if (np.abs(mat_rho0_sgz_inv - rho0_sgz_inv).sum() > tol):
-            error_number =+ 1
-            print(line + "rho0_sgz_inv is not correct!")
-            print("mat:", mat_rho0_sgz_inv[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("py:", rho0_sgz_inv[Nx // 2 - 3: Nx //2 + 3, 0, 0])
-            print("max diff:", np.max(np.abs(mat_rho0_sgz_inv - rho0_sgz_inv)))
-            print("arg max:", np.argmax(np.abs(mat_rho0_sgz_inv - rho0_sgz_inv)),
-                  np.unravel_index(np.argmax(np.abs(mat_rho0_sgz_inv - rho0_sgz_inv)), rho0_sgz_inv.shape, order='F'))
-        else:
-            pass
-
-
-    if checking:
-        if (np.abs(mat_source_ux - k_sim.source.ux).sum() > tol):
-            error_number =+ 1
-            print(line + "k_sim.source.ux is not correct!")
-        else:
-            pass
-
-        if (np.abs(np.squeeze(mat_ddx_k_shift_pos) - np.squeeze(ddx_k_shift_pos)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddx_k_shift_pos is not correct!")
-        else:
-            pass
-        if (np.abs(np.squeeze(mat_ddx_k_shift_neg) - np.squeeze(ddx_k_shift_neg)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddx_k_shift_neg is not correct!")
-        else:
-            pass
-
-        if (np.abs(np.squeeze(mat_ddy_k_shift_pos) - np.squeeze(ddy_k_shift_pos)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddy_k_shift_pos is not correct!")
-        else:
-            pass
-        if (np.abs(np.squeeze(mat_ddy_k_shift_neg) - np.squeeze(ddy_k_shift_neg)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddy_k_shift_neg is not correct!")
-        else:
-            pass
-
-        if (np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddz_k_shift_pos is not correct!",
-                  np.sum(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
-                  np.max(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
-                  np.argmax(np.abs(np.squeeze(mat_ddz_k_shift_pos) - np.squeeze(ddz_k_shift_pos))),
-                  np.squeeze(mat_ddz_k_shift_pos)[15], np.squeeze(ddz_k_shift_pos)[15]  )
-        else:
-            pass
-
-        if (np.abs(np.squeeze(mat_ddz_k_shift_neg) - np.squeeze(ddz_k_shift_neg)).sum() > tol):
-            error_number =+ 1
-            print(line + "ddz_k_shift_neg is not correct!")
-        else:
-            pass
-
-
-    if checking:
-        if (np.abs(mat_eta - eta).sum() > tol):
-            error_number =+ 1
-            print(line + "eta is not correct!", np.abs(mat_eta - eta).sum(), "\n",
-                  np.max(mat_eta), np.argmax(mat_eta),
-                  np.min(mat_eta), np.argmin(mat_eta),
-                  np.max(eta), np.argmax(eta),
-                  np.min(eta), np.argmin(eta))
-        else:
-            pass
-        if (np.abs(mat_chi - chi).sum() > tol):
-            error_number =+ 1
-            print(line + "chi is not correct!", np.abs(mat_chi - chi).sum(), "\n",
-                  np.max(mat_chi), np.argmax(mat_chi),
-                  np.min(mat_chi), np.argmin(mat_chi),
-                  np.max(chi), np.argmax(chi),
-                  np.min(chi), np.argmin(chi))
-        else:
-            pass
-        if (np.abs(mat_mu - mu).sum() > tol):
-            error_number =+ 1
-            print(line + "mu is not correct!", np.abs(mat_mu - mu).sum(), "\n",
-                  np.max(mat_mu), np.argmax(mat_mu),
-                  np.min(mat_mu), np.argmin(mat_mu),
-                  np.max(mu), np.argmax(mu),
-                  np.min(mu), np.argmin(mu))
-        else:
-            pass
-        if (np.abs(mat_lambda - lame_lambda).sum() > tol):
-            error_number =+ 1
-            print(line + "mu is not correct!", np.abs(mat_lambda - lame_lambda).sum(), "\n",
-                  np.max(mat_lambda), np.argmax(mat_lambda),
-                  np.min(mat_lambda), np.argmin(mat_lambda),
-                  np.max(lame_lambda), np.argmax(lame_lambda),
-                  np.min(lame_lambda), np.argmin(lame_lambda))
-        else:
-            pass
 
 
     # =========================================================================
@@ -1302,7 +968,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         k_sim.s_source_sig_index = np.squeeze(k_sim.s_source_sig_index) - int(1)
 
     if hasattr(k_sim, 'u_source_sig_index') and k_sim.u_source_sig_index is not None:
-        k_sim.u_source_sig_index = np.squeeze(k_sim.u_source_sig_index)
+        k_sim.u_source_sig_index = np.squeeze(k_sim.u_source_sig_index) - int(1)
 
     if hasattr(k_sim, 'p_source_sig_index') and k_sim.p_source_sig_index is not None:
         k_sim.p_source_sig_index = np.squeeze(k_sim.p_source_sig_index) - int(1)
@@ -1343,55 +1009,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         dsyzdy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_neg, np.fft.fft(syz_split_y + syz_split_z, axis=1), order='F'), axis=1))
         dsyzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(syz_split_y + syz_split_z, axis=2), order='F'), axis=2))
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_dsxxdx - dsxxdx).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsxxdx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsyydy - dsyydy).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsyydy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dszzdz - dszzdz).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dszzdz is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsxydx - dsxydx).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsxydx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsxydy - dsxydy).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsxydy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsxzdx - dsxzdx).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsxzdx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsxzdz - dsxzdz).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsxzdz is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsyzdy - dsyzdy).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsyzdy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_dsyzdz - dsyzdz).sum() > tol):
-                    error_number =+ 1
-                    print(line + "dsyzdz is not correct!")
-                else:
-                    pass
-
 
         # calculate the split-field components of ux_sgx, uy_sgy, and uz_sgz at
         # the next time step using the components of the stress at the current
@@ -1507,58 +1124,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         uz_split_z = np.multiply(mpml_y, e, order='F')
         # uz_split_z = mpml_y * mpml_x * pml_z_sgz * (mpml_y * mpml_x * pml_z_sgz * uz_split_z + kgrid.dt * rho0_sgz_inv * dszzdz)
 
-        if checking:
-            if (t_index == load_index):
-
-                if (np.abs(mat_ux_split_x - ux_split_x).sum() > tol):
-                    error_number =+ 1
-                    print(line + "ux_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_ux_split_y - ux_split_y).sum() > tol):
-                    error_number =+ 1
-                    print("ux_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_ux_split_z - ux_split_z).sum() > tol):
-                    error_number =+ 1
-                    print("ux_split_z is not correct!")
-                else:
-                    pass
-
-                if (np.abs(mat_uy_split_x - uy_split_x).sum() > tol):
-                    error_number =+ 1
-                    print("uy_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
-                    error_number =+ 1
-                    print("uy_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_uy_split_z - uy_split_z).sum() > tol):
-                    error_number =+ 1
-                    print("uy_split_z is not correct!")
-                else:
-                    pass
-
-                if (np.abs(mat_uz_split_x - uz_split_x).sum() > tol):
-                    error_number =+ 1
-                    print("uz_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_uz_split_y - uz_split_y).sum() > tol):
-                    error_number =+ 1
-                    print("uz_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_uz_split_z - uz_split_z).sum() > tol):
-                    error_number =+ 1
-                    print("uz_split_z is not correct!")
-                else:
-                    pass
-
-
         # add in the velocity source terms
         if k_sim.source_ux is not False and k_sim.source_ux > t_index:
             if (source.u_mode == 'dirichlet'):
@@ -1597,25 +1162,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         uy_sgy = uy_split_x + uy_split_y + uy_split_z
         uz_sgz = uz_split_x + uz_split_y + uz_split_z
 
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_ux_sgx - ux_sgx).sum() > tol):
-                    print("ux_sgx is NOT correct!")
-                else:
-                    pass
-                    # print("ux_sgx is correct!", np.abs(mat_ux_sgx - ux_sgx).sum(), np.max(np.abs(mat_ux_sgx - ux_sgx)))
-                if (np.abs(mat_uy_sgy - uy_sgy).sum() > tol):
-                    print("uy_sgy is NOT correct!")
-                else:
-                    pass
-                    #print("uy_sgy is correct!", np.abs(mat_uy_sgy - uy_sgy).sum(), np.max(np.abs(mat_uy_sgy - uy_sgy)))
-                if (np.abs(mat_uz_sgz - uz_sgz).sum() > tol):
-                    print("uz_sgz is NOT correct!")
-                else:
-                    pass
-                    #print("uz_sgx is correct!", np.abs(mat_uz_sgz - uz_sgz).sum(), np.max(np.abs(mat_uz_sgz - uz_sgz)))
-
-
         # calculate the velocity gradients (these variables do not necessarily
         # need to be stored, they could be computed when needed)
         duxdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_neg, np.fft.fft(ux_sgx, axis=0), order='F'), axis=0)) #
@@ -1631,121 +1177,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         duzdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uz_sgz, axis=0), order='F'), axis=0))
         duzdy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(uz_sgz, axis=1), order='F'), axis=1))
         duzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(uz_sgz, axis=2), order='F'), axis=2))
-
-        if checking:
-            if (t_index == load_index):
-
-                a_x = np.fft.fft(ux_sgx, axis=0)
-                if (np.abs(mat_a_x - a_x).sum() > tol):
-                    error_number =+ 1
-                    print(line + "a_x is not correct!", tol, np.abs(mat_a_x - a_x).sum(), np.abs(mat_a_x).sum(), np.abs(a_x).sum(),
-                    np.max(np.abs(mat_a_x)), np.max(np.abs(a_x)) )
-                else:
-                    pass
-                    # print(line + "a_x is correct!", np.abs(mat_a_x - a_x).sum(), np.max(np.abs(mat_a_x - a_x)))
-
-                #b_x = np.expand_dims(ddx_k_shift_neg, axis=-1) * np.fft.fft(ux_sgx, axis=0)
-                #print(b_x.shape)
-                b_x = np.multiply(ddx_k_shift_neg, np.fft.fft(ux_sgx, axis=0), order='F')
-                if (np.abs(mat_b_x - b_x).sum() > tol):
-                    error_number =+ 1
-                    print(line + "b_x is not correct!",
-                          "\n\t", np.abs(mat_b_x - b_x).sum(),
-                          "\n\t", np.abs(mat_b_x).sum(),
-                          "\n\t", np.abs(b_x).sum(),
-                          "\n\t", np.max(np.abs(mat_b_x - b_x)),
-                          "\n\t", np.max(np.abs(mat_b_x)),
-                          "\n\t", np.max(np.abs(b_x)) )
-                else:
-                    pass
-                    # print(line + "b_x is correct!")
-
-                c_x = np.fft.ifft(b_x, axis=0)
-                if (np.abs(mat_c_x - c_x).sum() > tol):
-                    error_number =+ 1
-                    print(line + "c_x is not correct!", np.abs(mat_c_x - c_x).sum(), np.abs(mat_c_x).sum(), np.abs(c_x).sum(),
-                    np.max(np.abs(mat_c_x)), np.max(np.abs(c_x)) )
-                else:
-                    pass
-                    # print(line + "c_x is correct!")
-
-                a_y = np.fft.fft(ux_sgx, axis=1)
-                if (np.abs(mat_a_y - a_y).sum() > tol):
-                    error_number =+ 1
-                    print(line + "a_y is not correct!", tol, np.abs(mat_a_y - a_y).sum(), np.abs(mat_a_y).sum(), np.abs(a_y).sum(),
-                    np.max(np.abs(mat_a_y)), np.max(np.abs(a_y)) )
-                else:
-                    # print(line + "a_y is correct!")
-                    pass
-
-                b_y = ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1)
-                if (np.abs(mat_b_y - b_y).sum() > tol):
-                    error_number =+ 1
-                    print(line + "b_y is not correct!", np.abs(mat_b_y - b_y).sum(), np.abs(mat_b_y).sum(), np.abs(b_y).sum(),
-                    np.max(np.abs(mat_b_y)), np.max(np.abs(b_y)) )
-                else:
-                    # print(line + "b_y is correct!")
-                    pass
-
-                c_y = np.fft.ifft(ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1), axis=1)
-                if (np.abs(mat_c_y - c_y).sum() > tol):
-                    error_number =+ 1
-                    print(line + "c_y is not correct!", np.abs(mat_c_y - c_y).sum(), np.abs(mat_c_y).sum(), np.abs(c_y).sum(),
-                    np.max(np.abs(mat_c_y)), np.max(np.abs(c_y)) )
-                else:
-                    # print(line + "c_y is correct!")
-                    pass
-
-
-
-
-
-
-
-
-
-
-                if (np.abs(mat_duxdx - duxdx).sum() > tol):
-                    error_number =+ 1
-                    print(line + "duxdx is not correct!", np.abs(mat_duxdx - duxdx).sum(), np.abs(mat_duxdx).sum(), np.abs(duxdx).sum(),
-                    np.max(np.abs(mat_duxdx)), np.max(np.abs(duxdx)) )
-                else:
-                    pass
-                if (np.abs(mat_duxdy - duxdy).sum() > tol):
-                    error_number =+ 1
-                    print(line + "duxdy is not correct!" + "\tdiff:", np.abs(mat_duxdy - duxdy).sum(), np.abs(mat_duxdy).sum(), np.abs(duxdy).sum(),
-                    np.max(np.abs(mat_duxdy)), np.max(np.abs(duxdy)))
-                else:
-                    pass
-                if (np.abs(mat_duxdz - duxdz).sum() > tol):
-                    print("duxdz is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duydx - duydx).sum() > tol):
-                    print("duydx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duydy - duydy).sum() > tol):
-                    print("duydy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duydz - duydz).sum() > tol):
-                    print("duydz is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duzdx - duzdx).sum() > tol):
-                    print("duzdx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duzdy - duzdy).sum() > tol):
-                    print("duzdy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duzdz - duzdz).sum() > tol):
-                    print("duzdz is not correct!")
-                else:
-                    pass
-
 
         if options.kelvin_voigt_model:
 
@@ -1764,46 +1195,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             dduzdxdt = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(temp, axis=0), order='F'), axis=0))
             dduzdydt = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(temp, axis=1), order='F'), axis=1))
             dduzdzdt = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(temp, axis=2), order='F'), axis=2))
-
-            if checking:
-                if (t_index == load_index):
-                    if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
-                        print("dduxdxdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
-                        print("dduxdydt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduxdzdt - dduxdzdt).sum() > tol):
-                        print("dduxdzdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
-                        print("dduydxdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
-                        print("dduydydt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduydzdt - dduydzdt).sum() > tol):
-                        print("dduydzdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduzdxdt - dduzdxdt).sum() > tol):
-                        print("dduzdxdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduzdydt - dduzdydt).sum() > tol):
-                        print("dduzdydt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduzdzdt - dduzdzdt).sum() > tol):
-                        print("dduzdzdt is not correct!")
-                    else:
-                        pass
-
 
             # update the normal shear components of the stress tensor using a
             # Kelvin-Voigt model with a split-field multi-axial pml
@@ -1848,7 +1239,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             d = np.multiply(pml_y, c, order='F')
             e = np.multiply(mpml_z, d, order='F')
             sxx_split_y = np.multiply(mpml_x, e, order='F')
-
 
             # sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) \
@@ -1951,7 +1341,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             syz_split_z = mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + \
                                                                kgrid.dt * mu_sgyz * duydz + \
                                                                kgrid.dt * eta_sgyz * dduydzdt)
-
 
         else:
 
@@ -2153,81 +1542,10 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] = syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] + \
                   k_sim.source.syz[np.unravel_index(k_sim.s_source_sig_index, syz_split_z.shape, order='F'), t_index]
 
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_sxx_split_x - sxx_split_x).sum() > tol):
-                    print("sxx_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxx_split_y - sxx_split_y).sum() > tol):
-                    print("sxx_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxx_split_z - sxx_split_z).sum() > tol):
-                    print("sxx_split_z is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_syy_split_x - syy_split_x).sum() > tol):
-                    print("syy_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_syy_split_y - syy_split_y).sum() > tol):
-                    print("syy_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_syy_split_z - syy_split_z).sum() > tol):
-                    print("syy_split_z is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_szz_split_x - szz_split_x).sum() > tol):
-                    print("szz_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_szz_split_y - szz_split_y).sum() > tol):
-                    print("szz_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_szz_split_z - szz_split_z).sum() > tol):
-                    print("szz_split_z is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxy_split_x - sxy_split_x).sum() > tol):
-                    print("sxy_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxy_split_y - sxy_split_y).sum() > tol):
-                    print("sxy_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxz_split_x - sxz_split_x).sum() > tol):
-                    print("sxz_split_x is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_sxz_split_z - sxz_split_z).sum() > tol):
-                    print("sxz_split_z is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_syz_split_y - syz_split_y).sum() > tol):
-                    print("syz_split_y is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_syz_split_z - syz_split_z).sum() > tol):
-                    print("syz_split_z is not correct!")
-                else:
-                    pass
-
         # compute pressure from the normal components of the stress
         p = -(sxx_split_x + sxx_split_y + sxx_split_z +
               syy_split_x + syy_split_y + syy_split_z +
               szz_split_x + szz_split_y + szz_split_z) / 3.0
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_p - p).sum() > tol):
-                    print("p is not correct!")
-                else:
-                    pass
-
 
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
@@ -2242,24 +1560,23 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                 raise TypeError('Using a kWaveTransducer for output is not currently supported.')
 
             extract_options = dotdict({'record_u_non_staggered': k_sim.record.u_non_staggered,
-                               'record_u_split_field': k_sim.record.u_split_field,
-                               'record_I': k_sim.record.I,
-                               'record_I_avg': k_sim.record.I_avg,
-                               'binary_sensor_mask': k_sim.binary_sensor_mask,
-                               'record_p': k_sim.record.p,
-                               'record_p_max': k_sim.record.p_max,
-                               'record_p_min': k_sim.record.p_min,
-                               'record_p_rms': k_sim.record.p_rms,
-                               'record_p_max_all': k_sim.record.p_max_all,
-                               'record_p_min_all': k_sim.record.p_min_all,
-                               'record_u': k_sim.record.u,
-                               'record_u_max': k_sim.record.u_max,
-                               'record_u_min': k_sim.record.u_min,
-                               'record_u_rms': k_sim.record.u_rms,
-                               'record_u_max_all': k_sim.record.u_max_all,
-                               'record_u_min_all': k_sim.record.u_min_all,
-                               'compute_directivity': False
-                               })
+                                       'record_u_split_field': k_sim.record.u_split_field,
+                                       'record_I': k_sim.record.I,
+                                       'record_I_avg': k_sim.record.I_avg,
+                                       'binary_sensor_mask': k_sim.binary_sensor_mask,
+                                       'record_p': k_sim.record.p,
+                                       'record_p_max': k_sim.record.p_max,
+                                       'record_p_min': k_sim.record.p_min,
+                                       'record_p_rms': k_sim.record.p_rms,
+                                       'record_p_max_all': k_sim.record.p_max_all,
+                                       'record_p_min_all': k_sim.record.p_min_all,
+                                       'record_u': k_sim.record.u,
+                                       'record_u_max': k_sim.record.u_max,
+                                       'record_u_min': k_sim.record.u_min,
+                                       'record_u_rms': k_sim.record.u_rms,
+                                       'record_u_max_all': k_sim.record.u_max_all,
+                                       'record_u_min_all': k_sim.record.u_min_all,
+                                       'compute_directivity': False})
 
             # run sub-function to extract the required data
             sensor_data = extract_sensor_data(3, sensor_data, file_index, k_sim.sensor_mask_index,
@@ -2269,24 +1586,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             if options.stream_to_disk:
                 raise TypeError('"StreamToDisk" input is not currently supported.')
 
-            # if checking:
-            #     if (t_index == load_index):
-            #         if hasattr(sensor_data, 'p_max'):
-            #             temp = np.squeeze(np.array(mat_sensor_data[0][0].tolist()))
-            #             temp = np.reshape(temp, np.squeeze(np.asarray(sensor_data.p_max)).shape)
-            #             if (np.abs(temp - np.squeeze(np.asarray(sensor_data.p_max))).sum() > tol):
-            #                 print("p_max is not correct!")
-            #             else:
-            #                 pass
-
-        # # estimate the time to run the simulation
-        # if t_index == ESTIMATE_SIM_TIME_STEPS:
-
-        #     # display estimated simulation time
-        #     print('  estimated simulation time ', scale_time(etime(clock, loop_start_time) * index_end / t_index), '\')
-
-        #     # check memory usage
-        #     kspaceFirstOrder_checkMemoryUsage
 
 
         # # plot data if required
@@ -2359,11 +1658,9 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # CLEAN UP
     # =========================================================================
 
-
     # save the final acoustic pressure if required
     if k_sim.record.p_final or options.elastic_time_rev:
         sensor_data.p_final = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-
 
     # save the final particle velocity if required
     if k_sim.record.u_final:
@@ -2378,7 +1675,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
 
     # # run subscript to compute and save intensity values
-    if options.use_sensor and not options.elastic_time_rev and (options.record_I or options.record_I_avg):
+    if options.use_sensor and not options.elastic_time_rev and (k_sim.record.I or k_sim.record.I_avg):
         sensor_data = save_intensity(kgrid, sensor_data, k_sim.record.I_avg, options.cuboid_corners)
 
     # reorder the sensor points if a binary sensor mask was used for Cartesian
@@ -2386,7 +1683,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # recasting as the GPU toolboxes do not all support this subscript)
     if options.use_sensor and k_sim.reorder_data:
         sensor_data = reorder_sensor_data(kgrid, sensor, sensor_data)
-
 
     # filter the recorded time domain pressure signals if transducer filter
     # parameters are given
@@ -2420,7 +1716,6 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                'record_I': k_sim.record.I,
                                'record_I_avg': k_sim.record.I_avg})
         sensor_data = reorder_cuboid_corners(k_sim.kgrid, k_sim.record, sensor_data, time_info, cuboid_info, verbose=True)
-
 
     if options.elastic_time_rev:
         # if computing time reversal, reassign sensor_data.p_final to sensor_data

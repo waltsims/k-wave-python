@@ -440,7 +440,7 @@ y_vec = y_vec[pml_size:Ny - pml_size]
 
 # p_max = np.reshape(sensor_data.p_max[pml_size:Nx - pml_size, pml_size:Ny - pml_size, Nz // 2 - 1], (x_vec.size, y_vec.size), order='F')
 
-p_max = np.reshape(sensor_data.p_max, (x_vec.size, y_vec.size), order='F')
+p_max = np.reshape(sensor_data[0].p_max, (x_vec.size, y_vec.size), order='F')
 
 # plot
 fig1, ax1 = plt.subplots(nrows=1, ncols=1)

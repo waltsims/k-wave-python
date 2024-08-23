@@ -47,7 +47,6 @@ def test_pstd_elastic_2d_compare_binary_and_cartesian_sensor_mask():
     source = kSource()
     p0 = np.zeros((Nx, Ny))
     p0[21, Ny // 4 - 1:3 * Ny // 4] = 1
-    print(p0)
     source._p0 = p0
 
     # record all output variables
@@ -68,11 +67,17 @@ def test_pstd_elastic_2d_compare_binary_and_cartesian_sensor_mask():
     circ_mask = make_circle(Vector([Nx, Ny]), Vector([Nx // 2, Ny // 2]), int(Nx // 2 - 10))
     x_points = kgrid.x[circ_mask == 1]
     y_points = kgrid.y[circ_mask == 1]
-    sensor.mask = np.concatenate(x_points, y_points)
+    # print(np.shape(x_points))
+    # print(np.shape(y_points))
+    sensor.mask = np.concatenate((x_points, y_points))
+    # print(np.shape(sensor.mask))
+
+    # print(sensor.time_reversal_boundary_data, hasattr(sensor, 'time_reversal_boundary_data'))
 
     # run the simulation as normal
     simulation_options_c_ln = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                                cart_interp='linear')
+                                                cart_interp='linear',
+                                                kelvin_voigt_model=False)
     sensor_data_c_ln = pstd_elastic_2d(deepcopy(kgrid),
                                        deepcopy(medium),
                                        deepcopy(source),
@@ -100,10 +105,9 @@ def test_pstd_elastic_2d_compare_binary_and_cartesian_sensor_mask():
                                     deepcopy(sensor),
                                     deepcopy(simulation_options_b))
 
-
     # reorder the binary sensor data
-    sensor_data_b.p                 = reorder_binary_sensor_data(sensor_data_b.p, reorder_index)
-    sensor_data_b.p_max             = reorder_binary_sensor_data(sensor_data_b.p_max, reorder_index)
+    sensor_data_b['p'] = reorder_binary_sensor_data(sensor_data_b['p'], reorder_index)
+    sensor_data_b.p_max = reorder_binary_sensor_data(sensor_data_b.p_max, reorder_index)
     sensor_data_b.p_min             = reorder_binary_sensor_data(sensor_data_b.p_min, reorder_index)
     sensor_data_b.p_rms             = reorder_binary_sensor_data(sensor_data_b.p_rms, reorder_index)
     sensor_data_b.ux                = reorder_binary_sensor_data(sensor_data_b.ux, reorder_index)

@@ -33,12 +33,20 @@ def get_min_sound_speed(medium, is_elastic_code):
     else:  # pragma: no cover
         c_min = np.min(medium.sound_speed)
         c_min_comp = np.min(medium.sound_speed_compression)
+        # if a array
         if not np.isscalar(medium.sound_speed_shear):
-            c_min_shear = np.min(medium.sound_speed_shear[medium.sound_speed_shear != 0])
+            temp = medium.sound_speed_shear[np.where(np.abs(medium.sound_speed_shear) > 1e-6)]
+            if len(temp) > 0:
+                c_min_shear = np.min(temp)
+            else:
+                c_min_shear = None
+                #raise RuntimeWarning("c_min_shear is zero")
         else:
             c_min_shear = np.min(medium.sound_speed_shear)
-        if np.isclose(c_min_shear, 0.0):
-            raise RuntimeWarning("c_min_shear is zero")
+            if np.isclose(c_min_shear, 0.0):
+                c_min_shear = None
+                #raise RuntimeWarning("c_min_shear is zero")
+
         return c_min, c_min_comp, c_min_shear
 
 

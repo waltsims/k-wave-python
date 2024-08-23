@@ -186,7 +186,7 @@ n: int = int(np.size(sensor_data_reordered.p) / int(kgrid.Nt))
 sensors = np.arange(0, int(n))
 
 fig2, ax2 = plt.subplots(nrows=1, ncols=1)
-pcm2 = ax2.pcolormesh(t_array, sensors, -sensor_data_reordered.p[:,0:-1], cmap = get_color_map(),
+pcm2 = ax2.pcolormesh(t_array, sensors, -sensor_data_reordered.p, cmap = get_color_map(),
                       shading='gouraud', alpha=1, vmin=-1.0, vmax=1.0)
 ax2.invert_yaxis()
 cb2 = fig2.colorbar(pcm2, ax=ax2)

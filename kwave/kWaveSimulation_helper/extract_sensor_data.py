@@ -108,8 +108,8 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
             if (dim ==1):
                 sensor_data.ux_non_staggered[:, file_index] = ux_shifted[sensor_mask_index]
             elif (dim == 2):
-                sensor_data.ux_non_staggered[:, file_index] = ux_shifted[sensor_mask_index]
-                sensor_data.uy_non_staggered[:, file_index] = uy_shifted[sensor_mask_index]
+                sensor_data.ux_non_staggered[:, file_index] = ux_shifted[np.unravel_index(np.squeeze(sensor_mask_index), ux_shifted.shape, order='F')]
+                sensor_data.uy_non_staggered[:, file_index] = uy_shifted[np.unravel_index(np.squeeze(sensor_mask_index), uy_shifted.shape, order='F')]
             elif (dim == 3):
                 sensor_data.ux_non_staggered[:, file_index] = ux_shifted[sensor_mask_index]
                 sensor_data.uy_non_staggered[:, file_index] = uy_shifted[sensor_mask_index]
@@ -127,19 +127,19 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index, fl
 
                 # ux compressional
                 split_field = np.real(np.fft.ifftn(record.kx_norm**2 * ux_k + record.kx_norm * record.ky_norm * uy_k))
-                sensor_data.ux_split_p[:, file_index] = split_field[sensor_mask_index]
+                sensor_data.ux_split_p[:, file_index] = split_field[np.unravel_index(np.squeeze(sensor_mask_index), split_field.shape, order='F')]
 
                 # ux shear
                 split_field = np.real(np.fft.ifftn((1.0 - record.kx_norm**2) * ux_k - record.kx_norm * record.ky_norm * uy_k))
-                sensor_data.ux_split_s[:, file_index] = split_field[sensor_mask_index]
+                sensor_data.ux_split_s[:, file_index] = split_field[np.unravel_index(np.squeeze(sensor_mask_index), split_field.shape, order='F')]
 
                 # uy compressional
                 split_field = np.real(np.fft.ifftn(record.ky_norm * record.kx_norm * ux_k + record.ky_norm **2 * uy_k))
-                sensor_data.uy_split_p[:, file_index] = split_field[sensor_mask_index]
+                sensor_data.uy_split_p[:, file_index] = split_field[np.unravel_index(np.squeeze(sensor_mask_index), split_field.shape, order='F')]
 
                 # uy shear
                 split_field = np.real(np.fft.ifftn(record.ky_norm * record.kx_norm * ux_k + (1.0 - record.ky_norm**2) * uy_k))
-                sensor_data.uy_split_s[:, file_index] = split_field[sensor_mask_index]
+                sensor_data.uy_split_s[:, file_index] = split_field[np.unravel_index(np.squeeze(sensor_mask_index), split_field.shape, order='F')]
 
             elif (dim == 3):
 

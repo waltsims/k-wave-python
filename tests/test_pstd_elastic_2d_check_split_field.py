@@ -86,8 +86,8 @@ def test_pstd_elastic_2d_check_split_field():
     # convert the source parameters to grid points
     arc_pos     = np.round(np.asarray(arc_pos) / dx).astype(int) + np.asarray([Nx // 2, Ny // 2])
     focus_pos   = np.round(np.asarray(focus_pos) / dx).astype(int) + np.asarray([Nx // 2, Ny // 2])
-    radius      = round(radius / dx)
-    diameter    = round(diameter / dx)
+    radius      = int(round(radius / dx))
+    diameter    = int(round(diameter / dx))
 
     # force the diameter to be odd
     if diameter % 2 == 0:
@@ -124,8 +124,8 @@ def test_pstd_elastic_2d_check_split_field():
     source.syy = source.sxx
 
     simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                               pml_inside=False,
-                                               pml_size=PML_size)
+                                           pml_inside=False,
+                                           pml_size=PML_size)
 
     # run the elastic simulation
     sensor_data_elastic = pstd_elastic_2d(deepcopy(kgrid),
@@ -134,20 +134,21 @@ def test_pstd_elastic_2d_check_split_field():
                                           sensor=deepcopy(sensor),
                                           simulation_options=deepcopy(simulation_options))
 
-
     # compute errors
-    diff_ux = np.max(np.abs(sensor_data_elastic.ux_non_staggered -
-                            sensor_data_elastic.ux_split_p -
-                            sensor_data_elastic.ux_split_s)) / np.max(np.abs(sensor_data_elastic.ux_non_staggered))
+    diff_ux = np.max(np.abs(sensor_data_elastic['ux_non_staggered'] -
+                            sensor_data_elastic['ux_split_p'] -
+                            sensor_data_elastic['ux_split_s'])) / np.max(np.abs(sensor_data_elastic['ux_non_staggered']))
 
-    diff_uy = np.max(np.abs(sensor_data_elastic.uy_non_staggered -
-                            sensor_data_elastic.uy_split_p -
-                            sensor_data_elastic.uy_split_s)) / max(abs(sensor_data_elastic.uy_non_staggered))
+    diff_uy = np.max(np.abs(sensor_data_elastic['uy_non_staggered'] -
+                            sensor_data_elastic['uy_split_p'] -
+                            sensor_data_elastic['uy_split_s'])) / np.max(np.abs(sensor_data_elastic['uy_non_staggered']))
 
     # check for test pass
-    if (diff_ux > COMPARISON_THRESH) or (diff_uy > COMPARISON_THRESH):
+    if (diff_ux > COMPARISON_THRESH):
         test_pass = False
+    assert test_pass, "diff_ux"
 
-    return test_pass
-
+    if (diff_uy > COMPARISON_THRESH):
+        test_pass = False
+    assert test_pass, "diff_uy"
 

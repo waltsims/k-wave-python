@@ -459,14 +459,30 @@ def filter_time_series(
 
     """
 
-    # check the input is a row vector
-    if num_dim2(signal) == 1:
+    rotate_signal = False
+    if np.ndim(signal) == 2:
+        print("np.ndim(signal):", np.ndim(signal))
         m, n = signal.shape
-        if n == 1:
+        if n == 1 and m != 1:
             signal = signal.T
             rotate_signal = True
-        else:
+        elif m == 1 and n != 1:
             rotate_signal = False
+        else:
+            TypeError("Input signal must be a vector.")
+
+    signal = np.expand_dims(np.squeeze(signal), axis=-1)
+
+    # check the input is a row vector
+    if num_dim2(signal) == 1:
+        # print(np.shape(signal), num_dim2(signal))
+        # m, n = signal.shape
+        # if n == 1:
+        #     signal = signal.T
+        #     rotate_signal = True
+        # else:
+        #     rotate_signal = False
+        pass
     else:
         raise TypeError("Input signal must be a vector.")
 

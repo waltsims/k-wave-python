@@ -53,7 +53,7 @@ class kWaveSimulation(object):
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
-        if self.sensor.time_reversal_boundary_data is not None:
+        if hasattr(self.sensor, 'time_reversal_boundary_data') and self.sensor.time_reversal_boundary_data is not None:
             # define a _new_ source structure
             source = {"p_mask": self.sensor.p_mask,
                       "p": np.flip(self.sensor.time_reversal_boundary_data, 2),
@@ -78,8 +78,8 @@ class kWaveSimulation(object):
             self.binary_sensor_mask = True
 
             # check if the sensor mask is defined as a list of cuboid corners
-            print(self.sensor.mask)
-            print(self.sensor.mask is not None)
+            print(dir(self.sensor))
+            # print(self.sensor.mask is not None)
             if self.sensor.mask is not None and np.shape(self.sensor.mask)[0] == (2 * self.kgrid.dim):
                 self.userarg_cuboid_corners = True
             else:
