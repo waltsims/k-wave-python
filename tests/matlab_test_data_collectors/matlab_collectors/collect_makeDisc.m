@@ -7,13 +7,16 @@ all_params = { ...
     {17, 38, 5, 12, 4, false}, ...
 }; 
 
+recorder = utils.TestRecorder('collectedValues/makeDisc.mat');
 for idx=1:length(all_params)
     disp(idx);
     params = all_params{idx};
+
+    recorder.recordVariable('params', params);
     
     disc = makeDisc(params{:});
+    recorder.recordVariable('disc', disc);
+    recorder.increment();
     
-    idx_padded = sprintf('%06d', idx - 1);
-    filename = ['collectedValues/makeDisc/' idx_padded '.mat'];
-    save(filename, 'params', 'disc');
 end
+recorder.saveRecordsToDisk();
