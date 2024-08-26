@@ -42,7 +42,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.5.4",
+        "coverage==7.6.1",
         "phantominator",
         "requests==2.32.3"]
 example = ["gdown==5.2.0"]
@@ -75,9 +75,12 @@ exclude = [
     "*.mat",
 ]
 
-[tools.pytest.ini_options]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
-
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning"
+]
 [tool.coverage.run]
 branch = true
 command_line = "-m pytest"

@@ -30,7 +30,7 @@ def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -
     """
 
     # calculate conversion
-    alpha = 100 * alpha * (1e-6 / (2 * math.pi)) ** y / (20 * np.log10(np.exp(1)))
+    alpha = 100.0 * alpha * (1e-6 / (2.0 * math.pi)) ** y / (20.0 * np.log10(np.exp(1)))
     return alpha
 
 
@@ -231,8 +231,6 @@ def cart2grid(
         data_x = data_x + np.floor(kgrid.Nx // 2).astype(int)
         if not axisymmetric:
             data_y = data_y + np.floor(kgrid.Ny // 2).astype(int)
-        else:
-            data_y = data_y
 
         # check if the points all lie within the grid
         if data_x.max() >= kgrid.Nx or data_y.max() >= kgrid.Ny or data_x.min() < 0 or data_y.min() < 0:

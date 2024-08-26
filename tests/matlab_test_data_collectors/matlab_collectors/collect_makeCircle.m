@@ -10,9 +10,7 @@ params = { ...
     [20.3, 19.7, 5, 4, 2, 2*pi], ...
 }; 
 
-output_folder = 'collectedValues/makeCircle/';
-
-% 
+recorder = utils.TestRecorder('collectedValues/makeCircle.mat');
 
 for idx=1:length(params)
     disp(idx);
@@ -24,11 +22,10 @@ for idx=1:length(params)
     cy = param(4);
     radius = param(5);
     arc_angle = param(6);
+    recorder.recordVariable('param', param);
     circle = makeCircle(Nx, Ny, cx, cy, radius, arc_angle);
+    recorder.recordVariable('circle', circle);
+    recorder.increment()
     
-    idx_padded = sprintf('%06d', idx - 1);
-    if ~exist(output_folder, 'dir')
-        mkdir(output_folder);
-    end
-    filename = [output_folder idx_padded '.mat'];    save(filename, 'Nx', 'Ny', 'cx', 'cy', 'radius', 'arc_angle', 'circle');
 end
+recorder.saveRecordsToDisk();

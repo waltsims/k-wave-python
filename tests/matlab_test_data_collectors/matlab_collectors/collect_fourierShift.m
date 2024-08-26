@@ -2,7 +2,7 @@
 % fourierShift does not support more than 4 dims
 dims = [1, 2, 3, 4];
 data_dims = { ...
-    [1, 7], ...  # 1D
+    [7,], ...  # 1D
     [8, 2], ...  # 2D
     [4, 8, 3], ...  # 3D
     [5, 10, 5, 4] ...  # 4D

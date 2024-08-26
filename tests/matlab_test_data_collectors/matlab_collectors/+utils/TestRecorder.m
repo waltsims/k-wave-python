@@ -1,12 +1,13 @@
 classdef TestRecorder < handle
    properties
       record_filename = ""
-      records = containers.Map
+      records
       step = 0
    end
    methods
        
        function obj = TestRecorder(record_filename)
+           obj.records = containers.Map;
            obj.record_filename = record_filename;
        end
        
