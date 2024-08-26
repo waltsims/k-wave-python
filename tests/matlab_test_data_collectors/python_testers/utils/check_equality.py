@@ -23,9 +23,11 @@ def check_element_equality(
         expected = getattr(expected_element, field.name)
         actual = getattr(actual_elelment, field.name)
         if isinstance(expected, np.ndarray):
-            are_equal = np.allclose(actual, expected)
+            are_equal &= np.allclose(actual, expected)
+        elif isinstance(expected, float):
+            are_equal &= np.isclose(actual, expected)
         else:
-            are_equal = actual == expected
+            are_equal &= actual == expected
     return are_equal
 
 
