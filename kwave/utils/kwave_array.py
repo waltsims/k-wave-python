@@ -81,7 +81,7 @@ class Element:
                 self.end_point = [self.end_point]
             self.end_point = np.array(self.end_point, dtype=float)
 
-        self.measure = round(float(self.measure), 8)
+        self.measure = float(self.measure)
 
 
 class kWaveArray(object):
@@ -586,7 +586,7 @@ class kWaveArray(object):
             )
 
             # keep points in the positive y domain
-            grid_weights = grid_weights[:, kgrid.Ny:]
+            grid_weights = grid_weights[:, kgrid.Ny :]
 
         else:
             # remove integration points which are outside grid
