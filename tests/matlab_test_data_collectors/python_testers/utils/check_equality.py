@@ -15,20 +15,22 @@ def recursive_getattr(obj, attr, *args):
 
 
 def check_element_equality(
-    actual_elelment: Element,
+    actual_element: Element,
     expected_element: Element,
 ) -> bool:
-    are_equal = True
     for field in dataclasses.fields(expected_element):
         expected = getattr(expected_element, field.name)
-        actual = getattr(actual_elelment, field.name)
+        actual = getattr(actual_element, field.name)
         if isinstance(expected, np.ndarray):
-            are_equal &= np.allclose(actual, expected)
+            if not np.allclose(actual, expected):
+                return False
         elif isinstance(expected, float):
-            are_equal &= np.isclose(actual, expected)
+            if not np.isclose(actual, expected):
+                return False
         else:
-            are_equal &= actual == expected
-    return are_equal
+            if actual != expected:
+                return False
+    return True
 
 
 def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
@@ -130,14 +132,14 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
                 expected_value = [Element(**expected_value)]
                 for actual, expected in zip(actual_value, expected_value):
                     are_equal &= check_element_equality(
-                        actual_elelment=actual,
+                        actual_element=actual,
                         expected_element=expected,
                     )
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
                 for actual, expected in zip(actual_value, expected_value):
                     are_equal &= check_element_equality(
-                        actual_elelment=actual,
+                        actual_element=actual,
                         expected_element=expected,
                     )
         else:
