@@ -96,7 +96,7 @@ class Element:
         match between numerical fields. Works with ints, floats and numpy
         arrays.
 
-        See numpy.allclose and numpy.isclose for more details.
+        See numpy.allclose for more details.
 
         :param other: an instance of Element
         :param rtol: The relative tolerance parameter, defaults to 1e-05
@@ -111,11 +111,8 @@ class Element:
         for field in fields(self):
             self_attr = getattr(self, field.name)
             other_attr = getattr(other, field.name)
-            if isinstance(self_attr, np.ndarray):
+            if isinstance(self_attr, (int, float, np.ndarray)):
                 if not np.allclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
-                    return False
-            elif isinstance(self_attr, (int, float)):
-                if not np.isclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
                     return False
             else:
                 if self_attr != other_attr:
