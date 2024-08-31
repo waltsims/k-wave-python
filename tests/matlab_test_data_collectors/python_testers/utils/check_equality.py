@@ -1,6 +1,5 @@
 import functools
 import logging
-import dataclasses
 
 import numpy as np
 
@@ -12,21 +11,6 @@ def recursive_getattr(obj, attr, *args):
         return getattr(obj, attr, *args)
 
     return functools.reduce(_getattr, [obj] + attr.split("."))
-
-
-def check_element_equality(
-    actual_elelment: Element,
-    expected_element: Element,
-) -> bool:
-    are_equal = True
-    for field in dataclasses.fields(expected_element):
-        expected = getattr(expected_element, field.name)
-        actual = getattr(actual_elelment, field.name)
-        if isinstance(expected, np.ndarray):
-            are_equal = np.allclose(actual, expected)
-        else:
-            are_equal = actual == expected
-    return are_equal
 
 
 def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
@@ -127,17 +111,11 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= check_element_equality(
-                        actual_elelment=actual,
-                        expected_element=expected,
-                    )
+                    are_equal &= actual.is_close(expected)
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= check_element_equality(
-                        actual_elelment=actual,
-                        expected_element=expected,
-                    )
+                    are_equal &= actual.is_close(expected)
         else:
             actual_value = np.squeeze(actual_value)
             expected_value = np.array(expected_value)

@@ -1,6 +1,6 @@
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from math import ceil
 from typing import Optional
 
@@ -12,12 +12,19 @@ from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
-from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_spherical_segment
+from kwave.utils.mapgen import (
+    trim_cart_points,
+    make_cart_rect,
+    make_cart_arc,
+    make_cart_bowl,
+    make_cart_disc,
+    make_cart_spherical_segment,
+)
 from kwave.utils.math import sinc, get_affine_matrix
 from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
 
 
-@dataclass
+@dataclass(eq=False)
 class Element:
     group_id: int
     type: str
@@ -82,6 +89,60 @@ class Element:
             self.end_point = np.array(self.end_point, dtype=float)
 
         self.measure = float(self.measure)
+
+    def is_close(self, other: "Element", rtol=1e-05, atol=1e-08, equal_nan=False):
+        """Compares 2 Elements to a certain precision for their numerical
+        fields. This differs from the __eq__ method which requires a perfect
+        match between numerical fields. Works with ints, floats and numpy
+        arrays.
+
+        See numpy.allclose and numpy.isclose for more details.
+
+        :param other: an instance of Element
+        :param rtol: The relative tolerance parameter, defaults to 1e-05
+        :param atol: The absolute tolerance parameter, defaults to 1e-08
+        :param equal_nan: Whether to compare NaN's as equal, defaults to False
+        :raises ValueError: when other object is not an instance of Element
+        :return: bool
+        """
+        if not isinstance(other, type(self)):
+            raise ValueError(f"{other} is not instance of type Element")
+
+        for field in fields(self):
+            self_attr = getattr(self, field.name)
+            other_attr = getattr(other, field.name)
+            if isinstance(self_attr, np.ndarray):
+                if not np.allclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
+                    return False
+            elif isinstance(self_attr, (int, float)):
+                if not np.isclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
+                    return False
+            else:
+                if self_attr != other_attr:
+                    return False
+        return True
+
+    def __eq__(self, other):
+        """Equality operator that handles all fields but specifically numpy
+        arrays.
+
+        :param other: an instance of Element
+        :raises ValueError: when other object is not an instance of Element
+        :return: bool
+        """
+        if not isinstance(other, type(self)):
+            raise ValueError(f"{other} is not instance of type Element")
+
+        for field in fields(self):
+            self_attr = getattr(self, field.name)
+            other_attr = getattr(other, field.name)
+            if isinstance(self_attr, np.ndarray):
+                if not np.array_equal(self_attr, other_attr):
+                    return False
+            else:
+                if self_attr != other_attr:
+                    return False
+        return True
 
 
 class kWaveArray(object):
@@ -229,7 +290,11 @@ class kWaveArray(object):
     def add_custom_element(self, integration_points, measure, element_dim, label):
         assert isinstance(integration_points, (np.ndarray)), "'integration_points' must be a numpy array"
         assert isinstance(measure, (int, float)), "'measure' must be an integer or float"
-        assert isinstance(element_dim, (int)) and element_dim in [1, 2, 3], "'element_dim' must be an integer and either 1, 2 or 3"
+        assert isinstance(element_dim, (int)) and element_dim in [
+            1,
+            2,
+            3,
+        ], "'element_dim' must be an integer and either 1, 2 or 3"
         assert isinstance(label, (str)), "'label' must be a string"
 
         # check the dimensionality of the integration points
@@ -250,7 +315,13 @@ class kWaveArray(object):
 
         self.elements.append(
             Element(
-                group_id=0, type="custom", dim=element_dim, label=label, integration_points=integration_points, active=True, measure=measure
+                group_id=0,
+                type="custom",
+                dim=element_dim,
+                label=label,
+                integration_points=integration_points,
+                active=True,
+                measure=measure,
             )
         )
 
@@ -396,7 +467,13 @@ class kWaveArray(object):
 
         self.elements.append(
             Element(
-                group_id=0, type="line", dim=1, start_point=array(start_point), end_point=array(end_point), active=True, measure=line_length
+                group_id=0,
+                type="line",
+                dim=1,
+                start_point=array(start_point),
+                end_point=array(end_point),
+                active=True,
+                measure=line_length,
             )
         )
 
@@ -536,25 +613,37 @@ class kWaveArray(object):
             # points are offset by half the point spacing
             if self.dim == 1:
                 integration_points = np.linspace(
-                    self.elements[element_num].start_point + d[0] / 2, self.elements[element_num].end_point - d[0] / 2, m_integration
+                    self.elements[element_num].start_point + d[0] / 2,
+                    self.elements[element_num].end_point - d[0] / 2,
+                    m_integration,
                 )
             elif self.dim == 2:
                 px = np.linspace(
-                    self.elements[element_num].start_point[0] + d[0] / 2, self.elements[element_num].end_point[0] - d[0] / 2, m_integration
+                    self.elements[element_num].start_point[0] + d[0] / 2,
+                    self.elements[element_num].end_point[0] - d[0] / 2,
+                    m_integration,
                 )
                 py = np.linspace(
-                    self.elements[element_num].start_point[1] + d[1] / 2, self.elements[element_num].end_point[1] - d[1] / 2, m_integration
+                    self.elements[element_num].start_point[1] + d[1] / 2,
+                    self.elements[element_num].end_point[1] - d[1] / 2,
+                    m_integration,
                 )
                 integration_points = np.array([px, py])
             elif self.dim == 3:
                 px = np.linspace(
-                    self.elements[element_num].start_point[0] + d[0] / 2, self.elements[element_num].end_point[0] - d[0] / 2, m_integration
+                    self.elements[element_num].start_point[0] + d[0] / 2,
+                    self.elements[element_num].end_point[0] - d[0] / 2,
+                    m_integration,
                 )
                 py = np.linspace(
-                    self.elements[element_num].start_point[1] + d[1] / 2, self.elements[element_num].end_point[1] - d[1] / 2, m_integration
+                    self.elements[element_num].start_point[1] + d[1] / 2,
+                    self.elements[element_num].end_point[1] - d[1] / 2,
+                    m_integration,
                 )
                 pz = np.linspace(
-                    self.elements[element_num].start_point[2] + d[2] / 2, self.elements[element_num].end_point[2] - d[2] / 2, m_integration
+                    self.elements[element_num].start_point[2] + d[2] / 2,
+                    self.elements[element_num].end_point[2] - d[2] / 2,
+                    m_integration,
                 )
                 integration_points = np.array([px, py, pz])
 
@@ -630,7 +719,10 @@ class kWaveArray(object):
 
         prefixes = ["", "K", "M", "G", "T"]
         sz_bytes = np.round(sz_bytes, 2)  # TODO: should round to significant to map matlab functionality
-        logging.log(logging.INFO, f"approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)")
+        logging.log(
+            logging.INFO,
+            f"approximate size of source matrix: {str(sz_bytes)} {prefixes[sz_ind]} B ( {data_type} precision)",
+        )
 
         source_signal = source_signal.astype(data_type)
 
@@ -670,7 +762,8 @@ class kWaveArray(object):
             local_ind = np.isin(mask_ind, element_mask_ind)
 
             combined_sensor_data[element_num, :] = np.sum(
-                sensor_data[local_ind] * matlab_mask(source_weights, element_mask_ind - 1), axis=0
+                sensor_data[local_ind] * matlab_mask(source_weights, element_mask_ind - 1),
+                axis=0,
             )
 
             m_grid = self.elements[element_num].measure / (kgrid.dx) ** (self.elements[element_num].dim)
@@ -708,7 +801,15 @@ class kWaveArray(object):
 
 
 def off_grid_points(
-    kgrid, points, scale=1, bli_tolerance=0.1, bli_type="sinc", mask_only=False, single_precision=False, debug=False, display_wait_bar=False
+    kgrid,
+    points,
+    scale=1,
+    bli_tolerance=0.1,
+    bli_type="sinc",
+    mask_only=False,
+    single_precision=False,
+    debug=False,
+    display_wait_bar=False,
 ):
     wait_bar_update_freq = 100
 
@@ -826,7 +927,10 @@ def off_grid_points(
                         mask_t_y = get_delta_bli(kgrid.Ny, kgrid.dy, y_vec, point[1])
                         mask_t_z = get_delta_bli(kgrid.Nz, kgrid.dz, z_vec, point[2])
 
-                    mask = mask + scale[point_ind] * np.reshape(np.kron(mask_t_y @ mask_t_z.T, mask_t_x), [kgrid.Nx, kgrid.Ny, kgrid.Nz])
+                    mask = mask + scale[point_ind] * np.reshape(
+                        np.kron(mask_t_y @ mask_t_z.T, mask_t_x),
+                        [kgrid.Nx, kgrid.Ny, kgrid.Nz],
+                    )
 
         else:
             # create an array of neighbouring grid points for BLI evaluation
