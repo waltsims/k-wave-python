@@ -106,7 +106,7 @@ class Element:
         :return: bool
         """
         if not isinstance(other, type(self)):
-            raise ValueError(f"{other} is not instance of type Element")
+            raise TypeError(f"{other} with {type(other)} is not of type Element")
 
         for field in fields(self):
             self_attr = getattr(self, field.name)
@@ -128,7 +128,7 @@ class Element:
         :return: bool
         """
         if not isinstance(other, type(self)):
-            raise ValueError(f"{other} is not instance of type Element")
+            raise TypeError(f"{other} with {type(other)} is not of type Element")
 
         for field in fields(self):
             self_attr = getattr(self, field.name)
