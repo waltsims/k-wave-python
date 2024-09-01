@@ -111,7 +111,7 @@ class Element:
         for field in fields(self):
             self_attr = getattr(self, field.name)
             other_attr = getattr(other, field.name)
-            if isinstance(self_attr, (int, float, np.ndarray)):
+            if isinstance(self_attr, (float, np.ndarray)):
                 if not np.allclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
                     return False
             else:
