@@ -161,7 +161,7 @@ class kWaveSimulation(object):
         """
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
         if not any(self.record.is_set(fields)) and not self.time_rev:
-            return False
+            return True
         return False
 
     @property
