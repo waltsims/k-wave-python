@@ -160,7 +160,7 @@ class kWaveSimulation(object):
 
         """
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
-        if not any(self.record.is_set(fields)) and not self.time_rev:
+        if not (isinstance(self.sensor, NotATransducer) or any(self.record.is_set(fields)) or self.time_rev):
             return True
         return False
 
