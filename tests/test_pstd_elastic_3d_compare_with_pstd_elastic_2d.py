@@ -135,7 +135,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     t_array = np.linspace(0, (Nt - 1) * dt, Nt)
 
     # define sensor mask
-    sensor_mask_2D = make_circle(Vector([Nx, Ny]), Vector([Nx // 2, Ny// 2]), 15)
+    sensor_mask_2D = make_circle(Vector([Nx, Ny]), Vector([Nx // 2 - 1, Ny// 2 - 1]), 15)
 
     # define input arguements
     # input_args = {'PlotScale', [-1, 1, -0.2, 0.2], 'PMLSize', PML_size,
@@ -143,8 +143,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
     # define source properties
     source_strength = 3
-    source_position_x: int = Nx // 2 - 20
-    source_position_y: int = Ny // 2 - 10
+    source_position_x: int = Nx // 2 - 21
+    source_position_y: int = Ny // 2 - 11
     source_freq = 2e6
     source_signal = source_strength * np.sin(2.0 * np.pi * source_freq * t_array)
 
@@ -254,10 +254,11 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
                                                pml_alpha=PML_alpha,
                                                pml_size=PML_size,
                                                smooth_p0=False)
-        sensor_data_2D = pstd_elastic_2d(medium=deepcopy(medium),
-                                         kgrid=deepcopy(kgrid),
+
+        sensor_data_2D = pstd_elastic_2d(kgrid=deepcopy(kgrid),
                                          source=deepcopy(source),
                                          sensor=deepcopy(sensor),
+                                         medium=deepcopy(medium),
                                          simulation_options=deepcopy(simulation_options))
 
         # calculate velocity amplitude
@@ -322,10 +323,10 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
                                                pml_y_alpha=PML_alpha,
                                                pml_z_alpha=0.0)
 
-        sensor_data_3D_z = pstd_elastic_3d(medium=deepcopy(medium),
-                                           kgrid=deepcopy(kgrid),
+        sensor_data_3D_z = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                            source=deepcopy(source),
                                            sensor=deepcopy(sensor),
+                                           medium=deepcopy(medium),
                                            simulation_options=deepcopy(simulation_options))
 
         # calculate velocity amplitude

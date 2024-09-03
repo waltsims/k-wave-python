@@ -39,19 +39,19 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
     Nx: int = 64
     Ny: int = 64
     Nz: int = 64
-    dx = 0.1e-3
-    dy = 0.1e-3
-    dz = 0.1e-3
+    dx: float = 0.1e-3
+    dy: float = 0.1e-3
+    dz: float = 0.1e-3
     kgrid = kWaveGrid(Vector([Nx, Ny, Nz]), Vector([dx, dy, dz]))
 
     # define the medium properties
-    cp = 1500.0
-    cs = 0.0
-    rho = 1000.0
+    cp: float = 1500.0
+    cs: float = 0.0
+    rho: float = 1000.0
 
     # create the time zarray
-    CFL = 0.1
-    t_end = 3e-6
+    CFL: float = 0.1
+    t_end: float = 3e-6
     kgrid.makeTime(cp, CFL, t_end)
 
     # create and assign the variables
@@ -82,7 +82,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
 
 
     # set pass variable
-    test_pass = True
+    test_pass: bool = True
 
     # test names
     test_names = ['source.p0',
@@ -98,7 +98,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
     # define a single point sensor
     sensor = kSensor()
     sensor.mask = np.zeros((Nx, Ny, Nz))
-    sensor.mask[3 *Nx // 4 - 1, 3 * Ny // 4 - 1, 3 * Nz // 4 - 1] = 1
+    sensor.mask[3 * Nx // 4 - 1, 3 * Ny // 4 - 1, 3 * Nz // 4 - 1] = 1
 
     # set some things to record
     sensor.record = ['p', 'p_final', 'u', 'u_final']
@@ -112,8 +112,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
                                                        kelvin_voigt_model=False)
 
     # loop through tests
-    for test_num in np.arange(3,7):
-
+    for test_num in np.arange(2,len(test_names)):
 
         # update command line
         print('Running Test: ', test_names[test_num])
@@ -124,11 +123,11 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
 
         if test_num == 0:
             # create initial pressure distribution using makeBall
-            disc_magnitude = 5.0              # [Pa]
-            disc_x_pos: int = Nx // 2 - 11    # [grid points]
-            disc_y_pos: int = Ny // 2 - 1     # [grid points]
-            disx_z_pos: int = Nz // 2 - 1     # [grid points]
-            disc_radius: int = 3              # [grid points]
+            disc_magnitude: float = 5.0     # [Pa]
+            disc_x_pos: int = Nx // 2 - 11  # [grid points]
+            disc_y_pos: int = Ny // 2 - 1   # [grid points]
+            disx_z_pos: int = Nz // 2 - 1   # [grid points]
+            disc_radius: int = 3            # [grid points]
             source_fluid.p0 = disc_magnitude * make_ball(Vector([Nx, Ny, Nz]),
                                                          Vector([disc_x_pos, disc_y_pos, disx_z_pos]),
                                                          disc_radius)
@@ -208,18 +207,18 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
         execution_options_fluid = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False)
 
         # run the fluid simulation
-        sensor_data_fluid = kspaceFirstOrder3D(medium=deepcopy(medium_fluid),
-                                               kgrid=deepcopy(kgrid),
+        sensor_data_fluid = kspaceFirstOrder3D(kgrid=deepcopy(kgrid),
                                                source=deepcopy(source_fluid),
                                                sensor=deepcopy(sensor),
+                                               medium=deepcopy(medium_fluid),
                                                simulation_options=deepcopy(simulation_options_fluid),
                                                execution_options=deepcopy(execution_options_fluid))
 
         # run the elastic simulation
-        sensor_data_elastic = pstd_elastic_3d(medium=deepcopy(medium_elastic),
-                                              kgrid=deepcopy(kgrid),
+        sensor_data_elastic = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                               source=deepcopy(source_elastic),
                                               sensor=deepcopy(sensor),
+                                              medium=deepcopy(medium_elastic),
                                               simulation_options=deepcopy(simulation_options_elastic))
 
         # compute comparisons for time series
@@ -236,10 +235,14 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
 
         # compute pass
         latest_test: bool = False
-        if ((L_inf_p < COMPARISON_THRESH) and (L_inf_ux < COMPARISON_THRESH) and
-            (L_inf_uy < COMPARISON_THRESH) and (L_inf_uz < COMPARISON_THRESH) and
-            (L_inf_p_final < COMPARISON_THRESH) and (L_inf_ux_final < COMPARISON_THRESH)
-            and (L_inf_uy_final < COMPARISON_THRESH) and (L_inf_uz_final < COMPARISON_THRESH)):
+        if ((L_inf_p < COMPARISON_THRESH) and
+            (L_inf_ux < COMPARISON_THRESH) and
+            (L_inf_uy < COMPARISON_THRESH) and
+            (L_inf_uz < COMPARISON_THRESH) and
+            (L_inf_p_final < COMPARISON_THRESH) and
+            (L_inf_ux_final < COMPARISON_THRESH) and
+            (L_inf_uy_final < COMPARISON_THRESH) and
+            (L_inf_uz_final < COMPARISON_THRESH)):
             # set test variable
             latest_test = True
         else:
