@@ -58,33 +58,33 @@ def print_grid_size(kgrid, scale):
     grid_scale_str = " by ".join(map(str, grid_size_scale))
 
     # display grid size
-    logging.log(logging.INFO, f"  input grid size: {grid_size_str} grid points ({grid_scale_str} m)")
+    logging.log(logging.INFO, f"  input grid size: {grid_size_str} grid points ({grid_scale_str}m)")
 
 
 def print_max_supported_freq(kgrid, c_min):
     # display the grid size and maximum supported frequency
     k_max, k_max_all = kgrid.k_max, kgrid.k_max_all
 
+    def max_freq_str(kfreq):
+        return scale_SI(kfreq * c_min / (2 * np.pi))[0]
+
     if kgrid.dim == 1:
         # display maximum supported frequency
-        logging.log(logging.INFO, f"  maximum supported frequency: {scale_SI(k_max_all * c_min / (2 * np.pi))[0]} Hz")
+        logging.log(logging.INFO, f"  maximum supported frequency: {max_freq_str(k_max_all)}Hz")
 
     elif kgrid.dim == 2:
         # display maximum supported frequency
         if k_max.x == k_max.y:
-            logging.log(logging.INFO, f"  maximum supported frequency: {scale_SI(k_max_all * c_min / (2 * np.pi))[0]} Hz")
+            logging.log(logging.INFO, f"  maximum supported frequency: {max_freq_str(k_max_all)}Hz")
         else:
-            logging.log(
-                logging.INFO,
-                f"  maximum supported frequency: {scale_SI(k_max.x * c_min / (2 * np.pi))[0]} Hz by {scale_SI(k_max.y * c_min / (2 * np.pi))[0]} Hz",
-            )
+            logging.log(logging.INFO, f"  maximum supported frequency: {max_freq_str(k_max.x)}Hz by {max_freq_str(k_max.y)}Hz")
 
     elif kgrid.dim == 3:
         # display maximum supported frequency
         if k_max.x == k_max.z and k_max.x == k_max.y:
-            logging.log(logging.INFO, f"  maximum supported frequency: {scale_SI(k_max_all * c_min / (2*np.pi))[0]} Hz")
+            logging.log(logging.INFO, f"  maximum supported frequency: {max_freq_str(k_max_all)}Hz")
         else:
             logging.log(
                 logging.INFO,
-                f"  maximum supported frequency: {scale_SI(k_max.x * c_min / (2*np.pi))[0]} Hz by {scale_SI(k_max.y * c_min / (2*np.pi))[0]} Hz by {scale_SI(k_max.z * c_min / (2*np.pi))[0]} Hz",
+                f"  maximum supported frequency: {max_freq_str(k_max.x)}Hz by {max_freq_str(k_max.y)}Hz by {max_freq_str(k_max.z)}Hz",
             )

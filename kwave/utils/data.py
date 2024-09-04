@@ -200,7 +200,7 @@ def scale_SI(x: Union[float, np.ndarray]) -> Tuple[str, Union[int, float], str, 
     if (x_sc - int(x_sc)) < (0.1**round_decimals):
         # avoid values like X.0, instead have only X
         x_sc = int(x_sc)
-    x_sc = f"-{x_sc}{prefix}" if negative else f"{x_sc}{prefix}"
+    x_sc = f"-{x_sc:.1f}{prefix}" if negative else f"{x_sc:.1f}{prefix}"
     return x_sc, scale, prefix, prefix_fullname
 
 
