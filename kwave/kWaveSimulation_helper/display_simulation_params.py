@@ -66,7 +66,8 @@ def print_max_supported_freq(kgrid, c_min):
     k_max, k_max_all = kgrid.k_max, kgrid.k_max_all
 
     def max_freq_str(kfreq):
-        return scale_SI(kfreq * c_min / (2 * np.pi))[0]
+        scaled_num_str, _, _, _ = scale_SI(kfreq * c_min / (2 * np.pi))
+        return scaled_num_str
 
     if kgrid.dim == 1:
         # display maximum supported frequency
