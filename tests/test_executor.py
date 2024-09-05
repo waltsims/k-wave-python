@@ -144,7 +144,7 @@ class TestExecutor(unittest.TestCase):
         self.mock_h5py_file.assert_called_once_with("/fake/output.h5", "r")
         mock_file.keys.assert_called_once()
         mock_file.__getitem__.assert_called_once_with("/data")
-        mock_dataset.__getitem__.assert_called_once_with(0)
+        mock_dataset.__getitem__.assert_called_once_with(slice(None))
         mock_dataset.__getitem__.return_value.squeeze.assert_called_once()
         self.assertIn("data", result)
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))

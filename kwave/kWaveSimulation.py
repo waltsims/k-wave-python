@@ -1311,7 +1311,7 @@ class kWaveSimulation(object):
         """
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
-            if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
+            if not self.blank_sensor or self.options.save_to_disk:
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
