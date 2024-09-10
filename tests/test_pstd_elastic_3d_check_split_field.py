@@ -16,8 +16,6 @@ from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.signals import tone_burst
 from kwave.utils.mapgen import make_bowl
 
-import scipy.io as sio
-
 def test_pstd_elastic_3d_check_split_field():
 
     # set comparison threshold
@@ -76,7 +74,7 @@ def test_pstd_elastic_3d_check_split_field():
 
     # define the sensor to record the maximum particle velocity everywhere
     sensor = kSensor()
-    sensor.record = ['u_split_field', 'u_non_staggered']
+    sensor.record = ['p', 'u_split_field', 'u_non_staggered']
     sensor.mask = np.zeros((Nx, Ny, Nz))
     sensor.mask[:, :, Nz // 2 - 1] = 1
 
@@ -85,9 +83,6 @@ def test_pstd_elastic_3d_check_split_field():
     focus_pos   = np.round(np.asarray(focus_pos) / dx).astype(int) + np.asarray([Nx // 2 - 1, Ny // 2 - 1, Nz // 2 - 1])
     radius      = int(round(radius / dx))
     diameter    = int(round(diameter / dx))
-
-    print(bowl_pos)
-    print(focus_pos)
 
     # force the diameter to be odd
     if diameter % 2 == 0:
@@ -130,7 +125,7 @@ def test_pstd_elastic_3d_check_split_field():
                                            kelvin_voigt_model=False)
 
     # run the elastic simulation
-    sensor_data_elastic = pstd_elastic_3d(deepcopy(kgrid),
+    sensor_data_elastic = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                           medium=deepcopy(medium),
                                           source=deepcopy(source),
                                           sensor=deepcopy(sensor),
@@ -142,54 +137,12 @@ def test_pstd_elastic_3d_check_split_field():
                             sensor_data_elastic['ux_split_s'])) / np.max(np.abs(sensor_data_elastic['ux_non_staggered']))
 
     diff_uy = np.max(np.abs(sensor_data_elastic['uy_non_staggered'] -
-                            sensor_data_elastic['ux_split_p'] -
+                            sensor_data_elastic['uy_split_p'] -
                             sensor_data_elastic['uy_split_s'])) / np.max(np.abs(sensor_data_elastic['uy_non_staggered']))
 
     diff_uz = np.max(np.abs(sensor_data_elastic['uz_non_staggered'] -
                             sensor_data_elastic['uz_split_p'] -
                             sensor_data_elastic['uz_split_s'])) / np.max(np.abs(sensor_data_elastic['uz_non_staggered']))
-
-    mat_contents = sio.loadmat('split_field.mat')
-
-    ux_split_p = mat_contents['ux_split_p']
-    uy_split_p = mat_contents['uy_split_p']
-    uz_split_p = mat_contents['uz_split_p']
-
-    ux_non_staggered = mat_contents['ux_non_staggered']
-    uy_non_staggered = mat_contents['uy_non_staggered']
-    uz_non_staggered = mat_contents['uz_non_staggered']
-
-    diff_mat_ux_non_staggered = np.max(np.abs(sensor_data_elastic['ux_non_staggered'] - ux_non_staggered))
-    diff_mat_uy_non_staggered = np.max(np.abs(sensor_data_elastic['uy_non_staggered'] - uy_non_staggered))
-    diff_mat_uz_non_staggered = np.max(np.abs(sensor_data_elastic['uz_non_staggered'] - uz_non_staggered))
-
-    diff_mat_ux_split_p = np.max(np.abs(sensor_data_elastic['ux_split_p'] - ux_split_p))
-    diff_mat_uy_split_p = np.max(np.abs(sensor_data_elastic['uy_split_p'] - uy_split_p))
-    diff_mat_uz_split_p = np.max(np.abs(sensor_data_elastic['uz_split_p'] - uz_split_p))
-
-    # diff_mat_ux_split_s = np.max(np.abs(sensor_data_elastic['ux_split_s'] - ux_split_s))
-    # diff_mat_uy_split_s = np.max(np.abs(sensor_data_elastic['uy_split_s'] - uy_split_s))
-    # diff_mat_uz_split_s = np.max(np.abs(sensor_data_elastic['uz_split_s'] - uz_split_s))
-
-    print("diff_mat_ux_non_staggered:", diff_mat_ux_non_staggered,
-          np.max(np.abs(sensor_data_elastic['ux_non_staggered'])), np.argmax(np.abs(sensor_data_elastic['ux_non_staggered'])),
-          np.max(np.abs(ux_non_staggered)), np.argmax(np.abs(ux_non_staggered)))
-    print("diff_mat_uy_non_staggered:", diff_mat_uy_non_staggered,
-          np.max(np.abs(sensor_data_elastic['uy_non_staggered'])), np.argmax(np.abs(sensor_data_elastic['uy_non_staggered'])),
-          np.max(np.abs(uy_non_staggered)), np.argmax(np.abs(uy_non_staggered)))
-    print("diff_mat_uz_non_staggered:", diff_mat_uz_non_staggered,
-          np.max(np.abs(sensor_data_elastic['uz_non_staggered'])), np.argmax(np.abs(sensor_data_elastic['uz_non_staggered'])),
-          np.max(np.abs(uz_non_staggered)), np.argmax(np.abs(uz_non_staggered)))
-
-    print("diff_mat_ux_split_p:", diff_mat_ux_split_p,
-          np.max(np.abs(sensor_data_elastic['ux_split_p'])), np.argmax(np.abs(sensor_data_elastic['ux_split_p'])),
-          np.max(np.abs(ux_split_p)), np.argmax(np.abs(ux_split_p)))
-    print("diff_mat_uy_split_p:", diff_mat_uy_split_p,
-          np.max(np.abs(sensor_data_elastic['uy_split_p'])), np.argmax(np.abs(sensor_data_elastic['uy_split_p'])),
-          np.max(np.abs(uy_split_p)), np.argmax(np.abs(uy_split_p)))
-    print("diff_mat_uz_split_p:", diff_mat_uz_split_p,
-          np.max(np.abs(sensor_data_elastic['uz_split_p'])), np.argmax(np.abs(sensor_data_elastic['uz_split_p'])),
-          np.max(np.abs(uz_split_p)), np.argmax(np.abs(uz_split_p)))
 
     # check for test pass
     if (diff_ux > COMPARISON_THRESH):
