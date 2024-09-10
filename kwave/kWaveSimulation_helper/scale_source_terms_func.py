@@ -1,5 +1,7 @@
 import logging
 
+from copy import deepcopy
+
 import numpy as np
 
 from kwave.kgrid import kWaveGrid
@@ -7,8 +9,10 @@ from kwave.ksource import kSource
 from kwave.utils.dotdictionary import dotdict
 
 
-def scale_source_terms_func(c0, dt, kgrid: kWaveGrid, source, p_source_pos_index,
-                            s_source_pos_index, u_source_pos_index,
+def scale_source_terms_func(c0, dt, kgrid: kWaveGrid, source,
+                            p_source_pos_index,
+                            s_source_pos_index,
+                            u_source_pos_index,
                             transducer_input_signal, flags: dotdict):
     """
     Subscript for the first-order k-Wave simulation functions to scale source terms to the correct units.
@@ -211,20 +215,31 @@ def scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index):
 
     """
 
-    source.sxx = scale_stress_source(source, c0, flags.source_sxx, flags.source_p0, source.sxx, dt, N, dx, s_source_pos_index)
-    source.syy = scale_stress_source(source, c0, flags.source_syy, flags.source_p0, source.syy, dt, N, dx, s_source_pos_index)
-    source.szz = scale_stress_source(source, c0, flags.source_szz, flags.source_p0, source.szz, dt, N, dx, s_source_pos_index)
-    # source.sxy = scale_stress_source(source, c0, flags.source_sxy, True,          source.sxy, dt, N, dx, s_source_pos_index)
-    # source.sxz = scale_stress_source(source, c0, flags.source_sxz, True,          source.sxz, dt, N, dx, s_source_pos_index)
-    # source.syz = scale_stress_source(source, c0, flags.source_syz, True,          source.syz, dt, N, dx, s_source_pos_index)
+    if flags.source_sxx:
+        print("scale source.sxx")
+        source.sxx = scale_stress_source(source, c0, flags.source_sxx, flags.source_p0, deepcopy(source.sxx), dt, N, dx, s_source_pos_index)
+    if flags.source_syy:
+        print("scale source.syy")
+        source.syy = scale_stress_source(source, c0, flags.source_syy, flags.source_p0, deepcopy(source.syy), dt, N, dx, s_source_pos_index)
+    if flags.source_szz:
+        print("scale source.szz")
+        source.szz = scale_stress_source(source, c0, flags.source_szz, flags.source_p0, deepcopy(source.szz), dt, N, dx, s_source_pos_index)
+    if flags.source_sxy:
+        source.sxy = scale_stress_source(source, c0, flags.source_sxy, flags.source_p0, source.sxy, dt, N, dx, s_source_pos_index)
+    if flags.source_sxz:
+        source.sxz = scale_stress_source(source, c0, flags.source_sxz, flags.source_p0, source.sxz, dt, N, dx, s_source_pos_index)
+    if flags.source_syz:
+        source.syz = scale_stress_source(source, c0, flags.source_syz, flags.source_p0, source.syz, dt, N, dx, s_source_pos_index)
 
 
 def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_s, dt, N, dx, s_source_pos_index):
     if is_source_exists:
         if source.s_mode == "dirichlet" or is_p0_exists:
             source_s = source_s / N
+            print("source.s_mode == dirichlet or is_p0_exists")
         else:
             if c0.size == 1:
+                print("if c0.size == 1")
                 # compute the scale parameter based on the homogeneous sound
                 # speed
                 source_s = source_s * (2 * dt * c0 / (N * dx))
@@ -232,10 +247,14 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_s, dt
             else:
                 # compute the scale parameter seperately for each source
                 # position based on the sound speed at that position
-                ind = range(source_s[:, 0].size)
-                mask = s_source_pos_index.flatten("F")[ind]
-                scale = (2.0 * dt * np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1) ) / (N * dx)
-                source_s[ind, :] *= scale
+                s_index = range(0, np.shape(source_s)[0])
+                print("s_index:", s_index)
+                mask = s_source_pos_index.flatten("F")[s_index]
+                print("mask:", mask)
+                scale = (2.0 * dt * np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1)) / (N * dx)
+                print("scale:", scale, "from:", dt, N, dx, np.expand_dims(c0.ravel(order="F")[mask.ravel(order="F")], axis=-1))
+                print(np.shape(source_s[s_index, :]), np.shape(scale))
+                source_s[s_index, :] = source_s[s_index, :] * scale
 
     return source_s
 
@@ -278,9 +297,9 @@ def scale_velocity_sources(flags, source, kgrid, c0, dt, dx, dy, dz, u_source_po
     #     flags.source_ux, source.u_mode, source.ux, kgrid, c0, dt, dx, u_source_pos_index, flags.nonuniform_grid
     # )
 
-    source.ux = scale_velocity_source(flags.source_ux, source.u_mode, source.ux, c0, dt, u_source_pos_index, dx)
-    source.uy = scale_velocity_source(flags.source_uy, source.u_mode, source.uy, c0, dt, u_source_pos_index, dy)
-    source.uz = scale_velocity_source(flags.source_uz, source.u_mode, source.uz, c0, dt, u_source_pos_index, dz)
+    source.ux = scale_velocity_source(flags.source_ux, source.u_mode, deepcopy(source.ux), c0, dt, u_source_pos_index, dx)
+    source.uy = scale_velocity_source(flags.source_uy, source.u_mode, deepcopy(source.uy), c0, dt, u_source_pos_index, dy)
+    source.uz = scale_velocity_source(flags.source_uz, source.u_mode, deepcopy(source.uz), c0, dt, u_source_pos_index, dz)
 
 
 # def scale_velocity_source_x(is_source_ux, source_u_mode, source_val, kgrid, c0, dt, dx, u_source_pos_index, is_nonuniform_grid):

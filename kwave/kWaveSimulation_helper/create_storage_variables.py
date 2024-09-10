@@ -217,8 +217,17 @@ def create_shift_operators(record: Recorder, record_old: Recorder, kgrid: kWaveG
                 record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2)).T
             elif kgrid.dim == 3:
                 record.x_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.x * kgrid.dx / 2))
-                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2)).T
-                record.z_shift_neg = np.transpose(ifftshift(np.exp(-1j * kgrid.k_vec.z * kgrid.dz / 2)), [1, 2, 0])
+                record.y_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.y * kgrid.dy / 2))
+                record.z_shift_neg = ifftshift(np.exp(-1j * kgrid.k_vec.z * kgrid.dz / 2))
+
+                record.x_shift_neg = np.expand_dims(record.x_shift_neg, axis=-1)
+
+                record.y_shift_neg = np.expand_dims(record.y_shift_neg, axis=0)
+
+                record.z_shift_neg = np.squeeze(record.z_shift_neg)
+                record.z_shift_neg = np.expand_dims(record.z_shift_neg, axis=0)
+                record.z_shift_neg = np.expand_dims(record.z_shift_neg, axis=0)
+
         else:
             if kgrid.dim == 1:
                 record.x_shift_neg = 1
@@ -446,28 +455,26 @@ def compute_triangulation_points(flags, kgrid, record, mask):
     Barycentric coordinates)
     """
 
-    if kgrid.dim == 1:
-        # align sensor data as a column vector to be the same as kgrid.x_vec
-        # so that calls to interp return data in the correct dimension
-        sensor_x = np.reshape((mask, (-1, 1)))
-
-    elif kgrid.dim == 2:
-        sensor_x = mask[0, :]
-        sensor_y = mask[1, :]
-
-    elif kgrid.dim == 3:
-        sensor_x = mask[0, :]
-        sensor_y = mask[1, :]
-        sensor_z = mask[2, :]
-
-
     if not flags.binary_sensor_mask:
+
         if kgrid.dim == 1:
 
             # assign pseudonym for Cartesain grid points in 1D (this is later used for data casting)
             record.grid_x = kgrid.x_vec
 
         else:
+
+            if kgrid.dim == 1:
+              # align sensor data as a column vector to be the same as kgrid.x_vec
+              # so that calls to interp return data in the correct dimension
+              sensor_x = np.reshape((mask, (-1, 1)))
+            elif kgrid.dim == 2:
+                sensor_x = mask[0, :]
+                sensor_y = mask[1, :]
+            elif kgrid.dim == 3:
+                sensor_x = mask[0, :]
+                sensor_y = mask[1, :]
+                sensor_z = mask[2, :]
 
             # update command line status
             print('  calculating Delaunay triangulation...')
