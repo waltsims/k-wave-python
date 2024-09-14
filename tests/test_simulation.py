@@ -1,22 +1,21 @@
 import unittest
+
 import numpy as np
 import pytest
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
 from kwave.ksensor import kSensor
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-
+from kwave.kWaveSimulation import kWaveSimulation
 from kwave.options.simulation_options import SimulationOptions
-from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 
 
-class TestUltrasoundSimulationRecording(unittest.TestCase):
+class TestSimulation(unittest.TestCase):
     def setUp(self):
-
         # Initialize
         self.source = kSource()
         self.sensor = kSensor()
@@ -49,44 +48,40 @@ class TestUltrasoundSimulationRecording(unittest.TestCase):
         self.sensor.mask = np.zeros(self.N)
         self.sensor.mask[0] = 1
 
-        # create the time array
-        self.kgrid.makeTime(self.medium.sound_speed)
-
-
-    def run_simulation(self, record_fields):
-        self.sensor.record = record_fields
-
-        simulation_options = SimulationOptions(
+        # define simulation options
+        self.simulation_options = SimulationOptions(
             pml_inside=False, pml_size=self.PML_size, data_cast=self.DATA_CAST,
             save_to_disk=True, data_recast=True, smooth_p0=False,
         )
-        execution_options = ExecutionOptions(is_gpu_simulation=False, binary_name=self.binary_name)
 
-        sensor_data = kspaceFirstOrder2D(
-            kgrid=self.kgrid,
-            medium=self.medium,
-            source=self.source,
-            sensor=self.sensor,
-            simulation_options=simulation_options,
-            execution_options=execution_options,
-        )
-
-        return sensor_data
+        # create the time array
+        self.kgrid.makeTime(self.medium.sound_speed)
 
     def test_record_final_pressure(self):
-        record_fields = ['p_final']
-        sensor_data = self._test_simulation(record_fields=record_fields)
-        for field in record_fields:
-            assert field in sensor_data
+        self.sensor.record = ['p_final']
+        k_sim = kWaveSimulation(kgrid=self.kgrid, source=self.source, sensor=self.sensor,
+                                medium=self.medium, simulation_options=self.simulation_options)
+        k_sim.input_checking("kspaceFirstOrder2D")
+
+        recorder = k_sim.record.__dict__
+        for key, val in recorder.items():
+            if key == 'p_final':
+                assert val
+            elif key.startswith(('p', 'u', 'I')):
+                assert not val
 
     def test_record_pressure(self):
-        record_fields = ['p']
-        sensor_data = self._test_simulation(record_fields=record_fields)
-        for field in record_fields:
-            assert field in sensor_data
+        self.sensor.record = ['p']
+        k_sim = kWaveSimulation(kgrid=self.kgrid, source=self.source, sensor=self.sensor,
+                                medium=self.medium, simulation_options=self.simulation_options)
+        k_sim.input_checking("kspaceFirstOrder2D")
 
-    def _test_simulation(self, record_fields):
-        return self.run_simulation(record_fields)
+        recorder = k_sim.record.__dict__
+        for key, val in recorder.items():
+            if key == 'p':
+                assert val
+            elif key.startswith(('p', 'u', 'I')):
+                assert not val
 
 
 if __name__ == "__main__":
