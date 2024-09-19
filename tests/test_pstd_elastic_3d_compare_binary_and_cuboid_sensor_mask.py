@@ -124,7 +124,7 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
                                         sensor=deepcopy(sensor),
                                         simulation_options=deepcopy(simulation_options))
 
-    print(np.shape(sensor_data_comp1.p))
+    # print(np.shape(sensor_data_comp1.p))
 
     # compute the error from the first cuboid
     L_inf_p      = np.max(np.abs(sensor_data_cuboids[cuboid_index].p -
