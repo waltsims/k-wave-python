@@ -1,4 +1,3 @@
-# Assuming these are imported from elsewhere in your project
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
 from kwave import PLATFORM, BINARY_PATH
