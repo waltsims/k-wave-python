@@ -4,7 +4,7 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, Optional
 
 from .conversion import grid2cart
@@ -54,7 +54,7 @@ def interpolate3d(grid_points: List[np.ndarray], grid_values: np.ndarray, interp
     # Out of bound points will get NaN values
     result = interpn((g_x, g_y, g_z), grid_values, queries, method="linear", bounds_error=False, fill_value=np.nan)
     # Go back from list of interpolated values to 3D volume
-    result = result.reshape((g_x.size, g_y.size, g_z.size))
+    result = result.reshape((q_x.size, q_y.size, q_z.size))
     # set values outside of the interpolation range to original values
     result[np.isnan(result)] = grid_values[np.isnan(result)]
     return result
@@ -254,7 +254,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
     # nearest neighbour interpolation of the data points
     for point_index in range(num_binary_sensor_points):
         # find the measured data point that is closest
-        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask.T, ord=2, axis=1)
+        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask[: kgrid.dim, :].T, ord=2, axis=1)
         if interp == "nearest":
             dist_min_index = np.argmin(dist)
 
@@ -340,7 +340,7 @@ def interpftn(x, sz: tuple, win=None):
     return y
 
 
-@beartype
+@typechecker
 def get_delta_bli(Nx: int, dx: float, x: np.ndarray, x0: Union[int, float], include_imag: bool = False) -> np.ndarray:
     """
     Exact BLI of an arbitrarily positioned delta function.

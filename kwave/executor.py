@@ -1,10 +1,10 @@
-import logging
 import stat
 import subprocess
-import unittest.mock
+import sys
 
 import h5py
 
+import kwave
 from kwave.utils.dotdictionary import dotdict
 
 
@@ -16,7 +16,15 @@ class Executor:
         self._make_binary_executable()
 
     def _make_binary_executable(self):
-        self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
+        try:
+            self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
+        except FileNotFoundError as e:
+            if kwave.PLATFORM == "darwin" and self.execution_options.is_gpu_simulation:
+                raise ValueError(
+                    "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
+                ) from e
+            else:
+                raise e
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
         command = (
@@ -34,21 +42,18 @@ class Executor:
                     # Stream stdout in real-time
                     for line in proc.stdout:
                         print(line, end="")
-                else:
-                    stdout, stderr = proc.communicate()
+
+                stdout, stderr = proc.communicate()
 
                 proc.wait()  # wait for process to finish before checking return code
                 if proc.returncode != 0:
                     raise subprocess.CalledProcessError(proc.returncode, command, stdout, stderr)
 
         except subprocess.CalledProcessError as e:
-            # Special handling for MagicMock during testing
-            if isinstance(e.returncode, unittest.mock.MagicMock):
-                logging.info("Skipping AssertionError in testing.")
-            else:
-                # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
-                print(e.stdout)
-                raise
+            # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
+            print(e.stdout)
+            print(e.stderr, file=sys.stderr)
+            raise
 
         sensor_data = self.parse_executable_output(output_filename)
 
@@ -80,7 +85,7 @@ class Executor:
         with h5py.File(output_filename, "r") as output_file:
             sensor_data = {}
             for key in output_file.keys():
-                sensor_data[key] = output_file[f"/{key}"][0].squeeze()
+                sensor_data[key] = output_file[f"/{key}"][:].squeeze()
         #     if self.simulation_options.cuboid_corners:
         #         sensor_data = [output_file[f'/p/{index}'][()] for index in range(1, len(key['mask']) + 1)]
         #

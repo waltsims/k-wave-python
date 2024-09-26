@@ -81,7 +81,7 @@ class Element:
                 self.end_point = [self.end_point]
             self.end_point = np.array(self.end_point, dtype=float)
 
-        self.measure = round(float(self.measure), 8)
+        self.measure = float(self.measure)
 
 
 class kWaveArray(object):
@@ -426,7 +426,7 @@ class kWaveArray(object):
     def get_array_binary_mask(self, kgrid):
         self.check_for_elements()
 
-        mask = np.zeros((kgrid.Nx, kgrid.Ny, max(kgrid.Nz, 1)), dtype=bool)
+        mask = np.squeeze(np.zeros((kgrid.Nx, kgrid.Ny, max(kgrid.Nz, 1)), dtype=bool))
 
         for ind in range(self.number_elements):
             grid_weights = self.get_off_grid_points(kgrid, ind, True)
@@ -569,7 +569,7 @@ class kWaveArray(object):
 
         if self.axisymmetric:
             # create new expanded grid
-            kgrid_expanded = kWaveGrid(kgrid.Nx, kgrid.dx, 2 * kgrid.Ny, kgrid.dy)
+            kgrid_expanded = kWaveGrid(Vector([kgrid.Nx, 2 * kgrid.Ny]), Vector([kgrid.dx, kgrid.dy]))
 
             # remove integration points which are outside grid
             integration_points = trim_cart_points(kgrid_expanded, integration_points)
@@ -586,7 +586,7 @@ class kWaveArray(object):
             )
 
             # keep points in the positive y domain
-            grid_weights = grid_weights[:, kgrid.Ny + 1 :]
+            grid_weights = grid_weights[:, kgrid.Ny :]
 
         else:
             # remove integration points which are outside grid

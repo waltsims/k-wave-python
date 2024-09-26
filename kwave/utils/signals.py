@@ -5,9 +5,9 @@ import numpy as np
 import scipy
 from numpy.fft import ifftshift, fft, ifft
 
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Union, List, Optional, Tuple
-from nptyping import NDArray, Shape, Int, Bool
+from jaxtyping import Int, Bool
 
 from .conversion import freq2wavenumber
 from .data import scale_SI
@@ -15,6 +15,8 @@ from .mapgen import ndgrid
 from .math import sinc, gaussian
 from .matlab import matlab_mask, unflatten_matlab_mask, rem
 from .matrix import broadcast_axis, num_dim
+
+import kwave.utils.typing as kt
 
 
 def add_noise(signal: np.ndarray, snr: float, mode="rms"):
@@ -53,16 +55,16 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
     return signal
 
 
-@beartype
+@typechecker
 def get_win(
-    N: Union[int, NDArray, Tuple[int, int], Tuple[int, int, int], List[Union[int, Int]]],
+    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
     type_: str,  # TODO change this to enum in the future
     plot_win: bool = False,
     param: Optional[float] = None,
     rotation: bool = False,
-    symmetric: Union[bool, NDArray[Shape["N"], Bool]] = True,
+    symmetric: Union[bool, Bool[np.ndarray, "N"]] = True,
     square: bool = False,
 ):
     """
@@ -110,7 +112,7 @@ def get_win(
     # Check if N is either `int` or `list of ints`
     # assert isinstance(N, int) or isinstance(N, list) or isinstance(N, np.ndarray)
     N = np.array(N, dtype=int)
-    N = N if np.size(N) > 1 else int(N)
+    N = N if np.size(N) > 1 else N.item()
 
     # Check if symmetric is either `bool` or `list of bools`
     # assert isinstance(symmetric, int) or isinstance(symmetric, list)
@@ -362,8 +364,7 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope="Gaussian", plot_s
     tone_index = np.round(signal_offset)
 
     # check for ring up and ring down input
-    if isinstance(envelope, list) or isinstance(envelope, np.ndarray):  # and envelope.size == 2:
-        # assign the inputs
+    if isinstance(envelope, list) or isinstance(envelope, np.ndarray):
         num_ring_up_cycles, num_ring_down_cycles = envelope
 
         # check signal is long enough for ring up and down
@@ -408,11 +409,6 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope="Gaussian", plot_s
         if envelope == "Gaussian":
             tone_burst = tone_burst * np.squeeze(get_win(len(tone_burst), type_="Tukey", param=0.05)[0])
 
-    # calculate the expected FWHM in the frequency domain
-    # t_var = tone_length/(2*x_lim)
-    # w_var = 1/(4*pi^2*t_var)
-    # fw = 2 * sqrt(2 * log(2) * w_var)
-
     # Convert tone_index and signal_offset to numpy arrays
     signal_offset = np.array(signal_offset)
 
@@ -420,17 +416,18 @@ def tone_burst(sample_freq, signal_freq, num_cycles, envelope="Gaussian", plot_s
     signal_length = max(signal_length, signal_offset.max() + len(tone_burst))
 
     # Create the signal array with the correct size
-    signal = np.zeros((tone_index.size, signal_length))
+    signal = np.zeros((np.atleast_1d(signal_offset).size, signal_length))
 
-    # Add the tone burst to the signal array
     # Add the tone burst to the signal array
     tone_index = np.atleast_1d(tone_index)
 
     if tone_index.size == 1:
-        signal[:, int(tone_index) : int(tone_index) + len(tone_burst)] = tone_burst.T
+        tone_index = int(np.squeeze(tone_index))
+        signal[:, tone_index : tone_index + len(tone_burst)] = tone_burst.T
     else:
-        for offset, tone_idx in enumerate(tone_index):
-            signal[offset, int(tone_idx) : int(tone_idx) + len(tone_burst)] = tone_burst.T
+        for i, idx in enumerate(tone_index):
+            signal[i, int(idx) : int(idx) + len(tone_burst)] = tone_burst
+
     # plot the signal if required
     if plot_signal:
         raise NotImplementedError

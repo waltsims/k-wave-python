@@ -2,9 +2,9 @@ import logging
 import time
 
 import numpy as np
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Dict, Union
-from nptyping import NDArray, Float, Shape
+from jaxtyping import Float
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
@@ -13,9 +13,9 @@ from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
 
 
-@beartype
+@typechecker
 def angular_spectrum_cw(
-    input_plane: NDArray[Shape["Dim1, Dim2"], Float],
+    input_plane: Float[np.ndarray, "Dim1 Dim2"],
     dx: float,
     z_pos: float,
     f0: int,

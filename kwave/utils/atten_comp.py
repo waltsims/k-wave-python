@@ -1,8 +1,8 @@
 import logging
 import numpy as np
 from matplotlib import pyplot as plt
-from beartype import beartype
-from nptyping import NDArray, Float, Shape
+from beartype import beartype as typechecker
+from jaxtyping import Float
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.math import find_closest
@@ -13,16 +13,16 @@ from kwave.utils.math import find_closest
 # =========================================================================
 
 
-@beartype
+@typechecker
 def constlinfit(x: float, y: float, a: float, b: float, neg_penalty: float = 10):
     error = a * x + b - y
     error[error < 0] = error[error < 0] * neg_penalty
     return sum(abs(error))
 
 
-@beartype
+@typechecker
 def atten_comp(
-    signal: NDArray[Shape["SensorIndex, TimeIndex"], Float],
+    signal: Float[np.ndarray, "SensorIndex TimeIndex"],
     dt: float,
     c: int,
     alpha_0: float,
@@ -137,7 +137,7 @@ def atten_comp(
             tfd = np.fft.fftshift(tfd, 0) / (N * num_signals)
         elif distribution == "Wigner":
 
-            def qwigner2(x: NDArray[Shape["Dim1"], Float], Fs: float):
+            def qwigner2(x: Float[np.ndarray, "Dim1"], Fs: float):
                 raise NotImplementedError
 
             tfd = qwigner2(signal[:, 0], Fs)
@@ -158,8 +158,8 @@ def atten_comp(
     # FIND CUTOFF FREQUENCIES
     # =========================================================================
 
-    @beartype
-    def findClosest(arr: NDArray[Shape["Dim1"], Float], value: float):
+    @typechecker
+    def findClosest(arr: Float[np.ndarray, "Dim1"], value: float):
         return (np.abs(arr - value)).argmin()
 
     if filter_cutoff == "auto":  # noqa: F821

@@ -145,7 +145,7 @@ class kWaveMedium(object):
         assert np.isscalar(self.alpha_power), "medium.alpha_power must be scalar."
 
         # check y is real and within 0 to 3
-        assert np.all(np.isreal(self.alpha_coeff)) and 0 < self.alpha_power < 3, "medium.alpha_power must be a real number between 0 and 3."
+        assert np.all(np.isreal(self.alpha_coeff)) and 0 <= self.alpha_power < 3, "medium.alpha_power must be a real number between 0 and 3."
 
         # display warning if y is close to 1 and the dispersion term has not been set to zero
         if self.alpha_mode != "no_dispersion":

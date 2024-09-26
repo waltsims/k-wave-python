@@ -114,8 +114,8 @@ class NotATransducer(kSensor):
             sound_speed: sound speed used to calculate beamforming delays [m/s]
             focus_distance: focus distance used to calculate beamforming delays [m]
             input_signal:
-            steering_angle_max:
-            steering_angle:
+            steering_angle_max: max steering angle [deg]
+            steering_angle: steering angle [deg]
 
         """
 
