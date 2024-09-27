@@ -113,9 +113,9 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     # create a binary mask for display from the list of corners
     sensor.mask = np.zeros((Nx, Ny, Nz), dtype=bool)
     cuboid_index: int = 0
-    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[3, cuboid_index],
-                cuboid_corners[1, cuboid_index]:cuboid_corners[4, cuboid_index],
-                cuboid_corners[2, cuboid_index]:cuboid_corners[5, cuboid_index]] = True
+    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[3, cuboid_index] + 1,
+                cuboid_corners[1, cuboid_index]:cuboid_corners[4, cuboid_index] + 1,
+                cuboid_corners[2, cuboid_index]:cuboid_corners[5, cuboid_index] + 1] = True
 
     # run the simulation
     sensor_data_comp1 = pstd_elastic_3d(kgrid=deepcopy(kgrid),
@@ -184,9 +184,9 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
 
     sensor.mask = np.zeros((Nx, Ny, Nz), dtype=bool)
     cuboid_index: int = 1
-    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[3, cuboid_index],
-                cuboid_corners[1, cuboid_index]:cuboid_corners[4, cuboid_index],
-                cuboid_corners[2, cuboid_index]:cuboid_corners[5, cuboid_index]] = True
+    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[3, cuboid_index] + 1,
+                cuboid_corners[1, cuboid_index]:cuboid_corners[4, cuboid_index] + 1,
+                cuboid_corners[2, cuboid_index]:cuboid_corners[5, cuboid_index] + 1] = True
 
     # run the simulation
     sensor_data_comp2 = pstd_elastic_3d(kgrid=deepcopy(kgrid),

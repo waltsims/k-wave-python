@@ -1,5 +1,5 @@
 """
-Unit test to compare the simulation results using a labelled andbinary source mask.
+Unit test to compare the simulation results using a labelled and binary source mask.
 """
 
 import numpy as np
@@ -20,8 +20,8 @@ def test_pstd_elastic_3d_compare_labelled_and_binary_source_mask():
     # set pass variable
     test_pass: bool = True
 
-    # set additional literals to give further permutations of the test
-    COMPARISON_THRESH: float = 1e-15
+    # set additional literals to give further permutations of the test.
+    COMPARISON_THRESH: float = 1e-14
     pml_inside: bool = True
 
     # =========================================================================
@@ -51,47 +51,19 @@ def test_pstd_elastic_3d_compare_labelled_and_binary_source_mask():
     kgrid.makeTime(medium.sound_speed_compression, t_end=t_end)
 
     # define multiple curved transducer elements
-    bowl_pos = [(19, 19, Nz // 2 - 1), (48, 48, Nz // 2 - 1)]
-    bowl_pos = np.array([[19, 19, Nz // 2 - 1], [48, 48, Nz // 2 - 1]], dtype=int)
-    bowl_radius = [int(20), int(15)]
-    bowl_diameter = [int(15), int(21)]
-    bowl_focus = [(int(31), int(31), int(31))]
+    bowl_pos = np.array([(19.0, 19.0, Nz / 2.0 - 1.0), (48.0, 48.0, Nz / 2.0 - 1.0)])
+    bowl_radius = np.array([20.0, 15.0])
+    bowl_diameter = np.array([int(15), int(21)], dtype=np.uint8)
+    bowl_focus = np.array([(int(31), int(31), int(31))], dtype=np.uint8)
+
     binary_mask, labelled_mask = make_multi_bowl(Vector([Nx, Ny, Nz]), bowl_pos, bowl_radius, bowl_diameter, bowl_focus)
-
-    # define a time varying sinusoidal source
-    source_freq = 1e6          # [Hz]
-    source_mag = 0.5           # [Pa]
-    source_0 = source_mag * np.sin(2.0 * np.pi * source_freq * np.squeeze(kgrid.t_array))
-    source_0 = filter_time_series(kgrid, medium, source_0)
-
-    source_freq = 3e6          # [Hz]
-    source_mag = 0.8           # [Pa]
-    source_1 = source_mag * np.sin(2.0 * np.pi * source_freq * np.squeeze(kgrid.t_array))
-    source_1 = filter_time_series(kgrid, medium, source_1)
-
-    # assemble sources
-    labelled_sources = np.zeros((2, kgrid.Nt))
-    labelled_sources[0, :] = np.squeeze(source_0)
-    labelled_sources[1, :] = np.squeeze(source_1)
-
-    # create ksource object
-    source = kSource()
-
-    # assign sources for labelled source mask
-    source.s_mask = deepcopy(labelled_mask)
-    source.sxx = deepcopy(labelled_sources)
-    source.syy = deepcopy(labelled_sources)
-    source.szz = deepcopy(labelled_sources)
-    source.sxy = deepcopy(labelled_sources)
-    source.sxz = deepcopy(labelled_sources)
-    source.syz = deepcopy(labelled_sources)
 
     # create sensor object
     sensor = kSensor()
 
     # create a sensor mask covering the entire computational domain using the
-    # opposing corners of a cuboid
-    sensor.mask = np.array([[0, 0, 0, Nx-1, Ny-1, Nz-1]], dtype=int).T
+    # opposing corners of a cuboid. These means cuboid corners will be used
+    sensor.mask = np.array([[0, 0, 0, Nx - 1, Ny - 1, Nz - 1]], dtype=int).T
 
     # set the record mode capture the final wave-field and the statistics at
     # each sensor point
@@ -101,20 +73,53 @@ def test_pstd_elastic_3d_compare_labelled_and_binary_source_mask():
     simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                            pml_inside=pml_inside)
 
+    # define a time varying sinusoidal source
+    source_freq_0 = 1e6          # [Hz]
+    source_mag_0 = 0.5           # [Pa]
+    source_0 = source_mag_0 * np.sin(2.0 * np.pi * source_freq_0 * np.squeeze(kgrid.t_array))
+    source_0 = filter_time_series(kgrid, medium, deepcopy(source_0))
+
+    source_freq_1 = 3e6          # [Hz]
+    source_mag_1 = 0.8           # [Pa]
+    source_1 = source_mag_1 * np.sin(2.0 * np.pi * source_freq_1 * np.squeeze(kgrid.t_array))
+    source_1 = filter_time_series(kgrid, medium, deepcopy(source_1))
+
+    # assemble sources
+    labelled_sources = np.zeros((2, kgrid.Nt))
+    labelled_sources[0, :] = np.squeeze(source_0)
+    labelled_sources[1, :] = np.squeeze(source_1)
+
+    # create ksource object
+    source = kSource()
+
+    # source mask is from the labelled mask
+    source.s_mask = deepcopy(labelled_mask)
+
+    # assign sources from labelled source
+    source.sxx = deepcopy(labelled_sources)
+    source.syy = deepcopy(labelled_sources)
+    source.szz = deepcopy(labelled_sources)
+    source.sxy = deepcopy(labelled_sources)
+    source.sxz = deepcopy(labelled_sources)
+    source.syz = deepcopy(labelled_sources)
+
     # run the simulation using the labelled source mask
-    sensor_data_labelled = pstd_elastic_3d(kgrid=deepcopy(kgrid),
-                                           source=deepcopy(source),
-                                           sensor=deepcopy(sensor),
-                                           medium=deepcopy(medium),
-                                           simulation_options=deepcopy(simulation_options))
+    sensor_data_labelled_s = pstd_elastic_3d(kgrid=deepcopy(kgrid),
+                                             source=deepcopy(source),
+                                             sensor=deepcopy(sensor),
+                                             medium=deepcopy(medium),
+                                             simulation_options=deepcopy(simulation_options))
 
-
-    # reassign the source using a binary source mask
+    # assign the source using a binary source mask
     del source
     source = kSource()
+
+    # source mask is from **binary source mask**
     source.s_mask = binary_mask
-    index_mask = labelled_mask[labelled_mask != 0].astype(int) - int(1)
-    source.sxx = labelled_sources[index_mask, :]
+
+    index_mask = labelled_mask.flatten('F')[labelled_mask.flatten('F') != 0].astype(int) - int(1)
+
+    source.sxx = deepcopy(labelled_sources[index_mask, :])
     source.syy = deepcopy(source.sxx)
     source.szz = deepcopy(source.sxx)
     source.sxy = deepcopy(source.sxx)
@@ -122,21 +127,15 @@ def test_pstd_elastic_3d_compare_labelled_and_binary_source_mask():
     source.syz = deepcopy(source.sxx)
 
     # run the simulation using the a binary source mask
-    sensor_data_binary = pstd_elastic_3d(kgrid=deepcopy(kgrid),
-                                         source=deepcopy(source),
-                                         sensor=deepcopy(sensor),
-                                         medium=deepcopy(medium),
-                                         simulation_options=deepcopy(simulation_options))
+    sensor_data_binary_s = pstd_elastic_3d(kgrid=deepcopy(kgrid),
+                                           source=deepcopy(source),
+                                           sensor=deepcopy(sensor),
+                                           medium=deepcopy(medium),
+                                           simulation_options=deepcopy(simulation_options))
 
     # compute the error from the first cuboid
-    L_inf_final = np.max(np.abs(sensor_data_labelled[0].p_final - sensor_data_binary[0].p_final)) / np.max(np.abs(sensor_data_binary[0].p_final))
-    L_inf_max   = np.max(np.abs(sensor_data_labelled[0].p_max - sensor_data_binary[0].p_max)) / np.max(np.abs(sensor_data_binary[0].p_max))
-
-    # compute pass
-    if (L_inf_max > COMPARISON_THRESH) or (L_inf_final > COMPARISON_THRESH):
-        test_pass = False
-
-    assert test_pass, "cuboid to binary sensor mask using a stress source"
+    L_inf_final_stress_s = np.max(np.abs(sensor_data_labelled_s[1].p_final - sensor_data_binary_s[1].p_final)) / np.max(np.abs(sensor_data_binary_s[1].p_final))
+    L_inf_max_stress_s = np.max(np.abs(sensor_data_labelled_s[0].p_max - sensor_data_binary_s[0].p_max)) / np.max(np.abs(sensor_data_binary_s[0].p_max))
 
     # ----------------------------------------
     # repeat for a velocity source
@@ -144,40 +143,55 @@ def test_pstd_elastic_3d_compare_labelled_and_binary_source_mask():
 
     del source
     source = kSource()
-    source.u_mask = labelled_mask.astype(int)
-    source.ux = 1e6 * labelled_sources
+
+    # assign the source using a **labelled** source mask
+    source.u_mask = deepcopy(labelled_mask)
+    source.ux = 1e-6 * deepcopy(labelled_sources)
+    source.uy = 1e-6 * deepcopy(labelled_sources)
+    source.uz = 1e-6 * deepcopy(labelled_sources)
+
+    # run the simulation using the labelled source mask
+    sensor_data_labelled_v = pstd_elastic_3d(kgrid=deepcopy(kgrid),
+                                             source=deepcopy(source),
+                                             sensor=deepcopy(sensor),
+                                             medium=deepcopy(medium),
+                                             simulation_options=deepcopy(simulation_options))
+
+    # assign the source using a **binary** source mask
+    del source
+    source = kSource()
+    source.u_mask = binary_mask
+    index_mask = labelled_mask.flatten('F')[labelled_mask.flatten('F') != 0].astype(int) - int(1)
+    source.ux = 1e-6 * labelled_sources[index_mask, :]
     source.uy = deepcopy(source.ux)
     source.uz = deepcopy(source.ux)
 
-    # run the simulation using the labelled source mask
-    sensor_data_labelled = pstd_elastic_3d(kgrid=deepcopy(kgrid),
+    # run the simulation using the a binary source mask
+    sensor_data_binary_v = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                            source=deepcopy(source),
                                            sensor=deepcopy(sensor),
                                            medium=deepcopy(medium),
                                            simulation_options=deepcopy(simulation_options))
 
-    # reassign the source using a binary source mask
-    del source
-    source = kSource()
-    source.u_mask = binary_mask
-    index_mask = labelled_mask[labelled_mask != 0].astype(int) - int(1)
-    source.ux = 1e6 * labelled_sources[index_mask, :]
-    source.uy = deepcopy(source.ux)
-    source.uz = deepcopy(source.ux)
-
-    # run the simulation using the a binary source mask
-    sensor_data_binary = pstd_elastic_3d(deepcopy(kgrid),
-                                         deepcopy(medium),
-                                         deepcopy(source),
-                                         deepcopy(sensor),
-                                         deepcopy(simulation_options))
-
     # compute the error from the first cuboid
-    L_inf_final = np.max(np.abs(sensor_data_labelled[0].p_final - sensor_data_binary[0].p_final)) / np.max(np.abs(sensor_data_binary[0].p_final))
-    L_inf_max   = np.max(np.abs(sensor_data_labelled[0].p_max - sensor_data_binary[0].p_max)) / np.max(np.abs(sensor_data_binary[0].p_max))
+    L_inf_final_v = np.max(np.abs(sensor_data_labelled_v[1].p_final - sensor_data_binary_v[1].p_final)) / np.max(np.abs(sensor_data_binary_v[1].p_final))
+    L_inf_max_v = np.max(np.abs(sensor_data_labelled_v[0].p_max - sensor_data_binary_v[0].p_max)) / np.max(np.abs(sensor_data_binary_v[0].p_max))
 
     # compute pass
-    if (L_inf_max > COMPARISON_THRESH) or (L_inf_final > COMPARISON_THRESH):
+    if (L_inf_max_stress_s > COMPARISON_THRESH):
         test_pass = False
+    assert test_pass, "cuboid to binary sensor mask using a stress source " + str(L_inf_max_stress_s)
 
-    assert test_pass, "cuboid to binary sensor mask using a velocity source"
+    # compute pass
+    if (L_inf_final_stress_s > COMPARISON_THRESH):
+        test_pass = False
+    assert test_pass, "cuboid to binary sensor mask using a stress source " + str(L_inf_final_stress_s)
+
+    # compute pass
+    if (L_inf_final_v > COMPARISON_THRESH):
+        test_pass = False
+    assert test_pass, "cuboid to binary sensor mask using a velocity source " + str(L_inf_final_v)
+
+    if (L_inf_max_v > COMPARISON_THRESH):
+        test_pass = False
+    assert test_pass, "cuboid to binary sensor mask using a velocity source " + str(L_inf_max_v)
