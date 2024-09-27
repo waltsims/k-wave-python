@@ -120,7 +120,9 @@ def spect(
 
     # window the signal, reshaping the window to be in the correct direction
     win, coherent_gain = get_win(func_length, window, symmetric=False)
+
     win = np.reshape(win, tuple(([1] * dim + [func_length] + [1] * (len(sz) - 2))))
+
     func = win * func
 
     # compute the fft using the defined FFT length, if fft_len >
@@ -410,7 +412,7 @@ def filter_time_series(
     signal: np.ndarray,
     ppw: Optional[int] = 3,
     rppw: Optional[int] = 0,
-    stop_band_atten: Optional[int] = 60,
+    stop_band_atten: Optional[float] = 60.0,
     transition_width: Optional[float] = 0.1,
     zerophase: Optional[bool] = False,
     plot_spectrums: Optional[bool] = False,
@@ -461,7 +463,6 @@ def filter_time_series(
 
     rotate_signal = False
     if np.ndim(signal) == 2:
-        print("np.ndim(signal):", np.ndim(signal))
         m, n = signal.shape
         if n == 1 and m != 1:
             signal = signal.T
@@ -493,58 +494,48 @@ def filter_time_series(
     assert not isinstance(kgrid.t_array, str) or kgrid.t_array != "auto", "kgrid.t_array must be explicitly defined."
 
     # compute the sampling frequency
-    Fs = 1 / kgrid.dt
+    Fs = 1.0 / kgrid.dt
 
     # extract the minium sound speed
-    if medium.sound_speed is not None:
-        # for the fluid code, use medium.sound_speed
-        c0 = medium.sound_speed.min()
-
-    elif all(medium.is_defined("sound_speed_compression", "sound_speed_shear")):  # pragma: no cover
+    if all(medium.is_defined("sound_speed_compression", "sound_speed_shear")):
         # for the elastic code, combine the shear and compression sound speeds and remove zeros values
         ss = np.hstack([medium.sound_speed_compression, medium.sound_speed_shear])
         ss[ss == 0] = np.nan
         c0 = np.nanmin(ss)
-
         # cleanup unused variables
         del ss
-
     else:
-        raise ValueError(
-            "The input fields medium.sound_speed or medium.sound_speed_compression and medium.sound_speed_shear must " "be defined."
-        )
+        c0 = medium.sound_speed.min()
 
     # extract the maximum supported frequency (two points per wavelength)
-    f_max = kgrid.k_max_all * c0 / (2 * np.pi)
+    f_max = kgrid.k_max_all * c0 / (2.0 * np.pi)
 
     # calculate the filter cut-off frequency
-    filter_cutoff_f = 2 * f_max / ppw
+    filter_cutoff_f = 2.0 * f_max / ppw
 
     # calculate the wavelength of the filter cut-off frequency as a number of time steps
-    filter_wavelength = (2 * np.pi / filter_cutoff_f) / kgrid.dt
+    filter_wavelength = (2.0 * np.pi / filter_cutoff_f) / kgrid.dt
 
     # filter the signal if required
     if ppw != 0:
         filtered_signal = apply_filter(
-            signal,
-            Fs,
-            float(filter_cutoff_f),
-            "LowPass",
+            signal=signal,
+            Fs=Fs,
+            cutoff_f=float(filter_cutoff_f),
+            filter_type="LowPass",
             zero_phase=zerophase,
             stop_band_atten=float(stop_band_atten),
             transition_width=transition_width,
         )
 
-    # add a start-up ramp if required
+    # add a start-upp ramp if required
     if rppw != 0:
         # calculate the length of the ramp in time steps
-        ramp_length = round(rppw * filter_wavelength / (2 * ppw))
-
+        ramp_length = round(rppw * filter_wavelength / (2.0 * ppw))
         # create the ramp
-        ramp = (-np.cos(np.arange(0, ramp_length - 1 + 1) * np.pi / ramp_length) + 1) / 2
-
+        ramp = (-np.cos(np.arange(0, ramp_length) * np.pi / ramp_length) + 1.0) / 2.0
         # apply the ramp
-        filtered_signal[1:ramp_length] = filtered_signal[1:ramp_length] * ramp
+        filtered_signal[0:ramp_length] = filtered_signal[0:ramp_length] * ramp
 
     # restore the original vector orientation if modified
     if rotate_signal:
@@ -574,7 +565,8 @@ def apply_filter(
     filter_type: str,
     zero_phase: Optional[bool] = False,
     transition_width: Optional[float] = 0.1,
-    stop_band_atten: Optional[int] = 60,
+    window: Optional[np.ndarray] = None,
+    stop_band_atten: Optional[float] = 60,
 ) -> np.ndarray:
     """
     Filters an input signal using a FIR filter with Kaiser window coefficients based on the specified cut-off frequency and filter type.
@@ -601,7 +593,13 @@ def apply_filter(
 
         # apply the low pass filter
         func_filt_lp = apply_filter(
-            signal, Fs, cutoff_f[1], "LowPass", stop_band_atten=stop_band_atten, transition_width=transition_width, zero_phase=zero_phase
+            signal,
+            Fs,
+            cutoff_f[1],
+            "LowPass",
+            stop_band_atten=stop_band_atten,
+            transition_width=transition_width,
+            zero_phase=zero_phase,
         )
 
         # apply the high pass filter
@@ -621,7 +619,7 @@ def apply_filter(
             high_pass = False
         elif filter_type == "HighPass":
             high_pass = True
-            cutoff_f = Fs / 2 - cutoff_f
+            cutoff_f = Fs / 2.0 - cutoff_f
         else:
             raise ValueError(f'Unknown filter type {filter_type}. Options are "LowPass, HighPass, BandPass"')
 
@@ -632,31 +630,29 @@ def apply_filter(
 
         # correct the stopband attenuation if a zero phase filter is being used
         if zero_phase:
-            stop_band_atten = stop_band_atten / 2
+            stop_band_atten = stop_band_atten / 2.0
 
         # decide the filter order
-        N = np.ceil((stop_band_atten - 7.95) / (2.285 * (transition_width * np.pi)))
-        N = int(N)
+        N = np.ceil((stop_band_atten - 7.95) / (2.285 * (transition_width * np.pi))).astype(int)
 
         # construct impulse response of ideal bandpass filter h(n), a sinc function
         fc = cutoff_f / Fs  # normalised cut-off
-        n = np.arange(-N / 2, N / 2)
-        h = 2 * fc * sinc(2 * np.pi * fc * n)
+        n = np.arange(-N / 2.0, N / 2.0)
+        h = 2.0 * fc * sinc(2.0 * np.pi * fc * n)
 
         # if no window is given, use a Kaiser window
-        # TODO: there is no window argument
-        if "w" not in locals():
+        if window is None:
             # compute Kaiser window parameter beta
             if stop_band_atten > 50:
                 beta = 0.1102 * (stop_band_atten - 8.7)
             elif stop_band_atten >= 21:
-                beta = 0.5842 * (stop_band_atten - 21) ** 0.4 + 0.07886 * (stop_band_atten - 21)
+                beta = 0.5842 * (stop_band_atten - 21.0) ** 0.4 + 0.07886 * (stop_band_atten - 21.0)
             else:
-                beta = 0
+                beta = 0.0
 
             # construct the Kaiser smoothing window w(n)
             m = np.arange(0, N)
-            w = np.real(scipy.special.iv(0, np.pi * beta * np.sqrt(1 - (2 * m / N - 1) ** 2))) / np.real(scipy.special.iv(0, np.pi * beta))
+            w = np.real(scipy.special.i0(np.pi * beta * np.sqrt(1.0 - (2.0 * m / N - 1.0) ** 2))) / np.real(scipy.special.i0(np.pi * beta))
 
         # window the ideal impulse response with Kaiser window to obtain the FIR filter coefficients hw(n)
         hw = w * h
@@ -670,12 +666,12 @@ def apply_filter(
         filtered_signal = np.hstack([np.zeros((1, N)), signal]).squeeze()
 
         # apply the filter
-        filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal)
+        filtered_signal = lfilter(hw.squeeze(), 1.0, filtered_signal)
         if zero_phase:
             filtered_signal = np.fliplr(lfilter(hw.squeeze(), 1, filtered_signal[np.arange(L + N, 1, -1)]))
 
         # remove the part of the signal corresponding to the added zeros
-        filtered_signal = filtered_signal[N:]
+        filtered_signal = filtered_signal[N:(L+N+1)]
 
     return filtered_signal[np.newaxis]
 

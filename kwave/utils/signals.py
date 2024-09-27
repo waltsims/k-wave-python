@@ -489,7 +489,7 @@ def reorder_binary_sensor_data(sensor_data: np.ndarray, reorder_index: np.ndarra
 
     """
     reorder_index = np.squeeze(reorder_index)
-    assert sensor_data.ndim == 2
+    assert sensor_data.ndim == 2, "sensor_data has dimensions: " + str(sensor_data.ndim)
     assert reorder_index.ndim == 1
 
     return sensor_data[reorder_index.argsort()]

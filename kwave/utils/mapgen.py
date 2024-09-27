@@ -1554,11 +1554,11 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
     return pixel_map
 
 
-@typechecker
+# @typechecker
 def make_bowl(
     grid_size: Vector,
     bowl_pos: Vector,
-    radius: Union[int, float],
+    radius: Union[int, float, Int[kt.ScalarLike, ""]],
     diameter: Real[kt.ScalarLike, ""],
     focus_pos: Vector,
     binary: bool = False,
@@ -1632,16 +1632,22 @@ def make_bowl(
     # BOUND THE GRID TO SPEED UP CALCULATION
     # =========================================================================
 
+    if isinstance(diameter, np.ndarray):
+        if np.size(diameter == 1):
+            diameter = diameter.item()
+
     # create bounding box slightly larger than bowl diameter * sqrt(2)
     Nx = np.round(np.sqrt(2) * diameter).astype(int) + BOUNDING_BOX_EXP
     Ny = Nx
     Nz = Nx
     grid_size_sm = Vector([Nx, Ny, Nz])
 
+    # print("sizes in bowl:", Nx, Ny, Nz)
+
     # set the bowl position to be the centre of the bounding box
-    bx = np.ceil(Nx / 2).astype(int)
-    by = np.ceil(Ny / 2).astype(int)
-    bz = np.ceil(Nz / 2).astype(int)
+    bx = np.ceil(Nx // 2 - 1).astype(int)
+    by = np.ceil(Ny // 2 - 1).astype(int)
+    bz = np.ceil(Nz // 2 - 1).astype(int)
     bowl_pos_sm = np.array([bx, by, bz])
 
     # set the focus position to be in the direction specified by the user
@@ -1666,9 +1672,9 @@ def make_bowl(
 
         # find centre of sphere on which the bowl lies
         distance_cf = np.sqrt((bx - fx) ** 2 + (by - fy) ** 2 + (bz - fz) ** 2)
-        cx = round(radius / distance_cf * (fx - bx) + bx)
-        cy = round(radius / distance_cf * (fy - by) + by)
-        cz = round(radius / distance_cf * (fz - bz) + bz)
+        cx = np.round(radius / distance_cf * (fx - bx) + bx).astype(int)
+        cy = np.round(radius / distance_cf * (fy - by) + by).astype(int)
+        cz = np.round(radius / distance_cf * (fz - bz) + bz).astype(int)
         c = np.array([cx, cy, cz])
 
         # generate matrix with distance from the centre
@@ -1686,6 +1692,16 @@ def make_bowl(
 
     # calculate distance from search radius
     pixel_map = np.abs(pixel_map - search_radius)
+
+    # offset: int = 1
+
+    # x_foward_shift: int = 1
+    # y_foward_shift: int = 1
+    # z_foward_shift: int = 1
+
+    # x_backwards_shift: int = 1
+    # y_backwards_shift: int = 1
+    # z_backwards_shift: int = 1
 
     # =========================================================================
     # DIMENSION 1
@@ -1830,6 +1846,7 @@ def make_bowl(
 
             # if the angle is greater than the half angle of the bowl, remove
             # it from the bowl
+            # print(l2, l1, v1, v2, np.shape(v1 * v2), theta, half_arc_angle)
             if theta > half_arc_angle:
                 bowl_sm = matlab_assign(bowl_sm, bowl_ind_i - 1, 0)
 
@@ -2092,39 +2109,69 @@ def make_bowl(
 
     # truncate bounding box if it falls outside the grid
     if x1 < 0:
-        bowl_sm = bowl_sm[abs(x1) :, :, :]
+        #bowl_sm = bowl_sm[abs(x1):, :, :]
+        bowl_sm = np.delete(bowl_sm, slice(0, abs(x1)), axis=0)
         x1 = 0
+        print("x1 < 0", np.shape(bowl_sm))
     if y1 < 0:
-        bowl_sm = bowl_sm[:, abs(y1) :, :]
+        # bowl_sm = bowl_sm[:, abs(y1):, :]
+        bowl_sm = np.delete(bowl_sm, slice(0, abs(y1)), axis=1)
         y1 = 0
+        print("y1 < 0", np.shape(bowl_sm))
     if z1 < 0:
-        bowl_sm = bowl_sm[:, :, abs(z1) :]
+        # bowl_sm = bowl_sm[:, :, abs(z1):]
+        bowl_sm = np.delete(bowl_sm, slice(0, abs(z1)), axis=2)
         z1 = 0
-    if x2 >= grid_size[0]:
-        to_delete = x2 - grid_size[0]
-        bowl_sm = bowl_sm[:-to_delete, :, :]
+        print("z1 < 0", np.shape(bowl_sm))
+    if x2 > grid_size[0]:
+        # to_delete = x2 - grid_size[0]
+        # bowl_sm = bowl_sm[:-to_delete, :, :]
+        start_index = bowl_sm.shape[0] - (x2 - grid_size[0])
+        end_index = bowl_sm.shape[0]
+        bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=0)
         x2 = grid_size[0]
-    if y2 >= grid_size[1]:
-        to_delete = y2 - grid_size[1]
-        bowl_sm = bowl_sm[:, :-to_delete, :]
+        print("x2 > Nx", np.shape(bowl_sm))
+    if y2 > grid_size[1]:
+        # to_delete = y2 - grid_size[1]
+        # bowl_sm = bowl_sm[:, :-to_delete, :]
+        start_index = bowl_sm.shape[1] - (y2 - grid_size[1])
+        end_index = bowl_sm.shape[1]
+        bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=1)
         y2 = grid_size[1]
-    if z2 >= grid_size[2]:
-        to_delete = z2 - grid_size[2]
-        bowl_sm = bowl_sm[:, :, :-to_delete]
+        print("y2 > Ny", np.shape(bowl_sm))
+    if z2 > grid_size[2]:
+        # to_delete = z2 - grid_size[2]
+        # bowl_sm = bowl_sm[:, :, :-to_delete]
+        start_index = bowl_sm.shape[2] - (z2 - grid_size[2])
+        end_index = bowl_sm.shape[2]
+        bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=2)
         z2 = grid_size[2]
+        print("z2 > Nz", np.shape(bowl_sm))
 
-    # place bowl into grid
+    # x1 = x1 + 1
+    # x2 = x2 + 1
+    # y1 = y1 + 1
+    # y2 = y2 + 1
+    # z1 = z1 + 1
+    # z2 = z2 + 1
+
+    # shifted_mask[1:, 1:, 1:] = binary_mask[:-1, :-1, :-1]
+    # print(np.shape(bowl[x1:x2, y1:y2, z1:z2]), np.shape(bowl_sm))
+
     bowl[x1:x2, y1:y2, z1:z2] = bowl_sm
 
-    return bowl
+    shifted_bowl = np.zeros_like(bowl)
+    shifted_bowl[1:, 1:, 1:] = bowl[:-1, :-1, :-1]
+
+    return shifted_bowl
 
 
 def make_multi_bowl(
     grid_size: Vector,
-    bowl_pos: List[Tuple[int, int]],
-    radius: int,
-    diameter: int,
-    focus_pos: Tuple[int, int],
+    bowl_pos: List[Tuple[int, int, int]],
+    radius: List[int],
+    diameter: List[int],
+    focus_pos: List[Tuple[int, int, int]],
     binary: bool = False,
     remove_overlap: bool = False,
 ) -> Tuple[np.ndarray, List[np.ndarray]]:
@@ -2134,10 +2181,10 @@ def make_multi_bowl(
 
     Args:
         grid_size: The size of the grid (assumed to be square).
-        bowl_pos: A list of tuples containing the (x, y) coordinates of the center of each bowl.
+        bowl_pos: A list of tuples containing the (x, y, z) coordinates of the center of each bowl.
         radius: The radius of each bowl.
         diameter: The diameter of the bowls.
-        focus_pos: The (x, y) coordinates of the focus.
+        focus_pos: The list of (x, y, z) coordinates of the focus.
         binary: Whether to return a binary mask (default: False).
         remove_overlap: Whether to remove overlap between the bowls (default: False).
 
@@ -2147,7 +2194,7 @@ def make_multi_bowl(
     """
 
     # check inputs
-    if bowl_pos.shape[-1] != 3:
+    if np.shape(np.asarray(bowl_pos))[1] != 3:
         raise ValueError("bowl_pos should contain 3 columns, with [bx, by, bz] in each row.")
 
     if len(radius) != 1 and len(radius) != bowl_pos.shape[0]:
@@ -2189,32 +2236,33 @@ def make_multi_bowl(
             bowl_pos_k = bowl_pos[bowl_index]
         else:
             bowl_pos_k = bowl_pos
-        bowl_pos_k = Vector(bowl_pos_k)
+        # bowl_pos_k = Vector(bowl_pos_k)
 
         if len(radius) > 1:
             radius_k = radius[bowl_index]
         else:
-            radius_k = radius
+            radius_k = radius.item()
 
         if len(diameter) > 1:
             diameter_k = diameter[bowl_index]
         else:
-            diameter_k = diameter
+            diameter_k = diameter[0].item()
 
         if focus_pos.shape[0] > 1:
             focus_pos_k = focus_pos[bowl_index]
         else:
-            focus_pos_k = focus_pos
+            focus_pos_k = focus_pos[0]
         focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
-        new_bowl = make_bowl(grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k, remove_overlap=remove_overlap, binary=binary)
+        new_bowl = make_bowl(grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k,
+                             remove_overlap=remove_overlap, binary=binary)
 
         # add bowl to bowl matrix
         bowls = bowls + new_bowl
 
         # add new bowl to labelling matrix
-        bowls_labelled[new_bowl == 1] = bowl_index
+        bowls_labelled[new_bowl == 1] = bowl_index + int(1)
 
     TicToc.toc()
 
@@ -2341,7 +2389,7 @@ def make_sphere(
     """
     assert len(grid_size) == 3, "grid_size must be a 3D vector"
 
-    # enforce a centered sphere
+    # enforce a centered sphere: matlab indexed
     center = np.floor(grid_size / 2).astype(int) + 1
 
     # preallocate the storage variable
@@ -2470,6 +2518,8 @@ def make_spherical_section(
 
     # flatten transducer and store the maximum and indices
     mx = np.squeeze(np.max(ss, axis=0))
+
+    print(np.shape(mx))
 
     # calculate the total length/width of the transducer
     length = mx[(len(mx) + 1) // 2].sum()
