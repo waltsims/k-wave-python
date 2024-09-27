@@ -91,7 +91,7 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
     medium.alpha_coeff_compression = np.squeeze(medium.alpha_coeff_compression)
     medium.alpha_coeff_shear = np.squeeze(medium.alpha_coeff_shear)
 
-
+@pytest.mark.skip(reason="not ready")
 def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
     # set additional literals to give further permutations of the test

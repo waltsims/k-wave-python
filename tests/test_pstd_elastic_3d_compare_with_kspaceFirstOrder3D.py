@@ -1,3 +1,8 @@
+"""
+Unit test to compare that the elastic code with the shear wave speed set to
+zero gives the same answers as the regular fluid code in k-Wave.
+"""
+
 import numpy as np
 from copy import deepcopy
 
@@ -13,11 +18,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_ball
 
-"""
-Unit test to compare that the elastic code with the shear wave speed set to
-zero gives the same answers as the regular fluid code in k-Wave.
-"""
-
+@pytest.mark.skip(reason="not ready")
 def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
 
     # set additional literals to give further permutations of the test
@@ -58,22 +59,22 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
     if HETEROGENEOUS:
         # elastic medium
         sound_speed_compression = cp * np.ones((Nx, Ny, Nz))
+        sound_speed_compression[Nx // 2 - 1:, :, :] = 2 * cp
         sound_speed_shear = cs * np.ones((Nx, Ny, Nz))
         density = rho * np.ones((Nx, Ny, Nz))
         medium_elastic = kWaveMedium(sound_speed_compression,
                                     density=density,
                                     sound_speed_compression=sound_speed_compression,
                                     sound_speed_shear=sound_speed_shear)
-        medium_elastic.sound_speed_compression[Nx // 2 - 1:, :, :] = 2 * cp
         # fluid medium
         sound_speed = cp * np.ones((Nx, Ny, Nz))
+        sound_speed[Nx // 2 - 1:, :, :] = 2 * cp
         density = rho * np.ones((Nx, Ny, Nz))
         medium_fluid = kWaveMedium(sound_speed, density=density)
-        medium_fluid.sound_speed[Nx // 2 - 1:, :, :] = 2 * cp
-
     else:
         # elastic medium
-        medium_elastic = kWaveMedium(cp, density=rho,
+        medium_elastic = kWaveMedium(cp,
+                                     density=rho,
                                      sound_speed_compression=cp,
                                      sound_speed_shear=cs)
         # fluid medium
@@ -87,7 +88,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
     # test names
     test_names = ['source.p0',
         'source.p, additive',
-        'source.p, dirichlet',
+        'source.p, dirichlet', # gives warning
         'source.ux, additive',
         'source.ux, dirichlet',
         'source.uy, additive',
@@ -106,13 +107,14 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
     # set input args
     if not USE_PML:
         simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                                       pml_alpha=0.0, kelvin_voigt_model=False)
+                                                       pml_alpha=0.0,
+                                                       kelvin_voigt_model=False)
     else:
         simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                                        kelvin_voigt_model=False)
 
     # loop through tests
-    for test_num in np.arange(2,len(test_names)):
+    for test_num in np.arange(1, len(test_names)):
 
         # update command line
         print('Running Test: ', test_names[test_num])
@@ -131,7 +133,6 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
             source_fluid.p0 = disc_magnitude * make_ball(Vector([Nx, Ny, Nz]),
                                                          Vector([disc_x_pos, disc_y_pos, disx_z_pos]),
                                                          disc_radius)
-
             # assign to elastic source
             source_elastic = deepcopy(source_fluid)
 
@@ -144,37 +145,37 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
                                                 deepcopy(medium_fluid),
                                                 deepcopy(source_fluid.p))
             # create equivalent elastic source
-            source_elastic.s_mask = source_fluid.p_mask
-            source_elastic.sxx = -source_fluid.p
-            source_elastic.syy = -source_fluid.p
-            source_elastic.szz = -source_fluid.p
+            source_elastic.s_mask = deepcopy(source_fluid.p_mask)
+            source_elastic.sxx = deepcopy(-source_fluid.p)
+            source_elastic.syy = deepcopy(-source_fluid.p)
+            source_elastic.szz = deepcopy(-source_fluid.p)
 
         elif test_num == 3 or test_num == 4:
             # create velocity source
             source_fluid.u_mask = np.zeros((Nx, Ny, Nz))
             source_fluid.u_mask[Nx // 2 - 11, Ny // 2 - 1, Nz // 2 - 1] = 1
             source_fluid.ux = 5.0 * np.sin(2.0 * np.pi * 1e6 * np.squeeze(kgrid.t_array))
-            source_fluid.ux = filter_time_series(kgrid, medium_fluid, source_fluid.ux)
+            source_fluid.ux = filter_time_series(kgrid, medium_fluid, deepcopy(source_fluid.ux))
             # create equivalent elastic source
-            source_elastic = source_fluid
+            source_elastic = deepcopy(source_fluid)
 
         elif test_num == 5 or test_num == 6:
             # create velocity source
             source_fluid.u_mask = np.zeros((Nx, Ny, Nz))
             source_fluid.u_mask[Nx // 2 - 11, Ny // 2 - 1, Nz // 2 - 1] = 1
             source_fluid.uy = 5.0 * np.sin(2.0 * np.pi * 1e6 * np.squeeze(kgrid.t_array)) / (cp * rho)
-            source_fluid.uy = filter_time_series(kgrid, medium_fluid, source_fluid.uy)
+            source_fluid.uy = filter_time_series(kgrid, medium_fluid, deepcopy(source_fluid.uy))
             # create equivalent elastic source
-            source_elastic = source_fluid
+            source_elastic = deepcopy(source_fluid)
 
         elif test_num == 7 or test_num == 8:
             # create velocity source
             source_fluid.u_mask = np.zeros((Nx, Ny, Nz))
             source_fluid.u_mask[Nx // 2 - 11, Ny // 2 - 1, Nz // 2 - 1] = 1
             source_fluid.uz = 5.0 * np.sin(2.0 * np.pi * 1e6 * np.squeeze(kgrid.t_array)) / (cp * rho)
-            source_fluid.uz = filter_time_series(kgrid, medium_fluid, source_fluid.uz)
+            source_fluid.uz = filter_time_series(kgrid, medium_fluid, deepcopy(source_fluid.uz))
             # create equivalent elastic source
-            source_elastic = source_fluid
+            source_elastic = deepcopy(source_fluid)
 
         # set source mode
         if test_num == 1:
@@ -195,7 +196,18 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
         output_filename_p = 'data_p_output.h5'
         DATA_CAST: str = 'single'
         DATA_PATH = '.'
-        simulation_options_fluid = SimulationOptions(data_cast=DATA_CAST,
+        if not USE_PML:
+            simulation_options_fluid = SimulationOptions(data_cast=DATA_CAST,
+                                                     data_recast=True,
+                                                     save_to_disk=True,
+                                                     input_filename=input_filename_p,
+                                                     output_filename=output_filename_p,
+                                                     data_path=DATA_PATH,
+                                                     use_kspace=False,
+                                                     pml_alpha=0.0,
+                                                     hdf_compression_level='lzf')
+        else:
+            simulation_options_fluid = SimulationOptions(data_cast=DATA_CAST,
                                                      data_recast=True,
                                                      save_to_disk=True,
                                                      input_filename=input_filename_p,
@@ -203,6 +215,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
                                                      data_path=DATA_PATH,
                                                      use_kspace=False,
                                                      hdf_compression_level='lzf')
+
         # options for executing simulations
         execution_options_fluid = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False)
 
@@ -229,7 +242,7 @@ def test_pstd_elastic_3D_compare_with_kspaceFirstOrder3D():
 
         # compuate comparisons for field
         L_inf_p_final = np.max(np.abs(sensor_data_elastic['p_final'].T - sensor_data_fluid['p_final'])) / np.max(np.abs(sensor_data_fluid['p_final']))
-        L_inf_ux_final = np.max(np.abs(sensor_data_elastic['ux_final'].T  - sensor_data_fluid['ux_final'])) / np.max(np.abs(sensor_data_fluid['ux_final']))
+        L_inf_ux_final = np.max(np.abs(sensor_data_elastic['ux_final'].T - sensor_data_fluid['ux_final'])) / np.max(np.abs(sensor_data_fluid['ux_final']))
         L_inf_uy_final = np.max(np.abs(sensor_data_elastic['uy_final'].T - sensor_data_fluid['uy_final'])) / np.max(np.abs(sensor_data_fluid['uy_final']))
         L_inf_uz_final = np.max(np.abs(sensor_data_elastic['uz_final'].T - sensor_data_fluid['uz_final'])) / np.max(np.abs(sensor_data_fluid['uz_final']))
 

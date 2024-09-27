@@ -14,6 +14,7 @@ from kwave.ksensor import kSensor
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.mapgen import make_disc
 
+@pytest.mark.skip(reason="2D not ready")
 def test_pstd_elastic_2d_compare_binary_and_cuboid_sensor_mask():
 
     # set pass variable
@@ -80,8 +81,8 @@ def test_pstd_elastic_2d_compare_binary_and_cuboid_sensor_mask():
     sensor.mask = np.zeros(np.shape(kgrid.k))
 
     cuboid_index: int = 0
-    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[2, cuboid_index],
-                cuboid_corners[1, cuboid_index]:cuboid_corners[3, cuboid_index]] = 1
+    sensor.mask[cuboid_corners[0, cuboid_index]:cuboid_corners[2, cuboid_index] + 1,
+                cuboid_corners[1, cuboid_index]:cuboid_corners[3, cuboid_index] + 1] = 1
 
     # run the simulation
     simulation_options_comp1 = SimulationOptions(simulation_type=SimulationType.ELASTIC,

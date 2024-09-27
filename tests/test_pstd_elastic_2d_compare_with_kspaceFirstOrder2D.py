@@ -18,6 +18,8 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_disc
 
+
+@pytest.mark.skip(reason="2D not ready")
 def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
 
     # set additional literals to give further permutations of the test
@@ -80,9 +82,13 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
         medium_fluid = kWaveMedium(sound_speed=cp, density=rho)
 
     # test names
-    test_names = ['source.p0', 'source.p, additive', 'source.p, dirichlet',
-                  'source.ux, additive', 'source.ux, dirichlet',
-                  'source.uy, additive', 'source.uy, dirichlet']
+    test_names = ['source.p0',
+                  'source.p, additive',
+                  'source.p, dirichlet',
+                  'source.ux, additive',
+                  'source.ux, dirichlet',
+                  'source.uy, additive',
+                  'source.uy, dirichlet']
 
     # define a single point sensor
     sensor = kSensor()

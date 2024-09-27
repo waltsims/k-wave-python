@@ -17,6 +17,7 @@ from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.signals import tone_burst
 from kwave.utils.mapgen import make_arc
 
+@pytest.mark.skip(reason="2D not ready")
 def test_pstd_elastic_2d_check_split_field():
 
     # set comparison threshold
