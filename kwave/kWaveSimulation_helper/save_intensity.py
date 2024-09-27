@@ -52,12 +52,14 @@ def save_intensity(kgrid, sensor_data, save_intensity_options):
 
         sensor_data = ensure_list(sensor_data)
 
-        n: int = len(sensor_data)
+        l_sensor_data: int = len(sensor_data)
 
-        if (n > 1) and (sensor_data[-1].ux_non_staggered is None):
-            n = n - 1
+        # this states that if _all data is recorded, which is stored as a separate entry in the list,
+        # then the number of entries in which the intensity is computed should be reduced by one.
+        if (l_sensor_data > 1) and (sensor_data[-1].ux_non_staggered is None):
+            l_sensor_data = l_sensor_data - int(1)
 
-        for sensor_mask_index in np.arange(n):
+        for sensor_mask_index in np.arange(l_sensor_data):
 
             print(sensor_mask_index)
 

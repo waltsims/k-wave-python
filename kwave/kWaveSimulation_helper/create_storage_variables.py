@@ -45,16 +45,21 @@ def gridDataFast3D(x, y, z, xi, yi, zi):
     yi = np.ravel(yi)
     zi = np.ravel(zi)
 
-    points = np.squeeze(np.dstack((x, y, z)))
+    grid_points = np.squeeze(np.dstack((x, y, z)))
     interpolation_points = np.squeeze(np.dstack((xi, yi, zi)))
 
-    tri = Delaunay(points)
+    tri = Delaunay(grid_points)
 
-    indices = tri.find_simplex(interpolation_points)
+    simplex_indices = tri.find_simplex(interpolation_points)
 
-    bc = tri.transform[indices, :2].dot(np.transpose(tri.points[indices, :] - tri.transform[indices, 2]))
+    print("----------->", tri.simplices[simplex_indices])
 
-    return tri.points[indices, :], bc
+    # barycentric coordinates
+    bc = tri.transform[simplex_indices, :2].dot(np.transpose(tri.points[simplex_indices, :] - tri.transform[simplex_indices, 2]))
+
+    print("----------->", bc)
+
+    return tri.points[simplex_indices, :], bc
 
 
 class OutputSensor(object):
@@ -540,8 +545,8 @@ def create_transducer_buffer(is_transducer_sensor, is_transducer_receive_elevati
 def compute_triangulation_points(flags, kgrid, record, mask):
     """
     precomputate the triangulation points if a Cartesian sensor mask is used
-    with linear interpolation (tri and bc are the Delaunay triangulation and
-    Barycentric coordinates)
+    with linear interpolation (tri and bc are the Delaunay TRIangulation and
+    Barycentric Coordinates)
     """
 
     if not flags.binary_sensor_mask:

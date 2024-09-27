@@ -199,47 +199,47 @@ def reorder_cuboid_corners(kgrid, record, sensor_data, time_info, flags, verbose
 
 
     if any([flags.record_p_min_all, flags.record_p_max_all, flags.record_u_max_all, flags.record_u_min_all]):
-        l: int = n_cuboids + 1
+        last_cuboid: int = n_cuboids + 1
 
     # assign max and final variables
     if flags.record_p_final:
-        sensor_data_temp[l].p_final = sensor_data.p_final
+        sensor_data_temp[last_cuboid].p_final = sensor_data.p_final
 
     if flags.record_u_final:
         # x-dimension
-        sensor_data_temp[l].ux_final = sensor_data.ux_final
+        sensor_data_temp[last_cuboid].ux_final = sensor_data.ux_final
         # y-dimension if 2D or 3D
         if kgrid.dim > 1:
-            sensor_data_temp[l].uy_final = sensor_data.uy_final
+            sensor_data_temp[last_cuboid].uy_final = sensor_data.uy_final
         # z-dimension if 3D
         if kgrid.dim > 2:
-            sensor_data_temp[l].uz_final = sensor_data.uz_final
+            sensor_data_temp[last_cuboid].uz_final = sensor_data.uz_final
 
     if flags.record_p_max_all:
-        sensor_data_temp[l].p_max_all = sensor_data.p_max_all
+        sensor_data_temp[last_cuboid].p_max_all = sensor_data.p_max_all
 
     if flags.record_p_min_all:
-        sensor_data_temp[l].p_min_all = sensor_data.p_min_all
+        sensor_data_temp[last_cuboid].p_min_all = sensor_data.p_min_all
 
     if flags.record_u_max_all:
         # x-dimension
-        sensor_data_temp[l].ux_max_all = sensor_data.ux_max_all
+        sensor_data_temp[last_cuboid].ux_max_all = sensor_data.ux_max_all
         # y-dimension if 2D or 3D
         if kgrid.dim > 1:
-            sensor_data_temp[l].uy_max_all = sensor_data.uy_max_all
+            sensor_data_temp[last_cuboid].uy_max_all = sensor_data.uy_max_all
         # z-dimension if 3D
         if kgrid.dim > 2:
-            sensor_data_temp[l].uz_max_all = sensor_data.uz_max_all
+            sensor_data_temp[last_cuboid].uz_max_all = sensor_data.uz_max_all
 
     if flags.record_u_min_all:
         # x-dimension
-        sensor_data_temp[l].ux_min_all = sensor_data.ux_min_all
+        sensor_data_temp[last_cuboid].ux_min_all = sensor_data.ux_min_all
         # y-dimension if 2D or 3D
         if kgrid.dim > 1:
-            sensor_data_temp[l].uy_min_all = sensor_data.uy_min_all
+            sensor_data_temp[last_cuboid].uy_min_all = sensor_data.uy_min_all
         # z-dimension if 3D
         if kgrid.dim > 2:
-            sensor_data_temp[l].uz_min_all = sensor_data.uz_min_all
+            sensor_data_temp[last_cuboid].uz_min_all = sensor_data.uz_min_all
 
     # assign new sensor data to old
     sensor_data = sensor_data_temp

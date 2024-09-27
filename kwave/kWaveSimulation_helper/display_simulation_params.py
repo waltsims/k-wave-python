@@ -30,7 +30,7 @@ def get_min_sound_speed(medium, is_elastic_code):
     if not is_elastic_code:
         c_min = np.min(medium.sound_speed)
         return c_min, None, None
-    else:  # pragma: no cover
+    else:
         c_min = np.min(medium.sound_speed)
         c_min_comp = np.min(medium.sound_speed_compression)
         # if a array
