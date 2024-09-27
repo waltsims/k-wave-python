@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.interpolate import interpn
-import scipy.io as sio
 from tqdm import tqdm
 from typing import Union
-
+from copy import deepcopy
+import logging
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -25,94 +25,13 @@ from kwave.options.simulation_options import SimulationOptions
 
 from kwave.kWaveSimulation_helper import extract_sensor_data, reorder_cuboid_corners, save_intensity
 
-
-# @jit(nopython=True)
-# def add3(sxx_split_x, sxx_split_y, sxx_split_z):
-#     return sxx_split_x + sxx_split_y + sxx_split_z
-
-
-# @jit(nopython=True)
-# def add2(sxx_split_x, sxx_split_y):
-#     return sxx_split_x + sxx_split_y
-
-
-# def compute_stress_grad_3(sxx_split_x, sxx_split_y, sxx_split_z, ddx_k_shift_pos, axis: int = 0):
-#     temp = sxx_split_x + sxx_split_y + sxx_split_z
-#     return np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=axis), axis=axis))
-
-
-# def compute_stress_grad_2(sxx_split_x, sxx_split_y, ddx_k_shift_pos, axis=0):
-#     temp = sxx_split_x + sxx_split_y
-#     return np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=axis), axis=axis))
-
-
-# @jit(nopython=True)
-# def compute_syz_split_z(mpml_x, mpml_y_sgy, pml_z_sgz, syz_split_z, dt, mu_sgyz, duydz):
-#     """
-#     Not on trace
-#     """
-#     return mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + dt * mu_sgyz * duydz)
-
-
-# @jit(nopython=True)
-# def compute_sxx_split_x(mpml_z, mpml_y, pml_x, sxx_split_x, dt, mu, lame_lambda, duxdx, eta, chi, dduxdxdt):
-#     """
-#     On trace
-#     """
-#     return mpml_z * mpml_y * pml_x * (mpml_z * mpml_y * pml_x * sxx_split_x + dt * (2.0 * mu + lame_lambda) * duxdx + dt * (2.0 * eta + chi) * dduxdxdt)
-
-
-# @jit
-# def jit_accelerated_fft_operation(ddx_k_shift_pos, temp):
-#     """
-#     Perform FFT, manipulate and inverse FFT
-#     """
-#     temp_fft = np.fft.fft(temp, axis=0)
-#     result_fft = ddx_k_shift_pos * temp_fft
-#     result_ifft = np.fft.ifft(result_fft, axis=0)
-#     result_real = np.real(result_ifft)
-#     return result_real
-
-# # Assuming ddx_k_shift_pos and temp are numpy arrays, convert them to cupy arrays
-# ddx_k_shift_pos_gpu = cp.asarray(ddx_k_shift_pos)
-# temp_gpu = cp.asarray(temp)
-
-# # Perform FFT, element-wise multiplication, and inverse FFT using CuPy on the GPU
-# temp_fft_gpu = cp.fft.fft(temp_gpu, axis=0)
-# result_fft_gpu = cp.multiply(ddx_k_shift_pos_gpu, temp_fft_gpu)
-# result_ifft_gpu = cp.fft.ifft(result_fft_gpu, axis=0)
-# result_real_gpu = cp.real(result_ifft_gpu)
-
-# # Convert the result back to a NumPy array if necessary
-# result_real = cp.asnumpy(result_real_gpu)
-
-# def xp_accelerated_fft_operation(ddx_k_shift_pos, x):
-#     xp = cp.get_array_module(x)
-#     x_fft = xp.fft.fft(x, axis=0)
-#     result_fft = xp.multiply(ddx_k_shift_pos, x_fft)
-#     result_ifft = xp.fft.ifft(result_fft, axis=0)
-#     result_real =  xp.real(result_ifft)
-#     return result_real
-
-
-# # update the normal components and shear components of stress tensor
-# # using a split field pml
-# @jit(nopython=True)
-# def compute_syz_split_z(mpml_x, mpml_y_sgy, pml_z_sgz, syz_split_z, dt, mu_sgyz, duydz):
-#     return mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + dt * mu_sgyz * duydz)
-
-# @jit(nopython=True)
-# def compute_sxx_split_x(mpml_z, mpml_y, pml_x, sxx_split_x, dt, mu, lame_lambda, duxdx, eta, chi, dduxdxdt):
-#     return mpml_z * mpml_y * pml_x * (mpml_z * mpml_y * pml_x * sxx_split_x + dt * (2.0 * mu + lame_lambda) * duxdx + dt * (2.0 * eta + chi) * dduxdxdt)
-
-
 def pstd_elastic_3d(kgrid: kWaveGrid,
                     source: kSource,
                     sensor: Union[NotATransducer, kSensor],
                     medium: kWaveMedium,
                     simulation_options: SimulationOptions):
     """
-    pstd_elastic_3d 3D time-domain simulation of elastic wave propagation.
+    3D time-domain simulation of elastic wave propagation.
 
     DESCRIPTION:
 
@@ -184,7 +103,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         By default, the recorded acoustic pressure field is passed directly
         to the output sensor_data. However, other acoustic parameters can
         also be recorded by setting sensor.record to a cell array of the form
-        {'p', 'u', 'p_max', \}. For example, both the particle velocity and
+        {'p', 'u', 'p_max', }. For example, both the particle velocity and
         the acoustic pressure can be returned by setting sensor.record =
         {'p', 'u'}. If sensor.record is given, the output sensor_data is
         returned as a structure with the different outputs appended as
@@ -219,13 +138,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         sensor mask (computed using nearest neighbour interpolation) is then
         used to place the pressure values into the computational grid at each
         time step. If sensor.mask is given as a binary matrix of sensor
-        points, the boundary data must be ordered using MATLAB's standard
-        column-wise linear matrix indexing. If no additional inputs are
-        required, the source input can be replaced with an empty array [].
+        points, the boundary data must be ordered using matlab's standard
+        column-wise linear matrix indexing - this means, Fortran ordering.
 
     USAGE:
-        sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor)
-        sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor, \)
+        sensor_data = pstd_elastic_3d(kgrid, medium, source, sensor, options)
 
     INPUTS:
     The minimum fields that must be assigned to run an initial value problem
@@ -293,8 +210,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                 where the pressure is recorded at each
                                 time-step
         sensor.record          - cell array of the acoustic parameters to
-                                record in the form sensor.record = {'p',
-                                'u', \} valid inputs are:
+                                record in the form sensor.record = ['p',
+                                'u'] valid inputs are:
 
             'p' (acoustic pressure)
             'p_max' (maximum pressure)
@@ -542,17 +459,17 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     timer = TicToc()
     timer.tic()
 
-    k_sim = kWaveSimulation(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options
-    )
+    # build simulation object with flags and formatted data containers
+    k_sim = kWaveSimulation(kgrid=kgrid,
+                            source=source,
+                            sensor=sensor,
+                            medium=medium,
+                            simulation_options=simulation_options)
 
     # run helper script to check inputs
     k_sim.input_checking('pstd_elastic_3d')
 
+    # TODO - if cuboid corners with more than one choise, then is a list,
     sensor_data = k_sim.sensor_data
 
     options = k_sim.options
@@ -746,25 +663,25 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     pml_x_alpha, pml_y_alpha, pml_z_alpha  = options.pml_x_alpha, options.pml_y_alpha, options.pml_z_alpha
     pml_x_size, pml_y_size, pml_z_size = options.pml_x_size, options.pml_y_size, options.pml_z_size
 
-    multi_axial_PML_ratio = options.multi_axial_PML_ratio
+    multi_axial_pml_ratio = options.multi_axial_PML_ratio
 
     c_ref = k_sim.c_ref
 
     # get the regular PML operators based on the reference sound speed and PML settings
     pml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 0)
-    pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, (True and options.use_sg), 0)
+    pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, options.use_sg, 0)
     pml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 1)
-    pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, (True and options.use_sg), 1)
+    pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, options.use_sg, 1)
     pml_z     = get_pml(Nz, dz, dt, c_ref, pml_z_size, pml_z_alpha, False, 2)
-    pml_z_sgz = get_pml(Nz, dz, dt, c_ref, pml_z_size, pml_z_alpha, (True and options.use_sg), 2)
+    pml_z_sgz = get_pml(Nz, dz, dt, c_ref, pml_z_size, pml_z_alpha, options.use_sg, 2)
 
     # get the multi-axial PML operators
-    mpml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, False, 0)
-    mpml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, (True and options.use_sg), 0)
-    mpml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, False, 1)
-    mpml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, (True and options.use_sg), 1)
-    mpml_z     = get_pml(Nz, dz, dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, False, 2)
-    mpml_z_sgz = get_pml(Nz, dz, dt, c_ref, pml_z_size, multi_axial_PML_ratio * pml_z_alpha, (True and options.use_sg), 2)
+    mpml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_pml_ratio * pml_x_alpha, False, 0)
+    mpml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_pml_ratio * pml_x_alpha, options.use_sg, 0)
+    mpml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, multi_axial_pml_ratio * pml_y_alpha, False, 1)
+    mpml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, multi_axial_pml_ratio * pml_y_alpha, options.use_sg, 1)
+    mpml_z     = get_pml(Nz, dz, dt, c_ref, pml_z_size, multi_axial_pml_ratio * pml_z_alpha, False, 2)
+    mpml_z_sgz = get_pml(Nz, dz, dt, c_ref, pml_z_size, multi_axial_pml_ratio * pml_z_alpha, options.use_sg, 2)
 
     # define the k-space derivative operators, multiply by the staggered
     # grid shift operators, and then re-order using  np.fft.ifftshift (the option
@@ -791,8 +708,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # force the derivative and shift operators to be in the correct direction
     # for use with broadcasting
-    ddx_k_shift_pos = np.expand_dims(np.expand_dims(ddx_k_shift_pos, axis=-1), axis=-1)
-    ddx_k_shift_neg = np.expand_dims(np.expand_dims(ddx_k_shift_neg, axis=-1), axis=-1)
+    ddx_k_shift_pos = np.expand_dims(np.expand_dims(np.squeeze(ddx_k_shift_pos), axis=-1), axis=-1)
+    ddx_k_shift_neg = np.expand_dims(np.expand_dims(np.squeeze(ddx_k_shift_neg), axis=-1), axis=-1)
     ddy_k_shift_pos = np.expand_dims(np.expand_dims(np.squeeze(ddy_k_shift_pos), axis=0), axis=-1)
     ddy_k_shift_neg = np.expand_dims(np.expand_dims(np.squeeze(ddy_k_shift_neg), axis=0), axis=-1)
     ddz_k_shift_pos = np.expand_dims(np.expand_dims(np.squeeze(ddz_k_shift_pos), axis=0), axis=0)
@@ -949,23 +866,25 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # ENSURE PYTHON INDEXING
     # =========================================================================
 
-    # this squeezes the arrays but also, if they don't exist, returns a np.array with no entries
-    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-    k_sim.u_source_pos_index = np.squeeze(k_sim.u_source_pos_index)
-    k_sim.p_source_pos_index = np.squeeze(k_sim.p_source_pos_index)
-
     # These should be zero indexed
-    if hasattr(k_sim, 's_source_pos_index') and k_sim.s_source_pos_index.ndim != 0:
-        k_sim.s_source_pos_index = np.squeeze(np.asarray(k_sim.s_source_pos_index)) - int(1)
+    if hasattr(k_sim, 's_source_pos_index'):
+        if k_sim.s_source_pos_index is not None:
+        # if k_sim.s_source_pos_index.ndim != 0:
+            k_sim.s_source_pos_index = np.squeeze(np.asarray(k_sim.s_source_pos_index)) - int(1)
 
-    if hasattr(k_sim, 'u_source_pos_index') and k_sim.u_source_pos_index.ndim != 0:
-        k_sim.u_source_pos_index = np.squeeze(k_sim.u_source_pos_index) - int(1)
+    if hasattr(k_sim, 'u_source_pos_index'):
+        if k_sim.u_source_pos_index is not None:
+        # if k_sim.u_source_pos_index.ndim != 0:
+          k_sim.u_source_pos_index = np.squeeze(k_sim.u_source_pos_index) - int(1)
 
-    if hasattr(k_sim, 'p_source_pos_index') and k_sim.p_source_pos_index.ndim != 0:
-        k_sim.p_source_pos_index = np.squeeze(k_sim.p_source_pos_index) - int(1)
+    if hasattr(k_sim, 'p_source_pos_index'):
+        if k_sim.p_source_pos_index is not None:
+        # if k_sim.p_source_pos_index.ndim != 0:
+            k_sim.p_source_pos_index = np.squeeze(k_sim.p_source_pos_index) - int(1)
 
-    if hasattr(k_sim, 's_source_sig_index') and k_sim.s_source_sig_index is not None:
-        k_sim.s_source_sig_index = np.squeeze(k_sim.s_source_sig_index) - int(1)
+    if hasattr(k_sim, 's_source_sig_index'):
+        if k_sim.s_source_sig_index is not None:
+            k_sim.s_source_sig_index = np.squeeze(k_sim.s_source_sig_index) - int(1)
 
     if hasattr(k_sim, 'u_source_sig_index') and k_sim.u_source_sig_index is not None:
         k_sim.u_source_sig_index = np.squeeze(k_sim.u_source_sig_index) - int(1)
@@ -978,11 +897,63 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
     # These should be zero indexed. Note the x2, y2 and z2 indices do not need to be shifted
     if hasattr(record, 'x1_inside') and record.x1_inside is not None:
-        record.x1_inside = int(record.x1_inside - 1)
+      if (record.x1_inside == 0):
+          print("GAH")
+      else:
+          record.x1_inside = int(record.x1_inside - 1)
     if hasattr(record, 'y1_inside') and record.y1_inside is not None:
         record.y1_inside = int(record.y1_inside - 1)
     if hasattr(record, 'z1_inside') and record.z1_inside is not None:
         record.z1_inside = int(record.z1_inside - 1)
+
+    # =========================================================================
+    # checking
+    # =========================================================================
+
+    checking: bool = False
+    import scipy.io as sio
+    filename = "C:/Users/dsinden/dev/octave/k-Wave/testing/unit/3DoneStep_split.mat"
+    verbose: bool = True
+    load_index: int = 0
+    if checking:
+        mat_contents = sio.loadmat(filename)
+        tol: float = 10E-12
+
+        if verbose:
+            print(sorted(mat_contents.keys()))
+
+        # mat_mu_sgxy = mat_contents['mu_sgxy']
+        # mat_mu_sgxz = mat_contents['mu_sgxz']
+        # mat_mu_sgyz = mat_contents['mu_sgyz']
+
+
+        mat_dsxxdx = mat_contents['dsxxdx']
+        mat_dsyydy = mat_contents['dsyydy']
+        mat_dsxydx = mat_contents['dsxydx']
+        mat_dsxydy = mat_contents['dsxydy']
+
+        mat_sxx = mat_contents['sxx']
+        mat_syy = mat_contents['syy']
+        mat_szz = mat_contents['szz']
+
+        mat_duxdx = mat_contents['duxdx']
+        mat_duxdy = mat_contents['duxdy']
+        mat_duydx = mat_contents['duydx']
+        mat_duydy = mat_contents['duydy']
+
+        mat_ux_sgx = mat_contents['ux_sgx']
+        mat_ux_split_x = mat_contents['ux_split_x']
+        mat_ux_split_y = mat_contents['ux_split_y']
+        mat_uy_sgy = mat_contents['uy_sgy']
+        mat_uy_split_x = mat_contents['uy_split_x']
+        mat_uy_split_y = mat_contents['uy_split_y']
+
+        mat_sxx_split_x = mat_contents['sxx_split_x']
+        mat_sxx_split_y = mat_contents['sxx_split_y']
+        mat_syy_split_x = mat_contents['syy_split_x']
+        mat_syy_split_y = mat_contents['syy_split_y']
+        mat_sxy_split_x = mat_contents['sxy_split_x']
+        mat_sxy_split_y = mat_contents['sxy_split_y']
 
     # =========================================================================
     # LOOP THROUGH TIME STEPS
@@ -991,6 +962,11 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # update command line status
     print('\tprecomputation completed in', scale_time(TicToc.toc()))
     print('\tstarting time loop ...')
+
+    if k_sim.source_ux is not False:
+        print(k_sim.source.ux[0:1, 0:1])
+
+    # index_end = 6
 
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
@@ -1009,6 +985,22 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         dsyzdy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_neg, np.fft.fft(syz_split_y + syz_split_z, axis=1), order='F'), axis=1))
         dsyzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(syz_split_y + syz_split_z, axis=2), order='F'), axis=2))
+
+        if checking:
+            if (t_index == load_index):
+                diff0 = np.max(np.abs(dsxxdx - mat_dsxxdx))
+                if (diff0 > tol):
+                    print("\tdsxxdx is incorrect:" + diff0)
+                diff0 = np.max(np.abs(dsyydy - mat_dsyydy))
+                if (diff0 > tol):
+                    print("\tdsyydy is incorrect:" + diff0)
+                diff0 = np.max(np.abs(dsxydy - mat_dsxydy))
+                if (diff0 > tol):
+                    print("\tdsxydy is incorrect:" + diff0)
+                diff0 = np.max(np.abs(dsxydx - mat_dsxydx))
+                if (diff0 > tol):
+                    print("\tdsxydx is incorrect:" + diff0)
+
 
         # calculate the split-field components of ux_sgx, uy_sgy, and uz_sgz at
         # the next time step using the components of the stress at the current
@@ -1124,6 +1116,28 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         uz_split_z = np.multiply(mpml_y, e, order='F')
         # uz_split_z = mpml_y * mpml_x * pml_z_sgz * (mpml_y * mpml_x * pml_z_sgz * uz_split_z + kgrid.dt * rho0_sgz_inv * dszzdz)
 
+        if checking:
+            if (t_index == load_index):
+
+                # print(k_sim.u_source_sig_index)
+                # print(k_sim.source.ux[k_sim.u_source_sig_index, t_index])
+
+                diff0 = np.max(np.abs(ux_split_x - mat_ux_split_x))
+                if (diff0 > tol):
+                    print("\tux_split_x is incorrect:" + diff0)
+                diff0 = np.max(np.abs(ux_split_y - mat_ux_split_y))
+                if (diff0 > tol):
+                    print("\tux_split_y is incorrect:" + diff0)
+                diff0 = np.max(np.abs(uy_split_x - mat_uy_split_x))
+                if (diff0 > tol):
+                    print("\tuy_split_x is incorrect:" + diff0)
+
+        # if (t_index == load_index):
+
+        #     print(k_sim.u_source_sig_index)
+        #     print(k_sim.source.ux[k_sim.u_source_sig_index, t_index])
+
+
         # add in the velocity source terms
         if k_sim.source_ux is not False and k_sim.source_ux > t_index:
             if (source.u_mode == 'dirichlet'):
@@ -1177,6 +1191,21 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         duzdx = np.real(np.fft.ifft(np.multiply(ddx_k_shift_pos, np.fft.fft(uz_sgz, axis=0), order='F'), axis=0))
         duzdy = np.real(np.fft.ifft(np.multiply(ddy_k_shift_pos, np.fft.fft(uz_sgz, axis=1), order='F'), axis=1))
         duzdz = np.real(np.fft.ifft(np.multiply(ddz_k_shift_neg, np.fft.fft(uz_sgz, axis=2), order='F'), axis=2))
+
+        if checking:
+            if (t_index == load_index):
+                diff0 = np.max(np.abs(duxdx - mat_duxdx))
+                if (diff0 > tol):
+                    print("\tduxdx is incorrect:" + diff0)
+                diff0 = np.max(np.abs(duxdy - mat_duxdy))
+                if (diff0 > tol):
+                    print("\tduxdy is incorrect:" + diff0)
+                diff0 = np.max(np.abs(duydy - mat_duydy))
+                if (diff0 > tol):
+                    print("\tduydy is incorrect:" + diff0)
+                diff0 = np.max(np.abs(duydx - mat_duydx))
+                if (diff0 > tol):
+                    print("\tduydx is incorrect:" + diff0)
 
         if options.kelvin_voigt_model:
 
@@ -1344,8 +1373,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 
         else:
 
-            print('NOT KV')
-            temp = 2.0 * mu + lame_lambda
+            # temp = 2.0 * mu + lame_lambda
 
             # update the normal and shear components of the stress tensor using
             # a lossless elastic model with a split-field multi-axial pml
@@ -1355,13 +1383,15 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #                                    bsxfun(@times, mpml_z,
             #                                           bsxfun(@times, mpml_y,
             #                                                  bsxfun(@times, pml_x, sxx_split_x))) + kgrid.dt * (2 * mu + lame_lambda) * duxdx ) ))
-            sxx_split_x = mpml_z * mpml_y * pml_x * (mpml_z * mpml_y * pml_x * sxx_split_x + kgrid.dt * (2.0 * mu + lame_lambda) * duxdx)
+            sxx_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * sxx_split_x)) + \
+                                                     kgrid.dt * (2.0 * mu + lame_lambda) * duxdx)))
 
             # sxx_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, sxx_split_y))) \
             #             + kgrid.dt * lame_lambda * duydy )))
             sxx_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * sxx_split_y)) + \
                                                kgrid.dt * lame_lambda * duydy)))
+
             # sxx_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, sxx_split_z))) \
             #             + kgrid.dt * lame_lambda * duzdz )))
@@ -1373,11 +1403,13 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             + kgrid.dt * lame_lambda * duxdx)))
             syy_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * syy_split_x)) + \
                                                kgrid.dt * lame_lambda * duxdx)))
+
             # syy_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, syy_split_y))) \
             #             + kgrid.dt * (2 * mu + lame_lambda) * duydy )))
             syy_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * syy_split_y)) + \
                                                kgrid.dt * (2.0 * mu + lame_lambda) * duydy)))
+
             # syy_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, syy_split_z))) \
             #             + kgrid.dt * lame_lambda * duzdz )))
@@ -1389,11 +1421,13 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #             + kgrid.dt * lame_lambda * duxdx)))
             szz_split_x = mpml_z * (mpml_y * (pml_x * (mpml_z * (mpml_y * (pml_x * szz_split_x)) + \
                                                kgrid.dt * lame_lambda * duxdx)))
+
             # szz_split_y = bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, \
             #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_z, bsxfun(@times, pml_y, szz_split_y))) \
             #             + kgrid.dt * lame_lambda * duydy )))
             szz_split_y = mpml_x * (mpml_z * (pml_y * (mpml_x * (mpml_z * (pml_y * szz_split_y)) + \
                                                kgrid.dt * lame_lambda * duydy)))
+
             # szz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x, bsxfun(@times, pml_z, szz_split_z))) \
             #             + kgrid.dt * (2 * mu + lame_lambda) * duzdz )))
@@ -1409,16 +1443,19 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             #                                                  kgrid.dt * mu_sgxy * duydx)))
             sxy_split_x = mpml_z * (mpml_y_sgy * (pml_x_sgx * (mpml_z * (mpml_y_sgy * (pml_x_sgx * sxy_split_x)) + \
                                                                kgrid.dt * mu_sgxy * duydx)))
+
             # sxy_split_y = bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, \
             #             bsxfun(@times, mpml_z, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_y_sgy, sxy_split_y))) \
             #             + kgrid.dt * mu_sgxy * duxdy)))
             sxy_split_y = mpml_z * (mpml_x_sgx * (pml_y_sgy * (mpml_z * (mpml_x_sgx * (pml_y_sgy * sxy_split_y)) + \
                                                                kgrid.dt * mu_sgxy * duxdy)))
+
             # sxz_split_x = bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_z_sgz, bsxfun(@times, pml_x_sgx, sxz_split_x))) \
             #             + kgrid.dt * mu_sgxz * duzdx)))
             sxz_split_x = mpml_y * (mpml_z_sgz * (pml_x_sgx * (mpml_y * (mpml_z_sgz * (pml_x_sgx * sxz_split_x)) + \
                                                                kgrid.dt * mu_sgxz * duzdx)))
+
             # sxz_split_z = bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, \
             #             bsxfun(@times, mpml_y, bsxfun(@times, mpml_x_sgx, bsxfun(@times, pml_z_sgz, sxz_split_z))) \
             #             + kgrid.dt * mu_sgxz * duxdz)))
@@ -1431,14 +1468,15 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
             syz_split_y = mpml_x * (mpml_z_sgz * (pml_y_sgy * (mpml_x * (mpml_z_sgz * (pml_y_sgy * syz_split_y)) + \
                                                                kgrid.dt * mu_sgyz * duzdy)))
 
-            # syz_split_z = bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, \
-            #             bsxfun(@times, mpml_x, bsxfun(@times, mpml_y_sgy, bsxfun(@times, pml_z_sgz, syz_split_z))) \
-            #             + kgrid.dt * mu_sgyz * duydz)))
-            syz_split_z = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z)) + \
-                                                               kgrid.dt * mu_sgyz * duydz)))
+            # syz_split_z = bsxfun(@times, mpml_x,
+            #                      bsxfun(@times, mpml_y_sgy,
+            #                             bsxfun(@times, pml_z_sgz,
+            #                                    bsxfun(@times, mpml_x,
+            #                                           bsxfun(@times, mpml_y_sgy,
+            #                                                  bsxfun(@times, pml_z_sgz, syz_split_z))) + kgrid.dt * mu_sgyz * duydz)))
+            syz_split_z  = mpml_x * (mpml_y_sgy * (pml_z_sgz * (mpml_x * (mpml_y_sgy * (pml_z_sgz * syz_split_z)) + \
+                                                                kgrid.dt * mu_sgyz * duydz)))
 
-            # syz_split_z = mpml_x * mpml_y_sgy * pml_z_sgz * (mpml_x * mpml_y_sgy * pml_z_sgz * syz_split_z + kgrid.dt * mu_sgyz * duydz)
-            # result = compute_syz_split_z(mpml_x, mpml_y_sgy, pml_z_sgz, syz_split_z, kgrid.dt, mu_sgyz, duydz)
 
         # add in the pre-scaled stress source terms
 
@@ -1462,95 +1500,131 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                         raise RuntimeError('Need to set s_source_sig_index')
 
         if (k_sim.source_sxx is not False and t_index < np.size(source.sxx)):
+
+            # if (t_index == 0):
+                # print(np.shape(k_sim.source.sxx), np.shape(k_sim.s_source_pos_index), np.shape(k_sim.s_source_sig_index) )
+
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_x.shape, order='F'), t_index]
-                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_y.shape, order='F'), t_index]
-                sxx_split_z[np.unravel_index(k_sim.s_source_pos_index, sxx_split_z.shape, order='F')] = k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_z.shape, order='F'), t_index]
+                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_z[np.unravel_index(k_sim.s_source_pos_index, sxx_split_z.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
                 sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                  k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_x.shape, order='F'), t_index]
+                  k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
                 sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                  k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_y.shape, order='F'), t_index]
+                  k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
                 sxx_split_z[np.unravel_index(k_sim.s_source_pos_index, sxx_split_z.shape, order='F')] = sxx_split_z[np.unravel_index(k_sim.s_source_pos_index, sxx_split_z.shape, order='F')] + \
-                  k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_z.shape, order='F'), t_index]
+                  k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
 
         if (k_sim.source_syy is not False and t_index < np.size(source.syy)):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_x.shape, order='F'), t_index]
-                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_y.shape, order='F'), t_index]
-                syy_split_z[np.unravel_index(k_sim.s_source_pos_index, syy_split_z.shape, order='F')] = k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_z.shape, order='F'), t_index]
+                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_z[np.unravel_index(k_sim.s_source_pos_index, syy_split_z.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
                 syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
-                  k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_x.shape, order='F'), t_index]
+                  k_sim.source.syy[k_sim.s_source_sig_index, t_index]
                 syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
-                  k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_y.shape, order='F'), t_index]
+                  k_sim.source.syy[k_sim.s_source_sig_index, t_index]
                 syy_split_z[np.unravel_index(k_sim.s_source_pos_index, syy_split_z.shape, order='F')] = syy_split_z[np.unravel_index(k_sim.s_source_pos_index, syy_split_z.shape, order='F')] + \
-                  k_sim.source.syy[np.unravel_index(k_sim.s_source_sig_index, syy_split_z.shape, order='F'), t_index]
+                  k_sim.source.syy[k_sim.s_source_sig_index, t_index]
 
-        if (k_sim.source_szz is not False and t_index < np.size(source.syy)):
+        if (k_sim.source_szz is not False and t_index < np.size(source.szz)):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] = k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_x.shape, order='F'), t_index]
-                szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] = k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_y.shape, order='F'), t_index]
-                szz_split_z[np.unravel_index(k_sim.s_source_pos_index, szz_split_z.shape, order='F')] = k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_z.shape, order='F'), t_index]
+                szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
+                szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
+                szz_split_z[np.unravel_index(k_sim.s_source_pos_index, szz_split_z.shape, order='F')] = k_sim.source.szz[k_sim.s_source_sig_index, t_index]
             else:
                 # # add the source values to the existing field values
                 szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] = szz_split_x[np.unravel_index(k_sim.s_source_pos_index, szz_split_x.shape, order='F')] + \
-                  k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_x.shape, order='F'), t_index]
+                  k_sim.source.szz[k_sim.s_source_sig_index, t_index]
                 szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] = szz_split_y[np.unravel_index(k_sim.s_source_pos_index, szz_split_y.shape, order='F')] + \
-                  k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_y.shape, order='F'), t_index]
+                  k_sim.source.szz[k_sim.s_source_sig_index, t_index]
                 szz_split_z[np.unravel_index(k_sim.s_source_pos_index, szz_split_z.shape, order='F')] = szz_split_z[np.unravel_index(k_sim.s_source_pos_index, szz_split_z.shape, order='F')] + \
-                  k_sim.source.szz[np.unravel_index(k_sim.s_source_sig_index, szz_split_z.shape, order='F'), t_index]
+                  k_sim.source.szz[k_sim.s_source_sig_index, t_index]
 
         if (k_sim.source_sxy is not False and t_index < np.size(source.sxy)):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = k_sim.source.sxy[np.unravel_index(k_sim.s_source_sig_index, sxy_split_x.shape, order='F'), t_index]
-                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = k_sim.source.sxy[np.unravel_index(k_sim.s_source_sig_index, sxy_split_y.shape, order='F'), t_index]
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
                 # add the source values to the existing field values
             else:
                 sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
-                  k_sim.source.sxy[np.unravel_index(k_sim.s_source_sig_index, sxy_split_x.shape, order='F'), t_index]
+                  k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
                 sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
-                  k_sim.source.sxy[np.unravel_index(k_sim.s_source_sig_index, sxy_split_y.shape, order='F'), t_index]
+                  k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
 
         if (k_sim.source_sxz is not False and t_index < np.size(source.sxz)):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxz_split_x[np.unravel_index(k_sim.s_source_pos_index, sxz_split_x.shape, order='F')] = k_sim.source.sxz[np.unravel_index(k_sim.s_source_sig_index, sxz_split_x.shape, order='F'), t_index]
-                sxz_split_z[np.unravel_index(k_sim.s_source_pos_index, sxz_split_z.shape, order='F')] = k_sim.source.sxz[np.unravel_index(k_sim.s_source_sig_index, sxz_split_z.shape, order='F'), t_index]
+                sxz_split_x[np.unravel_index(k_sim.s_source_pos_index, sxz_split_x.shape, order='F')] = k_sim.source.sxz[k_sim.s_source_sig_index, t_index]
+                sxz_split_z[np.unravel_index(k_sim.s_source_pos_index, sxz_split_z.shape, order='F')] = k_sim.source.sxz[k_sim.s_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
                 sxz_split_x[np.unravel_index(k_sim.s_source_pos_index, sxz_split_x.shape, order='F')] = sxz_split_x[np.unravel_index(k_sim.s_source_pos_index, sxz_split_x.shape, order='F')] + \
-                  k_sim.source.sxz[np.unravel_index(k_sim.s_source_sig_index, sxz_split_x.shape, order='F'), t_index]
+                  k_sim.source.sxz[k_sim.s_source_sig_index, t_index]
                 sxz_split_z[np.unravel_index(k_sim.s_source_pos_index, sxz_split_z.shape, order='F')] = sxz_split_z[np.unravel_index(k_sim.s_source_pos_index, sxz_split_z.shape, order='F')] + \
-                  k_sim.source.sxz[np.unravel_index(k_sim.s_source_sig_index, sxz_split_z.shape, order='F'), t_index]
+                  k_sim.source.sxz[k_sim.s_source_sig_index,  t_index]
 
         if (k_sim.source_syz is not False and t_index < np.size(source.syz)):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                syz_split_y[np.unravel_index(k_sim.s_source_pos_index, syz_split_y.shape, order='F')] = k_sim.source.syz[np.unravel_index(k_sim.s_source_sig_index, syz_split_y.shape, order='F'), t_index]
-                syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] = k_sim.source.syz[np.unravel_index(k_sim.s_source_sig_index, syz_split_z.shape, order='F'), t_index]
+                syz_split_y[np.unravel_index(k_sim.s_source_pos_index, syz_split_y.shape, order='F')] = k_sim.source.syz[k_sim.s_source_sig_index, t_index]
+                syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] = k_sim.source.syz[k_sim.s_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
                 syz_split_y[np.unravel_index(k_sim.s_source_pos_index, syz_split_y.shape, order='F')] = syz_split_y[np.unravel_index(k_sim.s_source_pos_index, syz_split_y.shape, order='F')] + \
-                  k_sim.source.syz[np.unravel_index(k_sim.s_source_sig_index, syz_split_y.shape, order='F'), t_index]
+                  k_sim.source.syz[k_sim.s_source_sig_index, t_index]
                 syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] = syz_split_z[np.unravel_index(k_sim.s_source_pos_index, syz_split_z.shape, order='F')] + \
-                  k_sim.source.syz[np.unravel_index(k_sim.s_source_sig_index, syz_split_z.shape, order='F'), t_index]
+                  k_sim.source.syz[k_sim.s_source_sig_index, t_index]
+
+        if checking:
+            if (t_index == load_index):
+
+                print("k_sim.s_source_pos_index:", k_sim.s_source_pos_index)
+
+                print("k_sim.source.sxx:", k_sim.source.sxx)
+
+                print("np.max(k_sim.s_source_sig_index):", np.max(k_sim.s_source_sig_index))
+                print("np.sum(k_sim.s_source_sig_index)", np.sum(k_sim.s_source_sig_index))
+                print("np.shape(k_sim.s_source_sig_index)", np.shape(k_sim.s_source_sig_index))
+                print("sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')]",
+                      sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')])
+
+                diff0 = np.max(np.abs(sxx_split_x - mat_sxx_split_x))
+                if (diff0 > tol):
+                    print("\tsxx_split_x is incorrect:" + diff0)
+                diff0 = np.max(np.abs(sxx_split_y - mat_sxx_split_y))
+                if (diff0 > tol):
+                    print("\tsxx_split_y is incorrect:" + diff0)
+                diff0 = np.max(np.abs(sxy_split_y - mat_sxy_split_y))
+                if (diff0 > tol):
+                    print("\tsxy_split_y is incorrect:" + diff0)
+                diff0 = np.max(np.abs(sxy_split_x - mat_sxy_split_x))
+                if (diff0 > tol):
+                    print("\tsxy_split_x is incorrect:" + diff0)
+
 
         # compute pressure from the normal components of the stress
         p = -(sxx_split_x + sxx_split_y + sxx_split_z +
               syy_split_x + syy_split_y + syy_split_z +
               szz_split_x + szz_split_y + szz_split_z) / 3.0
 
+        # update index for data storage
+        file_index: int = t_index - sensor.record_start_index
+
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
         # sensor.record_start_index (defaults to 1) - why not zero?
         if ((options.use_sensor is not False) and (not options.elastic_time_rev) and (t_index >= k_sim.sensor.record_start_index)):
+
+            # print("FAIL")
 
             # update index for data storage
             file_index: int = t_index - sensor.record_start_index
@@ -1576,7 +1650,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                        'record_u_rms': k_sim.record.u_rms,
                                        'record_u_max_all': k_sim.record.u_max_all,
                                        'record_u_min_all': k_sim.record.u_min_all,
-                                       'compute_directivity': False})
+                                       'compute_directivity': False,
+                                       'use_cuboid_corners': options.cuboid_corners})
 
             # run sub-function to extract the required data
             sensor_data = extract_sensor_data(3, sensor_data, file_index, k_sim.sensor_mask_index,
@@ -1658,31 +1733,76 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # CLEAN UP
     # =========================================================================
 
-    # save the final acoustic pressure if required
-    if k_sim.record.p_final or options.elastic_time_rev:
-        sensor_data.p_final = p[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+    # print("bounds:", record.x1_inside, record.x2_inside, record.y1_inside, record.y2_inside, record.z1_inside, record.z2_inside)
 
-    # save the final particle velocity if required
-    if k_sim.record.u_final:
-        sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-        sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
-        sensor_data.uz_final = uz_sgz[record.x1_inside:record.x2_inside, record.y1_inside:record.y2_inside, record.z1_inside:record.z2_inside]
+    if not options.cuboid_corners:
+        # save the final acoustic pressure if required
+        if k_sim.record.p_final or options.elastic_time_rev:
+            sensor_data.p_final = p[record.x1_inside:record.x2_inside,
+                                    record.y1_inside:record.y2_inside,
+                                    record.z1_inside:record.z2_inside]
+        # save the final particle velocity if required
+        if k_sim.record.u_final:
+            sensor_data.ux_final = ux_sgx[record.x1_inside:record.x2_inside,
+                                          record.y1_inside:record.y2_inside,
+                                          record.z1_inside:record.z2_inside]
+            sensor_data.uy_final = uy_sgy[record.x1_inside:record.x2_inside,
+                                          record.y1_inside:record.y2_inside,
+                                          record.z1_inside:record.z2_inside]
+            sensor_data.uz_final = uz_sgz[record.x1_inside:record.x2_inside,
+                                          record.y1_inside:record.y2_inside,
+                                          record.z1_inside:record.z2_inside]
+    else:
+        # save the final acoustic pressure if required
+        if k_sim.record.p_final or options.elastic_time_rev:
+            sensor_data.append(dotdict({'p_final': p[record.x1_inside:record.x2_inside,
+                                    record.y1_inside:record.y2_inside,
+                                    record.z1_inside:record.z2_inside]}))
+            # save the final particle velocity if required
+            if k_sim.record.u_final:
+                i: int = len(sensor_data) - 1
+                sensor_data[i].ux_final = ux_sgx[record.x1_inside:record.x2_inside,
+                                              record.y1_inside:record.y2_inside,
+                                              record.z1_inside:record.z2_inside]
+                sensor_data[i].uy_final = uy_sgy[record.x1_inside:record.x2_inside,
+                                              record.y1_inside:record.y2_inside,
+                                              record.z1_inside:record.z2_inside]
+                sensor_data[i].uz_final = uz_sgz[record.x1_inside:record.x2_inside,
+                                              record.y1_inside:record.y2_inside,
+                                              record.z1_inside:record.z2_inside]
+        elif k_sim.record.u_final:
+            sensor_data.append(dotdict({'ux_final': ux_sgx[record.x1_inside:record.x2_inside,
+                                                           record.y1_inside:record.y2_inside,
+                                                           record.z1_inside:record.z2_inside],
+                                        'uy_final': uy_sgy[record.x1_inside:record.x2_inside,
+                                                           record.y1_inside:record.y2_inside,
+                                                           record.z1_inside:record.z2_inside],
+                                        'uz_final': uz_sgz[record.x1_inside:record.x2_inside,
+                                                           record.y1_inside:record.y2_inside,
+                                                           record.z1_inside:record.z2_inside]}))
 
+
+        # logging.log(logging.WARN, "  not done if there are cuboid corners")
 
     # # run subscript to cast variables back to double precision if required
     # if options.data_recast:
     #     kspaceFirstOrder_dataRecast
 
-
     # # run subscript to compute and save intensity values
     if options.use_sensor and not options.elastic_time_rev and (k_sim.record.I or k_sim.record.I_avg):
-        sensor_data = save_intensity(kgrid, sensor_data, k_sim.record.I_avg, options.cuboid_corners)
+        save_intensity_options = dotdict({'record_I_avg': k_sim.record.I_avg,
+                                          'record_p': k_sim.record.p,
+                                          'record_I': k_sim.record.I,
+                                          'record_u_non_staggered': k_sim.record.u_non_staggered,
+                                          'use_cuboid_corners': options.cuboid_corners})
+        sensor_data = save_intensity(kgrid, sensor_data, save_intensity_options)
 
     # reorder the sensor points if a binary sensor mask was used for Cartesian
     # sensor mask nearest neighbour interpolation (this is performed after
     # recasting as the GPU toolboxes do not all support this subscript)
     if options.use_sensor and k_sim.reorder_data:
-        sensor_data = reorder_sensor_data(kgrid, sensor, sensor_data)
+        print("reorder?")
+        sensor_data = reorder_sensor_data(kgrid, sensor, deepcopy(sensor_data))
 
     # filter the recorded time domain pressure signals if transducer filter
     # parameters are given
@@ -1690,36 +1810,36 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
         sensor_data.p = gaussian_filter(sensor_data.p, 1.0 / kgrid.dt,
                                         k_sim.sensor.frequency_response[0], k_sim.sensor.frequency_response[1])
 
-
-    # reorder the sensor points if cuboid corners is used (outputs are indexed
-    # as [X, Y, Z, T] or [X, Y, Z] rather than [sensor_index, time_index]
-    num_stream_time_points: int = k_sim.kgrid.Nt - k_sim.sensor.record_start_index
-    if options.cuboid_corners:
-        time_info = dotdict({'num_stream_time_points': num_stream_time_points,
-                             'num_recorded_time_points': k_sim.num_recorded_time_points,
-                             'stream_to_disk': options.stream_to_disk})
-        cuboid_info = dotdict({'record_p': k_sim.record.p,
-                               'record_p_rms': k_sim.record.p_rms,
-                               'record_p_max': k_sim.record.p_max,
-                               'record_p_min': k_sim.record.p_min,
-                               'record_p_final': k_sim.record.p_final,
-                               'record_p_max_all': k_sim.record.p_max_all,
-                               'record_p_min_all': k_sim.record.p_min_all,
-                               'record_u': k_sim.record.u,
-                               'record_u_non_staggered': k_sim.record.u_non_staggered,
-                               'record_u_rms': k_sim.record.u_rms,
-                               'record_u_max': k_sim.record.u_max,
-                               'record_u_min': k_sim.record.u_min,
-                               'record_u_final': k_sim.record.u_final,
-                               'record_u_max_all': k_sim.record.u_max_all,
-                               'record_u_min_all': k_sim.record.u_min_all,
-                               'record_I': k_sim.record.I,
-                               'record_I_avg': k_sim.record.I_avg})
-        sensor_data = reorder_cuboid_corners(k_sim.kgrid, k_sim.record, sensor_data, time_info, cuboid_info, verbose=True)
+    # # reorder the sensor points if cuboid corners is used (outputs are indexed
+    # # as [X, Y, Z, T] or [X, Y, Z] rather than [sensor_index, time_index]
+    # num_stream_time_points: int = k_sim.kgrid.Nt - k_sim.sensor.record_start_index
+    # if options.cuboid_corners:
+    #     print("cuboid corners?")
+    #     time_info = dotdict({'num_stream_time_points': num_stream_time_points,
+    #                          'num_recorded_time_points': k_sim.num_recorded_time_points,
+    #                          'stream_to_disk': options.stream_to_disk})
+    #     cuboid_info = dotdict({'record_p': k_sim.record.p,
+    #                            'record_p_rms': k_sim.record.p_rms,
+    #                            'record_p_max': k_sim.record.p_max,
+    #                            'record_p_min': k_sim.record.p_min,
+    #                            'record_p_final': k_sim.record.p_final,
+    #                            'record_p_max_all': k_sim.record.p_max_all,
+    #                            'record_p_min_all': k_sim.record.p_min_all,
+    #                            'record_u': k_sim.record.u,
+    #                            'record_u_non_staggered': k_sim.record.u_non_staggered,
+    #                            'record_u_rms': k_sim.record.u_rms,
+    #                            'record_u_max': k_sim.record.u_max,
+    #                            'record_u_min': k_sim.record.u_min,
+    #                            'record_u_final': k_sim.record.u_final,
+    #                            'record_u_max_all': k_sim.record.u_max_all,
+    #                            'record_u_min_all': k_sim.record.u_min_all,
+    #                            'record_I': k_sim.record.I,
+    #                            'record_I_avg': k_sim.record.I_avg})
+    #     sensor_data = reorder_cuboid_corners(k_sim.kgrid, k_sim.record, sensor_data, time_info, cuboid_info, verbose=True)
 
     if options.elastic_time_rev:
         # if computing time reversal, reassign sensor_data.p_final to sensor_data
-        sensor_data = sensor_data.p_final
+        # sensor_data = sensor_data.p_final
         raise NotImplementedError("elastic_time_rev is not implemented")
     elif not options.use_sensor:
         # if sensor is not used, return empty sensor data
