@@ -4,6 +4,7 @@ Unit test to compare cartesian and binary sensor masks.
 
 import numpy as np
 from copy import deepcopy
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

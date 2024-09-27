@@ -6,6 +6,7 @@ Unit test to check that the split field components sum to give the correct field
 
 import numpy as np
 from copy import deepcopy
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

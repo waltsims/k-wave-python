@@ -4,6 +4,7 @@ Unit test to compare the simulation results using a labelled and binary source m
 
 import numpy as np
 from copy import deepcopy
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

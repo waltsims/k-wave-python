@@ -5,6 +5,8 @@ zero gives the same answers as the regular fluid code in k-Wave.
 
 import numpy as np
 from copy import deepcopy
+import pytest
+
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

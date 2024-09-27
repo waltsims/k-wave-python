@@ -30,6 +30,7 @@
 
 import numpy as np
 from copy import deepcopy
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

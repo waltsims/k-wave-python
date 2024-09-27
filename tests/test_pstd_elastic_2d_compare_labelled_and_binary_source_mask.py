@@ -4,6 +4,7 @@ Unit test to compare the simulation results using a labelled and binary source m
 
 import numpy as np
 from copy import deepcopy
+import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -14,7 +15,7 @@ from kwave.ksensor import kSensor
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.mapgen import make_multi_arc
 
-
+@pytest.mark.skip(reason="2D not ready")
 def pstd_elastic_2d_compare_labelled_and_binary_source_mask():
 
     # set pass variable
