@@ -192,7 +192,7 @@ class kWaveSimulation(object):
 
         is_elastic_simulation = self.options.simulation_type.is_elastic_simulation()
         if is_elastic_simulation:
-            if ((self.medium.alpha_coeff_compression is not None) and (self.medium.alpha_shear is not None)):
+            if ((self.medium.alpha_coeff_compression is not None) and (self.medium.alpha_coeff_shear is not None)):
                 return True
         return False
 

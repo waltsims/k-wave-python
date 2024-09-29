@@ -3,7 +3,7 @@ from scipy.interpolate import interpn
 from tqdm import tqdm
 from typing import Union
 from copy import deepcopy
-import logging
+# import logging
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -23,7 +23,8 @@ from kwave.utils.dotdictionary import dotdict
 
 from kwave.options.simulation_options import SimulationOptions
 
-from kwave.kWaveSimulation_helper import extract_sensor_data, reorder_cuboid_corners, save_intensity
+from kwave.kWaveSimulation_helper import extract_sensor_data, save_intensity
+#from kwave.kWaveSimulation_helper import  reorder_cuboid_corners
 
 def pstd_elastic_3d(kgrid: kWaveGrid,
                     source: kSource,
