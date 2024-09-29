@@ -963,8 +963,8 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     print('\tprecomputation completed in', scale_time(TicToc.toc()))
     print('\tstarting time loop ...')
 
-    if k_sim.source_ux is not False:
-        print(k_sim.source.ux[0:1, 0:1])
+    # if k_sim.source_ux is not False:
+    #     print(k_sim.source.ux[0:1, 0:1])
 
     # index_end = 6
 

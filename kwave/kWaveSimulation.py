@@ -78,8 +78,6 @@ class kWaveSimulation(object):
             self.binary_sensor_mask = True
 
             # check if the sensor mask is defined as a list of cuboid corners
-            print(dir(self.sensor))
-            # print(self.sensor.mask is not None)
             if self.sensor.mask is not None and np.shape(self.sensor.mask)[0] == (2 * self.kgrid.dim):
                 self.userarg_cuboid_corners = True
             else:
@@ -175,35 +173,28 @@ class kWaveSimulation(object):
 
         """
 
-        # fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max",
-        #           "u_min", "u_rms", "I", "I_avg"]
+        fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
         field_max_all = ["p_max_all", "p_min_all", "p_final", "u_max_all", "u_min_all", "u_final"]
-        # print("IN BLANK SENSOR:")
-        # print(any(self.record.is_set(fields)), self.record)
-        # print(not any(self.record.is_set(fields)) )
-        # print(not self.time_rev)
-        # print("CLAUS:", not any(self.record.is_set(fields)) and (not self.time_rev))
-
-        # cond1: bool = self.sensor.mask is None
-        # cond2: bool = any(self.record.is_set(fields))
-
-        # cond3: bool = cond1 and cond2
-        # print(cond1, cond2, cond3)
         if any(self.record.is_set(field_max_all)) and self.sensor.mask is None:
+            self.sensor.mask = True
+
+        if not any(self.record.is_set(fields)) and (not self.time_rev):
             return True
 
-        # if not any(self.record.is_set(fields)) and (not self.time_rev):
-        #     return True
         return False
 
-    # @property
-    # def kelvin_voigt_model(self):
-    #     """
-    #     Returns:
-    #         Whether the simulation is elastic with absorption
+    @property
+    def kelvin_voigt_model(self):
+        """
+        Returns:
+            Whether the simulation is elastic with absorption
+        """
 
-    #     """
-    #     return False
+        is_elastic_simulation = self.options.simulation_type.is_elastic_simulation()
+        if is_elastic_simulation:
+            if ((self.medium.alpha_coeff_compression is not None) and (self.medium.alpha_shear is not None)):
+                return True
+        return False
 
     @property
     def nonuniform_grid(self):
@@ -257,6 +248,7 @@ class kWaveSimulation(object):
         Returns:
             Whether the sensor.mask is a list of cuboid corners
         """
+        print(np.shape(np.asarray(self.sensor.mask))[0])
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if self.sensor.mask is not None:
                 if not self.blank_sensor and np.shape(np.asarray(self.sensor.mask))[0] == 2 * self.kgrid.dim:
@@ -525,7 +517,7 @@ class kWaveSimulation(object):
 
         # add options which are properties of the class
         self.options.use_sensor = self.use_sensor
-        # self.options.kelvin_voigt_model = self.kelvin_voigt_model
+        self.options.kelvin_voigt_model = self.kelvin_voigt_model
         self.options.blank_sensor = self.blank_sensor
         self.options.cuboid_corners = self.cuboid_corners # there is the userarg_ values as well
         self.options.nonuniform_grid = self.nonuniform_grid
@@ -590,7 +582,8 @@ class kWaveSimulation(object):
                              "reorder_data": self.reorder_data,
                              "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
                              "axisymmetric": opt.simulation_type.is_axisymmetric(),
-                             "transducer_sensor": self.transducer_sensor})
+                             "transducer_sensor": self.transducer_sensor,
+                             "use_cuboid_corners": self.cuboid_corners})
 
             # this creates the storage variables by determining the spatial locations of the data which is in record.
             flags, self.record, self.sensor_data, self.num_recorded_time_points = create_storage_variables(self.kgrid,
@@ -744,6 +737,7 @@ class kWaveSimulation(object):
                 # check for time reversal inputs and set flags
                 if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
+                    print("don't think time reversal is implemented")
 
                 # check for sensor.record and set usage flgs - if no flags are
                 # given, the time history of the acoustic pressure is recorded by
@@ -763,12 +757,11 @@ class kWaveSimulation(object):
                 # and _final variables
                 fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
                 if any(self.record.is_set(fields)):
-                    assert self.sensor.mask is not None
+                    assert self.sensor.mask is not None, "sensor.mask should be set"
 
                 # check if sensor mask is a binary grid, a set of cuboid corners,
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
-                    print(not self.blank_sensor, self.blank_sensor)
 
                     # binary grid
                     if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
@@ -784,6 +777,8 @@ class kWaveSimulation(object):
 
                     # cuboid corners
                     elif np.shape(self.sensor.mask)[0] == 2 * kgrid_dim:
+
+                        # set cuboid_corners flag?
 
                         # make sure the points are integers
                         assert np.all(np.asarray(self.sensor.mask) % 1 == 0), "sensor.mask cuboid corner indices must be integers."
@@ -807,23 +802,23 @@ class kWaveSimulation(object):
                                 )
 
                         # check the list are within bounds
-                        if np.any(np.asarray(self.sensor.mask) < 1):
+                        if np.any(np.asarray(self.sensor.mask) < 0):
                             raise ValueError("sensor.mask cuboid corners must be within the grid.")
                         else:
                             if kgrid_dim == 1:
-                                if np.any(np.asarray(self.sensor.mask) > self.kgrid.Nx):
+                                if np.any(np.asarray(self.sensor.mask) > self.kgrid.Nx - 1):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
                             elif kgrid_dim == 2:
-                                if np.any(np.asarray(self.sensor.mask)[[0, 2], :] > self.kgrid.Nx) or np.any(
-                                    np.asarray(self.sensor.mask)[[1, 3], :] > self.kgrid.Ny
+                                if np.any(np.asarray(self.sensor.mask)[[0, 2], :] > self.kgrid.Nx - 1) or np.any(
+                                    np.asarray(self.sensor.mask)[[1, 3], :] > self.kgrid.Ny -1
                                 ):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
                             elif kgrid_dim == 3:
                                 mask = np.asarray(self.sensor.mask)
                                 if (
-                                    np.any(mask[[0, 3], :] > self.kgrid.Nx)
-                                    or np.any(mask[[1, 4], :] > self.kgrid.Ny)
-                                    or np.any(mask[[2, 5], :] > self.kgrid.Nz)
+                                    np.any(mask[[0, 3], :] > self.kgrid.Nx - 1)
+                                    or np.any(mask[[1, 4], :] > self.kgrid.Ny - 1)
+                                    or np.any(mask[[2, 5], :] > self.kgrid.Nz - 1)
                                 ):
                                     raise ValueError("sensor.mask cuboid corners must be within the grid.")
 
@@ -856,9 +851,11 @@ class kWaveSimulation(object):
                         ), f"Cartesian sensor.mask for a {kgrid_dim}D simulation must be given as a {kgrid_dim} by N array."
 
                         # set Cartesian mask flag (this is modified in
-                        # createStorageVariables if the interpolation setting is
+                        # create_storage_variables if the interpolation setting is
                         # set to nearest)
                         self.binary_sensor_mask = False
+
+                        # print("here!")
 
                         # extract Cartesian data from sensor mask
                         if kgrid_dim == 1:
@@ -905,6 +902,9 @@ class kWaveSimulation(object):
                             # remove the reordering data
                             sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
                             """
+                else:
+                    # print('is a blank sensor')
+                    pass
             else:
                 # set transducer_sensor flag to true, i.e. the sensor is a transducer
                 self.transducer_sensor = True
@@ -978,13 +978,11 @@ class kWaveSimulation(object):
 
                 # check size and contents
                 if np.allclose(np.abs(self.source.p0), np.zeros_like(self.source.p0)):
-
                     # if the initial pressure is empty or zero, remove field
                     del self.source.p0
                     raise RuntimeWarning('All entries in source.p0 are close to zero')
 
                 if np.any(np.size(np.squeeze(self.source.p0)) != np.size(np.squeeze(self.kgrid.k))):
-
                     # throw an error if p0 is not the correct size
                     raise RuntimeError('source.p0 must be the same size as the computational grid')
 
@@ -1011,7 +1009,8 @@ class kWaveSimulation(object):
                 if self.source_p > k_Nt:
                     logging.log(logging.WARN, "  source.p has more time points than kgrid.Nt, remaining time points will not be used.")
 
-                # create an indexing variable corresponding to the location of all the source elements
+                # create an indexing variable corresponding to the location of all the source elements.
+                # matlab_find is matlab indexed
                 self.p_source_pos_index = matlab_find(self.source.p_mask)
 
                 # check if the mask is binary or labelled
@@ -1020,11 +1019,11 @@ class kWaveSimulation(object):
                 # create a second indexing variable
                 if p_unique.size <= 2 and p_unique.sum() == 1:
                     # set signal index to all elements
-                    self.p_source_sig_index = ":"
+                    self.u_source_sig_index = np.arange(0, np.shape(self.source.p)[0]) + 1
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    self.p_source_sig_index = self.source.p_mask(self.source.p_mask != 0)
+                    self.p_source_sig_index = self.source.p_mask[self.source.p_mask != 0] + int(1)
 
                 # convert the data type depending on the number of indices
                 self.p_source_pos_index = cast_to_type(self.p_source_pos_index, self.index_data_type)
@@ -1034,6 +1033,7 @@ class kWaveSimulation(object):
 
             # check for time varying velocity source input and set source flag
             if any([(getattr(self.source, k) is not None) for k in ["ux", "uy", "uz", "u_mask"]]):
+
                 # check the source mode input is valid
                 if self.source.u_mode is None:
                     self.source.u_mode = self.SOURCE_U_MODE_DEF
@@ -1045,7 +1045,7 @@ class kWaveSimulation(object):
                 # check if the mask is binary or labelled
                 u_unique = np.unique(self.source.u_mask)
 
-                # create a second indexing variable. This is u_source_sig_index. The signal index.
+                # create a second indexing variable. This is u_source_sig_index, the signal index.
                 # If binary.
                 if u_unique.size <= 2 and u_unique.sum() == 1:
                     # set signal index to all elements
@@ -1055,11 +1055,18 @@ class kWaveSimulation(object):
                         self.u_source_sig_index = np.arange(0, np.shape(self.source.ux)[0]) + 1
                     elif self.source.uy is not None:
                         self.u_source_sig_index = np.arange(0, np.shape(self.source.uy)[0]) + 1
+                    elif self.source.uz is not None:
+                        self.u_source_sig_index = np.arange(0, np.shape(self.source.uz)[0]) + 1
 
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    self.u_source_sig_index = self.source.u_mask[self.source.u_mask != 0] + 1
+
+                    #  self.u_source_sig_index = self.source.u_mask[self.source.u_mask != 0] + 1
+
+                    arr = np.where(self.source.u_mask.flatten(order="F") != 0)[0]
+                    self.u_source_sig_index = self.source.u_mask.flatten(order="F")[arr]
+
 
                 # convert the data type depending on the number of indices
                 self.u_source_pos_index = cast_to_type(self.u_source_pos_index, self.index_data_type)
@@ -1083,14 +1090,40 @@ class kWaveSimulation(object):
 
                 # create a second indexing variable
                 if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
-                    # set signal index to all elements
-                    self.s_source_sig_index = np.arange(0, np.shape(self.source.sxx)[0])
+                    # set signal index to all elements, should also be for szz or szz
+                    print("THIS is zero indexed", np.shape(self.source.sxx), np.shape(self.source.syy), np.shape(self.source.szz), np.max(np.shape(self.source.szz)))
+                    temp_array = []
+                    if self.source.sxx is not None:
+                        # temp_array.append(np.max(np.shape(self.source.sxx)))
+                        temp_array.append(np.shape(self.source.sxx)[0])
+                    if self.source.syy is not None:
+                        # temp_array.append(np.max(np.shape(self.source.syy)))
+                        temp_array.append(np.shape(self.source.syy)[0])
+                    if self.source.szz is not None:
+                        # temp_array.append(np.max(np.shape(self.source.szz)))
+                        temp_array.append(np.shape(self.source.szz)[0])
+                    if self.source.syz is not None:
+                        # temp_array.append(np.max(np.shape(self.source.syz)))
+                        temp_array.append(np.shape(self.source.sxy)[0])
+                    if self.source.sxz is not None:
+                        # temp_array.append(np.max(np.shape(self.source.sxz)))
+                        temp_array.append(np.shape(self.source.sxz)[0])
+                    if self.source.sxy is not None:
+                        # temp_array.append(np.max(np.shape(self.source.sxy)))
+                        temp_array.append(np.shape(self.source.syz)[0])
+                    value: int = np.max(np.asarray(temp_array))
+                    print("value:", value)
+                    self.s_source_sig_index = np.squeeze(np.arange(0, value) + int(1))
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
-                    self.s_source_sig_index = self.source.s_mask[self.source.s_mask != 0]
+                    print("THIS is also zero indexed")
+                    arr = np.where(self.source.s_mask.flatten(order="F") != 0)[0]
+                    self.s_source_sig_index = self.source.s_mask.flatten(order="F")[arr]
+                    # self.s_source_sig_index = self.source.s_mask[self.source.s_mask != 0] + int(1) # matlab_find(self.source.s_mask)
+                    # self.s_source_sig_index = matlab_find(self.source.s_mask)
 
-                self.s_source_pos_index = np.asarray(self.s_source_pos_index )
+                self.s_source_pos_index = np.asarray(self.s_source_pos_index)
                 for i in range(np.shape(self.s_source_pos_index)[0]):
                     self.s_source_pos_index[i] = cast_to_type(self.s_source_pos_index[i], self.index_data_type)
 
@@ -1270,7 +1303,7 @@ class kWaveSimulation(object):
         if self.record.u_split_field and not self.binary_sensor_mask:
             raise ValueError("The option sensor.record = {" "u_split_field" "} is only compatible " "with a binary sensor mask.")
 
-        # check input options for data streaming *****
+        # check input options for data streaming
         if opt.stream_to_disk:
             if not self.use_sensor or self.time_rev:
                 raise ValueError(
@@ -1279,9 +1312,9 @@ class kWaveSimulation(object):
                     " is currently only compatible "
                     "with forward simulations using a non-zero sensor mask."
                 )
-            elif self.sensor.record is not None and self.sensor.record.ismember(self.record.flags[1:]).any():
+            elif self.sensor.record is not None and np.all([item not in ['p', "p"] for item in self.sensor.record]):
                 raise ValueError(
-                    "The optional input " "StreamToDisk" " is currently only compatible " "with sensor.record = {" "p" "} (the default)."
+                    "The optional input " "StreamToDisk" " is currently only compatible " "with sensor.record = [" "p" "] (the default)."
                 )
 
         is_axisymmetric = self.options.simulation_type.is_axisymmetric()
@@ -1467,11 +1500,15 @@ class kWaveSimulation(object):
 
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
+
             print('\tuse_sensor:', self.use_sensor)
+
             if (not self.blank_sensor) or isinstance(self.options.save_to_disk, str):
+
                 print('\tblank_sensor:', self.blank_sensor)
                 print("\tsave_to_disk:", isinstance(self.options.save_to_disk, str))
                 print("\tCONDITION:", (not self.blank_sensor) or isinstance(self.options.save_to_disk, str))
+
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
@@ -1512,8 +1549,11 @@ class kWaveSimulation(object):
                     # cleanup unused variables
                     del temp_mask
 
+                    # print("-------------", np.shape(self.sensor_mask_index ) )
+
                 else:
 
+                    print("this is something else - not cuboid corners")
                     # create mask indices (this works for both normal sensor and transducer inputs)
                     self.sensor_mask_index = np.where(self.sensor.mask.flatten(order="F") != 0)[0] + 1  # +1 due to matlab indexing. Use matlab_find?
                     self.sensor_mask_index = np.expand_dims(self.sensor_mask_index, -1)  # compatibility, n => [n, 1]
@@ -1523,8 +1563,13 @@ class kWaveSimulation(object):
                 self.sensor_mask_index = cast_to_type(self.sensor_mask_index, self.index_data_type)
 
             else:
+                print('Use sensor but is not a blank sensor', (not self.blank_sensor))
                 # set the sensor mask index variable to be empty
                 self.sensor_mask_index = None
+        else:
+            print("not using a sensor")
+
+        # print("create_sensor_variables", self.sensor_mask_index)
 
 
     def create_absorption_vars(self) -> None:
