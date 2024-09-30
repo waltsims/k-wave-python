@@ -507,9 +507,10 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
         # cast matrix to 64-bit unsigned integer
         print(key, value is not None)
         if (value is None):
-            print(key)
-        value = np.array(value, dtype=np.uint64)
-        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
+            print("*********", key, "*********")
+        else:
+            value = np.array(value, dtype=np.uint64)
+            write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
         del value
 
     # set additional file attributes
