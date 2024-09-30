@@ -2107,46 +2107,63 @@ def make_bowl(
     z1 = bowl_pos[2] - bz
     z2 = z1 + Nz
 
+    print("MultiBowl information: pre")
+    print(bx,by,bz,bowl_pos, Nx, Ny, Nz)
+    print(x1,x2,y1,y2,z1,z2)
+
     # truncate bounding box if it falls outside the grid
     if x1 < 0:
         #bowl_sm = bowl_sm[abs(x1):, :, :]
-        bowl_sm = np.delete(bowl_sm, slice(0, abs(x1)), axis=0)
+
+        s = slice(0, abs(x1))
+        bowl_sm = np.delete(bowl_sm, s, axis=0)
         x1 = 0
-        print("x1 < 0", np.shape(bowl_sm))
+
+        # print("x1 < 0", bowl_pos[0], bx, x1, s.start, s.stop, s.step,
+              # np.shape(bowl_sm), Nx, Ny, Nz, grid_size)
+        # print("x1 < 0", np.shape(bowl_sm))
+
+        # x1 = x1 + 1
+        # # x2 = x2 + 1
+        # print("x1 < 0", np.shape(bowl_sm))
+
     if y1 < 0:
         # bowl_sm = bowl_sm[:, abs(y1):, :]
         bowl_sm = np.delete(bowl_sm, slice(0, abs(y1)), axis=1)
         y1 = 0
-        print("y1 < 0", np.shape(bowl_sm))
+        # print("y1 < 0", np.shape(bowl_sm))
     if z1 < 0:
         # bowl_sm = bowl_sm[:, :, abs(z1):]
         bowl_sm = np.delete(bowl_sm, slice(0, abs(z1)), axis=2)
         z1 = 0
-        print("z1 < 0", np.shape(bowl_sm))
-    if x2 > grid_size[0]:
+        # print("z1 < 0", np.shape(bowl_sm))
+    if x2 > grid_size[0]-1:
         # to_delete = x2 - grid_size[0]
         # bowl_sm = bowl_sm[:-to_delete, :, :]
         start_index = bowl_sm.shape[0] - (x2 - grid_size[0])
         end_index = bowl_sm.shape[0]
+        s = slice(start_index, end_index)
         bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=0)
         x2 = grid_size[0]
-        print("x2 > Nx", np.shape(bowl_sm))
-    if y2 > grid_size[1]:
+        # print("x2 > Nx", np.shape(bowl_sm))
+        # print("x2 < Nx", bowl_pos[0], bx, x2, s.start, s.stop, s.step, np.shape(bowl_sm))
+
+    if y2 > grid_size[1] - 1:
         # to_delete = y2 - grid_size[1]
         # bowl_sm = bowl_sm[:, :-to_delete, :]
         start_index = bowl_sm.shape[1] - (y2 - grid_size[1])
         end_index = bowl_sm.shape[1]
         bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=1)
         y2 = grid_size[1]
-        print("y2 > Ny", np.shape(bowl_sm))
-    if z2 > grid_size[2]:
+        # print("y2 > Ny", np.shape(bowl_sm))
+    if z2 > grid_size[2] - 1:
         # to_delete = z2 - grid_size[2]
         # bowl_sm = bowl_sm[:, :, :-to_delete]
         start_index = bowl_sm.shape[2] - (z2 - grid_size[2])
         end_index = bowl_sm.shape[2]
         bowl_sm = np.delete(bowl_sm, slice(start_index, end_index), axis=2)
         z2 = grid_size[2]
-        print("z2 > Nz", np.shape(bowl_sm))
+        # print("z2 > Nz", np.shape(bowl_sm))
 
     # x1 = x1 + 1
     # x2 = x2 + 1
@@ -2155,15 +2172,19 @@ def make_bowl(
     # z1 = z1 + 1
     # z2 = z2 + 1
 
+    print("MultiBowl information: post")
+    print(x1,x2,y1,y2,z1,z2)
+    print(np.shape(bowl), np.shape(bowl_sm), np.shape(bowl[x1:x2, y1:y2, z1:z2]), grid_size)
+
     # shifted_mask[1:, 1:, 1:] = binary_mask[:-1, :-1, :-1]
     # print(np.shape(bowl[x1:x2, y1:y2, z1:z2]), np.shape(bowl_sm))
 
     bowl[x1:x2, y1:y2, z1:z2] = bowl_sm
 
-    shifted_bowl = np.zeros_like(bowl)
-    shifted_bowl[1:, 1:, 1:] = bowl[:-1, :-1, :-1]
+    # shifted_bowl = np.zeros_like(bowl)
+    # shifted_bowl[1:, 1:, 1:] = bowl[:-1, :-1, :-1]
 
-    return shifted_bowl
+    return bowl
 
 
 def make_multi_bowl(
