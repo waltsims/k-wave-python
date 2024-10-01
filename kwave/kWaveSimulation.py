@@ -248,7 +248,6 @@ class kWaveSimulation(object):
         Returns:
             Whether the sensor.mask is a list of cuboid corners
         """
-        print(np.shape(np.asarray(self.sensor.mask))[0])
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if self.sensor.mask is not None:
                 if not self.blank_sensor and np.shape(np.asarray(self.sensor.mask))[0] == 2 * self.kgrid.dim:
