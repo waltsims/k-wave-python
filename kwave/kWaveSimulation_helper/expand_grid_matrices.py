@@ -222,15 +222,15 @@ def expand_velocity_sources(
 
         else:
 
-            if source.u_mask.ndim == 1:
-                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),) )
-            elif source.u_mask.ndim == 2:
-                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
-                                        (expand_size[1]//2, expand_size[1]//2)) )
-            elif source.u_mask.ndim == 3:
-                exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
-                                        (expand_size[1]//2, expand_size[1]//2),
-                                        (expand_size[2]//2, expand_size[2]//2), ) )
+            # if source.u_mask.ndim == 1:
+            #     exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),) )
+            # elif source.u_mask.ndim == 2:
+            #     exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
+            #                             (expand_size[1]//2, expand_size[1]//2)) )
+            # elif source.u_mask.ndim == 3:
+            #     exp_size = np.asarray( ((expand_size[0]//2, expand_size[0]//2),
+            #                             (expand_size[1]//2, expand_size[1]//2),
+            #                             (expand_size[2]//2, expand_size[2]//2), ) )
 
             # if np.max(matlab_find(source.u_mask)) == np.size(source.ux):
             #     print("CHANGING ux")
@@ -243,7 +243,7 @@ def expand_velocity_sources(
 
             # enlarge the velocity source mask
             # source.u_mask = np.pad(source.u_mask, pad_width=exp_size)
-            expand_matrix(source.u_mask, expand_size, 0)
+            source.u_mask = expand_matrix(source.u_mask, expand_size, 0)
 
             # create an indexing variable corresponding to the source elements
             u_source_pos_index = matlab_find(source.u_mask)
