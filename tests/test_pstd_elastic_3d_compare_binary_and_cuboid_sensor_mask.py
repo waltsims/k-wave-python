@@ -78,15 +78,8 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     source.ux = focus(kgrid, deepcopy(source.ux), deepcopy(source.u_mask), Vector([0.0, 0.0, 0.0]), 1500.0)
 
     # define list of cuboid corners using two intersecting cuboids
-
-    # cuboid_corners = np.array([[20, 10],
-    #                            [40, 35],
-    #                            [30, 30],
-    #                            [30, 25],
-    #                            [50, 42],
-    #                            [40, 40]], dtype=int)
-
-    cuboid_corners = np.transpose(np.array([[20, 40, 30, 30, 50, 40], [10, 35, 30, 25, 42, 40]], dtype=int)) - int(1)
+    cuboid_corners = np.transpose(np.array([[20, 40, 30, 30, 50, 40],
+                                            [10, 35, 30, 25, 42, 40]], dtype=int)) - int(1)
 
     # create sensor
     sensor = kSensor()
@@ -101,8 +94,8 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
 
     # run the simulation as normal
     simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                                   pml_inside=PML_INSIDE,
-                                                   kelvin_voigt_model=False)
+                                           pml_inside=PML_INSIDE,
+                                           kelvin_voigt_model=False)
     # run the simulation
     sensor_data_cuboids = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                           medium=deepcopy(medium),
@@ -124,11 +117,9 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
                                         sensor=deepcopy(sensor),
                                         simulation_options=deepcopy(simulation_options))
 
-    # print(np.shape(sensor_data_comp1.p))
-
     # compute the error from the first cuboid
     L_inf_p      = np.max(np.abs(sensor_data_cuboids[cuboid_index].p -
-                          np.reshape(sensor_data_comp1.p, np.shape(sensor_data_cuboids[cuboid_index].p), order='F') ))     / np.max(np.abs(sensor_data_comp1.p))
+                          np.reshape(sensor_data_comp1.p, np.shape(sensor_data_cuboids[cuboid_index].p), order='F') )) / np.max(np.abs(sensor_data_comp1.p))
     # L_inf_p_max  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_max  - sensor_data_comp1.p_max)) / np.max(np.abs(sensor_data_comp1.p_max))
     # L_inf_p_min  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_min  - sensor_data_comp1.p_min)) / np.max(np.abs(sensor_data_comp1.p_min))
     # L_inf_p_rms  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_rms  - sensor_data_comp1.p_rms)) / np.max(np.abs(sensor_data_comp1.p_rms))
@@ -177,8 +168,11 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     # compute pass
     if (L_inf_max > COMPARISON_THRESH):
         test_pass = False
+        msg: str = "fails on first cuboids: " + str(L_inf_max) + " > " + str(COMPARISON_THRESH)
+    else:
+        print("passses on first cuboids: " + str(L_inf_max) + " < " + str(COMPARISON_THRESH))
 
-    assert test_pass, "fails on first cuboids"
+    assert test_pass, msg
 
     # create a binary mask for display from the list of corners
 
@@ -196,30 +190,32 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
                                         simulation_options=deepcopy(simulation_options))
 
     # compute the error from the second cuboid
-    L_inf_p      = np.max(np.abs(sensor_data_cuboids[cuboid_index].p -
-                          np.reshape(sensor_data_comp2.p, np.shape(sensor_data_cuboids[cuboid_index].p), order='F') )) / np.max(np.abs(sensor_data_comp2.p))
+    L_inf_p = np.max(np.abs(sensor_data_cuboids[cuboid_index].p -
+                            np.reshape(sensor_data_comp2.p, np.shape(sensor_data_cuboids[cuboid_index].p), order='F') )) / np.max(np.abs(sensor_data_comp2.p))
 
-    # L_inf_p_max  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_max  - sensor_data_comp2.p_max)) / np.max(np.abs(sensor_data_comp2.p_max))
-    # L_inf_p_min  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_min  - sensor_data_comp2.p_min)) / np.max(np.abs(sensor_data_comp2.p_min))
-    # L_inf_p_rms  = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_rms  - sensor_data_comp2.p_rms)) / np.max(np.abs(sensor_data_comp2.p_rms))
+    # L_inf_p_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_max -
+                                # np.reshape(sensor_data_comp2.p_max, np.shape(sensor_data_cuboids[cuboid_index].p_max), order='F') )) / np.max(np.abs(sensor_data_comp2.p_max))
 
-    # L_inf_ux      = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux      - sensor_data_comp2.ux))     / np.max(np.abs(sensor_data_comp2.ux))
-    # L_inf_ux_max  = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_max  - sensor_data_comp2.ux_max)) / np.max(np.abs(sensor_data_comp2.ux_max))
-    # L_inf_ux_min  = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_min  - sensor_data_comp2.ux_min)) / np.max(np.abs(sensor_data_comp2.ux_min))
-    # L_inf_ux_rms  = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_rms  - sensor_data_comp2.ux_rms)) / np.max(np.abs(sensor_data_comp2.ux_rms))
+    # L_inf_p_min = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_min - sensor_data_comp2.p_min)) / np.max(np.abs(sensor_data_comp2.p_min))
+    # L_inf_p_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_rms - sensor_data_comp2.p_rms)) / np.max(np.abs(sensor_data_comp2.p_rms))
 
-    # L_inf_uy      = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy      - sensor_data_comp2.uy))     / np.max(np.abs(sensor_data_comp2.uy))
-    # L_inf_uy_max  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_max  - sensor_data_comp2.uy_max)) / np.max(np.abs(sensor_data_comp2.uy_max))
-    # L_inf_uy_min  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_min  - sensor_data_comp2.uy_min)) / np.max(np.abs(sensor_data_comp2.uy_min))
-    # L_inf_uy_rms  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_rms  - sensor_data_comp2.uy_rms)) / np.max(np.abs(sensor_data_comp2.uy_rms))
+    # L_inf_ux = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux - sensor_data_comp2.ux)) / np.max(np.abs(sensor_data_comp2.ux))
+    # L_inf_ux_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_max - sensor_data_comp2.ux_max)) / np.max(np.abs(sensor_data_comp2.ux_max))
+    # L_inf_ux_min = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_min - sensor_data_comp2.ux_min)) / np.max(np.abs(sensor_data_comp2.ux_min))
+    # L_inf_ux_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].ux_rms - sensor_data_comp2.ux_rms)) / np.max(np.abs(sensor_data_comp2.ux_rms))
 
-    # L_inf_uz      = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz      - sensor_data_comp2.uz))     / np.max(np.abs(sensor_data_comp2.uz))
-    # L_inf_uz_max  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_max  - sensor_data_comp2.uz_max)) / np.max(np.abs(sensor_data_comp2.uz_max))
-    # L_inf_uz_min  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_min  - sensor_data_comp2.uz_min)) / np.max(np.abs(sensor_data_comp2.uz_min))
-    # L_inf_uz_rms  = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_rms  - sensor_data_comp2.uz_rms)) / np.max(np.abs(sensor_data_comp2.uz_rms))
+    # L_inf_uy = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy - sensor_data_comp2.uy)) / np.max(np.abs(sensor_data_comp2.uy))
+    # L_inf_uy_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_max - sensor_data_comp2.uy_max)) / np.max(np.abs(sensor_data_comp2.uy_max))
+    # L_inf_uy_min = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_min - sensor_data_comp2.uy_min)) / np.max(np.abs(sensor_data_comp2.uy_min))
+    # L_inf_uy_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].uy_rms - sensor_data_comp2.uy_rms)) / np.max(np.abs(sensor_data_comp2.uy_rms))
+
+    # L_inf_uz = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz - sensor_data_comp2.uz)) / np.max(np.abs(sensor_data_comp2.uz))
+    # L_inf_uz_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_max - sensor_data_comp2.uz_max)) / np.max(np.abs(sensor_data_comp2.uz_max))
+    # L_inf_uz_min = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_min - sensor_data_comp2.uz_min)) / np.max(np.abs(sensor_data_comp2.uz_min))
+    # L_inf_uz_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_rms - sensor_data_comp2.uz_rms)) / np.max(np.abs(sensor_data_comp2.uz_rms))
 
     # get maximum error
-    L_inf_max = np.max([L_inf_p#, L_inf_p_max, L_inf_p_min, L_inf_p_rms,
+    L_inf_max = np.max([L_inf_p, #L_inf_p_max, #L_inf_p_min, L_inf_p_rms,
         # L_inf_ux, L_inf_ux_max, L_inf_ux_min, L_inf_ux_rms,
         # L_inf_uy, L_inf_uy_max, L_inf_uy_min, L_inf_uy_rms,
         # L_inf_uz, L_inf_uz_max, L_inf_uz_min, L_inf_uz_rms
@@ -228,63 +224,8 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     # compute pass
     if (L_inf_max > COMPARISON_THRESH):
         test_pass = False
+        msg: str = "fails on second cuboids: " + str(L_inf_max) + " > " + str(COMPARISON_THRESH)
+    else:
+        print("passses on second cuboids: " + str(L_inf_max) + " < " + str(COMPARISON_THRESH))
 
-    assert test_pass, "fails on second cuboids"
-
-# # =========================================================================
-# # PLOT COMPARISONS
-# # =========================================================================
-
-# if plot_comparisons
-
-#     # plot the simulated sensor data
-#     figure;
-#     subplot(3, 2, 1);
-#     imagesc(reshape(sensor_data_cuboids(1).p, [], size(sensor_data_comp1.p, 2)), [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 1');
-#     colorbar;
-
-#     subplot(3, 2, 2);
-#     imagesc(reshape(sensor_data_cuboids(2).p, [], size(sensor_data_comp1.p, 2)), [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 2');
-#     colorbar;
-
-#     subplot(3, 2, 3);
-#     imagesc(sensor_data_comp1.p, [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 1 - Comparison');
-#     colorbar;
-
-#     subplot(3, 2, 4);
-#     imagesc(sensor_data_comp2.p, [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 2 - Comparison');
-#     colorbar;
-
-#     subplot(3, 2, 5);
-#     imagesc(reshape(sensor_data_cuboids(1).p, [], size(sensor_data_comp1.p, 2)) - sensor_data_comp1.p, [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 1 - Difference');
-#     colorbar;
-
-#     subplot(3, 2, 6);
-#     imagesc(reshape(sensor_data_cuboids(2).p, [], size(sensor_data_comp1.p, 2)) - sensor_data_comp2.p, [-1, 1]);
-#     colormap(getColorMap);
-#     ylabel('Sensor Position');
-#     xlabel('Time Step');
-#     title('Cuboid 2 - Difference');
-#     colorbar;
-
-# end
+    assert test_pass, msg
