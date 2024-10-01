@@ -242,7 +242,8 @@ def expand_velocity_sources(
             #     print("NOT CHANGING")
 
             # enlarge the velocity source mask
-            source.u_mask = np.pad(source.u_mask, pad_width=exp_size)
+            # source.u_mask = np.pad(source.u_mask, pad_width=exp_size)
+            expand_matrix(source.u_mask, expand_size, 0)
 
             # create an indexing variable corresponding to the source elements
             u_source_pos_index = matlab_find(source.u_mask)
