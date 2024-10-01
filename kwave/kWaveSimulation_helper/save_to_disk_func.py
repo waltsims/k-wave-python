@@ -383,12 +383,12 @@ def grab_sensor_props(integer_variables, kgrid_dim, sensor_mask_index, cuboid_co
     # SENSOR VARIABLES
     # =========================================================================
 
-    print("in grab sensor props", integer_variables.sensor_mask_type, flags.cuboid_corners,
-          integer_variables.sensor_mask_type == 0, integer_variables.sensor_mask_type == 1)
+    # print("in grab sensor props", integer_variables.sensor_mask_type, flags.cuboid_corners,
+          # integer_variables.sensor_mask_type == 0, integer_variables.sensor_mask_type == 1)
 
     if integer_variables.sensor_mask_type == 0:
         # mask is defined as a list of grid indices
-        print(sensor_mask_index)
+        # print(sensor_mask_index)
         integer_variables.sensor_mask_index = sensor_mask_index
 
     elif integer_variables.sensor_mask_type == 1:
@@ -505,12 +505,12 @@ def save_h5_file(filepath, integer_variables, float_variables, hdf_compression_l
     # (long in C++), then add to HDF5 file
     for key, value in integer_variables.items():
         # cast matrix to 64-bit unsigned integer
-        print(key, value is not None)
+        # print(key, value is not None)
         if (value is None):
             print("*********", key, "*********")
-        else:
-            value = np.array(value, dtype=np.uint64)
-            write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
+        #else:
+        value = np.array(value, dtype=np.uint64)
+        write_matrix(filepath, value, key, hdf_compression_level, auto_chunk)
         del value
 
     # set additional file attributes
