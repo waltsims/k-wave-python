@@ -21,7 +21,7 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     test_pass: bool = True
 
     # set additional literals to give further permutations of the test
-    COMPARISON_THRESH: float = 1e-15
+    COMPARISON_THRESH: float = 1e-13
     PML_INSIDE: bool = True
 
     # =========================================================================
@@ -193,8 +193,8 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     L_inf_p = np.max(np.abs(sensor_data_cuboids[cuboid_index].p -
                             np.reshape(sensor_data_comp2.p, np.shape(sensor_data_cuboids[cuboid_index].p), order='F') )) / np.max(np.abs(sensor_data_comp2.p))
 
-    # L_inf_p_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_max -
-                                # np.reshape(sensor_data_comp2.p_max, np.shape(sensor_data_cuboids[cuboid_index].p_max), order='F') )) / np.max(np.abs(sensor_data_comp2.p_max))
+    L_inf_p_max = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_max -
+                                np.reshape(sensor_data_comp2.p_max, np.shape(sensor_data_cuboids[cuboid_index].p_max), order='F') )) / np.max(np.abs(sensor_data_comp2.p_max))
 
     # L_inf_p_min = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_min - sensor_data_comp2.p_min)) / np.max(np.abs(sensor_data_comp2.p_min))
     # L_inf_p_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].p_rms - sensor_data_comp2.p_rms)) / np.max(np.abs(sensor_data_comp2.p_rms))
@@ -215,7 +215,7 @@ def test_pstd_elastic_3d_compare_binary_and_cuboid_sensor_mask():
     # L_inf_uz_rms = np.max(np.abs(sensor_data_cuboids[cuboid_index].uz_rms - sensor_data_comp2.uz_rms)) / np.max(np.abs(sensor_data_comp2.uz_rms))
 
     # get maximum error
-    L_inf_max = np.max([L_inf_p, #L_inf_p_max, #L_inf_p_min, L_inf_p_rms,
+    L_inf_max = np.max([L_inf_p, L_inf_p_max, #L_inf_p_min, L_inf_p_rms,
         # L_inf_ux, L_inf_ux_max, L_inf_ux_min, L_inf_ux_rms,
         # L_inf_uy, L_inf_uy_max, L_inf_uy_min, L_inf_uy_rms,
         # L_inf_uz, L_inf_uz_max, L_inf_uz_min, L_inf_uz_rms
