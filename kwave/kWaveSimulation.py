@@ -1564,7 +1564,7 @@ class kWaveSimulation(object):
             else:
                 print('Use sensor but is not a blank sensor', (not self.blank_sensor))
                 # set the sensor mask index variable to be empty
-                self.sensor_mask_index = None
+                self.sensor_mask_index = [] # None
         else:
             print("not using a sensor")
 
