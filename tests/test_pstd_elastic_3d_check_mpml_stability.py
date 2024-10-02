@@ -81,13 +81,12 @@ def test_pstd_elastic_3d_check_mpml_stability():
     fs = 1.0 / kgrid.dt
     source.sxx = tone_burst(sample_freq=fs, signal_freq=1e6, num_cycles=3)
 
-    # print(source.sxx)
-
     source.syy = deepcopy(source.sxx)
     source.szz = deepcopy(source.sxx)
 
     # define sensor
     sensor = kSensor()
+    sensor.mask = np.ones((Nx, Ny, Nz), dtype=bool)
     sensor.record = ['u_final']
 
     # define input arguments
