@@ -44,19 +44,33 @@ class kWaveSimulation(object):
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
         # flags which control the characteristics of the sensor
+        #: Whether the sensor sensor mask is defined by cuboid corners
         #: Whether time reversal simulation is enabled
+
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
         if self.sensor.time_reversal_boundary_data is not None:
             # define a new source structure
-            source = {"p_mask": self.sensor.p_mask, "p": np.flip(self.sensor.time_reversal_boundary_data, 2), "p_mode": "dirichlet"}
+            self.source = kSource()
+            self.source.p_mask = self.sensor.mask
+            self.source.p = np.flip(self.sensor.time_reversal_boundary_data, 1)
+            self.source.p_mode = "dirichlet"
 
             # define a new sensor structure
             Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
-            sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
+            self.sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
+
             # set time reversal flag
             self.userarg_time_rev = True
+
+            self.record = Recorder()
+            self.record.p = False
         else:
             # set time reversal flag
             self.userarg_time_rev = False
@@ -68,12 +82,6 @@ class kWaveSimulation(object):
 
             #: Whether the sensor.mask is binary
             self.binary_sensor_mask = True
-
-            # check if the sensor mask is defined as a list of cuboid corners
-            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-                self.userarg_cuboid_corners = True
-            else:
-                self.userarg_cuboid_corners = False
 
             #: If tse sensor is an object of the kWaveTransducer class
             self.transducer_sensor = False
