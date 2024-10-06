@@ -31,8 +31,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_num_threads_setter_valid(self):
         """Test setting a valid number of threads."""
         options = self.default_options
-        options.num_threads = 4
-        self.assertEqual(options.num_threads, 4)
+        options.num_threads = os.cpu_count()
+        self.assertEqual(options.num_threads, os.cpu_count())
 
         options.num_threads = "all"
         self.assertEqual(options.num_threads, os.cpu_count())
