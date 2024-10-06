@@ -79,12 +79,13 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        if self._binary_name is None or self._binary_name in ["kspaceFirstOrder3D", "kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP"]:
+        valid_binary_names = ["kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP", "kspaceFirstOrder-OMP.exe", "kspaceFirstOrder-CUDA.exe"]
+        if self._binary_name is None or self._binary_name in valid_binary_names:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation:
-                self._binary_name = "kspaceFirstOrder-CUDA"
+                self._binary_name = f"kspaceFirstOrder-CUDA{'.exe' if PLATFORM == 'windows' else ''}"
             else:
-                self._binary_name = "kspaceFirstOrder-OMP"
+                self._binary_name = f"kspaceFirstOrder-OMP{'.exe' if PLATFORM == 'windows' else ''}"
         else:
             Warning("Custom binary name set. Ignoring `is_gpu_simulation` state.")
             self._binary_name = self._binary_name
