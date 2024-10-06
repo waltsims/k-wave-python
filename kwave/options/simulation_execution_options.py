@@ -51,7 +51,7 @@ class SimulationExecutionOptions:
         if cpu_count is None:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
         if isinstance(value, int):
-            if value <= 0 or value > cpu_count:
+            if value <= 0 or value >= cpu_count:
                 raise ValueError("Number of threads must be a positive integer and less than total threads on the system")
         elif value == "all":
             value = cpu_count
