@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 from kwave.ksensor import kSensor
 from kwave import PLATFORM, BINARY_PATH
-from kwave.options.simulation_execution_options import SimulationExecutionOptions  # Adjust import as per your project structure
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 import os
 
 from kwave.utils.checks import is_unix
@@ -127,8 +127,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA")
 
         options.is_gpu_simulation = False
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP")
-        self.assertTrue(str(options.binary_path).endswith("kspaceFirstOrder-OMP"))
+        self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else ""))
+        self.assertTrue(str(options.binary_path).endswith("kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else "")))
 
 
 if __name__ == "__main__":
