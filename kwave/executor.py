@@ -1,3 +1,4 @@
+import os
 import stat
 import subprocess
 import sys
@@ -13,6 +14,10 @@ class Executor:
         self.execution_options = execution_options
         self.simulation_options = simulation_options
 
+        if os.environ.get("KWAVE_FORCE_CPU") == "1":
+            self.execution_options.is_gpu_simulation = False
+            self.execution_options.binary_name = "kspaceFirstOrder-OMP"
+            self.execution_options.binary_path = kwave.BINARY_PATH / self.execution_options.binary_name
         self._make_binary_executable()
 
     def _make_binary_executable(self):
@@ -85,7 +90,7 @@ class Executor:
         with h5py.File(output_filename, "r") as output_file:
             sensor_data = {}
             for key in output_file.keys():
-                sensor_data[key] = output_file[f"/{key}"][0].squeeze()
+                sensor_data[key] = output_file[f"/{key}"][:].squeeze()
         #     if self.simulation_options.cuboid_corners:
         #         sensor_data = [output_file[f'/p/{index}'][()] for index in range(1, len(key['mask']) + 1)]
         #
