@@ -7,6 +7,10 @@ from kwave.utils.checks import is_unix
 
 
 class SimulationExecutionOptions:
+    """
+    A class to manage and configure the execution options for k-Wave simulations.
+    """
+
     def __init__(
         self,
         is_gpu_simulation: bool = False,
@@ -34,7 +38,7 @@ class SimulationExecutionOptions:
         self.verbose_level = verbose_level
         self.auto_chunking = auto_chunking
         self.show_sim_log = show_sim_log
-        self._update_binary_attributes()
+        self._refresh_binary_attributes()
 
     @property
     def num_threads(self) -> Union[int, str]:
@@ -42,7 +46,9 @@ class SimulationExecutionOptions:
 
     @num_threads.setter
     def num_threads(self, value: Union[int, str]):
-        cpu_count = os.cpu_count() or 1
+        cpu_count = os.cpu_count()
+        if cpu_count is None:
+            cpu_count = 1
         if isinstance(value, int):
             if value <= 0 or value == float("inf"):
                 raise ValueError("Number of threads must be a positive integer")
@@ -69,7 +75,7 @@ class SimulationExecutionOptions:
     @is_gpu_simulation.setter
     def is_gpu_simulation(self, value: bool):
         self._is_gpu_simulation = value
-        self._update_binary_attributes()
+        self._refresh_binary_attributes()
 
     @property
     def binary_name(self) -> str:
@@ -95,15 +101,11 @@ class SimulationExecutionOptions:
     def binary_path(self, value: str):
         self._binary_path = value
 
-    def _update_binary_attributes(self):
-        # Force the properties to refresh their values
-        self._binary_name = None
-
     def get_options_string(self, sensor: kSensor) -> str:
         options_list = []
+        if self.device_num is not None and self.device_num < 0:
+            raise ValueError("Device number must be non-negative")
         if self.device_num is not None:
-            if self.device_num < 0:
-                raise ValueError("Device number must be non-negative")
             options_list.append(f" -g {self.device_num}")
 
         if self.num_threads is not None:
@@ -145,7 +147,7 @@ class SimulationExecutionOptions:
         if sensor.record_start_index is not None:
             options_list.append(f" -s {sensor.record_start_index}")
 
-        return "".join(options_list)
+        return " ".join(options_list)
 
     def _construct_system_string(self, env_set_str: str, sys_sep_str: str) -> str:
         omp_proc_bind = "SPREAD" if self.thread_binding else "CLOSE"
