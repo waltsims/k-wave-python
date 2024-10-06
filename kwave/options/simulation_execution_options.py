@@ -1,28 +1,37 @@
 from kwave.ksensor import kSensor
-from kwave.utils.checks import is_unix
-from kwave import PLATFORM, BINARY_PATH
+from kwave import BINARY_PATH, SIMULATION_OPTIONS_DEPRICATION_VERSION
 import logging
 from dataclasses import dataclass, field
 from typing import Optional, Union
 from pathlib import Path
 import warnings
+import os
 
+# Set up warnings to always be shown.
 warnings.filterwarnings("always")
 warnings.simplefilter("always", DeprecationWarning)
 
-
+# Set up logger
 logger = logging.getLogger(__name__)
 
-DEPRECATION_VERSION = "0.3.7"
+
+# Unified deprecation warning function
+def warn_deprecation(feature_name: str, alternative: str):
+    message = (
+        f"The `{feature_name}` argument is deprecated and will be removed in version {SIMULATION_OPTIONS_DEPRICATION_VERSION}. "
+        f"Please use `{alternative}` instead."
+    )
+    warnings.warn(message, DeprecationWarning)
+    logger.warning(message)
 
 
 @dataclass
 class SimulationExecutionOptions:
-    _is_gpu_simulation: bool = field(default=False, init=False)
-    _binary_name: Optional[str] = field(default=None, init=False)
-    _binary_path: Optional[Path] = field(default=BINARY_PATH, init=False)
+    _gpu_simulation_enabled: bool = field(default=False, init=False)
+    _binary_name: str = field(init=False)
+    _binary_dir: Optional[Path] = field(default=Path(BINARY_PATH), init=False)
 
-    is_gpu_simulation: bool = False
+    gpu_simulation_enabled: bool = False
     kwave_function_name: Optional[str] = "kspaceFirstOrder3D"
     delete_data: bool = True
     device_num: Optional[int] = None
@@ -33,91 +42,73 @@ class SimulationExecutionOptions:
     auto_chunking: Optional[bool] = True
     show_sim_log: bool = True
 
-    def __post_init__(self):
-        if self.is_gpu_simulation:
-            warnings.warn(
-                f"Constructor argument `is_gpu_simulation` is deprecated and will be removed in version {DEPRECATION_VERSION}. Use configure() method instead.",
-                DeprecationWarning,
-            )
-        if self.binary_name:
-            warnings.warn(
-                f"Constructor argument `binary_name` is deprecated and will be removed in version {DEPRECATION_VERSION}. Use configure() method instead.",
-                DeprecationWarning,
-            )
-        self.configure(is_gpu_simulation=self.is_gpu_simulation, binary_path=self.binary_path)
+    def __init__(self, is_gpu_simulation: Optional[bool] = None, **kwargs):
+        if is_gpu_simulation is not None:
+            warn_deprecation("is_gpu_simulation", "gpu_simulation_enabled")
+            self._gpu_simulation_enabled = is_gpu_simulation
+
+        self.kwave_function_name = kwargs.get("kwave_function_name", "kspaceFirstOrder3D")
+        self.delete_data = kwargs.get("delete_data", True)
+        self._device_num = kwargs.get("device_num", None)
+        self._num_threads = kwargs.get("num_threads", "all")
+        self.thread_binding = kwargs.get("thread_binding", None)
+        self.system_call = kwargs.get("system_call", None)
+        self.verbose_level = kwargs.get("verbose_level", 0)
+        self.auto_chunking = kwargs.get("auto_chunking", True)
+        self.show_sim_log = kwargs.get("show_sim_log", True)
+        self._set_binary_name()
+
+    def _set_binary_name(self):
+        self._binary_name = "kspaceFirstOrder-CUDA" if self._gpu_simulation_enabled else "kspaceFirstOrder-OMP"
 
     @property
-    def is_gpu_simulation(self):
-        return self._is_gpu_simulation
+    def gpu_simulation_enabled(self):
+        return self._gpu_simulation_enabled
 
-    @is_gpu_simulation.setter
-    def is_gpu_simulation(self, value):
-        warnings.warn(
-            f"Setting is_gpu_simulation directly is deprecated and will be removed in version {DEPRECATION_VERSION}. Use configure() method instead.",
-            DeprecationWarning,
-        )
-        self._is_gpu_simulation = value
-
-    @property
-    def binary_name(self):
-        return self._binary_name
-
-    @binary_name.setter
-    def binary_name(self, value):
-        warnings.warn(
-            f"Setting binary_name directly is deprecated and will be removed in version {DEPRECATION_VERSION}. Use configure() method instead.",
-            DeprecationWarning,
-        )
-        self._binary_name = value
+    @gpu_simulation_enabled.setter
+    def gpu_simulation_enabled(self, value: bool):
+        self._gpu_simulation_enabled = value
+        self._set_binary_name()
+        logger.info(f"GPU simulation set to {'enabled' if value else 'disabled'}. Binary name updated to: {self._binary_name}")
 
     @property
     def binary_path(self):
-        return self._binary_path
+        return self._binary_dir / self._binary_name
 
     @binary_path.setter
-    def binary_path(self, value):
-        warnings.warn(
-            f"Setting binary_path directly is deprecated and will be removed in version {DEPRECATION_VERSION}. Use configure() method instead.",
-            DeprecationWarning,
-        )
-        self._binary_path = Path(value)
+    def binary_path(self, path: str):
+        self._binary_dir = Path(path)
+        self._binary_path = str(self._binary_dir / self._binary_name)
+        if not Path(self._binary_path).exists():
+            logger.warning(f"Specified binary path does not exist: {self._binary_path}")
+        logger.info(f"Binary directory updated to: {self._binary_dir}")
 
-    def configure(self, is_gpu_simulation: bool, binary_path: Optional[str] = None):
-        self._is_gpu_simulation = is_gpu_simulation
+    @property
+    def num_threads(self):
+        if self._num_threads == "all":
+            return os.cpu_count()
+        return self._num_threads
 
-        if is_gpu_simulation:
-            self._binary_name = "kspaceFirstOrder-CUDA"
+    @num_threads.setter
+    def num_threads(self, value: Union[int, str]):
+        if isinstance(value, int) and value <= 0:
+            raise ValueError("Number of threads must be a positive integer or 'all'.")
+        self._num_threads = value
+        logger.info(f"Number of threads set to: {value}")
+
+    @property
+    def device_num(self):
+        return self._device_num
+
+    @device_num.setter
+    def device_num(self, value: Optional[int]):
+        self._device_num = value
+        if value is not None:
+            logger.info(f"Device number set to: {value}")
         else:
-            self._binary_name = "kspaceFirstOrder-OMP"
+            logger.info("Device number not specified.")
 
-        if PLATFORM == "windows" and not self._binary_name.endswith(".exe"):
-            self._binary_name += ".exe"
-
-        if binary_path:
-            self._binary_path = Path(binary_path) / self._binary_name
-            if not self._binary_path.exists():
-                logger.warning(f"Specified binary path does not exist: {self._binary_path}")
-        else:
-            self._binary_path = Path(BINARY_PATH) / self._binary_name
-            if not self._binary_path.exists():
-                logger.error(f"Default binary not found at: {self._binary_path}")
-                raise FileNotFoundError(f"Default binary not found at: {self._binary_path}")
-
-        logger.info(f"Configured with binary path: {self._binary_path}")
-
-    @classmethod
-    def create_gpu_config(cls, binary_path: Optional[str] = None):
-        instance = cls()
-        instance.configure(is_gpu_simulation=True, binary_path=binary_path)
-        return instance
-
-    @classmethod
-    def create_cpu_config(cls, binary_path: Optional[str] = None):
-        instance = cls()
-        instance.configure(is_gpu_simulation=False, binary_path=binary_path)
-        return instance
-
-    def get_options_string(self, sensor: kSensor) -> str:
+    def get_options_string(self, sensor: "kSensor") -> str:
         options_dict = {}
         if self.device_num:
             options_dict["-g"] = self.device_num
@@ -125,9 +116,6 @@ class SimulationExecutionOptions:
         if self.num_threads:
             if isinstance(self.num_threads, int):
                 assert self.num_threads > 0 and self.num_threads != float("inf")
-            else:
-                assert self.num_threads == "all"
-                self.num_threads = None
             options_dict["-t"] = self.num_threads
 
         if self.verbose_level:
@@ -139,11 +127,9 @@ class SimulationExecutionOptions:
             if value:
                 options_string += f" {flag} {str(value)}"
 
-        # check if sensor.record is given
         if sensor.record is not None:
             record = sensor.record
 
-            # set the options string to record the required output fields
             record_options_map = {
                 "p": "p_raw",
                 "p_max": "p_max",
@@ -170,51 +156,40 @@ class SimulationExecutionOptions:
             if ("I_avg" in record or "I" in record) and ("p" not in record):
                 options_string = options_string + " --p_raw"
         else:
-            # if sensor.record is not given, record the raw time series of p
             options_string = options_string + " --p_raw"
 
-        # check if sensor.record_start_index is given
         if sensor.record_start_index is not None:
             options_string = options_string + " -s " + str(sensor.record_start_index)
         return options_string
 
     @property
     def system_string(self):
-        # set OS string for setting environment variables
-        if is_unix():
+        if os.name == "posix":
             env_set_str = ""
             sys_sep_str = " "
         else:
             env_set_str = "set "
             sys_sep_str = " & "
 
-        # set system string to define domain for thread migration
         system_string = env_set_str + "OMP_PLACES=cores" + sys_sep_str
 
         if self.thread_binding is not None:
-            # read the parameters and update the system options
             if self.thread_binding:
-                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+                system_string += env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
             else:
-                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=CLOSE" + sys_sep_str
+                system_string += env_set_str + "OMP_PROC_BIND=CLOSE" + sys_sep_str
         else:
-            # set to round-robin over places
-            system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+            system_string += env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
 
         if self.system_call:
-            system_string = system_string + " " + self.system_call + sys_sep_str
+            system_string += self.system_call + sys_sep_str
 
         return system_string
 
 
 # Example usage
 if __name__ == "__main__":
-    # Create a GPU configuration
-    gpu_options = SimulationExecutionOptions.create_gpu_config("/custom/gpu/path")
-
-    # Create a CPU configuration
-    cpu_options = SimulationExecutionOptions.create_cpu_config()
-
-    # Manual configuration
-    manual_options = SimulationExecutionOptions()
-    manual_options.configure(is_gpu_simulation=True, binary_path="/another/custom/path")
+    options = SimulationExecutionOptions()
+    options.gpu_simulation_enabled = True  # Using the setter to configure GPU usage.
+    options.num_threads = 4  # Using the setter to configure number of threads.
+    options.binary_path = "/custom/path"  # Using the setter to configure binary path.
