@@ -51,8 +51,8 @@ class SimulationExecutionOptions:
         if cpu_count is None:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
         if isinstance(value, int):
-            if value <= 0 or value >= cpu_count:
-                raise ValueError("Number of threads must be a positive integer and less than total threads on the system")
+            if value <= 0 or value > cpu_count:
+                raise ValueError("Number of threads must be a positive integer and less than total threads on the system.")
         elif value == "all":
             value = cpu_count
         else:
@@ -79,13 +79,17 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        valid_binary_names = ["kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP", "kspaceFirstOrder-OMP.exe", "kspaceFirstOrder-CUDA.exe"]
+        valid_binary_names = ["kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP"]
+        if PLATFORM == "windows":
+            valid_binary_names = [name + ".exe" for name in valid_binary_names]
+
         if self._binary_name is None or self._binary_name in valid_binary_names:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation:
-                self._binary_name = f"kspaceFirstOrder-CUDA{'.exe' if PLATFORM == 'windows' else ''}"
+                _binary_name = "kspaceFirstOrder-CUDA"
             else:
-                self._binary_name = f"kspaceFirstOrder-OMP{'.exe' if PLATFORM == 'windows' else ''}"
+                _binary_name = "kspaceFirstOrder-OMP"
+            self._binary_name = _binary_name + ".exe" if PLATFORM == "windows" else self._binary_name
         else:
             Warning("Custom binary name set. Ignoring `is_gpu_simulation` state.")
             self._binary_name = self._binary_name
@@ -172,7 +176,10 @@ class SimulationExecutionOptions:
 
         return " ".join(options_list)
 
-    def _construct_system_string(self, env_set_str: str, sys_sep_str: str) -> str:
+    @property
+    def system_string(self):
+        env_set_str = "" if is_unix() else "set "
+        sys_sep_str = " " if is_unix() else " & "
         omp_proc_bind = "SPREAD" if self.thread_binding else "CLOSE"
         system_string = f"{env_set_str}OMP_PLACES=cores{sys_sep_str} {env_set_str}OMP_PROC_BIND={omp_proc_bind}{sys_sep_str}"
 
@@ -180,9 +187,3 @@ class SimulationExecutionOptions:
             system_string += f" {self.system_call}" + sys_sep_str
 
         return system_string
-
-    @property
-    def system_string(self):
-        env_set_str = "" if is_unix() else "set "
-        sys_sep_str = " " if is_unix() else " & "
-        return self._construct_system_string(env_set_str, sys_sep_str)
