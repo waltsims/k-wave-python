@@ -8,11 +8,6 @@ import hashlib
 import json
 
 
-def setup_logging():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-
-# setup_logging()
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
 VERSION = "0.3.4"
