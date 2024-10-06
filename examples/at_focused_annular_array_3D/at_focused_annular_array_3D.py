@@ -22,32 +22,32 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 verbose: bool = False
 
 # medium parameters
-c0: float            = 1500.0  # sound speed [m/s]
-rho0: float          = 1000.0  # density [kg/m^3]
+c0: float = 1500.0  # sound speed [m/s]
+rho0: float = 1000.0  # density [kg/m^3]
 
 # source parameters
-source_f0            = 1.0e6                                    # source frequency [Hz]
-source_roc           = 30e-3                                    # bowl radius of curvature [m]
-source_amp           = np.array([0.5e6, 1e6, 0.75e6])           # source pressure [Pa]
-source_phase         = np.deg2rad(np.array([0.0, 10.0, 20.0]))  # source phase [radians]
+source_f0 = 1.0e6  # source frequency [Hz]
+source_roc = 30e-3  # bowl radius of curvature [m]
+source_amp = np.array([0.5e6, 1e6, 0.75e6])  # source pressure [Pa]
+source_phase = np.deg2rad(np.array([0.0, 10.0, 20.0]))  # source phase [radians]
 
 # aperture diameters of the elements given an inner, outer pairs [m]
 diameters = np.array([[0.0, 5.0], [10.0, 15.0], [20.0, 25.0]]) * 1e-3
 diameters = diameters.tolist()
 
 # grid parameters
-axial_size: float   = 40e-3  # total grid size in the axial dimension [m]
+axial_size: float = 40e-3  # total grid size in the axial dimension [m]
 lateral_size: float = 45e-3  # total grid size in the lateral dimension [m]
 
 # computational parameters
-ppw: int             = 3      # number of points per wavelength
-t_end: float         = 40e-6  # total compute time [s] (this must be long enough to reach steady state)
-record_periods: int  = 1      # number of periods to record
-cfl: float           = 0.5    # CFL number
-source_x_offset: int = 20     # grid points to offset the source
-bli_tolerance: float = 0.01   # tolerance for truncation of the off-grid source points
-upsampling_rate: int = 10     # density of integration points relative to grid
-verbose_level: int   = 0      # verbosity of k-wave executable
+ppw: int = 3  # number of points per wavelength
+t_end: float = 40e-6  # total compute time [s] (this must be long enough to reach steady state)
+record_periods: int = 1  # number of periods to record
+cfl: float = 0.5  # CFL number
+source_x_offset: int = 20  # grid points to offset the source
+bli_tolerance: float = 0.01  # tolerance for truncation of the off-grid source points
+upsampling_rate: int = 10  # density of integration points relative to grid
+verbose_level: int = 0  # verbosity of k-wave executable
 
 # =========================================================================
 # RUN SIMULATION
@@ -161,7 +161,7 @@ amp = np.reshape(amp, (Nx - (source_x_offset + 1), Ny), order="F")
 amp_on_axis = amp[:, Ny // 2]
 
 # define axis vectors for plotting
-x_vec = kgrid.x_vec[source_x_offset + 1 : -1, :] - kgrid.x_vec[source_x_offset]
+x_vec = kgrid.x_vec[source_x_offset + 1 :, :] - kgrid.x_vec[source_x_offset]
 y_vec = kgrid.y_vec
 
 # =========================================================================

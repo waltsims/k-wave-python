@@ -1,5 +1,6 @@
 import functools
 import logging
+import dataclasses
 
 import numpy as np
 
@@ -11,6 +12,25 @@ def recursive_getattr(obj, attr, *args):
         return getattr(obj, attr, *args)
 
     return functools.reduce(_getattr, [obj] + attr.split("."))
+
+
+def check_element_equality(
+    actual_element: Element,
+    expected_element: Element,
+) -> bool:
+    for field in dataclasses.fields(expected_element):
+        expected = getattr(expected_element, field.name)
+        actual = getattr(actual_element, field.name)
+        if isinstance(expected, np.ndarray):
+            if not np.allclose(actual, expected):
+                return False
+        elif isinstance(expected, float):
+            if not np.isclose(actual, expected):
+                return False
+        else:
+            if actual != expected:
+                return False
+    return True
 
 
 def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
@@ -107,14 +127,21 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
         actual_value = recursive_getattr(kwave_array_object, mapped_key, None)
 
         if key == "elements":
+            are_equal = True
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
-            elif isinstance(expected_value, np.ndarray):
-                expected_value = expected_value.tolist()
+                for actual, expected in zip(actual_value, expected_value):
+                    are_equal &= check_element_equality(
+                        actual_element=actual,
+                        expected_element=expected,
+                    )
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
-            # Hacky way to compare but works the best for now
-            are_equal = str(actual_value) == str(expected_value)
+                for actual, expected in zip(actual_value, expected_value):
+                    are_equal &= check_element_equality(
+                        actual_element=actual,
+                        expected_element=expected,
+                    )
         else:
             actual_value = np.squeeze(actual_value)
             expected_value = np.array(expected_value)

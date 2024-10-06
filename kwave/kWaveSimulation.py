@@ -160,8 +160,8 @@ class kWaveSimulation(object):
 
         """
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
-        if not any(self.record.is_set(fields)) and not self.time_rev:
-            return False
+        if not (isinstance(self.sensor, NotATransducer) or any(self.record.is_set(fields)) or self.time_rev):
+            return True
         return False
 
     @property
@@ -1311,7 +1311,7 @@ class kWaveSimulation(object):
         """
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
-            if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
+            if not self.blank_sensor or self.options.save_to_disk:
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
