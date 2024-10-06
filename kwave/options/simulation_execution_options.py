@@ -105,7 +105,24 @@ class SimulationExecutionOptions:
 
     @binary_path.setter
     def binary_path(self, value: str):
+        # check if the binary path is a valid path
+        if not os.path.exists(value):
+            raise FileNotFoundError(
+                f"Binary path {value} does not exist. If you are trying to set `binary_dir`, use the `binary_dir` attribute instead."
+            )
         self._binary_path = value
+
+    @property
+    def binary_dir(self) -> str:
+        return BINARY_DIR if self._binary_dir is None else self._binary_dir
+
+    @binary_dir.setter
+    def binary_dir(self, value: str):
+        # check if binary_dir is a directory
+        if not os.path.isdir(value):
+            raise NotADirectoryError(
+                f"{value} is not a directory. If you are trying to set the `binary_path`, use the `binary_path` attribute instead."
+            )
 
     def get_options_string(self, sensor: kSensor) -> str:
         options_list = []
