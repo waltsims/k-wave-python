@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 from kwave.ksensor import kSensor
-from kwave import PLATFORM, BINARY_PATH
+from kwave import PLATFORM
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 import os
 
@@ -16,7 +16,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         """Test default values during initialization."""
         options = self.default_options
         self.assertFalse(options.is_gpu_simulation)
-        self.assertEqual(options._binary_path, BINARY_PATH)
+        self.assertEqual(options._binary_path, None)
         self.assertIsNone(options._binary_name)
         self.assertEqual(options.kwave_function_name, "kspaceFirstOrder3D")
         self.assertTrue(options.delete_data)

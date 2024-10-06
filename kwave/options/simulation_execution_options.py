@@ -1,7 +1,7 @@
 from typing import Optional, Union
 import os
 
-from kwave import PLATFORM, BINARY_PATH
+from kwave import PLATFORM, BINARY_DIR
 from kwave.ksensor import kSensor
 from kwave.utils.checks import is_unix
 
@@ -14,7 +14,8 @@ class SimulationExecutionOptions:
     def __init__(
         self,
         is_gpu_simulation: bool = False,
-        binary_path: Optional[str] = BINARY_PATH,
+        binary_path: Optional[str] = None,
+        binary_dir: Optional[str] = None,
         binary_name: Optional[str] = None,
         kwave_function_name: Optional[str] = "kspaceFirstOrder3D",
         delete_data: bool = True,
@@ -29,6 +30,7 @@ class SimulationExecutionOptions:
         self.is_gpu_simulation = is_gpu_simulation
         self._binary_path = binary_path
         self._binary_name = binary_name
+        self._binary_dir = binary_dir
         self.kwave_function_name = kwave_function_name
         self.delete_data = delete_data
         self.device_num = device_num
@@ -38,7 +40,6 @@ class SimulationExecutionOptions:
         self.verbose_level = verbose_level
         self.auto_chunking = auto_chunking
         self.show_sim_log = show_sim_log
-        self._refresh_binary_attributes()
 
     @property
     def num_threads(self) -> Union[int, str]:
@@ -48,10 +49,10 @@ class SimulationExecutionOptions:
     def num_threads(self, value: Union[int, str]):
         cpu_count = os.cpu_count()
         if cpu_count is None:
-            cpu_count = 1
+            raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
         if isinstance(value, int):
-            if value <= 0 or value == float("inf"):
-                raise ValueError("Number of threads must be a positive integer")
+            if value <= 0 or value > cpu_count:
+                raise ValueError("Number of threads must be a positive integer and less than total threads on the system")
         elif value == "all":
             value = cpu_count
         else:
@@ -75,15 +76,18 @@ class SimulationExecutionOptions:
     @is_gpu_simulation.setter
     def is_gpu_simulation(self, value: bool):
         self._is_gpu_simulation = value
-        self._refresh_binary_attributes()
 
     @property
     def binary_name(self) -> str:
-        if self._binary_name is None:
+        if self._binary_name is None or self._binary_name in ["kspaceFirstOrder3D", "kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP"]:
+            # set default binary name based on GPU simulation value
             if self.is_gpu_simulation:
                 self._binary_name = "kspaceFirstOrder-CUDA"
             else:
                 self._binary_name = "kspaceFirstOrder-OMP"
+        else:
+            Warning("Custom binary name set. Ignoring `is_gpu_simulation` state.")
+            self._binary_name = self._binary_name
         return self._binary_name
 
     @binary_name.setter
@@ -92,7 +96,8 @@ class SimulationExecutionOptions:
 
     @property
     def binary_path(self) -> str:
-        path = BINARY_PATH / self.binary_name
+        binary_dir = BINARY_DIR if self._binary_dir is None else self._binary_dir
+        path = binary_dir / self.binary_name
         if PLATFORM == "windows" and not path.name.endswith(".exe"):
             path = path.with_suffix(".exe")
         return path
@@ -111,7 +116,7 @@ class SimulationExecutionOptions:
         if self.num_threads is not None:
             options_list.append(f" -t {self.num_threads}")
 
-        if self.verbose_level is not None:
+        if self.verbose_level > 0:
             options_list.append(f" --verbose {self.verbose_level}")
 
         record_options_map = {
