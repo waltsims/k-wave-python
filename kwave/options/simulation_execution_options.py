@@ -1,195 +1,155 @@
-from kwave.ksensor import kSensor
-from kwave import BINARY_PATH, SIMULATION_OPTIONS_DEPRICATION_VERSION
-import logging
-from dataclasses import dataclass, field
 from typing import Optional, Union
-from pathlib import Path
-import warnings
 import os
 
-# Set up warnings to always be shown.
-warnings.filterwarnings("always")
-warnings.simplefilter("always", DeprecationWarning)
-
-# Set up logger
-logger = logging.getLogger(__name__)
+from kwave import PLATFORM, BINARY_PATH
+from kwave.ksensor import kSensor
+from kwave.utils.checks import is_unix
 
 
-# Unified deprecation warning function
-def warn_deprecation(feature_name: str, alternative: str):
-    message = (
-        f"The `{feature_name}` argument is deprecated and will be removed in version {SIMULATION_OPTIONS_DEPRICATION_VERSION}. "
-        f"Please use `{alternative}` instead."
-    )
-    warnings.warn(message, DeprecationWarning)
-    logger.warning(message)
-
-
-@dataclass
 class SimulationExecutionOptions:
-    _gpu_simulation_enabled: bool = field(default=False, init=False)
-    _binary_name: str = field(init=False)
-    _binary_dir: Optional[Path] = field(default=Path(BINARY_PATH), init=False)
-
-    gpu_simulation_enabled: bool = False
-    kwave_function_name: Optional[str] = "kspaceFirstOrder3D"
-    delete_data: bool = True
-    device_num: Optional[int] = None
-    num_threads: Union[int, str] = "all"
-    thread_binding: Optional[bool] = None
-    system_call: Optional[str] = None
-    verbose_level: int = 0
-    auto_chunking: Optional[bool] = True
-    show_sim_log: bool = True
-
-    def __init__(self, is_gpu_simulation: Optional[bool] = None, **kwargs):
-        if is_gpu_simulation is not None:
-            warn_deprecation("is_gpu_simulation", "gpu_simulation_enabled")
-            self._gpu_simulation_enabled = is_gpu_simulation
-
-        self.kwave_function_name = kwargs.get("kwave_function_name", "kspaceFirstOrder3D")
-        self.delete_data = kwargs.get("delete_data", True)
-        self._device_num = kwargs.get("device_num", None)
-        self._num_threads = kwargs.get("num_threads", "all")
-        self.thread_binding = kwargs.get("thread_binding", None)
-        self.system_call = kwargs.get("system_call", None)
-        self.verbose_level = kwargs.get("verbose_level", 0)
-        self.auto_chunking = kwargs.get("auto_chunking", True)
-        self.show_sim_log = kwargs.get("show_sim_log", True)
-        self._set_binary_name()
-
-    def _set_binary_name(self):
-        self._binary_name = "kspaceFirstOrder-CUDA" if self._gpu_simulation_enabled else "kspaceFirstOrder-OMP"
+    def __init__(
+        self,
+        is_gpu_simulation: bool = False,
+        binary_path: Optional[str] = BINARY_PATH,
+        binary_name: Optional[str] = None,
+        kwave_function_name: Optional[str] = "kspaceFirstOrder3D",
+        delete_data: bool = True,
+        device_num: Optional[int] = None,
+        num_threads: Union[int, str] = "all",
+        thread_binding: Optional[bool] = None,
+        system_call: Optional[str] = None,
+        verbose_level: int = 0,
+        auto_chunking: Optional[bool] = True,
+        show_sim_log: bool = True,
+    ):
+        self.is_gpu_simulation = is_gpu_simulation
+        self._binary_path = binary_path
+        self._binary_name = binary_name
+        self.kwave_function_name = kwave_function_name
+        self.delete_data = delete_data
+        self.device_num = device_num
+        self.num_threads = num_threads
+        self.thread_binding = thread_binding
+        self.system_call = system_call
+        self.verbose_level = verbose_level
+        self.auto_chunking = auto_chunking
+        self.show_sim_log = show_sim_log
+        self._update_binary_attributes()
 
     @property
-    def gpu_simulation_enabled(self):
-        return self._gpu_simulation_enabled
-
-    @gpu_simulation_enabled.setter
-    def gpu_simulation_enabled(self, value: bool):
-        self._gpu_simulation_enabled = value
-        self._set_binary_name()
-        logger.info(f"GPU simulation set to {'enabled' if value else 'disabled'}. Binary name updated to: {self._binary_name}")
-
-    @property
-    def binary_path(self):
-        return self._binary_dir / self._binary_name
-
-    @binary_path.setter
-    def binary_path(self, path: str):
-        self._binary_dir = Path(path)
-        self._binary_path = str(self._binary_dir / self._binary_name)
-        if not Path(self._binary_path).exists():
-            logger.warning(f"Specified binary path does not exist: {self._binary_path}")
-        logger.info(f"Binary directory updated to: {self._binary_dir}")
-
-    @property
-    def num_threads(self):
-        if self._num_threads == "all":
-            return os.cpu_count()
+    def num_threads(self) -> Union[int, str]:
         return self._num_threads
 
     @num_threads.setter
     def num_threads(self, value: Union[int, str]):
-        if isinstance(value, int) and value <= 0:
-            raise ValueError("Number of threads must be a positive integer or 'all'.")
+        cpu_count = os.cpu_count() or 1
+        if isinstance(value, int):
+            if value <= 0 or value == float("inf"):
+                raise ValueError("Number of threads must be a positive integer")
+        elif value == "all":
+            value = cpu_count
+        else:
+            raise ValueError("Number of threads must be 'all' or a positive integer")
         self._num_threads = value
-        logger.info(f"Number of threads set to: {value}")
 
     @property
-    def device_num(self):
-        return self._device_num
+    def verbose_level(self) -> int:
+        return self._verbose_level
 
-    @device_num.setter
-    def device_num(self, value: Optional[int]):
-        self._device_num = value
-        if value is not None:
-            logger.info(f"Device number set to: {value}")
-        else:
-            logger.info("Device number not specified.")
+    @verbose_level.setter
+    def verbose_level(self, value: int):
+        if not (isinstance(value, int) and 0 <= value <= 2):
+            raise ValueError("Verbose level must be between 0 and 2")
+        self._verbose_level = value
 
-    def get_options_string(self, sensor: "kSensor") -> str:
-        options_dict = {}
-        if self.device_num:
-            options_dict["-g"] = self.device_num
+    @property
+    def is_gpu_simulation(self) -> bool:
+        return self._is_gpu_simulation
 
-        if self.num_threads:
-            if isinstance(self.num_threads, int):
-                assert self.num_threads > 0 and self.num_threads != float("inf")
-            options_dict["-t"] = self.num_threads
+    @is_gpu_simulation.setter
+    def is_gpu_simulation(self, value: bool):
+        self._is_gpu_simulation = value
+        self._update_binary_attributes()
 
-        if self.verbose_level:
-            assert isinstance(self.verbose_level, int) and 0 <= self.verbose_level <= 2
-            options_dict["--verbose"] = self.verbose_level
+    @property
+    def binary_name(self) -> str:
+        if self._binary_name is None:
+            if self.is_gpu_simulation:
+                return "kspaceFirstOrder-CUDA"
+            else:
+                return "kspaceFirstOrder-OMP"
+        return self._binary_name
 
-        options_string = ""
-        for flag, value in options_dict.items():
-            if value:
-                options_string += f" {flag} {str(value)}"
+    @property
+    def binary_path(self) -> str:
+        path = BINARY_PATH / self.binary_name
+        if PLATFORM == "windows" and not path.name.endswith(".exe"):
+            path = path.with_suffix(".exe")
+        return path
+
+    def _update_binary_attributes(self):
+        # Force the properties to refresh their values
+        self._binary_name = None
+
+    def get_options_string(self, sensor: kSensor) -> str:
+        options_list = []
+        if self.device_num is not None:
+            if self.device_num < 0:
+                raise ValueError("Device number must be non-negative")
+            options_list.append(f" -g {self.device_num}")
+
+        if self.num_threads is not None:
+            options_list.append(f" -t {self.num_threads}")
+
+        if self.verbose_level is not None:
+            options_list.append(f" --verbose {self.verbose_level}")
+
+        record_options_map = {
+            "p": "p_raw",
+            "p_max": "p_max",
+            "p_min": "p_min",
+            "p_rms": "p_rms",
+            "p_max_all": "p_max_all",
+            "p_min_all": "p_min_all",
+            "p_final": "p_final",
+            "u": "u_raw",
+            "u_max": "u_max",
+            "u_min": "u_min",
+            "u_rms": "u_rms",
+            "u_max_all": "u_max_all",
+            "u_min_all": "u_min_all",
+            "u_final": "u_final",
+        }
 
         if sensor.record is not None:
-            record = sensor.record
+            matching_keys = set(sensor.record).intersection(record_options_map.keys())
+            for key in matching_keys:
+                options_list.append(f" --{record_options_map[key]}")
 
-            record_options_map = {
-                "p": "p_raw",
-                "p_max": "p_max",
-                "p_min": "p_min",
-                "p_rms": "p_rms",
-                "p_max_all": "p_max_all",
-                "p_min_all": "p_min_all",
-                "p_final": "p_final",
-                "u": "u_raw",
-                "u_max": "u_max",
-                "u_min": "u_min",
-                "u_rms": "u_rms",
-                "u_max_all": "u_max_all",
-                "u_min_all": "u_min_all",
-                "u_final": "u_final",
-            }
-            for k, v in record_options_map.items():
-                if k in record:
-                    options_string = options_string + f" --{v}"
+            if "u_non_staggered" in sensor.record or "I_avg" in sensor.record or "I" in sensor.record:
+                options_list.append(" --u_non_staggered_raw")
 
-            if "u_non_staggered" in record or "I_avg" in record or "I" in record:
-                options_string = options_string + " --u_non_staggered_raw"
-
-            if ("I_avg" in record or "I" in record) and ("p" not in record):
-                options_string = options_string + " --p_raw"
+            if ("I_avg" in sensor.record or "I" in sensor.record) and ("p" not in sensor.record):
+                options_list.append(" --p_raw")
         else:
-            options_string = options_string + " --p_raw"
+            options_list.append(" --p_raw")
 
         if sensor.record_start_index is not None:
-            options_string = options_string + " -s " + str(sensor.record_start_index)
-        return options_string
+            options_list.append(f" -s {sensor.record_start_index}")
 
-    @property
-    def system_string(self):
-        if os.name == "posix":
-            env_set_str = ""
-            sys_sep_str = " "
-        else:
-            env_set_str = "set "
-            sys_sep_str = " & "
+        return "".join(options_list)
 
-        system_string = env_set_str + "OMP_PLACES=cores" + sys_sep_str
-
-        if self.thread_binding is not None:
-            if self.thread_binding:
-                system_string += env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
-            else:
-                system_string += env_set_str + "OMP_PROC_BIND=CLOSE" + sys_sep_str
-        else:
-            system_string += env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+    def _construct_system_string(self, env_set_str: str, sys_sep_str: str) -> str:
+        omp_proc_bind = "SPREAD" if self.thread_binding else "CLOSE"
+        system_string = f"{env_set_str}OMP_PLACES=cores{sys_sep_str} {env_set_str}OMP_PROC_BIND={omp_proc_bind}{sys_sep_str}"
 
         if self.system_call:
-            system_string += self.system_call + sys_sep_str
+            system_string += f" {self.system_call}" + sys_sep_str
 
         return system_string
 
-
-# Example usage
-if __name__ == "__main__":
-    options = SimulationExecutionOptions()
-    options.gpu_simulation_enabled = True  # Using the setter to configure GPU usage.
-    options.num_threads = 4  # Using the setter to configure number of threads.
-    options.binary_path = "/custom/path"  # Using the setter to configure binary path.
+    @property
+    def system_string(self):
+        env_set_str = "" if is_unix() else "set "
+        sys_sep_str = " " if is_unix() else " & "
+        return self._construct_system_string(env_set_str, sys_sep_str)
