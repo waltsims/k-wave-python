@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional, Union
 import os
 
@@ -70,12 +71,15 @@ class SimulationExecutionOptions:
         self._verbose_level = value
 
     @property
-    def is_gpu_simulation(self) -> bool:
+    def is_gpu_simulation(self) -> Optional[bool]:
         return self._is_gpu_simulation
 
     @is_gpu_simulation.setter
-    def is_gpu_simulation(self, value: bool):
+    def is_gpu_simulation(self, value: Optional[bool]):
         self._is_gpu_simulation = value
+        # Automatically update the binary name based on the GPU simulation flag
+        if value is not None:
+            self._binary_name = None
 
     @property
     def binary_name(self) -> str:
@@ -83,16 +87,20 @@ class SimulationExecutionOptions:
         if PLATFORM == "windows":
             valid_binary_names = [name + ".exe" for name in valid_binary_names]
 
-        if self._binary_name is None or self._binary_name in valid_binary_names:
+        if self._binary_name is None:
             # set default binary name based on GPU simulation value
+            if self.is_gpu_simulation is None:
+                raise ValueError("`is_gpu_simulation` must be set to either True or False before determining the binary name.")
             if self.is_gpu_simulation:
-                _binary_name = "kspaceFirstOrder-CUDA"
+                self._binary_name = "kspaceFirstOrder-CUDA"
             else:
-                _binary_name = "kspaceFirstOrder-OMP"
-            self._binary_name = _binary_name + ".exe" if PLATFORM == "windows" else self._binary_name
-        else:
-            Warning("Custom binary name set. Ignoring `is_gpu_simulation` state.")
-            self._binary_name = self._binary_name
+                self._binary_name = "kspaceFirstOrder-OMP"
+            if PLATFORM == "windows":
+                self._binary_name += ".exe"
+        elif self._binary_name not in valid_binary_names:
+            import warnings
+
+            warnings.warn("Custom binary name set. Ignoring `is_gpu_simulation` state.")
         return self._binary_name
 
     @binary_name.setter
@@ -100,9 +108,13 @@ class SimulationExecutionOptions:
         self._binary_name = value
 
     @property
-    def binary_path(self) -> str:
+    def binary_path(self) -> Path:
+        if self._binary_path is not None:
+            return self._binary_path
         binary_dir = BINARY_DIR if self._binary_dir is None else self._binary_dir
-        path = binary_dir / self.binary_name
+        if binary_dir is None:
+            raise ValueError("Binary directory is not specified.")
+        path = Path(binary_dir) / self.binary_name
         if PLATFORM == "windows" and not path.name.endswith(".exe"):
             path = path.with_suffix(".exe")
         return path
@@ -127,6 +139,7 @@ class SimulationExecutionOptions:
             raise NotADirectoryError(
                 f"{value} is not a directory. If you are trying to set the `binary_path`, use the `binary_path` attribute instead."
             )
+        self._binary_dir = Path(value)
 
     def get_options_string(self, sensor: kSensor) -> str:
         options_list = []
@@ -181,9 +194,9 @@ class SimulationExecutionOptions:
         env_set_str = "" if is_unix() else "set "
         sys_sep_str = " " if is_unix() else " & "
         omp_proc_bind = "SPREAD" if self.thread_binding else "CLOSE"
-        system_string = f"{env_set_str}OMP_PLACES=cores{sys_sep_str} {env_set_str}OMP_PROC_BIND={omp_proc_bind}{sys_sep_str}"
+        system_string = f"{env_set_str}OMP_PLACES=cores{sys_sep_str}{env_set_str}OMP_PROC_BIND={omp_proc_bind}{sys_sep_str}"
 
         if self.system_call:
-            system_string += f" {self.system_call}" + sys_sep_str
+            system_string += f" {self.system_call}{sys_sep_str}"
 
         return system_string

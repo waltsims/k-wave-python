@@ -105,10 +105,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         """Test the _construct_system_string method for proper environment variable formatting."""
         options = self.default_options
         options.thread_binding = True
-        env_set_str = "" if is_unix() else "set "
-        sys_sep_str = " " if is_unix() else " & "
 
-        system_string = options._construct_system_string(env_set_str, sys_sep_str)
+        system_string = options.system_string
         expected_omp_bind = "SPREAD" if options.thread_binding else "CLOSE"
         self.assertIn(f"OMP_PROC_BIND={expected_omp_bind}", system_string)
 
