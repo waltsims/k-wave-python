@@ -75,10 +75,14 @@ class SimulationExecutionOptions:
     def binary_name(self) -> str:
         if self._binary_name is None:
             if self.is_gpu_simulation:
-                return "kspaceFirstOrder-CUDA"
+                self._binary_name = "kspaceFirstOrder-CUDA"
             else:
-                return "kspaceFirstOrder-OMP"
+                self._binary_name = "kspaceFirstOrder-OMP"
         return self._binary_name
+
+    @binary_name.setter
+    def binary_name(self, value: str):
+        self._binary_name = value
 
     @property
     def binary_path(self) -> str:
@@ -86,6 +90,10 @@ class SimulationExecutionOptions:
         if PLATFORM == "windows" and not path.name.endswith(".exe"):
             path = path.with_suffix(".exe")
         return path
+
+    @binary_path.setter
+    def binary_path(self, value: str):
+        self._binary_path = value
 
     def _update_binary_attributes(self):
         # Force the properties to refresh their values
