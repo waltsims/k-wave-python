@@ -32,6 +32,18 @@ class kWaveMedium(object):
     absorbing: bool = False
     # is the medium absorbing stokes?
     stokes: bool = False
+    # compressional sound speed [m/s]
+    sound_speed_compression: np.array = None
+    # reference compressional sound speed [m/s]
+    sound_speed_ref_compression: np.array = None
+    # pshear wave speed [m/s]
+    sound_speed_shear: np.array = None
+    # reference shear wave speed [m/s]
+    sound_speed_ref_shear: np.array = None
+    # power law absorption for compressional waves coefficient [dB/(MHz^y cm)]
+    alpha_coeff_compression: np.array = None
+    # power law absorption for shearwaves coefficient [dB/(MHz^y cm)]
+    alpha_coeff_shear: np.array = None
 
     #  """
     #     Note: For heterogeneous medium parameters, medium.sound_speed and
@@ -181,50 +193,3 @@ class kWaveMedium(object):
         assert self.alpha_filter is None, (
             "Input option medium.alpha_filter is not supported with the axisymmetric code " "or medium.alpha_mode = 'stokes'. "
         )
-
-    ##########################################
-    # Elastic-code related properties - raise error when accessed
-    ##########################################
-    _ELASTIC_CODE_ACCESS_ERROR_TEXT_ = "Elastic simulation and related properties are not supported!"
-
-    @property
-    def sound_speed_shear(self):  # pragma: no cover
-        """
-        Shear sound speed (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
-
-    @property
-    def sound_speed_ref_shear(self):  # pragma: no cover
-        """
-        Shear sound speed reference (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
-
-    @property
-    def sound_speed_compression(self):  # pragma: no cover
-        """
-        Compression sound speed (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
-
-    @property
-    def sound_speed_ref_compression(self):  # pragma: no cover
-        """
-        Compression sound speed reference (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
-
-    @property
-    def alpha_coeff_compression(self):  # pragma: no cover
-        """
-        Compression alpha coefficient (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
-
-    @property
-    def alpha_coeff_shear(self):  # pragma: no cover
-        """
-        Shear alpha coefficient (used in elastic simulations | not supported currently!)
-        """
-        raise NotImplementedError(self._ELASTIC_CODE_ACCESS_ERROR_TEXT_)
