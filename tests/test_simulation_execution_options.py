@@ -100,7 +100,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options.verbose_level = 2
 
         options_string = options.get_options_string(mock_sensor)
-        expected_substrings = [" -g 1", " -t 4", " --verbose 2", " --p_raw", " --u_max", " -s 10"]
+        expected_substrings = [" -g 1", f" -t {os.cpu_count}", " --verbose 2", " --p_raw", " --u_max", " -s 10"]
         for substring in expected_substrings:
             self.assertIn(substring, options_string)
 
