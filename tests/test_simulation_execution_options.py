@@ -122,7 +122,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_gpu_dependency_on_binary_name_and_path(self):
         """Test that the binary_name and binary_path are updated correctly based on is_gpu_simulation."""
         options = SimulationExecutionOptions(is_gpu_simulation=True)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA")
+        self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA{}".format(".exe" if PLATFORM == "windows" else ""))
 
         options.is_gpu_simulation = False
         self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else ""))
