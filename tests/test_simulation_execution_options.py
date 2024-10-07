@@ -96,7 +96,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options = self.default_options
         options.device_num = 1
-        options.num_threads = 4
+        options.num_threads = os.cpu_count()
         options.verbose_level = 2
 
         options_string = options.get_options_string(mock_sensor)
