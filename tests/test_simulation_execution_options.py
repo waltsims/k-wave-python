@@ -7,6 +7,9 @@ import os
 
 from kwave.utils.checks import is_unix
 
+OMP_BINARY_NAME = "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else "")
+CUDA_BINARY_NAME = "kspaceFirstOrder-CUDA{}".format(".exe" if PLATFORM == "windows" else "")
+
 
 class TestSimulationExecutionOptions(unittest.TestCase):
     def setUp(self):
@@ -65,11 +68,11 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         options.is_gpu_simulation = True
         self.assertTrue(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA")
+        self.assertEqual(options.binary_name, CUDA_BINARY_NAME)
 
         options.is_gpu_simulation = False
         self.assertFalse(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP")
+        self.assertEqual(options.binary_name, OMP_BINARY_NAME)
 
     def test_binary_name_custom(self):
         """Test setting a custom binary name."""
@@ -122,11 +125,11 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_gpu_dependency_on_binary_name_and_path(self):
         """Test that the binary_name and binary_path are updated correctly based on is_gpu_simulation."""
         options = SimulationExecutionOptions(is_gpu_simulation=True)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA{}".format(".exe" if PLATFORM == "windows" else ""))
+        self.assertEqual(options.binary_name, CUDA_BINARY_NAME)
 
         options.is_gpu_simulation = False
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else ""))
-        self.assertTrue(str(options.binary_path).endswith("kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else "")))
+        self.assertEqual(options.binary_name, OMP_BINARY_NAME)
+        self.assertTrue(str(options.binary_path).endswith(OMP_BINARY_NAME))
 
 
 if __name__ == "__main__":

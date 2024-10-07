@@ -59,7 +59,7 @@ class SimulationExecutionOptions:
             raise ValueError("Got {value}. Number of threads must be 'all' or a positive integer")
 
         if value <= 0 or value > cpu_count:
-            raise ValueError("Number of threads must be a positive integer and less than total threads on the system.")
+            raise ValueError(f"Number of threads {value} must be a positive integer and less than total threads on the system {cpu_count}.")
 
         self._num_threads = value
 
