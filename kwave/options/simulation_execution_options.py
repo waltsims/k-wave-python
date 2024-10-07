@@ -51,13 +51,16 @@ class SimulationExecutionOptions:
         cpu_count = os.cpu_count()
         if cpu_count is None:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
-        if isinstance(value, int):
-            if value <= 0 or value > cpu_count:
-                raise ValueError("Number of threads must be a positive integer and less than total threads on the system.")
-        elif value == "all":
+
+        if value == "all":
             value = cpu_count
-        else:
-            raise ValueError("Number of threads must be 'all' or a positive integer")
+
+        if not isinstance(value, int):
+            raise ValueError("Got {value}. Number of threads must be 'all' or a positive integer")
+
+        if value <= 0 or value > cpu_count:
+            raise ValueError("Number of threads must be a positive integer and less than total threads on the system.")
+
         self._num_threads = value
 
     @property
@@ -76,6 +79,7 @@ class SimulationExecutionOptions:
 
     @is_gpu_simulation.setter
     def is_gpu_simulation(self, value: Optional[bool]):
+        "Set the flag to enable default GPU simulation. This option will supercede custom binary paths."
         self._is_gpu_simulation = value
         # Automatically update the binary name based on the GPU simulation flag
         if value is not None:
@@ -91,10 +95,12 @@ class SimulationExecutionOptions:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation is None:
                 raise ValueError("`is_gpu_simulation` must be set to either True or False before determining the binary name.")
+
             if self.is_gpu_simulation:
                 self._binary_name = "kspaceFirstOrder-CUDA"
             else:
                 self._binary_name = "kspaceFirstOrder-OMP"
+
             if PLATFORM == "windows":
                 self._binary_name += ".exe"
         elif self._binary_name not in valid_binary_names:
@@ -111,9 +117,12 @@ class SimulationExecutionOptions:
     def binary_path(self) -> Path:
         if self._binary_path is not None:
             return self._binary_path
+
         binary_dir = BINARY_DIR if self._binary_dir is None else self._binary_dir
+
         if binary_dir is None:
             raise ValueError("Binary directory is not specified.")
+
         path = Path(binary_dir) / self.binary_name
         if PLATFORM == "windows" and not path.name.endswith(".exe"):
             path = path.with_suffix(".exe")
