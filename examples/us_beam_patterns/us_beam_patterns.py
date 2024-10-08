@@ -3,13 +3,12 @@
 
 # In[2]:
 
-
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import signal
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
-from kwave.kmedium import kWaveMedium
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ksensor import kSensor
 from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
@@ -17,9 +16,7 @@ from kwave.kWaveSimulation import SimulationOptions
 
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.filters import spect
-from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.plot import voxel_plot
+from kwave.utils.math import find_closest
 from kwave.utils.signals import tone_burst
 
 
@@ -167,9 +164,6 @@ if USE_STATISTICS:
 
 # In[13]:
 
-
-from scipy import signal
-
 # Compute the amplitude spectrum
 def spect(data, fs, dim):
     # Assuming 'spect' function is similar to MATLAB's spectrogram
@@ -179,9 +173,6 @@ def spect(data, fs, dim):
 
 
 # In[14]:
-
-
-from kwave.utils.math import find_closest
 
 sensor_data_array = np.reshape(sensor_data["p"], [kgrid.Nt, Nj, Nx])
 # compute the amplitude spectrum
@@ -253,4 +244,3 @@ plt.ylabel('Normalized Amplitude')
 plt.legend(loc=2)
 plt.xlim([-25,25])
 plt.show()
-
