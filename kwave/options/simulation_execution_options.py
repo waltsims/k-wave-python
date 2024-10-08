@@ -127,17 +127,22 @@ class SimulationExecutionOptions:
             sys_sep_str = " & "
 
         # set system string to define domain for thread migration
-        system_string = env_set_str + "OMP_PLACES=cores" + sys_sep_str
+        system_string = env_set_str
+        if PLATFORM != "darwin":
+            system_string += "OMP_PLACES=cores" + sys_sep_str
 
         if self.thread_binding is not None:
+            if PLATFORM == "darwin":
+                raise ValueError("Thread binding is not supported in MacOS.")
             # read the parameters and update the system options
             if self.thread_binding:
                 system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
             else:
                 system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=CLOSE" + sys_sep_str
         else:
-            # set to round-robin over places
-            system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+            if PLATFORM != "darwin":
+                # set to round-robin over places
+                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
 
         if self.system_call:
             system_string = system_string + " " + self.system_call + sys_sep_str
