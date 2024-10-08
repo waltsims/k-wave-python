@@ -74,3 +74,15 @@ To run the tests with coverage, use the following command:
 .. code-block:: bash
 
     coverage run
+
+To run all examples, to ensure they still run after changes use the following command:
+
+.. code-block:: bash
+
+    MPLBACKEND=Agg python run_examples.py
+
+If you want to force the examples to run on the cpu:
+
+.. code-block:: bash
+
+    MPLBACKEND=Agg KWAVE_FORCE_CPU=1 python run_examples.py
