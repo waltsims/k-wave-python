@@ -1,4 +1,3 @@
-# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -16,7 +15,6 @@ from kwave.utils.filters import spect
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
 
-# %%
 # simulation settings
 DATA_CAST = "single"
 
@@ -34,7 +32,6 @@ dz = dx
 
 kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
 
-# %%
 # define the medium
 medium = kWaveMedium(sound_speed=1540, density=1000, alpha_coeff=0.75, alpha_power=1.5, BonA=6)
 
@@ -42,7 +39,6 @@ medium = kWaveMedium(sound_speed=1540, density=1000, alpha_coeff=0.75, alpha_pow
 t_end = 40e-6
 kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
-# %%
 # define the input signal
 source_strength = 1e6
 tone_burst_freq = 0.5e6
@@ -50,8 +46,6 @@ tone_burst_cycles = 5
 input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 input_signal = (source_strength / (medium.sound_speed * medium.density)) * input_signal
 
-
-# %%
 # define the transducer
 transducer = dotdict()
 transducer.number_elements = 72
@@ -60,14 +54,10 @@ transducer.element_length = 12
 transducer.element_spacing = 0
 transducer.radius = np.inf
 
-# calculate the width of the transducer in grid points
-transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
-
 # use this to position the transducer in the middle of the computational grid
-transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
+transducer.position = np.round([1, Ny / 2 - Nx // 2, Nz / 2 - transducer.element_length / 2])
 transducer = kWaveTransducerSimple(kgrid, **transducer)
 
-# %%
 not_transducer = dotdict()
 not_transducer.sound_speed = medium.sound_speed  # sound speed [m/s]
 not_transducer.focus_distance = 20e-3  # focus distance [m]
@@ -81,10 +71,8 @@ not_transducer.input_signal = input_signal
 
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-# %%
 voxel_plot(np.single(not_transducer.all_elements_mask))
 
-# %%
 # define sensor mask
 sensor_mask = np.zeros((Nx, Ny, Nz))
 sensor_mask[Nx // 4, Ny // 2, Nz // 2] = 1
@@ -112,16 +100,12 @@ sensor_data = kspaceFirstOrder3D(
     execution_options=execution_options,
 )
 
-
-# %%
-
 padded_input_signal = np.concatenate((input_signal, np.zeros((1, 2 * np.shape(input_signal)[1]))), axis=1)
 f_input, as_input, _ = spect(padded_input_signal, 1 / kgrid.dt)
 _, as_1, _ = spect(sensor_data["p"][:, 0], 1 / kgrid.dt)
 _, as_2, _ = spect(sensor_data["p"][:, 1], 1 / kgrid.dt)
 f, as_3, _ = spect(sensor_data["p"][:, 2], 1 / kgrid.dt)
 
-# %%
 fig, axes = plt.subplots(2, 1)
 axes[0].plot(np.arange(0, input_signal.shape[-1]) * kgrid.dt * 1e6, input_signal.T, "k-")
 axes[0].set_xlabel("Time [\mus]")
@@ -134,8 +118,6 @@ axes[1].set_ylabel("Amplitude Spectrum [au]")
 f_max = medium.sound_speed / (2 * dx)
 axes[1].set_xlim([0, f_max / 1e6])
 
-
-# %%
 # Creating a dictionary with the step labels as keys
 sensor_positions = {
     "Sensor Position 1": sensor_data["p"][:, 0],
