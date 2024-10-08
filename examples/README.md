@@ -1,7 +1,7 @@
 # Examples
 
 Many examples from k-wave-python are Python mirrors of the [large collection of great examples](http://www.k-wave.org/documentation/k-wave_examples.php) from the original k-wave project.
-All examples are included as python files or notebooks in a subdirectory of the example directory.
+All examples are included as python files or notebooks in a subdirectory of the example directory. When running the examples in Google Colab, remember to select a GPU runtime for GPU simulations.
 Every example has a short readme.md file which briefly describes the purpose of the example.
 
 ## List of Examples
@@ -13,8 +13,7 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Photoacoustic Waveforms](ivp_photoacoustic_waveforms/) ([original example](http://www.k-wave.org/documentation/example_ivp_photoacoustic_waveforms.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/ivp_photoacoustic_waveforms/ivp_photoacoustic_waveforms.ipynb))
 - [Controlling the PML](na_controlling_the_pml/)
 ([original example](http://www.k-wave.org/documentation/example_na_controlling_the_pml.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/na_controlling_the_pml/na_controlling_the_pml.ipynb))
-- [Defining An Ultrasound Transducer Example](us_defining_transducer/)
-([original example](http://www.k-wave.org/documentation/example_us_defining_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_defining_transducer/us_defining_transducer.ipynb))
+- [Defining An Ultrasound Transducer Example](us_defining_transducer) ([original example](http://www.k-wave.org/documentation/example_us_defining_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_defining_transducer/us_defining_transducer.ipynb))
 - [Simulating Ultrasound Beam Patterns](us_beam_patterns/)([original example](http://www.k-wave.org/documentation/example_us_beam_patterns), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_beam_patterns/us_beam_patterns.ipynb))
 - [Linear transducer B-mode](us_bmode_linear_transducer/) ([original example](http://www.k-wave.org/documentation/example_us_bmode_linear_transducer.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb))
 - [Phased array B-mode](us_bmode_phased_array/)
@@ -31,14 +30,12 @@ Every example has a short readme.md file which briefly describes the purpose of 
 - [Focused annular array](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_annular_array_3D/at_focused_annular_array_3D.ipynb))
 
 
- 
-
-
 ## Contributing new examples
 
 When adding a new example notebook, follow these steps:
 
-1. Search the open issues to see if a related example has already been requested. If not add an example issue and assign yourself to the issue.
+1. Search the [list of examples](https://docs.google.com/spreadsheets/d/1-x13iIez84AEyjjHMOe2GoC8FSyzUFHoy9R7VKttTlo/edit?usp=sharing) to find an open example.
+1. Claim your example by opening an "Example" issue on GitHub.
 3. Fork and clone the repository and create a branch for your new example.
 2. Create an example sub-directory using the name from the hyperlink of the original k-wave example if it exists (e.g. for http://www.k-wave.org/documentation/example_ivp_loading_external_image.php name the directory "ivp_loading_external_image).
 3. Add your example notebook to your example directory.

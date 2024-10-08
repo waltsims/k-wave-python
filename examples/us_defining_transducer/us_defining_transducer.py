@@ -100,7 +100,6 @@ sensor_data = kspaceFirstOrder3D(
     execution_options=execution_options,
 )
 
-
 padded_input_signal = np.concatenate((input_signal, np.zeros((1, 2 * np.shape(input_signal)[1]))), axis=1)
 f_input, as_input, _ = spect(padded_input_signal, 1 / kgrid.dt)
 _, as_1, _ = spect(sensor_data["p"][:, 0], 1 / kgrid.dt)
