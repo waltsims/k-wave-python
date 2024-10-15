@@ -153,13 +153,6 @@ sensor_data = kspaceFirstOrder3D(
     execution_options=execution_options,
 )
 
-
-# In[37]:
-
-
-sensor.record
-
-
 # In[38]:
 
 
