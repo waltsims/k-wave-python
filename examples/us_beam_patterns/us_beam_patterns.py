@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[ ]:
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,7 +22,7 @@ from kwave.utils.math import find_closest
 from kwave.utils.signals import tone_burst
 
 
-# In[30]:
+# In[ ]:
 
 
 # simulation settings
@@ -28,7 +30,7 @@ DATA_CAST = "single"
 # set to 'xy' or 'xz' to generate the beam pattern in different planes
 MASK_PLANE = "xy"
 # set to true to compute the rms or peak beam patterns, set to false to compute the harmonic beam patterns
-USE_STATISTICS = False
+USE_STATISTICS = True
 
 # define the grid
 PML_X_SIZE = 20
@@ -48,9 +50,6 @@ kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
 # In[ ]:
 
 
-# In[31]:
-
-
 # define the medium
 medium = kWaveMedium(sound_speed=1540, density=1000, alpha_coeff=0.75, alpha_power=1.5, BonA=6)
 
@@ -60,7 +59,7 @@ t_end = 45e-6  # alternatively, use np.sqrt(kgrid.x_size ** 2 + kgrid.y_size ** 
 kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
 
-# In[32]:
+# In[ ]:
 
 
 # define the input signal
@@ -71,7 +70,7 @@ input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 input_signal = (source_strength / (medium.sound_speed * medium.density)) * input_signal
 
 
-# In[33]:
+# In[ ]:
 
 
 # define the transducer
@@ -90,7 +89,7 @@ transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - trans
 transducer = kWaveTransducerSimple(kgrid, **transducer)
 
 
-# In[34]:
+# In[ ]:
 
 
 not_transducer = dotdict()
@@ -106,7 +105,7 @@ not_transducer.input_signal = input_signal
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
 
-# In[35]:
+# In[ ]:
 
 
 sensor_mask = np.zeros((Nx, Ny, Nz))
@@ -125,7 +124,7 @@ elif MASK_PLANE == "xz":
     j_label = "z"
 
 
-# In[36]:
+# In[ ]:
 
 
 sensor = kSensor(sensor_mask)
@@ -153,7 +152,8 @@ sensor_data = kspaceFirstOrder3D(
     execution_options=execution_options,
 )
 
-# In[38]:
+
+# In[ ]:
 
 
 if USE_STATISTICS:
@@ -186,6 +186,9 @@ if USE_STATISTICS:
     plt.show()
 
 
+# In[ ]:
+
+
 if not USE_STATISTICS:
     sensor_data_array = np.reshape(sensor_data["p"], [kgrid.Nt, kgrid.Ny, kgrid.Nx]).transpose(2, 1, 0)
     # compute the amplitude spectrum
@@ -205,7 +208,7 @@ if not USE_STATISTICS:
     beam_pattern_total = np.squeeze(np.sum(amp_spect, axis=2))
 
 
-# In[149]:
+# In[ ]:
 
 
 if not USE_STATISTICS:
@@ -223,6 +226,7 @@ if not USE_STATISTICS:
                 max((kgrid.x_vec - min(kgrid.x_vec)) * 1e3),
             ],
             aspect="auto",
+            cmap="jet",
         )
         axes[ind].set_xlabel("y-position (mm)")
         axes[ind].set_ylabel("x-position (mm)")
@@ -238,7 +242,7 @@ if not USE_STATISTICS:
     plt.show()
 
 
-# In[133]:
+# In[ ]:
 
 
 if not USE_STATISTICS:
