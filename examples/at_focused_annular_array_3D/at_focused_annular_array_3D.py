@@ -152,7 +152,8 @@ sensor_data = kspaceFirstOrder3D(
 )
 
 # extract amplitude from the sensor data
-amp, _, _ = extract_amp_phase(sensor_data["p"].T, 1.0 / kgrid.dt, source_f0, dim=1, fft_padding=1, window="Rectangular")
+amp, _, _ = extract_amp_phase(sensor_data["p"].T, 1.0 / kgrid.dt,
+                              source_f0, dim=1, fft_padding=1, window="Rectangular")
 
 # reshape data
 amp = np.reshape(amp, (Nx - (source_x_offset + 1), Ny), order="F")
@@ -161,7 +162,7 @@ amp = np.reshape(amp, (Nx - (source_x_offset + 1), Ny), order="F")
 amp_on_axis = amp[:, Ny // 2]
 
 # define axis vectors for plotting
-x_vec = kgrid.x_vec[source_x_offset + 1 : -1, :] - kgrid.x_vec[source_x_offset]
+x_vec = kgrid.x_vec[source_x_offset + 1:, :] - kgrid.x_vec[source_x_offset]
 y_vec = kgrid.y_vec
 
 # =========================================================================
