@@ -75,7 +75,7 @@ def print_grid_size(kgrid, scale):
     logging.log(logging.INFO, f"  input grid size: {grid_size_str} grid points ({grid_scale_str}m)")
 
 
-def print_max_supported_freq(kgrid, c_min, c_min_comp, c_min_shear):
+def print_max_supported_freq(kgrid, c_min, c_min_comp=None, c_min_shear=None):
     # display the grid size and maximum supported frequency
     k_max, k_max_all = kgrid.k_max, kgrid.k_max_all
 
