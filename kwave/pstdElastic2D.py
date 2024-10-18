@@ -44,10 +44,11 @@ def nan_helper(y):
     return np.isnan(y), lambda z: z.nonzero()[0]
 
 def pstd_elastic_2d(kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions, verbose: bool = False):
+                    source: kSource,
+                    sensor: Union[NotATransducer, kSensor],
+                    medium: kWaveMedium,
+                    simulation_options: SimulationOptions,
+                    verbose: bool = False):
     """
     2D time-domain simulation of elastic wave propagation.
 
@@ -1178,6 +1179,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         # add in the pre-scaled stress source terms
         if hasattr(k_sim, 's_source_sig_index'):
+            print(k_sim.s_source_sig_index)
+            print(hasattr(k_sim.source, 'sxx'), hasattr(k_sim.source, 'ux'))
             if isinstance(k_sim.s_source_sig_index, str):
                 if k_sim.s_source_sig_index == ':':
                     s_source_sig_index = np.shape(source.sxx)[0]
@@ -1198,9 +1201,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 # spatially and temporally varying source
                 if np.shape(np.squeeze(source.sxx)) == (n_pos, k_sim.kgrid.Nt):
                     sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), :]
+                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_x.shape, order='F'), :]
                     sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F'), :]
+                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_y.shape, order='F'), :]
 
                 # initial pressure (converted into stress) source
                 elif np.shape(np.squeeze(source.sxx)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
@@ -1213,7 +1216,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
                     mask = sxx_split_x.flatten("F")[k_sim.s_source_pos_index]
                     sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                      np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+                      np.squeeze(k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), t_index] ) * np.ones_like(mask)
                     mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
                     sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
                       np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)

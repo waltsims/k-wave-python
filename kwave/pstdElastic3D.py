@@ -454,6 +454,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
 # CHECK INPUT STRUCTURES AND OPTIONAL INPUTS
 # =========================================================================
 
+    # fortran ordered
     myOrder = 'F'
 
     # start the timer and store the start time
@@ -470,7 +471,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
     # run helper script to check inputs
     k_sim.input_checking('pstd_elastic_3d')
 
-    # TODO - if cuboid corners with more than one choise, then is a list,
+    # TODO - if cuboid corners with more than one choice, then is a list
     sensor_data = k_sim.sensor_data
 
     options = k_sim.options
