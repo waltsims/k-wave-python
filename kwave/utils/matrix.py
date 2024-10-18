@@ -146,7 +146,7 @@ def expand_matrix(
         opts["pad_width"] = exp_coeff
     elif len(matrix.shape) == 2:
         if n_coeff == 2:
-            opts["pad_width"] = np.asarray(exp_coeff.astype(int))
+            opts["pad_width"] = [(exp_coeff[0],), (exp_coeff[1],)]
         if n_coeff == 4:
             opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:

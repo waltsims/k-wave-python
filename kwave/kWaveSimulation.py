@@ -174,13 +174,8 @@ class kWaveSimulation(object):
         """
 
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
-        #field_max_all = ["p_max_all", "p_min_all", "p_final", "u_max_all", "u_min_all", "u_final"]
-        #if any(self.record.is_set(field_max_all)) and self.sensor.mask is None:
-        #    self.sensor.mask = True
-
-        if not any(self.record.is_set(fields)) and (not self.time_rev):
-            return False
-
+        if not (isinstance(self.sensor, NotATransducer) or any(self.record.is_set(fields)) or self.time_rev):
+            return True
         return False
 
     @property
@@ -1499,17 +1494,7 @@ class kWaveSimulation(object):
 
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
-
-            print('\t\tuse_sensor:', self.use_sensor)
-            print('\t\t', isinstance(self.options.save_to_disk, str))
-            print('\t\t', (not self.blank_sensor))
-
-            if (not self.blank_sensor) or isinstance(self.options.save_to_disk, str):
-
-                print('\tblank_sensor:', self.blank_sensor)
-                print("\tsave_to_disk:", isinstance(self.options.save_to_disk, str))
-                print("\tCONDITION:", (not self.blank_sensor) or isinstance(self.options.save_to_disk, str))
-
+            if not self.blank_sensor or self.options.save_to_disk:
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
