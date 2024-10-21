@@ -1,3 +1,4 @@
+import os
 import stat
 import subprocess
 import sys
@@ -13,6 +14,10 @@ class Executor:
         self.execution_options = execution_options
         self.simulation_options = simulation_options
 
+        if os.environ.get("KWAVE_FORCE_CPU") == "1":
+            self.execution_options.is_gpu_simulation = False
+            self.execution_options.binary_name = "kspaceFirstOrder-OMP"
+            self.execution_options.binary_path = kwave.BINARY_PATH / self.execution_options.binary_name
         self._make_binary_executable()
 
     def _make_binary_executable(self):
