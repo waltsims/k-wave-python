@@ -28,11 +28,7 @@ class Executor:
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
         command = (
-            f"{self.execution_options.system_string} "
-            f"{self.execution_options.binary_path} "
-            f"-i {input_filename} "
-            f"-o {output_filename} "
-            f"{options}"
+            f"{self.execution_options.system_string}" f'"{self.execution_options.binary_path}" -i {input_filename} -o {output_filename} {options}'
         )
 
         try:
