@@ -50,7 +50,7 @@ example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-tabs==3.4.7",
-    "sphinx-toolbox==3.8.0",
+    "sphinx-toolbox==3.8.1",
     "furo==2024.8.6"]
 dev = ["pre-commit==4.0.1"]
 
