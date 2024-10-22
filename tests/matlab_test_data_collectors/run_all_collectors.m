@@ -1,5 +1,6 @@
 clear all;
-
+% ensure k-wave is on the path
+addpath(genpath('../../../k-wave'));
 directory = pwd + "/matlab_collectors";
 files = getListOfFiles(directory);
 % remove this file.
