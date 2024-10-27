@@ -21,9 +21,10 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             self.assertEqual(options.verbose_level, 0)
 
     def test_gpu_simulation_initialization(self):
-        options = SimulationExecutionOptions(is_gpu_simulation=True)
-        self.assertTrue(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA")
+        with patch("kwave.options.simulation_execution_options.PLATFORM", "linux"):
+            options = SimulationExecutionOptions(is_gpu_simulation=True)
+            self.assertTrue(options.is_gpu_simulation)
+            self.assertEqual(options.binary_name, "kspaceFirstOrder-CUDA")
 
     def test_binary_name_extension_on_windows(self):
         with patch("kwave.options.simulation_execution_options.PLATFORM", "windows"):
