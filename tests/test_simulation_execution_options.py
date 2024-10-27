@@ -12,12 +12,13 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.sensor.record_start_index = 10
 
     def test_default_initialization(self):
-        options = SimulationExecutionOptions()
-        self.assertFalse(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP")
-        self.assertTrue(options.delete_data)
-        self.assertEqual(options.num_threads, None)  # TODO: confusing logic here
-        self.assertEqual(options.verbose_level, 0)
+        with patch("kwave.options.simulation_execution_options.PLATFORM", "linux"):
+            options = SimulationExecutionOptions()
+            self.assertFalse(options.is_gpu_simulation)
+            self.assertEqual(options.binary_name, "kspaceFirstOrder-OMP")
+            self.assertTrue(options.delete_data)
+            self.assertEqual(options.num_threads, None)  # TODO: confusing logic here
+            self.assertEqual(options.verbose_level, 0)
 
     def test_gpu_simulation_initialization(self):
         options = SimulationExecutionOptions(is_gpu_simulation=True)
