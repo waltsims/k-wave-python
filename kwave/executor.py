@@ -27,7 +27,7 @@ class Executor:
                 raise e
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
-        command = [self.execution_options.binary_path, "-i", input_filename, "-o", output_filename, options]
+        command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename, options]
 
         try:
             with subprocess.Popen(
