@@ -9,7 +9,7 @@ MATLAB_SCRIPT = tests/matlab_test_data_collectors/run_all_collectors.m
 KWAVE_MATLAB_PATH = $(abspath ../k-wave) # Get absolute path of k-wave directory
 
 # Define the artifact directory
-COLLECTED_VALUES_DIR = $(abspath k-wave-python/tests/matlab_test_data_collectors/python_testers/collectedValues)
+COLLECTED_VALUES_DIR = $(abspath tests/matlab_test_data_collectors/python_testers/collectedValues)
 
 # Default target
 all: run-examples test
@@ -26,10 +26,8 @@ test: $(COLLECTED_VALUES_DIR)
 
 # Target to run the MATLAB script and create the artifact directory
 $(COLLECTED_VALUES_DIR): 
-	@echo "Running MATLAB script to collect values..."
-	@$(MATLAB) -batch "run('$(MATLAB_SCRIPT)');"
-	@echo "MATLAB script has completed successfully, and collected values directory is ready."
-
+	@echo "Running MATLAB script to collect values..."; \
+	$(MATLAB) -batch "run('$(MATLAB_SCRIPT)');"; \
 # Clean target (optional) - cleans Python caches and collected values
 clean: clean-python clean-collected_values
 
