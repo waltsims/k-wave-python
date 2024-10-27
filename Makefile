@@ -17,7 +17,7 @@ all: run-examples test
 # Target to run all examples
 run-examples:
 	@echo "Running all examples..."
-	@$(PYTHON) run_examples.py
+	@MPLBACKEND=Agg $(PYTHON) run_examples.py
 
 # Target to run pytest, which depends on running the MATLAB script first
 test: $(COLLECTED_VALUES_DIR)
