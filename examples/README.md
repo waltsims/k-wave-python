@@ -28,7 +28,9 @@ Every example has a short readme.md file which briefly describes the purpose of 
 
 - [Focused annular array](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_at_piston_and_bowl_transducers.php#heading7), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_focused_annular_array_3D/at_focused_annular_array_3D.ipynb))
 
-- [Focussed Detector In 2D Example](at_focused_annular_array_3D/) ([original example](http://www.k-wave.org/documentation/example_sd_focussed_detector_2D.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/sd_focussed_detector_2D/sd_focussed_detector_2D.ipynb))
+- [Focussed Detector In 2D Example](sd_focussed_detector_2D/) ([original example](http://www.k-wave.org/documentation/example_sd_focussed_detector_2D.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/sd_focussed_detector_2D/sd_focussed_detector_2D.ipynb))
+
+- [Focussed Detector In 3D Example](sd_focussed_detector_3D/) ([original example](http://www.k-wave.org/documentation/example_sd_focussed_detector_3D.php), [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/sd_focussed_detector_3D/sd_focussed_detector_3D.ipynb))
 
 
 ## Contributing new examples
