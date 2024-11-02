@@ -149,38 +149,57 @@ class TestExecutor(unittest.TestCase):
         self.assertIn("data", result)
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
 
+    def test_executor_file_not_found_on_non_darwin(self):
+        # Configure the mock path object
+        mock_binary_path = MagicMock(spec=Path)
+        mock_binary_path.chmod.side_effect = FileNotFoundError
 
-def test_executor_file_not_found_on_non_darwin():
-    # Configure the mock path object
-    mock_binary_path = MagicMock(spec=Path)
-    mock_binary_path.chmod.side_effect = FileNotFoundError
+        # Mock the execution options to use the mocked path
+        mock_execution_options = MagicMock()
+        mock_execution_options.binary_path = mock_binary_path
+        mock_execution_options.is_gpu_simulation = False
 
-    # Mock the execution options to use the mocked path
-    mock_execution_options = MagicMock()
-    mock_execution_options.binary_path = mock_binary_path
-    mock_execution_options.is_gpu_simulation = False
+        with patch("kwave.PLATFORM", "windows"):
+            with pytest.raises(FileNotFoundError):
+                _ = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
 
-    with patch("kwave.PLATFORM", "windows"):
-        with pytest.raises(FileNotFoundError):
-            _ = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
+    def test_cpu_environment_variable(self):
+        """Test that environment variable KWAVE_FORCE_CPU sets CPU simulation."""
+        # Set the environment variable
+        os.environ["KWAVE_FORCE_CPU"] = "1"
 
+        # Create mock execution options with default GPU simulation
+        mock_execution_options = MagicMock()
+        mock_execution_options.is_gpu_simulation = True
+        mock_execution_options.binary_name = "kspaceFirstOrder-CUDA"
+        mock_execution_options.binary_path = MagicMock()
 
-def test_executor_gpu_cuda_failure_darwin():
-    expected_error_msg = (
-        "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
-    )
-    # Configure the mock path object
-    mock_binary_path = MagicMock(spec=Path)
-    mock_binary_path.chmod.side_effect = FileNotFoundError
+        # Create the Executor instance
+        executor = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
 
-    # Mock the execution options to use the mocked path
-    mock_execution_options = MagicMock()
-    mock_execution_options.binary_path = mock_binary_path
-    mock_execution_options.is_gpu_simulation = True
+        # Assert that the environment variable has changed the simulation to CPU
+        self.assertFalse(executor.execution_options.is_gpu_simulation)
+        self.assertEqual(executor.execution_options.binary_name, "kspaceFirstOrder-OMP")
 
-    with patch("kwave.PLATFORM", "darwin"):
-        with pytest.raises(ValueError, match=expected_error_msg):
-            _ = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
+        # Cleanup environment variable
+        del os.environ["KWAVE_FORCE_CPU"]
+
+    def test_executor_gpu_cuda_failure_darwin(self):
+        expected_error_msg = (
+            "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
+        )
+        # Configure the mock path object
+        mock_binary_path = MagicMock(spec=Path)
+        mock_binary_path.chmod.side_effect = FileNotFoundError
+
+        # Mock the execution options to use the mocked path
+        mock_execution_options = MagicMock()
+        mock_execution_options.binary_path = mock_binary_path
+        mock_execution_options.is_gpu_simulation = True
+
+        with patch("kwave.PLATFORM", "darwin"):
+            with pytest.raises(ValueError, match=expected_error_msg):
+                _ = Executor(execution_options=mock_execution_options, simulation_options=MagicMock())
 
 
 if __name__ == "__main__":
