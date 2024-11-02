@@ -32,16 +32,12 @@ class Executor:
                 raise e
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
-        command = (
-            f"{self.execution_options.system_string} "
-            f"{self.execution_options.binary_path} "
-            f"-i {input_filename} "
-            f"-o {output_filename} "
-            f"{options}"
-        )
+        command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename, options]
 
         try:
-            with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True) as proc:
+            with subprocess.Popen(
+                command, env=self.execution_options.env_vars, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            ) as proc:
                 stdout, stderr = "", ""
                 if self.execution_options.show_sim_log:
                     # Stream stdout in real-time
