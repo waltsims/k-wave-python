@@ -4,6 +4,7 @@
 
 # Virtual environments
 .venv/
+venv/
 
 # Compiled files
 *.pyc

@@ -4,7 +4,6 @@ import os
 
 from kwave import PLATFORM, BINARY_DIR
 from kwave.ksensor import kSensor
-from kwave.utils.checks import is_unix
 
 
 class SimulationExecutionOptions:
@@ -199,13 +198,22 @@ class SimulationExecutionOptions:
         return " ".join(options_list)
 
     @property
-    def system_string(self):
-        env_set_str = "" if is_unix() else "set "
-        sys_sep_str = " " if is_unix() else " & "
-        omp_proc_bind = "SPREAD" if self.thread_binding else "CLOSE"
-        system_string = f"{env_set_str}OMP_PLACES=cores{sys_sep_str}{env_set_str}OMP_PROC_BIND={omp_proc_bind}{sys_sep_str}"
+    def env_vars(self) -> dict:
+        env = os.environ
 
-        if self.system_call:
-            system_string += f" {self.system_call}{sys_sep_str}"
+        if PLATFORM != "darwin":
+            env.update({"OMP_PLACES": "cores"})
 
-        return system_string
+        if self.thread_binding is not None:
+            if PLATFORM == "darwin":
+                raise ValueError("Thread binding is not supported in MacOS.")
+            # read the parameters and update the system options
+            if self.thread_binding:
+                env.update({"OMP_PROC_BIND": "SPREAD"})
+            else:
+                env.update({"OMP_PROC_BIND": "CLOSE"})
+        else:
+            if PLATFORM != "darwin":
+                env.update({"OMP_PROC_BIND": "SPREAD"})
+
+        return env
