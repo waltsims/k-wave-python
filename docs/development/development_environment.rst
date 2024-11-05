@@ -21,6 +21,46 @@ Ensure pre-commit is configured by running the following command:
 
     pre-commit install
 
+Running Tests
+=======================
+Assuming matlab is installed locally, and `k-wave <https://github.com/ucl-bug/k-wave>` is installed in a parallel directory, testing can be performed using the make file located in the project root.
+.. code-block:: bash
+
+    make test
+
+This process will first generate refernce files in matlab and run the complete python test suite against them.
+
+To run the tests manually after reference generation, use the following command:    
+
+.. code-block:: bash
+
+    pytest 
+
+To run the tests with coverage, use the following command:
+
+.. code-block:: bash
+
+    coverage run
+
+To run all examples, to ensure they still run after changes use the following command:
+.. code-block:: bash
+    make run-examples
+
+or
+
+.. code-block:: bash
+
+    MPLBACKEND=Agg python run_examples.py
+
+
+
+If you want to force the examples to run on the cpu:
+
+.. code-block:: bash
+
+    MPLBACKEND=Agg KWAVE_FORCE_CPU=1 python run_examples.py
+
+
 Test References
 =======================
 
@@ -42,7 +82,7 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
   These ``.json`` files are stored in the code repository and do not need to be regenerated.
   Since these files are generated from the original k-Wave package, they only need to be updated when a new release of k-Wave is made.
 
-**Matlab reference file generation** is a bit involved process. Below are the steps that describe the process.
+**Matlab reference file generation** can be described in the following steps.
 
 #. Open desired example in matlab, e.g. `example_pr_2D_TR_directional_sensors.m <https://github.com/ucl-bug/k-wave/blob/main/k-Wave/examples/example_pr_2D_TR_directional_sensors.m>`_
 #. Find the lines where the call to one of the `kSpaceFirstOrder-family` function is made. For example,
@@ -63,14 +103,3 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
         https://github.com/waltsims/k-wave-python/blob/1f9df5d987d0b3edb1a8a43fad0885d3d6079029/tests/h5_summary.py#L97-L106
 
 
-To run the tests, use the following command:    
-
-.. code-block:: bash
-
-    pytest 
-
-To run the tests with coverage, use the following command:
-
-.. code-block:: bash
-
-    coverage run
