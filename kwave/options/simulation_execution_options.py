@@ -1,9 +1,9 @@
 from dataclasses import dataclass
+import os
 from typing import Optional, Union
 
 from kwave import PLATFORM, BINARY_PATH
 from kwave.ksensor import kSensor
-from kwave.utils.checks import is_unix
 
 
 @dataclass
@@ -117,34 +117,22 @@ class SimulationExecutionOptions:
         return options_string
 
     @property
-    def system_string(self):
-        # set OS string for setting environment variables
-        if is_unix():
-            env_set_str = ""
-            sys_sep_str = " "
-        else:
-            env_set_str = "set "
-            sys_sep_str = " & "
+    def env_vars(self) -> dict:
+        env = os.environ
 
-        # set system string to define domain for thread migration
-        system_string = env_set_str
         if PLATFORM != "darwin":
-            system_string += "OMP_PLACES=cores" + sys_sep_str
+            env.update({"OMP_PLACES": "cores"})
 
         if self.thread_binding is not None:
             if PLATFORM == "darwin":
                 raise ValueError("Thread binding is not supported in MacOS.")
             # read the parameters and update the system options
             if self.thread_binding:
-                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+                env.update({"OMP_PROC_BIND": "SPREAD"})
             else:
-                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=CLOSE" + sys_sep_str
+                env.update({"OMP_PROC_BIND": "CLOSE"})
         else:
             if PLATFORM != "darwin":
-                # set to round-robin over places
-                system_string = system_string + " " + env_set_str + "OMP_PROC_BIND=SPREAD" + sys_sep_str
+                env.update({"OMP_PROC_BIND": "SPREAD"})
 
-        if self.system_call:
-            system_string = system_string + " " + self.system_call + sys_sep_str
-
-        return system_string
+        return env
