@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
@@ -15,12 +16,22 @@ from kwave.utils.colormap import get_color_map
 from kwave.utils.mapgen import make_disc
 from kwave.utils.filters import smooth
 
+
+# 2D FFT Reconstruction For A Line Sensor Example
+
+# This example demonstrates the use of k-Wave for the reconstruction of a
+# two-dimensional photoacoustic wave-field recorded  over a linear array of
+# sensor elements  The sensor data is simulated using kspaceFirstOrder2D
+# and reconstructed using kspaceLineRecon. It builds on the Homogeneous
+# Propagation Medium and Heterogeneous Propagation Medium examples.
+
+
 def main():
-    
-    # =========================================================================
+
+    # --------------------
     # SIMULATION
-    # =========================================================================
-    
+    # --------------------
+
     # create the computational grid
     PML_size = 20  # size of the PML in grid points
     N = Vector([128, 256]) - 2 * PML_size  # number of grid points
@@ -85,7 +96,11 @@ def main():
     query_points = np.stack((kgrid.x - kgrid.x.min(), kgrid.y), axis=-1)
     p_xy_rs = interp_func(query_points)
 
+
+    # --------------------
     # VISUALIZATION
+    # --------------------
+
     cmap = get_color_map()
 
     # plot the initial pressure and sensor distribution
@@ -93,17 +108,20 @@ def main():
     im = ax.imshow(p0 + sensor.mask[PML_size:-PML_size, PML_size:-PML_size] * disc_magnitude,
                    extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
                    vmin=-disc_magnitude, vmax=disc_magnitude, cmap=cmap)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel('x-position [mm]')
     ax.set_xlabel('y-position [mm]')
-    fig.colorbar(im, ax=ax)
+    fig.colorbar(im, cax=cax)
     plt.show()
 
-    # plot the simulated sensor data
     fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(sensor_data, vmin=-1, vmax=1, cmap=cmap)
+    im = ax.imshow(sensor_data, vmin=-1, vmax=1, cmap=cmap, aspect='auto')
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel('Sensor Position')
     ax.set_xlabel('Time Step')
-    fig.colorbar(im, ax=ax)
+    fig.colorbar(im, cax=cax)
     plt.show()
 
     # plot the reconstructed initial pressure
@@ -111,9 +129,11 @@ def main():
     im = ax.imshow(p_xy_rs,
                    extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
                    vmin=-disc_magnitude, vmax=disc_magnitude, cmap=cmap)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel('x-position [mm]')
     ax.set_xlabel('y-position [mm]')
-    fig.colorbar(im, ax=ax)
+    fig.colorbar(im, cax=cax)
     plt.show()
 
     # plot a profile for comparison
@@ -125,7 +145,6 @@ def main():
     plt.axis('tight')
     plt.ylim([0, 5.1])
     plt.show()
-
 
 if __name__ == '__main__':
     main()

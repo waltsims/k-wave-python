@@ -17,8 +17,21 @@ import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 
+# 3D FFT Reconstruction For A Planar Sensor Example
+
+# This example demonstrates the use of k-Wave for the reconstruction of a
+# three-dimensional photoacoustic wave-field recorded over a planar array
+# of sensor elements. The sensor data is simulated using kspaceFirstOrder3D
+# and reconstructed using kspacePlaneRecon. It builds on the Simulations In
+# Three Dimensions and 2D FFT Reconstruction For A Line Sensor examples.
+
+
 def main():
-    # change scale to 1
+
+    # --------------------
+    # SIMULATION
+    # --------------------
+
     scale = 1
 
     # create the computational grid
@@ -45,9 +58,6 @@ def main():
     sensor_mask[0] = 1
     sensor.mask = sensor_mask
 
-    # create the time array
-    kgrid.makeTime(medium.sound_speed)
-
     # set the input arguments
     simulation_options = SimulationOptions(
         save_to_disk=True,
@@ -70,8 +80,6 @@ def main():
     p_xyz = kspacePlaneRecon(sensor_data_rs, kgrid.dy, kgrid.dz, kgrid.dt.item(),
                              medium.sound_speed.item(), data_order='yzt', pos_cond=True)
 
-    # VISUALIZATION
-
     # define a k-space grid using the dimensions of p_xyz
     N_recon = Vector(p_xyz.shape)
     d_recon = Vector([kgrid.dt.item() * medium.sound_speed.item(), kgrid.dy, kgrid.dz])
@@ -92,6 +100,11 @@ def main():
                              kgrid_interp.z - kgrid_interp.z.min()),
                             axis=-1)
     p_xyz_rs = interp_func(query_points)
+
+
+    # --------------------
+    # VISUALIZATION
+    # --------------------
 
     # plot the initial pressure and sensor surface in voxel form
     # voxel_plot(np.single((p0 + sensor_mask) > 0))  # todo: needs unsmoothed po + plot not working
@@ -146,5 +159,5 @@ def main():
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
