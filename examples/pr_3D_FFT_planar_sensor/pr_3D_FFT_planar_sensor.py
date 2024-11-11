@@ -7,7 +7,6 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.kspacePlaneRecon import kspacePlaneRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.plot import voxel_plot
 from kwave.utils.colormap import get_color_map
 from kwave.utils.mapgen import make_ball
 from kwave.utils.filters import smooth
@@ -107,6 +106,7 @@ def main():
     # --------------------
 
     # plot the initial pressure and sensor surface in voxel form
+    # from kwave.utils.plot import voxel_plot
     # voxel_plot(np.single((p0 + sensor_mask) > 0))  # todo: needs unsmoothed po + plot not working
 
     # plot the initial pressure

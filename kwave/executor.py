@@ -65,11 +65,6 @@ class Executor:
         pml_z_size = 0 if Nz <= 1 else sensor_data["pml_z_size"].item()
         axisymmetric = sensor_data['axisymmetric_flag'].item()
 
-        # set the default index variables for the _all and _final variables
-        x1, x2 = 0, Nx - 1
-        y1, y2 = 0, Ny - 1
-        z1, z2 = 0, Nz - 1
-
         pml_inside = self.simulation_options.pml_inside
         if not pml_inside:
             # if the PML is outside, set the index variables to remove the pml
@@ -81,15 +76,15 @@ class Executor:
             z1 = pml_z_size
             z2 = Nz - pml_z_size
 
-        possible_fields = ['p_final', 'p_max_all', 'p_min_all', 'ux_max_all', 'uy_max_all',
-                           'uz_max_all', 'ux_min_all', 'uy_min_all', 'uz_min_all', 'ux_final',
-                           'uy_final', 'uz_final']
-        for field in possible_fields:
-            if field in sensor_data:
-                if sensor_data[field].ndim == 2:
-                    sensor_data[field] = sensor_data[field][y1:y2, x1:x2]
-                else:
-                    sensor_data[field] = sensor_data[field][z1:z2, y1:y2, x1:x2]
+            possible_fields = ['p_final', 'p_max_all', 'p_min_all', 'ux_max_all', 'uy_max_all',
+                               'uz_max_all', 'ux_min_all', 'uy_min_all', 'uz_min_all', 'ux_final',
+                               'uy_final', 'uz_final']
+            for field in possible_fields:
+                if field in sensor_data:
+                    if sensor_data[field].ndim == 2:
+                        sensor_data[field] = sensor_data[field][y1:y2, x1:x2]
+                    else:
+                        sensor_data[field] = sensor_data[field][z1:z2, y1:y2, x1:x2]
 
         return sensor_data
 
