@@ -193,6 +193,7 @@ class TestExecutor(unittest.TestCase):
         # Configure the mock path object
         mock_binary_path = MagicMock(spec=Path)
         mock_binary_path.chmod.side_effect = FileNotFoundError
+        mock_binary_path.exists.return_value = False
 
         # Mock the execution options to use the mocked path
         mock_execution_options = MagicMock()
