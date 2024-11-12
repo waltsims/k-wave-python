@@ -4,4 +4,4 @@
 
 This example demonstrates how the sensitivity of a large single element detector varies with the angular position of a point-like source.
 
-To read more, visit the [original example page](http://www.k-wave.org/documentation/sd_directivity_modelling_2D.php).
+To read more, visit the [original example page](http://www.k-wave.org/documentation/example_sd_directivity_modelling_2D.php).
