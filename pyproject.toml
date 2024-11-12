@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
 readme = "docs/README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
     { name = "Walter Simson", email = "walter.simson@tum.de"}
@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "h5py==3.12.1",
-    "scipy==1.13.1",
+    "scipy==1.14.1",
     "opencv-python==4.10.0.84",
     "deepdiff==8.0.1",
     "matplotlib==3.9.2",

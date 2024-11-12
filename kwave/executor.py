@@ -1,3 +1,4 @@
+import os
 import stat
 import subprocess
 import sys
@@ -5,34 +6,39 @@ import sys
 import h5py
 
 import kwave
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 
 
 class Executor:
-    def __init__(self, execution_options, simulation_options):
+    def __init__(self, execution_options: SimulationExecutionOptions, simulation_options):
         self.execution_options = execution_options
         self.simulation_options = simulation_options
 
+        if os.environ.get("KWAVE_FORCE_CPU") == "1":
+            self.execution_options.is_gpu_simulation = False
+            self.execution_options.binary_name = "kspaceFirstOrder-OMP"
+            self.execution_options.binary_path = kwave.BINARY_PATH / self.execution_options.binary_name
         self._make_binary_executable()
 
     def _make_binary_executable(self):
-        try:
-            self.execution_options.binary_path.chmod(self.execution_options.binary_path.stat().st_mode | stat.S_IEXEC)
-        except FileNotFoundError as e:
+        binary_path = self.execution_options.binary_path
+        if not binary_path.exists():
             if kwave.PLATFORM == "darwin" and self.execution_options.is_gpu_simulation:
                 raise ValueError(
-                    "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
-                ) from e
-            else:
-                raise e
+                    "GPU simulations are currently not supported on MacOS. "
+                    "Try running the simulation on CPU by setting is_gpu_simulation=False."
+                )
+            raise FileNotFoundError(f"Binary not found at {binary_path}")
+        binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
     def run_simulation(self, input_filename: str, output_filename: str, options: str):
-        command = (
-            f"{self.execution_options.system_string}" f'"{self.execution_options.binary_path}" -i {input_filename} -o {output_filename} {options}'
-        )
+        command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename, options]
 
         try:
-            with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True) as proc:
+            with subprocess.Popen(
+                command, env=self.execution_options.env_vars, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            ) as proc:
                 stdout, stderr = "", ""
                 if self.execution_options.show_sim_log:
                     # Stream stdout in real-time
