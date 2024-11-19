@@ -90,13 +90,11 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
 
     """
 
-    if mask.dtype == "uint8":
-        mask = mask.astype(np.int16)
-
     if diff is None:
-        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F")], axis=-1)  # compatibility, n => [n, 1]
+        flat_mask = mask.ravel(order="F")
     else:
-        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F") + diff], axis=-1)  # compatibility, n => [n, 1]
+        flat_mask = mask.ravel(order="F") + diff
+    return np.expand_dims(arr.ravel(order="F")[flat_mask], axis=-1)  # compatibility, n => [n, 1]
 
 
 def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[Union[int, np.ndarray], ...]:
