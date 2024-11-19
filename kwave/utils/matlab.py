@@ -90,8 +90,9 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
 
     """
 
-    # mask is np.intp type
-    mask = mask.astype(np.intp)
+    if mask.dtype == "uint8":
+        mask = mask.astype(np.int16)
+
     if diff is None:
         return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F")], axis=-1)  # compatibility, n => [n, 1]
     else:
