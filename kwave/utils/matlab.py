@@ -91,7 +91,7 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
     """
 
     if mask.dtype == "uint8":
-        mask = mask.dtype("int8")
+        mask = mask.astype("int8")
 
     if diff is None:
         flat_mask = mask.ravel(order="F")
