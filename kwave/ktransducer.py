@@ -644,7 +644,7 @@ class NotATransducer(kSensor):
             ].min()  # -1s compatibility
         else:
             mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += self.stored_beamforming_delays_offset  # -1s compatibility
-        return mask.astype(np.uint8)
+        return mask.astype(np.int16)
 
     @property
     def elevation_beamforming_delays(self):
