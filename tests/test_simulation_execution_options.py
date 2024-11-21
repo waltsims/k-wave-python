@@ -86,7 +86,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             options = SimulationExecutionOptions()
             self.assertTrue(options.binary_name.endswith(".exe"))
 
-    def test_get_options_string(self):
+    @patch("kwave.options.simulation_execution_options.PLATFORM", "darwin")
+    def test_get_options_string_darwin(self):
         """Test the get_options_string method with a mock sensor."""
         options = self.default_options
         options.device_num = 1
@@ -98,17 +99,31 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         for substring in expected_substrings:
             self.assertIn(substring, options_string)
 
+    @patch("kwave.options.simulation_execution_options.PLATFORM", "windows")
     def test_get_options_string_windows(self):
-        """Test that -t flag is not included in options string on Windows platform."""
-        with patch("kwave.options.simulation_execution_options.PLATFORM", "windows"):
-            options = SimulationExecutionOptions()
-            options.num_threads = os.cpu_count()
-            options_string = options.get_options_string(self.mock_sensor)
-            self.assertNotIn(" -t ", options_string)
-            # Verify other options are still present
-            self.assertIn(" --p_raw", options_string)
-            self.assertIn(" --u_max", options_string)
-            self.assertIn(" -s 10", options_string)
+        """Test the get_options_string method with a mock sensor."""
+        options = self.default_options
+        options.device_num = 1
+        options.num_threads = os.cpu_count()
+        options.verbose_level = 2
+
+        options_string = options.get_options_string(self.mock_sensor)
+        expected_substrings = [" -g 1", " --verbose 2", " --p_raw", " --u_max", " -s 10"]
+        for substring in expected_substrings:
+            self.assertIn(substring, options_string)
+
+    @patch("kwave.options.simulation_execution_options.PLATFORM", "linux")
+    def test_get_options_string_linux(self):
+        """Test the get_options_string method with a mock sensor."""
+        options = self.default_options
+        options.device_num = 1
+        options.num_threads = os.cpu_count()
+        options.verbose_level = 2
+
+        options_string = options.get_options_string(self.mock_sensor)
+        expected_substrings = [" -g 1", f" -t {os.cpu_count()}", " --verbose 2", " --p_raw", " --u_max", " -s 10"]
+        for substring in expected_substrings:
+            self.assertIn(substring, options_string)
 
     def test_gpu_dependency_on_binary_name_and_path(self):
         """Test that the binary_name and binary_path are updated correctly based on is_gpu_simulation."""
