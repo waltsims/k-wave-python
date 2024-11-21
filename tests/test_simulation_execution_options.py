@@ -98,6 +98,18 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         for substring in expected_substrings:
             self.assertIn(substring, options_string)
 
+    def test_get_options_string_windows(self):
+        """Test that -t flag is not included in options string on Windows platform."""
+        with patch("kwave.options.simulation_execution_options.PLATFORM", "windows"):
+            options = SimulationExecutionOptions()
+            options.num_threads = os.cpu_count()
+            options_string = options.get_options_string(self.mock_sensor)
+            self.assertNotIn(" -t ", options_string)
+            # Verify other options are still present
+            self.assertIn(" --p_raw", options_string)
+            self.assertIn(" --u_max", options_string)
+            self.assertIn(" -s 10", options_string)
+
     def test_gpu_dependency_on_binary_name_and_path(self):
         """Test that the binary_name and binary_path are updated correctly based on is_gpu_simulation."""
         options = SimulationExecutionOptions(is_gpu_simulation=True)
