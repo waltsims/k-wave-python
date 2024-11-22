@@ -111,6 +111,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         expected_substrings = [" -g 1", " --verbose 2", " --p_raw", " --u_max", " -s 10"]
         for substring in expected_substrings:
             self.assertIn(substring, options_string)
+        self.assertNotIn(f" -t {os.cpu_count()}", expected_substrings)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "linux")
     def test_get_options_string_linux(self):
