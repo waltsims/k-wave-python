@@ -10,7 +10,7 @@ import json
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = "0.3.6"
+VERSION = "0.3.7"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
