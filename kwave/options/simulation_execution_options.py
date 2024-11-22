@@ -156,7 +156,7 @@ class SimulationExecutionOptions:
         if self.device_num is not None:
             options_list.append(f" -g {self.device_num}")
 
-        if self.num_threads is not None:
+        if self.num_threads is not None and PLATFORM != "windows":
             options_list.append(f" -t {self.num_threads}")
 
         if self.verbose_level > 0:
