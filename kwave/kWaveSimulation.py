@@ -190,7 +190,7 @@ class kWaveSimulation(object):
 
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
+            if not self.options.simulation_type.is_elastic and self.sensor.time_reversal_boundary_data is not None:
                 return True
         else:
             return self.userarg_time_rev
@@ -477,14 +477,13 @@ class kWaveSimulation(object):
         self.check_calling_func_name_and_dim(calling_func_name, k_dim)
 
         # run subscript to check optional inputs
-        self.options = SimulationOptions.option_factory(self.kgrid, self.options)
         opt = self.options
 
         # TODO(Walter): clean this up with getters in simulation options pml size
         pml_x_size, pml_y_size, pml_z_size = opt.pml_x_size, opt.pml_y_size, opt.pml_z_size
         pml_size = Vector([pml_x_size, pml_y_size, pml_z_size])
 
-        is_elastic_code = opt.simulation_type.is_elastic_simulation()
+        is_elastic_code = opt.simulation_type.is_elastic
         self.print_start_status(is_elastic_code=is_elastic_code)
         self.set_index_data_type()
 
@@ -512,7 +511,7 @@ class kWaveSimulation(object):
             kgrid_N=Vector(self.kgrid.N),
             pml_size=pml_size,
             pml_inside=opt.pml_inside,
-            is_axisymmetric=opt.simulation_type.is_axisymmetric(),
+            is_axisymmetric=opt.simulation_type.is_axisymmetric,
         )
 
     @staticmethod
@@ -580,7 +579,7 @@ class kWaveSimulation(object):
         """
 
         # if using the fluid code, allow the density field to be blank if the medium is homogeneous
-        if (not simulation_type.is_elastic_simulation()) and medium.density is None and medium.sound_speed.size == 1:
+        if (not simulation_type.is_elastic) and medium.density is None and medium.sound_speed.size == 1:
             user_medium_density_input = False
             medium.density = 1
         else:
@@ -589,7 +588,7 @@ class kWaveSimulation(object):
 
         # check medium absorption inputs for the fluid code
         is_absorbing = any(medium.is_defined("alpha_coeff", "alpha_power"))
-        is_stokes = simulation_type.is_axisymmetric() or medium.alpha_mode == "stokes"
+        is_stokes = simulation_type.is_axisymmetric or medium.alpha_mode == "stokes"
         medium.set_absorbing(is_absorbing, is_stokes)
 
         if is_absorbing:
@@ -642,7 +641,7 @@ class kWaveSimulation(object):
                         directivity.set_wavenumbers(self.kgrid)
 
                 # check for time reversal inputs and set flags
-                if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
+                if not self.options.simulation_type.is_elastic and self.sensor.time_reversal_boundary_data is not None:
                     self.record.p = False
 
                 # check for sensor.record and set usage flgs - if no flgs are
@@ -657,7 +656,7 @@ class kWaveSimulation(object):
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
 
                     # check the sensor record flgs
-                    self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic_simulation())
+                    self.record.set_flags_from_list(self.sensor.record, self.options.simulation_type.is_elastic)
 
                 # enforce the sensor.mask field unless just recording the max_all
                 # and _final variables
@@ -777,7 +776,7 @@ class kWaveSimulation(object):
                         # display, if flgs.time_rev = true or cartesian_interp =
                         # 'nearest' this grid is used as the sensor.mask
                         self.sensor.mask, self.order_index, self.reorder_index = cart2grid(
-                            self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric()
+                            self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric
                         )
 
                         # if in time reversal mode, reorder the p0 input data in
@@ -1029,7 +1028,7 @@ class kWaveSimulation(object):
             self.kgrid.makeTime(self.medium.sound_speed, self.KSPACE_CFL)
 
         # check kgrid.t_array for stability given medium properties
-        if not self.options.simulation_type.is_elastic_simulation():
+        if not self.options.simulation_type.is_elastic:
             # calculate the largest timestep for which the model is stable
 
             dt_stability_limit = check_stability(self.kgrid, self.medium)
@@ -1126,7 +1125,7 @@ class kWaveSimulation(object):
                     "The optional input " "StreamToDisk" " is currently only compatible " "with sensor.record = {" "p" "} (the default)."
                 )
 
-        is_axisymmetric = self.options.simulation_type.is_axisymmetric()
+        is_axisymmetric = self.options.simulation_type.is_axisymmetric
         # make sure the PML size is smaller than the grid if PMLInside is true
         if opt.pml_inside and (
             (k_dim == 1 and (pml_size.x * 2 > self.kgrid.Nx))
@@ -1167,10 +1166,6 @@ class kWaveSimulation(object):
         if not self.source_p0:
             self.options.smooth_p0 = False
 
-        # start log if required
-        if opt.create_log:
-            raise NotImplementedError(f"diary({self.LOG_NAME}.txt');")
-
         # update command line status
         if self.time_rev:
             logging.log(logging.INFO, "  time reversal mode")
@@ -1206,7 +1201,7 @@ class kWaveSimulation(object):
             # update command line status
             logging.log(logging.INFO, "  smoothing p0 distribution...")
 
-            if self.options.simulation_type.is_axisymmetric():
+            if self.options.simulation_type.is_axisymmetric:
                 if self.options.radial_symmetry in ["WSWA-FFT", "WSWA"]:
                     # create a new kWave grid object with expanded radial grid
                     kgrid_exp = kWaveGrid([kgrid_N.x, kgrid_N.y * 4], [self.kgrid.dx, self.kgrid.dy])
@@ -1258,7 +1253,7 @@ class kWaveSimulation(object):
                 ),
                 dotdict(
                     {
-                        "axisymmetric": self.options.simulation_type.is_axisymmetric(),
+                        "axisymmetric": self.options.simulation_type.is_axisymmetric,
                         "use_sensor": self.use_sensor,
                         "blank_sensor": self.blank_sensor,
                         "cuboid_corners": self.cuboid_corners,
@@ -1280,7 +1275,7 @@ class kWaveSimulation(object):
             self.kgrid, self.index_data_type, self.p_source_pos_index, self.u_source_pos_index, self.s_source_pos_index = expand_results
 
         # get maximum prime factors
-        if self.options.simulation_type.is_axisymmetric():
+        if self.options.simulation_type.is_axisymmetric:
             prime_facs = self.kgrid.highest_prime_factors(self.options.radial_symmetry[:4])
         else:
             prime_facs = self.kgrid.highest_prime_factors()
@@ -1367,7 +1362,7 @@ class kWaveSimulation(object):
         Returns:
             None
         """
-        if not self.options.simulation_type.is_elastic_simulation() and not self.options.save_to_disk:
+        if not self.options.simulation_type.is_elastic and not self.options.save_to_disk:
             self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(
                 self.kgrid, self.medium, self.equation_of_state
             )

@@ -15,7 +15,7 @@ def set_sound_speed_ref(medium: kWaveMedium, simulation_type: SimulationType):
     Returns:
 
     """
-    if not simulation_type.is_elastic_simulation():
+    if not simulation_type.is_elastic:
         return get_ordinary_sound_speed_ref(medium)
     elif simulation_type == SimulationType.ELASTIC:  # pragma: no cover
         return get_pstd_elastic_sound_speed_ref(medium)
