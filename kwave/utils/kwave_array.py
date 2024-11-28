@@ -6,7 +6,7 @@ from typing import Optional
 
 import numpy as np
 from numpy import arcsin, pi, cos, size, array
-from numpy.linalg import linalg
+import numpy.linalg as linalg
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid

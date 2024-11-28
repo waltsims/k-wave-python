@@ -98,18 +98,15 @@ def spect(
 
     # automatically set dimension to first non - singleton dimension
     if dim == "auto":
-        dim_index = 0
-        while dim_index <= len(sz):
-            if sz[dim_index] > 1:
-                dim = dim_index
-                break
-            dim_index = dim_index + 1
+        dim = np.argmax(np.array(sz) > 1)
+        if sz[dim] <= 1:
+            raise ValueError("All dimensions are singleton; unable to determine valid dimension.")
 
     # assign the number of points being analysed
     func_length = sz[dim]
 
     # set the length of the FFT
-    if not fft_len > func_length:
+    if fft_len <= 0 or fft_len < func_length:
         if power_two:
             # find an appropriate FFT length of the form 2 ^ N that is equal to or
             # larger than the length of the input signal
@@ -119,34 +116,32 @@ def spect(
             fft_len = func_length
 
     # window the signal, reshaping the window to be in the correct direction
-    win, coherent_gain = get_win(func_length, window, symmetric=False)
-    win = np.reshape(win, tuple(([1] * dim + [func_length] + [1] * (len(sz) - 2))))
+    win, coherent_gain = get_win(func_length, type_=window, symmetric=False)
+    win_shape = [1] * len(sz)
+    win_shape[dim] = func_length
+    win = np.reshape(win, tuple(win_shape))
     func = win * func
 
     # compute the fft using the defined FFT length, if fft_len >
     # func_length, the input signal is padded with zeros
-    func_fft = fft(func, fft_len, dim)
+    func_fft = np.fft.fft(func, n=fft_len, axis=dim)
 
     # correct for the magnitude scaling of the FFT and the coherent gain of the
     # window(note that the correction is equal to func_length NOT fft_len)
-    func_fft = func_fft / (func_length * coherent_gain)
+    epsilon = 1e-10  # Small value to prevent division by zero
+    func_fft = func_fft / (func_length * coherent_gain + epsilon)
 
     # reduce to a single sided spectrum where the number of unique points for
     # even numbered FFT lengths is given by N / 2 + 1, and for odd(N + 1) / 2
     num_unique_pts = int(np.ceil((fft_len + 1) / 2))
-    if dim == 0:
-        func_fft = func_fft[0:num_unique_pts]
-    elif dim == 1:
-        func_fft = func_fft[:, 0:num_unique_pts]
-    elif dim == 2:
-        func_fft = func_fft[:, :, 0:num_unique_pts]
-    elif dim == 3:
-        func_fft = func_fft[:, :, :, 0:num_unique_pts]
+    slicing = [slice(None)] * len(sz)
+    slicing[dim] = slice(0, num_unique_pts)
+    func_fft = func_fft[tuple(slicing)]
 
     func_fft = single_sided_correction(func_fft, fft_len, dim)
 
     # create the frequency axis variable
-    f = np.arange(0, func_fft.shape[dim]) * Fs / fft_len
+    f = np.arange(0, num_unique_pts) * Fs / fft_len
 
     # calculate the amplitude spectrum
     func_as = np.abs(func_fft)
@@ -156,7 +151,7 @@ def spect(
 
     # unwrap the phase spectrum if required
     if unwrap_phase:
-        func_ps = scipy.unwrap(func_ps, [], dim)
+        func_ps = np.unwrap(func_ps, axis=dim)
 
     return f, func_as, func_ps
 

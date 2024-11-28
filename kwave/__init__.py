@@ -7,9 +7,10 @@ from typing import List
 import hashlib
 import json
 
+
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = "0.3.4"
+VERSION = "0.3.7"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
@@ -21,7 +22,9 @@ if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
+# TODO: depricate in 0.3.7
 BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
+BINARY_DIR = BINARY_PATH  # add alias for BINARY_PATH for now
 
 
 WINDOWS_DLLS = [
