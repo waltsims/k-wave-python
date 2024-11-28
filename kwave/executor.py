@@ -59,7 +59,12 @@ class Executor:
             raise
 
         sensor_data = self.parse_executable_output(output_filename)
+        if not self.simulation_options.pml_inside:
+            self._crop_pml(sensor_data)
 
+        return sensor_data
+
+    def _crop_pml(self, sensor_data: dotdict):
         Nx = sensor_data["Nx"].item()
         Ny = sensor_data["Ny"].item()
         Nz = sensor_data["Nz"].item()
@@ -68,67 +73,44 @@ class Executor:
         pml_z_size = 0 if Nz <= 1 else sensor_data["pml_z_size"].item()
         axisymmetric = sensor_data["axisymmetric_flag"].item()
 
-        pml_inside = self.simulation_options.pml_inside
-        if not pml_inside:
-            # if the PML is outside, set the index variables to remove the pml
-            # from the _all and _final variables
-            x1 = pml_x_size
-            x2 = Nx - pml_x_size
-            y1 = 0 if axisymmetric else pml_y_size
-            y2 = Ny - pml_y_size
-            z1 = pml_z_size
-            z2 = Nz - pml_z_size
+        # if the PML is outside, set the index variables to remove the pml
+        # from the _all and _final variables
+        x1 = pml_x_size
+        x2 = Nx - pml_x_size
+        y1 = 0 if axisymmetric else pml_y_size
+        y2 = Ny - pml_y_size
+        z1 = pml_z_size
+        z2 = Nz - pml_z_size
 
-            possible_fields = [
-                "p_final",
-                "p_max_all",
-                "p_min_all",
-                "ux_max_all",
-                "uy_max_all",
-                "uz_max_all",
-                "ux_min_all",
-                "uy_min_all",
-                "uz_min_all",
-                "ux_final",
-                "uy_final",
-                "uz_final",
-            ]
-            for field in possible_fields:
-                if field in sensor_data:
-                    if sensor_data[field].ndim == 2:
-                        sensor_data[field] = sensor_data[field][y1:y2, x1:x2]
-                    else:
-                        sensor_data[field] = sensor_data[field][z1:z2, y1:y2, x1:x2]
-
-        return sensor_data
+        possible_fields = [
+            "p_final",
+            "p_max_all",
+            "p_min_all",
+            "ux_max_all",
+            "uy_max_all",
+            "uz_max_all",
+            "ux_min_all",
+            "uy_min_all",
+            "uz_min_all",
+            "ux_final",
+            "uy_final",
+            "uz_final",
+        ]
+        for field in possible_fields:
+            if field in sensor_data:
+                if sensor_data[field].ndim == 2:
+                    sensor_data[field] = sensor_data[field][y1:y2, x1:x2]
+                else:
+                    sensor_data[field] = sensor_data[field][z1:z2, y1:y2, x1:x2]
 
     @staticmethod
     def parse_executable_output(output_filename: str) -> dotdict:
-        # Load the simulation and pml sizes from the output file
-        # with h5py.File(output_filename, 'r') as output_file:
-        #     Nx, Ny, Nz = output_file['/Nx'][0].item(), output_file['/Ny'][0].item(), output_file['/Nz'][0].item()
-        #     pml_x_size, pml_y_size = output_file['/pml_x_size'][0].item(), output_file['/pml_y_size'][0].item()
-        #     pml_z_size = output_file['/pml_z_size'][0].item() if Nz > 1 else 0
-
-        # # Set the default index variables for the _all and _final variables
-        # x1, x2 = 1, Nx
-        # y1, y2 = (
-        #     1, 1 + pml_y_size) if self.simulation_options.simulation_type is not SimulationType.AXISYMMETRIC else (
-        #     1, Ny)
-        # z1, z2 = (1 + pml_z_size, Nz - pml_z_size) if Nz > 1 else (1, Nz)
-        #
-        # # Check if the PML is set to be outside the computational grid
-        # if self.simulation_options.pml_inside:
-        #     x1, x2 = 1 + pml_x_size, Nx - pml_x_size
-        #     y1, y2 = (1, Ny) if self.simulation_options.simulation_type is SimulationType.AXISYMMETRIC else (
-        #         1 + pml_y_size, Ny - pml_y_size)
-        #     z1, z2 = 1 + pml_z_size, Nz - pml_z_size if Nz > 1 else (1, Nz)
-
         # Load the C++ data back from disk using h5py
         with h5py.File(output_filename, "r") as output_file:
             sensor_data = {}
             for key in output_file.keys():
                 sensor_data[key] = output_file[f"/{key}"][:].squeeze()
+
         #     if self.simulation_options.cuboid_corners:
         #         sensor_data = [output_file[f'/p/{index}'][()] for index in range(1, len(key['mask']) + 1)]
         #
