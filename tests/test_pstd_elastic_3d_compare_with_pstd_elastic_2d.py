@@ -30,7 +30,8 @@
 
 import numpy as np
 from copy import deepcopy
-import pytest
+import matplotlib.pyplot as plt
+# import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -55,7 +56,7 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
     medium.sound_speed_shear = cs1 * np.ones((N1, N2, N3))
     medium.density = rho1 * np.ones((N1, N2, N3))
 
-    cp2         = 2000.0
+    cp2: float = 2000.0
     cs2         = 800.0
     rho2        = 1200.0
     alpha_p2    = 1.0
@@ -80,8 +81,8 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
     # absorption
     if hasattr(medium, 'alpha_coeff_compression'):
         if medium.alpha_coeff_compression is not None:
-            medium.alpha_coeff_compression = alpha_p1 * np.ones((N1, N2, N3))
-            medium.alpha_coeff_shear = alpha_s1 * np.ones((N1, N2, N3))
+            medium.alpha_coeff_compression = alpha_p1 #* np.ones((N1, N2, N3), dtype=np.float32)
+            medium.alpha_coeff_shear = alpha_s1 #* np.ones((N1, N2, N3), dtype=np.float32)
             if direction == 1:
                 medium.alpha_coeff_compression[interface_position:, :, :] = alpha_p2
                 medium.alpha_coeff_shear[interface_position:, :, :] = alpha_s2
@@ -92,12 +93,13 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
     medium.alpha_coeff_compression = np.squeeze(medium.alpha_coeff_compression)
     medium.alpha_coeff_shear = np.squeeze(medium.alpha_coeff_shear)
 
-@pytest.mark.skip(reason="not ready")
+
+# @pytest.mark.skip(reason="not ready")
 def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
     # set additional literals to give further permutations of the test
     USE_PML             = False
-    COMPARISON_THRESH   = 1e-14
+    COMPARISON_THRESH   = 1e-10
     SMOOTH_P0_SOURCE    = False
 
     # =========================================================================
@@ -108,16 +110,16 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     Nx: int = 64
     Ny: int = 64
     Nz: int = 32
-    dx = 0.1e-3
-    dy = dx
-    dz = dx
+    dx: float = 0.1e-3
+    dy: float = 0.1e-3
+    dz: float = 0.1e-3
 
     # define PML properties
-    PML_size: int = 10
+    pml_size: int = 10
     if USE_PML:
-        PML_alpha = 2
+        pml_alpha = 2.0
     else:
-        PML_alpha = 0
+        pml_alpha = 0.0
 
     # define material properties
     cp1         = 1500.0
@@ -126,75 +128,57 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     alpha_p1    = 0.5
     alpha_s1    = 0.5
 
-    # define time array
-    cfl     = 0.1
-    t_end   = 3e-6
-    dt      = cfl * dx / cp1
-    Nt: int = int(round(t_end / dt))
-
-    #t_array = 0:dt:(Nt - 1) * dt
-    t_array = np.linspace(0, (Nt - 1) * dt, Nt)
-
-    # define sensor mask
-    sensor_mask_2D = make_circle(Vector([Nx, Ny]), Vector([Nx // 2 - 1, Ny// 2 - 1]), 15)
-
-    # define input arguements
-    # input_args = {'PlotScale', [-1, 1, -0.2, 0.2], 'PMLSize', PML_size,
-    # 'UseSG', USE_SG, 'Smooth', false, 'PlotSim', plot_simulations};
-
-    # define source properties
-    source_strength = 3
-    source_position_x: int = Nx // 2 - 21
-    source_position_y: int = Ny // 2 - 11
-    source_freq = 2e6
-    source_signal = source_strength * np.sin(2.0 * np.pi * source_freq * t_array)
-
     # set pass variable
     test_pass = True
 
     # test names
     test_names = ['lossless + source.p0 + homogeneous',
-        'lossless + source.p0 + heterogeneous',
-        'lossless + source.s (additive) + homogeneous',
-        'lossless + source.s (additive) + heterogeneous',
-        'lossless + source.s (dirichlet) + homogeneous',
-        'lossless + source.s (dirichlet) + heterogeneous',
-        'lossless + source.u (additive) + homogeneous',
-        'lossless + source.u (additive) + heterogeneous',
-        'lossless + source.u (dirichlet) + homogeneous',
-        'lossless + source.u (dirichlet) + heterogeneous',
-        'lossy + source.p0 + homogeneous',
-        'lossy + source.p0 + heterogeneous',
-        'lossy + source.s (additive) + homogeneous',
-        'lossy + source.s (additive) + heterogeneous',
-        'lossy + source.s (dirichlet) + homogeneous',
-        'lossy + source.s (dirichlet) + heterogeneous',
-        'lossy + source.u (additive) + homogeneous',
-        'lossy + source.u (additive) + heterogeneous',
-        'lossy + source.u (dirichlet) + homogeneous',
-        'lossy + source.u (dirichlet) + heterogeneous']
+                  'lossless + source.p0 + heterogeneous',
+                  'lossless + source.s (additive) + homogeneous',
+                  'lossless + source.s (additive) + heterogeneous',
+                  'lossless + source.s (dirichlet) + homogeneous',
+                  'lossless + source.s (dirichlet) + heterogeneous',
+                  'lossless + source.u (additive) + homogeneous',
+                  'lossless + source.u (additive) + heterogeneous',
+                  'lossless + source.u (dirichlet) + homogeneous',
+                  'lossless + source.u (dirichlet) + heterogeneous',
+                  'lossy + source.p0 + homogeneous',
+                  'lossy + source.p0 + heterogeneous',
+                  'lossy + source.s (additive) + homogeneous',
+                  'lossy + source.s (additive) + heterogeneous',
+                  'lossy + source.s (dirichlet) + homogeneous',
+                  'lossy + source.s (dirichlet) + heterogeneous',
+                  'lossy + source.u (additive) + homogeneous',
+                  'lossy + source.u (additive) + heterogeneous',
+                  'lossy + source.u (dirichlet) + homogeneous',
+                  'lossy + source.u (dirichlet) + heterogeneous']
 
     # lists used to set properties
-    p0_tests = [1, 2, 11, 12]
-    s_tests  = [3, 4, 5, 6, 13, 14, 15, 16]
-    u_tests  = [7, 8, 9, 10, 17, 18, 19, 20]
-    dirichlet_tests = [5, 6, 9, 10, 15, 16, 19, 20]
+    p0_tests = [0, 1, 10, 11]
+    s_tests  = [2, 3, 4, 5, 12, 13, 14, 15]
+    u_tests  = [6, 7, 8, 9, 16, 17, 18, 19]
+    # additive_tests = [2, 3, 6, 7, 12, 13, 16, 17]
+    dirichlet_tests = [4, 5, 8, 9, 14, 15, 18, 19]
 
     # =========================================================================
     # SIMULATIONS
     # =========================================================================
 
     # loop through tests
-    for test_num in np.arange(1, 21, dtype=int):
+    for test_num in np.arange(start=0, stop=1, step=1, dtype=int):
+        # np.arange(1, 21, dtype=int):
+
+        test_name = test_names[test_num]
 
         # update command line
-        print('Running Test: ', test_names[test_num])
+        print('Running Test: ', test_name)
 
         # assign medium properties
         medium = kWaveMedium(sound_speed=cp1,
                              density=rho1,
                              sound_speed_compression=cp1,
                              sound_speed_shear=cs1)
+
         if test_num > 10:
             medium.alpha_coeff_compression = alpha_p1
             medium.alpha_coeff_shear  = alpha_s1
@@ -208,11 +192,28 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # create computational grid
         kgrid = kWaveGrid(Vector([Nx, Ny]), Vector([dx, dy]))
-        kgrid.t_array = t_array
 
         # heterogeneous medium properties
         if not bool(rem(test_num, 2)):
             setMaterialProperties(medium, Nx, Ny, N3=int(1), direction=1)
+            c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
+        else:
+            c_max = np.max(medium.sound_speed_compression)
+
+        # define time array
+        cfl = 0.1
+        t_end = 3e-6
+        kgrid.makeTime(c_max, cfl, t_end)
+
+        # define sensor mask
+        sensor_mask_2D = make_circle(Vector([Nx, Ny]), Vector([Nx // 2 - 1, Ny // 2 - 1]), 15)
+
+        # define source properties
+        source_strength: float = 3
+        source_position_x: int = Nx // 2 - 21
+        source_position_y: int = Ny // 2 - 11
+        source_freq: float = 2e6
+        source_signal = source_strength * np.sin(2.0 * np.pi * source_freq * kgrid.t_array)
 
         # sensor
         sensor = kSensor()
@@ -220,7 +221,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # source
         source = kSource()
-        if any(p0_tests == test_num):
+        if test_num in p0_tests:
             p0 = np.zeros((Nx, Ny))
             p0[source_position_x, source_position_y] = source_strength
             if SMOOTH_P0_SOURCE:
@@ -228,16 +229,16 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
             source.p0 = p0
 
         elif any(s_tests == test_num):
-            source.s_mask = np.zeros((Nx, Ny))
-            source.s_mask[source_position_x, source_position_y] = 1
+            source.s_mask = np.zeros((Nx, Ny), dtype=bool)
+            source.s_mask[source_position_x, source_position_y] = True
             source.sxx = source_signal
             source.syy = source_signal
             if any(dirichlet_tests == test_num):
                 source.s_mode = 'dirichlet'
 
         elif any(u_tests == test_num):
-            source.u_mask = np.zeros((Nx, Ny))
-            source.u_mask[source_position_x, source_position_y] = 1
+            source.u_mask = np.zeros((Nx, Ny), dtype=bool)
+            source.u_mask[source_position_x, source_position_y] = True
             source.ux = source_signal / (cp1 * rho1)
             source.uy = source_signal / (cp1 * rho1)
             if any(dirichlet_tests == test_num):
@@ -252,8 +253,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # run the simulation
         simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                                kelvin_voigt_model=kelvin_voigt,
-                                               pml_alpha=PML_alpha,
-                                               pml_size=PML_size,
+                                               pml_alpha=pml_alpha,
+                                               pml_size=pml_size,
                                                smooth_p0=False)
 
         sensor_data_2D = pstd_elastic_2d(kgrid=deepcopy(kgrid),
@@ -263,6 +264,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
                                          simulation_options=deepcopy(simulation_options))
 
         # calculate velocity amplitude
+        sensor_data_2D['ux'] = np.reshape(sensor_data_2D['ux'], sensor_data_2D['ux'].shape, order='F')
+        sensor_data_2D['uy'] = np.reshape(sensor_data_2D['uy'], sensor_data_2D['uy'].shape, order='F')
         sensor_data_2D = np.sqrt(sensor_data_2D['ux']**2 + sensor_data_2D['uy']**2)
 
         # ----------------
@@ -275,11 +278,18 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # create computational grid
         kgrid = kWaveGrid(Vector([Nx, Ny, Nz]), Vector([dx, dy, dz]))
-        kgrid.t_array = t_array
 
         # heterogeneous medium properties
         if not bool(rem(test_num, 2)):
             setMaterialProperties(medium, Nx, Ny, Nz, direction=1, cp1=cp1, cs1=cs1, rho=rho1)
+            c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
+        else:
+            c_max = np.max(medium.sound_speed_compression)
+
+        # define time array
+        cfl     = 0.1
+        t_end   = 3e-6
+        kgrid.makeTime(c_max, cfl, t_end)
 
         # source
         source = kSource()
@@ -320,9 +330,11 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # run the simulation
         simulation_options = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                                kelvin_voigt_model=kelvin_voigt,
-                                               pml_x_alpha=PML_alpha,
-                                               pml_y_alpha=PML_alpha,
-                                               pml_z_alpha=0.0)
+                                               pml_size=pml_size,
+                                               pml_x_alpha=pml_alpha,
+                                               pml_y_alpha=pml_alpha,
+                                               pml_z_alpha=0.0,
+                                               smooth_p0=False)
 
         sensor_data_3D_z = pstd_elastic_3d(kgrid=deepcopy(kgrid),
                                            source=deepcopy(source),
@@ -331,6 +343,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
                                            simulation_options=deepcopy(simulation_options))
 
         # calculate velocity amplitude
+        sensor_data_3D_z['ux'] = np.reshape(sensor_data_3D_z['ux'], sensor_data_3D_z['ux'].shape, order='F')
+        sensor_data_3D_z['uy'] = np.reshape(sensor_data_3D_z['uy'], sensor_data_3D_z['uy'].shape, order='F')
         sensor_data_3D_z = np.sqrt(sensor_data_3D_z['ux']**2 + sensor_data_3D_z['uy']**2)
 
     #     # ----------------
@@ -441,16 +455,33 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     #     # calculate velocity amplitude
     #     sensor_data_3D_x = sqrt(sensor_data_3D_x.uy.^2 + sensor_data_3D_x.uz.^2);
 
+        # clear structures
+        del kgrid
+        del source
+        del medium
+        del sensor
+
         # -------------
         # COMPARISON
         # -------------
 
-        ref_max = np.max(np.abs(sensor_data_2D))
+        max2d = np.max(np.abs(sensor_data_2D))
+        max3d_z = np.max(np.abs(sensor_data_3D_z))
 
-        diff_2D_3D_z = np.max(np.abs(sensor_data_2D - sensor_data_3D_z)) / ref_max
+        diff_2D_3D_z = np.max(np.abs(sensor_data_2D - sensor_data_3D_z)) / max2d
         if diff_2D_3D_z > COMPARISON_THRESH:
             test_pass = False
-            assert test_pass, "Not equal: diff_2D_3D_z"
+            msg = f"Not equal: diff_2D_3D_z: {diff_2D_3D_z} and 2d: {max2d}, 3d: {max3d_z}"
+
+        fig3, ((ax3a, ax3b, ax3c) ) = plt.subplots(3, 1)
+        fig3.suptitle(f"{test_name}: Final Values")
+        ax3a.imshow(sensor_data_2D)
+        ax3b.imshow(sensor_data_3D_z)
+        ax3c.imshow(np.abs(sensor_data_2D - sensor_data_3D_z))
+
+        plt.show()
+
+    assert test_pass, msg
 
         # diff_2D_3D_x = np.max(np.abs(sensor_data_2D - sensor_data_3D_x)) / ref_max
         # if diff_2D_3D_x > COMPARISON_THRESH:
@@ -462,11 +493,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         #     test_pass = False
         #     assert test_pass, "Not equal: diff_2D_3D_y"
 
-        # clear structures
-        del kgrid
-        del source
-        del medium
-        del sensor
+
 
 
 

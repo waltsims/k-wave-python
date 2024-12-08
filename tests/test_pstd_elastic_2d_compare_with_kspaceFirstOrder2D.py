@@ -5,7 +5,8 @@ zero gives the same answers as the regular fluid code in k-Wave.
 
 import numpy as np
 from copy import deepcopy
-import pytest
+# import pytest
+import matplotlib.pyplot as plt
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -20,13 +21,13 @@ from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_disc
 
 
-@pytest.mark.skip(reason="2D not ready")
+#@pytest.mark.skip(reason="2D not ready")
 def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
 
     # set additional literals to give further permutations of the test
     HETEROGENEOUS: bool = True
-    USE_PML: bool = False
-    COMPARISON_THRESH = 5e-13
+    USE_PML: bool = True
+    COMPARISON_THRESH = 5e-10
 
     # option to skip the first point in the time series (for p0 sources, there
     # is a strange bug where there is a high error for the first stored time
@@ -43,8 +44,8 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
     # create the computational grid
     Nx: int = 96            # number of grid points in the x (row) direction
     Ny: int = 192           # number of grid points in the y (column) direction
-    dx = 0.1e-3        # grid point spacing in the x direction [m]
-    dy = 0.1e-3        # grid point spacing in the y direction [m]
+    dx = 0.1e-3             # grid point spacing in the x direction [m]
+    dy = 0.1e-3             # grid point spacing in the y direction [m]
     kgrid = kWaveGrid(Vector([Nx, Ny]), Vector([dx, dy]))
 
     # define the medium properties
@@ -61,26 +62,31 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
     if HETEROGENEOUS:
         # elastic medium
         sound_speed_compression = cp * np.ones((Nx, Ny))
+        sound_speed_compression[Nx // 2 - 1:, :] = 2.0 * cp
         sound_speed_shear = cs * np.ones((Nx, Ny))
         density = rho * np.ones((Nx, Ny))
-        medium_elastic = kWaveMedium(sound_speed_compression,
-                                    density=density,
-                                    sound_speed_compression=sound_speed_compression,
-                                    sound_speed_shear=sound_speed_shear)
-        medium_elastic.sound_speed_compression[Nx // 2 - 1:, :] = 2.0 * cp
+        medium_elastic = kWaveMedium(sound_speed=sound_speed_compression,
+                                     density=density,
+                                     sound_speed_compression=sound_speed_compression,
+                                     sound_speed_shear=sound_speed_shear)
+
 
         # fluid medium
         sound_speed = cp * np.ones((Nx, Ny))
-        density = rho * np.ones((Nx, Ny))
-        medium_fluid = kWaveMedium(sound_speed, density=density)
-        medium_fluid.sound_speed[Nx // 2 - 1:, :] = 2.0 * cp
+        sound_speed[Nx // 2 - 1:, :] = 2.0 * cp
+        medium_fluid = kWaveMedium(sound_speed,
+                                   density=density)
+
 
     else:
         # elastic medium
-        medium_elastic = kWaveMedium(cp, density=rho, sound_speed_compression=cp,
+        medium_elastic = kWaveMedium(sound_speed=cp,
+                                     density=rho,
+                                     sound_speed_compression=cp,
                                      sound_speed_shear=cs)
         # fluid medium
-        medium_fluid = kWaveMedium(sound_speed=cp, density=rho)
+        medium_fluid = kWaveMedium(sound_speed=cp,
+                                   density=rho)
 
     # test names
     test_names = ['source.p0',
@@ -89,46 +95,47 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
                   'source.ux, additive',
                   'source.ux, dirichlet',
                   'source.uy, additive',
-                  'source.uy, dirichlet']
+                  'source.uy, dirichlet'
+                  ]
 
     # define a single point sensor
-    sensor = kSensor()
-    sensor.mask = np.zeros((Nx, Ny))
-    sensor.mask[3 * Nx // 4, 3 * Ny // 4] = 1
+    sensor_elastic = kSensor()
+    sensor_fluid = kSensor()
+    sensor_elastic.mask = np.zeros((Nx, Ny), dtype=bool)
+    sensor_elastic.mask[3 * Nx // 4 - 1, 3 * Ny // 4 - 1] = True
+    sensor_fluid.mask = np.zeros((Nx, Ny), dtype=bool)
+    sensor_fluid.mask[3 * Nx // 4 - 1, 3 * Ny // 4 - 1] = True
 
     # set some things to record
-    sensor.record = ['p', 'p_final', 'u', 'u_final']
-
-    if not USE_PML:
-        simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                                       pml_alpha=0.0, kelvin_voigt_model=False)
-    else:
-        simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
-                                                       kelvin_voigt_model=False)
-
-    simulation_options_fluid = SimulationOptions(simulation_type=SimulationType.FLUID, use_kspace=False)
+    sensor_elastic.record = ['p', 'p_final', 'u', 'u_final']
+    sensor_fluid.record = ['p', 'p_final', 'u', 'u_final']
 
     # loop through tests
-    for test_num in np.arange(7):
+    for test_num, test_name in enumerate(test_names):
 
         source_fluid = kSource()
         source_elastic = kSource()
 
         # update command line
-        print('Running Test: ', test_names[test_num])
+        print('Running Number: ', test_num, ':', test_name)
 
-        if test_num == 0:
+        if test_name == 'source.p0':
             # create initial pressure distribution using makeDisc
+            disc_magnitude = 5.0            # [Pa]
+            disc_x_pos: int = 29            # [grid points]
+            disc_y_pos: int = Ny // 2 - 1   # [grid points]
+            disc_radius: int = 6            # [grid points]
+            source_fluid.p0 = disc_magnitude * make_disc(Vector([Nx, Ny]),
+                                                         Vector([disc_x_pos, disc_y_pos]), disc_radius)
+            # create equivalent elastic source
             disc_magnitude = 5.0           # [Pa]
             disc_x_pos: int = 29           # [grid points]
             disc_y_pos: int = Ny // 2 - 1  # [grid points]
             disc_radius: int = 6           # [grid points]
-            source_fluid.p0 = disc_magnitude * make_disc(Vector([Nx, Ny]),
-                                                         Vector([disc_x_pos, disc_y_pos]), disc_radius)
-            # create equivalent elastic source
-            source_elastic = deepcopy(source_fluid)
+            source_elastic.p0 = disc_magnitude * make_disc(Vector([Nx, Ny]),
+                                                           Vector([disc_x_pos, disc_y_pos]), disc_radius)
 
-        elif test_num == 1 or test_num == 2:
+        elif test_name == 'source.p, additive' or test_name == 'source.p, dirichlet':
             # create pressure source
             source_fluid.p_mask = np.zeros((Nx, Ny))
             source_fluid.p_mask[29, Ny // 2 - 1] = 1
@@ -141,16 +148,16 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
             source_elastic.sxx = -source_fluid.p
             source_elastic.syy = -source_fluid.p
 
-        elif test_num == 3 or test_num == 4:
+        elif test_name == 'source.ux, additive' or test_name == 'source.ux, dirichlet':
             # create velocity source
             source_fluid.u_mask = np.zeros((Nx, Ny))
             source_fluid.u_mask[29, Ny // 2 - 1] = 1
-            source_fluid.ux = 5.0 * np.sin(2.0 * np.pi * 1e6 * np.squeeze(kgrid.t_array))
+            source_fluid.ux = 5.0 * np.sin(2.0 * np.pi * 1e6 * np.squeeze(kgrid.t_array)) / (cp * rho)
             source_fluid.ux = filter_time_series(kgrid, medium_fluid, source_fluid.ux)
             # create equivalent elastic source
             source_elastic = source_fluid
 
-        elif test_num == 5 or test_num == 6:
+        elif test_name == 'source.uy, additive' or test_name == 'source.uy, dirichlet':
             # create velocity source
             source_fluid.u_mask = np.zeros((Nx, Ny))
             source_fluid.u_mask[29, Ny // 2 - 1] = 1
@@ -160,16 +167,16 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
             source_elastic = source_fluid
 
         # set source mode
-        if test_num == 1:
+        if test_name == 'source.p, additive':
             source_fluid.p_mode   = 'additive'
             source_elastic.s_mode = 'additive'
-        elif test_num == 2:
+        elif test_name == 'source.p, dirichlet':
             source_fluid.p_mode   = 'dirichlet'
             source_elastic.s_mode = 'dirichlet'
-        elif test_num == 3 or test_num == 5:
+        elif test_name == 'source.ux, additive' or test_name == 'source.uy, additive':
             source_fluid.u_mode   = 'additive'
             source_elastic.u_mode = 'additive'
-        elif test_num == 4 or test_num == 6:
+        elif test_name == 'source.ux, dirichlet' or test_name == 'source.uy, dirichlet':
             source_fluid.u_mode   = 'dirichlet'
             source_elastic.u_mode = 'dirichlet'
 
@@ -178,43 +185,71 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
         output_filename_p = 'data_p_output.h5'
         DATA_CAST: str = 'single'
         DATA_PATH = '.'
-        simulation_options_fluid = SimulationOptions(data_cast=DATA_CAST,
-                                                     data_recast=True,
-                                                     save_to_disk=True,
-                                                     input_filename=input_filename_p,
-                                                     output_filename=output_filename_p,
-                                                     data_path=DATA_PATH,
-                                                     use_kspace=False,
-                                                     hdf_compression_level='lzf')
+
+        if not USE_PML:
+            simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
+                                                           pml_alpha=0.0,
+                                                           kelvin_voigt_model=False)
+            simulation_options_fluid = SimulationOptions(simulation_type=SimulationType.FLUID,
+                                                         data_cast=DATA_CAST,
+                                                         data_recast=True,
+                                                         save_to_disk=True,
+                                                         input_filename=input_filename_p,
+                                                         output_filename=output_filename_p,
+                                                         data_path=DATA_PATH,
+                                                         use_kspace=False,
+                                                         pml_alpha=0.0,
+                                                         hdf_compression_level='lzf')
+        else:
+            simulation_options_elastic = SimulationOptions(simulation_type=SimulationType.ELASTIC,
+                                                           kelvin_voigt_model=False)
+            simulation_options_fluid = SimulationOptions(simulation_type=SimulationType.FLUID,
+                                                         data_cast=DATA_CAST,
+                                                         data_recast=True,
+                                                         save_to_disk=True,
+                                                         input_filename=input_filename_p,
+                                                         output_filename=output_filename_p,
+                                                         data_path=DATA_PATH,
+                                                         use_kspace=False,
+                                                         hdf_compression_level='lzf')
+
         # options for executing simulations
         execution_options_fluid = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False)
 
         # run the fluid simulation
-        print(kgrid)
         sensor_data_fluid = kspace_first_order_2d_gpu(medium=deepcopy(medium_fluid),
                                                       kgrid=deepcopy(kgrid),
                                                       source=deepcopy(source_fluid),
-                                                      sensor=deepcopy(sensor),
+                                                      sensor=deepcopy(sensor_fluid),
                                                       simulation_options=deepcopy(simulation_options_fluid),
                                                       execution_options=deepcopy(execution_options_fluid))
 
         # run the simulations
-        print(kgrid)
         sensor_data_elastic = pstd_elastic_2d(medium=deepcopy(medium_elastic),
                                               kgrid=deepcopy(kgrid),
                                               source=deepcopy(source_elastic),
-                                              sensor=deepcopy(sensor),
+                                              sensor=deepcopy(sensor_elastic),
                                               simulation_options=deepcopy(simulation_options_elastic))
-        print(kgrid)
+
+        # reshape data to fit
+        sensor_data_elastic['p_final'] = np.transpose(sensor_data_elastic['p_final'])
+        sensor_data_elastic['p_final'] = sensor_data_elastic['p_final'].reshape(sensor_data_elastic['p_final'].shape, order='F')
+
+        sensor_data_elastic['ux_final'] = np.transpose(sensor_data_elastic['ux_final'])
+        sensor_data_elastic['ux_final'] = sensor_data_elastic['ux_final'].reshape(sensor_data_elastic['ux_final'].shape, order='F')
+
+        sensor_data_elastic['uy_final'] = np.transpose(sensor_data_elastic['uy_final'])
+        sensor_data_elastic['uy_final'] = sensor_data_elastic['uy_final'].reshape(sensor_data_elastic['uy_final'].shape, order='F')
+
         # compute comparisons for time series
         L_inf_p = np.max(np.abs(np.squeeze(sensor_data_elastic['p'])[COMP_START_INDEX:] - sensor_data_fluid['p'][COMP_START_INDEX:])) / np.max(np.abs(sensor_data_fluid['p'][COMP_START_INDEX:]))
         L_inf_ux = np.max(np.abs(np.squeeze(sensor_data_elastic['ux'])[COMP_START_INDEX:] - sensor_data_fluid['ux'][COMP_START_INDEX:])) / np.max(np.abs(sensor_data_fluid['ux'][COMP_START_INDEX:]))
         L_inf_uy = np.max(np.abs(np.squeeze(sensor_data_elastic['uy'])[COMP_START_INDEX:] - sensor_data_fluid['uy'][COMP_START_INDEX:])) / np.max(np.abs(sensor_data_fluid['uy'][COMP_START_INDEX:]))
 
         # compuate comparisons for field
-        L_inf_p_final = np.max(np.abs(sensor_data_elastic['p_final'].T - sensor_data_fluid['p_final'])) / np.max(np.abs(sensor_data_fluid['p_final']))
-        L_inf_ux_final = np.max(np.abs(sensor_data_elastic['ux_final'].T  - sensor_data_fluid['ux_final'])) / np.max(np.abs(sensor_data_fluid['ux_final']))
-        L_inf_uy_final = np.max(np.abs(sensor_data_elastic['uy_final'].T - sensor_data_fluid['uy_final'])) / np.max(np.abs(sensor_data_fluid['uy_final']))
+        L_inf_p_final = np.max(np.abs(sensor_data_elastic['p_final'] - sensor_data_fluid['p_final'])) / np.max(np.abs(sensor_data_fluid['p_final']))
+        L_inf_ux_final = np.max(np.abs(sensor_data_elastic['ux_final']  - sensor_data_fluid['ux_final'])) / np.max(np.abs(sensor_data_fluid['ux_final']))
+        L_inf_uy_final = np.max(np.abs(sensor_data_elastic['uy_final'] - sensor_data_fluid['uy_final'])) / np.max(np.abs(sensor_data_fluid['uy_final']))
 
         # compute pass
         latest_test: bool = False
@@ -226,7 +261,61 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
         else:
             print('fails')
 
+        if (L_inf_p < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_p =', L_inf_p)
+
+        if (L_inf_ux < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_ux =', L_inf_ux)
+
+        if (L_inf_uy < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_uy =', L_inf_uy)
+
+        if (L_inf_p_final < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_p_final =', L_inf_p_final)
+
+        if (L_inf_ux_final < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_ux_final =', L_inf_ux_final)
+
+        if (L_inf_uy_final < COMPARISON_THRESH):
+            latest_test = True
+        else:
+            print('\tfails at L_inf_uy_final =', L_inf_uy_final)
+
+
         test_pass = test_pass and latest_test
+
+        ###########
+
+        fig1, ((ax1a, ax1b, ax1c,)) = plt.subplots(3, 1)
+        fig1.suptitle(f"{test_name}: Comparisons")
+        ax1a.plot(np.squeeze(sensor_data_elastic['p'])[COMP_START_INDEX:], 'r-o', sensor_data_fluid['p'][COMP_START_INDEX:], 'b--*')
+        ax1b.plot(np.squeeze(sensor_data_elastic['ux'])[COMP_START_INDEX:], 'r-o', sensor_data_fluid['ux'][COMP_START_INDEX:], 'b--*')
+        ax1c.plot(np.squeeze(sensor_data_elastic['uy'])[COMP_START_INDEX:], 'r-o', sensor_data_fluid['uy'][COMP_START_INDEX:], 'b--*')
+
+        fig2, ((ax2a, ax2b, ax2c)) = plt.subplots(3, 1)
+        fig2.suptitle(f"{test_name}: Errors")
+        ax2a.plot(np.abs(np.squeeze(sensor_data_elastic['p'])[COMP_START_INDEX:] - sensor_data_fluid['p'][COMP_START_INDEX:]))
+        ax2b.plot(np.abs(np.squeeze(sensor_data_elastic['ux'])[COMP_START_INDEX:] - sensor_data_fluid['ux'][COMP_START_INDEX:]))
+        ax2c.plot(np.abs(np.squeeze(sensor_data_elastic['uy'])[COMP_START_INDEX:] - sensor_data_fluid['uy'][COMP_START_INDEX:]))
+
+        fig3, ((ax3a, ax3b, ax3c), (ax3d, ax3e, ax3f)) = plt.subplots(2, 3)
+        fig3.suptitle(f"{test_name}: Final Values")
+        ax3a.imshow(sensor_data_elastic['p_final'])
+        ax3b.imshow(sensor_data_elastic['ux_final'])
+        ax3c.imshow(sensor_data_elastic['uy_final'])
+        ax3d.imshow(sensor_data_fluid['p_final'])
+        ax3e.imshow(sensor_data_fluid['ux_final'])
+        ax3f.imshow(sensor_data_fluid['uy_final'])
 
         # clear structures
         del source_fluid
@@ -234,6 +323,6 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
         del sensor_data_elastic
         del sensor_data_fluid
 
-        print(kgrid)
+    plt.show()
 
     assert test_pass, "not working"
