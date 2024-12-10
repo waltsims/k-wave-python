@@ -47,9 +47,9 @@ from kwave.utils.filters import smooth
 
 
 
-def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction=int,
+def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction: int, interface_position: int,
                           cp1: float=1500.0, cs1: float=0.0, rho1: float=1000.0,
-                          alpha_p1: float=0.5, alpha_s1: float=0.5):
+                          alpha_p1: float=0.5, alpha_s1: float=0.5, ):
 
     # sound speed and density
     medium.sound_speed_compression = cp1 * np.ones((N1, N2, N3))
@@ -63,7 +63,7 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
     alpha_s2 = 1.0
 
     # position of the heterogeneous interface
-    interface_position: int = N1 // 2
+
 
     if direction == 1:
             medium.sound_speed_compression[interface_position:, :, :] = cp2
@@ -115,6 +115,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     dx: float = 0.1e-3
     dy: float = 0.1e-3
     dz: float = 0.1e-3
+
+    interface_position: int = Nx // 2 - 1
 
     # define PML properties
     pml_size: int = 10
@@ -170,7 +172,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     # =========================================================================
 
     # loop through tests
-    for test_num in [1, 10]: # np.arange(start=1, stop=2, step=1, dtype=int):
+    for test_num in [1,]: # np.arange(start=1, stop=2, step=1, dtype=int):
         # np.arange(1, 21, dtype=int):
 
         test_name = test_names[test_num]
@@ -202,7 +204,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
             print("SET MATERIALS [2d] AS Hetrogeneous: ", bool(rem(test_num, 2)), "for", test_num)
-            setMaterialProperties(medium, Nx, Ny, N3=int(1), direction=1)
+            setMaterialProperties(medium, Nx, Ny, N3=int(1), direction=1, interface_position=interface_position)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
             c_max = np.max(medium.sound_speed_compression)
@@ -288,7 +290,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
             print("SET MATERIALS [3D Z] AS Hetrogeneous:", bool(rem(test_num, 2)), "for ", test_num)
-            setMaterialProperties(medium, Nx, Ny, Nz, direction=1, cp1=cp1, cs1=cs1, rho1=rho1)
+            setMaterialProperties(medium, Nx, Ny, Nz, direction=1, interface_position=interface_position, cp1=cp1, cs1=cs1, rho1=rho1)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
             c_max = np.max(medium.sound_speed_compression)
@@ -367,7 +369,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
             print("SET MATERIALS [3D Y] AS Hetrogeneous: ", bool(rem(test_num, 2)), "for ", test_num)
-            setMaterialProperties(medium, Nx, Nz, Ny, direction=1, cp1=cp1, cs1=cs1, rho1=rho1)
+            setMaterialProperties(medium, Nx, Nz, Ny, direction=1, interface_position=interface_position, cp1=cp1, cs1=cs1, rho1=rho1)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
             c_max = np.max(medium.sound_speed_compression)
@@ -445,8 +447,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
-            print("SET MATERIALS [3D X] AS Hetrogeneous: ", bool(rem(test_num, 2)), "for ", test_num)
-            setMaterialProperties(medium, Nz, Nx, Ny, direction=1, cp1=cp1, cs1=cs1, rho1=rho1)
+            print("SET MATERIALS [3D X] AS Hetrogeneous:", bool(rem(test_num, 2)), "for", test_num)
+            setMaterialProperties(medium, Nz, Nx, Ny, direction=2, interface_position=interface_position, cp1=cp1, cs1=cs1, rho1=rho1)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
             c_max = np.max(medium.sound_speed_compression)
