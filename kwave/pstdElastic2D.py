@@ -429,6 +429,9 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     sensor_data = k_sim.sensor_data
     options = k_sim.options
 
+    print("pml alphas:", options.pml_x_alpha, options.pml_y_alpha)
+    print("pml_sizes:", options.pml_x_size, options.pml_y_size)
+
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
     # =========================================================================
@@ -446,7 +449,8 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # assign the viscosity coefficients
     if options.kelvin_voigt_model:
-        eta = 2.0 * rho0 * medium.sound_speed_shear**3 * db2neper(medium.alpha_coeff_shear, 2)
+        print(medium.alpha_coeff_shear, medium.alpha_coeff_compression, options.kelvin_voigt_model)
+        eta = 2.0 * rho0 * medium.sound_speed_shear**3 * db2neper(medium.alpha_coeff_shear, 2.0)
         chi = 2.0 * rho0 * medium.sound_speed_compression**3 * db2neper(np.asarray(medium.alpha_coeff_compression), 2.0) - 2.0 * eta
         m_eta : int = np.squeeze(eta).ndim
 
@@ -642,11 +646,23 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     p = np.zeros((Nx, Ny), dtype=myType)  # **
 
+    if m_mu == 2:
+        mu = mu.astype(myType)
+        lame_lambda = lame_lambda.astype(myType)
+    else:
+        if not (options.data_cast == 'off'):
+            mu = np.float32(mu)
+            lame_lambda = np.float32(lame_lambda)
+        else:
+            mu = np.float64(mu)
+            lame_lambda = np.float64(lame_lambda)
+
     if options.kelvin_voigt_model:
         dduxdxdt = np.zeros(grid_shape, dtype=myType)  # **
         dduydydt = np.zeros(grid_shape, dtype=myType)  # **
         dduxdydt = np.zeros(grid_shape, dtype=myType)  # **
         dduydxdt = np.zeros(grid_shape, dtype=myType)  # **
+
 
 
     # to save memory, the variables noted with a ** do not neccesarily need to
@@ -664,7 +680,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         index_start: int = 0
         index_step: int = 1
         index_end: int = Nt
-        sensor.record_start_index = sensor.record_start_index - 1
     else:
         # throw error for unsupported feature
         raise TypeError('Time reversal using sensor.time_reversal_boundary_data is not currently supported.')
@@ -727,7 +742,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     pml_y = np.expand_dims(pml_y, axis=0)
 
     checking: bool = False
-    verbose: bool = True
+    verbose: bool = False
 
     if checking:
         mat_contents = sio.loadmat('data/2DoneStep.mat')
@@ -801,13 +816,20 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     record.x1_inside = int(record.x1_inside - 1)
     record.y1_inside = int(record.y1_inside - 1)
 
+    sensor.record_start_index: int = sensor.record_start_index - int(1)
+
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
 
         # compute the gradients of the stress tensor (these variables do not necessaily need to be stored, they could be computed as needed)
+        temp = sxx_split_x + sxx_split_y
+        dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
+        temp = syy_split_x + syy_split_y
+        dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(temp, axis=1), axis=1))
+        temp = sxy_split_x + sxy_split_y
+        dsxydx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=0), axis=0))
+        dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=1), axis=1))
 
-        # dsxxdx = np.real(np.fft.ifft( bsxfun(@times, ddx_k_shift_pos, fft(sxx_split_x + sxx_split_y, [], 1)), [], 1) );
-        dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(sxx_split_x + sxx_split_y, axis=0), axis=0))
         if checking:
             if (t_index == load_index):
                 if (np.abs(mat_dsxxdx - dsxxdx).sum() > tol):
@@ -816,8 +838,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
                     # print("dsxxdx is correct!")
 
-        #dsyydy = real( ifft( bsxfun(@times, ddy_k_shift_pos, fft(syy_split_x + syy_split_y, [], 2)), [], 2) );
-        dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(syy_split_x + syy_split_y, axis=1), axis=1))
+
         if checking:
             if (t_index == load_index):
                 if (np.abs(mat_dsyydy - dsyydy).sum() > tol):
@@ -826,8 +847,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
                     # print("dsyydy is correct!")
 
-        #dsxydx = real( ifft( bsxfun(@times, ddx_k_shift_neg, fft(sxy_split_x + sxy_split_y, [], 1)), [], 1) );
-        dsxydx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=0), axis=0))
+
         if checking:
             if (t_index == load_index):
                 if (np.abs(mat_dsxydx - dsxydx).sum() > tol):
@@ -836,8 +856,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
                     # print("dsxydx is correct!")
 
-        #dsxydy = real( ifft( bsxfun(@times, ddy_k_shift_neg, fft(sxy_split_x + sxy_split_y, [], 2)), [], 2) );
-        dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=1), axis=1))
+
         if checking:
             if (t_index == load_index):
                 if (np.abs(mat_dsxydy - dsxydy).sum() > tol):
@@ -849,11 +868,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         # calculate the split-field components of ux_sgx and uy_sgy at the next
         # time step using the components of the stress at the current time step
 
-        # ux_split_x = bsxfun(@times, mpml_y,
-        #                     bsxfun(@times, pml_x_sgx,
-        #                            bsxfun(@times, mpml_y,
-        #                                   bsxfun(@times, pml_x_sgx, ux_split_x)) + dt .* rho0_sgx_inv .* dsxxdx));
-        # print("start ux_split_x:", ux_split_x.shape, pml_x_sgx.shape,)
+
         a = pml_x_sgx * ux_split_x
         b = mpml_y * a
         c = b + kgrid.dt * rho0_sgx_inv * dsxxdx
@@ -866,15 +881,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 else:
                     pass
 
-        # ux_split_y = bsxfun(@times, mpml_x_sgx,
-        #                     bsxfun(@times, pml_y,
-        #                            bsxfun(@times, mpml_x_sgx,
-        #                                   bsxfun(@times, pml_y, ux_split_y)) + dt .* rho0_sgx_inv .* dsxydy));
         a = pml_y * ux_split_y
         b = mpml_x_sgx * a
         c = b + kgrid.dt * rho0_sgx_inv * dsxydy
         d = pml_y * c
-        ux_split_y = d * mpml_x_sgx
+        ux_split_y = mpml_x_sgx * d
         if checking:
             if (t_index == load_index):
                 if (np.abs(mat_ux_split_y - ux_split_y).sum() > tol):
@@ -883,10 +894,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
 
 
-        # uy_split_x = bsxfun(@times, mpml_y_sgy,
-        #                     bsxfun(@times, pml_x,
-        #                            bsxfun(@times, mpml_y_sgy,
-        #                                   bsxfun(@times, pml_x, uy_split_x)) + dt .* rho0_sgy_inv .* dsxydx));
         a = pml_x * uy_split_x
         b = mpml_y_sgy * a
         c = b + kgrid.dt * rho0_sgy_inv * dsxydx
@@ -900,10 +907,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                     pass
 
 
-        # uy_split_y = bsxfun(@times, mpml_x,
-        #                     bsxfun(@times, pml_y_sgy,
-        #                            bsxfun(@times, mpml_x,
-        #                                   bsxfun(@times, pml_y_sgy, uy_split_y)) + dt .* rho0_sgy_inv .* dsyydy));
         a = pml_y_sgy * uy_split_y
         b = mpml_x * a
         c = b + kgrid.dt * rho0_sgy_inv * dsyydy
@@ -929,7 +932,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                   ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] + \
                   k_sim.source.ux[k_sim.u_source_sig_index, t_index]
 
-                #ux_split_x[k_sim.u_source_pos_index] = ux_split_x[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
 
 
         if (k_sim.source_uy > t_index):
@@ -943,7 +945,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                uy_split_y[k_sim.u_source_pos_index] = k_sim.source.uy[k_sim.u_source_sig_index, t_index]
+                uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] = k_sim.source.uy[k_sim.u_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
                 # uy_split_y[k_sim.u_source_pos_index] = uy_split_y[k_sim.u_source_pos_index] + source.uy[k_sim.u_source_sig_index, t_index]
@@ -985,11 +987,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         # calculate the velocity gradients (these variables do not necessarily
         # need to be stored, they could be computed when needed)
-
-        # duxdx = real( ifft( bsxfun(@times, ddx_k_shift_neg, fft(ux_sgx, [], 1)), [], 1));
-        # duxdy = real( ifft( bsxfun(@times, ddy_k_shift_pos, fft(ux_sgx, [], 2)), [], 2));
-        # duydx = real( ifft( bsxfun(@times, ddx_k_shift_pos, fft(uy_sgy, [], 1)), [], 1));
-        # duydy = real( ifft( bsxfun(@times, ddy_k_shift_neg, fft(uy_sgy, [], 2)), [], 2));
         duxdx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(ux_sgx, axis=0), axis=0))
         duxdy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1), axis=1))
         duydx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(uy_sgy, axis=0), axis=0))
@@ -1020,13 +1017,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             # compute additional gradient terms needed for the Kelvin-Voigt model
 
-            #dduxdxdt = real(ifft( bsxfun(@times, ddx_k_shift_neg, fft( (dsxxdx + dsxydy) .* rho0_sgx_inv , [], 1 )), [], 1));
-            #dduxdydt = real(ifft( bsxfun(@times, ddy_k_shift_pos, fft( (dsxxdx + dsxydy) .* rho0_sgx_inv , [], 2 )), [], 2));
-            #dduydydt = real(ifft( bsxfun(@times, ddy_k_shift_neg, fft( (dsyydy + dsxydx) .* rho0_sgy_inv , [], 2 )), [], 2));
-            #dduydxdt = real(ifft( bsxfun(@times, ddx_k_shift_pos, fft( (dsyydy + dsxydx) .* rho0_sgy_inv , [], 1 )), [], 1));
             temp = (dsxxdx + dsxydy) * rho0_sgx_inv
             dduxdxdt = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(temp, axis=0), axis=0))
             dduxdydt = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(temp, axis=1), axis=1))
+
             temp = (dsyydy + dsxydx) * rho0_sgy_inv
             dduydydt = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(temp, axis=1), axis=1))
             dduydxdt = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
@@ -1179,110 +1173,121 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         # add in the pre-scaled stress source terms
         if hasattr(k_sim, 's_source_sig_index'):
-            print(k_sim.s_source_sig_index)
-            print(hasattr(k_sim.source, 'sxx'), hasattr(k_sim.source, 'ux'))
             if isinstance(k_sim.s_source_sig_index, str):
                 if k_sim.s_source_sig_index == ':':
-                    s_source_sig_index = np.shape(source.sxx)[0]
+                    k_sim.s_source_sig_index = np.shape(source.sxx)[1]
 
-        # First find whether source locations are provided and how.
-        if np.ndim(np.squeeze(k_sim.s_source_pos_index)) != 0:
-            n_pos = np.shape(np.squeeze(k_sim.s_source_pos_index))[0]
-        else:
-            n_pos = None
+        # # First find whether source locations are provided and how.
+        # if np.ndim(np.squeeze(k_sim.s_source_pos_index)) != 0:
+        #     n_pos = np.shape(np.squeeze(k_sim.s_source_pos_index))[0]
+        # else:
+        #     n_pos = None
 
-        if (k_sim.source_sxx is not False and t_index < np.size(source.sxx)):
-
-            if (source.s_mode == 'dirichlet'):
-                # enforce the source values as a dirichlet boundary condition
-                sxx_split_x[k_sim.s_source_pos_index] = k_sim.source.sxx[0:s_source_sig_index, t_index]
-                sxx_split_y[k_sim.s_source_pos_index] = k_sim.source.sxx[0:s_source_sig_index, t_index]
-            else:
-                # spatially and temporally varying source
-                if np.shape(np.squeeze(source.sxx)) == (n_pos, k_sim.kgrid.Nt):
-                    sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_x.shape, order='F'), :]
-                    sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                      k_sim.source.sxx[np.unravel_index(k_sim.s_source_sig_index, sxx_split_y.shape, order='F'), :]
-
-                # initial pressure (converted into stress) source
-                elif np.shape(np.squeeze(source.sxx)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                    if t_index == 0:
-                        sxx_split_x = k_sim.source.sxx
-                        sxx_split_y = k_sim.source.sxx
-
-                # spatially uniform but temporally varying stress source
-                else:
-                    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                    mask = sxx_split_x.flatten("F")[k_sim.s_source_pos_index]
-                    sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                      np.squeeze(k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), t_index] ) * np.ones_like(mask)
-                    mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
-                    sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                      np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
-
-                #else:
-                #    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
-
-        if (k_sim.source_syy is not False and t_index < np.size(k_sim.source.syy)):
+        if (k_sim.source_sxx is not False and t_index < np.shape(source.sxx)[1]):
 
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                syy_split_x[k_sim.s_source_pos_index] = k_sim.source.syy[0:s_source_sig_index, t_index]
-                syy_split_y[k_sim.s_source_pos_index] = k_sim.source.syy[0:s_source_sig_index, t_index]
+                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+            else:
+                # spatially and temporally varying source
+                # if np.shape(np.squeeze(source.sxx)) == (n_pos, k_sim.kgrid.Nt):
+                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
+                      k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
+                      k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+
+                # initial pressure (converted into stress) source
+                # elif np.shape(np.squeeze(source.sxx)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
+                #     if t_index == 0:
+                #         sxx_split_x = k_sim.source.sxx
+                #         sxx_split_y = k_sim.source.sxx
+
+                # # spatially uniform but temporally varying stress source
+                # else:
+
+                #     # print("in here", np.shape(k_sim.s_source_pos_index))
+                #     # print("in here", np.shape(k_sim.source.sxx))
+
+                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
+                #     mask = sxx_split_x.flatten("F")[k_sim.s_source_pos_index]
+
+                #     # print("in here", np.shape(k_sim.s_source_pos_index))
+                #     # print("in here", np.shape(k_sim.source.sxx))
+
+                #     sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
+                #       k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+
+
+                #     # sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
+                #     #   np.squeeze(k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), t_index] ) * np.ones_like(mask)
+
+                #     mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
+                #     sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
+                #       np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
+
+                # #else:
+                # #    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
+
+        if (k_sim.source_syy is not False and t_index < np.shape(source.sxx)[1]):
+
+            if (source.s_mode == 'dirichlet'):
+                # enforce the source values as a dirichlet boundary condition
+                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
 
             else:
                 # spatially and temporally varying source
-                if np.shape(np.squeeze(source.syy)) == (n_pos, k_sim.kgrid.Nt):
-                    syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
-                      k_sim.source.syy[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F'), :]
-                    syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
-                      k_sim.source.syy[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F'), :]
+                # if np.shape(np.squeeze(source.syy)) == (n_pos, k_sim.kgrid.Nt):
+                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
+                      k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
+                      k_sim.source.syy[k_sim.s_source_sig_index, t_index]
                 # initial pressure (converted into stress) source
-                elif np.shape(np.squeeze(source.syy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                    if t_index == 0:
-                        syy_split_x = k_sim.source.syy
-                        syy_split_y = k_sim.source.syy
+                # elif np.shape(np.squeeze(source.syy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
+                #     if t_index == 0:
+                #         syy_split_x = k_sim.source.syy
+                #         syy_split_y = k_sim.source.syy
                 # spatially uniform but temporally varying stress source
-                else:
-                    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                    mask = syy_split_x.flatten("F")[k_sim.s_source_pos_index]
-                    syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
-                      np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                    mask = syy_split_y.flatten("F")[k_sim.s_source_pos_index]
-                    syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
-                      np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
+                # else:
+                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
+                #     mask = syy_split_x.flatten("F")[k_sim.s_source_pos_index]
+                #     syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
+                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
+                #     mask = syy_split_y.flatten("F")[k_sim.s_source_pos_index]
+                #     syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
+                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
                 #else:
                 #    raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
 
         if (k_sim.source_sxy is not False and t_index < k_sim.source_sxy):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxy_split_x[k_sim.s_source_pos_index] = source.sxy[k_sim.s_source_sig_index, t_index]
-                sxy_split_y[k_sim.s_source_pos_index] = source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
             else:
                 # spatially and temporally varying source
-                if np.shape(np.squeeze(source.sxy)) == (n_pos, k_sim.kgrid.Nt):
-                    sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
-                      k_sim.source.sxy[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F'), :]
-                    sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
-                      k_sim.source.sxy[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F'), :]
+                # if np.shape(np.squeeze(source.sxy)) == (n_pos, k_sim.kgrid.Nt):
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
+                      k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
+                      k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
                 # initial pressure (converted into stress) source
-                elif np.shape(np.squeeze(source.sxy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                    if t_index == 0:
-                        sxy_split_x = k_sim.source.sxy
-                        sxy_split_y = k_sim.source.sxy
-                # spatially uniform but temporally varying stress source
-                elif np.shape(np.squeeze(source.sxy)) == k_sim.kgrid.Nt:
-                    k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                    mask = sxy_split_x.flatten("F")[k_sim.s_source_pos_index]
-                    sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
-                      np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                    mask = sxy_split_y.flatten("F")[k_sim.s_source_pos_index]
-                    sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
-                      np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                else:
-                    raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
+                # elif np.shape(np.squeeze(source.sxy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
+                #     if t_index == 0:
+                #         sxy_split_x = k_sim.source.sxy
+                #         sxy_split_y = k_sim.source.sxy
+                # # spatially uniform but temporally varying stress source
+                # elif np.shape(np.squeeze(source.sxy)) == k_sim.kgrid.Nt:
+                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
+                #     mask = sxy_split_x.flatten("F")[k_sim.s_source_pos_index]
+                #     sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
+                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
+                #     mask = sxy_split_y.flatten("F")[k_sim.s_source_pos_index]
+                #     sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
+                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
+                # else:
+                #     raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
 
         if checking:
             if (t_index == load_index):
