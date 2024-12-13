@@ -349,7 +349,7 @@ class kSource(object):
     @property
     def flag_uy(self):
         """
-        Get the length of the sources in X-direction, this allows the
+        Get the length of the sources in Y-direction, this allows the
         inputs to be defined independently and be of any length
 
         Returns:
@@ -360,7 +360,7 @@ class kSource(object):
     @property
     def flag_uz(self):
         """
-        Get the length of the sources in X-direction, this allows the
+        Get the length of the sources in Z-direction, this allows the
         inputs to be defined independently and be of any length
 
         Returns:

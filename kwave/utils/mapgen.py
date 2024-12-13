@@ -1022,6 +1022,7 @@ def make_line(
         xx = np.array([a[0], b[0]], dtype=int)
         yy = np.array([a[1], b[1]], dtype=int)
         if np.any(a < 0) or np.any(b < 0) or np.any(xx > grid_size.x - 1) or np.any(yy > grid_size.y - 1):
+            print("a,b", a, b)
             raise ValueError("Both the start and end points must lie within the grid.")
 
     if linetype == "angled":

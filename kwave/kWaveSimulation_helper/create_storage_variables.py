@@ -276,7 +276,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
     a container called sensor_data. If cuboid corners are used this is a list, else a dictionary-like container
     """
 
-    print(record_old)
+    print("[record_old] (create_sensor_variables)", record_old)
 
     if use_cuboid_corners:
 
@@ -508,10 +508,10 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
                 sensor_data.uz_split_s = np.zeros([num_sensor_points, num_recorded_time_points])
 
     if use_cuboid_corners:
-        info = "using cuboid_corners," + str(len(sensor_data)) + ", " + str(np.shape(sensor_data[0].p))
+        info = "using cuboid_corners (create storage variables)," + str(len(sensor_data)) + ", " + str(np.shape(sensor_data[0].p))
     else:
-        info = "binary_mask, ", np.shape(sensor_data.p)
-    print("end here", info)
+        info = "binary_mask (create storage variables), ", np.shape(sensor_data.p)
+    print("end here (create storage variables)", info)
 
     return sensor_data
 

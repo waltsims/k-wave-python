@@ -236,7 +236,7 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_s, dt
     if is_source_exists:
         if source.s_mode == "dirichlet" or is_p0_exists:
             source_s = source_s / N
-            print("source.s_mode == dirichlet or is_p0_exists")
+            print(f"source.s_mode == dirichlet or is_p0_exists divide {source_s} by {N}")
         else:
             if c0.size == 1:
                 print("if c0.size == 1")

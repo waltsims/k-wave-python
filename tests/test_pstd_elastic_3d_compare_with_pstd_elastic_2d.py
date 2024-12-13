@@ -33,6 +33,8 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 # import pytest
 
+from scipy.io import loadmat
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -80,7 +82,7 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
 
     # absorption
     if hasattr(medium, 'alpha_coeff_compression'):
-        print("Probably none, untill now")
+        print("Probably none, until now")
         if medium.alpha_coeff_compression is not None or medium.alpha_coeff_shear is not None:
             print("Is not none")
             medium.alpha_coeff_compression = alpha_p1 * np.ones((N1, N2, N3), dtype=np.float32)
@@ -99,10 +101,13 @@ def setMaterialProperties(medium: kWaveMedium, N1:int, N2:int, N3:int, direction
 # @pytest.mark.skip(reason="not ready")
 def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
+    verbose: bool = False
+
     # set additional literals to give further permutations of the test
-    USE_PML             = True
+    USE_PML             = False
     COMPARISON_THRESH   = 1e-10
     SMOOTH_P0_SOURCE    = False
+    USE_SG              = True
 
     # =========================================================================
     # SIMULATION PARAMETERS
@@ -172,7 +177,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     # =========================================================================
 
     # loop through tests
-    for test_num in [1,]: # np.arange(start=1, stop=2, step=1, dtype=int):
+    for test_num in [0,]: # np.arange(start=1, stop=2, step=1, dtype=int):
         # np.arange(1, 21, dtype=int):
 
         test_name = test_names[test_num]
@@ -190,9 +195,6 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         if test_num > 9:
             medium.alpha_coeff_compression = alpha_p1
             medium.alpha_coeff_shear = alpha_s1
-        #     kelvin_voigt = True
-        # else:
-        #     kelvin_voigt = False
 
         # ----------------
         # 2D SIMULATION
@@ -263,7 +265,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         simulation_options_2d = SimulationOptions(simulation_type=SimulationType.ELASTIC,
                                                   pml_alpha=pml_alpha,
                                                   pml_size=pml_size,
-                                                  smooth_p0=SMOOTH_P0_SOURCE)
+                                                  smooth_p0=SMOOTH_P0_SOURCE,
+                                                  use_sg=USE_SG)
 
         sensor_data_2D = pstd_elastic_2d(kgrid=deepcopy(kgrid),
                                          source=deepcopy(source),
@@ -289,7 +292,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
-            print("SET MATERIALS [3D Z] AS Hetrogeneous:", bool(rem(test_num, 2)), "for ", test_num)
+            print("SET MATERIALS [3D Z] AS Hetrogeneous:", bool(rem(test_num, 2)), "for", test_num)
             setMaterialProperties(medium, Nx, Ny, Nz, direction=1, interface_position=interface_position, cp1=cp1, cs1=cs1, rho1=rho1)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
@@ -333,7 +336,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # sensor
         sensor = kSensor()
         sensor.record = ['u']
-        sensor.mask = np.zeros((Nx, Ny, Nz))
+        sensor.mask = np.zeros((Nx, Ny, Nz)) #, order='F')
         sensor.mask[:, :, Nz // 2 - 1] = sensor_mask_2D
 
         # run the simulation
@@ -349,6 +352,8 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
                                            sensor=deepcopy(sensor),
                                            medium=deepcopy(medium),
                                            simulation_options=deepcopy(simulation_options_3d))
+
+        print(np.shape(sensor_data_3D_z['ux']), np.shape(sensor_data_3D_z['uy']), pml_size, Nx, kgrid.Nx, Ny, kgrid.Ny, kgrid.Nt)
 
         # calculate velocity amplitude
         sensor_data_3D_z['ux'] = np.reshape(sensor_data_3D_z['ux'], sensor_data_3D_z['ux'].shape, order='F')
@@ -368,7 +373,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # heterogeneous medium properties
         if bool(rem(test_num, 2)):
-            print("SET MATERIALS [3D Y] AS Hetrogeneous: ", bool(rem(test_num, 2)), "for ", test_num)
+            print("SET MATERIALS [3D Y] AS Hetrogeneous:", bool(rem(test_num, 2)), "for", test_num)
             setMaterialProperties(medium, Nx, Nz, Ny, direction=1, interface_position=interface_position, cp1=cp1, cs1=cs1, rho1=rho1)
             c_max = np.max(np.asarray([np.max(medium.sound_speed_compression), np.max(medium.sound_speed_shear)]))
         else:
@@ -412,7 +417,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # sensor
         sensor = kSensor()
         sensor.record = ['u']
-        sensor.mask = np.zeros((Nx, Nz, Ny))
+        sensor.mask = np.zeros((Nx, Nz, Ny)) #, order='F')
         sensor.mask[:, Nz // 2 - 1, :] = sensor_mask_2D
 
         # run the simulation
@@ -491,7 +496,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # sensor
         sensor = kSensor()
         sensor.record = ['u']
-        sensor.mask = np.zeros((Nz, Nx, Ny))
+        sensor.mask = np.zeros((Nz, Nx, Ny)) #, order='F')
         sensor.mask[Nz // 2 - 1, :, :] = sensor_mask_2D
 
         # run the simulation
@@ -513,18 +518,17 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         sensor_data_3D_x['uz'] = np.reshape(sensor_data_3D_x['uz'], sensor_data_3D_x['uz'].shape, order='F')
         sensor_data_3D_x = np.sqrt(sensor_data_3D_x['uy']**2 + sensor_data_3D_x['uz']**2)
 
-
-        # clear structures
-        del kgrid
-        del source
-        del medium
-        del sensor
-
         # -------------
         # COMPARISON
         # -------------
 
-        print(np.unravel_index(np.argmax(np.abs(sensor_data_2D)), sensor_data_2D.shape, order='F'),
+        if (test_num == 0):
+            matlab_test = loadmat("C:/Users/dsinden/dev/octave/sensor2D.mat")
+
+        matlab_2d = matlab_test['sensor_2d']
+
+        print(np.unravel_index(np.argmax(np.abs(matlab_2d)), matlab_2d.shape, order='F'),
+              np.unravel_index(np.argmax(np.abs(sensor_data_2D)), sensor_data_2D.shape, order='F'),
               np.unravel_index(np.argmax(np.abs(sensor_data_3D_z)), sensor_data_3D_z.shape, order='F'),
               np.unravel_index(np.argmax(np.abs(sensor_data_3D_y)), sensor_data_3D_y.shape, order='F'),
               np.unravel_index(np.argmax(np.abs(sensor_data_3D_x)), sensor_data_3D_x.shape, order='F'),)
@@ -555,11 +559,12 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
             print(msg)
         all_tests = all_tests and test_pass
 
-        fig3, ((ax3a, ax3b, ax3c) ) = plt.subplots(3, 1)
+        fig3, ((ax3a, ax3b), (ax3c, ax3d)) = plt.subplots(2, 2)
         fig3.suptitle(f"{test_name}: Z")
         ax3a.imshow(sensor_data_2D)
         ax3b.imshow(sensor_data_3D_z)
         ax3c.imshow(np.abs(sensor_data_2D - sensor_data_3D_z))
+        ax3d.imshow(np.abs(matlab_2d))
 
         fig2, ((ax2a, ax2b, ax2c) ) = plt.subplots(3, 1)
         fig2.suptitle(f"{test_name}: Y")
@@ -573,7 +578,27 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         ax1b.imshow(sensor_data_3D_x)
         ax1c.imshow(np.abs(sensor_data_2D - sensor_data_3D_x))
 
+
+        fig0, ax0a = plt.subplots(1, 1)
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_2D[Nx // 2 - 1, :], label='2D')
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_x[Nx // 2 - 1, :], label='3D x')
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_y[Nx // 2 - 1, :], label='3D y')
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_z[Nx // 2 - 1, :], label='3D z')
+        ax0a.plot(np.squeeze(kgrid.t_array)[1:], matlab_2d[Nx // 2 - 1, :], 'k-', label='matlab')
+        ax0a.legend()
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_2D[:, Ny // 2 - 1], label='2D')
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_x[:, Ny // 2 - 1], label='3D x')
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_y[:, Ny // 2 - 1], label='3D y')
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_z[:, Ny // 2 - 1], label='3D z')
+        # ax0b.legend()
+
         plt.show()
+
+        # clear structures
+        del kgrid
+        del source
+        del medium
+        del sensor
 
     assert all_tests, msg
 

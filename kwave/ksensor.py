@@ -10,6 +10,7 @@ class kSensor(object):
         self._mask = mask
         # cell array of the acoustic parameters to record in the form Recorder
         self.record = record
+
         # record the time series from the beginning by default
         # time index at which the sensor should start recording the data specified by sensor.record
         self._record_start_index = 1

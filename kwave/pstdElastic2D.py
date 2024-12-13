@@ -429,9 +429,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     sensor_data = k_sim.sensor_data
     options = k_sim.options
 
-    print("pml alphas:", options.pml_x_alpha, options.pml_y_alpha)
-    print("pml_sizes:", options.pml_x_size, options.pml_y_size)
-
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
     # =========================================================================
@@ -449,7 +446,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     # assign the viscosity coefficients
     if options.kelvin_voigt_model:
-        print(medium.alpha_coeff_shear, medium.alpha_coeff_compression, options.kelvin_voigt_model)
+        # print(medium.alpha_coeff_shear, medium.alpha_coeff_compression, options.kelvin_voigt_model)
         eta = 2.0 * rho0 * medium.sound_speed_shear**3 * db2neper(medium.alpha_coeff_shear, 2.0)
         chi = 2.0 * rho0 * medium.sound_speed_compression**3 * db2neper(np.asarray(medium.alpha_coeff_compression), 2.0) - 2.0 * eta
         m_eta : int = np.squeeze(eta).ndim
@@ -741,11 +738,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     pml_y = np.squeeze(pml_y)
     pml_y = np.expand_dims(pml_y, axis=0)
 
-    checking: bool = False
-    verbose: bool = False
+    checking: bool = True
+    verbose: bool = True
 
     if checking:
-        mat_contents = sio.loadmat('data/2DoneStep.mat')
+        mat_contents = sio.loadmat('C:/Users/dsinden/dev/octave/2DoneStep_p_additive.mat')
 
         load_index: int = 0
 
@@ -768,10 +765,10 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         mat_dsxydx = mat_contents['dsxydx']
         mat_dsxydy = mat_contents['dsxydy']
 
-        mat_dduxdxdt = mat_contents['dduxdxdt']
-        mat_dduxdydt = mat_contents['dduxdydt']
-        mat_dduydxdt = mat_contents['dduydxdt']
-        mat_dduydydt = mat_contents['dduydydt']
+        # mat_dduxdxdt = mat_contents['dduxdxdt']
+        # mat_dduxdydt = mat_contents['dduxdydt']
+        # mat_dduydxdt = mat_contents['dduydxdt']
+        # mat_dduydydt = mat_contents['dduydydt']
 
         mat_duxdx = mat_contents['duxdx']
         mat_duxdy = mat_contents['duxdy']
@@ -795,8 +792,22 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         mat_p = mat_contents['p']
         mat_sensor_data = mat_contents['sensor_data']
 
-        mat_pre = mat_contents['pre']
-        mat_post = mat_contents['post']
+        # mat_pre = mat_contents['pre']
+        # mat_post = mat_contents['post']
+
+    # if checking:
+    #     mat_sxx = mat_contents['sxx']
+    #     if (np.abs(mat_sxx - source.sxx).sum() > tol):
+    #         print("sxx is not correct!")
+    #         print(mat_sxx)
+    #         print(source.sxx)
+
+    #         source.sxx = mat_sxx
+    #         source.syy = mat_sxx
+    #     else:
+    #         pass
+    #         # print("dsxxdx is correct!")
+
 
     # These should be zero indexed
     if k_sim.s_source_pos_index is not None:
@@ -816,16 +827,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     record.x1_inside = int(record.x1_inside - 1)
     record.y1_inside = int(record.y1_inside - 1)
 
-    sensor.record_start_index: int = sensor.record_start_index - int(1)
+    sensor.record_start_index = sensor.record_start_index - int(1)
+
+
 
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
 
         # compute the gradients of the stress tensor (these variables do not necessaily need to be stored, they could be computed as needed)
-        temp = sxx_split_x + sxx_split_y
-        dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
-        temp = syy_split_x + syy_split_y
-        dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(temp, axis=1), axis=1))
+        dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(sxx_split_x + sxx_split_y, axis=0), axis=0))
+        dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(syy_split_x + syy_split_y, axis=1), axis=1))
         temp = sxy_split_x + sxy_split_y
         dsxydx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=0), axis=0))
         dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(sxy_split_x + sxy_split_y, axis=1), axis=1))
@@ -936,12 +947,12 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         if (k_sim.source_uy > t_index):
 
-            if checking:
-                if (t_index == load_index):
-                    if (np.abs(mat_pre - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-                        print("PRE uy_split_y is not correct!")
-                    else:
-                        pass
+            # if checking:
+            #     if (t_index == load_index):
+            #         if (np.abs(mat_pre - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
+            #             print("PRE uy_split_y is not correct!")
+            #         else:
+            #             pass
 
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
@@ -953,18 +964,18 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                   uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] + \
                   k_sim.source.uy[k_sim.u_source_sig_index, t_index]
 
-            if checking:
-                if (t_index == load_index):
-                    if (np.abs(mat_post - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-                        print("POST uy_split_y is not correct!",
-                              np.max(mat_post),
-                              np.max(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
-                              mat_post[0:5],
-                              uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')],
-                              mat_post[0:5] - uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')])
-                        #uy_split_y = np.reshape(mat_post, uy_split_y.shape, order='F')
-                    else:
-                        pass
+            # if checking:
+            #     if (t_index == load_index):
+            #         if (np.abs(mat_post - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
+            #             print("POST uy_split_y is not correct!",
+            #                   np.max(mat_post),
+            #                   np.max(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
+            #                   mat_post[0:5],
+            #                   uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')],
+            #                   mat_post[0:5] - uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')])
+            #             #uy_split_y = np.reshape(mat_post, uy_split_y.shape, order='F')
+            #         else:
+            #             pass
 
 
         # Q - should the velocity source terms for the Dirichlet condition be
@@ -1024,24 +1035,24 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             temp = (dsyydy + dsxydx) * rho0_sgy_inv
             dduydydt = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(temp, axis=1), axis=1))
             dduydxdt = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
-            if checking:
-                if (t_index == load_index):
-                    if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
-                        print("dduxdxdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
-                        print("dduxdydt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
-                        print("dduydxdt is not correct!")
-                    else:
-                        pass
-                    if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
-                        print("dduydydt is not correct!")
-                    else:
-                        pass
+            # if checking:
+            #     if (t_index == load_index):
+            #         if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
+            #             print("dduxdxdt is not correct!")
+            #         else:
+            #             pass
+            #         if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
+            #             print("dduxdydt is not correct!")
+            #         else:
+            #             pass
+            #         if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
+            #             print("dduydxdt is not correct!")
+            #         else:
+            #             pass
+            #         if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
+            #             print("dduydydt is not correct!")
+            #         else:
+            #             pass
 
             # update the normal shear components of the stress tensor using a
             # Kelvin-Voigt model with a split-field multi-axial pml
@@ -1184,7 +1195,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         #     n_pos = None
 
         if (k_sim.source_sxx is not False and t_index < np.shape(source.sxx)[1]):
-
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
@@ -1234,7 +1244,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
-                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
 
             else:
                 # spatially and temporally varying source
@@ -1264,7 +1274,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
-                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
             else:
                 # spatially and temporally varying source
                 # if np.shape(np.squeeze(source.sxy)) == (n_pos, k_sim.kgrid.Nt):
@@ -1291,15 +1301,18 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
         if checking:
             if (t_index == load_index):
-                diff = np.abs(mat_syy_split_x - syy_split_x)
+                diff = np.abs(mat_sxx_split_x - sxx_split_x)
                 if (diff.sum() > tol):
-                    print("sxx_split_x diff.sum()", diff.sum())
-                    print("time point:", load_index)
-                    print("diff:", np.max(diff), np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print("matlab max:", np.max(mat_sxx_split_x), np.max(sxx_split_x))
-                    print("matlab argmax:", np.argmax(mat_sxx_split_x), np.argmax(sxx_split_x))
-                    print("min:", np.min(mat_sxx_split_x), np.min(sxx_split_x))
-                    print("argmin:", np.argmin(mat_sxx_split_x), np.argmin(sxx_split_x))
+                    print("sxx_split_x is not correct!", diff.sum())
+                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+                    print(np.max(diff))
+                    # print("sxx_split_x diff.sum()=", diff.sum())
+                    # print("time point:", load_index)
+                    # print("diff:", np.max(diff), np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
+                    # print("matlab max:", np.max(mat_sxx_split_x), np.max(sxx_split_x))
+                    # print("matlab argmax:", np.argmax(mat_sxx_split_x), np.argmax(sxx_split_x))
+                    # print("min:", np.min(mat_sxx_split_x), np.min(sxx_split_x))
+                    # print("argmin:", np.argmin(mat_sxx_split_x), np.argmin(sxx_split_x))
                 else:
                     pass
             if (t_index == load_index):
@@ -1313,11 +1326,11 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 else:
                     pass
             if (t_index == load_index):
-                diff = np.abs(mat_sxx_split_x - syy_split_x)
+                diff = np.abs(mat_syy_split_x - syy_split_x)
                 if (np.abs(mat_syy_split_x - syy_split_x).sum() > tol):
                     print("syy_split_x is not correct!")
                     if (diff.sum() > tol):
-                        print("sxx_split_y is not correct!", diff.sum())
+                        print("syy_split_x is not correct!", diff.sum())
                         print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
                         print(np.max(diff))
                 else:
@@ -1327,7 +1340,7 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
                 if (np.abs(mat_syy_split_y - syy_split_y).sum() > tol):
                     print("syy_split_y is not correct!")
                     if (diff.sum() > tol):
-                        print("sxx_split_y is not correct!", diff.sum())
+                        print("syy_split_y is not correct!", diff.sum())
                         print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
                         print(np.max(diff))
                 else:

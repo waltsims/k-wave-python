@@ -339,6 +339,7 @@ class SimulationOptions(object):
         if options.use_fd:
             # input only supported in 1D fluid code
             assert kgrid.dim == 1 and not options.simulation_type.is_elastic_simulation(), "Optional input ''use_fd'' only supported in 1D."
+
         # get optimal pml size
         if options.simulation_type.is_axisymmetric() or options.pml_auto:
             if options.simulation_type.is_axisymmetric():
@@ -359,4 +360,5 @@ class SimulationOptions(object):
 
             # cleanup unused variables
             del pml_size_temp
+
         return options

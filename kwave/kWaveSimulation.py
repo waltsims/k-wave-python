@@ -382,7 +382,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxx is not None:
-            flag = len(self.source.sxx[0])
+            flag = np.shape(self.source.sxx)[1]
         return flag
 
     @property
@@ -394,7 +394,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syy is not None:
-            flag = len(self.source.syy[0])
+            flag = np.shape(self.source.syy)[1]
         return flag
 
     @property
@@ -406,7 +406,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.szz is not None:
-            flag = len(self.source.szz[0])
+            flag = np.shape(self.source.szz)[1]
         return flag
 
     @property
@@ -418,7 +418,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxy is not None:
-            flag = len(self.source.sxy[0])
+            flag = np.shape(self.source.sxy)[1]
         return flag
 
     @property
@@ -430,7 +430,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxz is not None:
-            flag = len(self.source.sxz[0])
+            flag = np.shape(self.source.sxz)[1]
         return flag
 
     @property
@@ -442,7 +442,7 @@ class kWaveSimulation(object):
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syz is not None:
-            flag = len(self.source.syz[0])
+            flag = np.shape(self.source.syz)[1]
         return flag
 
     @property
@@ -614,6 +614,9 @@ class kWaveSimulation(object):
         elif calling_func_name in ["kspaceFirstOrder3D", "pstdElastic3D", "kspaceElastic3D"]:
             assert kgrid_dim == 3, f"kgrid has the wrong dimensionality for {calling_func_name}."
 
+        elif calling_func_name in ["pstd_elastic_3d", "pstd_elastic_3d_gpu"]:
+            assert kgrid_dim == 3, f"kgrid has the wrong dimensionality for {calling_func_name}."
+
 
     @staticmethod
     def print_start_status(is_elastic_code: bool) -> None:
@@ -626,7 +629,7 @@ class kWaveSimulation(object):
         Returns:
             None
         """
-        if is_elastic_code:  # pragma: no cover
+        if is_elastic_code:
             logging.log(logging.INFO, "Running k-Wave elastic simulation ...")
         else:
             logging.log(logging.INFO, "Running k-Wave acoustic simulation ...")
@@ -985,11 +988,24 @@ class kWaveSimulation(object):
                 # (2*CFL) is the same as source.p0 = 1
                 if self.options.simulation_type.is_elastic_simulation():
 
-                    self.source.sxx = self.source.p0 / 2.0
-                    self.source.syy = self.source.p0 / 2.0
+
+                    print('DEFINE AS A STRESS SOURCE')
+
+                    self.source.s_mask = np.ones(np.shape(self.kgrid.k), dtype=bool)
+
+                    self.source.p0 = smooth(self.source.p0, restore_max=True)
+
+                    self.source.sxx = np.empty((np.size(self.source.p0), 2))
+                    self.source.sxx[:, 0] = -self.source.p0.flatten(order="F") / 2.0
+                    self.source.sxx[:, 1] = -self.source.p0.flatten(order="F") / 2.0
+
+                    self.source.syy = copy.deepcopy(self.source.sxx)
+
+                    self.s_source_pos_index = matlab_find(self.source.s_mask)
+                    self.s_source_sig_index = self.s_source_pos_index
 
                     if self.kgrid.dim == 3:
-                        self.source.szz = np.empty_like(self.source.sxx)
+                        self.source.szz = copy.deepcopy(self.source.sxx)
 
 
 
@@ -1013,7 +1029,7 @@ class kWaveSimulation(object):
                 # create a second indexing variable
                 if p_unique.size <= 2 and p_unique.sum() == 1:
                     # set signal index to all elements
-                    self.u_source_sig_index = np.arange(0, np.shape(self.source.p)[0]) + 1
+                    self.p_source_sig_index = np.arange(0, np.shape(self.source.p)[0]) + 1
                 else:
                     # set signal index to the labels (this allows one input signal
                     # to be used for each source label)
@@ -1021,6 +1037,7 @@ class kWaveSimulation(object):
 
                 # convert the data type depending on the number of indices
                 self.p_source_pos_index = cast_to_type(self.p_source_pos_index, self.index_data_type)
+
                 if self.source_p_labelled:
                     self.p_source_sig_index = cast_to_type(self.p_source_sig_index, self.index_data_type)
 
@@ -1070,8 +1087,8 @@ class kWaveSimulation(object):
 
 
             # check for time varying stress source input and set source flag
-            if any([(getattr(self.source, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]) and \
-              not self.source_p0_elastic:
+            if any([(getattr(self.source, k) is not None) for k in ["sxx", "syy", "szz", "sxy", "sxz", "syz", "s_mask"]]) and not self.source_p0_elastic:
+
                 # check the source mode input is valid
                 if self.source.s_mode is None:
                     self.source.s_mode = self.SOURCE_S_MODE_DEF
@@ -1084,8 +1101,11 @@ class kWaveSimulation(object):
 
                 # create a second indexing variable
                 if np.size(s_unique) <= 2 and np.sum(s_unique) == 1:
+
+                    # unlabelled source mask
+
                     # set signal index to all elements, should also be for szz or szz
-                    print("THIS is zero indexed", np.shape(self.source.sxx), np.shape(self.source.syy), np.shape(self.source.szz), np.max(np.shape(self.source.szz)))
+                    # print("THIS is zero indexed", np.shape(self.source.sxx), np.shape(self.source.syy), np.shape(self.source.szz), np.max(np.shape(self.source.szz)))
                     temp_array = []
                     if self.source.sxx is not None:
                         # temp_array.append(np.max(np.shape(self.source.sxx)))
@@ -1108,9 +1128,19 @@ class kWaveSimulation(object):
                     value: int = np.max(np.asarray(temp_array))
                     print("value:", value)
                     self.s_source_sig_index = np.squeeze(np.arange(0, value) + int(1))
+
+                    if self.source_p0_elastic:
+                        print("value (source_p0_elastic):", value)
+                        self.s_source_sig_index = self.s_source_pos_index
+
+
+                    # print("-------->", self.s_source_sig_index)
+
                 else:
-                    # set signal index to the labels (this allows one input signal
-                    # to be used for each source label)
+
+                    # labelled source mask
+
+                    # set signal index to the labels (this allows one input signal to be used for each source label)
                     print("THIS is also zero indexed")
                     arr = np.where(self.source.s_mask.flatten(order="F") != 0)[0]
                     self.s_source_sig_index = self.source.s_mask.flatten(order="F")[arr]
@@ -1350,7 +1380,10 @@ class kWaveSimulation(object):
 
         # ensure p0 smoothing is switched off if p0 is empty
         if not self.source_p0:
+            print("----------------------NO SMOOTHING")
             self.options.smooth_p0 = False
+        else:
+            print('----------------------SMOOTHED!')
 
         # start log if required
         if opt.create_log:
@@ -1379,6 +1412,8 @@ class kWaveSimulation(object):
         Returns:
             None
         """
+
+        print("SMOOTH AND ENLARGE")
 
         # smooth the initial pressure distribution p0 if required, and then restore
         # the maximum magnitude
@@ -1424,7 +1459,12 @@ class kWaveSimulation(object):
                 del kgrid_exp
                 del p0_exp
             else:
-                source.p0 = smooth(source.p0, True)
+                if not self.source_p0_elastic:
+                    print('...............smoothing')
+                    source.p0 = smooth(source.p0, True)
+                else:
+                    print('already smoothed')
+                    pass
 
         # expand the computational grid if the PML is set to be outside the input
         # grid defined by the user

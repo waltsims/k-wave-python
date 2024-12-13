@@ -1395,7 +1395,7 @@ def pstd_elastic_3d(kgrid: kWaveGrid,
                                           'record_p': k_sim.record.p,
                                           'record_I': k_sim.record.I,
                                           'record_u_non_staggered': k_sim.record.u_non_staggered,
-                                          'useuboidorners': options.cuboid_corners})
+                                          'use_cuboid_corners': options.cuboid_corners})
         sensor_data = save_intensity(kgrid, sensor_data, save_intensity_options)
 
     # reorder the sensor points if a binary sensor mask was used for Cartesian
