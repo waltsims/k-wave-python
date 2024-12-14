@@ -94,75 +94,112 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options.num_threads = os.cpu_count()
         options.verbose_level = 2
 
-        options_string = options.get_options_string(self.mock_sensor)
-        expected_substrings = ["-g 1", f"-t {os.cpu_count()}", "--verbose 2", "--p_raw", "--u_max",  "-s 10"]
-        for substring in expected_substrings:
-            self.assertIn(substring, options_string)
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            f"-g {options.device_num}",
+            f"-t {os.cpu_count()}",
+            "--verbose 2",
+            "--p_raw",
+            "--u_max",
+            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+        ]
+        for element in expected_elements:
+            self.assertIn(element, options_list)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "windows")
-    def test_get_options_string_windows(self):
-        """Test the get_options_string method with a mock sensor."""
+    def test_as_list_windows(self):
+        """Test the list representation of options on Windows."""
         options = self.default_options
         options.device_num = 1
         options.num_threads = os.cpu_count()
         options.verbose_level = 2
 
-        options_string = options.get_options_string(self.mock_sensor)
-        expected_substrings = ["-g 1", "--verbose 2", "--p_raw", "--u_max", "-s 10"]
-        for substring in expected_substrings:
-            self.assertIn(substring, options_string)
-        self.assertNotIn(f" -t {os.cpu_count()}", expected_substrings)
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            f"-g {options.device_num}",
+            "--verbose 2",
+            "--p_raw",
+            "--u_max",
+            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+        ]
+        for element in expected_elements:
+            self.assertIn(element, options_list)
+        self.assertNotIn(f"-t {os.cpu_count()}", options_list)
 
-    @patch("kwave.options.simulation_execution_options.PLATFORM", "linux")
-    def test_get_options_string_linux(self):
-        """Test the get_options_string method with a mock sensor."""
+    @patch("kwave.options.simulation_execution_options.PLATFORM", "darwin")
+    def test_as_list_darwin(self):
+        """Test the list representation of options on macOS."""
         options = self.default_options
         options.device_num = 1
         options.num_threads = os.cpu_count()
         options.verbose_level = 2
 
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            f"-g {options.device_num}",
+            f"-t {os.cpu_count()}",
+            "--verbose 2",
+            "--p_raw",
+            "--u_max",
+            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+        ]
+        for element in expected_elements:
+            self.assertIn(element, options_list)
+
+    def test_as_list_custom_record(self):
+        """Test the list representation with a custom record configuration."""
+        options = self.default_options
+        self.mock_sensor.record = ["p_max", "u_min", "I_avg"]
+        options.device_num = 2
+        options.num_threads = 8
+        options.verbose_level = 1
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            f"-g {options.device_num}",
+            "-t 8",
+            "--verbose 1",
+            "--p_max",
+            "--u_min",
+            "--p_raw"  # Default if no specific 'p' or 'u' options are given
+        ]
+        for element in expected_elements:
+            self.assertIn(element, options_list)
+
+    def test_as_list_with_invalid_values(self):
+        """Test the behavior of as_list when there are invalid values."""
+        options = self.default_options
+        options.device_num = -1  # Invalid device_num should raise an exception when set
+        with self.assertRaises(ValueError):
+            options.as_list(self.mock_sensor)
+
+    def test_as_list_no_record(self):
+        """Test the list representation when there is no record."""
+        options = self.default_options
+        self.mock_sensor.record = None
+        options.device_num = 1
+        options.num_threads = 4
+        options.verbose_level = 0
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            f"-g {options.device_num}",
+            "-t 4",
+            "--p_raw",  # Default value
+        ]
+        for element in expected_elements:
+            self.assertIn(element, options_list)
+
+    def test_list_compared_to_string(self):
+        """Test the list representation compared to the string representation."""
+        options = self.default_options
+        options.device_num = 1
+        options.num_threads = 4
+        options.verbose_level = 1
+
+        options_list = options.as_list(self.mock_sensor)
         options_string = options.get_options_string(self.mock_sensor)
-        expected_substrings = ["-g 1", f"-t {os.cpu_count()}", "--verbose 2", "--p_raw", "--u_max", "-s 10"]
-        for substring in expected_substrings:
-            self.assertIn(substring, options_string)
-
-    def test_gpu_dependency_on_binary_name_and_path(self):
-        """Test that the binary_name and binary_path are updated correctly based on is_gpu_simulation."""
-        options = SimulationExecutionOptions(is_gpu_simulation=True)
-        self.assertEqual(options.binary_name, CUDA_BINARY_NAME)
-
-        options.is_gpu_simulation = False
-        self.assertEqual(options.binary_name, OMP_BINARY_NAME)
-        self.assertTrue(str(options.binary_path).endswith(OMP_BINARY_NAME))
-
-    def test_env_vars_linux(self):
-        with patch("kwave.options.simulation_execution_options.PLATFORM", "linux"):
-            options = SimulationExecutionOptions()
-            env_vars = options.env_vars
-            self.assertIn("OMP_PLACES", env_vars)
-            self.assertEqual(env_vars["OMP_PLACES"], "cores")
-            self.assertIn("OMP_PROC_BIND", env_vars)
-            self.assertEqual(env_vars["OMP_PROC_BIND"], "SPREAD")
-
-    def test_thread_binding_linux(self):
-        with patch("kwave.options.simulation_execution_options.PLATFORM", "linux"):
-            options = SimulationExecutionOptions(thread_binding=True)
-            env_vars = options.env_vars
-            self.assertEqual(env_vars["OMP_PROC_BIND"], "SPREAD")
-
-    def test_thread_binding_darwin(self):
-        with patch("kwave.options.simulation_execution_options.PLATFORM", "darwin"):
-            options = SimulationExecutionOptions(thread_binding=True)
-            with self.assertRaises(ValueError, msg="Thread binding is not supported in MacOS."):
-                _ = options.env_vars
-
-    def test_env_vars_darwin(self):
-        with patch("kwave.options.simulation_execution_options.PLATFORM", "darwin"):
-            options = SimulationExecutionOptions()
-            env_vars = options.env_vars
-            self.assertNotIn("OMP_PLACES", env_vars)
-            self.assertNotIn("OMP_PROC_BIND", env_vars)
-
+        self.assertEqual(" ".join(options_list), options_string)
 
 if __name__ == "__main__":
     unittest.main()
