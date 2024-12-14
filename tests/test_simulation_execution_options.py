@@ -136,7 +136,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         ]
         for element in expected_elements:
             self.assertIn(element, options_list)
-        self.assertNotIn(f"-t {os.cpu_count()}", options_list)
+        self.assertNotIn("-t", options_list)
+        self.assertNotIn(f"{os.cpu_count()}", options_list)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "darwin")
     def test_as_list_darwin(self):
@@ -174,14 +175,17 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         expected_elements = [
             "-g",
             f"{options.device_num}",
-            "-t",
-            f"{os.cpu_count()}",
+
             "--verbose",
             "1",
             "--p_max",
             "--u_min",
             "--p_raw"  # Default if no specific 'p' or 'u' options are given
         ]
+        if not PLATFORM == "windows":
+            expected_elements.append("-t")
+            expected_elements.append(f"{os.cpu_count()}")
+
         for element in expected_elements:
             self.assertIn(element, options_list)
 
@@ -204,10 +208,13 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         expected_elements = [
             "-g",
             f"{options.device_num}",
-            "-t",
-            f"{os.cpu_count()}",
+
             "--p_raw",  # Default value
         ]
+
+        if not PLATFORM == "windows":
+            expected_elements.append("-t")
+            expected_elements.append(f"{os.cpu_count()}")
         for element in expected_elements:
             self.assertIn(element, options_list)
 
