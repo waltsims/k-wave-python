@@ -96,12 +96,16 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            f"-g {options.device_num}",
-            f"-t {os.cpu_count()}",
-            "--verbose 2",
+            "-g",
+            f"{options.device_num}",
+            "-t",
+            f"{os.cpu_count()}",
+            "--verbose",
+            "2",
             "--p_raw",
             "--u_max",
-            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+            "-s",
+            f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
         ]
         for element in expected_elements:
             self.assertIn(element, options_list)
@@ -116,11 +120,14 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            f"-g {options.device_num}",
-            "--verbose 2",
+            "-g",
+            f"{options.device_num}",
+            "--verbose",
+            "2",
             "--p_raw",
             "--u_max",
-            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+            "-s",
+            f"{self.mock_sensor.record_start_index}"  
         ]
         for element in expected_elements:
             self.assertIn(element, options_list)
@@ -136,12 +143,16 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            f"-g {options.device_num}",
-            f"-t {os.cpu_count()}",
-            "--verbose 2",
+            "-g",
+            f"{options.device_num}",
+            "-t",
+            f"{os.cpu_count()}",
+            "--verbose",
+            "2",
             "--p_raw",
             "--u_max",
-            f"-s {self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+            "-s",
+            f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
         ]
         for element in expected_elements:
             self.assertIn(element, options_list)
@@ -156,9 +167,12 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            f"-g {options.device_num}",
-            "-t 8",
-            "--verbose 1",
+            "-g",
+            f"{options.device_num}",
+            "-t",
+            "8",
+            "--verbose",
+            "1",
             "--p_max",
             "--u_min",
             "--p_raw"  # Default if no specific 'p' or 'u' options are given
@@ -183,8 +197,10 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            f"-g {options.device_num}",
-            "-t 4",
+            "-g",
+            f"{options.device_num}",
+            "-t",
+            "4",
             "--p_raw",  # Default value
         ]
         for element in expected_elements:

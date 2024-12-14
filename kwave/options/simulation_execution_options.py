@@ -156,13 +156,17 @@ class SimulationExecutionOptions:
         if self.device_num is not None:
             if self.device_num < 0:
                 raise ValueError("Device number must be non-negative")
-            options_list.append(f"-g {self.device_num}")
+            options_list.append("-g")
+            options_list.append(str(self.device_num)) 
 
         if self.num_threads is not None and PLATFORM != "windows":
-            options_list.append(f"-t {self.num_threads}")
+            options_list.append("-t")
+            options_list.append(str(self.num_threads)) 
 
         if self.verbose_level > 0:
-            options_list.append(f"--verbose {self.verbose_level}")
+            options_list.append("--verbose")
+            options_list.append(str(self.verbose_level))
+
 
         record_options_map = {
             "p": "p_raw", "p_max": "p_max", "p_min": "p_min", "p_rms": "p_rms",
@@ -184,7 +188,8 @@ class SimulationExecutionOptions:
             options_list.append("--p_raw")
 
         if sensor.record_start_index is not None:
-            options_list.append(f"-s {sensor.record_start_index}")
+            options_list.append("-s")
+            options_list.append(f"{sensor.record_start_index}")
 
         return options_list
 
