@@ -162,7 +162,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         self.mock_sensor.record = ["p_max", "u_min", "I_avg"]
         options.device_num = 2
-        options.num_threads = 8
+        options.num_threads = os.cpu_count()
         options.verbose_level = 1
 
         options_list = options.as_list(self.mock_sensor)
@@ -192,7 +192,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         self.mock_sensor.record = None
         options.device_num = 1
-        options.num_threads = 4
+        options.num_threads = os.cpu_count()
         options.verbose_level = 0
 
         options_list = options.as_list(self.mock_sensor)
@@ -210,7 +210,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         """Test the list representation compared to the string representation."""
         options = self.default_options
         options.device_num = 1
-        options.num_threads = 4
+        options.num_threads = os.cpu_count()
         options.verbose_level = 1
 
         options_list = options.as_list(self.mock_sensor)
