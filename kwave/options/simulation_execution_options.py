@@ -34,8 +34,8 @@ class SimulationExecutionOptions:
         self._binary_dir = binary_dir
         self.kwave_function_name = kwave_function_name
         self.delete_data = delete_data
-        self.device_num = device_num
-        self.num_threads = num_threads
+        self._device_num = device_num
+        self._num_threads = num_threads
         self.thread_binding = thread_binding
         self.system_call = system_call
         self.verbose_level = verbose_level
@@ -149,19 +149,27 @@ class SimulationExecutionOptions:
                 f"{value} is not a directory. If you are trying to set the `binary_path`, use the `binary_path` attribute instead."
             )
         self._binary_dir = Path(value)
+    
+    @property
+    def device_num(self) -> Optional[int]:
+        return self._device_num
+    
+    @device_num.setter
+    def device_num(self, value: Optional[int]):
+        if value is not None and value < 0:
+            raise ValueError("Device number must be non-negative")
+        self._device_num = value
 
     def as_list(self, sensor: kSensor) -> list[str]:
         options_list = []
 
         if self.device_num is not None:
-            if self.device_num < 0:
-                raise ValueError("Device number must be non-negative")
             options_list.append("-g")
             options_list.append(str(self.device_num)) 
 
-        if self.num_threads is not None and PLATFORM != "windows":
+        if self._num_threads is not None and PLATFORM != "windows":
             options_list.append("-t")
-            options_list.append(str(self.num_threads)) 
+            options_list.append(str(self._num_threads)) 
 
         if self.verbose_level > 0:
             options_list.append("--verbose")

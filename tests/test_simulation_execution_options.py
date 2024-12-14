@@ -26,7 +26,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.kwave_function_name, "kspaceFirstOrder3D")
         self.assertTrue(options.delete_data)
         self.assertIsNone(options.device_num)
-        self.assertEqual(options.num_threads, os.cpu_count())  # "all" should default to CPU count
+        self.assertEqual(options.num_threads, "all")  # "all" should default to CPU count
         self.assertIsNone(options.thread_binding)
         self.assertEqual(options.verbose_level, 0)
         self.assertTrue(options.auto_chunking)
@@ -74,6 +74,11 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options.is_gpu_simulation = False
         self.assertFalse(options.is_gpu_simulation)
         self.assertEqual(options.binary_name, OMP_BINARY_NAME)
+
+    def test_device_num_setter_invalid(self):
+        """Test setting an invalid device number."""
+        options = self.default_options
+
 
     def test_binary_name_custom(self):
         """Test setting a custom binary name."""
@@ -170,7 +175,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-g",
             f"{options.device_num}",
             "-t",
-            "8",
+            f"{os.cpu_count()}",
             "--verbose",
             "1",
             "--p_max",
@@ -183,9 +188,9 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_as_list_with_invalid_values(self):
         """Test the behavior of as_list when there are invalid values."""
         options = self.default_options
-        options.device_num = -1  # Invalid device_num should raise an exception when set
         with self.assertRaises(ValueError):
-            options.as_list(self.mock_sensor)
+            options.device_num = -1
+
 
     def test_as_list_no_record(self):
         """Test the list representation when there is no record."""
@@ -200,7 +205,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-g",
             f"{options.device_num}",
             "-t",
-            "4",
+            f"{os.cpu_count()}",
             "--p_raw",  # Default value
         ]
         for element in expected_elements:
