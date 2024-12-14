@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, Union
 import os
+import warnings
 
 from kwave import PLATFORM, BINARY_DIR
 from kwave.ksensor import kSensor
@@ -149,51 +150,49 @@ class SimulationExecutionOptions:
             )
         self._binary_dir = Path(value)
 
-    def get_options_string(self, sensor: kSensor) -> str:
+    def as_list(self, sensor: kSensor) -> list[str]:
         options_list = []
-        if self.device_num is not None and self.device_num < 0:
-            raise ValueError("Device number must be non-negative")
+
         if self.device_num is not None:
-            options_list.append(f" -g {self.device_num}")
+            if self.device_num < 0:
+                raise ValueError("Device number must be non-negative")
+            options_list.append(f"-g {self.device_num}")
 
         if self.num_threads is not None and PLATFORM != "windows":
-            options_list.append(f" -t {self.num_threads}")
+            options_list.append(f"-t {self.num_threads}")
 
         if self.verbose_level > 0:
-            options_list.append(f" --verbose {self.verbose_level}")
+            options_list.append(f"--verbose {self.verbose_level}")
 
         record_options_map = {
-            "p": "p_raw",
-            "p_max": "p_max",
-            "p_min": "p_min",
-            "p_rms": "p_rms",
-            "p_max_all": "p_max_all",
-            "p_min_all": "p_min_all",
-            "p_final": "p_final",
-            "u": "u_raw",
-            "u_max": "u_max",
-            "u_min": "u_min",
-            "u_rms": "u_rms",
-            "u_max_all": "u_max_all",
-            "u_min_all": "u_min_all",
-            "u_final": "u_final",
+            "p": "p_raw", "p_max": "p_max", "p_min": "p_min", "p_rms": "p_rms",
+            "p_max_all": "p_max_all", "p_min_all": "p_min_all", "p_final": "p_final",
+            "u": "u_raw", "u_max": "u_max", "u_min": "u_min", "u_rms": "u_rms",
+            "u_max_all": "u_max_all", "u_min_all": "u_min_all", "u_final": "u_final",
         }
 
         if sensor.record is not None:
             matching_keys = set(sensor.record).intersection(record_options_map.keys())
-            for key in matching_keys:
-                options_list.append(f" --{record_options_map[key]}")
+            options_list.extend([f"--{record_options_map[key]}" for key in matching_keys])
 
             if "u_non_staggered" in sensor.record or "I_avg" in sensor.record or "I" in sensor.record:
-                options_list.append(" --u_non_staggered_raw")
+                options_list.append("--u_non_staggered_raw")
 
             if ("I_avg" in sensor.record or "I" in sensor.record) and ("p" not in sensor.record):
-                options_list.append(" --p_raw")
+                options_list.append("--p_raw")
         else:
-            options_list.append(" --p_raw")
+            options_list.append("--p_raw")
 
         if sensor.record_start_index is not None:
-            options_list.append(f" -s {sensor.record_start_index}")
+            options_list.append(f"-s {sensor.record_start_index}")
+
+        return options_list
+
+
+    def get_options_string(self, sensor: kSensor) -> str:
+        # raise a deprication warning
+        warnings.warn("This method is deprecated. Use `as_list` method instead.", DeprecationWarning)
+        options_list = self.as_list(sensor)
 
         return " ".join(options_list)
 
