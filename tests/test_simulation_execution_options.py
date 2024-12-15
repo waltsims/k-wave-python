@@ -96,15 +96,15 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         """Test the get_options_string method with a mock sensor."""
         options = self.default_options
         options.device_num = 1
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.verbose_level = 2
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
             "-g",
-            f"{options.device_num}",
+            "1",
             "-t",
-            f"{os.cpu_count()}",
+            "1",
             "--verbose",
             "2",
             "--p_raw",
@@ -112,21 +112,20 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-s",
             f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
         ]
-        for element in expected_elements:
-            self.assertIn(element, options_list)
+        self.assertListEqual(expected_elements, options_list)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "windows")
     def test_as_list_windows(self):
         """Test the list representation of options on Windows."""
         options = self.default_options
         options.device_num = 1
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.verbose_level = 2
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
             "-g",
-            f"{options.device_num}",
+            "1",
             "--verbose",
             "2",
             "--p_raw",
@@ -134,17 +133,14 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-s",
             f"{self.mock_sensor.record_start_index}"  
         ]
-        for element in expected_elements:
-            self.assertIn(element, options_list)
-        self.assertNotIn("-t", options_list)
-        self.assertNotIn(f"{os.cpu_count()}", options_list)
+        self.assertListEqual(expected_elements, options_list)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "darwin")
     def test_as_list_darwin(self):
         """Test the list representation of options on macOS."""
         options = self.default_options
         options.device_num = 1
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.verbose_level = 2
 
         options_list = options.as_list(self.mock_sensor)
@@ -152,7 +148,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-g",
             f"{options.device_num}",
             "-t",
-            f"{os.cpu_count()}",
+            f"1",
             "--verbose",
             "2",
             "--p_raw",
@@ -160,34 +156,34 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-s",
             f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
         ]
-        for element in expected_elements:
-            self.assertIn(element, options_list)
+        
+        self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_custom_record(self):
         """Test the list representation with a custom record configuration."""
         options = self.default_options
         self.mock_sensor.record = ["p_max", "u_min", "I_avg"]
-        options.device_num = 2
-        options.num_threads = os.cpu_count()
+        options.device_num = 1
+        options.num_threads = 1
         options.verbose_level = 1
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
             "-g",
-            f"{options.device_num}",
-
+            "1",
             "--verbose",
             "1",
             "--p_max",
             "--u_min",
-            "--p_raw"  # Default if no specific 'p' or 'u' options are given
+            '--u_non_staggered_raw',
+            "--p_raw",
+            '-s',
+            '10',
         ]
         if not PLATFORM == "windows":
-            expected_elements.append("-t")
-            expected_elements.append(f"{os.cpu_count()}")
-
-        for element in expected_elements:
-            self.assertIn(element, options_list)
+            expected_elements.insert(2,"-t")
+            expected_elements.insert(3,f"1")
+        self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_with_invalid_values(self):
         """Test the behavior of as_list when there are invalid values."""
@@ -201,22 +197,23 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         self.mock_sensor.record = None
         options.device_num = 1
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.verbose_level = 0
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
             "-g",
             f"{options.device_num}",
-
             "--p_raw",  # Default value
+            "-s", # start timestep index
+            "10"
         ]
 
         if not PLATFORM == "windows":
-            expected_elements.append("-t")
-            expected_elements.append(f"{os.cpu_count()}")
-        for element in expected_elements:
-            self.assertIn(element, options_list)
+            expected_elements.insert(2, "-t")
+            expected_elements.insert(3, "1")
+        self.assertListEqual(expected_elements, options_list)
+        
 
     def test_list_compared_to_string(self):
         """Test the list representation compared to the string representation."""

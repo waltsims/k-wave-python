@@ -186,7 +186,7 @@ class SimulationExecutionOptions:
         }
 
         if sensor.record is not None:
-            matching_keys = set(sensor.record).intersection(record_options_map.keys())
+            matching_keys = sorted(set(sensor.record).intersection(record_options_map.keys()))
             options_list.extend([f"--{record_options_map[key]}" for key in matching_keys])
 
             if "u_non_staggered" in sensor.record or "I_avg" in sensor.record or "I" in sensor.record:
