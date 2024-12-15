@@ -440,6 +440,6 @@ def kspaceFirstOrder2D(
             return
 
         executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
-        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
+        executor_options = execution_options.as_list(sensor=k_sim.sensor)
         sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename, options=executor_options)
         return sensor_data

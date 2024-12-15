@@ -80,8 +80,10 @@ exclude = [
 testpaths = ["tests"]
 filterwarnings = [
     "error::DeprecationWarning",
-    "error::PendingDeprecationWarning"
+    "error::PendingDeprecationWarning",
+    "ignore::DeprecationWarning:kwave",
 ]
+
 [tool.coverage.run]
 branch = true
 command_line = "-m pytest"

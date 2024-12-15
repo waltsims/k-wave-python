@@ -32,9 +32,8 @@ class Executor:
             raise FileNotFoundError(f"Binary not found at {binary_path}")
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
-    def run_simulation(self, input_filename: str, output_filename: str, options: str):
-        command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename]
-        command.extend(options.split(' '))
+    def run_simulation(self, input_filename: str, output_filename: str, options: list[str]) -> dotdict:
+        command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename] + options
 
         try:
             with subprocess.Popen(
