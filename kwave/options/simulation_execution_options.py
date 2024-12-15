@@ -21,7 +21,7 @@ class SimulationExecutionOptions:
         kwave_function_name: Optional[str] = "kspaceFirstOrder3D",
         delete_data: bool = True,
         device_num: Optional[int] = None,
-        num_threads: Union[int, str] = "all",
+        num_threads: Optional[int] = None,
         thread_binding: Optional[bool] = None,
         system_call: Optional[str] = None,
         verbose_level: int = 0,
@@ -34,8 +34,8 @@ class SimulationExecutionOptions:
         self._binary_dir = binary_dir
         self.kwave_function_name = kwave_function_name
         self.delete_data = delete_data
-        self._device_num = device_num
-        self._num_threads = num_threads
+        self.device_num = device_num
+        self.num_threads = num_threads
         self.thread_binding = thread_binding
         self.system_call = system_call
         self.verbose_level = verbose_level
@@ -53,7 +53,11 @@ class SimulationExecutionOptions:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
 
         if value == "all":
-            value = cpu_count
+            warnings.warn("The 'all' option is deprecated. The value of None sets the maximal number of threads (excluding Windows).", DeprecationWarning)
+            value = cpu_count    
+
+        if value is None:
+            value = cpu_count        
 
         if not isinstance(value, int):
             raise ValueError("Got {value}. Number of threads must be 'all' or a positive integer")
@@ -87,10 +91,8 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        valid_binary_names = ["kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP"]
-        if PLATFORM == "windows":
-            valid_binary_names = [name + ".exe" for name in valid_binary_names]
-
+        
+        valid_binary_names = ["kspaceFirstOrder-OMP", "kspaceFirstOrder-CUDA"]
         if self._binary_name is None:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation is None:
@@ -103,9 +105,9 @@ class SimulationExecutionOptions:
 
             if PLATFORM == "windows":
                 self._binary_name += ".exe"
+                valid_binary_names = [name + ".exe" for name in valid_binary_names]
+                    
         elif self._binary_name not in valid_binary_names:
-            import warnings
-
             warnings.warn("Custom binary name set. Ignoring `is_gpu_simulation` state.")
         return self._binary_name
 

@@ -26,7 +26,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.kwave_function_name, "kspaceFirstOrder3D")
         self.assertTrue(options.delete_data)
         self.assertIsNone(options.device_num)
-        self.assertEqual(options.num_threads, "all")  # "all" should default to CPU count
+        self.assertEqual(options._num_threads, os.cpu_count()) 
         self.assertIsNone(options.thread_binding)
         self.assertEqual(options.verbose_level, 0)
         self.assertTrue(options.auto_chunking)
