@@ -993,7 +993,9 @@ class kWaveSimulation(object):
 
                     self.source.s_mask = np.ones(np.shape(self.kgrid.k), dtype=bool)
 
-                    self.source.p0 = smooth(self.source.p0, restore_max=True)
+                    if self.options.smooth_p0:
+                        print('smooth p0')
+                        self.source.p0 = smooth(self.source.p0, restore_max=True)
 
                     self.source.sxx = np.empty((np.size(self.source.p0), 2))
                     self.source.sxx[:, 0] = -self.source.p0.flatten(order="F") / 2.0
@@ -1383,7 +1385,7 @@ class kWaveSimulation(object):
             print("----------------------NO SMOOTHING")
             self.options.smooth_p0 = False
         else:
-            print('----------------------SMOOTHED!')
+            print('----------------------(PERHAPS) SMOOTHED!')
 
         # start log if required
         if opt.create_log:
@@ -1413,7 +1415,7 @@ class kWaveSimulation(object):
             None
         """
 
-        print("SMOOTH AND ENLARGE")
+        print("[SMOOTH] AND ENLARGE")
 
         # smooth the initial pressure distribution p0 if required, and then restore
         # the maximum magnitude
@@ -1423,7 +1425,7 @@ class kWaveSimulation(object):
         #   exactly zero within the PML
         #   NOTE 3: for the axisymmetric code, p0 is smoothed assuming WS origin
         #   symmetry
-        if self.source_p0 and self.options.smooth_p0:
+        if self.source_p0:
             # update command line status
             logging.log(logging.INFO, "  smoothing p0 distribution...")
 
@@ -1449,8 +1451,9 @@ class kWaveSimulation(object):
                     p0_exp[:, 1 : kgrid_N.y] = source.p0
                     p0_exp[:, kgrid_N.y + 0 : kgrid_N.y * 2 - 2] = np.fliplr(source.p0[:, 1:-1])
 
-                # smooth p0
-                p0_exp = smooth(p0_exp, True)
+                # smooth p0 if declared
+                if self.options.smooth_p0:
+                    p0_exp = smooth(p0_exp, True)
 
                 # trim back to original size
                 source.p0 = p0_exp[:, 0 : self.kgrid.Ny]
@@ -1459,11 +1462,11 @@ class kWaveSimulation(object):
                 del kgrid_exp
                 del p0_exp
             else:
-                if not self.source_p0_elastic:
+                if (not self.source_p0_elastic) and self.options.smooth_p0:
                     print('...............smoothing')
                     source.p0 = smooth(source.p0, True)
                 else:
-                    print('already smoothed')
+                    print('already smoothed or not declared')
                     pass
 
         # expand the computational grid if the PML is set to be outside the input
@@ -1514,14 +1517,22 @@ class kWaveSimulation(object):
         del prime_facs
 
         # smooth the sound speed distribution if required
-        if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
-            logging.log(logging.INFO, "  smoothing sound speed distribution...")
-            self.medium.sound_speed = smooth(self.medium.sound_speed)
+        if not self.options.simulation_type.is_elastic_simulation():
+          if opt.smooth_c0 and num_dim2(self.medium.sound_speed) == k_dim and self.medium.sound_speed.size > 1:
+              logging.log(logging.INFO, "  smoothing ACOUSTIC sound speed distribution...")
+              self.medium.sound_speed = smooth(self.medium.sound_speed, restore_max=False)
+        else:
+            if opt.smooth_c0 and num_dim2(self.medium.sound_speed_compression) == k_dim and self.medium.sound_speed_compression.size > 1:
+                logging.log(logging.INFO, "  smoothing sound speed compression distribution...")
+                self.medium.sound_speed_compression = smooth(self.medium.sound_speed_compression, restore_max=False)
+            if opt.smooth_c0 and num_dim2(self.medium.sound_speed_shear) == k_dim and self.medium.sound_speed_shear.size > 1:
+                logging.log(logging.INFO, "  smoothing sound speed shear distribution...")
+                self.medium.sound_speed_shear = smooth(self.medium.sound_speed_shear, restore_max=False)
 
         # smooth the ambient density distribution if required
         if opt.smooth_rho0 and num_dim2(self.medium.density) == k_dim and self.medium.density.size > 1:
             logging.log(logging.INFO, "smoothing density distribution...")
-            self.medium.density = smooth(self.medium.density)
+            self.medium.density = smooth(self.medium.density, restore_max=False)
 
 
     def create_sensor_variables(self) -> None:

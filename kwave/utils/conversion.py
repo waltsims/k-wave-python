@@ -30,7 +30,7 @@ def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -
     """
 
     # calculate conversion
-    alpha = 100.0 * alpha * (1e-6 / (2.0 * math.pi)) ** y / (20.0 * np.log10(np.exp(1)))
+    alpha = 100.0 * alpha * (1e-6 / (2.0 * math.pi)) ** y / (20.0 * np.log10(np.exp(1.0)))
     return alpha
 
 

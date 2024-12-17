@@ -11,37 +11,53 @@ import kwave.utils.checks
 class kWaveMedium(object):
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
     sound_speed: np.array
+
     # reference sound speed used within the k-space operator (phase correction term) [m/s]
     sound_speed_ref: np.array = None
+
     # density distribution within the acoustic medium [kg/m^3]
     density: np.array = None
+
     # power law absorption coefficient [dB/(MHz^y cm)]
     alpha_coeff: np.array = None
+
     # power law absorption exponent
     alpha_power: np.array = None
+
     # optional input to force either the absorption or dispersion terms in the equation of state to be excluded;
     # valid inputs are 'no_absorption' or 'no_dispersion'
     alpha_mode: np.array = None
+
     # frequency domain filter applied to the absorption and dispersion terms in the equation of state
     alpha_filter: np.array = None
+
     # two element array used to control the sign of absorption and dispersion terms in the equation of state
     alpha_sign: np.array = None
+
     # parameter of nonlinearity
     BonA: np.array = None
+
     # is the medium absorbing?
     absorbing: bool = False
+
     # is the medium absorbing stokes?
     stokes: bool = False
+
     # compressional sound speed [m/s]
     sound_speed_compression: np.array = None
+
     # reference compressional sound speed [m/s]
     sound_speed_ref_compression: np.array = None
-    # pshear wave speed [m/s]
+
+    # shear wave speed [m/s]
     sound_speed_shear: np.array = None
+
     # reference shear wave speed [m/s]
     sound_speed_ref_shear: np.array = None
+
     # power law absorption for compressional waves coefficient [dB/(MHz^y cm)]
     alpha_coeff_compression: np.array = None
+
     # power law absorption for shearwaves coefficient [dB/(MHz^y cm)]
     alpha_coeff_shear: np.array = None
 
