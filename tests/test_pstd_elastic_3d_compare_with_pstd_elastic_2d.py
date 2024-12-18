@@ -80,6 +80,8 @@ def setMaterialProperties(medium: kWaveMedium, N1: int, N2: int, N3: int,
     medium.sound_speed_shear = np.squeeze(medium.sound_speed_shear)
     medium.density = np.squeeze(medium.density)
 
+    medium.sound_speed = medium.sound_speed_compression
+
     # absorption
     if hasattr(medium, 'alpha_coeff_compression'):
         if medium.alpha_coeff_compression is not None or medium.alpha_coeff_shear is not None:
@@ -101,14 +103,14 @@ def setMaterialProperties(medium: kWaveMedium, N1: int, N2: int, N3: int,
 # @pytest.mark.skip(reason="not ready")
 def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
-    verbose: bool = False
+    verbose: bool = True
 
     # set additional literals to give further permutations of the test
     USE_PML             = True
     COMPARISON_THRESH   = 1e-10
     # this smooths everything not just p0
     SMOOTH_P0_SOURCE    = True
-    USE_SG              = True
+    # USE_SG              = True
 
     # =========================================================================
     # SIMULATION PARAMETERS
@@ -178,7 +180,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
     # =========================================================================
 
     # loop through tests
-    for test_num in [16,]: # np.arange(start=1, stop=2, step=1, dtype=int):
+    for test_num in [17,]: # np.arange(start=1, stop=2, step=1, dtype=int):
         # np.arange(1, 21, dtype=int):
 
         test_name = test_names[test_num]
@@ -269,6 +271,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
 
         # run the simulation
         simulation_options_2d = SimulationOptions(simulation_type=SimulationType.ELASTIC,
+                                                  pml_size=[pml_size, pml_size],
                                                   pml_x_size=pml_size,
                                                   pml_y_size=pml_size,
                                                   pml_x_alpha=pml_alpha,
@@ -284,7 +287,7 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # calculate velocity amplitude
         sensor_data_2D['ux'] = np.reshape(sensor_data_2D['ux'], sensor_data_2D['ux'].shape, order='F')
         sensor_data_2D['uy'] = np.reshape(sensor_data_2D['uy'], sensor_data_2D['uy'].shape, order='F')
-        sensor_data_2D = np.sqrt(sensor_data_2D['ux']**2 + sensor_data_2D['uy']**2)
+        sensor_2D = np.sqrt(sensor_data_2D['ux']**2 + sensor_data_2D['uy']**2)
 
 
 
@@ -371,12 +374,9 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
             print(np.shape(sensor_data_3D_z['ux']), np.shape(sensor_data_3D_z['uy']), pml_size, Nx, kgrid.Nx, Ny, kgrid.Ny, kgrid.Nt)
 
         # calculate velocity amplitude
-
-        # sensor_data_3D_z['uy'] = np.transpose(sensor_data_3D_z['uy_final'], (2, 1, 0))
-
         sensor_data_3D_z['ux'] = np.reshape(sensor_data_3D_z['ux'], sensor_data_3D_z['ux'].shape, order='F')
         sensor_data_3D_z['uy'] = np.reshape(sensor_data_3D_z['uy'], sensor_data_3D_z['uy'].shape, order='F')
-        sensor_data_3D_z = np.sqrt(sensor_data_3D_z['ux']**2 + sensor_data_3D_z['uy']**2)
+        sensor_3D_z = np.sqrt(sensor_data_3D_z['ux']**2 + sensor_data_3D_z['uy']**2)
 
         # # ----------------
         # # 3D SIMULATION: Y
@@ -579,42 +579,42 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
             if ((test_num == 0) or (test_num == 17) or (test_num == 16)):
                 print(np.unravel_index(np.argmax(np.abs(matlab_2d)), matlab_2d.shape, order='F'),
                       np.unravel_index(np.argmax(np.abs(matlab_3d)), matlab_3d.shape, order='F'),
-                      np.unravel_index(np.argmax(np.abs(sensor_data_2D)), sensor_data_2D.shape, order='F'),
-                      np.unravel_index(np.argmax(np.abs(sensor_data_3D_z)), sensor_data_3D_z.shape, order='F'),
+                      np.unravel_index(np.argmax(np.abs(sensor_2D)), sensor_2D.shape, order='F'),
+                      np.unravel_index(np.argmax(np.abs(sensor_3D_z)), sensor_3D_z.shape, order='F'),
                       # np.unravel_index(np.argmax(np.abs(sensor_data_3D_y)), sensor_data_3D_y.shape, order='F'),
                       # np.unravel_index(np.argmax(np.abs(sensor_data_3D_x)), sensor_data_3D_x.shape, order='F'),
                       )
             else:
-                print(np.unravel_index(np.argmax(np.abs(sensor_data_2D)), sensor_data_2D.shape, order='F'),
-                      np.unravel_index(np.argmax(np.abs(sensor_data_3D_z)), sensor_data_3D_z.shape, order='F'),
+                print(np.unravel_index(np.argmax(np.abs(sensor_2D)), sensor_2D.shape, order='F'),
+                      np.unravel_index(np.argmax(np.abs(sensor_3D_z)), sensor_3D_z.shape, order='F'),
                       # np.unravel_index(np.argmax(np.abs(sensor_data_3D_y)), sensor_data_3D_y.shape, order='F'),
                       # np.unravel_index(np.argmax(np.abs(sensor_data_3D_x)), sensor_data_3D_x.shape, order='F'),
                       )
 
-        # sensor_data_3D_z = np.zeros_like(sensor_data_2D)
-        sensor_data_3D_y = np.zeros_like(sensor_data_2D)
-        sensor_data_3D_x = np.zeros_like(sensor_data_2D)
+        # sensor_data_3D_z = np.zeros_like(sensor_2D)
+        sensor_data_3D_y = np.zeros_like(sensor_2D)
+        sensor_data_3D_x = np.zeros_like(sensor_2D)
 
-        max2d = np.max(np.abs(sensor_data_2D))
-        max3d_z = np.max(np.abs(sensor_data_3D_z))
+        max2d = np.max(np.abs(sensor_2D))
+        max3d_z = np.max(np.abs(sensor_3D_z))
         max3d_y = np.max(np.abs(sensor_data_3D_y))
         max3d_x = np.max(np.abs(sensor_data_3D_x))
 
-        diff_2D_3D_z = np.max(np.abs(sensor_data_2D - sensor_data_3D_z)) / max2d
+        diff_2D_3D_z = np.max(np.abs(sensor_2D - sensor_3D_z)) / max2d
         if diff_2D_3D_z > COMPARISON_THRESH:
             test_pass = False
             msg = f"Not equal: diff_2D_3D_z: {diff_2D_3D_z} and 2d: {max2d}, 3d: {max3d_z}"
             print(msg)
         all_tests = all_tests and test_pass
 
-        diff_2D_3D_y = np.max(np.abs(sensor_data_2D - sensor_data_3D_y)) / max2d
+        diff_2D_3D_y = np.max(np.abs(sensor_2D - sensor_data_3D_y)) / max2d
         if diff_2D_3D_y > COMPARISON_THRESH:
             test_pass = False
             msg = f"Not equal: diff_2D_3D_y: {diff_2D_3D_y} and 2d: {max2d}, 3d: {max3d_y}"
             print(msg)
         all_tests = all_tests and test_pass
 
-        diff_2D_3D_x = np.max(np.abs(sensor_data_2D - sensor_data_3D_x)) / max2d
+        diff_2D_3D_x = np.max(np.abs(sensor_2D - sensor_data_3D_x)) / max2d
         if diff_2D_3D_x > COMPARISON_THRESH:
             test_pass = False
             msg = f"Not equal: diff_2D_3D_x: {diff_2D_3D_x} and 2d: {max2d}, 3d: {max3d_x}"
@@ -624,53 +624,64 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         # if (test_num == 0):
         #     fig3, ((ax3a, ax3b), (ax3c, ax3d)) = plt.subplots(2, 2)
         #     fig3.suptitle(f"{test_name}: Z")
-        #     ax3a.imshow(sensor_data_2D)
-        #     # ax3b.imshow(sensor_data_3D_z)
-        #     # ax3c.imshow(np.abs(sensor_data_2D - sensor_data_3D_z))
+        #     ax3a.imshow(sensor_2D)
+        #     # ax3b.imshow(sensor_3D_z)
+        #     # ax3c.imshow(np.abs(sensor_2D - sensor_3D_z))
         #     ax3d.imshow(np.abs(matlab_2d))
         # else:
         #     fig3, (ax3a, ax3b, ax3c) = plt.subplots(3, 1)
         #     fig3.suptitle(f"{test_name}: Z")
-        #     ax3a.imshow(sensor_data_2D)
-        #     # ax3b.imshow(sensor_data_3D_z)
-        #     # ax3c.imshow(np.abs(sensor_data_2D - sensor_data_3D_z))
+        #     ax3a.imshow(sensor_2D)
+        #     # ax3b.imshow(sensor_3D_z)
+        #     # ax3c.imshow(np.abs(sensor_2D - sensor_3D_z))
 
         # fig2, ((ax2a, ax2b, ax2c) ) = plt.subplots(3, 1)
         # fig2.suptitle(f"{test_name}: Y")
-        # ax2a.imshow(sensor_data_2D)
+        # ax2a.imshow(sensor_2D)
         # # ax2b.imshow(sensor_data_3D_y)
-        # # ax2c.imshow(np.abs(sensor_data_2D - sensor_data_3D_y))
+        # # ax2c.imshow(np.abs(sensor_2D - sensor_data_3D_y))
 
         # fig1, ((ax1a, ax1b, ax1c) ) = plt.subplots(3, 1)
         # fig1.suptitle(f"{test_name}: X")
-        # ax1a.imshow(sensor_data_2D)
+        # ax1a.imshow(sensor_2D)
         # ax1b.imshow(sensor_data_3D_x)
-        # ax1c.imshow(np.abs(sensor_data_2D - sensor_data_3D_x))
+        # ax1c.imshow(np.abs(sensor_2D - sensor_data_3D_x))
 
 
         fig0, ax0a = plt.subplots(1, 1)
-        N2 = np.shape(sensor_data_2D)[0]
+        N2 = np.shape(sensor_2D)[0]
         # print(N2)
         # N3x = np.shape(sensor_data_3D_x)[0]
         # N3y = np.shape(sensor_data_3D_y)[0]
-        N3z = np.shape(sensor_data_3D_z)[0]
+        N3z = np.shape(sensor_3D_z)[0]
         # print(N3z)
-        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_2D[N2 // 2 - 1, :], label='2D')
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_2D[N2 // 2 - 1, :], label='2D')
         # ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_x[Nx // 2 - 1, :], label='3D x')
         # ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_y[Ny // 2 - 1, :], label='3D y')
-        ax0a.plot(np.squeeze(kgrid.t_array), sensor_data_3D_z[N3z // 2 - 1, :],
+        ax0a.plot(np.squeeze(kgrid.t_array), sensor_3D_z[N3z // 2 - 1, :],
                   color='tab:orange', linestyle='--', marker='o', markerfacecolor='none', markeredgecolor='tab:orange', label='3D z')
         if ((test_num == 0) or (test_num == 16) or (test_num == 17)):
             ax0a.plot(np.squeeze(kgrid.t_array), matlab_2d[np.shape(matlab_2d)[0] // 2 - 1, :], 'k-', label='matlab 2d')
             ax0a.plot(np.squeeze(kgrid.t_array), matlab_3d[np.shape(matlab_3d)[0] // 2 - 1, :], 'k--*', label='matlab 3d')
         ax0a.legend()
-        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_2D[:, Ny // 2 - 1], label='2D')
+        ax0a.set_ylim(-1e-6, 1e-6)
+        fig0.suptitle(f"{test_name}")
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_2D[:, Ny // 2 - 1], label='2D')
         # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_x[:, Ny // 2 - 1], label='3D x')
         # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_y[:, Ny // 2 - 1], label='3D y')
-        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_data_3D_z[:, Ny // 2 - 1], label='3D z')
+        # ax0b.plot(np.squeeze(kgrid.t_array), sensor_3D_z[:, Ny // 2 - 1], label='3D z')
         # ax0b.legend()
 
-        plt.show()
+        fig1, ax1a = plt.subplots(1, 1)
+        N2 = np.shape(sensor_2D)[0]
+        ax1a.plot(sensor_data_2D['ux'][N2 // 2 - 1, :], label='ux 2D')
+        ax1a.plot(sensor_data_2D['uy'][N2 // 2 - 1, :], label='uy 2D')
+        ax1a.plot(sensor_data_3D_z['ux'][N3z // 2 - 1, :], label='ux 3D')
+        ax1a.plot(sensor_data_3D_z['uy'][N3z // 2 - 1, :], label='uy 3D')
+        ax1a.legend()
+        ax1a.set_ylim(-1e-6, 1e-6)
+        fig1.suptitle(f"{test_name}")
+
 
         # clear structures
         del kgrid
@@ -678,14 +689,16 @@ def test_pstd_elastic_3d_compare_with_pstd_elastic_2d():
         del medium
         del sensor
 
+    plt.show()
+
     assert all_tests, msg
 
-        # diff_2D_3D_x = np.max(np.abs(sensor_data_2D - sensor_data_3D_x)) / ref_max
+        # diff_2D_3D_x = np.max(np.abs(sensor_2D - sensor_data_3D_x)) / ref_max
         # if diff_2D_3D_x > COMPARISON_THRESH:
         #     test_pass = False
         #     assert test_pass, "Not equal: dff_2D_3D_x"
 
-        # diff_2D_3D_y = np.max(np.abs(sensor_data_2D - sensor_data_3D_y)) / ref_max
+        # diff_2D_3D_y = np.max(np.abs(sensor_2D - sensor_data_3D_y)) / ref_max
         # if diff_2D_3D_y > COMPARISON_THRESH:
         #     test_pass = False
         #     assert test_pass, "Not equal: diff_2D_3D_y"

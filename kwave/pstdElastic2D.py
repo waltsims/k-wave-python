@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interpn
-import scipy.io as sio
+import scipy.fft
 from tqdm import tqdm
 from typing import Union
 from copy import deepcopy
@@ -443,8 +443,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     lame_lambda = medium.density * medium.sound_speed_compression**2 - 2.0 * mu
     m_mu: int = np.squeeze(mu).ndim
 
-    points = (k_sim.kgrid.x_vec, k_sim.kgrid.y_vec)
-
     # assign the viscosity coefficients
     if options.kelvin_voigt_model:
         eta = 2.0 * rho0 * medium.sound_speed_shear**3 * db2neper(deepcopy(medium.alpha_coeff_shear), 2.0)
@@ -454,20 +452,23 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # calculate the values of the density at the staggered grid points
     # using the arithmetic average [1, 2], where sgx  = (x + dx/2, y) and
     # sgy  = (x, y + dy/2)
+
+    points = (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec))
+
     if (m_rho0 == 2 and options.use_sg):
 
         # rho0 is heterogeneous and staggered grids are used
-        points = (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec))
-
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
                          np.squeeze(k_sim.kgrid.y_vec),
                          indexing='ij',)
         interp_points = np.moveaxis(mg, 0, -1)
+
         rho0_sgx = interpn(points, k_sim.rho0, interp_points, method='linear', bounds_error=False)
 
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec),
                          np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2,
                          indexing='ij',)
+
         interp_points = np.moveaxis(mg, 0, -1)
         rho0_sgy = interpn(points, k_sim.rho0, interp_points, method='linear', bounds_error=False)
 
@@ -489,23 +490,20 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     del rho0_sgx
     del rho0_sgy
 
-    mu_sgxy = np.empty_like(rho0_sgy_inv)
 
     # calculate the values of mu at the staggered grid points using the
     # harmonic average [1, 2], where sgxy = (x + dx/2, y + dy/2)
     if (m_mu == 2 and options.use_sg):
 
         # mu is heterogeneous and staggered grids are used
-        points = (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec))
-
         mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
                          np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2,
                          indexing='ij',)
+
         interp_points = np.moveaxis(mg, 0, -1)
 
-        #with np.errstate(divide='ignore', invalid='ignore'):
-
-        mu_sgxy = 1.0 / interpn(points, 1.0 / mu, interp_points, method='linear', bounds_error=False)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            mu_sgxy = 1.0 / interpn(points, 1.0 / mu, interp_points, method='linear', bounds_error=False)
 
         # set values outside of the interpolation range to original values
         mu_sgxy[np.isnan(mu_sgxy)] = mu[np.isnan(mu_sgxy)]
@@ -520,17 +518,15 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     if options.kelvin_voigt_model:
         if (m_eta == 2 and options.use_sg):
 
-            print('compute eta_sgxy')
-
             # eta is heterogeneous and staggered grids are used
-            points = (np.squeeze(k_sim.kgrid.x_vec), np.squeeze(k_sim.kgrid.y_vec))
             mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2,
                              np.squeeze(k_sim.kgrid.y_vec) + k_sim.kgrid.dy / 2,
                              indexing ='ij')
-            interp_points = np.moveaxis(mg, 0, -1)
-            # with np.errstate(divide='ignore', invalid='ignore'):
 
-            eta_sgxy = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
+            interp_points = np.moveaxis(mg, 0, -1)
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                eta_sgxy = 1.0 / interpn(points, 1.0 / eta, interp_points, method='linear', bounds_error=False)
 
             # set values outside of the interpolation range to original values
             eta_sgxy[np.isnan(eta_sgxy)] = eta[np.isnan(eta_sgxy)]
@@ -579,7 +575,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, True,  1)
 
     # get the multi-axial PML operators
-    multi_axial_PML_ratio: float = 0.1
     mpml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, False, 0)
     mpml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, multi_axial_PML_ratio * pml_x_alpha, True,  0)
     mpml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, multi_axial_PML_ratio * pml_y_alpha, False, 1)
@@ -588,20 +583,19 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # define the k-space derivative operators, multiply by the staggered
     # grid shift operators, and then re-order using ifftshift (the option
     # options.use_sg exists for debugging)
+    kx_vec = np.squeeze(k_sim.kgrid.k_vec[0])
+    ky_vec = np.squeeze(k_sim.kgrid.k_vec[1])
+
     if options.use_sg:
-
-        kx_vec = np.squeeze(k_sim.kgrid.k_vec[0])
-        ky_vec = np.squeeze(k_sim.kgrid.k_vec[1])
-
-        ddx_k_shift_pos = np.fft.ifftshift(1j * kx_vec * np.exp(1j * kx_vec * dx / 2.0))
-        ddx_k_shift_neg = np.fft.ifftshift(1j * kx_vec * np.exp(-1j * kx_vec * dx / 2.0))
-        ddy_k_shift_pos = np.fft.ifftshift(1j * ky_vec * np.exp(1j * ky_vec * dy / 2.0))
-        ddy_k_shift_neg = np.fft.ifftshift(1j * ky_vec * np.exp(-1j * ky_vec * dy / 2.0))
+        ddx_k_shift_pos = scipy.fft.ifftshift(1j * kx_vec * np.exp(1j * kx_vec * dx / 2.0))
+        ddy_k_shift_pos = scipy.fft.ifftshift(1j * ky_vec * np.exp(1j * ky_vec * dy / 2.0))
+        ddx_k_shift_neg = scipy.fft.ifftshift(1j * kx_vec * np.exp(-1j * kx_vec * dx / 2.0))
+        ddy_k_shift_neg = scipy.fft.ifftshift(1j * ky_vec * np.exp(-1j * ky_vec * dy / 2.0))
     else:
-        ddx_k_shift_pos = np.fft.ifftshift(1j * kx_vec)
-        ddx_k_shift_neg = np.fft.ifftshift(1j * kx_vec)
-        ddy_k_shift_pos = np.fft.ifftshift(1j * ky_vec)
-        ddy_k_shift_neg = np.fft.ifftshift(1j * ky_vec)
+        ddx_k_shift_pos = scipy.fft.ifftshift(1j * kx_vec)
+        ddx_k_shift_neg = scipy.fft.ifftshift(1j * kx_vec)
+        ddy_k_shift_pos = scipy.fft.ifftshift(1j * ky_vec)
+        ddy_k_shift_neg = scipy.fft.ifftshift(1j * ky_vec)
 
     # shape for broadcasting
     ddx_k_shift_pos = np.expand_dims(ddx_k_shift_pos, axis=1)
@@ -650,6 +644,13 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
     p = np.zeros((Nx, Ny), dtype=myType)  # **
 
+    if not (options.data_cast == 'off'):
+        two = np.float32(2.0)
+        dt = np.float32(dt)
+    else:
+        two = np.float64(2.0)
+        dt = np.float64(dt)
+
     if m_mu == 2:
         mu = mu.astype(myType)
         lame_lambda = lame_lambda.astype(myType)
@@ -666,6 +667,16 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
         dduydydt = np.zeros(grid_shape, dtype=myType)  # **
         dduxdydt = np.zeros(grid_shape, dtype=myType)  # **
         dduydxdt = np.zeros(grid_shape, dtype=myType)  # **
+        if m_eta == 2:
+            eta = eta.astype(myType)
+            chi = chi.astype(myType)
+        else:
+            if not (options.data_cast == 'off'):
+                eta = np.float32(eta)
+                chi = np.float32(chi)
+            else:
+                eta = np.float64(eta)
+                chi = np.float64(chi)
 
 
 
@@ -745,204 +756,23 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     pml_y = np.squeeze(pml_y)
     pml_y = np.expand_dims(pml_y, axis=0)
 
-    checking: bool = False
-    verbose: bool = False
-
-    if checking:
-        mat_contents = sio.loadmat('C:/Users/dsinden/dev/octave/k-Wave/3D2D_2D_oneStep_num18.mat')
-        print(mat_contents.keys())
-
-        load_index: int = 0
-
-        # import h5py
-        # f = h5py.File('data/pressure.h5', 'r' )
-        # u_e = np.asarray(f.get('u_e'))
-        # print("u_e: ", u_e.shape)
-        # print("u_e: ", u_e.size)
-        # # print("u_e: ", np.max(u_e))
-        # u_e = np.asarray(f['u_e'])
-        # print("u_e: ", u_e.shape)
-        # print("u_e: ", u_e.size)
-        # print("u_e: ", u_e.dtype)
-
-        tol: float = 10E-12
-        if verbose:
-            print(sorted(mat_contents.keys()))
-        mat_dsxxdx = mat_contents['dsxxdx']
-        mat_dsyydy = mat_contents['dsyydy']
-        mat_dsxydx = mat_contents['dsxydx']
-        mat_dsxydy = mat_contents['dsxydy']
-
-        # mat_dduxdxdt = mat_contents['dduxdxdt']
-        # mat_dduxdydt = mat_contents['dduxdydt']
-        # mat_dduydxdt = mat_contents['dduydxdt']
-        # mat_dduydydt = mat_contents['dduydydt']
-
-        mat_duxdx = mat_contents['duxdx']
-        mat_duxdy = mat_contents['duxdy']
-        mat_duydx = mat_contents['duydx']
-        mat_duydy = mat_contents['duydy']
-
-        mat_ux_sgx = mat_contents['ux_sgx']
-        mat_ux_split_x = mat_contents['ux_split_x']
-        mat_ux_split_y = mat_contents['ux_split_y']
-        mat_uy_sgy = mat_contents['uy_sgy']
-        mat_uy_split_x = mat_contents['uy_split_x']
-        mat_uy_split_y = mat_contents['uy_split_y']
-
-        mat_sxx_split_x = mat_contents['sxx_split_x']
-        mat_sxx_split_y = mat_contents['sxx_split_y']
-        mat_syy_split_x = mat_contents['syy_split_x']
-        mat_syy_split_y = mat_contents['syy_split_y']
-
-        mat_ux = mat_contents['ux']
-        mat_uy = mat_contents['uy']
-
-        mat_p = mat_contents['p']
-        mat_sensor_data = mat_contents['sensor_data']
-
-        mat_ddx_k_shift_neg = mat_contents['ddx_k_shift_neg']
-        mat_ddx_k_shift_pos = mat_contents['ddx_k_shift_pos']
-        mat_ddy_k_shift_neg = mat_contents['ddy_k_shift_neg']
-        mat_ddy_k_shift_pos = mat_contents['ddy_k_shift_pos']
-        # mat_post = mat_contents['post']
-
-        # print('########### C_REF:', c_ref)
-
-    if checking:
-        mat_ux = mat_contents['ux']
-        if (np.abs(mat_ux - source.ux).sum() > tol) or (np.abs(mat_uy - source.uy).sum() > tol):
-            print("ux is not correct!")
-            print(mat_ux)
-            print(source.ux)
-            source.ux = mat_ux
-            source.uy = mat_uy
-        else:
-            # pass
-            print("ux and uy are correct!")
-
-    if checking:
-        mat_rho0_sgx_inv = mat_contents['rho0_sgx_inv']
-        mat_rho0_sgy_inv = mat_contents['rho0_sgy_inv']
-        if (np.abs(mat_rho0_sgx_inv - rho0_sgx_inv).sum() > tol) or (np.abs(mat_rho0_sgy_inv - rho0_sgy_inv).sum() > tol):
-            print("rho0_sgx_inv is not correct!")
-            print(mat_rho0_sgy_inv)
-            print(rho0_sgx_inv)
-            rho0_sgx_inv = mat_rho0_sgx_inv
-            rho0_sgy_inv = mat_rho0_sgy_inv
-        else:
-            # pass
-            print("rho0_sgx_inv and rho0_sgy_inv are correct!")
-
-    if checking:
-
-
-
-        mat_mu = mat_contents['mu']
-        diff = np.abs(mat_mu - mu)
-        if (np.abs(mat_mu - mu).sum() > tol):
-            print("mat_mu is not correct!", diff.sum(), diff.max(), diff.argmax(), )
-            ind = diff.argmax()
-            idx, idy = np.unravel_index(ind, diff.shape, order='F')
-            print(mat_mu[idx, idy], mu[idx, idy], diff[idx, idy])
-            print("matlab:", mat_mu)
-            print("python:", mu)
-            print("diff:", mat_mu - mu)
-            mu = mat_mu
-        else:
-            print("mu is correct!")
-
-        mat_lambda = mat_contents['lambda']
-        if (np.abs(mat_lambda - lame_lambda).sum() > tol):
-            print("lame_lambda is not correct!", np.abs(mat_lambda - lame_lambda).sum(), np.abs(mat_lambda - lame_lambda).max(), np.abs(mat_lambda - lame_lambda).argmax(), )
-            print("matlab:", mat_lambda)
-            print("python:", lame_lambda)
-            print("diff:", mat_lambda - lame_lambda)
-            lame_lambda = mat_lambda
-        else:
-            print("lambda is correct!")
-
-        mat_eta = mat_contents['eta']
-        if ( (np.abs(mat_eta - eta) / np.abs(mat_eta) ).sum() > 0.1):
-            print("eta is not correct!", np.abs(mat_eta - eta).sum(), np.abs(mat_eta - eta).sum() / np.abs(mat_eta).sum(),
-                  (np.abs(mat_eta - eta) / np.abs(mat_eta) ).sum(), np.abs(mat_eta - eta).max(), np.abs(mat_eta - eta).argmax() )
-            print("matlab:", mat_eta)
-            print("python:", eta)
-            print("diff:", mat_eta - eta)
-            eta = mat_eta
-        else:
-            print("eta is correct!", (np.abs(mat_eta - eta) / np.abs(mat_eta) ).sum())
-
-        mat_chi = mat_contents['chi']
-        if (np.abs(mat_chi - chi).sum() > tol):
-            print("chi is not correct!")
-            print("matlab:", mat_chi)
-            print("python:", chi)
-            print("diff:", mat_chi - chi)
-            chi = mat_chi
-        else:
-            print("chi is correct!")
-
-        mat_shear = mat_contents['shear']
-        if (np.abs(mat_shear - medium.sound_speed_shear**3).sum() > tol):
-            print("shear is not correct!")
-        else:
-            # pass
-            print("mu_sgxy is correct!")
-
-
-        mat_mu_sgxy = mat_contents['mu_sgxy']
-        if (np.abs(mat_mu_sgxy - mu_sgxy).sum() > tol):
-            # print("mu_sgxy is not correct!")
-            # print(mat_mu_sgxy)
-            # print(mu_sgxy)
-            mu_sgxy = mat_mu_sgxy
-        else:
-            # pass
-            print("mu_sgxy is correct!")
-
-        mat_eta_sgxy = mat_contents['eta_sgxy']
-        if (np.abs(mat_eta_sgxy - eta_sgxy).sum() > tol):
-            # print("eta_sgxy is not correct!")
-            # print(mat_mu_sgxy)
-            # print(eta_sgxy)
-            eta_sgxy = mat_eta_sgxy
-        else:
-            # pass
-            print("eta_sgxy is correct!")
-
-        if (np.abs(mat_ddx_k_shift_neg - ddx_k_shift_neg).sum() > tol):
-            print("ddx_k_shift_neg is not correct!")
-        else:
-            print("ddx_k_shift_neg is correct!")
-
-        if (np.abs(mat_ddx_k_shift_pos - ddx_k_shift_pos).sum() > tol):
-            print("ddx_k_shift_pos is not correct!")
-        else:
-            print("ddx_k_shift_pos is correct!")
-
-        if (np.abs(mat_ddy_k_shift_neg - ddy_k_shift_neg).sum() > tol):
-            print("ddy_k_shift_neg is not correct!")
-        else:
-            print("ddy_k_shift_neg is correct!")
-
-        if (np.abs(mat_ddy_k_shift_pos - ddy_k_shift_pos).sum() > tol):
-            print("ddy_k_shift_pos is not correct!")
-        else:
-            print("ddy_k_shift_pos is correct!")
-
 
     # These should be zero indexed
-    if k_sim.s_source_pos_index is not None:
+    if hasattr(k_sim, 's_source_sig_index') and k_sim.s_source_pos_index is not None:
         k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index) - int(1)
-    if k_sim.u_source_pos_index is not None:
+
+    if hasattr(k_sim, 'u_source_pos_index') and k_sim.u_source_pos_index is not None:
         k_sim.u_source_pos_index = np.squeeze(k_sim.u_source_pos_index) - int(1)
-    if k_sim.p_source_pos_index is not None:
+
+    if hasattr(k_sim, 'p_source_pos_index') and k_sim.p_source_pos_index is not None:
         k_sim.p_source_pos_index = np.squeeze(k_sim.p_source_pos_index) - int(1)
+
     if hasattr(k_sim, 's_source_sig_index') and k_sim.s_source_sig_index is not None:
         k_sim.s_source_sig_index = np.squeeze(k_sim.s_source_sig_index) - int(1)
+
     if hasattr(k_sim, 'u_source_sig_index') and k_sim.u_source_sig_index is not None:
         k_sim.u_source_sig_index = np.squeeze(k_sim.u_source_sig_index) - int(1)
+
     if hasattr(k_sim, 'p_source_sig_index') and k_sim.p_source_sig_index is not None:
         k_sim.p_source_sig_index = np.squeeze(k_sim.p_source_sig_index) - int(1)
 
@@ -955,532 +785,155 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
 
-        # compute the gradients of the stress tensor (these variables do not necessaily need to be stored, they could be computed as needed)
-        dsxxdx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(sxx_split_x + sxx_split_y, axis=0), axis=0))
-        dsyydy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(syy_split_x + syy_split_y, axis=1), axis=1))
+        # compute the gradients of the stress tensor
+        # these variables do not necessaily need to be stored, they could be computed as needed
+        dsxxdx = np.real(scipy.fft.ifftn(ddx_k_shift_pos * scipy.fft.fftn(sxx_split_x + sxx_split_y, axes=(0,) ), axes=(0,) ))
+        dsyydy = np.real(scipy.fft.ifftn(ddy_k_shift_pos * scipy.fft.fftn(syy_split_x + syy_split_y, axes=(1,) ), axes=(1,) ))
         temp = sxy_split_x + sxy_split_y
-        dsxydx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(temp, axis=0), axis=0))
-        dsxydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(temp, axis=1), axis=1))
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_dsxxdx - dsxxdx).sum() > tol):
-                    print("dsxxdx is not correct!")
-                else:
-                    pass
-                    # print("dsxxdx is correct!")
-
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_dsyydy - dsyydy).sum() > tol):
-                    print("dsyydy is not correct!")
-                else:
-                    pass
-                    # print("dsyydy is correct!")
-
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_dsxydx - dsxydx).sum() > tol):
-                    print("dsxydx is not correct!")
-                else:
-                    pass
-                    # print("dsxydx is correct!")
-
-
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_dsxydy - dsxydy).sum() > tol):
-                    print("dsxydy is not correct!")
-                else:
-                    pass
-                    # print("dsxydy is correct!")
+        dsxydx = np.real(scipy.fft.ifftn(ddx_k_shift_neg * scipy.fft.fftn(temp, axes=(0,) ), axes=(0,) ))
+        dsxydy = np.real(scipy.fft.ifftn(ddy_k_shift_neg * scipy.fft.fftn(temp, axes=(1,) ), axes=(1,) ))
 
         # calculate the split-field components of ux_sgx and uy_sgy at the next
         # time step using the components of the stress at the current time step
+        temp =  mpml_y * pml_x_sgx
+        ux_split_x = temp * (temp * ux_split_x + dt * rho0_sgx_inv * dsxxdx)
 
+        temp =  mpml_x_sgx * pml_y
+        ux_split_y = temp * (temp * ux_split_y + dt * rho0_sgx_inv * dsxydy)
 
-        a = pml_x_sgx * ux_split_x
-        b = mpml_y * a
-        c = b + kgrid.dt * rho0_sgx_inv * dsxxdx
-        d = pml_x_sgx * c
-        ux_split_x = mpml_y * d
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_ux_split_x - ux_split_x).sum() > tol):
-                    print("ux_split_x is not correct!")
-                else:
-                    pass
+        temp =  mpml_y_sgy * pml_x
+        uy_split_x = temp * (temp * uy_split_x + dt * rho0_sgy_inv * dsxydx)
 
-        a = pml_y * ux_split_y
-        b = mpml_x_sgx * a
-        c = b + kgrid.dt * rho0_sgx_inv * dsxydy
-        d = pml_y * c
-        ux_split_y = mpml_x_sgx * d
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_ux_split_y - ux_split_y).sum() > tol):
-                    print("ux_split_y is not correct!")
-                else:
-                    pass
-
-
-        a = pml_x * uy_split_x
-        b = mpml_y_sgy * a
-        c = b + kgrid.dt * rho0_sgy_inv * dsxydx
-        d = pml_x * c
-        uy_split_x = mpml_y_sgy * d
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_uy_split_x - uy_split_x).sum() > tol):
-                    print("uy_split_x is not correct!")
-                else:
-                    pass
-
-
-        a = pml_y_sgy * uy_split_y
-        b = mpml_x * a
-        c = b + kgrid.dt * rho0_sgy_inv * dsyydy
-        d = pml_y_sgy * c
-        uy_split_y = mpml_x * d
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_uy_split_y - uy_split_y).sum() > tol):
-                    print("uy_split_y is not correct!")
-                else:
-                    pass
-
+        temp =  mpml_x * pml_y_sgy
+        uy_split_y = temp * (temp * uy_split_y + dt * rho0_sgy_inv * dsyydy)
 
         # add in the pre-scaled velocity source terms
         if (k_sim.source_ux > t_index):
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] = \
-                  k_sim.source.ux[k_sim.u_source_sig_index, t_index]
+                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] = k_sim.source.ux[k_sim.u_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
-                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] = \
-                  ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] + \
-                  k_sim.source.ux[k_sim.u_source_sig_index, t_index]
-
-
+                ux_split_x[np.unravel_index(k_sim.u_source_pos_index, ux_split_x.shape, order='F')] += k_sim.source.ux[k_sim.u_source_sig_index, t_index]
 
         if (k_sim.source_uy > t_index):
-
-            # if checking:
-            #     if (t_index == load_index):
-            #         if (np.abs(mat_pre - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-            #             print("PRE uy_split_y is not correct!")
-            #         else:
-            #             pass
-
             if (source.u_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] = k_sim.source.uy[k_sim.u_source_sig_index, t_index]
             else:
                 # add the source values to the existing field values
-                # uy_split_y[k_sim.u_source_pos_index] = uy_split_y[k_sim.u_source_pos_index] + source.uy[k_sim.u_source_sig_index, t_index]
-                uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] = \
-                  uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] + \
-                  k_sim.source.uy[k_sim.u_source_sig_index, t_index]
-
-            # if checking:
-            #     if (t_index == load_index):
-            #         if (np.abs(mat_post - uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]).sum() > tol):
-            #             print("POST uy_split_y is not correct!",
-            #                   np.max(mat_post),
-            #                   np.max(uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')]),
-            #                   mat_post[0:5],
-            #                   uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')],
-            #                   mat_post[0:5] - uy_split_y[np.unravel_index(k_sim.u_source_pos_index[0:5], uy_split_y.shape, order='F')])
-            #             #uy_split_y = np.reshape(mat_post, uy_split_y.shape, order='F')
-            #         else:
-            #             pass
+                uy_split_y[np.unravel_index(k_sim.u_source_pos_index, uy_split_y.shape, order='F')] += k_sim.source.uy[k_sim.u_source_sig_index, t_index]
 
 
-        # Q - should the velocity source terms for the Dirichlet condition be
-        # added to the split or combined velocity field?
-
-        # combine split field components (these variables do not necessarily
-        # need to be stored, they could be computed when needed)
+        # combine split field components
+        # these variables do not necessarily need to be stored, they could be computed when needed
         ux_sgx = ux_split_x + ux_split_y
         uy_sgy = uy_split_x + uy_split_y
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_ux_sgx - ux_sgx).sum() > tol):
-                    print("ux_sgx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_uy_sgy - uy_sgy).sum() > tol):
-                    print("uy_sgy is not correct!")
-                else:
-                    pass
 
-        # calculate the velocity gradients (these variables do not necessarily
-        # need to be stored, they could be computed when needed)
-        duxdx = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(ux_sgx, axis=0), axis=0))
-        duxdy = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(ux_sgx, axis=1), axis=1))
-        duydx = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(uy_sgy, axis=0), axis=0))
-        duydy = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(uy_sgy, axis=1), axis=1))
+        # calculate the velocity gradients
+        # these variables do not necessarily need to be stored, they could be computed when needed
+        duxdx = np.real(scipy.fft.ifftn(ddx_k_shift_neg * scipy.fft.fftn(ux_sgx, axes=(0,) ), axes=(0,) ))
+        duxdy = np.real(scipy.fft.ifftn(ddy_k_shift_pos * scipy.fft.fftn(ux_sgx, axes=(1,) ), axes=(1,) ))
+        duydx = np.real(scipy.fft.ifftn(ddx_k_shift_pos * scipy.fft.fftn(uy_sgy, axes=(0,) ), axes=(0,) ))
+        duydy = np.real(scipy.fft.ifftn(ddy_k_shift_neg * scipy.fft.fftn(uy_sgy, axes=(1,) ), axes=(1,) ))
 
-        if checking:
-            if (t_index == load_index):
-                if (np.abs(mat_duxdx - duxdx).sum() > tol):
-                    print("duxdx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duxdy - duxdy).sum() > tol):
-                    print("duxdy is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duydx - duydx).sum() > tol):
-                    print("duydx is not correct!")
-                else:
-                    pass
-                if (np.abs(mat_duydy - duydy).sum() > tol):
-                    print("duydy is not correct!")
-                else:
-                    pass
-
-        # update the normal components and shear components of stress tensor
-        # using a split field pml
+        # update the normal components and shear components of stress tensor using a split field pml
         if options.kelvin_voigt_model:
 
             # compute additional gradient terms needed for the Kelvin-Voigt model
 
             temp = (dsxxdx + dsxydy) * rho0_sgx_inv
-            dduxdxdt = np.real(np.fft.ifft(ddx_k_shift_neg * np.fft.fft(temp, axis=0), axis=0))
-            dduxdydt = np.real(np.fft.ifft(ddy_k_shift_pos * np.fft.fft(temp, axis=1), axis=1))
+            dduxdxdt = np.real(scipy.fft.ifftn(ddx_k_shift_neg * scipy.fft.fftn(temp, axes=(0,) ), axes=(0,) ))
+            dduxdydt = np.real(scipy.fft.ifftn(ddy_k_shift_pos * scipy.fft.fftn(temp, axes=(1,) ), axes=(1,) ))
 
             temp = (dsyydy + dsxydx) * rho0_sgy_inv
-            dduydxdt = np.real(np.fft.ifft(ddx_k_shift_pos * np.fft.fft(temp, axis=0), axis=0))
-            dduydydt = np.real(np.fft.ifft(ddy_k_shift_neg * np.fft.fft(temp, axis=1), axis=1))
-            # if checking:
-            #     if (t_index == load_index):
-            #         if (np.abs(mat_dduxdxdt - dduxdxdt).sum() > tol):
-            #             print("dduxdxdt is not correct!")
-            #         else:
-            #             pass
-            #         if (np.abs(mat_dduxdydt - dduxdydt).sum() > tol):
-            #             print("dduxdydt is not correct!")
-            #         else:
-            #             pass
-            #         if (np.abs(mat_dduydxdt - dduydxdt).sum() > tol):
-            #             print("dduydxdt is not correct!")
-            #         else:
-            #             pass
-            #         if (np.abs(mat_dduydydt - dduydydt).sum() > tol):
-            #             print("dduydydt is not correct!")
-            #         else:
-            #             pass
+            dduydxdt = np.real(scipy.fft.ifftn(ddx_k_shift_pos * scipy.fft.fftn(temp, axes=(0,) ), axes=(0,) ))
+            dduydydt = np.real(scipy.fft.ifftn(ddy_k_shift_neg * scipy.fft.fftn(temp, axes=(1,) ), axes=(1,) ))
 
-            # update the normal shear components of the stress tensor using a
-            # Kelvin-Voigt model with a split-field multi-axial pml
+            temp = mpml_y * pml_x
+            temp1 = dt * (lame_lambda * duxdx + chi * dduxdxdt)
+            temp2 = two * dt * (mu * duxdx + eta * dduxdxdt)
 
-            # sxx_split_x = bsxfun(@times, mpml_y,
-            #                      bsxfun(@times, pml_x,
-            #                             bsxfun(@times, mpml_y,
-            #                                    bsxfun(@times, pml_x, sxx_split_x)) +
-            #                                        dt .* (2 .* mu + lame_lambda) .* duxdx + dt .* (2 .* eta + chi) .* dduxdxdt));
-            a = pml_x * sxx_split_x
-            b = mpml_y * a
-            c = b + dt * (2.0 * mu + lame_lambda) * duxdx + dt * (2.0 * eta + chi) * dduxdxdt
-            d = pml_x * c
-            sxx_split_x = mpml_y * d
+            sxx_split_x = temp * (temp * sxx_split_x + temp1 + temp2)
+            syy_split_x = temp * (temp * syy_split_x + temp1)
 
-            # sxx_split_y = bsxfun(@times, mpml_x,
-            #                      bsxfun(@times, pml_y,
-            #                             bsxfun(@times, mpml_x,
-            #                                    bsxfun(@times, pml_y, sxx_split_y)) + dt .* lame_lambda .* duydy + dt .* chi .* dduydydt));
-            a = pml_y * sxx_split_y
-            b = mpml_x * a
-            c = b + dt * (lame_lambda * duydy + chi * dduydydt)
-            d = pml_y * c
-            sxx_split_y = mpml_x * d
 
-            # syy_split_x = bsxfun(@times, mpml_y,
-            #                      bsxfun(@times, pml_x,
-            #                             bsxfun(@times, mpml_y,
-            #                                    bsxfun(@times, pml_x, syy_split_x)) + dt .* lame_lambda .* duxdx + dt .* chi .* dduxdxdt));
-            a = pml_x * syy_split_x
-            b = mpml_y * a
-            c = b + dt * (lame_lambda * duxdx + chi * dduxdxdt)
-            d = pml_x * c
-            syy_split_x = mpml_y * d
+            temp = mpml_x * pml_y
+            temp1 = dt * (lame_lambda * duydy + chi * dduydydt)
+            temp2 = two * dt * (mu * duydy + eta * dduydydt)
 
-            # syy_split_y = bsxfun(@times, mpml_x,
-            #                      bsxfun(@times, pml_y,
-            #                             bsxfun(@times, mpml_x,
-            #                                    bsxfun(@times, pml_y, syy_split_y)) + dt .* (2 .* mu + lame_lambda) .* duydy + dt .* (2 .* eta + chi) .* dduydydt));
-            a = pml_y * syy_split_y
-            b = mpml_x * a
-            c = b + dt * (2.0 * mu + lame_lambda) * duydy + dt * (2.0 * eta + chi) * dduydydt
-            d = pml_y * c
-            syy_split_y = mpml_x * d
+            sxx_split_y = temp * (temp * sxx_split_y + temp1)
+            syy_split_y = temp * (temp * syy_split_y + temp1 + temp2)
 
-            # sxy_split_x = bsxfun(@times, mpml_y_sgy,
-            #                      bsxfun(@times, pml_x_sgx,
-            #                             bsxfun(@times, mpml_y_sgy,
-            #                                    bsxfun(@times, pml_x_sgx, sxy_split_x)) + dt .* mu_sgxy .* duydx + dt .* eta_sgxy .* dduydxdt));
-            a = pml_x_sgx * sxy_split_x
-            b = mpml_y_sgy * a
-            c = b + dt * (mu_sgxy * duydx + eta_sgxy * dduydxdt)
-            d = pml_x_sgx * c
-            sxy_split_x = mpml_y_sgy * d
 
-            # sxy_split_y = bsxfun(@times, mpml_x_sgx,
-            #                      bsxfun(@times, pml_y_sgy,
-            #                             bsxfun(@times, mpml_x_sgx,
-            #                                    bsxfun(@times, pml_y_sgy, sxy_split_y)) + dt .* mu_sgxy .* duxdy + dt .* eta_sgxy .* dduxdydt));
-            a = pml_y_sgy * sxy_split_y
-            b = mpml_x_sgx * a
-            c = b + dt * (mu_sgxy * duxdy + eta_sgxy * dduxdydt)
-            d = pml_y_sgy * c
-            sxy_split_y = mpml_x_sgx * d
+            temp = mpml_y_sgy * pml_x_sgx
+            sxy_split_x = temp * (temp * sxy_split_x + dt * (mu_sgxy * duydx + eta_sgxy * dduydxdt))
+
+            temp = mpml_x_sgx * pml_y_sgy
+            sxy_split_y = temp * (temp * sxy_split_y + dt * (mu_sgxy * duxdy + eta_sgxy * dduxdydt))
 
         else:
             # update the normal and shear components of the stress tensor using
             # a lossless elastic model with a split-field multi-axial pml
 
-            # sxx_split_x = bsxfun(@times, mpml_y,
-            #                      bsxfun(@times, pml_x,
-            #                             bsxfun(@times, mpml_y,
-            #                                    bsxfun(@times, pml_x, sxx_split_x)) + dt .* (2 .* mu + lame_lambda) .* duxdx));
-            a = pml_x * sxx_split_x
-            b = mpml_y * a
-            c = b + dt * (2.0 * mu + lame_lambda) * duxdx
-            d = pml_x * c
-            sxx_split_x = mpml_y * d
+            temp = mpml_y * pml_x
+            temp1 = dt * lame_lambda * duxdx
+            temp2 = dt * two * mu * duxdx
 
-            # sxx_split_y = bsxfun(@times, mpml_x,
-            #                      bsxfun(@times, pml_y,
-            #                             bsxfun(@times, mpml_x,
-            #                                    bsxfun(@times, pml_y, sxx_split_y)) + dt .* lame_lambda .* duydy));
-            a = pml_y * sxx_split_y
-            b = mpml_x * a
-            c = b + dt * lame_lambda * duydy
-            d = pml_y * c
-            sxx_split_y = mpml_x * d
+            sxx_split_x = temp * (temp * sxx_split_x + temp1 + temp2)
+            syy_split_x = temp * (temp * syy_split_x + temp1)
 
-            # syy_split_x = bsxfun(@times, mpml_y,
-            #                      bsxfun(@times, pml_x,
-            #                             bsxfun(@times, mpml_y,
-            #                                    bsxfun(@times, pml_x, syy_split_x)) + dt .* lame_lambda .* duxdx));
-            a = pml_x * syy_split_x
-            b = mpml_y * a
-            c = b + dt * lame_lambda * duxdx
-            d = pml_x * c
-            syy_split_x = d * mpml_y
 
-            # syy_split_y = bsxfun(@times, mpml_x,
-            #                      bsxfun(@times, pml_y,
-            #                             bsxfun(@times, mpml_x,
-            #                                    bsxfun(@times, pml_y, syy_split_y)) + dt .* (2 .* mu + lame_lambda) .* duydy));
-            a = pml_y * syy_split_y
-            b = mpml_x * a
-            c = b + dt * (2.0 * mu + lame_lambda) * duydy
-            d = pml_y * c
-            syy_split_y = mpml_x * d
+            temp = mpml_x * pml_y
+            temp1 = dt * lame_lambda * duydy
+            temp2 = dt * two * mu * duydy
 
-            # sxy_split_x = bsxfun(@times, mpml_y_sgy,
-            #                      bsxfun(@times, pml_x_sgx,
-            #                             bsxfun(@times, mpml_y_sgy,
-            #                                    bsxfun(@times, pml_x_sgx, sxy_split_x)) + dt .* mu_sgxy .* duydx));
-            a = pml_x_sgx * sxy_split_x
-            b = mpml_y_sgy * a
-            c = b + dt * mu_sgxy * duydx
-            d = pml_x_sgx * c
-            sxy_split_x = mpml_y_sgy * d
+            sxx_split_y = temp * (temp * sxx_split_y + temp1)
+            syy_split_y = temp * (temp * syy_split_y + temp1 + temp2)
 
-            # sxy_split_y = bsxfun(@times, mpml_x_sgx,
-            #                      bsxfun(@times, pml_y_sgy,
-            #                             bsxfun(@times, mpml_x_sgx,
-            #                                    bsxfun(@times, pml_y_sgy, sxy_split_y)) + dt .* mu_sgxy .* duxdy));
-            a = pml_y_sgy * sxy_split_y
-            b = mpml_x_sgx * a
-            c = b + dt * mu_sgxy * duxdy
-            d = pml_y_sgy * c
-            sxy_split_y = mpml_x_sgx * d
 
-        # add in the pre-scaled stress source terms
-        if hasattr(k_sim, 's_source_sig_index'):
-            if isinstance(k_sim.s_source_sig_index, str):
-                if k_sim.s_source_sig_index == ':':
-                    k_sim.s_source_sig_index = np.shape(source.sxx)[1]
+            temp = mpml_y_sgy * pml_x_sgx
+            sxy_split_x = temp * (temp * sxy_split_x + dt * mu_sgxy * duydx)
 
-        # # First find whether source locations are provided and how.
-        # if np.ndim(np.squeeze(k_sim.s_source_pos_index)) != 0:
-        #     n_pos = np.shape(np.squeeze(k_sim.s_source_pos_index))[0]
-        # else:
-        #     n_pos = None
 
+            temp = mpml_x_sgx * pml_y_sgy
+            sxy_split_y = temp * (temp * sxy_split_y + dt * mu_sgxy * duxdy)
+
+
+        # add stress source terms
         if (k_sim.source_sxx is not False and t_index < np.shape(source.sxx)[1]):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
-                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
             else:
                 # spatially and temporally varying source
-                # if np.shape(np.squeeze(source.sxx)) == (n_pos, k_sim.kgrid.Nt):
-                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                      k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
-                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                      k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] += k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
+                sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] += k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
 
-                # initial pressure (converted into stress) source
-                # elif np.shape(np.squeeze(source.sxx)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                #     if t_index == 0:
-                #         sxx_split_x = k_sim.source.sxx
-                #         sxx_split_y = k_sim.source.sxx
-
-                # # spatially uniform but temporally varying stress source
-                # else:
-
-                #     # print("in here", np.shape(k_sim.s_source_pos_index))
-                #     # print("in here", np.shape(k_sim.source.sxx))
-
-                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                #     mask = sxx_split_x.flatten("F")[k_sim.s_source_pos_index]
-
-                #     # print("in here", np.shape(k_sim.s_source_pos_index))
-                #     # print("in here", np.shape(k_sim.source.sxx))
-
-                #     sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                #       k_sim.source.sxx[k_sim.s_source_sig_index, t_index]
-
-
-                #     # sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] = sxx_split_x[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F')] + \
-                #     #   np.squeeze(k_sim.source.sxx[np.unravel_index(k_sim.s_source_pos_index, sxx_split_x.shape, order='F'), t_index] ) * np.ones_like(mask)
-
-                #     mask = sxx_split_y.flatten("F")[k_sim.s_source_pos_index]
-                #     sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] = sxx_split_y[np.unravel_index(k_sim.s_source_pos_index, sxx_split_y.shape, order='F')] + \
-                #       np.squeeze(k_sim.source.sxx)[t_index] * np.ones_like(mask)
-
-                # #else:
-                # #    raise TypeError('Wrong size', np.shape(np.squeeze(source.sxx)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(sxy_split_y))
-
-        if (k_sim.source_syy is not False and t_index < np.shape(source.sxx)[1]):
-
+        if (k_sim.source_syy is not False and t_index < np.shape(source.syy)[1]):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
                 syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
                 syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = k_sim.source.syy[k_sim.s_source_sig_index, t_index]
-
             else:
                 # spatially and temporally varying source
-                # if np.shape(np.squeeze(source.syy)) == (n_pos, k_sim.kgrid.Nt):
-                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
-                      k_sim.source.syy[k_sim.s_source_sig_index, t_index]
-                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
-                      k_sim.source.syy[k_sim.s_source_sig_index, t_index]
-                # initial pressure (converted into stress) source
-                # elif np.shape(np.squeeze(source.syy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                #     if t_index == 0:
-                #         syy_split_x = k_sim.source.syy
-                #         syy_split_y = k_sim.source.syy
-                # spatially uniform but temporally varying stress source
-                # else:
-                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                #     mask = syy_split_x.flatten("F")[k_sim.s_source_pos_index]
-                #     syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] = syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] + \
-                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                #     mask = syy_split_y.flatten("F")[k_sim.s_source_pos_index]
-                #     syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] = syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] + \
-                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                #else:
-                #    raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
+                syy_split_x[np.unravel_index(k_sim.s_source_pos_index, syy_split_x.shape, order='F')] += k_sim.source.syy[k_sim.s_source_sig_index, t_index]
+                syy_split_y[np.unravel_index(k_sim.s_source_pos_index, syy_split_y.shape, order='F')] += k_sim.source.syy[k_sim.s_source_sig_index, t_index]
 
         if (k_sim.source_sxy is not False and t_index < k_sim.source_sxy):
             if (source.s_mode == 'dirichlet'):
                 # enforce the source values as a dirichlet boundary condition
-                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
-                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
             else:
                 # spatially and temporally varying source
-                # if np.shape(np.squeeze(source.sxy)) == (n_pos, k_sim.kgrid.Nt):
-                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
-                      k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
-                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
-                      k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
-                # initial pressure (converted into stress) source
-                # elif np.shape(np.squeeze(source.sxy)) == (k_sim.kgrid.Nx, k_sim.kgrid.Ny):
-                #     if t_index == 0:
-                #         sxy_split_x = k_sim.source.sxy
-                #         sxy_split_y = k_sim.source.sxy
-                # # spatially uniform but temporally varying stress source
-                # elif np.shape(np.squeeze(source.sxy)) == k_sim.kgrid.Nt:
-                #     k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index)
-                #     mask = sxy_split_x.flatten("F")[k_sim.s_source_pos_index]
-                #     sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] = sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] + \
-                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                #     mask = sxy_split_y.flatten("F")[k_sim.s_source_pos_index]
-                #     sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] = sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] + \
-                #       np.squeeze(k_sim.source.syy)[t_index] * np.ones_like(mask)
-                # else:
-                #     raise TypeError('Wrong size', np.shape(np.squeeze(source.syy)), (k_sim.kgrid.Nx, k_sim.kgrid.Ny), np.shape(syy_split_x), np.shape(syy_split_y))
+                sxy_split_x[np.unravel_index(k_sim.s_source_pos_index, sxy_split_x.shape, order='F')] += k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
+                sxy_split_y[np.unravel_index(k_sim.s_source_pos_index, sxy_split_y.shape, order='F')] += k_sim.source.sxy[k_sim.s_source_sig_index, t_index]
 
-        if checking:
-            if (t_index == load_index):
-                diff = np.abs(mat_sxx_split_x - sxx_split_x)
-                if (diff.sum() > tol):
-                    print("sxx_split_x is not correct!", diff.sum())
-                    print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print(np.max(diff))
-                    # print("sxx_split_x diff.sum()=", diff.sum())
-                    # print("time point:", load_index)
-                    # print("diff:", np.max(diff), np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    # print("matlab max:", np.max(mat_sxx_split_x), np.max(sxx_split_x))
-                    # print("matlab argmax:", np.argmax(mat_sxx_split_x), np.argmax(sxx_split_x))
-                    # print("min:", np.min(mat_sxx_split_x), np.min(sxx_split_x))
-                    # print("argmin:", np.argmin(mat_sxx_split_x), np.argmin(sxx_split_x))
-                else:
-                    pass
-            if (t_index == load_index):
-                diff = np.abs(mat_sxx_split_y - sxx_split_y)
-                if (np.abs(mat_sxx_split_y - sxx_split_y).sum() > tol):
-                    print("sxx_split_y is not correct!")
-                    if (diff.sum() > tol):
-                        print("sxx_split_y is not correct!", diff.sum())
-                        print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                        print(np.max(diff))
-                else:
-                    pass
-            if (t_index == load_index):
-                diff = np.abs(mat_syy_split_x - syy_split_x)
-                if (np.abs(mat_syy_split_x - syy_split_x).sum() > tol):
-                    print("syy_split_x is not correct!")
-                    if (diff.sum() > tol):
-                        print("syy_split_x is not correct!", diff.sum())
-                        print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                        print(np.max(diff))
-                else:
-                    pass
-            if (t_index == load_index):
-                diff = np.abs(mat_syy_split_y - syy_split_y)
-                if (np.abs(mat_syy_split_y - syy_split_y).sum() > tol):
-                    print("syy_split_y is not correct!")
-                    if (diff.sum() > tol):
-                        print("syy_split_y is not correct!", diff.sum())
-                        print(np.argmax(diff), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                        print(np.max(diff))
-                else:
-                    pass
 
         # compute pressure from normal components of the stress
-        p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / 2.0
-
-        if checking:
-            if (t_index == load_index):
-                diff = np.abs(mat_p - p)
-                if (diff.sum() > tol):
-                    print("\tp is not correct!", diff.sum())
-                    print("\tdiff:" + str(np.argmax(diff)), np.unravel_index(np.argmax(diff), diff.shape, order='F'))
-                    print("\tp:" + str(np.max(p)), np.argmax(p), np.min(p), np.argmin(p))
-                    print("\tmat_p:" + str(np.max(mat_p)), np.argmax(mat_p), np.min(mat_p), np.argmin(mat_p))
-                    print("\tmat_p:" + str(np.max(diff)), np.argmax(diff), np.min(diff), np.argmin(diff))
-                else:
-                    pass
+        p = -(sxx_split_x + sxx_split_y + syy_split_x + syy_split_y) / two
 
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
@@ -1512,21 +965,6 @@ def pstd_elastic_2d(kgrid: kWaveGrid,
 
             sensor_data = extract_sensor_data(2, sensor_data, file_index, k_sim.sensor_mask_index,
                                               extract_options, k_sim.record, p, ux_sgx, uy_sgy)
-
-            if checking:
-                if (t_index == load_index):
-                    if sensor_data.ux_max_all is not None:
-                        print(type(mat_sensor_data[0][0][0]), np.shape(mat_sensor_data[0][0][0]), mat_sensor_data[0][0][0])
-                        print(sensor_data.ux_max_all)
-                        if (np.abs(mat_sensor_data[0][0][0] - sensor_data.ux_max_all).sum() > tol):
-                            print("ux_max_all is not correct!")
-                        else:
-                            pass
-                    if sensor_data.uy_max_all is not None:
-                        if (np.abs(mat_sensor_data[0][0][0] - sensor_data.uy_max_all).sum() > tol):
-                            print("uy_max_all is not correct!")
-                        else:
-                            pass
 
             # update variable used for timing variable to exclude the first
             # time step if plotting is enabled
