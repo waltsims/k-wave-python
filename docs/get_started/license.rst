@@ -5,7 +5,7 @@ License
 Current License
 --------------------------------------
 
-For past licenses, see `the Past licenses section <#past-licenses-for-reference>`_. Migration was performed with aproval of all contributors in `the public forum of a discussion thread on github <#https://github.com/waltsims/k-wave-python/discussions/525>_.
+For past licenses, see `the Past Licenses section <#past-licenses-for-reference>`_. Migration was performed with aproval of all contributors in `the public forum GitHub <#https://github.com/waltsims/k-wave-python/discussions/525>.`_
 
 .. include:: ../../LICENSE
    :literal:
