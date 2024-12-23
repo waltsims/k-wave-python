@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, Union
 import os
+import warnings
 
 from kwave import PLATFORM, BINARY_DIR
 from kwave.ksensor import kSensor
@@ -20,7 +21,7 @@ class SimulationExecutionOptions:
         kwave_function_name: Optional[str] = "kspaceFirstOrder3D",
         delete_data: bool = True,
         device_num: Optional[int] = None,
-        num_threads: Union[int, str] = "all",
+        num_threads: Optional[int] = None,
         thread_binding: Optional[bool] = None,
         system_call: Optional[str] = None,
         verbose_level: int = 0,
@@ -52,7 +53,11 @@ class SimulationExecutionOptions:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
 
         if value == "all":
-            value = cpu_count
+            warnings.warn("The 'all' option is deprecated. The value of None sets the maximal number of threads (excluding Windows).", DeprecationWarning)
+            value = cpu_count    
+
+        if value is None:
+            value = cpu_count        
 
         if not isinstance(value, int):
             raise ValueError("Got {value}. Number of threads must be 'all' or a positive integer")
@@ -86,10 +91,8 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        valid_binary_names = ["kspaceFirstOrder-CUDA", "kspaceFirstOrder-OMP"]
-        if PLATFORM == "windows":
-            valid_binary_names = [name + ".exe" for name in valid_binary_names]
-
+        
+        valid_binary_names = ["kspaceFirstOrder-OMP", "kspaceFirstOrder-CUDA"]
         if self._binary_name is None:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation is None:
@@ -102,9 +105,9 @@ class SimulationExecutionOptions:
 
             if PLATFORM == "windows":
                 self._binary_name += ".exe"
+                valid_binary_names = [name + ".exe" for name in valid_binary_names]
+                    
         elif self._binary_name not in valid_binary_names:
-            import warnings
-
             warnings.warn("Custom binary name set. Ignoring `is_gpu_simulation` state.")
         return self._binary_name
 
@@ -148,52 +151,63 @@ class SimulationExecutionOptions:
                 f"{value} is not a directory. If you are trying to set the `binary_path`, use the `binary_path` attribute instead."
             )
         self._binary_dir = Path(value)
-
-    def get_options_string(self, sensor: kSensor) -> str:
-        options_list = []
-        if self.device_num is not None and self.device_num < 0:
+    
+    @property
+    def device_num(self) -> Optional[int]:
+        return self._device_num
+    
+    @device_num.setter
+    def device_num(self, value: Optional[int]):
+        if value is not None and value < 0:
             raise ValueError("Device number must be non-negative")
-        if self.device_num is not None:
-            options_list.append(f" -g {self.device_num}")
+        self._device_num = value
 
-        if self.num_threads is not None and PLATFORM != "windows":
-            options_list.append(f" -t {self.num_threads}")
+    def as_list(self, sensor: kSensor) -> list[str]:
+        options_list = []
+
+        if self.device_num is not None:
+            options_list.append("-g")
+            options_list.append(str(self.device_num)) 
+
+        if self._num_threads is not None and PLATFORM != "windows":
+            options_list.append("-t")
+            options_list.append(str(self._num_threads)) 
 
         if self.verbose_level > 0:
-            options_list.append(f" --verbose {self.verbose_level}")
+            options_list.append("--verbose")
+            options_list.append(str(self.verbose_level))
+
 
         record_options_map = {
-            "p": "p_raw",
-            "p_max": "p_max",
-            "p_min": "p_min",
-            "p_rms": "p_rms",
-            "p_max_all": "p_max_all",
-            "p_min_all": "p_min_all",
-            "p_final": "p_final",
-            "u": "u_raw",
-            "u_max": "u_max",
-            "u_min": "u_min",
-            "u_rms": "u_rms",
-            "u_max_all": "u_max_all",
-            "u_min_all": "u_min_all",
-            "u_final": "u_final",
+            "p": "p_raw", "p_max": "p_max", "p_min": "p_min", "p_rms": "p_rms",
+            "p_max_all": "p_max_all", "p_min_all": "p_min_all", "p_final": "p_final",
+            "u": "u_raw", "u_max": "u_max", "u_min": "u_min", "u_rms": "u_rms",
+            "u_max_all": "u_max_all", "u_min_all": "u_min_all", "u_final": "u_final",
         }
 
         if sensor.record is not None:
-            matching_keys = set(sensor.record).intersection(record_options_map.keys())
-            for key in matching_keys:
-                options_list.append(f" --{record_options_map[key]}")
+            matching_keys = sorted(set(sensor.record).intersection(record_options_map.keys()))
+            options_list.extend([f"--{record_options_map[key]}" for key in matching_keys])
 
             if "u_non_staggered" in sensor.record or "I_avg" in sensor.record or "I" in sensor.record:
-                options_list.append(" --u_non_staggered_raw")
+                options_list.append("--u_non_staggered_raw")
 
             if ("I_avg" in sensor.record or "I" in sensor.record) and ("p" not in sensor.record):
-                options_list.append(" --p_raw")
+                options_list.append("--p_raw")
         else:
-            options_list.append(" --p_raw")
+            options_list.append("--p_raw")
 
         if sensor.record_start_index is not None:
-            options_list.append(f" -s {sensor.record_start_index}")
+            options_list.append("-s")
+            options_list.append(f"{sensor.record_start_index}")
+
+        return options_list
+
+
+    def get_options_string(self, sensor: kSensor) -> str:
+        # raise a deprication warning
+        warnings.warn("This method is deprecated. Use `as_list` method instead.", DeprecationWarning)
+        options_list = self.as_list(sensor)
 
         return " ".join(options_list)
 
