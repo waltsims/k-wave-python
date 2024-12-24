@@ -101,7 +101,7 @@ class TestExecutor(unittest.TestCase):
 
         # Mock the parse_executable_output method
         with patch.object(executor, "parse_executable_output", return_value=dotdict()):
-            sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
         # Assert that the print function was called with the expected lines
         expected_calls = [call("line 1\n", end=""), call("line 2\n", end=""), call("line 3\n", end="")]
@@ -119,7 +119,7 @@ class TestExecutor(unittest.TestCase):
 
         # Mock the parse_executable_output method
         with patch.object(executor, "parse_executable_output", return_value=dotdict()):
-            sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
         normalized_path = os.path.normpath(self.execution_options.binary_path)
         expected_command = [normalized_path, "-i", "input.h5", "-o", "output.h5", "options"]
@@ -142,7 +142,7 @@ class TestExecutor(unittest.TestCase):
             # Mock the parse_executable_output method
             with patch.object(executor, "parse_executable_output", return_value=dotdict()):
                 with self.assertRaises(subprocess.CalledProcessError):
-                    executor.run_simulation("input.h5", "output.h5", "options")
+                    executor.run_simulation("input.h5", "output.h5", ["options"])
 
             # Get the printed output
             stdout_output = mock_stdout.getvalue()
