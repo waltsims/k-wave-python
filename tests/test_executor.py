@@ -184,7 +184,7 @@ class TestExecutor(unittest.TestCase):
 
         # Mock the parse_executable_output method
         with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
-            sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
         # because pml is outside, the output should be cropped
         two_d_output = sensor_data["p_final"]
@@ -206,7 +206,7 @@ class TestExecutor(unittest.TestCase):
 
         # Mock the parse_executable_output method
         with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
-            sensor_data = executor.run_simulation("input.h5", "output.h5", "options")
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
         # because pml is inside, the output should not be cropped
         two_d_output = sensor_data["p_final"]
