@@ -21,6 +21,7 @@ class TestExecutor(unittest.TestCase):
         self.execution_options.binary_path = Path("/fake/path/to/binary")
         self.execution_options.system_string = "fake_system"
         self.execution_options.show_sim_log = False
+        self.simulation_options.pml_inside = True
 
         # Mock for stat result
         self.mock_stat_result = Mock()
@@ -42,6 +43,28 @@ class TestExecutor(unittest.TestCase):
         self.mock_proc = MagicMock()
         self.mock_proc.communicate.return_value = ("stdout content", "stderr content")
         self.mock_popen.return_value.__enter__.return_value = self.mock_proc
+
+        # Mock return dictionary
+        N = np.array([20, 20, 20])
+        pml = np.array([2, 2, 2])
+        two_d_output = MagicMock()
+        two_d_output.ndim = 2
+        three_d_output = MagicMock()
+        three_d_output.ndim = 3
+        self.mock_dict_values = {
+            "Nx": N[0],
+            "Ny": N[1],
+            "Nz": N[2],
+            "pml_x_size": pml[0],
+            "pml_y_size": pml[1],
+            "pml_z_size": pml[2],
+            "axisymmetric_flag": np.array(False),
+            "p_final": two_d_output,
+            "p_max_all": three_d_output,
+        }
+        self.mock_dict = MagicMock()
+        self.mock_dict.__getitem__.side_effect = self.mock_dict_values.__getitem__
+        self.mock_dict.__contains__.side_effect = self.mock_dict_values.__contains__
 
     def tearDown(self):
         # Stop patchers
@@ -150,6 +173,51 @@ class TestExecutor(unittest.TestCase):
         mock_dataset.__getitem__.return_value.squeeze.assert_called_once()
         self.assertIn("data", result)
         self.assertTrue(np.all(result["data"] == np.ones((10, 10))))
+
+    def test_sensor_data_cropping_with_pml_outside(self):
+        """If pml is outside, fields like p_final and p_max_all should be cropped."""
+        self.mock_proc.returncode = 0
+        self.simulation_options.pml_inside = False
+
+        # Instantiate the Executor
+        executor = Executor(self.execution_options, self.simulation_options)
+
+        # Mock the parse_executable_output method
+        with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
+
+        # because pml is outside, the output should be cropped
+        two_d_output = sensor_data["p_final"]
+        two_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18)))
+        three_d_output = sensor_data["p_max_all"]
+        three_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18), slice(2, 18)))
+
+        # check that the other fields are changed
+        for field in self.mock_dict_values.keys():
+            if field not in ["p_final", "p_max_all"]:
+                self.assertEqual(sensor_data[field], self.mock_dict_values[field])
+
+    def test_sensor_data_cropping_with_pml_inside(self):
+        """If pml is inside, no field should be cropped."""
+        self.mock_proc.returncode = 0
+
+        # Instantiate the Executor
+        executor = Executor(self.execution_options, self.simulation_options)
+
+        # Mock the parse_executable_output method
+        with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
+            sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
+
+        # because pml is inside, the output should not be cropped
+        two_d_output = sensor_data["p_final"]
+        two_d_output.__getitem__.assert_not_called()
+        three_d_output = sensor_data["p_max_all"]
+        three_d_output.__getitem__.assert_not_called()
+
+        # check that the other fields are changed
+        for field in self.mock_dict_values.keys():
+            if field not in ["p_final", "p_max_all"]:
+                self.assertEqual(sensor_data[field], self.mock_dict_values[field])
 
     def test_executor_file_not_found_on_non_darwin(self):
         # Configure the mock path object
