@@ -1,0 +1,615 @@
+2025-01-06 14:27:13,067 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-06 14:27:13,070 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-06 14:27:14,340 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-06 14:27:14,341 | __main__ | INFO | not updated dt
+2025-01-06 14:27:14,342 | __main__ | INFO | PPW = 3.0
+2025-01-06 14:27:14,343 | __main__ | INFO | CFL = 20.0
+2025-01-06 14:27:14,343 | __main__ | INFO | PPP = 20
+2025-01-06 14:27:14,344 | __main__ | INFO | kSource
+2025-01-06 14:30:10,247 | __main__ | INFO | kSensor
+2025-01-06 14:30:10,251 | __main__ | INFO | simulation_options
+2025-01-06 14:30:10,252 | __main__ | INFO | execution_options
+2025-01-06 14:30:10,254 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-06 15:23:52,782 | __main__ | INFO | post processing
+2025-01-06 15:23:52,788 | __main__ | INFO | extract_amp_phase
+2025-01-06 15:25:45,083 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-06 15:25:45,089 | __main__ | INFO | number of contours: (2, 4, 2).
+2025-01-06 15:49:26,030 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-06 15:49:26,037 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-06 15:49:27,810 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-06 15:49:27,811 | __main__ | INFO | not updated dt
+2025-01-06 15:49:27,813 | __main__ | INFO | PPW = 3.0
+2025-01-06 15:49:27,814 | __main__ | INFO | CFL = 20.0
+2025-01-06 15:49:27,815 | __main__ | INFO | PPP = 20
+2025-01-06 15:49:27,816 | __main__ | INFO | kSource
+2025-01-06 15:52:17,839 | __main__ | INFO | kSensor
+2025-01-06 15:52:17,841 | __main__ | INFO | simulation_options
+2025-01-06 15:52:17,843 | __main__ | INFO | execution_options
+2025-01-06 15:52:36,606 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-06 16:04:07,009 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-06 16:04:07,012 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-06 16:04:08,013 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-06 16:04:08,014 | __main__ | INFO | not updated dt
+2025-01-06 16:04:08,014 | __main__ | INFO | PPW = 3.0
+2025-01-06 16:04:08,015 | __main__ | INFO | CFL = 20.0
+2025-01-06 16:04:08,015 | __main__ | INFO | PPP = 20
+2025-01-06 16:04:08,016 | __main__ | INFO | kSource
+2025-01-06 16:05:40,729 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-06 16:05:40,736 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-06 16:05:42,591 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-06 16:05:42,592 | __main__ | INFO | not updated dt
+2025-01-06 16:05:42,594 | __main__ | INFO | PPW = 3.0
+2025-01-06 16:05:42,595 | __main__ | INFO | CFL = 20.0
+2025-01-06 16:05:42,596 | __main__ | INFO | PPP = 20
+2025-01-06 16:05:42,598 | __main__ | INFO | kSource
+2025-01-06 16:08:26,878 | __main__ | INFO | kSensor
+2025-01-06 16:08:26,880 | __main__ | INFO | simulation_options
+2025-01-06 16:08:26,882 | __main__ | INFO | execution_options
+2025-01-06 16:08:46,715 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-06 17:46:23,886 | __main__ | INFO | post processing
+2025-01-06 17:46:23,890 | __main__ | INFO | extract_amp_phase
+2025-01-06 17:47:48,382 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-06 17:47:48,394 | __main__ | INFO | number of contours: (2, 4, 2).
+2025-01-07 12:55:32,670 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 12:55:32,675 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 12:55:33,901 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 12:55:33,902 | __main__ | INFO | not updated dt
+2025-01-07 12:55:33,903 | __main__ | INFO | PPW = 3.0
+2025-01-07 12:55:33,904 | __main__ | INFO | CFL = 20.0
+2025-01-07 12:55:33,904 | __main__ | INFO | PPP = 20
+2025-01-07 12:55:33,905 | __main__ | INFO | kSource
+2025-01-07 12:58:04,155 | __main__ | INFO | kSensor
+2025-01-07 12:58:04,157 | __main__ | INFO | simulation_options
+2025-01-07 12:58:04,159 | __main__ | INFO | execution_options
+2025-01-07 12:58:13,708 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 14:59:43,278 | __main__ | INFO | post processing
+2025-01-07 14:59:43,284 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:01:55,859 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:01:55,870 | __main__ | INFO | number of contours: (2, 4, 2).
+2025-01-07 15:20:12,837 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:20:12,850 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:20:14,595 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:20:14,596 | __main__ | INFO | not updated dt
+2025-01-07 15:20:14,597 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:20:14,598 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:20:14,599 | __main__ | INFO | PPP = 20
+2025-01-07 15:20:14,600 | __main__ | INFO | kSource
+2025-01-07 15:22:32,616 | __main__ | INFO | kSensor
+2025-01-07 15:22:32,619 | __main__ | INFO | simulation_options
+2025-01-07 15:22:32,620 | __main__ | INFO | execution_options
+2025-01-07 15:22:41,828 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 15:22:41,829 | __main__ | INFO | post processing
+2025-01-07 15:22:41,831 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:22:43,315 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:22:43,316 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 15:27:46,240 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:27:46,253 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:27:49,446 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:27:49,449 | __main__ | INFO | not updated dt
+2025-01-07 15:27:49,455 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:27:49,457 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:27:49,464 | __main__ | INFO | PPP = 20
+2025-01-07 15:27:49,467 | __main__ | INFO | kSource
+2025-01-07 15:30:44,260 | __main__ | INFO | kSensor
+2025-01-07 15:30:44,268 | __main__ | INFO | simulation_options
+2025-01-07 15:30:44,273 | __main__ | INFO | execution_options
+2025-01-07 15:31:48,010 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 15:31:48,010 | __main__ | INFO | post processing
+2025-01-07 15:31:48,012 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:31:49,468 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:31:49,468 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 15:32:31,343 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:32:31,350 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:32:33,233 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:32:33,233 | __main__ | INFO | not updated dt
+2025-01-07 15:32:33,235 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:32:33,237 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:32:33,237 | __main__ | INFO | PPP = 20
+2025-01-07 15:32:33,237 | __main__ | INFO | kSource
+2025-01-07 15:35:25,349 | __main__ | INFO | kSensor
+2025-01-07 15:35:25,352 | __main__ | INFO | simulation_options
+2025-01-07 15:35:25,352 | __main__ | INFO | execution_options
+2025-01-07 15:36:24,374 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 15:36:24,375 | __main__ | INFO | post processing
+2025-01-07 15:36:24,375 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:36:26,128 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:36:26,129 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 15:39:50,970 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:39:50,975 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:39:52,845 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:39:52,846 | __main__ | INFO | not updated dt
+2025-01-07 15:39:52,847 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:39:52,847 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:39:52,848 | __main__ | INFO | PPP = 20
+2025-01-07 15:39:52,849 | __main__ | INFO | kSource
+2025-01-07 15:42:16,296 | __main__ | INFO | kSensor
+2025-01-07 15:42:16,306 | __main__ | INFO | simulation_options
+2025-01-07 15:42:16,309 | __main__ | INFO | execution_options
+2025-01-07 15:42:16,314 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 15:42:16,317 | __main__ | INFO | post processing
+2025-01-07 15:42:16,319 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:42:17,885 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:42:17,888 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 15:45:42,048 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:45:42,053 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:45:43,809 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:45:43,810 | __main__ | INFO | not updated dt
+2025-01-07 15:45:43,811 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:45:43,812 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:45:43,813 | __main__ | INFO | PPP = 20
+2025-01-07 15:45:43,813 | __main__ | INFO | kSource
+2025-01-07 15:48:38,699 | __main__ | INFO | kSensor
+2025-01-07 15:48:38,701 | __main__ | INFO | simulation_options
+2025-01-07 15:48:38,703 | __main__ | INFO | execution_options
+2025-01-07 15:48:38,703 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 15:48:38,705 | __main__ | INFO | post processing
+2025-01-07 15:48:38,705 | __main__ | INFO | extract_amp_phase
+2025-01-07 15:48:40,045 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 15:48:40,046 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 15:52:59,642 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 15:52:59,646 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 15:53:02,044 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 15:53:02,045 | __main__ | INFO | not updated dt
+2025-01-07 15:53:02,047 | __main__ | INFO | PPW = 3.0
+2025-01-07 15:53:02,049 | __main__ | INFO | CFL = 20.0
+2025-01-07 15:53:02,050 | __main__ | INFO | PPP = 20
+2025-01-07 15:53:02,051 | __main__ | INFO | kSource
+2025-01-07 15:55:31,730 | __main__ | INFO | kSensor
+2025-01-07 15:55:31,740 | __main__ | INFO | simulation_options
+2025-01-07 15:55:31,745 | __main__ | INFO | execution_options
+2025-01-07 15:55:31,749 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 16:58:36,098 | __main__ | INFO | post processing
+2025-01-07 16:58:36,103 | __main__ | INFO | extract_amp_phase
+2025-01-07 17:00:26,668 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 17:00:26,678 | __main__ | INFO | number of contours: (2, 1, 2).
+2025-01-07 17:02:42,638 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-07 17:02:42,648 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-07 17:02:44,349 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-07 17:02:44,350 | __main__ | INFO | not updated dt
+2025-01-07 17:02:44,350 | __main__ | INFO | PPW = 3.0
+2025-01-07 17:02:44,350 | __main__ | INFO | CFL = 20.0
+2025-01-07 17:02:44,351 | __main__ | INFO | PPP = 20
+2025-01-07 17:02:44,351 | __main__ | INFO | kSource
+2025-01-07 17:04:55,084 | __main__ | INFO | kSensor
+2025-01-07 17:04:55,090 | __main__ | INFO | simulation_options
+2025-01-07 17:04:55,090 | __main__ | INFO | execution_options
+2025-01-07 17:04:55,092 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-07 18:03:30,766 | __main__ | INFO | post processing
+2025-01-07 18:03:30,770 | __main__ | INFO | extract_amp_phase
+2025-01-07 18:05:17,635 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-07 18:05:17,642 | __main__ | INFO | number of contours: (2, 4, 2).
+2025-01-08 08:53:02,417 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 08:53:02,422 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 08:53:03,488 | __main__ | INFO | dt_stability_limit=1.7147615847964107e-07, dt=1e-07
+2025-01-08 08:53:03,488 | __main__ | INFO | not updated dt
+2025-01-08 08:53:03,489 | __main__ | INFO | PPW = 3.0
+2025-01-08 08:53:03,489 | __main__ | INFO | CFL = 20.0
+2025-01-08 08:53:03,490 | __main__ | INFO | PPP = 20
+2025-01-08 08:53:03,490 | __main__ | INFO | kSource
+2025-01-08 08:55:15,732 | __main__ | INFO | kSensor
+2025-01-08 08:55:15,736 | __main__ | INFO | simulation_options
+2025-01-08 08:55:15,737 | __main__ | INFO | execution_options
+2025-01-08 08:55:15,738 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 10:34:20,673 | __main__ | INFO | post processing
+2025-01-08 10:34:20,676 | __main__ | INFO | extract_amp_phase
+2025-01-08 10:36:00,093 | __main__ | INFO | size of contours:(226, 171), (226, 191), (171, 191).
+2025-01-08 10:36:00,103 | __main__ | INFO | number of contours: (2, 4, 2).
+2025-01-08 11:51:41,496 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 11:51:41,507 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 11:57:18,237 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 11:57:18,240 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 11:57:18,514 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 11:57:18,516 | __main__ | INFO | transducer is planar
+2025-01-08 11:57:18,856 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 11:57:18,858 | __main__ | INFO | not updated dt
+2025-01-08 11:57:18,860 | __main__ | INFO | PPW = 1.875
+2025-01-08 11:57:18,860 | __main__ | INFO | CFL = 20.0
+2025-01-08 11:57:18,861 | __main__ | INFO | PPP = 20
+2025-01-08 11:57:18,862 | __main__ | INFO | kSource
+2025-01-08 11:57:19,003 | __main__ | INFO | kSensor
+2025-01-08 11:57:19,004 | __main__ | INFO | simulation_options
+2025-01-08 11:57:19,006 | __main__ | INFO | execution_options
+2025-01-08 11:57:19,008 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 12:00:41,154 | __main__ | INFO | post processing
+2025-01-08 12:00:41,155 | __main__ | INFO | extract_amp_phase
+2025-01-08 12:08:36,708 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 12:08:36,717 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 12:08:37,079 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 12:08:37,081 | __main__ | INFO | transducer is planar
+2025-01-08 12:08:37,653 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 12:08:37,654 | __main__ | INFO | not updated dt
+2025-01-08 12:08:37,655 | __main__ | INFO | PPW = 1.875
+2025-01-08 12:08:37,656 | __main__ | INFO | CFL = 20.0
+2025-01-08 12:08:37,658 | __main__ | INFO | PPP = 20
+2025-01-08 12:08:37,658 | __main__ | INFO | kSource
+2025-01-08 12:08:43,240 | __main__ | INFO | kSensor
+2025-01-08 12:08:43,242 | __main__ | INFO | simulation_options
+2025-01-08 12:08:43,245 | __main__ | INFO | execution_options
+2025-01-08 12:08:43,246 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 12:12:05,224 | __main__ | INFO | post processing
+2025-01-08 12:12:05,225 | __main__ | INFO | extract_amp_phase
+2025-01-08 12:12:21,403 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 12:12:21,404 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 12:28:21,522 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 12:28:21,531 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 12:28:21,928 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 12:28:21,928 | __main__ | INFO | transducer is planar
+2025-01-08 12:28:22,375 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 12:28:22,377 | __main__ | INFO | not updated dt
+2025-01-08 12:28:22,378 | __main__ | INFO | PPW = 1.875
+2025-01-08 12:28:22,378 | __main__ | INFO | CFL = 20.0
+2025-01-08 12:28:22,378 | __main__ | INFO | PPP = 20
+2025-01-08 12:28:22,380 | __main__ | INFO | kSource
+2025-01-08 12:28:25,475 | __main__ | INFO | kSensor
+2025-01-08 12:28:25,478 | __main__ | INFO | simulation_options
+2025-01-08 12:28:25,478 | __main__ | INFO | execution_options
+2025-01-08 12:28:25,481 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 12:31:41,479 | __main__ | INFO | post processing
+2025-01-08 12:31:41,479 | __main__ | INFO | extract_amp_phase
+2025-01-08 12:31:53,025 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 12:31:53,025 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 12:49:25,032 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 12:49:25,038 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 12:49:25,343 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 12:49:25,344 | __main__ | INFO | transducer is planar
+2025-01-08 12:49:25,705 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 12:49:25,706 | __main__ | INFO | not updated dt
+2025-01-08 12:49:25,706 | __main__ | INFO | PPW = 1.875
+2025-01-08 12:49:25,707 | __main__ | INFO | CFL = 20.0
+2025-01-08 12:49:25,707 | __main__ | INFO | PPP = 20
+2025-01-08 12:49:25,709 | __main__ | INFO | kSource
+2025-01-08 12:49:28,471 | __main__ | INFO | kSensor
+2025-01-08 12:49:28,473 | __main__ | INFO | simulation_options
+2025-01-08 12:49:28,475 | __main__ | INFO | execution_options
+2025-01-08 12:49:28,476 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 12:52:46,654 | __main__ | INFO | post processing
+2025-01-08 12:52:46,654 | __main__ | INFO | extract_amp_phase
+2025-01-08 12:52:58,470 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 12:52:58,471 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:03:19,693 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:03:19,696 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:03:19,961 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:03:19,961 | __main__ | INFO | transducer is planar
+2025-01-08 13:03:20,265 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:03:20,266 | __main__ | INFO | not updated dt
+2025-01-08 13:03:20,267 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:03:20,268 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:03:20,268 | __main__ | INFO | PPP = 20
+2025-01-08 13:03:20,269 | __main__ | INFO | kSource
+2025-01-08 13:03:23,513 | __main__ | INFO | kSensor
+2025-01-08 13:03:23,514 | __main__ | INFO | simulation_options
+2025-01-08 13:03:23,517 | __main__ | INFO | execution_options
+2025-01-08 13:03:23,519 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:06:47,924 | __main__ | INFO | post processing
+2025-01-08 13:06:47,926 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:07:00,489 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:07:00,491 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:15:47,194 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:15:47,199 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:15:47,466 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:15:47,466 | __main__ | INFO | transducer is planar
+2025-01-08 13:15:47,782 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:15:47,783 | __main__ | INFO | not updated dt
+2025-01-08 13:15:47,784 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:15:47,785 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:15:47,785 | __main__ | INFO | PPP = 20
+2025-01-08 13:15:47,786 | __main__ | INFO | kSource
+2025-01-08 13:15:49,879 | __main__ | INFO | kSensor
+2025-01-08 13:15:49,880 | __main__ | INFO | simulation_options
+2025-01-08 13:15:49,882 | __main__ | INFO | execution_options
+2025-01-08 13:15:49,882 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:19:10,217 | __main__ | INFO | post processing
+2025-01-08 13:19:10,218 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:19:25,314 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:19:25,315 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:21:20,345 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:21:20,349 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:21:20,727 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:21:20,727 | __main__ | INFO | transducer is planar
+2025-01-08 13:21:21,223 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:21:21,224 | __main__ | INFO | not updated dt
+2025-01-08 13:21:21,225 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:21:21,225 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:21:21,225 | __main__ | INFO | PPP = 20
+2025-01-08 13:21:21,227 | __main__ | INFO | kSource
+2025-01-08 13:21:24,693 | __main__ | INFO | kSensor
+2025-01-08 13:21:24,694 | __main__ | INFO | simulation_options
+2025-01-08 13:21:24,695 | __main__ | INFO | execution_options
+2025-01-08 13:21:24,697 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:24:48,375 | __main__ | INFO | post processing
+2025-01-08 13:24:48,376 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:25:01,000 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:25:01,002 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:29:28,613 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:29:28,624 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:29:28,961 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:29:28,962 | __main__ | INFO | transducer is planar
+2025-01-08 13:29:29,312 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:29:29,313 | __main__ | INFO | not updated dt
+2025-01-08 13:29:29,314 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:29:29,315 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:29:29,315 | __main__ | INFO | PPP = 20
+2025-01-08 13:29:29,316 | __main__ | INFO | kSource
+2025-01-08 13:29:31,937 | __main__ | INFO | kSensor
+2025-01-08 13:29:31,939 | __main__ | INFO | simulation_options
+2025-01-08 13:29:31,942 | __main__ | INFO | execution_options
+2025-01-08 13:29:31,945 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:32:52,600 | __main__ | INFO | post processing
+2025-01-08 13:32:52,601 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:33:04,249 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:33:04,250 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:45:49,858 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:45:49,866 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:45:50,294 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:45:50,295 | __main__ | INFO | transducer is planar
+2025-01-08 13:45:50,809 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:45:50,811 | __main__ | INFO | not updated dt
+2025-01-08 13:45:50,813 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:45:50,815 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:45:50,816 | __main__ | INFO | PPP = 20
+2025-01-08 13:45:50,818 | __main__ | INFO | kSource
+2025-01-08 13:45:53,646 | __main__ | INFO | kSensor
+2025-01-08 13:45:53,648 | __main__ | INFO | simulation_options
+2025-01-08 13:45:53,649 | __main__ | INFO | execution_options
+2025-01-08 13:45:53,649 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:49:16,530 | __main__ | INFO | post processing
+2025-01-08 13:49:16,532 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:49:28,656 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:49:28,656 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 13:55:01,523 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 13:55:01,527 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 13:55:01,794 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 13:55:01,795 | __main__ | INFO | transducer is planar
+2025-01-08 13:55:02,184 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 13:55:02,186 | __main__ | INFO | not updated dt
+2025-01-08 13:55:02,186 | __main__ | INFO | PPW = 1.875
+2025-01-08 13:55:02,186 | __main__ | INFO | CFL = 20.0
+2025-01-08 13:55:02,187 | __main__ | INFO | PPP = 20
+2025-01-08 13:55:02,187 | __main__ | INFO | kSource
+2025-01-08 13:55:05,839 | __main__ | INFO | kSensor
+2025-01-08 13:55:05,842 | __main__ | INFO | simulation_options
+2025-01-08 13:55:05,842 | __main__ | INFO | execution_options
+2025-01-08 13:55:05,843 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 13:58:24,567 | __main__ | INFO | post processing
+2025-01-08 13:58:24,568 | __main__ | INFO | extract_amp_phase
+2025-01-08 13:58:35,832 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 13:58:35,834 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:02:08,636 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:02:08,641 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:02:08,940 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:02:08,942 | __main__ | INFO | transducer is planar
+2025-01-08 14:02:09,279 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:02:09,280 | __main__ | INFO | not updated dt
+2025-01-08 14:02:09,280 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:02:09,282 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:02:09,283 | __main__ | INFO | PPP = 20
+2025-01-08 14:02:09,283 | __main__ | INFO | kSource
+2025-01-08 14:02:12,482 | __main__ | INFO | kSensor
+2025-01-08 14:02:12,485 | __main__ | INFO | simulation_options
+2025-01-08 14:02:12,487 | __main__ | INFO | execution_options
+2025-01-08 14:02:12,488 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:05:31,688 | __main__ | INFO | post processing
+2025-01-08 14:05:31,689 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:05:43,555 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:05:43,556 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:08:16,017 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:08:16,020 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:08:16,282 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:08:16,283 | __main__ | INFO | transducer is planar
+2025-01-08 14:08:16,625 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:08:16,625 | __main__ | INFO | not updated dt
+2025-01-08 14:08:16,626 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:08:16,627 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:08:16,628 | __main__ | INFO | PPP = 20
+2025-01-08 14:08:16,629 | __main__ | INFO | kSource
+2025-01-08 14:08:19,610 | __main__ | INFO | kSensor
+2025-01-08 14:08:19,612 | __main__ | INFO | simulation_options
+2025-01-08 14:08:19,614 | __main__ | INFO | execution_options
+2025-01-08 14:08:19,615 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:11:38,168 | __main__ | INFO | post processing
+2025-01-08 14:11:38,170 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:11:50,296 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:11:50,298 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:14:09,881 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:14:09,886 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:14:10,161 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:14:10,162 | __main__ | INFO | transducer is planar
+2025-01-08 14:14:10,535 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:14:10,536 | __main__ | INFO | not updated dt
+2025-01-08 14:14:10,537 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:14:10,537 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:14:10,537 | __main__ | INFO | PPP = 20
+2025-01-08 14:14:10,539 | __main__ | INFO | kSource
+2025-01-08 14:14:14,258 | __main__ | INFO | kSensor
+2025-01-08 14:14:14,261 | __main__ | INFO | simulation_options
+2025-01-08 14:14:14,263 | __main__ | INFO | execution_options
+2025-01-08 14:14:14,265 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:17:31,882 | __main__ | INFO | post processing
+2025-01-08 14:17:31,883 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:17:47,602 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:17:47,604 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:24:03,187 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:24:03,195 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:24:03,507 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:24:03,510 | __main__ | INFO | transducer is planar
+2025-01-08 14:24:03,954 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:24:03,954 | __main__ | INFO | not updated dt
+2025-01-08 14:24:03,956 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:24:03,957 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:24:03,958 | __main__ | INFO | PPP = 20
+2025-01-08 14:24:03,958 | __main__ | INFO | kSource
+2025-01-08 14:24:07,395 | __main__ | INFO | kSensor
+2025-01-08 14:24:07,397 | __main__ | INFO | simulation_options
+2025-01-08 14:24:07,397 | __main__ | INFO | execution_options
+2025-01-08 14:24:07,400 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:27:25,539 | __main__ | INFO | post processing
+2025-01-08 14:27:25,539 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:27:38,297 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:27:38,297 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:29:19,051 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:29:19,053 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:29:19,319 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:29:19,321 | __main__ | INFO | transducer is planar
+2025-01-08 14:29:19,599 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:29:19,601 | __main__ | INFO | not updated dt
+2025-01-08 14:29:19,601 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:29:19,601 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:29:19,601 | __main__ | INFO | PPP = 20
+2025-01-08 14:29:19,601 | __main__ | INFO | kSource
+2025-01-08 14:29:21,678 | __main__ | INFO | kSensor
+2025-01-08 14:29:21,681 | __main__ | INFO | simulation_options
+2025-01-08 14:29:21,681 | __main__ | INFO | execution_options
+2025-01-08 14:29:21,681 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:32:38,368 | __main__ | INFO | post processing
+2025-01-08 14:32:38,369 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:32:49,795 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:32:49,797 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:35:10,560 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:35:10,566 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:35:10,825 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:35:10,826 | __main__ | INFO | transducer is planar
+2025-01-08 14:35:11,167 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:35:11,168 | __main__ | INFO | not updated dt
+2025-01-08 14:35:11,169 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:35:11,170 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:35:11,170 | __main__ | INFO | PPP = 20
+2025-01-08 14:35:11,171 | __main__ | INFO | kSource
+2025-01-08 14:35:14,585 | __main__ | INFO | kSensor
+2025-01-08 14:35:14,587 | __main__ | INFO | simulation_options
+2025-01-08 14:35:14,588 | __main__ | INFO | execution_options
+2025-01-08 14:35:14,589 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:38:31,666 | __main__ | INFO | post processing
+2025-01-08 14:38:31,667 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:38:45,537 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:38:45,539 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:54:12,346 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:54:12,355 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:54:12,756 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:54:12,759 | __main__ | INFO | transducer is planar
+2025-01-08 14:54:13,225 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:54:13,226 | __main__ | INFO | not updated dt
+2025-01-08 14:54:13,227 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:54:13,228 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:54:13,228 | __main__ | INFO | PPP = 20
+2025-01-08 14:54:13,229 | __main__ | INFO | kSource
+2025-01-08 14:54:16,845 | __main__ | INFO | kSensor
+2025-01-08 14:54:16,847 | __main__ | INFO | simulation_options
+2025-01-08 14:54:16,849 | __main__ | INFO | execution_options
+2025-01-08 14:54:16,851 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 14:57:36,844 | __main__ | INFO | post processing
+2025-01-08 14:57:36,845 | __main__ | INFO | extract_amp_phase
+2025-01-08 14:57:58,221 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 14:57:58,222 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 14:58:58,970 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 14:58:58,974 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 14:58:59,215 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 14:58:59,215 | __main__ | INFO | transducer is planar
+2025-01-08 14:58:59,575 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 14:58:59,576 | __main__ | INFO | not updated dt
+2025-01-08 14:58:59,576 | __main__ | INFO | PPW = 1.875
+2025-01-08 14:58:59,577 | __main__ | INFO | CFL = 20.0
+2025-01-08 14:58:59,578 | __main__ | INFO | PPP = 20
+2025-01-08 14:58:59,579 | __main__ | INFO | kSource
+2025-01-08 14:59:02,454 | __main__ | INFO | kSensor
+2025-01-08 14:59:02,456 | __main__ | INFO | simulation_options
+2025-01-08 14:59:02,458 | __main__ | INFO | execution_options
+2025-01-08 14:59:02,459 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 15:02:19,836 | __main__ | INFO | post processing
+2025-01-08 15:02:19,837 | __main__ | INFO | extract_amp_phase
+2025-01-08 15:02:31,340 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 15:02:31,341 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 15:02:34,253 | __main__ | INFO | focus in brain: (48, 48, 31), mid point: [48, 48, 0] last plane: (48, 48)
+2025-01-08 15:59:19,838 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 15:59:19,841 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 15:59:20,063 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 15:59:20,065 | __main__ | INFO | transducer is planar
+2025-01-08 15:59:20,327 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 15:59:20,328 | __main__ | INFO | not updated dt
+2025-01-08 15:59:20,329 | __main__ | INFO | PPW = 1.875
+2025-01-08 15:59:20,329 | __main__ | INFO | CFL = 20.0
+2025-01-08 15:59:20,329 | __main__ | INFO | PPP = 20
+2025-01-08 15:59:20,330 | __main__ | INFO | kSource
+2025-01-08 15:59:22,336 | __main__ | INFO | kSensor
+2025-01-08 15:59:22,337 | __main__ | INFO | simulation_options
+2025-01-08 15:59:22,337 | __main__ | INFO | execution_options
+2025-01-08 15:59:22,338 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 16:02:38,741 | __main__ | INFO | post processing
+2025-01-08 16:02:38,744 | __main__ | INFO | extract_amp_phase
+2025-01-08 16:02:53,359 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 16:02:53,361 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 16:06:06,195 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 16:06:06,197 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 16:06:06,371 | __main__ | INFO | new shape=(97, 97, 216)
+2025-01-08 16:06:06,371 | __main__ | INFO | transducer is planar
+2025-01-08 16:06:06,618 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 16:06:06,619 | __main__ | INFO | not updated dt
+2025-01-08 16:06:06,619 | __main__ | INFO | PPW = 1.875
+2025-01-08 16:06:06,620 | __main__ | INFO | CFL = 20.0
+2025-01-08 16:06:06,620 | __main__ | INFO | PPP = 20
+2025-01-08 16:06:06,620 | __main__ | INFO | kSource
+2025-01-08 16:06:08,470 | __main__ | INFO | kSensor
+2025-01-08 16:06:08,471 | __main__ | INFO | simulation_options
+2025-01-08 16:06:08,473 | __main__ | INFO | execution_options
+2025-01-08 16:06:08,473 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 16:09:25,267 | __main__ | INFO | post processing
+2025-01-08 16:09:25,268 | __main__ | INFO | extract_amp_phase
+2025-01-08 16:09:37,961 | __main__ | INFO | size of contours:(216, 97), (216, 97), (97, 97).
+2025-01-08 16:09:37,963 | __main__ | INFO | number of contours: (4, 4, 2).
+2025-01-08 16:09:40,667 | __main__ | INFO | focus in brain: (48, 48, 31), mid point: [48, 48, 0] last plane: (48, 48)
+2025-01-08 16:29:39,806 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 16:29:39,814 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 16:29:40,258 | __main__ | INFO | new shape=(97, 97, 210)
+2025-01-08 16:29:40,259 | __main__ | INFO | transducer is planar
+2025-01-08 16:29:40,716 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=6.25e-08
+2025-01-08 16:29:40,718 | __main__ | INFO | not updated dt
+2025-01-08 16:29:40,720 | __main__ | INFO | PPW = 1.875
+2025-01-08 16:29:40,721 | __main__ | INFO | CFL = 20.0
+2025-01-08 16:29:40,723 | __main__ | INFO | PPP = 20
+2025-01-08 16:29:40,726 | __main__ | INFO | kSource
+2025-01-08 16:29:44,828 | __main__ | INFO | kSensor
+2025-01-08 16:29:44,830 | __main__ | INFO | simulation_options
+2025-01-08 16:29:44,834 | __main__ | INFO | execution_options
+2025-01-08 16:29:44,835 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 16:33:01,571 | __main__ | INFO | post processing
+2025-01-08 16:33:01,572 | __main__ | INFO | extract_amp_phase
+2025-01-08 16:33:18,806 | __main__ | INFO | size of contours:(210, 97), (210, 97), (97, 97).
+2025-01-08 16:33:18,809 | __main__ | INFO | number of contours: (4, 4, 3).
+2025-01-08 16:33:23,152 | __main__ | INFO | focus in brain: (48, 48, 26), mid point: [48, 48, 0] last plane: (48, 48)
+2025-01-08 16:35:58,944 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-08 16:35:58,952 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-08 16:35:59,414 | __main__ | INFO | new shape=(97, 97, 210)
+2025-01-08 16:35:59,415 | __main__ | INFO | transducer is planar
+2025-01-08 16:35:59,911 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=1e-07
+2025-01-08 16:35:59,913 | __main__ | INFO | not updated dt
+2025-01-08 16:35:59,915 | __main__ | INFO | PPW = 3.0
+2025-01-08 16:35:59,918 | __main__ | INFO | CFL = 20.0
+2025-01-08 16:35:59,920 | __main__ | INFO | PPP = 20
+2025-01-08 16:35:59,922 | __main__ | INFO | kSource
+2025-01-08 16:36:05,000 | __main__ | INFO | kSensor
+2025-01-08 16:36:05,004 | __main__ | INFO | simulation_options
+2025-01-08 16:36:05,006 | __main__ | INFO | execution_options
+2025-01-08 16:36:05,009 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-08 16:38:11,632 | __main__ | INFO | post processing
+2025-01-08 16:38:11,633 | __main__ | INFO | extract_amp_phase
+2025-01-08 16:38:27,423 | __main__ | INFO | size of contours:(210, 97), (210, 97), (97, 97).
+2025-01-08 16:38:27,425 | __main__ | INFO | number of contours: (4, 4, 3).
+2025-01-08 16:38:29,743 | __main__ | INFO | focus in brain: (50, 50, 16), mid point: [48, 48, 0] last plane: (44, 47)
+2025-01-09 14:22:23,733 | __main__ | INFO | C:/Users/dsinden/Documents/GitLab/k-wave-python/data/skull_mask_bm8_dx_1mm.mat
+2025-01-09 14:22:23,733 | __main__ | INFO | ['brain_mask', 'dx', 'skull_mask', 'xi', 'yi', 'zi']
+2025-01-09 14:22:23,890 | __main__ | INFO | new shape=(97, 97, 210)
+2025-01-09 14:22:23,890 | __main__ | INFO | transducer is planar
+2025-01-09 14:22:24,080 | __main__ | INFO | dt_stability_limit=1.7208334500763013e-07, dt=1e-07
+2025-01-09 14:22:24,080 | __main__ | INFO | not updated dt
+2025-01-09 14:22:24,080 | __main__ | INFO | PPW = 3.0
+2025-01-09 14:22:24,080 | __main__ | INFO | CFL = 20.0
+2025-01-09 14:22:24,080 | __main__ | INFO | PPP = 20
+2025-01-09 14:22:24,080 | __main__ | INFO | kSource
+2025-01-09 14:22:25,600 | __main__ | INFO | kSensor
+2025-01-09 14:22:25,600 | __main__ | INFO | simulation_options
+2025-01-09 14:22:25,600 | __main__ | INFO | execution_options
+2025-01-09 14:22:25,600 | __main__ | INFO | kspaceFirstOrder3DG
+2025-01-09 14:24:29,363 | __main__ | INFO | post processing
+2025-01-09 14:24:29,363 | __main__ | INFO | extract_amp_phase
+2025-01-09 14:24:40,963 | __main__ | INFO | size of contours:(210, 97), (210, 97), (97, 97).
+2025-01-09 14:24:40,963 | __main__ | INFO | number of contours: (4, 4, 3).
+2025-01-09 14:24:42,841 | __main__ | INFO | focus in brain: (50, 50, 16), mid point: [48, 48, 0] last plane: (44, 47)
