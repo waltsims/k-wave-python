@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "h5py==3.12.1",
-    "scipy==1.14.1",
+    "scipy==1.15.0",
     "opencv-python==4.10.0.84",
     "deepdiff==8.1.1",
     "numpy>=1.22.2,<2.3.0",
