@@ -50,37 +50,64 @@ class TestSimulation(unittest.TestCase):
 
         # define simulation options
         self.simulation_options = SimulationOptions(
-            pml_inside=False, pml_size=self.PML_size, data_cast=self.DATA_CAST,
-            save_to_disk=True, data_recast=True, smooth_p0=False,
+            pml_inside=False,
+            pml_size=self.PML_size,
+            data_cast=self.DATA_CAST,
+            save_to_disk=True,
+            data_recast=True,
+            smooth_p0=False,
         )
 
         # create the time array
         self.kgrid.makeTime(self.medium.sound_speed)
 
     def test_record_final_pressure(self):
-        self.sensor.record = ['p_final']
-        k_sim = kWaveSimulation(kgrid=self.kgrid, source=self.source, sensor=self.sensor,
-                                medium=self.medium, simulation_options=self.simulation_options)
+        self.sensor.record = ["p_final"]
+        k_sim = kWaveSimulation(
+            kgrid=self.kgrid, source=self.source, sensor=self.sensor, medium=self.medium, simulation_options=self.simulation_options
+        )
         k_sim.input_checking("kspaceFirstOrder2D")
 
         recorder = k_sim.record.__dict__
         for key, val in recorder.items():
-            if key == 'p_final':
+            if key == "p_final":
                 assert val
-            elif key.startswith(('p', 'u', 'I')):
+            elif key.startswith(("p", "u", "I")):
+                assert not val
+
+    def test_time_reversal(self):
+        self.sensor.time_reversal_boundary_data = np.zeros((len(self.sensor.mask[0]), self.kgrid.Nt))
+
+        k_sim = kWaveSimulation(
+            kgrid=self.kgrid, source=self.source, sensor=self.sensor, medium=self.medium, simulation_options=self.simulation_options
+        )
+        k_sim.input_checking("kspaceFirstOrder2D")
+
+        # source and sensor are replaced when time-reversal is enabled
+        assert not (k_sim.source is self.source)
+        assert not (k_sim.sensor is self.sensor)
+
+        assert k_sim.userarg_time_rev
+
+        recorder = k_sim.record.__dict__
+        for key, val in recorder.items():
+            if key == "p_final":
+                assert val
+            elif key.startswith(("p", "u", "I")):
                 assert not val
 
     def test_record_pressure(self):
-        self.sensor.record = ['p']
-        k_sim = kWaveSimulation(kgrid=self.kgrid, source=self.source, sensor=self.sensor,
-                                medium=self.medium, simulation_options=self.simulation_options)
+        self.sensor.record = ["p"]
+        k_sim = kWaveSimulation(
+            kgrid=self.kgrid, source=self.source, sensor=self.sensor, medium=self.medium, simulation_options=self.simulation_options
+        )
         k_sim.input_checking("kspaceFirstOrder2D")
 
         recorder = k_sim.record.__dict__
         for key, val in recorder.items():
-            if key == 'p':
+            if key == "p":
                 assert val
-            elif key.startswith(('p', 'u', 'I')):
+            elif key.startswith(("p", "u", "I")):
                 assert not val
 
 
