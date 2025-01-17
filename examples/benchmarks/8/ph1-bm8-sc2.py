@@ -63,7 +63,7 @@ tag = 'bm8'
 res = '1mm'
 transducer = 'sc2'
 
-mask_folder = 'C:/Users/dsinden/Documents/GitLab/k-wave-python/data/'
+mask_folder = 'C:/Users/dsinden/GitHub/k-wave-python/data/'
 
 mask_filename = mask_folder + 'skull_mask_' + tag + '_dx_' + res + '.mat'
 
