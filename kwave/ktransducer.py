@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 import logging
 
@@ -25,6 +27,9 @@ class kWaveTransducerSimple(object):
         element_spacing=0,
         position=None,
         radius=float("inf"),
+        active_elements=None,
+        receive_apodization="Rectangular",
+        transmit_apodization="Rectangular",
     ):
         """
         Args:
@@ -69,6 +74,22 @@ class kWaveTransducerSimple(object):
         elif self.position[0] > self.stored_grid_size[0]:
             raise ValueError("The defined transducer is positioned outside the grid in the x-direction")
 
+        if active_elements is None:
+            active_elements = np.ones((self.number_elements, 1))
+        self.active_elements = active_elements
+
+        # check the length of the input
+        assert (
+            not is_number(receive_apodization) or len(receive_apodization) == self.number_active_elements
+        ), "The length of the receive apodization input must match the number of active elements"
+        self.receive_apodization = receive_apodization
+
+        # check the length of the input
+        assert (
+            not is_number(transmit_apodization) or len(transmit_apodization) == self.number_active_elements
+        ), "The length of the transmit apodization input must match the number of active elements"
+        self.transmit_apodization = transmit_apodization
+
     @property
     def element_pitch(self):
         return (self.element_spacing + self.element_width) * self.grid_spacing[1]
@@ -85,6 +106,54 @@ class kWaveTransducerSimple(object):
         """
         return self.number_elements * self.element_width + (self.number_elements - 1) * self.element_spacing
 
+    @property
+    def number_active_elements(self) -> int:
+        return int(self.active_elements.sum())
+
+    def get_receive_apodization(self):
+        """
+        Get the current receive apodization setting.
+        """
+        if is_number(self.receive_apodization):
+            assert (
+                self.receive_apodization.size == self.number_active_elements
+            ), "The length of the receive apodization input must match the number of active elements"
+            return self.receive_apodization
+        else:
+            if self.number_active_elements > 1:
+                apodization, _ = get_win(int(self.number_active_elements), type_=self.receive_apodization)
+            else:
+                apodization = 1
+        return np.array(apodization)
+
+    def get_transmit_apodization(self):
+        """
+        Returns:
+            return the transmit apodization, converting strings of window
+            type to actual numbers using getWin
+
+        """
+
+        # check if a user defined apodization is given and whether this
+        # is still the correct size (in case the number of active
+        # elements has changed)
+        if is_number(self.transmit_apodization):
+            assert (
+                self.transmit_apodization.size == self.number_active_elements
+            ), "The length of the transmit apodization input must match the number of active elements"
+
+            # assign apodization
+            apodization = self.transmit_apodization
+        else:
+            # if the number of active elements is greater than 1,
+            # create apodization using getWin, otherwise, assign 1
+            if self.number_active_elements > 1:
+                apodization, _ = get_win(int(self.number_active_elements), type_=self.transmit_apodization)
+            else:
+                apodization = 1
+        apodization = np.array(apodization)
+        return apodization
+
 
 class NotATransducer(kSensor):
     def __init__(
@@ -94,8 +163,8 @@ class NotATransducer(kSensor):
         active_elements=None,
         focus_distance=float("inf"),
         elevation_focus_distance=float("inf"),
-        receive_apodization="Rectangular",
-        transmit_apodization="Rectangular",
+        receive_apodization=None,
+        transmit_apodization=None,
         sound_speed=1540,
         input_signal=None,
         steering_angle_max=None,
@@ -150,23 +219,37 @@ class NotATransducer(kSensor):
         else:
             raise ValueError("kgrid.dt or kgrid.t_array must be explicitly defined")
 
-        if active_elements is None:
-            active_elements = np.ones((transducer.number_elements, 1))
-        self.active_elements = active_elements
+        if active_elements is not None:
+            logging.log(
+                logging.WARN,
+                f"{DeprecationWarning.__name__}: active_elements should not be set "
+                f"in the {NotATransducer.__name__} class anymore. "
+                f"Please use the {kWaveTransducerSimple.__name__} class to set this property. "
+                f"For now, the functionality will be the same for backwards compatibility.",
+            )
+            self.transducer.active_elements = active_elements
 
         self.elevation_focus_distance = elevation_focus_distance
 
-        # check the length of the input
-        assert (
-            not is_number(receive_apodization) or len(receive_apodization) == self.number_active_elements
-        ), "The length of the receive apodization input must match the number of active elements"
-        self.receive_apodization = receive_apodization
+        if receive_apodization is not None:
+            logging.log(
+                logging.WARN,
+                f"{DeprecationWarning.__name__}: receive_apodization should not be set "
+                f"in the {NotATransducer.__name__} class anymore. "
+                f"Please use the {kWaveTransducerSimple.__name__} class to set this property. "
+                f"For now, the functionality will be the same for backwards compatibility.",
+            )
+            self.transducer.receive_apodization = receive_apodization
 
-        # check the length of the input
-        assert (
-            not is_number(transmit_apodization) or len(transmit_apodization) == self.number_active_elements
-        ), "The length of the transmit apodization input must match the number of active elements"
-        self.transmit_apodization = transmit_apodization
+        if transmit_apodization is not None:
+            logging.log(
+                logging.WARN,
+                f"{DeprecationWarning.__name__}: transmit_apodization should not be set "
+                f"in the {NotATransducer.__name__} class anymore. "
+                f"Please use the {kWaveTransducerSimple.__name__} class to set this property. "
+                f"For now, the functionality will be the same for backwards compatibility.",
+            )
+            self.transducer.transmit_apodization = transmit_apodization
 
         # check to see the sound_speed is positive
         assert sound_speed > 0, "transducer.sound_speed must be greater than 0"
@@ -477,8 +560,46 @@ class NotATransducer(kSensor):
         return signal
 
     @property
-    def number_active_elements(self):
-        return int(self.active_elements.sum())
+    def number_active_elements(self) -> int:
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.number_active_elements "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.number_active_elements instead.",
+        )
+
+        return self.transducer.number_active_elements
+
+    @property
+    def active_elements(self) -> np.ndarray:
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.active_elements "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.active_elements instead.",
+        )
+
+        return self.transducer.active_elements
+
+    @property
+    def receive_apodization(self) -> Union[np.ndarray, str]:
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.receive_apodization "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.receive_apodization instead.",
+        )
+        return self.transducer.receive_apodization
+
+    @property
+    def transmit_apodization(self) -> Union[np.ndarray, str]:
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.transmit_apodization "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.transmit_apodization instead.",
+        )
+        return self.transducer.transmit_apodization
 
     @property
     def appended_zeros(self):
@@ -577,25 +698,13 @@ class NotATransducer(kSensor):
 
         """
 
-        # check if a user defined apodization is given and whether this
-        # is still the correct size (in case the number of active
-        # elements has changed)
-        if is_number(self.transmit_apodization):
-            assert (
-                self.transmit_apodization.size == self.number_active_elements
-            ), "The length of the transmit apodization input must match the number of active elements"
-
-            # assign apodization
-            apodization = self.transmit_apodization
-        else:
-            # if the number of active elements is greater than 1,
-            # create apodization using getWin, otherwise, assign 1
-            if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), type_=self.transmit_apodization)
-            else:
-                apodization = 1
-        apodization = np.array(apodization)
-        return apodization
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.get_transmit_apodization() "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.get_transmit_apodization() instead.",
+        )
+        return self.transducer.get_transmit_apodization()
 
     def delay_mask(self, mode=None):
         """
@@ -675,18 +784,13 @@ class NotATransducer(kSensor):
         """
         Get the current receive apodization setting.
         """
-        # Example implementation, adjust based on actual logic
-        if is_number(self.receive_apodization):
-            assert (
-                self.receive_apodization.size == self.number_active_elements
-            ), "The length of the receive apodization input must match the number of active elements"
-            return self.receive_apodization
-        else:
-            if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), type_=self.receive_apodization)
-            else:
-                apodization = 1
-        return np.array(apodization)
+        logging.log(
+            logging.WARN,
+            f"{DeprecationWarning.__name__}: {NotATransducer.__name__}.get_receive_apodization() "
+            f"is deprecated and will be removed in the future. "
+            f"Please use {kWaveTransducerSimple.__name__}.get_receive_apodization instead.",
+        )
+        return self.transducer.get_receive_apodization()
 
     def scan_line(self, sensor_data):
         """
