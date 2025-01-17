@@ -44,3 +44,8 @@ tests/reference_outputs
 kspaceFirstOrder-*_metadata.json
 
 
+*.nii
+*.vtk
+*.vtk
+examples/benchmarks/8/runner.log
+*.vtk
