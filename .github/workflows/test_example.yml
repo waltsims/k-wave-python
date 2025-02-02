@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
       - name: Upload example results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: example_bmode_reconstruction_results_${{ matrix.os }}_${{ matrix.python-version }}
           path: ${{ github.workspace }}/example_bmode.png
