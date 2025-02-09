@@ -15,7 +15,6 @@ from kwave.utils.interp import get_delta_bli
 from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_spherical_segment
 from kwave.utils.math import sinc, make_affine
 from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
-from scipy.spatial.transform import Rotation
 
 
 @dataclass
