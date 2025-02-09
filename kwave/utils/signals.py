@@ -76,20 +76,8 @@ def create_window(N: Union[int, List[int]],
     Returns:
         Tuple of (window array, coherent gain)
     """
-    # Convert inputs to numpy arrays
-    N = np.array(N, dtype=int)
-    symmetric = np.array(symmetric, dtype=bool)
-    
-    # Handle window size adjustments
-    N = N + 1 * (1 - symmetric.astype(int))
-    
-    if square and (N.size != 1):
-        N_orig = np.copy(N)
-        L = min(N)
-        N[:] = L
-    
     # Map k-wave window names to scipy names
-    window_map = {
+    window = {
         'Bartlett': 'bartlett',
         'Blackman': 'blackman',
         'Hamming': 'hamming',
@@ -101,78 +89,51 @@ def create_window(N: Union[int, List[int]],
         'Gaussian': 'gaussian',
         'Blackman-Harris': 'blackmanharris',
         'Flattop': 'flattop'
-    }
-    
-    window = window_map.get(window, window.lower())
-    
-    def create_1d_window(size: int) -> np.ndarray:
-        """Create a 1D window of specified size"""
+    }.get(window, window.lower())
+
+    # Convert inputs to numpy arrays
+    N = np.array(N, dtype=int)
+    if square and N.size > 1:
+        N = np.full_like(N, N.min())
+
+    # Create base 1D window
+    def get_1d_window(size):
         if window == 'gaussian':
-            sigma = param if param is not None else 0.5
-            return signal_windows.gaussian(size, sigma * size)
+            return signal_windows.gaussian(size, (param or 0.5) * size)
         elif window in ['kaiser', 'tukey']:
-            beta = param if param is not None else 3 if window == 'kaiser' else 0.5
-            return getattr(signal_windows, window)(size, beta)
-        else:
-            return getattr(signal_windows, window)(size)
-    
+            return getattr(signal_windows, window)(size, param or (3 if window == 'kaiser' else 0.5))
+        return getattr(signal_windows, window)(size)
+
+    # Handle 1D case
     if N.size == 1:
-        # 1D window
-        win = create_1d_window(int(N))
-        win = np.expand_dims(win, axis=-1)
+        win = get_1d_window(int(N))
+        return win[:, np.newaxis], win.sum() / N
+
+    # Handle multi-dimensional case
+    if rotation:
+        # Create radially symmetric window
+        max_size = N.max()
+        radius = (max_size - 1) / 2
+        window_1d = get_1d_window(max_size)
+        
+        # Create coordinate grid
+        coords = [np.linspace(-radius, radius, n) for n in N]
+        grid = np.meshgrid(*coords, indexing='ij')
+        
+        # Calculate radial distances
+        r = np.sqrt(sum(x**2 for x in grid))
+        r_norm = r / radius
+        
+        # Interpolate window values
+        win = np.interp(r_norm.flatten(), np.linspace(0, 1, max_size), window_1d).reshape(r.shape)
     else:
-        if rotation:
-            # Create via rotation
-            L = np.max(N)
-            radius = (L - 1) / 2
-            linear_window = create_1d_window(L)
-            
-            # Create the reference axis for interpolation
-            reference_axis = np.linspace(-radius, radius, L)
-            interp_func = scipy.interpolate.interp1d(reference_axis, linear_window)
-            
-            # Create the grid
-            axes = [np.linspace(-radius, radius, dim_size) for dim_size in N]
-            grid = ndgrid(*axes)
-            
-            # Compute radial distances and interpolate
-            radial_distances = np.linalg.norm(grid, axis=0)
-            radial_distances_clipped = np.clip(radial_distances, a_min=None, a_max=radius)
-            win = interp_func(radial_distances_clipped)
-        else:
-            # Create via outer product
-            windows = [create_1d_window(dim) for dim in N]
-            if len(windows) == 2:
-                win = np.outer(*windows)
-            else:  # 3D
-                win = windows[0][:, np.newaxis] * windows[2].T * windows[1][np.newaxis, :]
-    
-        # Trim the window if required
-        N = N - 1 * (1 - np.array(symmetric).astype(int))
-        if N.size == 2:
-            win = win[0:N[0], 0:N[1]]
-        elif N.size == 3:
-            win = win[0:N[0], 0:N[1], 0:N[2]]
-    
-    # Handle square windows
-    if square and (N.size != 1):
-        L = N[0]
-        win_sq = win
-        win = np.zeros(N_orig)
-        if N.size == 2:
-            index1 = round((N_orig[0] - L) / 2)
-            index2 = round((N_orig[1] - L) / 2)
-            win[index1:index1 + L, index2:index2 + L] = win_sq
-        elif N.size == 3:
-            index1 = floor((N_orig[0] - L) / 2)
-            index2 = floor((N_orig[1] - L) / 2)
-            index3 = floor((N_orig[2] - L) / 2)
-            win[index1:index1 + L, index2:index2 + L, index3:index3 + L] = win_sq
-    
-    # Calculate coherent gain
-    cg = win.sum() / np.prod(N)
-    
-    return win, cg
+        # Create separable window using outer products
+        windows = [get_1d_window(n) for n in N]
+        win = windows[0]
+        for w in windows[1:]:
+            win = win[..., np.newaxis] * w
+
+    return win, win.sum() / win.size
 
 
 def tone_burst(sample_freq, signal_freq, num_cycles, envelope="Gaussian", plot_signal=False, signal_length=0, signal_offset=0):
