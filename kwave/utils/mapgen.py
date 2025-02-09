@@ -10,10 +10,11 @@ from scipy import optimize
 from beartype import beartype as typechecker
 from beartype.typing import Union, List, Tuple, cast, Optional
 from jaxtyping import Float, Complex, Int, Real, Integer
+from scipy.spatial.transform import Rotation
 
 from .conversion import db2neper, neper2db
 from .data import scale_SI
-from .math import cosd, sind, Rz, Ry, Rx, compute_linear_transform
+from .math import cosd, sind
 from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
@@ -2625,8 +2626,8 @@ def make_cart_rect(
             # No rotation
             R = np.eye(3)
         else:
-            # Using intrinsic rotations chain from right to left (z-y'-z'' rotations)
-            R = np.dot(Rz(theta[2]), np.dot(Ry(theta[1]), Rx(theta[0])))
+            # Using intrinsic rotations chain from right to left (xyz rotations)
+            R = Rotation.from_euler("xyz", [theta[0], theta[1], theta[2]], degrees=True).as_matrix()
 
     # Combine scaling and rotation matrices
     A = np.dot(R, S)

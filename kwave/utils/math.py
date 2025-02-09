@@ -2,10 +2,54 @@ import math
 from itertools import compress
 from typing import Optional, Tuple, Union, List
 
+
 import numpy as np
 from numpy.fft import ifftshift, fft, ifft
+from scipy.spatial.transform import Rotation
 
 from kwave.data import Vector
+from kwave.utils.deprecation import deprecated
+
+
+def Rx(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the x-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("x", theta, degrees=True).as_matrix()
+
+
+def Ry(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the y-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("y", theta, degrees=True).as_matrix()
+
+
+def Rz(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the z-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("z", theta, degrees=True).as_matrix()
+
+
+@deprecated("Use make_affine instead", "2.0.0")
+def get_affine_matrix(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
+    return make_affine(translation, rotation, seq)
 
 
 def largest_prime_factor(n: int) -> int:
@@ -306,80 +350,40 @@ def sind(angle_in_degrees):
     return math.sin(angle_in_radians)
 
 
-def Rx(theta):
+def make_affine(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
     """
-    3D rotation matrix for rotation about x-axis
+    Create an affine transformation matrix combining rotation and translation.
+    Uses scipy.spatial.transform.Rotation internally.
 
     Args:
-    theta : float. Angle of rotation (in degrees)
+        translation: [dx, dy] or [dx, dy, dz]
+        rotation: Single angle (degrees) for 2D or list of angles for 3D
+        seq: Rotation sequence for 3D (default: 'xyz')
 
     Returns:
-    np.array. 3D rotation matrix
+        3x3 (2D) or 4x4 (3D) affine transformation matrix
+
+    Examples:
+        # 2D transform (rotation around z-axis)
+        T1 = make_affine([1, 2], 45)
+
+        # 3D transform with xyz Euler angles
+        T2 = make_affine([1, 2, 3], [45, 30, 60])
+
+        # 3D transform with custom sequence
+        T3 = make_affine([1, 2, 3], [45, 30], 'xy')
     """
-    R = np.array([[1, 0, 0], [0, cosd(theta), -sind(theta)], [0, sind(theta), cosd(theta)]])
-    return R
-
-
-def Ry(theta):
-    """
-    3D rotation matrix for rotation about y-axis
-
-    Args:
-    theta : float. Angle of rotation (in degrees)
-
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    R = np.array([[cosd(theta), 0, sind(theta)], [0, 1, 0], [-sind(theta), 0, cosd(theta)]])
-    return R
-
-
-def Rz(theta):
-    """
-    3D rotation matrix for rotation about z-axis
-
-    Args:
-    theta : float. Angle of rotation (in degrees)
-
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    R = np.array([[cosd(theta), -sind(theta), 0], [sind(theta), cosd(theta), 0], [0, 0, 1]])
-    return R
-
-
-def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarray, Vector]):
-    # Check dimensions
-    if len(translation) == 2 and isinstance(rotation, (int, float)):
-        # Assign the inputs
-        dx = translation[0]
-        dy = translation[1]
-        th = rotation
-
-        # Build affine matrix (counter-clockwise)
-        affine = np.array([[cosd(th), -sind(th), dx], [sind(th), cosd(th), dy], [0, 0, 1]])
-
-    elif len(translation) == 3 and isinstance(rotation, (np.ndarray, Vector)) and len(rotation) == 3:
-        # Assign the inputs
-        dx, dy, dz = translation
-        x_th, y_th, z_th = rotation
-
-        # Build the rotation matrices
-        x_th_matrix = np.array([[1, 0, 0], [0, cosd(x_th), -sind(x_th)], [0, sind(x_th), cosd(x_th)]])
-
-        y_th_matrix = np.array([[cosd(y_th), 0, sind(y_th)], [0, 1, 0], [-sind(y_th), 0, cosd(y_th)]])
-
-        z_th_matrix = np.array([[cosd(z_th), -sind(z_th), 0], [sind(z_th), cosd(z_th), 0], [0, 0, 1]])
-
-        # Build affine matrix
-        affine = np.zeros((4, 4))
-        affine[0:3, 0:3] = np.dot(z_th_matrix, np.dot(y_th_matrix, x_th_matrix))
-        affine[:, 3] = [dx, dy, dz, 1]
-
+    if len(translation) == 2:
+        # 2D transformation
+        R = Rotation.from_euler("z", rotation, degrees=True).as_matrix()[:2, :2]
+        return np.array([[R[0, 0], R[0, 1], translation[0]], [R[1, 0], R[1, 1], translation[1]], [0, 0, 1]])
     else:
-        raise ValueError("Incorrect size for translation and rotation inputs.")
-
-    return affine
+        # 3D transformation
+        R = Rotation.from_euler(seq, rotation, degrees=True)
+        T = np.eye(4)
+        T[:3, :3] = R.as_matrix()
+        T[:3, 3] = translation
+        return T
 
 
 def compute_linear_transform(pos1, pos2, offset=None):
