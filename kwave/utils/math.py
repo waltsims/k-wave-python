@@ -389,57 +389,70 @@ def make_affine(translation: Vector, rotation: Union[float, List[float]], seq: s
         return T
 
 
-def _compute_direction_vector(start_pos: np.ndarray, end_pos: np.ndarray) -> np.ndarray:
-    """Compute direction vector between two 3D points.
+def _compute_direction_vector(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Compute and normalize the direction vector between two points.
 
     Args:
         start_pos: Starting position (3D point)
         end_pos: Ending position (3D point)
-    """
-    # Check if start_pos and end_pos are 3D points
-    if start_pos.shape != (3,) or end_pos.shape != (3,):
-        raise ValueError("start_pos and end_pos must be 3D points")
 
-    # Compute and normalize direction vector
+    Returns:
+        Tuple containing:
+        - Normalized direction vector
+        - Magnitude of the direction vector
+    """
     direction = end_pos - start_pos
     magnitude = np.linalg.norm(direction)
-
-    if np.isclose(magnitude, 0):
-        return np.eye(3), np.zeros_like(start_pos)
-
-    direction = direction / magnitude
-
-    return direction
+    return direction, magnitude
 
 
-def _compute_rotation_matrix(direction: np.ndarray, reference: np.ndarray) -> np.ndarray:
-    """Compute rotation matrix between two 3D points.
+def _compute_rotation_axis(reference: np.ndarray, direction: np.ndarray) -> np.ndarray:
+    """Compute the normalized rotation axis between two vectors.
 
     Args:
-        direction: Direction vector between two 3D points
-        reference: Reference direction (canonical vector)
+        reference: Reference direction vector
+        direction: Target direction vector
+
+    Returns:
+        Normalized rotation axis vector
     """
-    # Normalize vectors to ensure unit length
-    direction = direction / np.linalg.norm(direction)
-    reference = reference / np.linalg.norm(reference)
+    u = np.cross(reference, direction)
+    if np.any(u != 0):
+        u = u / np.linalg.norm(u)
+    return u
 
-    # Handle parallel/anti-parallel cases
-    if np.allclose(direction, reference):
-        return np.eye(3)
-    elif np.allclose(direction, -reference):
-        # For anti-parallel vectors, rotate 180° around any perpendicular axis
-        # We can use [1, 0, 0] or find a perpendicular vector if this fails
-        perp = np.array([1.0, 0.0, 0.0])
-        if np.allclose(abs(np.dot(perp, direction)), 1.0):
-            perp = np.array([0.0, 1.0, 0.0])
-        return Rotation.from_rotvec(np.pi * perp).as_matrix()
 
-    # Find rotation axis and angle
-    axis = np.cross(reference, direction)
-    angle = np.arccos(np.clip(np.dot(reference, direction), -1.0, 1.0))
+def _compute_rotation_angle(reference: np.ndarray, direction: np.ndarray) -> float:
+    """Compute the rotation angle between two vectors.
 
-    # Create rotation using scipy's Rotation class
-    return Rotation.from_rotvec(axis * angle).as_matrix()
+    Args:
+        reference: Reference direction vector
+        direction: Target direction vector
+
+    Returns:
+        Rotation angle in radians
+    """
+    return np.arccos(np.dot(reference, direction))
+
+
+def _compute_rodrigues_rotation_matrix(u: np.ndarray, theta: float) -> np.ndarray:
+    """Compute rotation matrix using Rodrigues' formula.
+
+    Args:
+        u: Rotation axis (normalized)
+        theta: Rotation angle in radians
+
+    Returns:
+        3x3 rotation matrix
+    """
+    # Create skew-symmetric matrix of u
+    u_skew = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+
+    # Compute outer product u⊗u
+    u_outer = np.outer(u, u)
+
+    # Combine terms in the same order as MATLAB
+    return np.cos(theta) * np.eye(3) + np.sin(theta) * u_skew + (1 - np.cos(theta)) * u_outer
 
 
 def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -458,17 +471,44 @@ def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray)
         - 3x3 rotation matrix
         - Direction vector from start to end position (normalized)
     """
+    # Compute and normalize direction vector
+    direction, magnitude = _compute_direction_vector(start_pos, end_pos)
 
-    direction = _compute_direction_vector(start_pos, end_pos)
+    if np.isclose(magnitude, 0):
+        return np.eye(3), np.zeros_like(start_pos)
+
+    direction = direction / magnitude
+
     # Reference direction (canonical vector)
     reference = np.array([0, 0, -1])
 
-    rotation_matrix = _compute_rotation_matrix(direction, reference)
+    # Find the rotation axis and angle
+    u = _compute_rotation_axis(reference, direction)
+    theta = _compute_rotation_angle(reference, direction)
+
+    # Compute rotation matrix using Rodrigues' formula
+    rotation_matrix = _compute_rodrigues_rotation_matrix(u, theta)
+
     return rotation_matrix, direction
 
 
 def compute_linear_transform(pos1, pos2, offset=None):
-    """Deprecated: Use compute_rotation_between_vectors instead."""
+    """
+    Compute linear transformation between two 3D points.
+
+    This function computes the linear transformation that maps a vector pointing from
+    pos1 to pos2 into the canonical direction [0, 0, -1].
+
+    Args:
+        pos1: Starting position (3D point)
+        pos2: Ending position (3D point)
+        offset: Offset vector (3D point)
+
+    Returns:
+        Tuple containing:
+        - 3x3 rotation matrix
+
+    """
     rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
     if offset is not None:
         offset_pos = pos1 + offset * direction
