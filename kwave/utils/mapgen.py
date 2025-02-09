@@ -2628,7 +2628,7 @@ def make_cart_rect(
             R = np.eye(3)
         else:
             # Using intrinsic rotations chain from right to left (xyz rotations)
-            R = Rotation.from_euler("xyz", [theta[0], theta[1], theta[2]], degrees=True).as_matrix()
+            R = Rotation.from_euler("xyz", theta, degrees=True).as_matrix()
 
     # Combine scaling and rotation matrices
     A = np.dot(R, S)

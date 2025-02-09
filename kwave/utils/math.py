@@ -11,6 +11,8 @@ from kwave.data import Vector
 from kwave.utils.deprecation import deprecated
 
 
+
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
 def Rx(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the x-axis.
 
@@ -22,7 +24,7 @@ def Rx(theta: float) -> np.ndarray:
     """
     return Rotation.from_euler("x", theta, degrees=True).as_matrix()
 
-
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
 def Ry(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the y-axis.
 
@@ -34,7 +36,7 @@ def Ry(theta: float) -> np.ndarray:
     """
     return Rotation.from_euler("y", theta, degrees=True).as_matrix()
 
-
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
 def Rz(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the z-axis.
 
@@ -47,7 +49,7 @@ def Rz(theta: float) -> np.ndarray:
     return Rotation.from_euler("z", theta, degrees=True).as_matrix()
 
 
-@deprecated("Use make_affine instead", "2.0.0")
+@deprecated("Use make_affine instead", "0.5.0")
 def get_affine_matrix(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
     return make_affine(translation, rotation, seq)
 
@@ -443,7 +445,7 @@ def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray)
     return rotation_matrix, direction
 
 
-@deprecated("Use compute_rotation_between_vectors instead", "2.0.0")
+@deprecated("Use compute_rotation_between_vectors instead", "0.5.0")
 def compute_linear_transform(pos1, pos2, offset=None):
     """Deprecated: Use compute_rotation_between_vectors instead."""
     rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
