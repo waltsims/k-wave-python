@@ -391,7 +391,7 @@ def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray)
     
     This function computes the rotation matrix that transforms a vector pointing from
     start_pos to end_pos into the canonical direction [0, 0, -1].
-    Uses scipy.spatial.transform.Rotation internally.
+    Uses Rodrigues' rotation formula to match MATLAB's behavior exactly.
     
     Args:
         start_pos: Starting position (3D point)
@@ -414,10 +414,33 @@ def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray)
     # Reference direction (canonical vector)
     reference = np.array([0, 0, -1])
     
-    # Use scipy to find rotation between vectors
-    rotation = Rotation.align_vectors(direction.reshape(1, -1), reference.reshape(1, -1))[0]
+    # Find the rotation axis (cross product)
+    u = np.cross(reference, direction)
     
-    return rotation.as_matrix(), direction
+    # If rotation axis is non-zero, normalize it
+    if np.any(u != 0):
+        u = u / np.linalg.norm(u)
+        
+    # Find rotation angle
+    theta = np.arccos(np.dot(reference, direction))
+    
+    # Convert axis-angle transformation to a rotation matrix using MATLAB's formula
+    # R = cos(θ)I + sin(θ)A + (1-cos(θ))(u⊗u)
+    # where A is the skew-symmetric matrix of u
+    # and u⊗u is the outer product
+    u_skew = np.array([[0, -u[2], u[1]], 
+                       [u[2], 0, -u[0]], 
+                       [-u[1], u[0], 0]])
+    
+    # Compute outer product u⊗u
+    u_outer = np.outer(u, u)
+    
+    # Combine terms in the same order as MATLAB
+    rotation_matrix = (np.cos(theta) * np.eye(3) + 
+                      np.sin(theta) * u_skew + 
+                      (1 - np.cos(theta)) * u_outer)
+    
+    return rotation_matrix, direction
 
 
 @deprecated("Use compute_rotation_between_vectors instead", "2.0.0")
