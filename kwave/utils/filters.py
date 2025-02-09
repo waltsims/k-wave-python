@@ -10,7 +10,7 @@ from .checks import is_number
 from .data import scale_SI
 from .math import find_closest, sinc, next_pow2, norm_var, gaussian
 from .matrix import num_dim, num_dim2
-from .signals import get_win
+from .signals import create_window
 from ..kgrid import kWaveGrid
 from ..kmedium import kWaveMedium
 
@@ -116,7 +116,7 @@ def spect(
             fft_len = func_length
 
     # window the signal, reshaping the window to be in the correct direction
-    win, coherent_gain = get_win(func_length, type_=window, symmetric=False)
+    win, coherent_gain = create_window(func_length, window, symmetric=False)
     win_shape = [1] * len(sz)
     win_shape[dim] = func_length
     win = np.reshape(win, tuple(win_shape))
@@ -187,7 +187,7 @@ def extract_amp_phase(
 
     # create 1D window and reshape to be oriented in the time dimension of the
     # input data
-    win, coherent_gain = get_win(data.shape[dim], window)
+    win, coherent_gain = create_window(data.shape[dim], window)
     # this list magic in Python comes from the use of ones in MATLAB
     # TODO: simplify this
     win = np.reshape(win, [1] * (dim - 1) + [len(win)])
@@ -696,9 +696,7 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
-    from .signals import get_win
-
-    win, _ = get_win(grid_size, type_=window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
+    win, _ = create_window(grid_size, window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
 
     # rotate window if input mat is (1, N)

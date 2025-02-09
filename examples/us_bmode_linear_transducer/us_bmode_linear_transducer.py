@@ -13,11 +13,12 @@ from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.signals import tone_burst, get_win
+from kwave.utils.signals import tone_burst
 from kwave.utils.filters import gaussian_filter
 from kwave.utils.conversion import db2neper
 from kwave.reconstruction.tools import log_compression
 from kwave.reconstruction.beamform import envelope_detection
+from scipy.signal.windows import tukey
 
 
 SENSOR_DATA_GDRIVE_ID = "1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv"
@@ -148,7 +149,7 @@ scan_lines = simulation_data
 # ### Remove Input Signal
 #
 # Trim the delay offset from the scan line data
-tukey_win, _ = get_win(kgrid.Nt * 2, "Tukey", False, 0.05)
+tukey_win = tukey(kgrid.Nt * 2, 0.05)
 transmit_len = len(input_signal.squeeze())
 scan_line_win = np.concatenate((np.zeros([1, transmit_len * 2]), tukey_win.T[:, : kgrid.Nt - transmit_len * 2]), axis=1)
 

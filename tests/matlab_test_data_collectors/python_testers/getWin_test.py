@@ -3,12 +3,13 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.signal import windows as signal_windows
 
-from kwave.utils.filters import get_win
+from kwave.utils.signals import create_window
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_get_win():
+def test_create_window():
     test_data_file = os.path.join(Path(__file__).parent, "collectedValues/getWin.mat")
     reader = TestRecordReader(test_data_file)
     for i in range(len(reader)):
@@ -32,7 +33,7 @@ def test_get_win():
 
         # logging.log(logging.INFO, N, type_, param, rotation, symmetric, square, win)
 
-        win_py, cg_py = get_win(N, type_, param=param, rotation=rotation, symmetric=symmetric, square=square)
+        win_py, cg_py = create_window(N, type_, param=param, rotation=rotation, symmetric=symmetric, square=square)
 
         cg = reader.expected_value_of("cg")
         win = reader.expected_value_of("win")

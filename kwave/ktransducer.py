@@ -7,7 +7,7 @@ from kwave.utils.checks import is_number
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.matlab import matlab_find, matlab_mask, unflatten_matlab_mask
 from kwave.utils.matrix import expand_matrix
-from kwave.utils.signals import get_win
+from kwave.utils.signals import create_window
 
 
 # force value to be a positive integer
@@ -573,7 +573,7 @@ class NotATransducer(kSensor):
         """
         Returns:
             return the transmit apodization, converting strings of window
-            type to actual numbers using getWin
+            type to actual numbers using create_window
 
         """
 
@@ -589,9 +589,9 @@ class NotATransducer(kSensor):
             apodization = self.transmit_apodization
         else:
             # if the number of active elements is greater than 1,
-            # create apodization using getWin, otherwise, assign 1
+            # create apodization using create_window, otherwise, assign 1
             if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), type_=self.transmit_apodization)
+                apodization, _ = create_window(int(self.number_active_elements), self.transmit_apodization)
             else:
                 apodization = 1
         apodization = np.array(apodization)
@@ -683,7 +683,7 @@ class NotATransducer(kSensor):
             return self.receive_apodization
         else:
             if self.number_active_elements > 1:
-                apodization, _ = get_win(int(self.number_active_elements), type_=self.receive_apodization)
+                apodization, _ = create_window(int(self.number_active_elements), self.receive_apodization)
             else:
                 apodization = 1
         return np.array(apodization)
