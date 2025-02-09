@@ -20,8 +20,8 @@ recorder.saveRecordsToDisk();
 
 function all_params = make_params()
     %% parameters taken from k-wave testing
-    bowl_pos = [0, 0, 0];
-    focus_pos = [0, 0, 1];
+    bowl_pos = [0.5, 0.5, 0.5];
+    focus_pos = [0.5, 0.5, 1.5];
     num_points_vec = [69, 70, 200, 1000];
     radius = 65e-3;
     ap_diam1 = 30e-3;

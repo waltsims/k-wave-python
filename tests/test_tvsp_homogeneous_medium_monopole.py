@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -42,11 +42,11 @@ def test_tvsp_homogeneous_medium_monopole():
     # define a single source point
     source = kSource()
     source.p_mask = np.zeros(grid_size_points)
-    source.p_mask[-grid_size_points.x//4 - 1, grid_size_points.y//2 - 1] = 1
+    source.p_mask[-grid_size_points.x // 4 - 1, grid_size_points.y // 2 - 1] = 1
 
     # define a time varying sinusoidal source
-    source_freq = 0.25e6   # [Hz]
-    source_mag = 2         # [Pa]
+    source_freq = 0.25e6  # [Hz]
+    source_mag = 2  # [Pa]
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
@@ -54,22 +54,17 @@ def test_tvsp_homogeneous_medium_monopole():
 
     # define a single sensor point
     sensor_mask = np.zeros(grid_size_points)
-    sensor_mask[grid_size_points.x//4 - 1, grid_size_points.y//2 - 1] = 1
+    sensor_mask[grid_size_points.x // 4 - 1, grid_size_points.y // 2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
     # define the acoustic parameters to record
-    sensor.record = ['p', 'p_final']
+    sensor.record = ["p", "p_final"]
 
     # set the input settings
-    input_filename = 'example_tvsp_homo_input.h5'
+    input_filename = "example_tvsp_homo_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True)
     # run the simulation
     kspaceFirstOrder2DC(
         medium=medium,
@@ -77,6 +72,6 @@ def test_tvsp_homogeneous_medium_monopole():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_tvsp_homogeneous_medium_monopole', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_tvsp_homogeneous_medium_monopole", input_file_full_path), "Files do not match!"

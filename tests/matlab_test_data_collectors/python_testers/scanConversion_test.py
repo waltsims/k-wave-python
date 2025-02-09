@@ -3,33 +3,28 @@ import os
 from pathlib import Path
 
 import numpy as np
-from scipy.io import loadmat
 
 from kwave.reconstruction.beamform import scan_conversion
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_scanConversion():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/scanConversion')
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/scanConversion.mat")
+    reader = TestRecordReader(collected_values_file)
 
-    num_collected_values = len(os.listdir(collected_values_folder))
+    for _ in range(len(reader)):
+        scan_lines = reader.expected_value_of("scan_lines")
+        steering_angles = reader.expected_value_of("steering_angles")
+        image_size = reader.expected_value_of("image_size")
+        c0 = reader.expected_value_of("c0")
+        dt = reader.expected_value_of("dt")
+        resolution = reader.expected_value_of("resolution")
+        expected_b_mode = reader.expected_value_of("b_mode")
 
-    for i in range(num_collected_values):
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath)
-
-        scan_lines = recorded_data['scan_lines'].astype(float)
-        steering_angles = np.squeeze(recorded_data['steering_angles'])
-        image_size = np.squeeze(recorded_data['image_size'])
-        c0 = float(recorded_data['c0'])
-        dt = float(recorded_data['dt'])
-        resolution = np.squeeze(recorded_data['resolution'])
-        expected_b_mode = recorded_data['b_mode']
-
-        calculated_b_mode = scan_conversion(
-            scan_lines, steering_angles, image_size,
-            c0, dt, resolution
-        )
+        calculated_b_mode = scan_conversion(scan_lines, steering_angles, image_size, c0, dt, resolution)
 
         assert np.allclose(expected_b_mode, calculated_b_mode, equal_nan=True)
 
-    logging.log(logging.INFO, 'scan_conversion(..) works as expected!')
+        reader.increment()
+
+    logging.log(logging.INFO, "scan_conversion(..) works as expected!")

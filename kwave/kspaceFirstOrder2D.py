@@ -19,12 +19,13 @@ from kwave.utils.tictoc import TicToc
 
 
 def kspace_first_order_2d_gpu(
-        kgrid: kWaveGrid,
-        source: kSource,
-        sensor: NotATransducer,
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions,
-        execution_options: SimulationExecutionOptions) -> np.ndarray:
+    kgrid: kWaveGrid,
+    source: kSource,
+    sensor: NotATransducer,
+    medium: kWaveMedium,
+    simulation_options: SimulationOptions,
+    execution_options: SimulationExecutionOptions,
+) -> np.ndarray:
     """
     2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -55,30 +56,24 @@ def kspace_first_order_2d_gpu(
     GPU binary.
     """
     execution_options.is_gpu_simulation = True  # force to GPU
-    assert isinstance(kgrid, kWaveGrid), 'kgrid must be a kWaveGrid object'
-    assert isinstance(medium, kWaveMedium), 'medium must be a kWaveMedium object'
-    assert isinstance(simulation_options, SimulationOptions), 'simulation_options must be a SimulationOptions object'
-    assert isinstance(execution_options,
-                      SimulationExecutionOptions), 'execution_options must be a SimulationExecutionOptions object'
+    assert isinstance(kgrid, kWaveGrid), "kgrid must be a kWaveGrid object"
+    assert isinstance(medium, kWaveMedium), "medium must be a kWaveMedium object"
+    assert isinstance(simulation_options, SimulationOptions), "simulation_options must be a SimulationOptions object"
+    assert isinstance(execution_options, SimulationExecutionOptions), "execution_options must be a SimulationExecutionOptions object"
 
-    sensor_data = kspaceFirstOrder2DC(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options,
-        execution_options=execution_options
+    sensor_data = kspaceFirstOrder2D(
+        kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options, execution_options=execution_options
     )  # pass inputs to CPU version
     return sensor_data
 
 
 def kspaceFirstOrder2DC(
-        kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions,
-        execution_options: SimulationExecutionOptions
+    kgrid: kWaveGrid,
+    source: kSource,
+    sensor: Union[NotATransducer, kSensor],
+    medium: kWaveMedium,
+    simulation_options: SimulationOptions,
+    execution_options: SimulationExecutionOptions,
 ):
     """
     2D time-domain simulation of wave propagation using C++ code.
@@ -130,23 +125,18 @@ def kspaceFirstOrder2DC(
     execution_options.is_gpu_simulation = False  # force to CPU
     # generate the input file and save to disk
     sensor_data = kspaceFirstOrder2D(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options,
-        execution_options=execution_options
+        kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options, execution_options=execution_options
     )
     return sensor_data
 
 
 def kspaceFirstOrder2D(
-        kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor, None],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions,
-        execution_options: SimulationExecutionOptions
+    kgrid: kWaveGrid,
+    source: kSource,
+    sensor: Union[NotATransducer, kSensor, None],
+    medium: kWaveMedium,
+    simulation_options: SimulationOptions,
+    execution_options: SimulationExecutionOptions,
 ):
     """
     2D time-domain simulation of wave propagation.
@@ -295,14 +285,16 @@ def kspaceFirstOrder2D(
     # start the timer and store the start time
     TicToc.tic()
 
-    k_sim = kWaveSimulation(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options
-    )
-    k_sim.input_checking('kspaceFirstOrder2D')
+    # Currently we only support binary execution, meaning all simulations must be saved to disk.
+    if not simulation_options.save_to_disk:
+        if execution_options.is_gpu_simulation:
+            raise ValueError("GPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True")
+        else:
+            raise ValueError("CPU simulation requires saving to disk. Please set SimulationOptions.save_to_disk=True")
+
+    k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options)
+
+    k_sim.input_checking("kspaceFirstOrder2D")
 
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
@@ -344,9 +336,9 @@ def kspaceFirstOrder2D(
     pml_x_size, pml_y_size = options.pml_x_size, options.pml_y_size
     c_ref = k_sim.c_ref
 
-    k_sim.pml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1)
+    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1)
     k_sim.pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True and options.use_sg, 1)
-    k_sim.pml_y     = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 2)
+    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 2)
     k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, True and options.use_sg, 2)
 
     # define the k-space derivative operators, multiply by the staggered
@@ -355,15 +347,15 @@ def kspaceFirstOrder2D(
     kx_vec, ky_vec = k_sim.kgrid.k_vec
     kx_vec, ky_vec = np.array(kx_vec), np.array(ky_vec)
     if options.use_sg:
-        k_sim.ddx_k_shift_pos = np.fft.ifftshift( 1j * kx_vec * np.exp( 1j * kx_vec * dx/2) )[None, :]
-        k_sim.ddx_k_shift_neg = np.fft.ifftshift( 1j * kx_vec * np.exp( -1j * kx_vec * dx/2) )[None, :]
-        k_sim.ddy_k_shift_pos = np.fft.ifftshift( 1j * ky_vec * np.exp( 1j * ky_vec * dy/2) )[None, :]
-        k_sim.ddy_k_shift_neg = np.fft.ifftshift( 1j * ky_vec * np.exp( -1j * ky_vec * dy/2) )[None, :]
+        k_sim.ddx_k_shift_pos = np.fft.ifftshift(1j * kx_vec * np.exp(1j * kx_vec * dx / 2))[None, :]
+        k_sim.ddx_k_shift_neg = np.fft.ifftshift(1j * kx_vec * np.exp(-1j * kx_vec * dx / 2))[None, :]
+        k_sim.ddy_k_shift_pos = np.fft.ifftshift(1j * ky_vec * np.exp(1j * ky_vec * dy / 2))[None, :]
+        k_sim.ddy_k_shift_neg = np.fft.ifftshift(1j * ky_vec * np.exp(-1j * ky_vec * dy / 2))[None, :]
     else:
-        k_sim.ddx_k_shift_pos = np.fft.ifftshift( 1j * kx_vec )[None, :]
-        k_sim.ddx_k_shift_neg = np.fft.ifftshift( 1j * kx_vec )[None, :]
-        k_sim.ddy_k_shift_pos = np.fft.ifftshift( 1j * ky_vec )[None, :]
-        k_sim.ddy_k_shift_neg = np.fft.ifftshift( 1j * ky_vec )[None, :]
+        k_sim.ddx_k_shift_pos = np.fft.ifftshift(1j * kx_vec)[None, :]
+        k_sim.ddx_k_shift_neg = np.fft.ifftshift(1j * kx_vec)[None, :]
+        k_sim.ddy_k_shift_pos = np.fft.ifftshift(1j * ky_vec)[None, :]
+        k_sim.ddy_k_shift_neg = np.fft.ifftshift(1j * ky_vec)[None, :]
 
     # force the derivative and shift operators to be in the correct direction for use with BSXFUN
     k_sim.ddy_k_shift_pos = k_sim.ddy_k_shift_pos.T
@@ -373,12 +365,13 @@ def kspaceFirstOrder2D(
     if options.use_kspace:
         k = k_sim.kgrid.k
         k_sim.kappa = np.fft.ifftshift(np.sinc(c_ref * k * dt / 2))
-        if (k_sim.source_p and k_sim.source.p_mode == 'additive') or \
-                ((k_sim.source_ux or k_sim.source_uy or k_sim.source_uz) and k_sim.source.u_mode == 'additive'):
+        if (k_sim.source_p and k_sim.source.p_mode == "additive") or (
+            (k_sim.source_ux or k_sim.source_uy or k_sim.source_uz) and k_sim.source.u_mode == "additive"
+        ):
             k_sim.source_kappa = np.fft.ifftshift(np.cos(c_ref * k * dt / 2))
     else:
-        k_sim.kappa          = 1
-        k_sim.source_kappa   = 1
+        k_sim.kappa = 1
+        k_sim.source_kappa = 1
 
     # =========================================================================
     # SAVE DATA TO DISK FOR RUNNING SIMULATION EXTERNAL TO MATLAB
@@ -391,46 +384,53 @@ def kspaceFirstOrder2D(
         retract_size = [[options.pml_x_size, options.pml_y_size, options.pml_z_size]]
 
         # run subscript to save files to disk
-        save_to_disk_func(k_sim.kgrid, k_sim.medium, k_sim.source, k_sim.options, execution_options.auto_chunking,
-                          dotdict({
-                              'ddx_k_shift_pos': k_sim.ddx_k_shift_pos,
-                              'ddx_k_shift_neg': k_sim.ddx_k_shift_neg,
-                              'dt': k_sim.dt,
-                              'c0': k_sim.c0,
-                              'c_ref': k_sim.c_ref,
-                              'rho0': k_sim.rho0,
-                              'rho0_sgx': k_sim.rho0_sgx,
-                              'rho0_sgy': k_sim.rho0_sgy,
-                              'rho0_sgz': k_sim.rho0_sgz,
-                              'p_source_pos_index': k_sim.p_source_pos_index,
-                              'u_source_pos_index': k_sim.u_source_pos_index,
-                              's_source_pos_index': k_sim.s_source_pos_index,
-                              'transducer_input_signal': k_sim.transducer_input_signal,
-                              'delay_mask': k_sim.delay_mask,
-                              'sensor_mask_index': k_sim.sensor_mask_index,
-                              'record': k_sim.record,
-                          }),
-                          dotdict({
-                            'source_p': k_sim.source_p,
-                            'source_p0': k_sim.source_p0,
-
-                            'source_ux': k_sim.source_ux,
-                            'source_uy': k_sim.source_uy,
-                            'source_uz': k_sim.source_uz,
-
-                            'source_sxx': k_sim.source_sxx,
-                            'source_syy': k_sim.source_syy,
-                            'source_szz': k_sim.source_szz,
-                            'source_sxy': k_sim.source_sxy,
-                            'source_sxz': k_sim.source_sxz,
-                            'source_syz': k_sim.source_syz,
-
-                            'transducer_source': k_sim.transducer_source,
-                            'nonuniform_grid': k_sim.nonuniform_grid,
-                            'elastic_code': k_sim.options.simulation_type.is_elastic_simulation(),
-                            'axisymmetric': k_sim.options.simulation_type.is_axisymmetric(),
-                            'cuboid_corners': k_sim.cuboid_corners,
-                        }))
+        save_to_disk_func(
+            k_sim.kgrid,
+            k_sim.medium,
+            k_sim.source,
+            k_sim.options,
+            execution_options.auto_chunking,
+            dotdict(
+                {
+                    "ddx_k_shift_pos": k_sim.ddx_k_shift_pos,
+                    "ddx_k_shift_neg": k_sim.ddx_k_shift_neg,
+                    "dt": k_sim.dt,
+                    "c0": k_sim.c0,
+                    "c_ref": k_sim.c_ref,
+                    "rho0": k_sim.rho0,
+                    "rho0_sgx": k_sim.rho0_sgx,
+                    "rho0_sgy": k_sim.rho0_sgy,
+                    "rho0_sgz": k_sim.rho0_sgz,
+                    "p_source_pos_index": k_sim.p_source_pos_index,
+                    "u_source_pos_index": k_sim.u_source_pos_index,
+                    "s_source_pos_index": k_sim.s_source_pos_index,
+                    "transducer_input_signal": k_sim.transducer_input_signal,
+                    "delay_mask": k_sim.delay_mask,
+                    "sensor_mask_index": k_sim.sensor_mask_index,
+                    "record": k_sim.record,
+                }
+            ),
+            dotdict(
+                {
+                    "source_p": k_sim.source_p,
+                    "source_p0": k_sim.source_p0,
+                    "source_ux": k_sim.source_ux,
+                    "source_uy": k_sim.source_uy,
+                    "source_uz": k_sim.source_uz,
+                    "source_sxx": k_sim.source_sxx,
+                    "source_syy": k_sim.source_syy,
+                    "source_szz": k_sim.source_szz,
+                    "source_sxy": k_sim.source_sxy,
+                    "source_sxz": k_sim.source_sxz,
+                    "source_syz": k_sim.source_syz,
+                    "transducer_source": k_sim.transducer_source,
+                    "nonuniform_grid": k_sim.nonuniform_grid,
+                    "elastic_code": k_sim.options.simulation_type.is_elastic_simulation(),
+                    "axisymmetric": k_sim.options.simulation_type.is_axisymmetric(),
+                    "cuboid_corners": k_sim.cuboid_corners,
+                }
+            ),
+        )
 
         # run subscript to resize the transducer object if the grid has been expanded
         retract_transducer_grid_size(k_sim.source, k_sim.sensor, retract_size, k_sim.options.pml_inside)
@@ -440,7 +440,6 @@ def kspaceFirstOrder2D(
             return
 
         executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
-        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
-        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
-                                              options=executor_options)
+        executor_options = execution_options.as_list(sensor=k_sim.sensor)
+        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename, options=executor_options)
         return sensor_data

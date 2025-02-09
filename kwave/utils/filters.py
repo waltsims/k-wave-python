@@ -30,7 +30,6 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
         The corrected FFT of the function.
     """
     if fft_len % 2:
-
         # odd FFT length switch dim case
         if dim == 0:
             func_fft[1:, :] = func_fft[1:, :] * 2
@@ -41,28 +40,28 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
         elif dim == 3:
             func_fft[:, :, :, 1:] = func_fft[:, :, :, 1:] * 2
     else:
-
         # even FFT length
         if dim == 0:
-            func_fft[1: -1] = func_fft[1: -1] * 2
+            func_fft[1:-1] = func_fft[1:-1] * 2
         elif dim == 1:
-            func_fft[:, 1: -1] = func_fft[:, 1: -1] * 2
+            func_fft[:, 1:-1] = func_fft[:, 1:-1] * 2
         elif dim == 2:
-            func_fft[:, :, 1: -1] = func_fft[:, :, 1: -1] * 2
+            func_fft[:, :, 1:-1] = func_fft[:, :, 1:-1] * 2
         elif dim == 3:
-            func_fft[:, :, :, 1: -1] = func_fft[:, :, :, 1: -1] * 2
+            func_fft[:, :, :, 1:-1] = func_fft[:, :, :, 1:-1] * 2
 
     return func_fft
 
 
 def spect(
-        func: np.ndarray,
-        Fs: float,
-        dim: Optional[Union[int, str]] = 'auto',
-        fft_len: Optional[int] = 0,
-        power_two: Optional[bool] = False,
-        unwrap_phase: Optional[bool] = False,
-        window: Optional[str] = 'Rectangular') -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    func: np.ndarray,
+    Fs: float,
+    dim: Optional[Union[int, str]] = "auto",
+    fft_len: Optional[int] = 0,
+    power_two: Optional[bool] = False,
+    unwrap_phase: Optional[bool] = False,
+    window: Optional[str] = "Rectangular",
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculates the spectrum of a signal.
 
@@ -91,26 +90,23 @@ def spect(
 
     # check input isn't scalar
     if np.size(func) == 1:
-        raise ValueError('Input signal cannot be scalar.')
+        raise ValueError("Input signal cannot be scalar.")
 
     # check input doesn't have more than 4 dimensions
     if len(sz) > 4:
-        raise ValueError('Input signal must have 1, 2, 3, or 4 dimensions.')
+        raise ValueError("Input signal must have 1, 2, 3, or 4 dimensions.")
 
     # automatically set dimension to first non - singleton dimension
-    if dim == 'auto':
-        dim_index = 0
-        while dim_index <= len(sz):
-            if sz[dim_index] > 1:
-                dim = dim_index
-                break
-            dim_index = dim_index + 1
+    if dim == "auto":
+        dim = np.argmax(np.array(sz) > 1)
+        if sz[dim] <= 1:
+            raise ValueError("All dimensions are singleton; unable to determine valid dimension.")
 
     # assign the number of points being analysed
     func_length = sz[dim]
 
     # set the length of the FFT
-    if not fft_len > func_length:
+    if fft_len <= 0 or fft_len < func_length:
         if power_two:
             # find an appropriate FFT length of the form 2 ^ N that is equal to or
             # larger than the length of the input signal
@@ -120,34 +116,32 @@ def spect(
             fft_len = func_length
 
     # window the signal, reshaping the window to be in the correct direction
-    win, coherent_gain = get_win(func_length, window, symmetric=False)
-    win = np.reshape(win, tuple(([1] * dim + [func_length] + [1] * (len(sz) - 2))))
+    win, coherent_gain = get_win(func_length, type_=window, symmetric=False)
+    win_shape = [1] * len(sz)
+    win_shape[dim] = func_length
+    win = np.reshape(win, tuple(win_shape))
     func = win * func
 
     # compute the fft using the defined FFT length, if fft_len >
     # func_length, the input signal is padded with zeros
-    func_fft = fft(func, fft_len, dim)
+    func_fft = np.fft.fft(func, n=fft_len, axis=dim)
 
     # correct for the magnitude scaling of the FFT and the coherent gain of the
     # window(note that the correction is equal to func_length NOT fft_len)
-    func_fft = func_fft / (func_length * coherent_gain)
+    epsilon = 1e-10  # Small value to prevent division by zero
+    func_fft = func_fft / (func_length * coherent_gain + epsilon)
 
     # reduce to a single sided spectrum where the number of unique points for
     # even numbered FFT lengths is given by N / 2 + 1, and for odd(N + 1) / 2
     num_unique_pts = int(np.ceil((fft_len + 1) / 2))
-    if dim == 0:
-        func_fft = func_fft[0:num_unique_pts]
-    elif dim == 1:
-        func_fft = func_fft[:, 0: num_unique_pts]
-    elif dim == 2:
-        func_fft = func_fft[:, :, 0: num_unique_pts]
-    elif dim == 3:
-        func_fft = func_fft[:, :, :, 0: num_unique_pts]
+    slicing = [slice(None)] * len(sz)
+    slicing[dim] = slice(0, num_unique_pts)
+    func_fft = func_fft[tuple(slicing)]
 
     func_fft = single_sided_correction(func_fft, fft_len, dim)
 
     # create the frequency axis variable
-    f = np.arange(0, func_fft.shape[dim]) * Fs / fft_len
+    f = np.arange(0, num_unique_pts) * Fs / fft_len
 
     # calculate the amplitude spectrum
     func_as = np.abs(func_fft)
@@ -157,14 +151,14 @@ def spect(
 
     # unwrap the phase spectrum if required
     if unwrap_phase:
-        func_ps = scipy.unwrap(func_ps, [], dim)
+        func_ps = np.unwrap(func_ps, axis=dim)
 
     return f, func_as, func_ps
 
 
-def extract_amp_phase(data: np.ndarray, Fs: float, source_freq: float, dim: Tuple[str, int] = 'auto',
-                      fft_padding: int = 3,
-                      window: str = 'Hanning') -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def extract_amp_phase(
+    data: np.ndarray, Fs: float, source_freq: float, dim: Tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
 
@@ -186,7 +180,7 @@ def extract_amp_phase(data: np.ndarray, Fs: float, source_freq: float, dim: Tupl
     """
 
     # check for the dim input
-    if dim == 'auto':
+    if dim == "auto":
         dim = num_dim(data)
         if dim == 2 and data.shape[1] == 1:
             dim = 1
@@ -228,7 +222,7 @@ def extract_amp_phase(data: np.ndarray, Fs: float, source_freq: float, dim: Tupl
         amp = func_as[:, :, :, f_index]
         phase = func_ps[:, :, :, f_index]
     else:
-        raise ValueError('dim must be 0, 1, 2, or 3')
+        raise ValueError("dim must be 0, 1, 2, or 3")
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
 
@@ -264,8 +258,11 @@ def tenenbaum_sharpness(im):
         sobel3D[:, :, 2] = -sobel3D[:, :, 0]
 
         # compute metric
-        s = (convolve(im, sobel3D) ** 2 + convolve(im, np.transpose(sobel3D, (2, 0, 1))) ** 2 +
-             convolve(im, np.transpose(sobel3D, (1, 2, 0))) ** 2).sum()
+        s = (
+            convolve(im, sobel3D) ** 2
+            + convolve(im, np.transpose(sobel3D, (2, 0, 1))) ** 2
+            + convolve(im, np.transpose(sobel3D, (1, 2, 0))) ** 2
+        ).sum()
     return s
 
     # TODO: get this passing the tests
@@ -289,9 +286,7 @@ def tenenbaum_sharpness(im):
     #     raise ValueError("Invalid number of dimensions in im")
 
 
-def sharpness(
-        im: np.ndarray,
-        mode: Optional[str] = "Brenner") -> float:
+def sharpness(im: np.ndarray, mode: Optional[str] = "Brenner") -> float:
     """
     Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.
 
@@ -320,8 +315,7 @@ def sharpness(
     elif mode == "NormVariance":
         metric = norm_var(im)
     else:
-        raise ValueError(
-            "Unrecognized sharpness metric passed. Valid values are ['Brenner', 'Tanenbaum', 'NormVariance']")
+        raise ValueError("Unrecognized sharpness metric passed. Valid values are ['Brenner', 'Tanenbaum', 'NormVariance']")
 
     return metric
 
@@ -352,10 +346,9 @@ def fwhm(f, x):
     def half_max_x(x, y):
         half = max(y) / 2.0
         signs = np.sign(np.add(y, -half))
-        zero_crossings = (signs[0:-2] != signs[1:-1])
+        zero_crossings = signs[0:-2] != signs[1:-1]
         zero_crossings_i = np.where(zero_crossings)[0]
-        return [lin_interp(x, y, zero_crossings_i[0], half),
-                lin_interp(x, y, zero_crossings_i[1], half)]
+        return [lin_interp(x, y, zero_crossings_i[0], half), lin_interp(x, y, zero_crossings_i[1], half)]
 
     hmx = half_max_x(x, f)
     fwhm_val = hmx[1] - hmx[0]
@@ -363,10 +356,9 @@ def fwhm(f, x):
     return fwhm_val, tuple(hmx)
 
 
-def gaussian_filter(signal: Union[np.ndarray, List[float]],
-                    Fs: float,
-                    frequency: float,
-                    bandwidth: float) -> Union[np.ndarray, List[float]]:
+def gaussian_filter(
+    signal: Union[np.ndarray, List[float]], Fs: float, frequency: float, bandwidth: float
+) -> Union[np.ndarray, List[float]]:
     """
     Applies a frequency domain Gaussian filter with the
     specified center frequency and percentage bandwidth to the input
@@ -374,7 +366,7 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
     applied to each matrix row.
 
     Args:
-        signal:         Signal to filter
+        signal:         Signal to filter [channel, samples]
         Fs:             Sampling frequency [Hz]
         frequency:      Center frequency of filter [Hz]
         bandwidth:      Bandwidth of filter in percentage
@@ -384,7 +376,7 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
 
     """
 
-    N = len(signal)
+    N = signal.shape[-1]
     if N % 2 == 0:
         f = np.arange(-N / 2, N / 2) * Fs / N
     else:
@@ -397,6 +389,10 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
     # create double-sided Gaussain filter
     gfilter = np.fmax(gaussian(f, magnitude, mean, variance), gaussian(f, magnitude, -mean, variance))
 
+    # add dimensions to filter to be broadcastable to signal shape
+    if len(signal.shape) == 2:
+        gfilter = gfilter[np.newaxis, :]
+
     # apply filter
     signal = np.real(ifft(ifftshift(gfilter * fftshift(fft(signal)))))
 
@@ -404,16 +400,16 @@ def gaussian_filter(signal: Union[np.ndarray, List[float]],
 
 
 def filter_time_series(
-        kgrid: "kWaveGrid",
-        medium: "kWaveMedium",
-        signal: np.ndarray,
-        ppw: Optional[int] = 3,
-        rppw: Optional[int] = 0,
-        stop_band_atten: Optional[int] = 60,
-        transition_width: Optional[float] = 0.1,
-        zerophase: Optional[bool] = False,
-        plot_spectrums: Optional[bool] = False,
-        plot_signals: Optional[bool] = False,
+    kgrid: "kWaveGrid",
+    medium: "kWaveMedium",
+    signal: np.ndarray,
+    ppw: Optional[int] = 3,
+    rppw: Optional[int] = 0,
+    stop_band_atten: Optional[int] = 60,
+    transition_width: Optional[float] = 0.1,
+    zerophase: Optional[bool] = False,
+    plot_spectrums: Optional[bool] = False,
+    plot_signals: Optional[bool] = False,
 ) -> np.ndarray:
     """
     Filters a time-domain signal using the Kaiser windowing method.
@@ -467,25 +463,23 @@ def filter_time_series(
         else:
             rotate_signal = False
     else:
-        raise TypeError('Input signal must be a vector.')
+        raise TypeError("Input signal must be a vector.")
 
     # update the command line status
-    logging.log(logging.INFO, 'Filtering input signal...')
+    logging.log(logging.INFO, "Filtering input signal...")
 
     # extract the time step
-    assert not isinstance(kgrid.t_array, str) or kgrid.t_array != 'auto', 'kgrid.t_array must be explicitly defined.'
+    assert not isinstance(kgrid.t_array, str) or kgrid.t_array != "auto", "kgrid.t_array must be explicitly defined."
 
     # compute the sampling frequency
     Fs = 1 / kgrid.dt
 
     # extract the minium sound speed
     if medium.sound_speed is not None:
-
         # for the fluid code, use medium.sound_speed
         c0 = medium.sound_speed.min()
 
-    elif all(medium.is_defined('sound_speed_compression', 'sound_speed_shear')):  # pragma: no cover
-
+    elif all(medium.is_defined("sound_speed_compression", "sound_speed_shear")):  # pragma: no cover
         # for the elastic code, combine the shear and compression sound speeds and remove zeros values
         ss = np.hstack([medium.sound_speed_compression, medium.sound_speed_shear])
         ss[ss == 0] = np.nan
@@ -496,8 +490,8 @@ def filter_time_series(
 
     else:
         raise ValueError(
-            'The input fields medium.sound_speed or medium.sound_speed_compression and medium.sound_speed_shear must '
-            'be defined.')
+            "The input fields medium.sound_speed or medium.sound_speed_compression and medium.sound_speed_shear must " "be defined."
+        )
 
     # extract the maximum supported frequency (two points per wavelength)
     f_max = kgrid.k_max_all * c0 / (2 * np.pi)
@@ -506,13 +500,19 @@ def filter_time_series(
     filter_cutoff_f = 2 * f_max / ppw
 
     # calculate the wavelength of the filter cut-off frequency as a number of time steps
-    filter_wavelength = ((2 * np.pi / filter_cutoff_f) / kgrid.dt)
+    filter_wavelength = (2 * np.pi / filter_cutoff_f) / kgrid.dt
 
     # filter the signal if required
     if ppw != 0:
-        filtered_signal = apply_filter(signal, Fs, float(filter_cutoff_f), 'LowPass',
-                                       zero_phase=zerophase, stop_band_atten=float(stop_band_atten),
-                                       transition_width=transition_width)
+        filtered_signal = apply_filter(
+            signal,
+            Fs,
+            float(filter_cutoff_f),
+            "LowPass",
+            zero_phase=zerophase,
+            stop_band_atten=float(stop_band_atten),
+            transition_width=transition_width,
+        )
 
     # add a start-up ramp if required
     if rppw != 0:
@@ -530,13 +530,14 @@ def filter_time_series(
         filtered_signal = filtered_signal.T
 
     # update the command line status
-    logging.log(logging.INFO, f'  maximum frequency supported by kgrid: {scale_SI(f_max)}Hz (2 PPW)')
+    logging.log(logging.INFO, f"  maximum frequency supported by kgrid: {scale_SI(f_max)}Hz (2 PPW)")
     if ppw != 0:
-        logging.log(logging.INFO, f'  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({ppw} PPW)')
+        logging.log(logging.INFO, f"  filter cutoff frequency: {scale_SI(filter_cutoff_f)}Hz ({ppw} PPW)")
     if rppw != 0:
-        logging.log(logging.INFO, 
-            f'  ramp frequency: {scale_SI(2 * np.pi / (2 * ramp_length * kgrid.dt))}Hz (ramp_points_per_wavelength PPW)')
-    logging.log(logging.INFO, '  computation complete.')
+        logging.log(
+            logging.INFO, f"  ramp frequency: {scale_SI(2 * np.pi / (2 * ramp_length * kgrid.dt))}Hz (ramp_points_per_wavelength PPW)"
+        )
+    logging.log(logging.INFO, "  computation complete.")
 
     # plot signals if required
     if plot_signals or plot_spectrums:
@@ -546,13 +547,13 @@ def filter_time_series(
 
 
 def apply_filter(
-        signal: np.ndarray,
-        Fs: float,
-        cutoff_f: float,
-        filter_type: str,
-        zero_phase: Optional[bool] = False,
-        transition_width: Optional[float] = 0.1,
-        stop_band_atten: Optional[int] = 60,
+    signal: np.ndarray,
+    Fs: float,
+    cutoff_f: float,
+    filter_type: str,
+    zero_phase: Optional[bool] = False,
+    transition_width: Optional[float] = 0.1,
+    stop_band_atten: Optional[int] = 60,
 ) -> np.ndarray:
     """
     Filters an input signal using a FIR filter with Kaiser window coefficients based on the specified cut-off frequency and filter type.
@@ -573,26 +574,33 @@ def apply_filter(
     """
 
     # for a bandpass filter, use applyFilter recursively
-    if filter_type == 'BandPass':
+    if filter_type == "BandPass":
         assert isinstance(cutoff_f, list), "List of two frequencies required as for filter type 'BandPass'"
         assert len(cutoff_f) == 2, "List of two frequencies required as for filter type 'BandPass'"
 
         # apply the low pass filter
-        func_filt_lp = apply_filter(signal, Fs, cutoff_f[1], 'LowPass', stop_band_atten=stop_band_atten,
-                                    transition_width=transition_width, zero_phase=zero_phase)
+        func_filt_lp = apply_filter(
+            signal, Fs, cutoff_f[1], "LowPass", stop_band_atten=stop_band_atten, transition_width=transition_width, zero_phase=zero_phase
+        )
 
         # apply the high pass filter
-        filtered_signal = apply_filter(func_filt_lp, Fs, cutoff_f[0], 'HighPass', stop_band_atten=stop_band_atten,
-                                       transition_width=transition_width, zero_phase=zero_phase)
+        filtered_signal = apply_filter(
+            func_filt_lp,
+            Fs,
+            cutoff_f[0],
+            "HighPass",
+            stop_band_atten=stop_band_atten,
+            transition_width=transition_width,
+            zero_phase=zero_phase,
+        )
 
     else:
-
         # check filter type
-        if filter_type == 'LowPass':
+        if filter_type == "LowPass":
             high_pass = False
-        elif filter_type == 'HighPass':
+        elif filter_type == "HighPass":
             high_pass = True
-            cutoff_f = (Fs / 2 - cutoff_f)
+            cutoff_f = Fs / 2 - cutoff_f
         else:
             raise ValueError(f'Unknown filter type {filter_type}. Options are "LowPass, HighPass, BandPass"')
 
@@ -616,8 +624,7 @@ def apply_filter(
 
         # if no window is given, use a Kaiser window
         # TODO: there is no window argument
-        if 'w' not in locals():
-
+        if "w" not in locals():
             # compute Kaiser window parameter beta
             if stop_band_atten > 50:
                 beta = 0.1102 * (stop_band_atten - 8.7)
@@ -628,8 +635,7 @@ def apply_filter(
 
             # construct the Kaiser smoothing window w(n)
             m = np.arange(0, N)
-            w = np.real(scipy.special.iv(0, np.pi * beta * np.sqrt(1 - (2 * m / N - 1) ** 2))) / np.real(
-                scipy.special.iv(0, np.pi * beta))
+            w = np.real(scipy.special.iv(0, np.pi * beta * np.sqrt(1 - (2 * m / N - 1) ** 2))) / np.real(scipy.special.iv(0, np.pi * beta))
 
         # window the ideal impulse response with Kaiser window to obtain the FIR filter coefficients hw(n)
         hw = w * h
@@ -653,10 +659,7 @@ def apply_filter(
     return filtered_signal[np.newaxis]
 
 
-def smooth(
-        a: np.ndarray,
-        restore_max: Optional[bool] = False,
-        window_type: Optional[str] = 'Blackman') -> np.ndarray:
+def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Optional[str] = "Blackman") -> np.ndarray:
     """
     Smooths a matrix.
 
@@ -671,6 +674,9 @@ def smooth(
     """
 
     DEF_USE_ROTATION = True
+
+    if a.dtype == bool:
+        a = a.astype(int)
 
     assert is_number(a) and np.all(~np.isinf(a))
     assert isinstance(restore_max, bool)
@@ -691,8 +697,8 @@ def smooth(
     # get the window, taking the absolute value to discard machine precision
     # negative values
     from .signals import get_win
-    win, _ = get_win(grid_size, type_=window_type,
-                     rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
+
+    win, _ = get_win(grid_size, type_=window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
 
     # rotate window if input mat is (1, N)

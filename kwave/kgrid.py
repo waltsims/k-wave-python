@@ -21,6 +21,7 @@ class kWaveGrid(object):
     Cartesian grid, with grid spacing given by dx, dy, dz (typically the
     grid spacing in each direction is constant).
     """
+
     # default CFL number
     CFL_DEFAULT = 0.3
 
@@ -38,23 +39,23 @@ class kWaveGrid(object):
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
         assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
 
-        self.N = N.astype(int)              #: grid size in each dimension [grid points]
-        self.spacing = spacing              #: grid point spacing in each direction [m]
-        self.dim = self.N.size              #: Number of dimensions (1, 2 or 3)
+        self.N = N.astype(int)  #: grid size in each dimension [grid points]
+        self.spacing = spacing  #: grid point spacing in each direction [m]
+        self.dim = self.N.size  #: Number of dimensions (1, 2 or 3)
 
-        self.nonuniform = False             #: flag that indicates grid non-uniformity
-        self.dt = 'auto'                    #: size of time step [s]
-        self.Nt = 'auto'                    #: number of time steps [s]
+        self.nonuniform = False  #: flag that indicates grid non-uniformity
+        self.dt = "auto"  #: size of time step [s]
+        self.Nt = "auto"  #: number of time steps [s]
 
         # originally there was [xn_vec, yn_vec, zn_vec]
-        self.n_vec      = FlexibleVector([0] * self.dim)  #: position vectors for the grid points in [0, 1]
+        self.n_vec = FlexibleVector([0] * self.dim)  #: position vectors for the grid points in [0, 1]
         # originally there was [xn_vec_sgx, yn_vec_sgy, zn_vec_sgz]
-        self.n_vec_sg   = FlexibleVector([0] * self.dim)  #: position vectors for the staggered grid points in [0, 1]
+        self.n_vec_sg = FlexibleVector([0] * self.dim)  #: position vectors for the staggered grid points in [0, 1]
 
         # originally there was [dxudxn, dyudyn, dzudzn]
-        self.dudn       = FlexibleVector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
+        self.dudn = FlexibleVector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
         # originally there was [dxudxn_sgx, dyudyn_sgy, dzudzn_sgz]
-        self.dudn_sg    = FlexibleVector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
+        self.dudn_sg = FlexibleVector([0] * self.dim)  #: transformation gradients between uniform and staggered grids
 
         # assign the grid parameters for the x spatial direction
         # originally kx_vec
@@ -96,8 +97,8 @@ class kWaveGrid(object):
         # TODO (walter): I would change this functionality to return a time array even if Nt or dt are not yet set
         #  (e.g. if they are still 'auto')
 
-        if self.Nt == 'auto' or self.dt == 'auto':
-            return 'auto'
+        if self.Nt == "auto" or self.dt == "auto":
+            return "auto"
         else:
             t_array = np.arange(0, self.Nt) * self.dt
             # TODO: adding this extra dimension seems unnecessary
@@ -107,10 +108,10 @@ class kWaveGrid(object):
     @t_array.setter
     def t_array(self, t_array):
         # check for 'auto' input
-        if t_array == 'auto':
+        if t_array == "auto":
             # set values to auto
-            self.Nt = 'auto'
-            self.dt = 'auto'
+            self.Nt = "auto"
+            self.dt = "auto"
 
         else:
             # extract property values
@@ -118,14 +119,13 @@ class kWaveGrid(object):
             dt_temp = t_array[1] - t_array[0]
 
             # check the time array begins at zero
-            assert t_array[0] == 0, 't_array must begin at zero.'
+            assert t_array[0] == 0, "t_array must begin at zero."
 
             # check the time array is evenly spaced
-            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.MACHINE_PRECISION, \
-                't_array must be evenly spaced.'
+            assert (t_array[1:] - t_array[0:-1] - dt_temp).max() < self.MACHINE_PRECISION, "t_array must be evenly spaced."
 
             # check the time steps are increasing
-            assert dt_temp > 0, 't_array must be monotonically increasing.'
+            assert dt_temp > 0, "t_array must be monotonically increasing."
 
             # assign values
             self.Nt = Nt_temp
@@ -142,12 +142,12 @@ class kWaveGrid(object):
         Returns: None
         """
         # check the value for Nt
-        assert (isinstance(Nt, int) or
-                np.issubdtype(Nt, np.int64) or
-                np.issubdtype(Nt, np.int32)) and Nt > 0, 'Nt must be a positive integer.'
+        assert (
+            isinstance(Nt, int) or np.issubdtype(Nt, np.int64) or np.issubdtype(Nt, np.int32)
+        ) and Nt > 0, "Nt must be a positive integer."
 
         # check the value for dt
-        assert dt > 0, 'dt must be positive.'
+        assert dt > 0, "dt must be positive."
 
         # assign values
         self.Nt = Nt
@@ -441,20 +441,14 @@ class kWaveGrid(object):
         """
         # import statement place here in order to avoid circular dependencies
         if axisymmetric is not None:
-            if axisymmetric == 'WSWA':
-                prime_facs = [largest_prime_factor(self.Nx),
-                              largest_prime_factor(self.Ny * 4),
-                              largest_prime_factor(self.Nz)]
-            elif axisymmetric == 'WSWS':
-                prime_facs = [largest_prime_factor(self.Nx),
-                              largest_prime_factor(self.Ny * 2 - 2),
-                              largest_prime_factor(self.Nz)]
+            if axisymmetric == "WSWA":
+                prime_facs = [largest_prime_factor(self.Nx), largest_prime_factor(self.Ny * 4), largest_prime_factor(self.Nz)]
+            elif axisymmetric == "WSWS":
+                prime_facs = [largest_prime_factor(self.Nx), largest_prime_factor(self.Ny * 2 - 2), largest_prime_factor(self.Nz)]
             else:
-                raise ValueError('Unknown axisymmetric symmetry.')
+                raise ValueError("Unknown axisymmetric symmetry.")
         else:
-            prime_facs = [largest_prime_factor(self.Nx),
-                          largest_prime_factor(self.Ny),
-                          largest_prime_factor(self.Nz)]
+            prime_facs = [largest_prime_factor(self.Nx), largest_prime_factor(self.Ny), largest_prime_factor(self.Nz)]
         return np.array(prime_facs)
 
     # TODO (walter): convert this name to snake case
@@ -588,8 +582,7 @@ class kWaveGrid(object):
             # HAHA / DST-II
             n = np.arange(1, M // 2 + 1).T
             kx_vec = 2 * math.pi * n / (M * dx)
-        elif dtt_type in [DiscreteCosine.TYPE_3, DiscreteCosine.TYPE_4,
-                          DiscreteSine.TYPE_3,   DiscreteSine.TYPE_4]:
+        elif dtt_type in [DiscreteCosine.TYPE_3, DiscreteCosine.TYPE_4, DiscreteSine.TYPE_3, DiscreteSine.TYPE_4]:
             # half-wavenumber DTTs
             # WSWA / DCT-III
             # HSHA / DCT-IV
@@ -622,22 +615,22 @@ class kWaveGrid(object):
         """
 
         # check the dimension to set the nonuniform grid is appropriate
-        assert dim <= self.dim, f'Cannot set nonuniform parameters for dimension {dim} of {self.dim}-dimensional grid.'
+        assert dim <= self.dim, f"Cannot set nonuniform parameters for dimension {dim} of {self.dim}-dimensional grid."
 
         # force non-uniform grid spacing to be column vectors, and the
         # gradients to be in the correct direction for use with bsxfun
-        n_vec            = np.reshape(n_vec,    (-1, 1), order='F')
-        n_vec_sg         = np.reshape(n_vec_sg, (-1, 1), order='F')
+        n_vec = np.reshape(n_vec, (-1, 1), order="F")
+        n_vec_sg = np.reshape(n_vec_sg, (-1, 1), order="F")
 
         if dim == 1:
-            dudn         = np.reshape(dudn,     (-1, 1), order='F')
-            dudn_sg      = np.reshape(dudn_sg,  (-1, 1), order='F')
+            dudn = np.reshape(dudn, (-1, 1), order="F")
+            dudn_sg = np.reshape(dudn_sg, (-1, 1), order="F")
         elif dim == 2:
-            dudn         = np.reshape(dudn,     (1, -1), order='F')
-            dudn_sg      = np.reshape(dudn_sg,  (1, -1), order='F')
+            dudn = np.reshape(dudn, (1, -1), order="F")
+            dudn_sg = np.reshape(dudn_sg, (1, -1), order="F")
         elif dim == 3:
-            dudn         = np.reshape(dudn,     (1, 1, -1), order='F')
-            dudn_sg      = np.reshape(dudn_sg,  (1, 1, -1), order='F')
+            dudn = np.reshape(dudn, (1, 1, -1), order="F")
+            dudn_sg = np.reshape(dudn_sg, (1, 1, -1), order="F")
 
         self.n_vec.assign_dim(self.dim, n_vec)
         self.n_vec_sg.assign_dim(self.dim, n_vec_sg)
@@ -671,7 +664,7 @@ class kWaveGrid(object):
         """
         # check dtt_type is a scalar or a vector the same size self.dim
         dtt_type = np.array(dtt_type)
-        assert (dtt_type.size in [1, self.dim]), f'dtt_type must be a scalar, or {self.dim}D vector'
+        assert dtt_type.size in [1, self.dim], f"dtt_type must be a scalar, or {self.dim}D vector"
         if self.dim == 1:
             k, M = self.kx_vec_dtt(dtt_type[0])
             return k, M

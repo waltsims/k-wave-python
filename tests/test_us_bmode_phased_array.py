@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -36,7 +36,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_us_bmode_phased_array():
     # simulation settings
-    DATA_CAST = 'single'
+    DATA_CAST = "single"
     RUN_SIMULATION = True
 
     # set the size of the perfectly matched layer (PML)
@@ -98,15 +98,12 @@ def test_us_bmode_phased_array():
     # transducer.radius = float('inf')        # radius of curvature of the transducer [m]
 
     # calculate the width of the transducer in grid points
-    transducer_width = transducer.number_elements * transducer.element_width + (
-                transducer.number_elements - 1) * transducer.element_spacing
+    transducer_width = transducer.number_elements * transducer.element_width + (transducer.number_elements - 1) * transducer.element_spacing
 
     # use this to position the transducer in the middle of the computational grid
-    transducer.position = np.round([
-        1,
-        grid_size_points.y / 2 - transducer_width / 2,
-        grid_size_points.z / 2 - transducer.element_length / 2
-    ])
+    transducer.position = np.round(
+        [1, grid_size_points.y / 2 - transducer_width / 2, grid_size_points.z / 2 - transducer.element_length / 2]
+    )
 
     # properties used to derive the beamforming delays
     not_transducer = dotdict()
@@ -117,8 +114,8 @@ def test_us_bmode_phased_array():
     not_transducer.steering_angle_max = 32  # steering angle [degrees]
 
     # apodization
-    not_transducer.transmit_apodization = 'Hanning'
-    not_transducer.receive_apodization = 'Rectangular'
+    not_transducer.transmit_apodization = "Hanning"
+    not_transducer.receive_apodization = "Rectangular"
 
     # define the transducer elements that are currently active
     not_transducer.active_elements = np.ones((transducer.number_elements, 1))
@@ -137,8 +134,9 @@ def test_us_bmode_phased_array():
     # define a random distribution of scatterers for the medium
     background_map_mean = 1
     background_map_std = 0.008
-    background_map = background_map_mean + background_map_std * \
-                     np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
+    background_map = background_map_mean + background_map_std * np.ones(
+        grid_size_points
+    )  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
 
     # define a random distribution of scatterers for the highly scattering region
     scattering_map = np.ones(grid_size_points)  # randn([Nx_tot, Ny_tot, Nz_tot]) => is random in original example
@@ -160,14 +158,10 @@ def test_us_bmode_phased_array():
     radius = 8e-3  # [m]
     x_pos = 32e-3  # [m]
     y_pos = grid_spacing_meters.y * (grid_size_points.y / 2)  # [m]
-    ball_location = Vector([
-        round(x_pos / grid_spacing_meters.x + rounding_eps),
-        round(y_pos / grid_spacing_meters.x + rounding_eps),
-        grid_size_points.z / 2
-    ])
-    scattering_region1 = make_ball(
-        grid_size_points, ball_location, round(radius / grid_spacing_meters.x + rounding_eps)
+    ball_location = Vector(
+        [round(x_pos / grid_spacing_meters.x + rounding_eps), round(y_pos / grid_spacing_meters.x + rounding_eps), grid_size_points.z / 2]
     )
+    scattering_region1 = make_ball(grid_size_points, ball_location, round(radius / grid_spacing_meters.x + rounding_eps))
 
     # assign region
     sound_speed_map[scattering_region1 == 1] = scattering_c0[scattering_region1 == 1]
@@ -188,7 +182,6 @@ def test_us_bmode_phased_array():
 
     # run the simulation if set to true, otherwise, load previous results from disk
     if RUN_SIMULATION:
-
         # set medium position
         medium_position = 0
 
@@ -196,13 +189,13 @@ def test_us_bmode_phased_array():
         # for angle_index in range(1, number_scan_lines + 1):
         for angle_index in range(1, 2):  # only compare first to angles to speed up test
             # update the command line status
-            logging.log(logging.INFO, f'Computing scan line {angle_index} of {number_scan_lines}')
+            logging.log(logging.INFO, f"Computing scan line {angle_index} of {number_scan_lines}")
 
             # update the current steering angle
             not_transducer.steering_angle = steering_angles[angle_index - 1]
 
             # set the input settings
-            input_filename = f'example_input_{angle_index}_input.h5'
+            input_filename = f"example_input_{angle_index}_input.h5"
             pathname = gettempdir()
             input_file_full_path = os.path.join(pathname, input_filename)  # set the input settings
             simulation_options = SimulationOptions(
@@ -213,7 +206,7 @@ def test_us_bmode_phased_array():
                 save_to_disk=True,
                 input_filename=input_filename,
                 save_to_disk_exit=True,
-                data_path=pathname
+                data_path=pathname,
             )
             # run the simulation
             kspaceFirstOrder3DC(
@@ -222,12 +215,12 @@ def test_us_bmode_phased_array():
                 source=not_transducer,
                 sensor=not_transducer,
                 simulation_options=simulation_options,
-                execution_options=SimulationExecutionOptions()
+                execution_options=SimulationExecutionOptions(),
             )
 
-            assert compare_against_ref(f'out_us_bmode_phased_array/input_{angle_index}', input_file_full_path,
-                                       precision=6), \
-                'Files do not match!'
+            assert compare_against_ref(
+                f"out_us_bmode_phased_array/input_{angle_index}", input_file_full_path, precision=6
+            ), "Files do not match!"
 
             # extract the scan line from the sensor data
             # scan_lines(scan_line_index, :) = transducer.scan_line(sensor_data);

@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -50,15 +50,10 @@ def test_sd_focussed_detector_2d():
     source.p0 = 2 * make_disc(grid_size, grid_size / 2, 4)
 
     # run the first simulation
-    input_filename = 'example_sd_focused_2d_input.h5'
+    input_filename = "example_sd_focused_2d_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True)
     # run the simulation
     kspaceFirstOrder2DC(
         medium=medium,
@@ -66,8 +61,7 @@ def test_sd_focussed_detector_2d():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_sd_focussed_detector_2D', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_sd_focussed_detector_2D", input_file_full_path), "Files do not match!"

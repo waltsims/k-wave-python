@@ -24,12 +24,12 @@ from kwave.utils.tictoc import TicToc
 
 
 def kspaceFirstOrderASC(
-        kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions,
-        execution_options: SimulationExecutionOptions
+    kgrid: kWaveGrid,
+    source: kSource,
+    sensor: Union[NotATransducer, kSensor],
+    medium: kWaveMedium,
+    simulation_options: SimulationOptions,
+    execution_options: SimulationExecutionOptions,
 ):
     """
     Axisymmetric time-domain simulation of wave propagation using C++ code.
@@ -77,23 +77,18 @@ def kspaceFirstOrderASC(
     """
     # generate the input file and save to disk
     sensor_data = kspaceFirstOrderAS(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options,
-        execution_options=execution_options
+        kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options, execution_options=execution_options
     )
     return sensor_data
 
 
 def kspaceFirstOrderAS(
-        kgrid: kWaveGrid,
-        source: kSource,
-        sensor: Union[NotATransducer, kSensor],
-        medium: kWaveMedium,
-        simulation_options: SimulationOptions,
-        execution_options: SimulationExecutionOptions
+    kgrid: kWaveGrid,
+    source: kSource,
+    sensor: Union[NotATransducer, kSensor],
+    medium: kWaveMedium,
+    simulation_options: SimulationOptions,
+    execution_options: SimulationExecutionOptions,
 ):
     """
     Axisymmetric time-domain simulation of wave propagation.
@@ -161,18 +156,14 @@ def kspaceFirstOrderAS(
     TicToc.tic()
 
     if simulation_options.simulation_type is not SimulationType.AXISYMMETRIC:
-        logging.log(logging.WARN,  "simulation type is not set to axisymmetric while using kSapceFirstOrderAS. "
-              "Setting simulation type to axisymmetric.")
+        logging.log(
+            logging.WARN,
+            "simulation type is not set to axisymmetric while using kSapceFirstOrderAS. " "Setting simulation type to axisymmetric.",
+        )
         simulation_options.simulation_type = SimulationType.AXISYMMETRIC
 
-    k_sim = kWaveSimulation(
-        kgrid=kgrid,
-        source=source,
-        sensor=sensor,
-        medium=medium,
-        simulation_options=simulation_options
-    )
-    k_sim.input_checking('kspaceFirstOrderAS')
+    k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options)
+    k_sim.input_checking("kspaceFirstOrderAS")
 
     # =========================================================================
     # CALCULATE MEDIUM PROPERTIES ON STAGGERED GRID
@@ -215,10 +206,12 @@ def kspaceFirstOrderAS(
     pml_x_size, pml_y_size = options.pml_x_size, options.pml_y_size
     c_ref = k_sim.c_ref
 
-    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1, False)
-    k_sim.pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True and options.use_sg, 1, False)
-    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, False, 2, True)
-    k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, True and options.use_sg, 2, True)
+    k_sim.pml_x = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, staggered=False, dimension=1, axisymmetric=False)
+    k_sim.pml_x_sgx = get_pml(
+        Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, staggered=True and options.use_sg, dimension=1, axisymmetric=False
+    )
+    k_sim.pml_y = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, staggered=False, dimension=2, axisymmetric=True)
+    k_sim.pml_y_sgy = get_pml(Ny, dy, dt, c_ref, pml_y_size, pml_y_alpha, staggered=True and options.use_sg, dimension=2, axisymmetric=True)
 
     # define the k-space, derivative, and shift operators
     # for the x (axial) direction, the operators are the same as normal
@@ -235,13 +228,13 @@ def kspaceFirstOrderAS(
     #    - the grid is expanded, and the fields replicated in the radial
     #      dimension to give the required symmetry
     #    - the derivative and shift operators are defined as normal
-    if options.radial_symmetry in ['WSWA-FFT', 'WSWS-FFT']:
+    if options.radial_symmetry in ["WSWA-FFT", "WSWS-FFT"]:
         # create a new kWave grid object with expanded radial grid
-        if options.radial_symmetry == 'WSWA-FFT':
+        if options.radial_symmetry == "WSWA-FFT":
             # extend grid by a factor of x4 to account for
             # symmetries in WSWA
             kgrid_exp = kWaveGrid([Nx, Ny * 4], [dx, dy])
-        elif options.radial_symmetry == 'WSWS-FFT':
+        elif options.radial_symmetry == "WSWS-FFT":
             # extend grid by a factor of x2 - 2 to account for
             # symmetries in WSWS
             kgrid_exp = kWaveGrid([Nx, Ny * 2 - 2], [dx, dy])
@@ -253,21 +246,22 @@ def kspaceFirstOrderAS(
         # define the k-space operator
         if options.use_kspace:
             k_sim.kappa = ifftshift(sinc(c_ref * kgrid_exp.k * dt / 2))
-            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or (
-                    (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
+            if (k_sim.source_p and (k_sim.source.p_mode == "additive")) or (
+                (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == "additive")
+            ):
                 k_sim.source_kappa = ifftshift(np.cos(c_ref * kgrid_exp.k * dt / 2))
         else:
             k_sim.kappa = 1
             k_sim.source_kappa = 1
-    elif options.radial_symmetry in ['WSWA', 'WSWS']:
-        if options.radial_symmetry == 'WSWA':
+    elif options.radial_symmetry in ["WSWA", "WSWS"]:
+        if options.radial_symmetry == "WSWA":
             # get the wavenumbers and implied length for the DTTs
             ky_vec, M = k_sim.kgrid.ky_vec_dtt(DiscreteCosine.TYPE_3)
 
             # define the derivative operators
             k_sim.ddy_k_wswa = -ky_vec.T
             k_sim.ddy_k_hahs = ky_vec.T
-        elif options.radial_symmetry == 'WSWS':
+        elif options.radial_symmetry == "WSWS":
             # get the wavenumbers and implied length for the DTTs
             ky_vec, M = k_sim.kgrid.ky_vec_dtt(DiscreteCosine.TYPE_1)
 
@@ -278,14 +272,15 @@ def kspaceFirstOrderAS(
         # define the k-space operator
         if options.use_kspace:
             # define scalar wavenumber
-            k_dtt = np.sqrt(np.tile(ifftshift(k_sim.kgrid.k_vec.x) ** 2, [1, k_sim.kgrid.Ny]) + np.tile((ky_vec.T) ** 2,
-                                                                                                        [k_sim.kgrid.Nx,
-                                                                                                         1]))
+            k_dtt = np.sqrt(
+                np.tile(ifftshift(k_sim.kgrid.k_vec.x) ** 2, [1, k_sim.kgrid.Ny]) + np.tile((ky_vec.T) ** 2, [k_sim.kgrid.Nx, 1])
+            )
 
             # define k-space operators
             k_sim.kappa = sinc(c_ref * k_dtt * k_sim.kgrid.dt / 2)
-            if (k_sim.source_p and (k_sim.source.p_mode == 'additive')) or (
-                    (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == 'additive')):
+            if (k_sim.source_p and (k_sim.source.p_mode == "additive")) or (
+                (k_sim.source_ux or k_sim.source_uy) and (k_sim.source.u_mode == "additive")
+            ):
                 k_sim.source_kappa = np.cos(c_ref * k_dtt * k_sim.kgrid.dt / 2)
 
             # cleanup unused variables
@@ -301,7 +296,7 @@ def kspaceFirstOrderAS(
 
     # option to run simulations without the spatial staggered grid is not
     # supported for the axisymmetric code
-    assert options.use_sg, 'Optional input ''UseSG'' is not supported for axisymmetric simulations.'
+    assert options.use_sg, "Optional input " "UseSG" " is not supported for axisymmetric simulations."
 
     # =========================================================================
     # SAVE DATA TO DISK FOR RUNNING SIMULATION EXTERNAL TO MATLAB
@@ -314,46 +309,53 @@ def kspaceFirstOrderAS(
         retract_size = [[options.pml_x_size, options.pml_y_size, options.pml_z_size]]
 
         # run subscript to save files to disk
-        save_to_disk_func(k_sim.kgrid, k_sim.medium, k_sim.source, k_sim.options, execution_options.auto_chunking,
-                          dotdict({
-                              'ddx_k_shift_pos': k_sim.ddx_k_shift_pos,
-                              'ddx_k_shift_neg': k_sim.ddx_k_shift_neg,
-                              'dt': k_sim.dt,
-                              'c0': k_sim.c0,
-                              'c_ref': k_sim.c_ref,
-                              'rho0': k_sim.rho0,
-                              'rho0_sgx': k_sim.rho0_sgx,
-                              'rho0_sgy': k_sim.rho0_sgy,
-                              'rho0_sgz': k_sim.rho0_sgz,
-                              'p_source_pos_index': k_sim.p_source_pos_index,
-                              'u_source_pos_index': k_sim.u_source_pos_index,
-                              's_source_pos_index': k_sim.s_source_pos_index,
-                              'transducer_input_signal': k_sim.transducer_input_signal,
-                              'delay_mask': k_sim.delay_mask,
-                              'sensor_mask_index': k_sim.sensor_mask_index,
-                              'record': k_sim.record,
-                          }),
-                          dotdict({
-                              'source_p': k_sim.source_p,
-                              'source_p0': k_sim.source_p0,
-
-                              'source_ux': k_sim.source_ux,
-                              'source_uy': k_sim.source_uy,
-                              'source_uz': k_sim.source_uz,
-
-                              'source_sxx': k_sim.source_sxx,
-                              'source_syy': k_sim.source_syy,
-                              'source_szz': k_sim.source_szz,
-                              'source_sxy': k_sim.source_sxy,
-                              'source_sxz': k_sim.source_sxz,
-                              'source_syz': k_sim.source_syz,
-
-                              'transducer_source': k_sim.transducer_source,
-                              'nonuniform_grid': k_sim.nonuniform_grid,
-                              'elastic_code': k_sim.options.simulation_type.is_elastic_simulation(),
-                              'axisymmetric': k_sim.options.simulation_type.is_axisymmetric(),
-                              'cuboid_corners': k_sim.cuboid_corners,
-                          }))
+        save_to_disk_func(
+            k_sim.kgrid,
+            k_sim.medium,
+            k_sim.source,
+            k_sim.options,
+            execution_options.auto_chunking,
+            dotdict(
+                {
+                    "ddx_k_shift_pos": k_sim.ddx_k_shift_pos,
+                    "ddx_k_shift_neg": k_sim.ddx_k_shift_neg,
+                    "dt": k_sim.dt,
+                    "c0": k_sim.c0,
+                    "c_ref": k_sim.c_ref,
+                    "rho0": k_sim.rho0,
+                    "rho0_sgx": k_sim.rho0_sgx,
+                    "rho0_sgy": k_sim.rho0_sgy,
+                    "rho0_sgz": k_sim.rho0_sgz,
+                    "p_source_pos_index": k_sim.p_source_pos_index,
+                    "u_source_pos_index": k_sim.u_source_pos_index,
+                    "s_source_pos_index": k_sim.s_source_pos_index,
+                    "transducer_input_signal": k_sim.transducer_input_signal,
+                    "delay_mask": k_sim.delay_mask,
+                    "sensor_mask_index": k_sim.sensor_mask_index,
+                    "record": k_sim.record,
+                }
+            ),
+            dotdict(
+                {
+                    "source_p": k_sim.source_p,
+                    "source_p0": k_sim.source_p0,
+                    "source_ux": k_sim.source_ux,
+                    "source_uy": k_sim.source_uy,
+                    "source_uz": k_sim.source_uz,
+                    "source_sxx": k_sim.source_sxx,
+                    "source_syy": k_sim.source_syy,
+                    "source_szz": k_sim.source_szz,
+                    "source_sxy": k_sim.source_sxy,
+                    "source_sxz": k_sim.source_sxz,
+                    "source_syz": k_sim.source_syz,
+                    "transducer_source": k_sim.transducer_source,
+                    "nonuniform_grid": k_sim.nonuniform_grid,
+                    "elastic_code": k_sim.options.simulation_type.is_elastic_simulation(),
+                    "axisymmetric": k_sim.options.simulation_type.is_axisymmetric(),
+                    "cuboid_corners": k_sim.cuboid_corners,
+                }
+            ),
+        )
 
         # run subscript to resize the transducer object if the grid has been expanded
         retract_transducer_grid_size(k_sim.source, k_sim.sensor, retract_size, k_sim.options.pml_inside)
@@ -363,7 +365,6 @@ def kspaceFirstOrderAS(
             return
 
         executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
-        executor_options = execution_options.get_options_string(sensor=k_sim.sensor)
-        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename,
-                                              options=executor_options)
+        executor_options = execution_options.as_list(sensor=k_sim.sensor)
+        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename, options=executor_options)
         return sensor_data

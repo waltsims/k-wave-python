@@ -1,9 +1,13 @@
 from typing import Optional
 
 import numpy as np
+from beartype import beartype as typechecker
+from jaxtyping import Float
+from matplotlib.colors import ListedColormap
 
 
-def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
+@typechecker
+def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
     the k-Wave Toolbox. Zero values are displayed as white, positive values
@@ -30,10 +34,12 @@ def get_color_map(num_colors: Optional[int] = None) -> np.ndarray:
     neg = neg[neg_pad:, :]
     pos = np.flipud(hot(num_colors // 2))
 
-    return np.vstack([neg, pos])
+    colors = np.vstack([neg, pos])
+    return ListedColormap(colors)
 
 
-def hot(m: int) -> np.ndarray:
+@typechecker
+def hot(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Generate a hot colormap of length m.
     The colormap consists of a progression from black to red, yellow, and white.
@@ -48,14 +54,15 @@ def hot(m: int) -> np.ndarray:
 
     n = int(np.fix(3 / 8 * m))
 
-    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m-n)])
-    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m-2*n)])
-    b = np.concatenate([np.zeros(2*n), np.arange(1, m-2*n + 1)/(m-2*n)])
+    r = np.concatenate([np.arange(1, n + 1) / n, np.ones(m - n)])
+    g = np.concatenate([np.zeros(n), np.arange(1, n + 1) / n, np.ones(m - 2 * n)])
+    b = np.concatenate([np.zeros(2 * n), np.arange(1, m - 2 * n + 1) / (m - 2 * n)])
 
     return np.hstack([r[:, None], g[:, None], b[:, None]])
 
 
-def bone(m: int) -> np.ndarray:
+@typechecker
+def bone(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an m-by-3 matrix containing a "bone" colormap.
 
@@ -68,7 +75,8 @@ def bone(m: int) -> np.ndarray:
     return (7 * gray(m) + np.fliplr(hot(m))) / 8
 
 
-def gray(m: int) -> np.ndarray:
+@typechecker
+def gray(m: int) -> Float[np.ndarray, "N 3"]:
     """
     Returns an M-by-3 matrix containing a grayscale colormap.
 

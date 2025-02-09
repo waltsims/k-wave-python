@@ -10,39 +10,39 @@ import kwave.utils.checks
 @dataclass
 class kWaveMedium(object):
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
-    sound_speed                 : np.array
+    sound_speed: np.array
     # reference sound speed used within the k-space operator (phase correction term) [m/s]
-    sound_speed_ref             : np.array = None
+    sound_speed_ref: np.array = None
     # density distribution within the acoustic medium [kg/m^3]
-    density                     : np.array = None
+    density: np.array = None
     # power law absorption coefficient [dB/(MHz^y cm)]
-    alpha_coeff                 : np.array = None
+    alpha_coeff: np.array = None
     # power law absorption exponent
-    alpha_power                 : np.array = None
+    alpha_power: np.array = None
     # optional input to force either the absorption or dispersion terms in the equation of state to be excluded;
     # valid inputs are 'no_absorption' or 'no_dispersion'
-    alpha_mode                  : np.array = None
+    alpha_mode: np.array = None
     # frequency domain filter applied to the absorption and dispersion terms in the equation of state
-    alpha_filter                : np.array = None
+    alpha_filter: np.array = None
     # two element array used to control the sign of absorption and dispersion terms in the equation of state
-    alpha_sign                  : np.array = None
+    alpha_sign: np.array = None
     # parameter of nonlinearity
-    BonA                        : np.array = None
+    BonA: np.array = None
     # is the medium absorbing?
-    absorbing                   : bool     = False
+    absorbing: bool = False
     # is the medium absorbing stokes?
-    stokes                      : bool     = False
+    stokes: bool = False
 
-   #  """
-   #     Note: For heterogeneous medium parameters, medium.sound_speed and
-   #     medium.density must be given in matrix form with the same dimensions as
-   #     kgrid. For homogeneous medium parameters, these can be given as single
-   #     numeric values. If the medium is homogeneous and velocity inputs or
-   #     outputs are not required, it is not necessary to specify medium.density.
-   # """
+    #  """
+    #     Note: For heterogeneous medium parameters, medium.sound_speed and
+    #     medium.density must be given in matrix form with the same dimensions as
+    #     kgrid. For homogeneous medium parameters, these can be given as single
+    #     numeric values. If the medium is homogeneous and velocity inputs or
+    #     outputs are not required, it is not necessary to specify medium.density.
+    # """
 
     def __post_init__(self):
-        self.sound_speed                    = np.atleast_1d(self.sound_speed)
+        self.sound_speed = np.atleast_1d(self.sound_speed)
 
     def check_fields(self, kgrid_shape: np.ndarray) -> None:
         """
@@ -56,22 +56,25 @@ class kWaveMedium(object):
         """
         # check the absorption mode input is valid
         if self.alpha_mode is not None:
-            assert self.alpha_mode in ['no_absorption', 'no_dispersion', 'stokes'], \
-                "medium.alpha_mode must be set to 'no_absorption', 'no_dispersion', or 'stokes'."
+            assert self.alpha_mode in [
+                "no_absorption",
+                "no_dispersion",
+                "stokes",
+            ], "medium.alpha_mode must be set to 'no_absorption', 'no_dispersion', or 'stokes'."
 
         # check the absorption filter input is valid
         if self.alpha_filter is not None and not (self.alpha_filter.shape == kgrid_shape).all():
-            raise ValueError('medium.alpha_filter must be the same size as the computational grid.')
+            raise ValueError("medium.alpha_filter must be the same size as the computational grid.")
 
         # check the absorption sign input is valid
-        if self.alpha_sign is not None and \
-                (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
-            raise ValueError('medium.alpha_sign must be given as a '
-                             '2 element numerical array controlling absorption and dispersion, respectively.')
+        if self.alpha_sign is not None and (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
+            raise ValueError(
+                "medium.alpha_sign must be given as a " "2 element numerical array controlling absorption and dispersion, respectively."
+            )
 
         # check alpha_coeff is non-negative and real
         if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):
-            raise ValueError('medium.alpha_coeff must be non-negative and real.')
+            raise ValueError("medium.alpha_coeff must be non-negative and real.")
 
     def is_defined(self, *fields) -> List[bool]:
         """
@@ -99,7 +102,7 @@ class kWaveMedium(object):
             None
         """
         for f in fields:
-            assert getattr(self, f) is not None, f'The field {f} must be not be None'
+            assert getattr(self, f) is not None, f"The field {f} must be not be None"
 
     def is_nonlinear(self) -> bool:
         """
@@ -136,19 +139,17 @@ class kWaveMedium(object):
             None
         """
         # enforce both absorption parameters
-        self.ensure_defined('alpha_coeff', 'alpha_power')
+        self.ensure_defined("alpha_coeff", "alpha_power")
 
         # check y is a scalar
-        assert np.isscalar(self.alpha_power), 'medium.alpha_power must be scalar.'
+        assert np.isscalar(self.alpha_power), "medium.alpha_power must be scalar."
 
         # check y is real and within 0 to 3
-        assert np.all(np.isreal(self.alpha_coeff)) and 0 < self.alpha_power < 3, \
-            'medium.alpha_power must be a real number between 0 and 3.'
+        assert np.all(np.isreal(self.alpha_coeff)) and 0 <= self.alpha_power < 3, "medium.alpha_power must be a real number between 0 and 3."
 
         # display warning if y is close to 1 and the dispersion term has not been set to zero
-        if self.alpha_mode != 'no_dispersion':
-            assert self.alpha_power != 1, \
-                """The power law dispersion term in the equation of state is not valid for medium.alpha_power = 1.
+        if self.alpha_mode != "no_dispersion":
+            assert self.alpha_power != 1, """The power law dispersion term in the equation of state is not valid for medium.alpha_power = 1.
                 This error can be avoided by choosing a power law exponent close to, but not exactly, 1.
                 If modelling acoustic absorption for medium.alpha_power = 1 is important and modelling dispersion is not
                 critical, this error can also be avoided by setting medium.alpha_mode to 'no_dispersion'"""
@@ -161,29 +162,30 @@ class kWaveMedium(object):
             None
         """
         # enforce absorption coefficient
-        self.ensure_defined('alpha_coeff')
+        self.ensure_defined("alpha_coeff")
 
         # give warning if y is specified
         if self.alpha_power is not None and (self.alpha_power.size != 1 or self.alpha_power != 2):
-            logging.log(logging.WARN, 'the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.')
+            logging.log(logging.WARN, "the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.")
 
         # overwrite y value
         self.alpha_power = 2
 
         # don't allow medium.alpha_mode with the axisymmetric code
-        if self.alpha_mode is not None and (self.alpha_mode in ['no_absorption', 'no_dispersion']):
-            raise NotImplementedError('Input option medium.alpha_mode is not supported with the axisymmetric code '
-                                      'or medium.alpha_mode = ''stokes''.')
+        if self.alpha_mode is not None and (self.alpha_mode in ["no_absorption", "no_dispersion"]):
+            raise NotImplementedError(
+                "Input option medium.alpha_mode is not supported with the axisymmetric code " "or medium.alpha_mode = " "stokes" "."
+            )
 
         # don't allow alpha_filter with stokes absorption (no variables are applied in k-space)
-        assert self.alpha_filter is None, \
-            "Input option medium.alpha_filter is not supported with the axisymmetric code " \
-            "or medium.alpha_mode = 'stokes'. "
+        assert self.alpha_filter is None, (
+            "Input option medium.alpha_filter is not supported with the axisymmetric code " "or medium.alpha_mode = 'stokes'. "
+        )
 
     ##########################################
     # Elastic-code related properties - raise error when accessed
     ##########################################
-    _ELASTIC_CODE_ACCESS_ERROR_TEXT_ = 'Elastic simulation and related properties are not supported!'
+    _ELASTIC_CODE_ACCESS_ERROR_TEXT_ = "Elastic simulation and related properties are not supported!"
 
     @property
     def sound_speed_shear(self):  # pragma: no cover

@@ -12,7 +12,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -35,7 +35,7 @@ def test_pr_2D_FFT_line_sensor():
     # =========================================================================
 
     # create the computational grid
-    pml_size = Vector([20, 20])               # size of the PML in grid points
+    pml_size = Vector([20, 20])  # size of the PML in grid points
     grid_size = Vector([128, 256]) - 2 * pml_size  # [grid points]
     grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
     kgrid = kWaveGrid(grid_size, grid_spacing)
@@ -46,11 +46,11 @@ def test_pr_2D_FFT_line_sensor():
     # create initial pressure distribution using make_disc
     disc_magnitude = 5  # [Pa]
     disc_pos = Vector([60, 140])  # [grid points]
-    disc_radius = 5    # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_pos = Vector([30, 110])  # [grid points]
-    disc_radius = 8    # [grid points]
+    disc_radius = 8  # [grid points]
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     source = kSource()
@@ -69,7 +69,7 @@ def test_pr_2D_FFT_line_sensor():
 
     # set the input arguements: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
-    input_filename = 'example_fft_line_input.h5'
+    input_filename = "example_fft_line_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
 
@@ -80,7 +80,7 @@ def test_pr_2D_FFT_line_sensor():
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
-        save_to_disk_exit=True
+        save_to_disk_exit=True,
     )
     # run the simulation
     kspaceFirstOrder2DC(
@@ -89,6 +89,6 @@ def test_pr_2D_FFT_line_sensor():
         source=source,
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_pr_2D_FFT_line_sensor', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_pr_2D_FFT_line_sensor", input_file_full_path), "Files do not match!"

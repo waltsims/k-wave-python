@@ -1,21 +1,21 @@
 types = {
-    'Bartlett'
-    'Bartlett-Hanning'
-    'Blackman'
-    'Blackman-Harris'
-    'Blackman-Nuttall'
-    'Cosine'
-    'Flattop'
-    'Gaussian'
-    'HalfBand'
-    'Hamming'
-    'Hanning'
-    'Kaiser'
-    'Lanczos'
-    'Nuttall'
-    'Rectangular'
-    'Triangular'
-    'Tukey'
+    "Bartlett"
+    "Bartlett-Hanning"
+    "Blackman"
+    "Blackman-Harris"
+    "Blackman-Nuttall"
+    "Cosine"
+    "Flattop"
+    "Gaussian"
+    "HalfBand"
+    "Hamming"
+    "Hanning"
+    "Kaiser"
+    "Lanczos"
+    "Nuttall"
+    "Rectangular"
+    "Triangular"
+    "Tukey"
 };
 
 dims = [1, 2, 3];
@@ -36,7 +36,7 @@ other_params = [
 windows_with_param = {'Tukey', 'Blackman', 'Gaussian', 'Kaiser'};
 control_params = [0.5, 0.16, 0.5, 3];
 
-idx = 0;
+recorder = utils.TestRecorder('collectedValues/getWin.mat');
 
 for dim = dims
     for type_idx = 1:length(types)
@@ -75,16 +75,18 @@ for dim = dims
                     [win, cg] = getWin(N', type_, input_args{:});
 %                     disp(size(win));
 
-                    idx_padded = sprintf('%06d', idx);
-                    filename = ['collectedValues/getWin/' idx_padded '.mat'];
                     type_ = char(type_);
-                    save(filename, 'N', 'type_', 'input_args', 'win', 'cg');
-
-                    idx = idx + 1;
+                    recorder.recordVariable('N', N);
+                    recorder.recordVariable('type_', type_);
+                    recorder.recordVariable('input_args', input_args);
+                    recorder.recordVariable('win', win);
+                    recorder.recordVariable('cg', cg);
+                    recorder.increment();
 
                 end
             end
         end
     end
 end
+recorder.saveRecordsToDisk();
 disp('Done.')

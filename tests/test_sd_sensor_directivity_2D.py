@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -36,7 +36,7 @@ def test_sd_sensor_directivity_2D():
     medium = kWaveMedium(sound_speed=1500)
 
     # define the array of temporal points
-    t_end = 600e-9      # [s]
+    t_end = 600e-9  # [s]
     kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
     # =========================================================================
@@ -51,7 +51,7 @@ def test_sd_sensor_directivity_2D():
     # define the angle of max directivity for each sensor point:
     #    0             = max sensitivity in x direction (up/down)
     #    pi/2 or -pi/2 = max sensitivity in y direction (left/right)
-    dir_angles = np.arange(-1, 1 + 1/15, 1/15)[:, None] * np.pi/2
+    dir_angles = np.arange(-1, 1 + 1 / 15, 1 / 15)[:, None] * np.pi / 2
 
     # assign to the directivity mask
     directivity = kSensorDirectivity()
@@ -59,7 +59,7 @@ def test_sd_sensor_directivity_2D():
     directivity.angle[sensor.mask == 1] = np.squeeze(dir_angles)
 
     # define the directivity pattern
-    directivity.pattern = 'pressure'
+    directivity.pattern = "pressure"
 
     # define the directivity size
     directivity.size = 16 * kgrid.dx
@@ -77,15 +77,11 @@ def test_sd_sensor_directivity_2D():
     source.p0 = source_p0
 
     # run the simulation
-    input_filename = 'example_def_tran_input.h5'
+    input_filename = "example_def_tran_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
-        pml_alpha=np.array([2, 0]),
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        pml_alpha=np.array([2, 0]), save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     # run the simulation
     kspaceFirstOrder2DC(
@@ -94,8 +90,7 @@ def test_sd_sensor_directivity_2D():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_sd_sensor_directivity_2D', input_file_full_path, precision=6), \
-        'Files do not match!'
+    assert compare_against_ref("out_sd_sensor_directivity_2D", input_file_full_path, precision=6), "Files do not match!"

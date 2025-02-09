@@ -11,7 +11,6 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import cast_to_type
@@ -30,8 +29,8 @@ def test_cpp_io_in_parts():
     example_number = 1
 
     # input and output filenames (these must have the .h5 extension)
-    input_filename = 'out_cpp_io_in_parts_input.h5'
-    output_filename = 'out_cpp_io_in_parts_ouput.h5'
+    input_filename = "out_cpp_io_in_parts_input.h5"
+    output_filename = "out_cpp_io_in_parts_ouput.h5"
 
     # pathname for the input and output files
     pathname = gettempdir()
@@ -51,31 +50,31 @@ def test_cpp_io_in_parts():
     # set the properties of the computational grid
     grid_size = Vector([256, 128, 64])  # [grid points]
     grid_spacing = 1e-4 * Vector([1, 1, 1])  # [m]
-    Nt = 1200                  # number of time steps
-    dt = 15e-9                 # time step [s]
+    Nt = 1200  # number of time steps
+    dt = 15e-9  # time step [s]
 
     # set the properties of the perfectly matched layer
     pml_size = Vector([10, 10, 10])  # [grid points]
     pml_alpha = Vector([2, 2, 2])  # [Nepers/grid point]
 
     # define a scattering ball
-    ball_radius = 20           # [grid points]
+    ball_radius = 20  # [grid points]
     ball_location = grid_size / 2 + Vector([40, 0, 0])  # [grid points]
 
     # define the properties of the medium
-    c0_background   = 1500     # [kg/m^3]
-    c0_ball         = 1800     # [kg/m^3]
-    rho0_background = 1000     # [kg/m^3]
-    rho0_ball       = 1200     # [kg/m^3]
-    alpha_coeff     = 0.75     # [dB/(MHz^y cm)]
-    alpha_power     = 1.5
+    c0_background = 1500  # [kg/m^3]
+    c0_ball = 1800  # [kg/m^3]
+    rho0_background = 1000  # [kg/m^3]
+    rho0_ball = 1200  # [kg/m^3]
+    alpha_coeff = 0.75  # [dB/(MHz^y cm)]
+    alpha_power = 1.5
 
     # define a the properties of a single square source element facing in the
     # x-direction
-    source_y_size   = 60       # [grid points]
-    source_z_size   = 30       # [grid points]
-    source_freq     = 2e6      # [Hz]
-    source_strength = 0.5e6    # [Pa]
+    source_y_size = 60  # [grid points]
+    source_z_size = 30  # [grid points]
+    source_freq = 2e6  # [Hz]
+    source_strength = 0.5e6  # [Pa]
 
     if example_number == 1:
         # =========================================================================
@@ -88,36 +87,36 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.tic()
-        logging.log(logging.INFO, 'Writing medium parameters... ')
+        logging.log(logging.INFO, "Writing medium parameters... ")
 
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
         # create the scattering ball and density matrix
-        ball       = make_ball(grid_size, ball_location, ball_radius, False, True)
-        ball       = np.array(ball)
-        rho0       = rho0_background * np.ones(grid_size, dtype=np.float32)
+        ball = make_ball(grid_size, ball_location, ball_radius, False, True)
+        ball = np.array(ball)
+        rho0 = rho0_background * np.ones(grid_size, dtype=np.float32)
         rho0[ball] = rho0_ball
 
         # make sure the input is in the correct data format
         rho0 = cast_to_type(rho0, h5_literals.MATRIX_DATA_TYPE_MATLAB)
 
         # save the density matrix
-        write_matrix(input_file_full_path, rho0, 'rho0')
+        write_matrix(input_file_full_path, rho0, "rho0")
 
         # create grid (variables are used for interpolation)
         kgrid = kWaveGrid(grid_size, grid_spacing)
 
         # interpolate onto staggered grid in x direction and save
         rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x + kgrid.dx / 2, kgrid.y, kgrid.z])
-        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgx')
+        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), "rho0_sgx")
 
         # interpolate onto staggered grid in y direction and save
         rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y + kgrid.dy / 2, kgrid.z])
-        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgy')
+        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), "rho0_sgy")
 
         # interpolate onto staggered grid in z direction and save
         rho0_sg = interpolate3d([kgrid.x, kgrid.y, kgrid.z], rho0, [kgrid.x, kgrid.y, kgrid.z + kgrid.dz / 2])
-        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), 'rho0_sgz')
+        write_matrix(input_file_full_path, rho0_sg.astype(np.float32), "rho0_sgz")
 
         # clear variable to free memory
         del kgrid
@@ -127,7 +126,7 @@ def test_cpp_io_in_parts():
         # :::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::---:::
 
         # create the sound speed matrix
-        c0       = c0_background * np.ones(grid_size, dtype=np.float32)
+        c0 = c0_background * np.ones(grid_size, dtype=np.float32)
         c0[ball] = c0_ball
 
         # set the reference sound speed to the maximum in the medium
@@ -140,7 +139,7 @@ def test_cpp_io_in_parts():
         c0 = cast_to_type(c0, h5_literals.MATRIX_DATA_TYPE_MATLAB)
 
         # save the sound speed matrix
-        write_matrix(input_file_full_path, c0, 'c0')
+        write_matrix(input_file_full_path, c0, "c0")
 
         # clear variable to free memory
         del c0
@@ -153,8 +152,8 @@ def test_cpp_io_in_parts():
         alpha_power = cast_to_type(alpha_power, h5_literals.MATRIX_DATA_TYPE_MATLAB)
 
         # save the absorption variables
-        write_matrix(input_file_full_path, alpha_coeff, 'alpha_coeff')
-        write_matrix(input_file_full_path, alpha_power, 'alpha_power')
+        write_matrix(input_file_full_path, alpha_coeff, "alpha_coeff")
+        write_matrix(input_file_full_path, alpha_power, "alpha_power")
 
         # clear variables to free memory
         del alpha_power
@@ -166,26 +165,26 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        logging.log(logging.INFO, 'Writing source parameters... ')
+        logging.log(logging.INFO, "Writing source parameters... ")
 
         # define a square source mask facing in the x-direction using the
         # normal k-Wave syntax
         p_mask = np.zeros(grid_size).astype(bool)
         p_mask[
             pml_size.x,
-            grid_size.y//2 - source_y_size//2-1:grid_size.y//2 + source_y_size//2,
-            grid_size.z//2 - source_z_size//2-1:grid_size.z//2 + source_z_size//2
+            grid_size.y // 2 - source_y_size // 2 - 1 : grid_size.y // 2 + source_y_size // 2,
+            grid_size.z // 2 - source_z_size // 2 - 1 : grid_size.z // 2 + source_z_size // 2,
         ] = 1
 
         # find linear source indices
-        p_source_index = np.where(p_mask.flatten(order='F') == 1)[0] + 1  # +1 due to Matlab indexing
+        p_source_index = np.where(p_mask.flatten(order="F") == 1)[0] + 1  # +1 due to Matlab indexing
         p_source_index = p_source_index.reshape((-1, 1))
 
         # make sure the input is in the correct data format
         p_source_index = cast_to_type(p_source_index, h5_literals.INTEGER_DATA_TYPE_MATLAB)
 
         # save the source index matrix
-        write_matrix(input_file_full_path, p_source_index, 'p_source_index')
+        write_matrix(input_file_full_path, p_source_index, "p_source_index")
 
         # clear variables to free memory
         del p_mask
@@ -198,7 +197,7 @@ def test_cpp_io_in_parts():
 
         # apply an cosine ramp to the beginning to avoid startup transients
         ramp_length = np.round((2 * np.pi / source_freq) / dt).astype(int)
-        p_source_input[0:ramp_length] = p_source_input[0:ramp_length] * (-np.cos(np.arange(0, ramp_length) * np.pi / ramp_length) + 1)/2
+        p_source_input[0:ramp_length] = p_source_input[0:ramp_length] * (-np.cos(np.arange(0, ramp_length) * np.pi / ramp_length) + 1) / 2
 
         # scale the source magnitude to be in the correct units for the code
         p_source_input = p_source_input * (2 * dt / (3 * c_source * grid_spacing.x))
@@ -208,7 +207,7 @@ def test_cpp_io_in_parts():
         p_source_input = cast_to_type(p_source_input, h5_literals.MATRIX_DATA_TYPE_MATLAB)
 
         # save the input signal
-        write_matrix(input_file_full_path, p_source_input, 'p_source_input')
+        write_matrix(input_file_full_path, p_source_input, "p_source_input")
 
         # clear variables to free memory
         del p_source_input
@@ -219,11 +218,11 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        logging.log(logging.INFO, 'Writing sensor parameters... ')
+        logging.log(logging.INFO, "Writing sensor parameters... ")
 
         # define a sensor mask through the central plane
         sensor_mask = np.zeros(grid_size, dtype=bool)
-        sensor_mask[:, :, grid_size.z//2 - 1] = 1
+        sensor_mask[:, :, grid_size.z // 2 - 1] = 1
 
         # extract the indices of the active sensor mask elements
         sensor_mask_index = matlab_find(sensor_mask)
@@ -233,7 +232,7 @@ def test_cpp_io_in_parts():
         sensor_mask_index = cast_to_type(sensor_mask_index, h5_literals.INTEGER_DATA_TYPE_MATLAB)
 
         # save the sensor mask
-        write_matrix(input_file_full_path, sensor_mask_index, 'sensor_mask_index')
+        write_matrix(input_file_full_path, sensor_mask_index, "sensor_mask_index")
 
         # clear variables to free memory
         del sensor_mask
@@ -245,7 +244,7 @@ def test_cpp_io_in_parts():
 
         # update command line status
         TicToc.toc(reset=True)
-        logging.log(logging.INFO, 'Writing grid parameters and attributes... ')
+        logging.log(logging.INFO, "Writing grid parameters and attributes... ")
 
         # write grid parameters
         write_grid(input_file_full_path, grid_size, grid_spacing, pml_size, pml_alpha, Nt, dt, c_ref)
@@ -254,19 +253,19 @@ def test_cpp_io_in_parts():
         write_flags(input_file_full_path)
 
         # set additional file attributes
-        write_attributes(input_file_full_path, legacy=True)
+        write_attributes(input_file_full_path)
 
         TicToc.toc()
 
         # display the required syntax to run the C++ simulation
-        print(f'Using a terminal window, navigate to the {os.path.sep}binaries folder of the k-Wave Toolbox')
-        print('Then, use the syntax shown below to run the simulation:')
-        if os.name == 'posix':
-            print(f'./kspaceFirstOrder-OMP -i {input_file_full_path} -o {pathname} {output_filename} --p_final --p_max')
+        print(f"Using a terminal window, navigate to the {os.path.sep}binaries folder of the k-Wave Toolbox")
+        print("Then, use the syntax shown below to run the simulation:")
+        if os.name == "posix":
+            print(f"./kspaceFirstOrder-OMP -i {input_file_full_path} -o {pathname} {output_filename} --p_final --p_max")
         else:
-            print(f'kspaceFirstOrder-OMP.exe -i {input_file_full_path} -o {pathname} {output_filename} --p_final --p_max')
+            print(f"kspaceFirstOrder-OMP.exe -i {input_file_full_path} -o {pathname} {output_filename} --p_final --p_max")
 
-        assert compare_against_ref('out_cpp_io_in_parts', input_file_full_path, precision=6), 'Files do not match!'
+        assert compare_against_ref("out_cpp_io_in_parts", input_file_full_path, precision=6), "Files do not match!"
 
     else:
         pass

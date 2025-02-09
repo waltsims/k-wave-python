@@ -9,14 +9,13 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_create_cw_signals():
-    test_record_path = os.path.join(Path(__file__).parent, Path(
-        'collectedValues/createCWSignals.mat'))
+    test_record_path = os.path.join(Path(__file__).parent, Path("collectedValues/createCWSignals.mat"))
     reader = TestRecordReader(test_record_path)
-    amp = reader.expected_value_of('amp')
-    phase = reader.expected_value_of('phase')
-    f = reader.expected_value_of('f')
-    t_array = reader.expected_value_of('t_array')
-    signal_prime = reader.expected_value_of('signal')
+    amp = reader.expected_value_of("amp")
+    phase = reader.expected_value_of("phase")
+    f = reader.expected_value_of("f")
+    t_array = reader.expected_value_of("t_array")
+    signal_prime = reader.expected_value_of("signal")
 
     signal = create_cw_signals(t_array=t_array, amp=amp, phase=phase, freq=f)
 

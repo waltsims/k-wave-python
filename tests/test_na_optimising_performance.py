@@ -11,7 +11,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -39,15 +39,15 @@ def test_na_optimising_performance():
 
     # load the initial pressure distribution from an image and scale
     source = kSource()
-    p0_magnitude = 2           # [Pa]
-    source.p0 = p0_magnitude * load_image('tests/EXAMPLE_source_two.bmp', is_gray=True)
+    p0_magnitude = 2  # [Pa]
+    source.p0 = p0_magnitude * load_image("tests/EXAMPLE_source_two.bmp", is_gray=True)
     source.p0 = resize(source.p0, grid_size_points)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
     # define a centered Cartesian circular sensor
-    sensor_radius = 4.5e-3     # [m]
+    sensor_radius = 4.5e-3  # [m]
     num_sensor_points = 100
     sensor_mask = make_cart_circle(sensor_radius, num_sensor_points)
     sensor = kSensor(sensor_mask)
@@ -58,33 +58,22 @@ def test_na_optimising_performance():
     # run the simulation
 
     # 1: default input options
-    input_filename = 'example_opt_perf_input.h5'
+    input_filename = "example_opt_perf_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True)
     kspaceFirstOrder2DC(
         medium=medium,
         kgrid=kgrid,
         source=deepcopy(source),
         sensor=deepcopy(sensor),
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_optimising_performance/input_1', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_optimising_performance/input_1", input_file_full_path), "Files do not match!"
 
     # 2: nearest neighbour Cartesian interpolation and plotting switched off
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True)
     # convert Cartesian sensor mask to binary mask
     sensor.mask, _, _ = cart2grid(kgrid, sensor.mask)
     kspaceFirstOrder2DC(
@@ -93,19 +82,14 @@ def test_na_optimising_performance():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_optimising_performance/input_2', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_optimising_performance/input_2", input_file_full_path), "Files do not match!"
 
     # 3: as above with 'data_cast' set to 'single'
     # set input arguments
     simulation_options = SimulationOptions(
-        data_cast='single',
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        data_cast="single", save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
     kspaceFirstOrder2DC(
         medium=medium,
@@ -113,7 +97,6 @@ def test_na_optimising_performance():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_na_optimising_performance/input_3', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_na_optimising_performance/input_3", input_file_full_path), "Files do not match!"

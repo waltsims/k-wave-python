@@ -1,18 +1,22 @@
 import logging
-from typing import Tuple, Union, List
 
 import numpy as np
 from scipy.interpolate import interpn, interp1d
+from beartype import beartype as typechecker
+from beartype.typing import Union, List, Tuple, Optional
+from jaxtyping import Int, Num, Shaped, Real, Bool
+import kwave.utils.typing as kt
 
 from .data import scale_time
 from .tictoc import TicToc
 
 
-def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
+@typechecker
+def trim_zeros(data: Num[np.ndarray, "..."]) -> Tuple[Num[np.ndarray, "..."], List[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]]]]:
     """
     Create a tight bounding box by removing zeros.
 
-    Args: 
+    Args:
         data: Matrix to trim.
 
     Returns:
@@ -56,7 +60,6 @@ def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
 
     # loop through dimensions
     for dim_index in range(data.ndim):
-
         # collapse to 1D vector
         if data.ndim == 1:
             summed_values = data
@@ -86,7 +89,12 @@ def trim_zeros(data: np.ndarray) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
     return data, ind
 
 
-def expand_matrix(matrix, exp_coeff, edge_val=None):
+@typechecker
+def expand_matrix(
+    matrix: Union[Num[np.ndarray, "..."], Bool[np.ndarray, "..."]],
+    exp_coeff: Union[Shaped[kt.ArrayLike, "dim"], List],
+    edge_val: Optional[Real[kt.ScalarLike, ""]] = None,
+):
     """
     Enlarge a matrix by extending the edge values.
 
@@ -119,35 +127,35 @@ def expand_matrix(matrix, exp_coeff, edge_val=None):
     matrix = np.squeeze(matrix)
 
     if edge_val is None:
-        opts['mode'] = 'edge'
+        opts["mode"] = "edge"
     else:
-        opts['mode'] = 'constant'
-        opts['constant_values'] = edge_val
+        opts["mode"] = "constant"
+        opts["constant_values"] = edge_val
 
     exp_coeff = np.array(exp_coeff).astype(int).squeeze()
     n_coeff = exp_coeff.size
     assert n_coeff > 0
 
     if n_coeff == 1:
-        opts['pad_width'] = exp_coeff
+        opts["pad_width"] = exp_coeff
     elif len(matrix.shape) == 1:
         assert n_coeff <= 2
-        opts['pad_width'] = exp_coeff
+        opts["pad_width"] = exp_coeff
     elif len(matrix.shape) == 2:
         if n_coeff == 2:
-            opts['pad_width'] = exp_coeff
+            opts["pad_width"] = [(exp_coeff[0],), (exp_coeff[1],)]
         if n_coeff == 4:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
+            opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:
         if n_coeff == 3:
-            opts['pad_width'] = np.tile(np.expand_dims(exp_coeff, axis=-1), [1, 2])
+            opts["pad_width"] = np.tile(np.expand_dims(exp_coeff, axis=-1), [1, 2])
         if n_coeff == 6:
-            opts['pad_width'] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3]), (exp_coeff[4], exp_coeff[5])]
+            opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3]), (exp_coeff[4], exp_coeff[5])]
 
     return np.pad(matrix, **opts)
 
 
-def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 'linear') -> np.ndarray:
+def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = "linear") -> np.ndarray:
     """
     Resizes a matrix of spatial samples to a desired resolution or spatial sampling frequency
     via interpolation.
@@ -164,10 +172,9 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
     TicToc.tic()
 
     # update command line status
-    logging.log(logging.INFO, 'Resizing matrix...')
+    logging.log(logging.INFO, "Resizing matrix...")
     # check inputs
-    assert num_dim2(mat) == len(new_size), \
-        'Resolution input must have the same number of elements as data dimensions.'
+    assert num_dim2(mat) == len(new_size), "Resolution input must have the same number of elements as data dimensions."
 
     mat = mat.squeeze()
 
@@ -191,9 +198,9 @@ def resize(mat: np.ndarray, new_size: Union[int, List[int]], interp_mode: str = 
         mat_rs = mat_rs.reshape([new_size[1], new_size[0], new_size[2]])
         mat_rs = np.transpose(mat_rs, (1, 0, 2))
     else:
-        mat_rs = mat_rs.reshape(new_size, order='F')
+        mat_rs = mat_rs.reshape(new_size, order="F")
     # update command line status
-    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}')
+    logging.log(logging.INFO, f"  completed in {scale_time(TicToc.toc())}")
     assert mat_rs.shape == tuple(new_size), "Resized matrix does not match requested size."
     return mat_rs
 
@@ -229,9 +236,9 @@ def gradient_fd(f, dx=None, dim=None, deriv_order=None, accuracy_order=None) -> 
     """
 
     if deriv_order:
-        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: deriv_order is no longer a supported argument.')
+        logging.log(logging.WARN, f"{DeprecationWarning.__name__}: deriv_order is no longer a supported argument.")
     if accuracy_order:
-        logging.log(logging.WARN, f'{DeprecationWarning.__name__}: accuracy_order is no longer a supported argument.')
+        logging.log(logging.WARN, f"{DeprecationWarning.__name__}: accuracy_order is no longer a supported argument.")
 
     if dim is not None and dx is not None:
         return np.gradient(f, dx, axis=dim)
@@ -341,7 +348,7 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
     TicToc.tic()
 
     # Update command line status
-    logging.log(logging.INFO, 'Revolving 2D matrix to form a 3D matrix...')
+    logging.log(logging.INFO, "Revolving 2D matrix to form a 3D matrix...")
 
     # Get size of matrix
     m, n = mat2d.shape
@@ -353,18 +360,18 @@ def revolve2d(mat2d: np.ndarray) -> np.ndarray:
     # Compute the distance from every pixel in the z-y cross-section of the 3D
     # matrix to the rotation axis
     z, y = np.meshgrid(r_axis_two_sided, r_axis_two_sided)
-    r = np.sqrt(y ** 2 + z ** 2)
+    r = np.sqrt(y**2 + z**2)
 
     # Create empty image matrix
     mat3D = np.zeros((m, 2 * n - 1, 2 * n - 1))
 
     # Loop through each cross-section and create 3D matrix
     for x_index in range(m):
-        interp = interp1d(x=r_axis_one_sided, y=mat2d[x_index, :], kind='linear', bounds_error=False, fill_value=0)
+        interp = interp1d(x=r_axis_one_sided, y=mat2d[x_index, :], kind="linear", bounds_error=False, fill_value=0)
         mat3D[x_index, :, :] = interp(r)
 
     # Update command line status
-    logging.log(logging.INFO, f'  completed in {scale_time(TicToc.toc())}s')
+    logging.log(logging.INFO, f"  completed in {scale_time(TicToc.toc())}s")
     return mat3D
 
 

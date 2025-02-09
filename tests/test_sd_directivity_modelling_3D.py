@@ -13,7 +13,7 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -44,18 +44,18 @@ def test_sd_directivity_modelling_3D():
     kgrid.makeTime(medium.sound_speed)
 
     # define a large area detector
-    sz = 16        # [grid points]
+    sz = 16  # [grid points]
     sensor_mask = np.zeros(grid_size_points)
     sensor_mask[
-        grid_size_points.x//2,
-        (grid_size_points.y//2 - sz//2):(grid_size_points.y//2 + sz//2 + 1),
-        (grid_size_points.z//2 - sz//2):(grid_size_points.z//2 + sz//2 + 1)
+        grid_size_points.x // 2,
+        (grid_size_points.y // 2 - sz // 2) : (grid_size_points.y // 2 + sz // 2 + 1),
+        (grid_size_points.z // 2 - sz // 2) : (grid_size_points.z // 2 + sz // 2 + 1),
     ] = 1
     sensor = kSensor(sensor_mask)
 
     # define equally spaced point sources lying on a circle centred at the
     # centre of the detector face
-    radius = 20    # [grid points]
+    radius = 20  # [grid points]
     points = 11
     circle = make_cart_circle(radius * grid_spacing_meters.x, points, Vector([0, 0]), np.pi)
     circle = np.vstack([circle, np.zeros((1, points))])
@@ -65,12 +65,12 @@ def test_sd_directivity_modelling_3D():
     circle3D, _, _ = cart2grid(kgrid, circle)
 
     # find the indices of the sources in the binary source mask
-    source_positions = matlab_find(circle3D, val=1, mode='eq')
+    source_positions = matlab_find(circle3D, val=1, mode="eq")
 
     # define a time varying sinusoidal source
     source = kSource()
-    source_freq = 0.25e6   # [Hz]
-    source_mag = 1         # [Pa]
+    source_freq = 0.25e6  # [Hz]
+    source_mag = 1  # [Pa]
     source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 
     # filter the source to remove high frequencies not supported by the grid
@@ -87,15 +87,11 @@ def test_sd_directivity_modelling_3D():
         source.p_mask[unflatten_matlab_mask(source.p_mask, source_positions[source_loop] - 1)] = 1
 
         # run the simulation
-        input_filename = f'example_input_{source_loop + 1}_input.h5'
+        input_filename = f"example_input_{source_loop + 1}_input.h5"
         pathname = gettempdir()
         input_file_full_path = os.path.join(pathname, input_filename)
         simulation_options = SimulationOptions(
-            pml_size=pml_size,
-            save_to_disk=True,
-            input_filename=input_filename,
-            save_to_disk_exit=True,
-            data_path=pathname
+            pml_size=pml_size, save_to_disk=True, input_filename=input_filename, save_to_disk_exit=True, data_path=pathname
         )
         # run the simulation
         kspaceFirstOrder3DC(
@@ -104,8 +100,7 @@ def test_sd_directivity_modelling_3D():
             source=deepcopy(source),
             sensor=sensor,
             simulation_options=simulation_options,
-            execution_options=SimulationExecutionOptions()
+            execution_options=SimulationExecutionOptions(),
         )
 
-        assert compare_against_ref(f'out_sd_directivity_modelling_3D/input_{source_loop + 1}', input_file_full_path), \
-            'Files do not match!'
+        assert compare_against_ref(f"out_sd_directivity_modelling_3D/input_{source_loop + 1}", input_file_full_path), "Files do not match!"
