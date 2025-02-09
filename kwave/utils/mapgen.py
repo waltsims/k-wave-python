@@ -21,6 +21,7 @@ from .tictoc import TicToc
 from ..data import Vector
 
 import kwave.utils.typing as kt
+from kwave.utils.math import compute_linear_transform
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
