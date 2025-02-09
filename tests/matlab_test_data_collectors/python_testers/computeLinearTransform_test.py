@@ -18,12 +18,14 @@ def test_compute_linear_transform():
             pos1, pos2 = params
             pos1, pos2 = pos1.astype(float), pos2.astype(float)
 
-            rot_mat, offset_pos = compute_rotation_between_vectors(pos1, pos2)
+            rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
+            offset_pos = 0
 
         else:
             pos1, pos2, offset = params
             pos1, pos2, offset = pos1.astype(float), pos2.astype(float), float(offset)
-            rot_mat, offset_pos = compute_rotation_between_vectors(pos1, pos2, offset)
+            rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
+            offset_pos = pos1 + offset * direction
 
         if not np.any(np.isnan(reader.expected_value_of("rotMat"))):
             assert np.allclose(rot_mat, reader.expected_value_of("rotMat"))

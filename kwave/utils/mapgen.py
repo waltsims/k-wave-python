@@ -3089,7 +3089,8 @@ def make_cart_spherical_segment(
     p0 = radius * p0
 
     # linearly transform the canonical spiral points to give bowl in correct orientation
-    R, b = compute_rotation_between_vectors(bowl_pos, focus_pos, radius)
+    R, direction = compute_rotation_between_vectors(bowl_pos, focus_pos)
+    b = bowl_pos + radius * direction
     if np.shape(b) == (3,):
         b = np.expand_dims(b, axis=1)  # expand dims for broadcasting
 
