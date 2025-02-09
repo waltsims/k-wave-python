@@ -386,48 +386,46 @@ def make_affine(translation: Vector, rotation: Union[float, List[float]], seq: s
         return T
 
 
+def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute rotation matrix between two 3D points.
+    
+    This function computes the rotation matrix that transforms a vector pointing from
+    start_pos to end_pos into the canonical direction [0, 0, -1].
+    Uses scipy.spatial.transform.Rotation internally.
+    
+    Args:
+        start_pos: Starting position (3D point)
+        end_pos: Ending position (3D point)
+        
+    Returns:
+        Tuple containing:
+        - 3x3 rotation matrix
+        - Direction vector from start to end position (normalized)
+    """
+    # Compute and normalize direction vector
+    direction = end_pos - start_pos
+    magnitude = np.linalg.norm(direction)
+    
+    if np.isclose(magnitude, 0):
+        return np.eye(3), np.zeros_like(start_pos)
+        
+    direction = direction / magnitude
+    
+    # Reference direction (canonical vector)
+    reference = np.array([0, 0, -1])
+    
+    # Use scipy to find rotation between vectors
+    rotation = Rotation.align_vectors(direction.reshape(1, -1), reference.reshape(1, -1))[0]
+    
+    return rotation.as_matrix(), direction
+
+
+@deprecated("Use compute_rotation_between_vectors instead", "2.0.0")
 def compute_linear_transform(pos1, pos2, offset=None):
-    # Compute vector pointing from pos1 to pos2
-    beam_vec = pos2 - pos1
-
-    magnitude = np.linalg.norm(beam_vec)
-
-    #  matlab behaviour is to return nans when positions are the same.
-    #  we choose to return the identity matrix and the offset in this case.
-    #  TODO: we should open an issue and change our behaviour once matlab is fixed.
-
-    # if np.isclose(magnitude, 0):
-
-    #     # "pos1 and pos2 are the same"
-    #     if (shape1 := np.shape(pos1)) == (shape2 := np.shape(pos2)):
-    #         raise ValueError(f"pos1 and pos2 must have the same shape. Received shapes: {shape1} and {shape2}")
-    #     return np.eye(3), np.zeros_like(pos1) if offset is None else offset * np.ones_like(pos1)
-
-    # Normalise to give unit beam vector
-    beam_vec = beam_vec / magnitude
-
-    # Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])
-    beam_vec0 = np.array([0, 0, -1])
-
-    # Find the rotation matrix for the bowl
-    u = np.cross(beam_vec0, beam_vec)
-
-    # Normalise the rotation matrix if not zero
-    if any(u != 0):
-        u = u / np.linalg.norm(u)
-
-    # Find the axis-angle transformation between beam_vec and e1
-    theta = np.arccos(np.dot(beam_vec0, beam_vec))
-
-    # Convert axis-angle transformation to a rotation matrix
-    A = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-    rotMat = np.cos(theta) * np.eye(3) + np.sin(theta) * A + (1 - np.cos(theta)) * np.outer(u, u)
-
-    # Compute an offset for the bowl, where bowl_centre = move from pos1
-    # towards focus by radius
+    """Deprecated: Use compute_rotation_between_vectors instead."""
+    rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
     if offset is not None:
-        offsetPos = pos1 + offset * beam_vec
+        offset_pos = pos1 + offset * direction
     else:
-        offsetPos = 0
-
-    return rotMat, offsetPos
+        offset_pos = 0
+    return rot_mat, offset_pos
