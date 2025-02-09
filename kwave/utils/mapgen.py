@@ -21,7 +21,7 @@ from .tictoc import TicToc
 from ..data import Vector
 
 import kwave.utils.typing as kt
-from kwave.utils.math import compute_linear_transform
+from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
@@ -3089,7 +3089,7 @@ def make_cart_spherical_segment(
     p0 = radius * p0
 
     # linearly transform the canonical spiral points to give bowl in correct orientation
-    R, b = compute_linear_transform(bowl_pos, focus_pos, radius)
+    R, b = compute_rotation_between_vectors(bowl_pos, focus_pos, radius)
     if np.shape(b) == (3,):
         b = np.expand_dims(b, axis=1)  # expand dims for broadcasting
 
