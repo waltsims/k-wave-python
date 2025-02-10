@@ -6,6 +6,9 @@ from typing import Optional, Tuple, Union, List
 import numpy as np
 from numpy.fft import ifftshift, fft, ifft
 from scipy.spatial.transform import Rotation
+from scipy.fft import fftshift
+from functools import wraps
+import warnings
 
 from kwave.data import Vector
 from kwave.utils.deprecation import deprecated
@@ -195,57 +198,60 @@ def next_pow2(n: int) -> int:
     return np.log2(n + 1)
 
 
-def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
+def phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
     """
-    Shifts an array along one of its dimensions using Fourier interpolation.
+    Interpolates array data using phase shifts in the Fourier domain.
+
+    This function applies a phase shift in the frequency domain to achieve sub-grid interpolation.
+    The phase shift method allows for precise fractional shifts without losing frequency content,
+    making it particularly useful for resampling data between staggered and regular grids.
+
+    Example:
+        # Move velocity data from staggered to regular grid points
+        v_regular = phase_shift_interpolate(v_staggered, shift=0.5)
 
     Args:
-        data: The input array.
-        shift: The amount of shift to apply.
-        shift_dim: The dimension along which to shift the array. Default is the last dimension.
+        data: The input array to be interpolated.
+        shift: Phase shift amount (in grid points). A shift of 1 means one full grid spacing.
+        shift_dim: The dimension along which to apply the phase shift. Default is the last dimension.
 
     Returns:
-        The shifted array.
-
+        The interpolated array after applying the phase shift.
     """
+    # Handle dimension selection
     if shift_dim is None:
-        shift_dim = data.ndim - 1
-        if (shift_dim == 1) and (data.shape[1] == 1):
-            # row vector
-            shift_dim = 0
+        shift_dim = data.ndim - 1 if not (data.ndim == 2 and data.shape[1] == 1) else 0
     else:
-        shift_dim -= 1
+        shift_dim = shift_dim - 1
         if not (0 <= shift_dim <= 3):
             raise ValueError("Input dim must be 0, 1, 2 or 3.")
-        else:
-            # subtract 1 in order to keep function interface compatible with matlab
-            if shift_dim >= data.ndim:
-                Warning(f"Shift dimension {shift_dim}is greater than the number of dimensions in the input array {data.ndim}.")
-                shift_dim = data.ndim - 1
+        elif shift_dim >= data.ndim:
+            Warning(f"Shift dimension {shift_dim}is greater than the number of dimensions in the input array {data.ndim}.")
+            shift_dim = data.ndim - 1
 
     N = data.shape[shift_dim]
 
-    if N % 2 == 0:
-        # grid dimension has an even number of points
-        k_vec = (2 * np.pi) * (np.arange(-N // 2, N // 2) / N)
-    else:
-        # grid dimension has an odd number of points
-        k_vec = (2 * np.pi) * (np.arange(-(N - 1) // 2, N // 2 + 1) / N)
+    # Create k-vector and handle even/odd cases
+    k_vec = np.arange(-(N // 2), (N + 1) // 2) * (2 * np.pi / N)
+    k_vec[N // 2] = 0  # Force middle value to zero
 
-    # force middle value to be zero in case 1/N is a recurring number and the
-    # series doesn't give exactly zero
-    k_vec[N // 2] = 0
+    # Reshape k_vec to match data dimensions for broadcasting
+    expand_dims = [1] * data.ndim
+    expand_dims[shift_dim] = -1
+    k_vec = k_vec.reshape(expand_dims)
 
-    reshape_dims_to = [1] * data.ndim
-    reshape_dims_to[shift_dim] = -1
-    k_vec = np.reshape(k_vec, reshape_dims_to)
+    # Apply phase shift in Fourier domain
+    return np.real(ifft(fft(data, axis=shift_dim) * ifftshift(np.exp(1j * k_vec * shift)), axis=shift_dim))
 
-    # shift the input using a Fourier interpolant
-    phase_shift = ifftshift(np.exp(1j * k_vec * shift))
-    kdata = fft(data, axis=shift_dim)
-    shifted_kdata = kdata * phase_shift
-    result = ifft(shifted_kdata, axis=shift_dim).real
-    return result
+
+@deprecated(
+    "This function has been renamed to phase_shift_interpolate to better reflect its functionality. "
+    "Please use phase_shift_interpolate instead.",
+    "0.5.0",
+)
+def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
+    """Wrapper for phase_shift_interpolate. See its documentation for details."""
+    return phase_shift_interpolate(data, shift, shift_dim)
 
 
 def round_even(x):
