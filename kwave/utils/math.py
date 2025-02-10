@@ -366,111 +366,65 @@ def gaussian(
     return gauss_distr
 
 
-def _compute_direction_vector(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:
-    """Compute and normalize the direction vector between two points.
-
-    Args:
-        start_pos: Starting position (3D point)
-        end_pos: Ending position (3D point)
-
-    Returns:
-        Tuple containing:
-        - Normalized direction vector
-        - Magnitude of the direction vector
-    """
+def _compute_direction(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Compute normalized direction vector and magnitude between two points."""
     direction = end_pos - start_pos
     magnitude = np.linalg.norm(direction)
-    if magnitude > 0:
-        direction = direction / magnitude  # Use numpy's broadcasting
+    direction = direction / magnitude
     return direction, magnitude
 
 
-def _compute_rotation_axis(reference: np.ndarray, direction: np.ndarray) -> np.ndarray:
-    """Compute the normalized rotation axis between two vectors.
-
-    Args:
-        reference: Reference direction vector
-        direction: Target direction vector
-
-    Returns:
-        Normalized rotation axis vector
-    """
-    # Use numpy's cross product and normalization
-    u = np.cross(reference, direction)
-    norm = np.linalg.norm(u)
-    if norm > 0:
-        u = u / norm
-    return u
+def _compute_rotation_axis(reference: np.ndarray, direction: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Compute normalized rotation axis and its magnitude."""
+    axis = np.cross(reference, direction)
+    axis_norm = np.linalg.norm(axis)
+    return axis, axis_norm
 
 
-def _compute_rotation_angle(reference: np.ndarray, direction: np.ndarray) -> float:
-    """Compute the rotation angle between two vectors.
+def _create_rotation_matrix(axis: np.ndarray, angle: float) -> np.ndarray:
+    """Create rotation matrix using Rodrigues' formula."""
+    cos_theta = np.cos(angle)
+    sin_theta = np.sin(angle)
 
-    Args:
-        reference: Reference direction vector
-        direction: Target direction vector
+    # Skew-symmetric matrix of axis
+    skew = np.array([[0, -axis[2], axis[1]], [axis[2], 0, -axis[0]], [-axis[1], axis[0], 0]])
 
-    Returns:
-        Rotation angle in radians
-    """
-    # Use numpy's clip to handle numerical precision issues
-    cos_theta = np.clip(np.dot(reference, direction), -1.0, 1.0)
-    return np.arccos(cos_theta)
+    # Outer product
+    outer = np.outer(axis, axis)
 
-
-def _compute_rodrigues_rotation_matrix(u: np.ndarray, theta: float) -> np.ndarray:
-    """Compute rotation matrix using Rodrigues' formula.
-
-    Args:
-        u: Rotation axis (normalized)
-        theta: Rotation angle in radians
-
-    Returns:
-        3x3 rotation matrix
-    """
-    # Create skew-symmetric matrix of u
-    u_skew = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-
-    # Compute outer product u⊗u
-    u_outer = np.outer(u, u)
-
-    # Combine terms in the same order as MATLAB
-    return np.cos(theta) * np.eye(3) + np.sin(theta) * u_skew + (1 - np.cos(theta)) * u_outer
+    return cos_theta * np.eye(3) + sin_theta * skew + (1 - cos_theta) * outer
 
 
 def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Compute rotation matrix between two 3D points.
 
-    This function computes the rotation matrix that transforms a vector pointing from
-    start_pos to end_pos into the canonical direction [0, 0, -1].
-    Uses Rodrigues' rotation formula to match MATLAB's behavior exactly.
-
     Args:
-        start_pos: Starting position (3D point)
-        end_pos: Ending position (3D point)
+        start_pos: Starting position vector
+        end_pos: Ending position vector
 
     Returns:
         Tuple containing:
         - 3x3 rotation matrix
-        - Direction vector from start to end position (normalized)
+        - Normalized direction vector
     """
-    # Compute and normalize direction vector
-    direction, magnitude = _compute_direction_vector(start_pos, end_pos)
+    direction, magnitude = _compute_direction(start_pos, end_pos)
 
     if np.isclose(magnitude, 0):
-        return np.eye(3), np.zeros_like(start_pos)
+        return np.eye(3), np.zeros(3)
 
-    # Reference direction (canonical vector)
-    reference = np.array([0, 0, -1])
+    reference = np.array([0.0, 0.0, -1.0])
 
-    # Find the rotation axis and angle
-    u = _compute_rotation_axis(reference, direction)
-    theta = _compute_rotation_angle(reference, direction)
+    axis, axis_norm = _compute_rotation_axis(reference, direction)
 
-    # Compute rotation matrix using Rodrigues' formula
-    rotation_matrix = _compute_rodrigues_rotation_matrix(u, theta)
+    if axis_norm > np.finfo(float).eps:
+        axis = axis / axis_norm
+        angle = np.arccos(np.clip(np.dot(reference, direction), -1.0, 1.0))
+        rot_mat = _create_rotation_matrix(axis, angle)
+    else:
+        # Vectors are parallel or anti-parallel
+        rot_mat = np.eye(3) if np.dot(reference, direction) > 0 else -np.eye(3)
 
-    return rotation_matrix, direction
+    return rot_mat, direction
 
 
 def compute_linear_transform(pos1, pos2, offset=None):
