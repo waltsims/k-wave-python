@@ -9,6 +9,7 @@ from scipy.spatial.transform import Rotation
 from scipy.fft import fftshift
 from functools import wraps
 import warnings
+from scipy import ndimage
 
 from kwave.data import Vector
 from kwave.utils.deprecation import deprecated
@@ -202,9 +203,13 @@ def phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optional[
     """
     Interpolates array data using phase shifts in the Fourier domain.
 
-    This function applies a phase shift in the frequency domain to achieve sub-grid interpolation.
-    The phase shift method allows for precise fractional shifts without losing frequency content,
-    making it particularly useful for resampling data between staggered and regular grids.
+    This function resamples the input data along the specified dimension using a
+    regular grid that is offset by the non-dimensional distance shift.
+    The resampling is performed using a Fourier interpolant.
+
+    This can be used to shift the acoustic particle velocity recorded by the
+    first-order simulation functions to the regular (non-staggered) temporal
+    grid by setting shift to 1/2.
 
     Example:
         # Move velocity data from staggered to regular grid points
@@ -212,36 +217,44 @@ def phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optional[
 
     Args:
         data: The input array to be interpolated.
-        shift: Phase shift amount (in grid points). A shift of 1 means one full grid spacing.
-        shift_dim: The dimension along which to apply the phase shift. Default is the last dimension.
+        shift: Non-dimensional shift amount, where:
+              0 = no shift
+              1/2 = shift for staggered grid
+              1 = full grid point
+        shift_dim: The dimension along which to apply the phase shift.
+                  Default is highest non-singleton dimension.
 
     Returns:
         The interpolated array after applying the phase shift.
     """
-    # Handle dimension selection
+    # Handle dimension selection (matching MATLAB behavior)
     if shift_dim is None:
-        shift_dim = data.ndim - 1 if not (data.ndim == 2 and data.shape[1] == 1) else 0
+        # Find highest non-singleton dimension
+        shift_dim = data.ndim - 1
+        if data.ndim == 2 and data.shape[1] == 1:
+            shift_dim = 0
     else:
         shift_dim = shift_dim - 1
         if not (0 <= shift_dim <= 3):
             raise ValueError("Input dim must be 0, 1, 2 or 3.")
         elif shift_dim >= data.ndim:
-            Warning(f"Shift dimension {shift_dim}is greater than the number of dimensions in the input array {data.ndim}.")
+            warnings.warn(f"Shift dimension {shift_dim} is greater than the number of dimensions in the input array {data.ndim}.")
             shift_dim = data.ndim - 1
 
-    N = data.shape[shift_dim]
+    # Create shift array with zeros except for the shift dimension
+    shifts = np.zeros(data.ndim)
+    shifts[shift_dim] = shift
 
-    # Create k-vector and handle even/odd cases
-    k_vec = np.arange(-(N // 2), (N + 1) // 2) * (2 * np.pi / N)
-    k_vec[N // 2] = 0  # Force middle value to zero
+    # Take FFT of input data
+    fft_data = np.fft.fft(data, axis=shift_dim)
 
-    # Reshape k_vec to match data dimensions for broadcasting
-    expand_dims = [1] * data.ndim
-    expand_dims[shift_dim] = -1
-    k_vec = k_vec.reshape(expand_dims)
+    # Apply fourier shift (scipy expects input in Fourier domain)
+    # Note: scipy.ndimage.fourier_shift applies the shift in the opposite direction
+    # compared to MATLAB, so we negate the shift
+    shifted_data = ndimage.fourier_shift(fft_data, -shifts)
 
-    # Apply phase shift in Fourier domain
-    return np.real(ifft(fft(data, axis=shift_dim) * ifftshift(np.exp(1j * k_vec * shift)), axis=shift_dim))
+    # Return to spatial domain, ensuring real output
+    return np.real(np.fft.ifft(shifted_data, axis=shift_dim))
 
 
 @deprecated(
