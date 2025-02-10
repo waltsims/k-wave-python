@@ -403,6 +403,8 @@ def _compute_direction_vector(start_pos: np.ndarray, end_pos: np.ndarray) -> Tup
     """
     direction = end_pos - start_pos
     magnitude = np.linalg.norm(direction)
+    if magnitude > 0:
+        direction = direction / magnitude  # Use numpy's broadcasting
     return direction, magnitude
 
 
@@ -416,9 +418,11 @@ def _compute_rotation_axis(reference: np.ndarray, direction: np.ndarray) -> np.n
     Returns:
         Normalized rotation axis vector
     """
+    # Use numpy's cross product and normalization
     u = np.cross(reference, direction)
-    if np.any(u != 0):
-        u = u / np.linalg.norm(u)
+    norm = np.linalg.norm(u)
+    if norm > 0:
+        u = u / norm
     return u
 
 
@@ -432,7 +436,9 @@ def _compute_rotation_angle(reference: np.ndarray, direction: np.ndarray) -> flo
     Returns:
         Rotation angle in radians
     """
-    return np.arccos(np.dot(reference, direction))
+    # Use numpy's clip to handle numerical precision issues
+    cos_theta = np.clip(np.dot(reference, direction), -1.0, 1.0)
+    return np.arccos(cos_theta)
 
 
 def _compute_rodrigues_rotation_matrix(u: np.ndarray, theta: float) -> np.ndarray:
@@ -476,8 +482,6 @@ def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray)
 
     if np.isclose(magnitude, 0):
         return np.eye(3), np.zeros_like(start_pos)
-
-    direction = direction / magnitude
 
     # Reference direction (canonical vector)
     reference = np.array([0, 0, -1])
