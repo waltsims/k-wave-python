@@ -92,19 +92,13 @@ def make_affine(translation: Vector, rotation: Union[float, List[float]], seq: s
 
 
 def cosd(angle_in_degrees):
-    # Note:
-    #   Using numpy.radians instead math.radians
-    #   does not yield the same results as matlab
-    angle_in_radians = math.radians(angle_in_degrees)
-    return math.cos(angle_in_radians)
+    """Compute cosine of angle in degrees."""
+    return np.cos(np.radians(angle_in_degrees))
 
 
 def sind(angle_in_degrees):
-    # Note:
-    #   Using numpy.radians instead math.radians
-    #   does not yield the same results as matlab
-    angle_in_radians = math.radians(angle_in_degrees)
-    return math.sin(angle_in_radians)
+    """Compute sine of angle in degrees."""
+    return np.sin(np.radians(angle_in_degrees))
 
 
 def largest_prime_factor(n: int) -> int:
