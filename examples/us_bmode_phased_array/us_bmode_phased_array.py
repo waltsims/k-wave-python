@@ -11,7 +11,8 @@ from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.dotdictionary import dotdict
-from kwave.utils.signals import tone_burst, get_win
+from kwave.utils.signals import tone_burst
+from scipy.signal import windows as signal_windows
 from kwave.utils.filters import gaussian_filter
 from kwave.utils.conversion import db2neper
 from kwave.reconstruction.tools import log_compression
@@ -166,7 +167,7 @@ scan_lines = scan_lines[:, t0_offset:]
 
 Nt = np.shape(scan_lines)[1]
 
-tukey_win, _ = get_win(Nt * 2, "Tukey", False, 0.05)
+tukey_win = signal_windows.tukey(Nt * 2, 0.05)
 scan_line_win = np.concatenate((np.zeros([1, t0_offset * 2]), tukey_win.T[:, : int(len(tukey_win) / 2) - t0_offset * 2]), axis=1)
 
 scan_lines = scan_lines * scan_line_win
