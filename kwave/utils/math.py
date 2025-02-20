@@ -2,10 +2,103 @@ import math
 from itertools import compress
 from typing import Optional, Tuple, Union, List
 
+
 import numpy as np
 from numpy.fft import ifftshift, fft, ifft
+from scipy.spatial.transform import Rotation
 
 from kwave.data import Vector
+from kwave.utils.deprecation import deprecated
+
+
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
+def Rx(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the x-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("x", theta, degrees=True).as_matrix()
+
+
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
+def Ry(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the y-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("y", theta, degrees=True).as_matrix()
+
+
+@deprecated("Use scipy.spatial.transform.Rotation instead", "0.5.0")
+def Rz(theta: float) -> np.ndarray:
+    """Create a rotation matrix for rotation about the z-axis.
+
+    Args:
+        theta: Rotation angle in degrees
+
+    Returns:
+        3x3 rotation matrix
+    """
+    return Rotation.from_euler("z", theta, degrees=True).as_matrix()
+
+
+@deprecated("Use make_affine instead", "0.5.0")
+def get_affine_matrix(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
+    return make_affine(translation, rotation, seq)
+
+
+def make_affine(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
+    """
+    Create an affine transformation matrix combining rotation and translation.
+    Uses scipy.spatial.transform.Rotation internally.
+
+    Args:
+        translation: [dx, dy] or [dx, dy, dz]
+        rotation: Single angle (degrees) for 2D or list of angles for 3D
+        seq: Rotation sequence for 3D (default: 'xyz')
+
+    Returns:
+        3x3 (2D) or 4x4 (3D) affine transformation matrix
+
+    Examples:
+        # 2D transform (rotation around z-axis)
+        T1 = make_affine([1, 2], 45)
+
+        # 3D transform with xyz Euler angles
+        T2 = make_affine([1, 2, 3], [45, 30, 60])
+
+        # 3D transform with custom sequence
+        T3 = make_affine([1, 2, 3], [45, 30], 'xy')
+    """
+    if len(translation) == 2:
+        # 2D transformation
+        R = Rotation.from_euler("z", rotation, degrees=True).as_matrix()[:2, :2]
+        return np.array([[R[0, 0], R[0, 1], translation[0]], [R[1, 0], R[1, 1], translation[1]], [0, 0, 1]])
+    else:
+        # 3D transformation
+        R = Rotation.from_euler(seq, rotation, degrees=True)
+        T = np.eye(4)
+        T[:3, :3] = R.as_matrix()
+        T[:3, 3] = translation
+        return T
+
+
+def cosd(angle_in_degrees):
+    """Compute cosine of angle in degrees."""
+    return np.cos(np.radians(angle_in_degrees))
+
+
+def sind(angle_in_degrees):
+    """Compute sine of angle in degrees."""
+    return np.sin(np.radians(angle_in_degrees))
 
 
 def largest_prime_factor(n: int) -> int:
@@ -19,7 +112,6 @@ def largest_prime_factor(n: int) -> int:
         The largest prime factor of n.
 
     """
-
     i = 2
     while i * i <= n:
         if n % i:
@@ -40,12 +132,67 @@ def rwh_primes(n: int) -> List[int]:
         A list of prime numbers less than n.
 
     """
-
     sieve = bytearray([True]) * (n // 2 + 1)
     for i in range(1, int(n**0.5) // 2 + 1):
         if sieve[i]:
             sieve[2 * i * (i + 1) :: 2 * i + 1] = bytearray((n // 2 - 2 * i * (i + 1)) // (2 * i + 1) + 1)
     return [2, *compress(range(3, n, 2), sieve[1:])]
+
+
+def primefactors(n: int) -> List[int]:
+    """
+    Finds the prime factors of a given integer.
+
+    Args:
+        n: The integer to factor.
+
+    Returns:
+        A list of prime factors of n.
+
+    """
+    factors = []
+    while n % 2 == 0:
+        (factors.append(2),)
+        n = n / 2
+
+    # n became odd
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+        while n % i == 0:
+            factors.append(i)
+            n = n / i
+
+    if n > 2:
+        factors.append(n)
+
+    return factors
+
+
+def next_pow2(n: int) -> int:
+    """
+    Calculate the next power of 2 that is greater than or equal to `n`.
+
+    This function takes a positive integer `n` and returns the smallest power of 2 that is greater
+    than or equal to `n`.
+
+    Args:
+        n: The number to find the next power of 2 for.
+
+    Returns:
+        The smallest power of 2 that is greater than or equal to `n`.
+
+    """
+    # decrement `n` (to handle cases when `n` itself is a power of 2)
+    n = n - 1
+
+    # set all bits after the last set bit
+    n |= n >> 1
+    n |= n >> 2
+    n |= n >> 4
+    n |= n >> 8
+    n |= n >> 16
+
+    # increment `n` and return
+    return np.log2(n + 1)
 
 
 def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
@@ -61,7 +208,6 @@ def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = Non
         The shifted array.
 
     """
-
     if shift_dim is None:
         shift_dim = data.ndim - 1
         if (shift_dim == 1) and (data.shape[1] == 1):
@@ -113,7 +259,6 @@ def round_even(x):
         Nearest even integer.
 
     """
-
     return 2 * round(x / 2)
 
 
@@ -128,7 +273,6 @@ def round_odd(x):
         Nearest odd integer.
 
     """
-
     return 2 * round((x + 1) / 2) - 1
 
 
@@ -150,7 +294,6 @@ def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int]
         A tuple containing the value and index of the closest element in A to a.
 
     """
-
     assert isinstance(A, np.ndarray), "A must be an np.array"
 
     idx = np.unravel_index(np.argmin(abs(A - a)), A.shape)
@@ -168,66 +311,7 @@ def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
         The sinc function of x.
 
     """
-
     return np.sinc(x / np.pi)
-
-
-def primefactors(n: int) -> List[int]:
-    """
-    Finds the prime factors of a given integer.
-
-    Args:
-        n: The integer to factor.
-
-    Returns:
-        A list of prime factors of n.
-
-    """
-
-    factors = []
-    while n % 2 == 0:
-        (factors.append(2),)
-        n = n / 2
-
-    # n became odd
-    for i in range(3, int(math.sqrt(n)) + 1, 2):
-        while n % i == 0:
-            factors.append(i)
-            n = n / i
-
-    if n > 2:
-        factors.append(n)
-
-    return factors
-
-
-def next_pow2(n: int) -> int:
-    """
-    Calculate the next power of 2 that is greater than or equal to `n`.
-
-    This function takes a positive integer `n` and returns the smallest power of 2 that is greater
-    than or equal to `n`.
-
-    Args:
-        n: The number to find the next power of 2 for.
-
-    Returns:
-        The smallest power of 2 that is greater than or equal to `n`.
-
-    """
-
-    # decrement `n` (to handle cases when `n` itself is a power of 2)
-    n = n - 1
-
-    # set all bits after the last set bit
-    n |= n >> 1
-    n |= n >> 2
-    n |= n >> 4
-    n |= n >> 8
-    n |= n >> 16
-
-    # increment `n` and return
-    return np.log2(n + 1)
 
 
 def norm_var(im: np.ndarray) -> float:
@@ -241,7 +325,6 @@ def norm_var(im: np.ndarray) -> float:
         The normalized variance of im.
 
     """
-
     mu = np.mean(im)
     s = np.sum((im - mu) ** 2) / mu
     return s
@@ -275,155 +358,95 @@ def gaussian(
         A Gaussian distribution.
 
     """
-
     if magnitude is None:
         magnitude = (2 * math.pi * variance) ** -0.5
 
     gauss_distr = magnitude * np.exp(-((x - mean) ** 2) / (2 * variance))
 
     return gauss_distr
-    # return magnitude * norm.pdf(x, loc=mean, scale=variance)
-    """ # Former impl. form Farid
-        if magnitude is None:
-        magnitude = np.sqrt(2 * np.pi * variance)
-    return magnitude * np.exp(-(x - mean) ** 2 / (2 * variance))
-    """
 
 
-def cosd(angle_in_degrees):
-    # Note:
-    #   Using numpy.radians instead math.radians
-    #   does not yield the same results as matlab
-    angle_in_radians = math.radians(angle_in_degrees)
-    return math.cos(angle_in_radians)
+def _compute_direction(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Compute normalized direction vector and magnitude between two points."""
+    direction = end_pos - start_pos
+    magnitude = np.linalg.norm(direction)
+    direction = direction / magnitude
+    return direction, magnitude
 
 
-def sind(angle_in_degrees):
-    # Note:
-    #   Using numpy.radians instead math.radians
-    #   does not yield the same results as matlab
-    angle_in_radians = math.radians(angle_in_degrees)
-    return math.sin(angle_in_radians)
+def _compute_rotation_axis(reference: np.ndarray, direction: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Compute normalized rotation axis and its magnitude."""
+    axis = np.cross(reference, direction)
+    axis_norm = np.linalg.norm(axis)
+    return axis, axis_norm
 
 
-def Rx(theta):
-    """
-    3D rotation matrix for rotation about x-axis
+def _create_rotation_matrix(axis: np.ndarray, angle: float) -> np.ndarray:
+    """Create rotation matrix using Rodrigues' formula."""
+    cos_theta = np.cos(angle)
+    sin_theta = np.sin(angle)
 
-    Args:
-    theta : float. Angle of rotation (in degrees)
+    # Skew-symmetric matrix of axis
+    skew = np.array([[0, -axis[2], axis[1]], [axis[2], 0, -axis[0]], [-axis[1], axis[0], 0]])
 
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    R = np.array([[1, 0, 0], [0, cosd(theta), -sind(theta)], [0, sind(theta), cosd(theta)]])
-    return R
+    # Outer product
+    outer = np.outer(axis, axis)
+
+    return cos_theta * np.eye(3) + sin_theta * skew + (1 - cos_theta) * outer
 
 
-def Ry(theta):
-    """
-    3D rotation matrix for rotation about y-axis
+def compute_rotation_between_vectors(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute rotation matrix between two 3D points.
 
     Args:
-    theta : float. Angle of rotation (in degrees)
+        start_pos: Starting position vector
+        end_pos: Ending position vector
 
     Returns:
-    np.array. 3D rotation matrix
+        Tuple containing:
+        - 3x3 rotation matrix
+        - Normalized direction vector
     """
-    R = np.array([[cosd(theta), 0, sind(theta)], [0, 1, 0], [-sind(theta), 0, cosd(theta)]])
-    return R
+    direction, magnitude = _compute_direction(start_pos, end_pos)
 
+    if np.isclose(magnitude, 0):
+        return np.eye(3), np.zeros(3)
 
-def Rz(theta):
-    """
-    3D rotation matrix for rotation about z-axis
+    reference = np.array([0.0, 0.0, -1.0])
 
-    Args:
-    theta : float. Angle of rotation (in degrees)
+    axis, axis_norm = _compute_rotation_axis(reference, direction)
 
-    Returns:
-    np.array. 3D rotation matrix
-    """
-    R = np.array([[cosd(theta), -sind(theta), 0], [sind(theta), cosd(theta), 0], [0, 0, 1]])
-    return R
-
-
-def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarray, Vector]):
-    # Check dimensions
-    if len(translation) == 2 and isinstance(rotation, (int, float)):
-        # Assign the inputs
-        dx = translation[0]
-        dy = translation[1]
-        th = rotation
-
-        # Build affine matrix (counter-clockwise)
-        affine = np.array([[cosd(th), -sind(th), dx], [sind(th), cosd(th), dy], [0, 0, 1]])
-
-    elif len(translation) == 3 and isinstance(rotation, (np.ndarray, Vector)) and len(rotation) == 3:
-        # Assign the inputs
-        dx, dy, dz = translation
-        x_th, y_th, z_th = rotation
-
-        # Build the rotation matrices
-        x_th_matrix = np.array([[1, 0, 0], [0, cosd(x_th), -sind(x_th)], [0, sind(x_th), cosd(x_th)]])
-
-        y_th_matrix = np.array([[cosd(y_th), 0, sind(y_th)], [0, 1, 0], [-sind(y_th), 0, cosd(y_th)]])
-
-        z_th_matrix = np.array([[cosd(z_th), -sind(z_th), 0], [sind(z_th), cosd(z_th), 0], [0, 0, 1]])
-
-        # Build affine matrix
-        affine = np.zeros((4, 4))
-        affine[0:3, 0:3] = np.dot(z_th_matrix, np.dot(y_th_matrix, x_th_matrix))
-        affine[:, 3] = [dx, dy, dz, 1]
-
+    if axis_norm > np.finfo(float).eps:
+        axis = axis / axis_norm
+        angle = np.arccos(np.clip(np.dot(reference, direction), -1.0, 1.0))
+        rot_mat = _create_rotation_matrix(axis, angle)
     else:
-        raise ValueError("Incorrect size for translation and rotation inputs.")
+        # Vectors are parallel or anti-parallel
+        rot_mat = np.eye(3) if np.dot(reference, direction) > 0 else -np.eye(3)
 
-    return affine
+    return rot_mat, direction
 
 
 def compute_linear_transform(pos1, pos2, offset=None):
-    # Compute vector pointing from pos1 to pos2
-    beam_vec = pos2 - pos1
+    """
+    Compute linear transformation between two 3D points.
 
-    magnitude = np.linalg.norm(beam_vec)
+    This function computes the linear transformation that maps a vector pointing from
+    pos1 to pos2 into the canonical direction [0, 0, -1].
 
-    #  matlab behaviour is to return nans when positions are the same.
-    #  we choose to return the identity matrix and the offset in this case.
-    #  TODO: we should open an issue and change our behaviour once matlab is fixed.
+    Args:
+        pos1: Starting position (3D point)
+        pos2: Ending position (3D point)
+        offset: Offset vector (3D point)
 
-    # if np.isclose(magnitude, 0):
+    Returns:
+        Tuple containing:
+        - 3x3 rotation matrix
 
-    #     # "pos1 and pos2 are the same"
-    #     if (shape1 := np.shape(pos1)) == (shape2 := np.shape(pos2)):
-    #         raise ValueError(f"pos1 and pos2 must have the same shape. Received shapes: {shape1} and {shape2}")
-    #     return np.eye(3), np.zeros_like(pos1) if offset is None else offset * np.ones_like(pos1)
-
-    # Normalise to give unit beam vector
-    beam_vec = beam_vec / magnitude
-
-    # Canonical normalised beam_vec (canonical pos1 is [0, 0, 1])
-    beam_vec0 = np.array([0, 0, -1])
-
-    # Find the rotation matrix for the bowl
-    u = np.cross(beam_vec0, beam_vec)
-
-    # Normalise the rotation matrix if not zero
-    if any(u != 0):
-        u = u / np.linalg.norm(u)
-
-    # Find the axis-angle transformation between beam_vec and e1
-    theta = np.arccos(np.dot(beam_vec0, beam_vec))
-
-    # Convert axis-angle transformation to a rotation matrix
-    A = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-    rotMat = np.cos(theta) * np.eye(3) + np.sin(theta) * A + (1 - np.cos(theta)) * np.outer(u, u)
-
-    # Compute an offset for the bowl, where bowl_centre = move from pos1
-    # towards focus by radius
+    """
+    rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
     if offset is not None:
-        offsetPos = pos1 + offset * beam_vec
+        offset_pos = pos1 + offset * direction
     else:
-        offsetPos = 0
-
-    return rotMat, offsetPos
+        offset_pos = 0
+    return rot_mat, offset_pos
