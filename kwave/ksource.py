@@ -58,7 +58,6 @@ class kSource(object):
 
     @p0.setter
     def p0(self, val):
-        print(val.sum())
         # check size and contents
         if len(val) == 0:
             # if the initial pressure is empty, remove field
