@@ -24,7 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py==3.12.1",
+    "h5py==3.13.0",
     "scipy==1.15.1",
     "opencv-python==4.11.0.86",
     "deepdiff==8.2.0",
@@ -42,7 +42,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.6.11",
+        "coverage==7.6.12",
         "phantominator",
         "testfixtures==8.3.0",
         "requests==2.32.3"]
