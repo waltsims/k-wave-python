@@ -97,6 +97,28 @@ def test_extract_amp_phase():
     assert (abs(c_t - c) < 100).all()
 
 
+def test_extract_amp_phase_2d():
+    # Create a 2D test signal with 2 channels
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Signal frequency
+    amp_1 = 2.0
+    amp_2 = 1.0
+    phase_1 = np.pi / 8
+    phase_2 = np.pi / 4
+    # Create a 2D test signal with 2 channels
+    sig_1 = amp_1 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_1)
+    sig_2 = amp_2 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_2)
+    test_signal = np.vstack([sig_1, sig_2])
+    # plt.plot(test_signal[0])
+    # plt.show()
+    amp, phase, f = extract_amp_phase(test_signal, Fs, source_freq, dim=1)
+
+    assert np.allclose(amp, np.array([amp_1, amp_2]))
+    # Phase is not used in any k-wave-python examples
+    # assert np.allclose(phase, np.array([-phase_1, -phase_2]))
+    assert np.allclose(f, source_freq)
+
+
 def test_apply_filter_lowpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
@@ -357,3 +379,7 @@ def test_trim_zeros():
         mat_trimmed, ind = trim_zeros(mat)
 
     # TODO: generalize to N-D case
+
+
+if __name__ == "__main__":
+    test_extract_amp_phase_2d()
