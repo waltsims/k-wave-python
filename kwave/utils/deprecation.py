@@ -21,13 +21,15 @@ def deprecated(message: str, target_version: str = "2.0.0") -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
+        # Issue warning at decoration time (module import time)
+        warnings.warn(
+            f"{func.__name__} is deprecated and will be removed in version {target_version}. {message}",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            warnings.warn(
-                f"{func.__name__} is deprecated and will be removed in version {target_version}. {message}",
-                DeprecationWarning,
-                stacklevel=2,
-            )
             return func(*args, **kwargs)
 
         return wrapper
