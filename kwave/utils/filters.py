@@ -30,23 +30,6 @@ def create_index_at_dim(ndim: int, dim: int, index_value: Any) -> tuple:
     return tuple(index_value if i == dim else slice(None) for i in range(ndim))
 
 
-def create_slice_at_dim(ndim: int, dim: int, dim_slice: slice) -> tuple:
-    """
-    Create a tuple of slice objects with a specific slice at the specified dimension.
-
-    Args:
-        ndim: Number of dimensions in the array
-        dim: The dimension where the specific slice should be placed
-        dim_slice: The slice to place at the specified dimension
-
-    Returns:
-        A tuple of slice objects with the slice at the specified dimension
-    """
-    idx_all = [slice(None)] * ndim
-    idx_all[dim] = dim_slice
-    return tuple(idx_all)
-
-
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
     """Correct the single-sided magnitude by multiplying the symmetric points by 2.
 
@@ -70,7 +53,9 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
         dim_slice = slice(1, -1)
 
     # Create a slice tuple with the appropriate slice at the specified dimension
-    idx_tuple = create_slice_at_dim(func_fft.ndim, dim, dim_slice)
+    idx_all = [slice(None)] * func_fft.ndim
+    idx_all[dim] = dim_slice
+    idx_tuple = tuple(idx_all)
 
     # Apply the correction
     func_fft[idx_tuple] = func_fft[idx_tuple] * 2
