@@ -379,7 +379,3 @@ def test_trim_zeros():
         mat_trimmed, ind = trim_zeros(mat)
 
     # TODO: generalize to N-D case
-
-
-if __name__ == "__main__":
-    test_extract_amp_phase_2d()
