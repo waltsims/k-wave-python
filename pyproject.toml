@@ -104,7 +104,7 @@ lint.select = ["NPY201", "I"]
 
 # Configure isort rules
 [tool.ruff.lint.isort]
-known-first-party = ["kwave"]
+known-first-party = ["kwave", "examples"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.ruff.lint.per-file-ignores]
