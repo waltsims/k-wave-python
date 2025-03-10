@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 
 from kwave.data import Vector
@@ -10,9 +10,9 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.colormap import get_color_map
 from kwave.utils.conversion import cart2grid
 from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.colormap import get_color_map
 from kwave.utils.mapgen import make_cart_circle, make_disc
 from kwave.utils.signals import reorder_binary_sensor_data
 

@@ -1,21 +1,15 @@
 import logging
 
+import numpy as np
+from numpy.fft import fftn, fftshift, ifftn, ifftshift
+from scipy.interpolate import RegularGridInterpolator
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
-import numpy as np
-from numpy.fft import fftn, ifftn, fftshift, ifftshift
-from scipy.interpolate import RegularGridInterpolator
-
 
 def kspaceLineRecon(
-        p: np.ndarray,
-        dy: float,
-        dt: float,
-        c: float,
-        data_order: str = 'ty',
-        interp: str = 'nearest',
-        pos_cond: bool = False
+    p: np.ndarray, dy: float, dt: float, c: float, data_order: str = "ty", interp: str = "nearest", pos_cond: bool = False
 ) -> np.ndarray:
     """
     kspaceLineRecon takes an acoustic pressure time-series p_ty recorded
@@ -61,7 +55,7 @@ def kspaceLineRecon(
     p = p.copy()
 
     # reorder the data if needed (p_ty)
-    if data_order == 'yt':
+    if data_order == "yt":
         p = p.T
 
     # mirror the time domain data about t = 0 to allow the cosine transform to
@@ -72,9 +66,10 @@ def kspaceLineRecon(
     Nt, Ny = p.shape
 
     # update command line status
-    logging.log(logging.INFO, "Running k-Wave line reconstruction...\n"
-                              f"grid size: {Ny} by {(Nt + 1) / 2} grid points\n"
-                              f"interpolation mode: {interp}")
+    logging.log(
+        logging.INFO,
+        "Running k-Wave line reconstruction...\n" f"grid size: {Ny} by {(Nt + 1) / 2} grid points\n" f"interpolation mode: {interp}",
+    )
 
     # create a computational grid that is evenly spaced in w and ky, where
     # Nx = Nt and dx = dt*c
@@ -96,8 +91,8 @@ def kspaceLineRecon(
     # calculate the scaling factor using the value of kx, where
     # kx = sqrt( (w/c).^2 - kgrid.ky.^2 ) and then manually
     # replacing the DC value with its limit (otherwise NaN results)
-    with np.errstate(divide='ignore', invalid='ignore'):
-        sf = c ** 2 * np.emath.sqrt((w / c) ** 2 - kgrid.ky ** 2) / (2 * w)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        sf = c**2 * np.emath.sqrt((w / c) ** 2 - kgrid.ky**2) / (2 * w)
     sf[(w == 0) & (kgrid.ky == 0)] = c / 2
 
     # compute the FFT of the input data p(t, y) to yield p(w, ky) and scale
@@ -108,10 +103,7 @@ def kspaceLineRecon(
 
     # compute the interpolation from p(w, ky) to p(kx, ky)and then force to be
     # symmetrical
-    interp_func = RegularGridInterpolator(
-        (w[:, 0], kgrid.ky[0]),
-        p, bounds_error=False, fill_value=0, method=interp
-    )
+    interp_func = RegularGridInterpolator((w[:, 0], kgrid.ky[0]), p, bounds_error=False, fill_value=0, method=interp)
     query_points = np.stack((w_new, kgrid.ky), axis=-1)
     p = interp_func(query_points)
 
@@ -120,7 +112,7 @@ def kspaceLineRecon(
 
     # remove the left part of the mirrored data which corresponds to the
     # negative part of the mirrored time data
-    p = p[(Nt // 2):, :]
+    p = p[(Nt // 2) :, :]
 
     # correct the scaling - the forward FFT is computed with a spacing of dt
     # and the reverse requires a spacing of dy = dt*c, the reconstruction
@@ -130,7 +122,7 @@ def kspaceLineRecon(
 
     # enforce positivity condition
     if pos_cond:
-        logging.log(logging.INFO, 'applying positivity condition...')
+        logging.log(logging.INFO, "applying positivity condition...")
         p[p < 0] = 0
 
     return p

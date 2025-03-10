@@ -4,24 +4,24 @@ from dataclasses import dataclass
 import numpy as np
 
 from kwave.data import Vector
-from kwave.kWaveSimulation_helper import (
-    display_simulation_params,
-    set_sound_speed_ref,
-    expand_grid_matrices,
-    create_absorption_variables,
-    scale_source_terms_func,
-)
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
+from kwave.kWaveSimulation_helper import (
+    create_absorption_variables,
+    display_simulation_params,
+    expand_grid_matrices,
+    scale_source_terms_func,
+    set_sound_speed_ref,
+)
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.recorder import Recorder
 from kwave.utils.checks import check_stability
 from kwave.utils.colormap import get_color_map
-from kwave.utils.conversion import cast_to_type, cart2grid
-from kwave.utils.data import get_smallest_possible_type, get_date_string
+from kwave.utils.conversion import cart2grid, cast_to_type
+from kwave.utils.data import get_date_string, get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import smooth
 from kwave.utils.matlab import matlab_find, matlab_mask

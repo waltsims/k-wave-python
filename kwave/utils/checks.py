@@ -2,7 +2,7 @@ import logging
 import numbers
 import platform
 from copy import deepcopy
-from typing import List, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List
 
 import numpy as np
 import scipy
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from kwave.kmedium import kWaveMedium
 
 from .conversion import db2neper
-from .math import sinc, primefactors
+from .math import primefactors, sinc
 
 
 def enforce_fields(dictionary, *fields):

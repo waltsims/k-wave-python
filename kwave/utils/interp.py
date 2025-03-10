@@ -1,11 +1,11 @@
 import logging
 
 import numpy as np
+from beartype import beartype as typechecker
+from beartype.typing import List, Optional, Tuple, Union
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from beartype import beartype as typechecker
-from beartype.typing import Union, List, Tuple, Optional
 
 from .conversion import grid2cart
 from .data import scale_time

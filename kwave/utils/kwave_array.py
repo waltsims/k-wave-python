@@ -5,16 +5,16 @@ from math import ceil
 from typing import Optional
 
 import numpy as np
-from numpy import arcsin, pi, cos, size, array
 import numpy.linalg as linalg
+from numpy import arcsin, array, cos, pi, size
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
-from kwave.utils.mapgen import trim_cart_points, make_cart_rect, make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_spherical_segment
-from kwave.utils.math import sinc, get_affine_matrix
-from kwave.utils.matlab import matlab_assign, matlab_mask, matlab_find
+from kwave.utils.mapgen import make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_rect, make_cart_spherical_segment, trim_cart_points
+from kwave.utils.math import get_affine_matrix, sinc
+from kwave.utils.matlab import matlab_assign, matlab_find, matlab_mask
 
 
 @dataclass

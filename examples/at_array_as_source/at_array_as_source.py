@@ -11,8 +11,8 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.colormap import get_color_map
+from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import tone_burst
 
 

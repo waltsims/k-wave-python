@@ -1,5 +1,6 @@
-import numpy as np
 import logging
+
+import numpy as np
 
 from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor

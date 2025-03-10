@@ -1,12 +1,11 @@
+import hashlib
+import json
 import logging
 import os
 import platform
-from urllib.request import urlretrieve
 from pathlib import Path
 from typing import List
-import hashlib
-import json
-
+from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0

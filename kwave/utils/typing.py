@@ -1,7 +1,6 @@
-from beartype.typing import Union
-from jaxtyping import Int, Bool, Float, Complex, Shaped
 import numpy as np
-
+from beartype.typing import Union
+from jaxtyping import Bool, Complex, Float, Int, Shaped
 
 ArrayLike = Union[
     np.ndarray,  # NumPy array type
