@@ -3,9 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
-
 from kwave.utils.kwave_array import kWaveArray
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader

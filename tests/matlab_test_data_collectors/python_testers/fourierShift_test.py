@@ -5,16 +5,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-
 from kwave.utils.math import fourier_shift
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_fourier_shift():
-
     collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/fourierShift.mat")
     reader = TestRecordReader(collected_values_file)
-
 
     for i in range(len(reader)):
         # Read recorded data

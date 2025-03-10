@@ -1,18 +1,18 @@
 import logging
-from typing import Optional, Union, Tuple, List
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipy
-from scipy.fftpack import fft, ifft, ifftshift, fftshift
-from scipy.signal import lfilter, convolve
+from scipy.fftpack import fft, fftshift, ifft, ifftshift
+from scipy.signal import convolve, lfilter
 
-from .checks import is_number
-from .data import scale_SI
-from .math import find_closest, sinc, next_pow2, norm_var, gaussian
-from .matrix import num_dim, num_dim2
-from .signals import get_win
 from ..kgrid import kWaveGrid
 from ..kmedium import kWaveMedium
+from .checks import is_number
+from .data import scale_SI
+from .math import find_closest, gaussian, next_pow2, norm_var, sinc
+from .matrix import num_dim, num_dim2
+from .signals import get_win
 
 
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
@@ -474,7 +474,7 @@ def filter_time_series(
     # compute the sampling frequency
     Fs = 1 / kgrid.dt
 
-    # extract the minium sound speed
+    # extract the minimum sound speed
     if medium.sound_speed is not None:
         # for the fluid code, use medium.sound_speed
         c0 = medium.sound_speed.min()

@@ -2,8 +2,8 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -13,13 +13,12 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.colormap import get_color_map
 from kwave.utils.conversion import cart2grid
+from kwave.utils.data import scale_SI
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_cart_circle
 from kwave.utils.matlab import ind2sub, matlab_find, unflatten_matlab_mask
-from kwave.utils.colormap import get_color_map
-from kwave.utils.data import scale_SI
-
 
 grid_size_points = Vector([128, 128])  # [grid points]
 grid_size_meters = Vector([50e-3, 50e-3])  # [m]

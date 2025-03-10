@@ -3,7 +3,7 @@ import numpy as np
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
+from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.reconstruction.beamform import focus
 from kwave.utils.checks import check_stability
 from kwave.utils.dotdictionary import dotdict

@@ -1,18 +1,18 @@
-from typing import Union
 import logging
+from typing import Union
 
 import numpy as np
 from numpy.fft import ifftshift
 
-from kwave.kgrid import kWaveGrid
 from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
-from kwave.kWaveSimulation import kWaveSimulation
-from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
+from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
+from kwave.kWaveSimulation import kWaveSimulation
+from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.dotdictionary import dotdict

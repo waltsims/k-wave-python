@@ -3,16 +3,15 @@ import math
 from typing import Any
 
 import numpy as np
-from numpy import ndarray
 from beartype import beartype as typechecker
 from beartype.typing import Tuple, Union
-from jaxtyping import Real, Float, Num
+from jaxtyping import Float, Num, Real
+from numpy import ndarray
 
+import kwave.utils.typing as kt
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
-
-import kwave.utils.typing as kt
 
 
 @typechecker

@@ -4,24 +4,24 @@ from dataclasses import dataclass
 import numpy as np
 
 from kwave.data import Vector
-from kwave.kWaveSimulation_helper import (
-    display_simulation_params,
-    set_sound_speed_ref,
-    expand_grid_matrices,
-    create_absorption_variables,
-    scale_source_terms_func,
-)
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
+from kwave.kWaveSimulation_helper import (
+    create_absorption_variables,
+    display_simulation_params,
+    expand_grid_matrices,
+    scale_source_terms_func,
+    set_sound_speed_ref,
+)
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.recorder import Recorder
 from kwave.utils.checks import check_stability
 from kwave.utils.colormap import get_color_map
-from kwave.utils.conversion import cast_to_type, cart2grid
-from kwave.utils.data import get_smallest_possible_type, get_date_string
+from kwave.utils.conversion import cart2grid, cast_to_type
+from kwave.utils.data import get_date_string, get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import smooth
 from kwave.utils.matlab import matlab_find, matlab_mask
@@ -1012,7 +1012,7 @@ class kWaveSimulation(object):
             None
         """
 
-        # check kgrid for t_array existance, and create if not defined
+        # check kgrid for t_array existence, and create if not defined
         if isinstance(self.kgrid.t_array, str) and self.kgrid.t_array == "auto":
             # check for time reversal mode
             if self.time_rev:
@@ -1110,7 +1110,7 @@ class kWaveSimulation(object):
         if not user_medium_density_input and self.medium.is_nonlinear():
             raise ValueError("medium.density must be explicitly defined if medium.BonA is specified.")
 
-        # check sensor compatability options for flgs.compute_directivity
+        # check sensor compatibility options for flgs.compute_directivity
         if self.use_sensor and k_dim == 2 and self.compute_directivity and not self.binary_sensor_mask and opt.cartesian_interp == "linear":
             raise ValueError(
                 "sensor directivity fields are only compatible " "with binary sensor masks or " "CartInterp" " set to " "nearest" "."
@@ -1165,7 +1165,7 @@ class kWaveSimulation(object):
             # display a warning only if using WSWS symmetry (not WSWA-FFT)
             if self.options.radial_symmetry.startswith("WSWS"):
                 logging.log(
-                    logging.WARN, "  Optional input " "RadialSymmetry" " changed to " "WSWA" " for compatability with " "SaveToDisk" "."
+                    logging.WARN, "  Optional input " "RadialSymmetry" " changed to " "WSWA" " for compatibility with " "SaveToDisk" "."
                 )
 
             # update setting
@@ -1459,7 +1459,7 @@ class kWaveSimulation(object):
         input 'PlotPML' is set to false
 
         Args:
-            kgrid_dim: kWaveGrid dimensinality
+            kgrid_dim: kWaveGrid dimensionality
             kgrid_N: kWaveGrid size in each direction
             pml_size: Size of the PML
             pml_inside: Whether the PML is inside the grid defined by the user

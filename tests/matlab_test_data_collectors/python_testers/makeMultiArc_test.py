@@ -1,11 +1,12 @@
-from kwave.data import Vector
-from kwave.utils.mapgen import make_multi_arc
-
 import logging
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.data import Vector
+from kwave.utils.mapgen import make_multi_arc
 
 
 def test_makeMultiArc():

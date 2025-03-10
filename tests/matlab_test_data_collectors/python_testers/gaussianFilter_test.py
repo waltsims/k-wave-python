@@ -1,12 +1,13 @@
-import numpy as np
 import os
 from pathlib import Path
-from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
+import numpy as np
+
 from kwave.utils.filters import gaussian_filter
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_gaussianFilter():
-
     collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/gaussianFilter.mat")
 
     record_reader = TestRecordReader(collected_values_file)

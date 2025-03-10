@@ -126,7 +126,7 @@ def scale_pressure_source_dirichlet(source_p, c0, N, p_source_pos_index):
         source_p = source_p / (N * (c0**2))
 
     else:
-        # compute the scale parameter seperately for each source
+        # compute the scale parameter separately for each source
         # position based on the sound speed at that position
         ind = range(source_p[:, 0].size)
         mask = p_source_pos_index.flatten("F")[ind]
@@ -146,7 +146,7 @@ def scale_pressure_source_nonuniform_grid(source_p, kgrid, c0, N, dt, p_source_p
     # create empty matrix
     grid_point_sep = np.zeros(x.size)
 
-    # compute averaged grid point seperation map, the interior
+    # compute averaged grid point separation map, the interior
     # points are calculated using the average distance to all
     # connected grid points (the edge values are not calculated
     # assuming there are no source points in the PML)
@@ -182,7 +182,7 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
         source_p = source_p * (2 * dt / (N * c0 * dx))
 
     else:
-        # compute the scale parameter seperately for each source
+        # compute the scale parameter separately for each source
         # position based on the sound speed at that position
         ind = range(source_p[:, 0].size)
         mask = p_source_pos_index.flatten("F")[ind]
@@ -193,7 +193,7 @@ def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_ind
 
 def scale_stress_sources(source, c0, flags, dt, dx, N, s_source_pos_index):
     """
-    scale the stress source by 1/N to divide amoungst the split field
+    scale the stress source by 1/N to divide amongst the split field
     components, and if source.s_mode is not set to 'dirichlet', also scale by
     2*dt*c0/dx to account for the time step and convert to units of
     [kg/(m^3 s)] (note dx is used in all dimensions)
@@ -228,7 +228,7 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
                 source_val = source_val * (2 * dt * c0 / (N * dx))
 
             else:
-                # compute the scale parameter seperately for each source
+                # compute the scale parameter separately for each source
                 # position based on the sound speed at that position
                 s_index = range(source_val.size[0])
                 source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
@@ -318,7 +318,7 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         # compute the scale parameter based on the homogeneous sound speed
         source_val = source_val * (2 * c0 * dt / d_direction)
     else:
-        # compute the scale parameter seperately for each source position
+        # compute the scale parameter separately for each source position
         # based on the sound speed at that position
         u_index = range(source_val.size[0])
         source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
@@ -351,7 +351,7 @@ def scale_velocity_source_nonuniform(is_source, source_u_mode, kgrid, source_val
     x_size = kgrid.size[0]
     grid_point_sep = np.zeros_like(x)
 
-    # compute averaged grid point seperation map, the interior
+    # compute averaged grid point separation map, the interior
     # points are calculated using the average distance to all
     # connected grid points (the edge values are not calculated
     # assuming there are no source points in the PML)

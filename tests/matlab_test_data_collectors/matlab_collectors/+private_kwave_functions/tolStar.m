@@ -15,7 +15,7 @@ function [lin_ind, is, js, ks] = tolStar(tolerance, kgrid, point, debug)
 %
 % INPUTS:
 %     tolerance             - Scalar value controlling where the spatial
-%                             extent of the BLI at each point is trunctated
+%                             extent of the BLI at each point is truncated
 %                             as a  portion of the maximum value.
 %     kgrid                 - Object of the kWaveGrid class defining the
 %                             Cartesian and k-space grid fields.

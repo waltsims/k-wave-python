@@ -1,23 +1,21 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from copy import deepcopy
 
-from kwave.data import Vector
+import matplotlib.pyplot as plt
+import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
+from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.utils.filters import extract_amp_phase
+from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import focused_bowl_oneil
 from kwave.utils.math import round_even
-from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
-
-from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-
-from kwave.options.simulation_options import SimulationOptions, SimulationType
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 verbose: bool = False
 

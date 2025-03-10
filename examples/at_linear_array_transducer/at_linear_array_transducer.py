@@ -2,17 +2,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import kwave.data
-from kwave.kWaveSimulation import SimulationOptions
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
+from kwave.kWaveSimulation import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.utils.colormap import get_color_map
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
-from kwave.utils.colormap import get_color_map
 
 
 def main():

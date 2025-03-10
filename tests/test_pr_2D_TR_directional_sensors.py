@@ -13,11 +13,10 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensorDirectivity, kSensor
+from kwave.ksensor import kSensor, kSensorDirectivity
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
@@ -65,7 +64,7 @@ def test_pr_2D_TR_directional_sensors():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements
+    # set the input arguments
     input_filename = "example_tr_dir_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)

@@ -1,8 +1,8 @@
 import logging
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io
-import matplotlib.pyplot as plt
-
 
 from examples.us_bmode_linear_transducer.example_utils import download_if_does_not_exist
 from kwave.data import Vector
@@ -12,13 +12,12 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.dotdictionary import dotdict
-from kwave.utils.signals import tone_burst, get_win
-from kwave.utils.filters import gaussian_filter
-from kwave.utils.conversion import db2neper
-from kwave.reconstruction.tools import log_compression
 from kwave.reconstruction.beamform import envelope_detection
-
+from kwave.reconstruction.tools import log_compression
+from kwave.utils.conversion import db2neper
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import gaussian_filter
+from kwave.utils.signals import get_win, tone_burst
 
 SENSOR_DATA_GDRIVE_ID = "1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv"
 PHANTOM_DATA_GDRIVE_ID = "1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4"

@@ -1,12 +1,12 @@
-import unittest
-from unittest.mock import patch, Mock, MagicMock, call
-from pathlib import Path
-import subprocess
-import stat
-import numpy as np
 import io
 import os
+import stat
+import subprocess
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
 
+import numpy as np
 import pytest
 
 from kwave.executor import Executor
