@@ -6,9 +6,33 @@ import pytest
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
-from kwave.utils.kwave_array import kWaveArray
+from kwave.utils.kwave_array import Element, kWaveArray
 from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
+
+def test_element():
+    element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    # element2 has a very similar position to element 1 but with a small numerical difference
+    element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001])
+    # element3 is the same as element 1 but belongs to a differnet group
+    element3 = Element(group_id=1, type="rect", dim=2, active=True, measure=2, position=[1, 1, 1])
+    # element4 is the same as element 1 but has a differnet position
+    element4 = Element(group_id=0, type="rect", dim=2, active=True, measure=2, position=[2, 2, 2])
+    # element 4 is not an element
+    element5 = "not an element"
+
+    assert element1 == element1
+    assert element1 != element2
+    assert element1.is_close(element2)
+    assert element1 != element3
+    assert not element1.is_close(element3)
+    assert element1 != element4
+    assert not element1.is_close(element4)
+    with pytest.raises(TypeError):
+        element1 != element5
+    with pytest.raises(TypeError):
+        element1.is_close(element5)
 
 
 def test_kwave_array():
