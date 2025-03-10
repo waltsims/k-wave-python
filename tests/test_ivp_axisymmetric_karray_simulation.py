@@ -62,7 +62,7 @@ def test_ivp_axisymmetric_karray_simulation():
     # create time varying continuous wave source
     source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, source_mag, source_phase)
 
-    # create empty kWaveArray this specfies the transducer properties in
+    # create empty kWaveArray this specifies the transducer properties in
     # axisymmetric coordinate system
     karray = kWaveArray(axisymmetric=True, bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate, single_precision=True)
 

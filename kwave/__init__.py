@@ -21,7 +21,7 @@ if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
-# TODO: depricate in 0.5.0
+# TODO: deprecate in 0.5.0
 BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
 BINARY_DIR = BINARY_PATH  # add alias for BINARY_PATH for now
 

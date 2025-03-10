@@ -86,7 +86,7 @@ class SimulationExecutionOptions:
 
     @is_gpu_simulation.setter
     def is_gpu_simulation(self, value: Optional[bool]):
-        "Set the flag to enable default GPU simulation. This option will supercede custom binary paths."
+        "Set the flag to enable default GPU simulation. This option will supersede custom binary paths."
         self._is_gpu_simulation = value
         # Automatically update the binary name based on the GPU simulation flag
         if value is not None:

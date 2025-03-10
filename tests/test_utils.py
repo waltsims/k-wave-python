@@ -162,8 +162,8 @@ def test_power_kramers_kronig():
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 2.5)
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 1)
     with pytest.warns(UserWarning):
-        ans = power_law_kramers_kronig(1, 1, 1540, 1, 4)
-        assert ans == 1540
+        and = power_law_kramers_kronig(1, 1, 1540, 1, 4)
+        assert and == 1540
     assert abs(-1.4311 - power_law_kramers_kronig(3, 1, 1540, 1, 1)) < 0.001
     assert abs(1.4285 - power_law_kramers_kronig(1, 3, 1540, 1, 1)) < 0.001
 

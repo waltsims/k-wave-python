@@ -76,7 +76,7 @@ def main():
     # VISUALIZATION
     # =========================================================================
 
-    # create pml mask (re-use default size of 20 grid points from simulation_options)
+    # create pml mask (reuse default size of 20 grid points from simulation_options)
     pml_size = simulation_options.pml_x_size  # 20 [grid_points]
     pml_mask = np.zeros((N.x, N.y), dtype=bool)
     pml_mask[:pml_size, :] = 1

@@ -304,7 +304,7 @@ class NotATransducer(kSensor):
     @property
     def mask(self):
         """
-        Allow mask query to allow compatability with regular sensor structure - return the active sensor mask
+        Allow mask query to allow compatibility with regular sensor structure - return the active sensor mask
 
         """
 

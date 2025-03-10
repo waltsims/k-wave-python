@@ -312,7 +312,7 @@ def interpftn(x, sz: tuple, win=None):
 
     Args:
         x:           matrix to interpolate
-        sz:          list or tupple of new size
+        sz:          list or tuple of new size
         win:         (optional) name of windowing function to use
 
     Returns:

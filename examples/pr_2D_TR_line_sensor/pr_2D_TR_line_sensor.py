@@ -63,7 +63,7 @@ def main():
     sensor.mask = np.zeros(N)
     sensor.mask[0] = 1
 
-    # set the input arguements: force the PML to be outside the computational
+    # set the input arguments: force the PML to be outside the computational
     # grid; switch off p0 smoothing within kspaceFirstOrder2D
     simulation_options = SimulationOptions(
         pml_inside=False,

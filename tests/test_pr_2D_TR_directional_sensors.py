@@ -64,7 +64,7 @@ def test_pr_2D_TR_directional_sensors():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements
+    # set the input arguments
     input_filename = "example_tr_dir_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)

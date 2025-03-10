@@ -23,6 +23,7 @@ repos:
   - id: codespell
     additional_dependencies:
       - tomli
+    args: [--write-changes]
 # - repo: https://github.com/pre-commit/pre-commit-hooks
 #   rev: v4.5.0  # Use the ref you want to point at
 #   hooks:

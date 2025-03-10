@@ -59,7 +59,7 @@ def main():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements
+    # set the input arguments
     simulation_options = SimulationOptions(
         save_to_disk=True,
         pml_size=PML_size,

@@ -474,7 +474,7 @@ def filter_time_series(
     # compute the sampling frequency
     Fs = 1 / kgrid.dt
 
-    # extract the minium sound speed
+    # extract the minimum sound speed
     if medium.sound_speed is not None:
         # for the fluid code, use medium.sound_speed
         c0 = medium.sound_speed.min()

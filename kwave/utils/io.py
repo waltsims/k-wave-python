@@ -206,7 +206,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None) -> N
     # get literals
     h5_literals = get_h5_literals()
 
-    # get computer infor
+    # get computer info
     comp_info = dotdict(
         {
             "date": datetime.now().strftime("%d-%b-%Y"),
