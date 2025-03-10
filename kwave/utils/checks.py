@@ -285,7 +285,7 @@ def check_divisible(number: float, divider: float) -> bool:
 
     Args:
         number: Number that's supposed to be divided
-        divider: Divider that should devide the number
+        divider: Divider that should divide the number
 
     Returns:
         True if number is divisible by divider, False otherwise

@@ -215,7 +215,7 @@ class SimulationExecutionOptions:
         return options_list
 
     def get_options_string(self, sensor: kSensor) -> str:
-        # raise a deprication warning
+        # raise a deprecation warning
         warnings.warn("This method is deprecated. Use `as_list` method instead.", DeprecationWarning)
         options_list = self.as_list(sensor)
 
