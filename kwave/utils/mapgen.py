@@ -933,7 +933,7 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 
         # pixel numbering has a double centre point
         else:
-            nx = np.hstack([np.arange(-Nx / 2 + 1, 0 + 1, 1), np.arange(0, -Nx / 2 - 1 + 1, 1)])
+            nx = np.hstack([np.arange(-Nx / 2 + 1, 0 + 1, 1), np.arange(0, Nx / 2 - 1 + 1, 1)])
 
     # grid dimension has an odd number of points
     else:
