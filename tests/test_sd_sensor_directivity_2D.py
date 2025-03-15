@@ -13,11 +13,10 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensorDirectivity, kSensor
+from kwave.ksensor import kSensor, kSensorDirectivity
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions

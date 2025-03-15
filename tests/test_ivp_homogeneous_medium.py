@@ -11,7 +11,6 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 # noinspection PyUnresolvedReferences
-
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -20,7 +19,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.mapgen import make_disc, make_cart_circle
+from kwave.utils.mapgen import make_cart_circle, make_disc
 from tests.diff_utils import compare_against_ref
 
 

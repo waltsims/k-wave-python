@@ -4,11 +4,10 @@ import numpy as np
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ksensor import kSensor
-from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.kWaveSimulation import SimulationOptions
-
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import spect

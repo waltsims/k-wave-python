@@ -13,7 +13,6 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -62,7 +61,7 @@ def test_pr_2D_TR_line_sensor():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements: force the PML to be outside the computational
+    # set the input arguments: force the PML to be outside the computational
     # grid switch off p0 smoothing within kspaceFirstOrder2D
     input_filename = "example_tr_dir_input.h5"
     pathname = gettempdir()

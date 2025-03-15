@@ -11,7 +11,7 @@ Please have a look at the `example_na_controlling_the_pml.ipynb` notebook file t
 ## Preparing the Matlab reference files
 
 We can verify the correctness of Python implementation by saving intermediate/final variable states from the Matlab script
-and comparing them against Pyton version. Saving the variable states can be done manually by running the Matlab script,
+and comparing them against Python version. Saving the variable states can be done manually by running the Matlab script,
 pausing it in appropriate places and saving the variables using `save(...)` method. However, this is very involved process.
 To automate the process a bit, we followed the steps below.
 

@@ -1,10 +1,11 @@
-from kwave.utils.mapgen import make_spherical_section
-
 import logging
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
+from scipy.io import loadmat
+
+from kwave.utils.mapgen import make_spherical_section
 
 
 def test_makeSphericalSection():

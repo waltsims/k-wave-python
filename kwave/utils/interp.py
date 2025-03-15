@@ -1,11 +1,11 @@
 import logging
 
 import numpy as np
+from beartype import beartype as typechecker
+from beartype.typing import List, Optional, Tuple, Union
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
-from beartype import beartype as typechecker
-from beartype.typing import Union, List, Tuple, Optional
 
 from .conversion import grid2cart
 from .data import scale_time
@@ -312,7 +312,7 @@ def interpftn(x, sz: tuple, win=None):
 
     Args:
         x:           matrix to interpolate
-        sz:          list or tupple of new size
+        sz:          list or tuple of new size
         win:         (optional) name of windowing function to use
 
     Returns:

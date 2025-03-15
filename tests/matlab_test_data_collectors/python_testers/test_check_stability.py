@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium

@@ -5,8 +5,8 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -16,9 +16,8 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.ktransducer import kSensor
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.mapgen import make_disc, make_circle
 from kwave.utils.data import scale_SI
-
+from kwave.utils.mapgen import make_circle, make_disc
 
 # In[3]:
 

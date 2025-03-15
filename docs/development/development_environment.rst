@@ -28,7 +28,7 @@ Assuming matlab is installed locally, and `k-wave <https://github.com/ucl-bug/k-
 
     make test
 
-This process will first generate refernce files in matlab and run the complete python test suite against them.
+This process will first generate reference files in matlab and run the complete python test suite against them.
 
 To run the tests manually after reference generation, use the following command:    
 

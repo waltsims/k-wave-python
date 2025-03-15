@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -7,12 +10,8 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.colormap import get_color_map
-from kwave.utils.mapgen import make_ball
 from kwave.utils.filters import smooth
-
-import matplotlib.pyplot as plt
-import numpy as np
-
+from kwave.utils.mapgen import make_ball
 
 # 3D Time Reversal Reconstruction For A Planar Sensor Example
 
@@ -60,7 +59,7 @@ def main():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements
+    # set the input arguments
     simulation_options = SimulationOptions(
         save_to_disk=True,
         pml_size=PML_size,

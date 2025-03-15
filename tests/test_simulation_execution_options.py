@@ -1,10 +1,10 @@
+import os
 import unittest
 from unittest.mock import Mock, patch
-from kwave.ksensor import kSensor
-from kwave import PLATFORM
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-import os
 
+from kwave import PLATFORM
+from kwave.ksensor import kSensor
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 OMP_BINARY_NAME = "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else "")
 CUDA_BINARY_NAME = "kspaceFirstOrder-CUDA{}".format(".exe" if PLATFORM == "windows" else "")
@@ -26,7 +26,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.kwave_function_name, "kspaceFirstOrder3D")
         self.assertTrue(options.delete_data)
         self.assertIsNone(options.device_num)
-        self.assertEqual(options._num_threads, os.cpu_count()) 
+        self.assertEqual(options._num_threads, os.cpu_count())
         self.assertIsNone(options.thread_binding)
         self.assertEqual(options.verbose_level, 0)
         self.assertTrue(options.auto_chunking)
@@ -79,7 +79,6 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         """Test setting an invalid device number."""
         options = self.default_options
 
-
     def test_binary_name_custom(self):
         """Test setting a custom binary name."""
         options = self.default_options
@@ -110,7 +109,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "--p_raw",
             "--u_max",
             "-s",
-            f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+            f"{self.mock_sensor.record_start_index}",  # Updated to use self.mock_sensor
         ]
         self.assertListEqual(expected_elements, options_list)
 
@@ -123,16 +122,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options.verbose_level = 2
 
         options_list = options.as_list(self.mock_sensor)
-        expected_elements = [
-            "-g",
-            "1",
-            "--verbose",
-            "2",
-            "--p_raw",
-            "--u_max",
-            "-s",
-            f"{self.mock_sensor.record_start_index}"  
-        ]
+        expected_elements = ["-g", "1", "--verbose", "2", "--p_raw", "--u_max", "-s", f"{self.mock_sensor.record_start_index}"]
         self.assertListEqual(expected_elements, options_list)
 
     @patch("kwave.options.simulation_execution_options.PLATFORM", "darwin")
@@ -154,9 +144,9 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "--p_raw",
             "--u_max",
             "-s",
-            f"{self.mock_sensor.record_start_index}"  # Updated to use self.mock_sensor
+            f"{self.mock_sensor.record_start_index}",  # Updated to use self.mock_sensor
         ]
-        
+
         self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_custom_record(self):
@@ -175,14 +165,14 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "1",
             "--p_max",
             "--u_min",
-            '--u_non_staggered_raw',
+            "--u_non_staggered_raw",
             "--p_raw",
-            '-s',
-            '10',
+            "-s",
+            "10",
         ]
         if not PLATFORM == "windows":
-            expected_elements.insert(2,"-t")
-            expected_elements.insert(3,f"1")
+            expected_elements.insert(2, "-t")
+            expected_elements.insert(3, f"1")
         self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_with_invalid_values(self):
@@ -190,7 +180,6 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         with self.assertRaises(ValueError):
             options.device_num = -1
-
 
     def test_as_list_no_record(self):
         """Test the list representation when there is no record."""
@@ -205,15 +194,14 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-g",
             f"{options.device_num}",
             "--p_raw",  # Default value
-            "-s", # start timestep index
-            "10"
+            "-s",  # start timestep index
+            "10",
         ]
 
         if not PLATFORM == "windows":
             expected_elements.insert(2, "-t")
             expected_elements.insert(3, "1")
         self.assertListEqual(expected_elements, options_list)
-        
 
     def test_list_compared_to_string(self):
         """Test the list representation compared to the string representation."""
@@ -225,6 +213,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options_list = options.as_list(self.mock_sensor)
         options_string = options.get_options_string(self.mock_sensor)
         self.assertEqual(" ".join(options_list), options_string)
+
 
 if __name__ == "__main__":
     unittest.main()

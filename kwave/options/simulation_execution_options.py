@@ -1,9 +1,9 @@
-from pathlib import Path
-from typing import Optional, Union
 import os
 import warnings
+from pathlib import Path
+from typing import Optional, Union
 
-from kwave import PLATFORM, BINARY_DIR
+from kwave import BINARY_DIR, PLATFORM
 from kwave.ksensor import kSensor
 
 
@@ -53,11 +53,14 @@ class SimulationExecutionOptions:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
 
         if value == "all":
-            warnings.warn("The 'all' option is deprecated. The value of None sets the maximal number of threads (excluding Windows).", DeprecationWarning)
-            value = cpu_count    
+            warnings.warn(
+                "The 'all' option is deprecated. The value of None sets the maximal number of threads (excluding Windows).",
+                DeprecationWarning,
+            )
+            value = cpu_count
 
         if value is None:
-            value = cpu_count        
+            value = cpu_count
 
         if not isinstance(value, int):
             raise ValueError("Got {value}. Number of threads must be 'all' or a positive integer")
@@ -83,7 +86,7 @@ class SimulationExecutionOptions:
 
     @is_gpu_simulation.setter
     def is_gpu_simulation(self, value: Optional[bool]):
-        "Set the flag to enable default GPU simulation. This option will supercede custom binary paths."
+        "Set the flag to enable default GPU simulation. This option will supersede custom binary paths."
         self._is_gpu_simulation = value
         # Automatically update the binary name based on the GPU simulation flag
         if value is not None:
@@ -91,7 +94,6 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        
         valid_binary_names = ["kspaceFirstOrder-OMP", "kspaceFirstOrder-CUDA"]
         if self._binary_name is None:
             # set default binary name based on GPU simulation value
@@ -106,7 +108,7 @@ class SimulationExecutionOptions:
             if PLATFORM == "windows":
                 self._binary_name += ".exe"
                 valid_binary_names = [name + ".exe" for name in valid_binary_names]
-                    
+
         elif self._binary_name not in valid_binary_names:
             warnings.warn("Custom binary name set. Ignoring `is_gpu_simulation` state.")
         return self._binary_name
@@ -151,11 +153,11 @@ class SimulationExecutionOptions:
                 f"{value} is not a directory. If you are trying to set the `binary_path`, use the `binary_path` attribute instead."
             )
         self._binary_dir = Path(value)
-    
+
     @property
     def device_num(self) -> Optional[int]:
         return self._device_num
-    
+
     @device_num.setter
     def device_num(self, value: Optional[int]):
         if value is not None and value < 0:
@@ -167,22 +169,31 @@ class SimulationExecutionOptions:
 
         if self.device_num is not None:
             options_list.append("-g")
-            options_list.append(str(self.device_num)) 
+            options_list.append(str(self.device_num))
 
         if self._num_threads is not None and PLATFORM != "windows":
             options_list.append("-t")
-            options_list.append(str(self._num_threads)) 
+            options_list.append(str(self._num_threads))
 
         if self.verbose_level > 0:
             options_list.append("--verbose")
             options_list.append(str(self.verbose_level))
 
-
         record_options_map = {
-            "p": "p_raw", "p_max": "p_max", "p_min": "p_min", "p_rms": "p_rms",
-            "p_max_all": "p_max_all", "p_min_all": "p_min_all", "p_final": "p_final",
-            "u": "u_raw", "u_max": "u_max", "u_min": "u_min", "u_rms": "u_rms",
-            "u_max_all": "u_max_all", "u_min_all": "u_min_all", "u_final": "u_final",
+            "p": "p_raw",
+            "p_max": "p_max",
+            "p_min": "p_min",
+            "p_rms": "p_rms",
+            "p_max_all": "p_max_all",
+            "p_min_all": "p_min_all",
+            "p_final": "p_final",
+            "u": "u_raw",
+            "u_max": "u_max",
+            "u_min": "u_min",
+            "u_rms": "u_rms",
+            "u_max_all": "u_max_all",
+            "u_min_all": "u_min_all",
+            "u_final": "u_final",
         }
 
         if sensor.record is not None:
@@ -203,9 +214,8 @@ class SimulationExecutionOptions:
 
         return options_list
 
-
     def get_options_string(self, sensor: kSensor) -> str:
-        # raise a deprication warning
+        # raise a deprecation warning
         warnings.warn("This method is deprecated. Use `as_list` method instead.", DeprecationWarning)
         options_list = self.as_list(sensor)
 

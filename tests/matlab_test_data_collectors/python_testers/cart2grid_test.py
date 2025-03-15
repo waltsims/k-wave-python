@@ -1,12 +1,12 @@
 import logging
 import os
+import typing
 from pathlib import Path
 from unittest.mock import Mock
 
 import numpy as np
-from kwave.kgrid import kWaveGrid
 
-import typing
+from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import cart2grid
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from kwave.data import Vector, FlexibleVector
+from kwave.data import FlexibleVector, Vector
 from kwave.enums import DiscreteCosine, DiscreteSine
 from kwave.utils import matlab
 from kwave.utils.math import largest_prime_factor

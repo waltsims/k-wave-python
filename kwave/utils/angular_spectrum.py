@@ -2,10 +2,10 @@ import logging
 import time
 
 import numpy as np
-from matplotlib import pyplot as plt
 from beartype import beartype as typechecker
 from beartype.typing import Dict, Union
 from jaxtyping import Float
+from matplotlib import pyplot as plt
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time

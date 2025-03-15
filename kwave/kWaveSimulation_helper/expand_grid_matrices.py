@@ -1,11 +1,12 @@
 import logging
+
 import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.options.simulation_options import SimulationOptions
 from kwave.ktransducer import NotATransducer
-from kwave.data import Vector
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.matlab import matlab_find
@@ -103,12 +104,12 @@ def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
 
 
 def expand_medium(medium: kWaveMedium, expand_size):
-    # enlarge the sound speed grids by exting the edge values into the expanded grid
+    # enlarge the sound speed grids by extending the edge values into the expanded grid
     medium.sound_speed = np.atleast_1d(medium.sound_speed)
     if medium.sound_speed.size > 1:
         medium.sound_speed = expand_matrix(medium.sound_speed, expand_size)
 
-    # enlarge the grid of density by exting the edge values into the expanded grid
+    # enlarge the grid of density by extending the edge values into the expanded grid
     medium.density = np.atleast_1d(medium.density)
     if medium.density.size > 1:
         medium.density = expand_matrix(medium.density, expand_size)

@@ -1,8 +1,8 @@
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
-import os
 
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.mapgen import trim_cart_points
