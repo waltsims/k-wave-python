@@ -29,7 +29,7 @@ dependencies = [
     "opencv-python==4.11.0.86",
     "deepdiff==8.3.0",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.0",
+    "matplotlib==3.10.1",
     "beartype==0.19.0",
     "jaxtyping==0.2.38"
 ]
