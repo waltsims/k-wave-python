@@ -198,7 +198,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None) -> N
 
     Args:
         filename: The name of the HDF5 file.
-        file_description: The description of the file. If not provided, a default description
+        file_description: The description of the file. If not provided, a default file description
             will be used.
 
     """
@@ -233,7 +233,7 @@ def write_attributes(filename: str, file_description: Optional[str] = None) -> N
         attributes = {
             h5_literals.FILE_MAJOR_VER_ATT_NAME: h5_literals.HDF_FILE_MAJOR_VERSION,
             h5_literals.FILE_MINOR_VER_ATT_NAME: h5_literals.HDF_FILE_MINOR_VERSION,
-            h5_literals.CREATED_BY_ATT_NAME: f"k-Wave {kwave.VERSION}",
+            h5_literals.CREATED_BY_ATT_NAME: f"k-Wave {kwave.__version__}",
             h5_literals.FILE_DESCR_ATT_NAME: file_description,
             h5_literals.FILE_TYPE_ATT_NAME: h5_literals.HDF_INPUT_FILE,
             h5_literals.FILE_CREATION_DATE_ATT_NAME: get_date_string(),

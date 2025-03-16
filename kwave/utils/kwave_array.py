@@ -13,7 +13,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
 from kwave.utils.interp import get_delta_bli
 from kwave.utils.mapgen import make_cart_arc, make_cart_bowl, make_cart_disc, make_cart_rect, make_cart_spherical_segment, trim_cart_points
-from kwave.utils.math import get_affine_matrix, sinc
+from kwave.utils.math import make_affine, sinc
 from kwave.utils.matlab import matlab_assign, matlab_find, matlab_mask
 
 
@@ -680,8 +680,13 @@ class kWaveArray(object):
         return combined_sensor_data
 
     def set_array_position(self, translation, rotation):
-        # get affine matrix and store
-        self.array_transformation = get_affine_matrix(translation, rotation)
+        """Set the array position using translation and rotation.
+
+        Args:
+            translation: Vector of translation values [dx, dy] or [dx, dy, dz]
+            rotation: Single angle (in degrees) for 2D or [x_angle, y_angle, z_angle] for 3D
+        """
+        self.array_transformation = make_affine(translation, rotation)
 
     def set_affine_transform(self, affine_transform):
         # check array has elements

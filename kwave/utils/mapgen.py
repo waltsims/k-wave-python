@@ -10,8 +10,10 @@ from beartype import beartype as typechecker
 from beartype.typing import List, Optional, Tuple, Union, cast
 from jaxtyping import Complex, Float, Int, Integer, Real
 from scipy import optimize
+from scipy.spatial.transform import Rotation
 
 import kwave.utils.typing as kt
+from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
 
 from ..data import Vector
 from .conversion import db2neper, neper2db
@@ -2625,8 +2627,8 @@ def make_cart_rect(
             # No rotation
             R = np.eye(3)
         else:
-            # Using intrinsic rotations chain from right to left (z-y'-z'' rotations)
-            R = np.dot(Rz(theta[2]), np.dot(Ry(theta[1]), Rx(theta[0])))
+            # Using intrinsic rotations chain from right to left (xyz rotations)
+            R = Rotation.from_euler("xyz", theta, degrees=True).as_matrix()
 
     # Combine scaling and rotation matrices
     A = np.dot(R, S)
