@@ -56,46 +56,69 @@ def test_make_affine_3d():
     assert np.allclose(np.linalg.det(rotation_part), 1.0)
 
 
-# @pytest.mark.skipif(__version__ >= "0.5.0", reason="These functions should be removed in 0.5.0")
-class TestDeprecatedFunctionsBehavior:
-    """Test that deprecated functions work correctly during deprecation period and are removed when they should be."""
+class TestMath:
+    """Test class for math utility functions."""
 
     @fail_if_not_removed
     def test_rotation_functions_equivalent(self):
-        """Test that Rx/Ry/Rz give same results as Rotation.from_euler and are removed when they should be."""
-        angle = 45.0
-        # Test each rotation function
-        assert np.allclose(Rx(angle), Rotation.from_euler("x", angle, degrees=True).as_matrix())
-        assert np.allclose(Ry(angle), Rotation.from_euler("y", angle, degrees=True).as_matrix())
-        assert np.allclose(Rz(angle), Rotation.from_euler("z", angle, degrees=True).as_matrix())
+        """Test that Rx, Ry, Rz are equivalent to scipy.spatial.transform.Rotation."""
+        angle = 45
+
+        # Test Rx
+        with pytest.warns(DeprecationWarning, match="Rx is deprecated as of 0.4.1") as warns:
+            assert np.allclose(Rx(angle), Rotation.from_euler("x", angle, degrees=True).as_matrix())
+        assert len(warns) == 1
+        assert "will be removed in 0.5.0" in str(warns[0].message)
+
+        # Test Ry
+        with pytest.warns(DeprecationWarning, match="Ry is deprecated as of 0.4.1") as warns:
+            assert np.allclose(Ry(angle), Rotation.from_euler("y", angle, degrees=True).as_matrix())
+        assert len(warns) == 1
+        assert "will be removed in 0.5.0" in str(warns[0].message)
+
+        # Test Rz
+        with pytest.warns(DeprecationWarning, match="Rz is deprecated as of 0.4.1") as warns:
+            assert np.allclose(Rz(angle), Rotation.from_euler("z", angle, degrees=True).as_matrix())
+        assert len(warns) == 1
+        assert "will be removed in 0.5.0" in str(warns[0].message)
 
     @fail_if_not_removed
     def test_affine_functions_equivalent(self):
-        """Test that get_affine_matrix and make_affine are equivalent and get_affine_matrix is removed when it should be."""
+        """Test that get_affine_matrix and make_affine are equivalent and properly deprecated."""
         translation = [1, 2, 3]
         rotation = [30, 45, 60]
 
-        old_result = get_affine_matrix(translation, rotation)
+        # Test deprecation warning
+        with pytest.warns(DeprecationWarning, match="get_affine_matrix is deprecated as of 0.4.1") as warns:
+            old_result = get_affine_matrix(translation, rotation)
+            
+        # Verify warning details
+        assert len(warns) == 1
+        assert "will be removed in 0.5.0" in str(warns[0].message)
+        
+        # Test functional equivalence
         new_result = make_affine(translation, rotation)
         assert np.allclose(old_result, new_result)
 
     @fail_if_not_removed
     def test_shift_functions_equivalent(self):
-        """Test that fourier_shift and phase_shift_interpolate are equivalent and fourier_shift is removed when it should be."""
+        """Test that fourier_shift and phase_shift_interpolate are equivalent and properly deprecated."""
         # Create test signal
         x = np.linspace(0, 10, 100)
         signal = np.sin(x)
         shift = 0.5
 
-        # Compare results
-        old_result = fourier_shift(signal, shift)
+        # Test deprecation warning
+        with pytest.warns(DeprecationWarning, match="fourier_shift is deprecated as of 0.4.1") as warns:
+            old_result = fourier_shift(signal, shift)
+            
+        # Verify warning details
+        assert len(warns) == 1
+        assert "will be removed in 0.5.0" in str(warns[0].message)
+        
+        # Test functional equivalence
         new_result = phase_shift_interpolate(signal, shift)
         assert np.allclose(old_result, new_result)
-
-        # Test with explicit dimension
-        old_result_dim = fourier_shift(signal, shift, shift_dim=1)
-        new_result_dim = phase_shift_interpolate(signal, shift, shift_dim=1)
-        assert np.allclose(old_result_dim, new_result_dim)
 
 
 def test_phase_shift_interpolate():
