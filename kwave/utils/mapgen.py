@@ -1,25 +1,25 @@
 import logging
 import math
-from math import floor
 import warnings
+from math import floor
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from scipy import optimize
 from beartype import beartype as typechecker
-from beartype.typing import Union, List, Tuple, cast, Optional
-from jaxtyping import Float, Complex, Int, Real, Integer
-
-from .conversion import db2neper, neper2db
-from .data import scale_SI
-from .math import cosd, sind, Rz, Ry, Rx, compute_linear_transform
-from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
-from .matrix import max_nd
-from .tictoc import TicToc
-from ..data import Vector
+from beartype.typing import List, Optional, Tuple, Union, cast
+from jaxtyping import Complex, Float, Int, Integer, Real
+from scipy import optimize
 
 import kwave.utils.typing as kt
+
+from ..data import Vector
+from .conversion import db2neper, neper2db
+from .data import scale_SI
+from .math import Rx, Ry, Rz, compute_linear_transform, cosd, sind
+from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
+from .matrix import max_nd
+from .tictoc import TicToc
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
@@ -2350,7 +2350,7 @@ def make_sphere(
     else:
         sphere = np.zeros(grid_size, dtype=int)
 
-    # create a guide circle from which the individal radii can be extracted
+    # create a guide circle from which the individual radii can be extracted
     guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
 
     # step through the guide circle points and create partially filled discs
@@ -2831,7 +2831,7 @@ def focused_annulus_oneil(
 
     # loop over elements and sum fields
     for ind in range(num_elements):
-        # get complex pressure for bowls with inner and outer aperature diameter
+        # get complex pressure for bowls with inner and outer aperture diameter
         if diameter[0, ind] == 0:
             p_el_inner = 0.0 + 0.0j
         else:

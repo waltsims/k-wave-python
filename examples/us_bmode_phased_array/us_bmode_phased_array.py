@@ -1,7 +1,8 @@
+from copy import deepcopy
+
 import numpy as np
 import scipy.io
 from matplotlib import pyplot as plt
-from copy import deepcopy
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
@@ -10,14 +11,13 @@ from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.dotdictionary import dotdict
-from kwave.utils.signals import tone_burst, get_win
-from kwave.utils.filters import gaussian_filter
-from kwave.utils.conversion import db2neper
-from kwave.reconstruction.tools import log_compression
 from kwave.reconstruction.beamform import envelope_detection, scan_conversion
+from kwave.reconstruction.tools import log_compression
+from kwave.utils.conversion import db2neper
+from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import gaussian_filter
 from kwave.utils.mapgen import make_ball
-
+from kwave.utils.signals import get_win, tone_burst
 
 # simulation settings
 DATA_CAST = "single"
