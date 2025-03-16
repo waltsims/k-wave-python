@@ -6,8 +6,8 @@ import pytest
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
+from kwave.ksource import kSource
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import smooth

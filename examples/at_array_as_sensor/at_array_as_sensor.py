@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 
 from kwave.data import Vector
@@ -10,9 +10,9 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.colormap import get_color_map
 from kwave.utils.conversion import cart2grid
 from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.colormap import get_color_map
 from kwave.utils.mapgen import make_cart_circle, make_disc
 from kwave.utils.signals import reorder_binary_sensor_data
 
@@ -76,7 +76,7 @@ def main():
     # VISUALIZATION
     # =========================================================================
 
-    # create pml mask (re-use default size of 20 grid points from simulation_options)
+    # create pml mask (reuse default size of 20 grid points from simulation_options)
     pml_size = simulation_options.pml_x_size  # 20 [grid_points]
     pml_mask = np.zeros((N.x, N.y), dtype=bool)
     pml_mask[:pml_size, :] = 1

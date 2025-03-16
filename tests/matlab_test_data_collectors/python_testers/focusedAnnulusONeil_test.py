@@ -1,13 +1,13 @@
 import logging
 import os
 from pathlib import Path
-import pytest
 
 import numpy as np
+import pytest
+from beartype.roar import BeartypeCallHintParamViolation
 
 from kwave.utils.mapgen import focused_annulus_oneil
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
-from beartype.roar import BeartypeCallHintParamViolation
 
 
 def test_focused_annulus_oneil():

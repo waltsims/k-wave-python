@@ -1,10 +1,10 @@
+import dataclasses
 import functools
 import logging
-import dataclasses
 
 import numpy as np
 
-from kwave.utils.kwave_array import kWaveArray, Element
+from kwave.utils.kwave_array import Element, kWaveArray
 
 
 def recursive_getattr(obj, attr, *args):
