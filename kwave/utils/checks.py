@@ -2,7 +2,7 @@ import logging
 import numbers
 import platform
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import scipy
@@ -85,7 +85,7 @@ def check_str_eq(value, target: str) -> bool:
     return isinstance(value, str) and value == target
 
 
-def check_str_in(value, target: List[str]) -> bool:
+def check_str_in(value, target: list[str]) -> bool:
     """
     Check if value is in the given list only if the value is string.
     Helps to avoid FutureWarnings when value is not a string.

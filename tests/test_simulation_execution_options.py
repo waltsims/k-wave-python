@@ -75,9 +75,6 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertFalse(options.is_gpu_simulation)
         self.assertEqual(options.binary_name, OMP_BINARY_NAME)
 
-    def test_device_num_setter_invalid(self):
-        """Test setting an invalid device number."""
-        options = self.default_options
 
     def test_binary_name_custom(self):
         """Test setting a custom binary name."""
@@ -138,7 +135,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-g",
             f"{options.device_num}",
             "-t",
-            f"1",
+            "1",
             "--verbose",
             "2",
             "--p_raw",
@@ -172,7 +169,7 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         ]
         if not PLATFORM == "windows":
             expected_elements.insert(2, "-t")
-            expected_elements.insert(3, f"1")
+            expected_elements.insert(3, "1")
         self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_with_invalid_values(self):

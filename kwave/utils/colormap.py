@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 from beartype import beartype as typechecker
@@ -7,7 +6,7 @@ from matplotlib.colors import ListedColormap
 
 
 @typechecker
-def get_color_map(num_colors: Optional[int] = None) -> ListedColormap:
+def get_color_map(num_colors: int | None = None) -> ListedColormap:
     """
     Returns the default color map used for display and visualisation across
     the k-Wave Toolbox. Zero values are displayed as white, positive values

@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from beartype import beartype as typechecker
@@ -34,7 +33,7 @@ def rem(x, y, rtol=1e-05, atol=1e-08):
     return remainder
 
 
-def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray], values: Union[int, float, np.ndarray]) -> np.ndarray:
+def matlab_assign(matrix: np.ndarray, indices: int | np.ndarray, values: int | float | np.ndarray) -> np.ndarray:
     """
     Assigns values to elements of a matrix using subscript indices.
 
@@ -53,7 +52,7 @@ def matlab_assign(matrix: np.ndarray, indices: Union[int, np.ndarray], values: U
     return matrix.reshape(original_shape, order="F")
 
 
-def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "neq") -> np.ndarray:
+def matlab_find(arr: list[int] | np.ndarray, val: int = 0, mode: str = "neq") -> np.ndarray:
     """
     Finds the indices of elements in an array that satisfy a given condition.
 
@@ -77,7 +76,7 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "ne
 
 
 @typechecker
-def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> np.ndarray:
+def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: int | None = None) -> np.ndarray:
     """
     Applies a mask to an array and returns the masked elements.
 
@@ -101,7 +100,7 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
     return np.expand_dims(arr.ravel(order="F")[flat_mask], axis=-1)  # compatibility, n => [n, 1]
 
 
-def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[Union[int, np.ndarray], ...]:
+def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: int | None = None) -> tuple[int | np.ndarray, ...]:
     """
     Converts a mask array to a tuple of subscript indices for an n-dimensional array.
 
@@ -121,7 +120,7 @@ def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int]
         return np.unravel_index(mask.ravel(order="F") + diff, arr.shape, order="F")
 
 
-def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
+def ind2sub(array_shape: tuple[int, ...], ind: int) -> tuple[int, ...]:
     """
     Converts a linear index to a tuple of subscript indices for an n-dimensional array.
 
@@ -139,7 +138,7 @@ def ind2sub(array_shape: Tuple[int, ...], ind: int) -> Tuple[int, ...]:
     return indices
 
 
-def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+def sub2ind(array_shape: tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     """
     Convert 3D subscript indices to a linear index.
 
@@ -159,7 +158,7 @@ def sub2ind(array_shape: Tuple[int, int, int], x: np.ndarray, y: np.ndarray, z: 
 
     results = []
     x, y, z = np.squeeze(x), np.squeeze(y), np.squeeze(z)
-    for x_i, y_i, z_i in zip(x, y, z):
+    for x_i, y_i, z_i in zip(x, y, z, strict=False):
         index = np.ravel_multi_index((x_i, y_i, z_i), dims=array_shape, order="F")
         results.append(index)
     return np.array(results)

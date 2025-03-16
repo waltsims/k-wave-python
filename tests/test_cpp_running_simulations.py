@@ -141,25 +141,7 @@ def test_cpp_running_simulations():
                 }
             )
 
-    elif example_number == 3:
-        # define the field parameters to record
-        sensor.record = ["p_final", "p_max"]
-
-        # run the C++ simulation using the wrapper function
-        simulation_options = SimulationOptions(
-            pml_size=pml_size, save_to_disk=True, input_filename=input_filename, save_to_disk_exit=True, data_path=pathname
-        )
-        # run the simulation
-        kspaceFirstOrder3DC(
-            medium=medium,
-            kgrid=kgrid,
-            source=source,
-            sensor=sensor,
-            simulation_options=simulation_options,
-            execution_options=SimulationExecutionOptions(),
-        )
-
-    elif example_number == 4:
+    elif example_number == 3 or example_number == 4:
         # define the field parameters to record
         sensor.record = ["p_final", "p_max"]
 

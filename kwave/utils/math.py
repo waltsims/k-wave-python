@@ -1,6 +1,5 @@
 import math
 from itertools import compress
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from numpy.fft import fft, ifft, ifftshift
@@ -29,7 +28,7 @@ def largest_prime_factor(n: int) -> int:
     return n
 
 
-def rwh_primes(n: int) -> List[int]:
+def rwh_primes(n: int) -> list[int]:
     """
     Generates a list of prime numbers less than a given integer.
 
@@ -48,7 +47,7 @@ def rwh_primes(n: int) -> List[int]:
     return [2, *compress(range(3, n, 2), sieve[1:])]
 
 
-def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
+def fourier_shift(data: np.ndarray, shift: float, shift_dim: int | None = None) -> np.ndarray:
     """
     Shifts an array along one of its dimensions using Fourier interpolation.
 
@@ -132,7 +131,7 @@ def round_odd(x):
     return 2 * round((x + 1) / 2) - 1
 
 
-def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int], Tuple[int, ...]]:
+def find_closest(A: np.ndarray, a: float | int) -> tuple[float | int, tuple[int, ...]]:
     """
     Returns the value and index of the item in A that is closest to the value a.
 
@@ -157,7 +156,7 @@ def find_closest(A: np.ndarray, a: Union[float, int]) -> Tuple[Union[float, int]
     return A[idx], idx
 
 
-def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
+def sinc(x: int | float | np.ndarray) -> int | float | np.ndarray:
     """
     Calculates the sinc function of a given value or array of values.
 
@@ -172,7 +171,7 @@ def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
     return np.sinc(x / np.pi)
 
 
-def primefactors(n: int) -> List[int]:
+def primefactors(n: int) -> list[int]:
     """
     Finds the prime factors of a given integer.
 
@@ -248,11 +247,11 @@ def norm_var(im: np.ndarray) -> float:
 
 
 def gaussian(
-    x: Union[int, float, np.ndarray],
-    magnitude: Optional[Union[int, float]] = None,
-    mean: Optional[float] = 0,
-    variance: Optional[float] = 1,
-) -> Union[int, float, np.ndarray]:
+    x: int | float | np.ndarray,
+    magnitude: int | float | None = None,
+    mean: float | None = 0,
+    variance: float | None = 1,
+) -> int | float | np.ndarray:
     """
     Returns a Gaussian distribution f(x) with the specified magnitude, mean, and variance. If these values are not specified,
     the magnitude is normalised and values of variance = 1 and mean = 0 are used. For example running:
@@ -348,7 +347,7 @@ def Rz(theta):
     return R
 
 
-def get_affine_matrix(translation: Vector, rotation: Union[int, float, np.ndarray, Vector]):
+def get_affine_matrix(translation: Vector, rotation: int | float | np.ndarray | Vector):
     # Check dimensions
     if len(translation) == 2 and isinstance(rotation, (int, float)):
         # Assign the inputs

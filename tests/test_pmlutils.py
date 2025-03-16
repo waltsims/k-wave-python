@@ -27,7 +27,7 @@ def test_get_optimal_pml_size_1d():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert 32 == get_optimal_pml_size(kgrid)
+    assert get_optimal_pml_size(kgrid) == 32
     pass
 
 
@@ -46,7 +46,7 @@ def test_get_optimal_pml_size_2D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert (32 == get_optimal_pml_size(kgrid)).all()
+    assert (get_optimal_pml_size(kgrid) == 32).all()
     pass
 
 
@@ -65,7 +65,7 @@ def test_get_optimal_pml_size_3D():
     # create the time array
     kgrid.setTime(round(t_end / dt) + 1, dt)
 
-    assert (32 == get_optimal_pml_size(kgrid)).all()
+    assert (get_optimal_pml_size(kgrid) == 32).all()
 
 
 def test_pml_sizes_2d():

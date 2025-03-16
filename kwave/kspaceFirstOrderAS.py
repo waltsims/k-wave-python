@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 import numpy as np
 from numpy.fft import ifftshift
@@ -26,7 +25,7 @@ from kwave.utils.tictoc import TicToc
 def kspaceFirstOrderASC(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
@@ -85,7 +84,7 @@ def kspaceFirstOrderASC(
 def kspaceFirstOrderAS(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,

@@ -1,7 +1,7 @@
 from time import perf_counter
 
 
-class TicToc(object):
+class TicToc:
     """
     A class for measuring the execution time of a code block.
 

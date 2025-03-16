@@ -130,14 +130,14 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
             are_equal = True
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
-                for actual, expected in zip(actual_value, expected_value):
+                for actual, expected in zip(actual_value, expected_value, strict=False):
                     are_equal &= check_element_equality(
                         actual_element=actual,
                         expected_element=expected,
                     )
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
-                for actual, expected in zip(actual_value, expected_value):
+                for actual, expected in zip(actual_value, expected_value, strict=False):
                     are_equal &= check_element_equality(
                         actual_element=actual,
                         expected_element=expected,

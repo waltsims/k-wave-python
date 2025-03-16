@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -43,7 +43,7 @@ class SimulationType(Enum):
 
 
 @dataclass
-class SimulationOptions(object):
+class SimulationOptions:
     """
     Args:
         axisymmetric: Flag that indicates whether axisymmetric simulation is used
@@ -96,28 +96,28 @@ class SimulationOptions(object):
     smooth_p0: bool = True
     use_kspace: bool = True
     use_sg: bool = True
-    use_fd: Optional[int] = None
+    use_fd: int | None = None
     pml_auto: bool = False
     create_log: bool = False
     use_finite_difference: bool = False
     stream_to_disk: bool = False
-    data_recast: Optional[bool] = False
+    data_recast: bool | None = False
     cartesian_interp: str = "linear"
-    hdf_compression_level: Optional[int] = None
+    hdf_compression_level: int | None = None
     data_cast: str = "off"
-    pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
+    pml_search_range: list[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = "WSWA-FFT"
     multi_axial_PML_ratio: float = 0.1
-    data_path: Optional[str] = field(default_factory=lambda: gettempdir())
-    input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
-    output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")
-    pml_x_alpha: Optional[float] = None
-    pml_y_alpha: Optional[float] = None
-    pml_z_alpha: Optional[float] = None
-    pml_size: Optional[List[int]] = None
-    pml_x_size: Optional[int] = None
-    pml_y_size: Optional[int] = None
-    pml_z_size: Optional[int] = None
+    data_path: str | None = field(default_factory=lambda: gettempdir())
+    input_filename: str | None = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
+    output_filename: str | None = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")
+    pml_x_alpha: float | None = None
+    pml_y_alpha: float | None = None
+    pml_z_alpha: float | None = None
+    pml_size: list[int] | None = None
+    pml_x_size: int | None = None
+    pml_y_size: int | None = None
+    pml_z_size: int | None = None
 
     def __post_init__(self):
         assert self.cartesian_interp in [
@@ -194,7 +194,7 @@ class SimulationOptions(object):
         ), "Optional input ''UseFD'' can only be set to 2, 4."
 
     @staticmethod
-    def option_factory(kgrid: "kWaveGrid", options: SimulationOptions):
+    def option_factory(kgrid: kWaveGrid, options: SimulationOptions):
         """
         Initialize the Simulation Options
 

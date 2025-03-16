@@ -2,7 +2,6 @@ import logging
 import time
 from dataclasses import dataclass
 from math import ceil
-from typing import Optional
 
 import numpy as np
 import numpy.linalg as linalg
@@ -25,27 +24,27 @@ class Element:
     active: bool
     measure: float
 
-    label: Optional[str] = None
-    group_type: Optional[str] = None
-    element_number: Optional[int] = None
+    label: str | None = None
+    group_type: str | None = None
+    element_number: int | None = None
 
-    inner_diameter: Optional[float] = None
-    outer_diameter: Optional[float] = None
-    diameter: Optional[float] = None
+    inner_diameter: float | None = None
+    outer_diameter: float | None = None
+    diameter: float | None = None
 
-    radius_of_curvature: Optional[float] = None
-    position: Optional[np.ndarray] = None
-    focus_position: Optional[np.ndarray] = None
+    radius_of_curvature: float | None = None
+    position: np.ndarray | None = None
+    focus_position: np.ndarray | None = None
 
     # custom element
-    integration_points: Optional[np.ndarray] = None
+    integration_points: np.ndarray | None = None
 
-    length: Optional[float] = None
-    width: Optional[float] = None
-    orientation: Optional[np.ndarray] = None
+    length: float | None = None
+    width: float | None = None
+    orientation: np.ndarray | None = None
 
-    start_point: Optional[np.ndarray] = None
-    end_point: Optional[np.ndarray] = None
+    start_point: np.ndarray | None = None
+    end_point: np.ndarray | None = None
 
     def __post_init__(self):
         """
@@ -84,7 +83,7 @@ class Element:
         self.measure = float(self.measure)
 
 
-class kWaveArray(object):
+class kWaveArray:
     def __init__(
         self,
         axisymmetric: bool = False,

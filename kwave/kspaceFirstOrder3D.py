@@ -1,4 +1,3 @@
-from typing import Union
 
 import numpy as np
 
@@ -21,7 +20,7 @@ from kwave.utils.tictoc import TicToc
 def kspaceFirstOrder3DG(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
@@ -73,7 +72,7 @@ def kspaceFirstOrder3DG(
 def kspaceFirstOrder3DC(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
@@ -126,7 +125,7 @@ def kspaceFirstOrder3DC(
 def kspaceFirstOrder3D(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,

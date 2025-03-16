@@ -11,7 +11,7 @@ from kwave.utils.math import largest_prime_factor
 
 
 @dataclass
-class kWaveGrid(object):
+class kWaveGrid:
     """
     kWaveGrid is the grid class used across the k-Wave Toolbox. An object
     of the kWaveGrid class contains the grid coordinates and wavenumber

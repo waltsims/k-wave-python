@@ -1,4 +1,3 @@
-from typing import Union
 
 import numpy as np
 
@@ -70,7 +69,7 @@ def kspace_first_order_2d_gpu(
 def kspaceFirstOrder2DC(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: NotATransducer | kSensor,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
@@ -133,7 +132,7 @@ def kspaceFirstOrder2DC(
 def kspaceFirstOrder2D(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor, None],
+    sensor: NotATransducer | kSensor | None,
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,

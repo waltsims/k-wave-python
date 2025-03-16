@@ -50,7 +50,7 @@ class Vector(np.ndarray):
 
 
 @dataclass
-class FlexibleVector(object):
+class FlexibleVector:
     """
     This class is very similar to Numpy.ndarray but there are differences:
         - It can have 3 elements at max

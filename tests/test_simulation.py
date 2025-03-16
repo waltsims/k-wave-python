@@ -84,8 +84,8 @@ class TestSimulation(unittest.TestCase):
         k_sim.input_checking("kspaceFirstOrder2D")
 
         # source and sensor are replaced when time-reversal is enabled
-        assert not (k_sim.source is self.source)
-        assert not (k_sim.sensor is self.sensor)
+        assert k_sim.source is not self.source
+        assert k_sim.sensor is not self.sensor
 
         assert k_sim.userarg_time_rev
 

@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import List
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
 
 @dataclass
-class Recorder(object):
+class Recorder:
     def __init__(self):
         # flags which control which parameters are recorded
         self.p = True  #: time-varying acoustic pressure
@@ -34,7 +33,7 @@ class Recorder(object):
         self.y1_inside, self.y2_inside = None, None
         self.z1_inside, self.z2_inside = None, None
 
-    def set_flags_from_list(self, flags_list: List[str], is_elastic_code: bool) -> None:
+    def set_flags_from_list(self, flags_list: list[str], is_elastic_code: bool) -> None:
         """
         Set Recorder flags that are present in the string list to True
 
@@ -130,7 +129,7 @@ class Recorder(object):
             allowed_flags += ["u_split_field"]
         return allowed_flags
 
-    def is_set(self, attrs: List[str]) -> List[bool]:
+    def is_set(self, attrs: list[str]) -> list[bool]:
         """
         Check if the attributes are set
 

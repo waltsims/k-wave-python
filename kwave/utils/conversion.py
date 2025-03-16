@@ -265,9 +265,9 @@ def cart2grid(
 
         # check if the points all lie within the grid
         assert (
-            0 <= data_x.min()
-            and 0 <= data_y.min()
-            and 0 <= data_z.min()
+            data_x.min() >= 0
+            and data_y.min() >= 0
+            and data_z.min() >= 0
             and data_x.max() < kgrid.Nx
             and data_y.max() < kgrid.Ny
             and data_z.max() < kgrid.Nz
@@ -363,11 +363,11 @@ def hounsfield2density(
     density[ct_data < 930] = np.polyval([1.025793065681423, -5.680404011488714], ct_data[ct_data < 930])
 
     # Part 2: Between 930 and 1098(soft tissue region)
-    index_selection = np.logical_and(930 <= ct_data, ct_data <= 1098)
+    index_selection = np.logical_and(ct_data >= 930, ct_data <= 1098)
     density[index_selection] = np.polyval([0.9082709691264, 103.6151457847139], ct_data[index_selection])
 
     # Part 3: Between 1098 and 1260(between soft tissue and bone)
-    index_selection = np.logical_and(1098 < ct_data, ct_data < 1260)
+    index_selection = np.logical_and(ct_data > 1098, ct_data < 1260)
     density[index_selection] = np.polyval([0.5108369316599, 539.9977189228704], ct_data[index_selection])
 
     # Part 4: Greater than 1260(bone region)
@@ -460,15 +460,15 @@ def tol_star(
         ks += z_closest_ind + 1
 
     if kgrid_dim == 1:
-        inbounds = (1 <= is_) & (is_ <= kgrid.Nx)
+        inbounds = (is_ >= 1) & (is_ <= kgrid.Nx)
         # TODO: this should likely be matlabmask and indexes should be checked.
         is_ = is_[inbounds]
     elif kgrid_dim == 2:
-        inbounds = (1 <= is_) & (is_ <= kgrid.Nx) & (1 <= js) & (js <= kgrid.Ny)
+        inbounds = (is_ >= 1) & (is_ <= kgrid.Nx) & (js >= 1) & (js <= kgrid.Ny)
         is_ = is_[inbounds]
         js = js[inbounds]
     if kgrid_dim == 3:
-        inbounds = (1 <= is_) & (is_ <= kgrid.Nx) & (1 <= js) & (js <= kgrid.Ny) & (1 <= ks) & (ks <= kgrid.Nz)
+        inbounds = (is_ >= 1) & (is_ <= kgrid.Nx) & (js >= 1) & (js <= kgrid.Ny) & (ks >= 1) & (ks <= kgrid.Nz)
         is_ = is_[inbounds]
         js = js[inbounds]
         ks = ks[inbounds]

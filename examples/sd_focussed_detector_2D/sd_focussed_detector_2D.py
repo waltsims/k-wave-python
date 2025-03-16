@@ -1,5 +1,10 @@
 # # Focussed Detector In 2D Example
-# This example shows how k-Wave-python can be used to model the output of a focused semicircular detector, where the directionality arises from spatially averaging across the detector surface. Unlike the original example in k-Wave, this example does not visualize the simulation, as this functionality is not intrinsically supported by the accelerated binaries.
+# This example shows how k-Wave-python can be used to model the 
+# output of a focused semicircular detector, where the directionality 
+# arises from spatially averaging across the detector surface. Unlike 
+# the original example in k-Wave, this example does not visualize the 
+# simulation, as this functionality is not intrinsically supported by 
+# the accelerated binaries.
 
 import os
 from copy import deepcopy

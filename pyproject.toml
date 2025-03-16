@@ -96,11 +96,26 @@ omit = [
     ]
 
 [tool.ruff]
-# Allow lines to be as long as 140 characters.
 line-length = 140
 # F821 needed to avoid false-positives in nested functions, F722 due to jaxtyping 
 lint.ignore = ["F821", "F722"]
-lint.select = ["NPY201", "I"]
+lint.select = [
+    # Numpy deprecation
+    "NPY201",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # Check re arguments
+    "B034"]
 
 # Configure isort rules
 [tool.ruff.lint.isort]

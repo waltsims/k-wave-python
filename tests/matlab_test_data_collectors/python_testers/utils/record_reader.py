@@ -2,7 +2,7 @@ import numpy as np
 from scipy.io import loadmat
 
 
-class TestRecordReader(object):
+class TestRecordReader:
     # Will make `pytest` to ignore this class as a test class
     __test__ = False
 

@@ -1,5 +1,7 @@
 # Focussed Detector In 3D Example
-# This example shows how k-Wave can be used to model the output of a focussed bowl detector where the directionality arises from spatially averaging across the detector surface.
+# This example shows how k-Wave can be used to model the output of
+# a focussed bowl detector where the directionality arises from 
+# spatially averaging across the detector surface.
 
 import os
 from copy import deepcopy

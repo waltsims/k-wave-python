@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Tuple
 
 import numpy as np
 import scipy
@@ -70,7 +69,7 @@ def focus(kgrid, input_signal, source_mask, focus_position, sound_speed):
 
 
 def scan_conversion(
-    scan_lines: np.ndarray, steering_angles, image_size: Tuple[float, float], c0, dt, resolution: Optional[Tuple[int, int]]
+    scan_lines: np.ndarray, steering_angles, image_size: tuple[float, float], c0, dt, resolution: tuple[int, int] | None
 ) -> np.ndarray:
     if resolution is None:
         resolution = (256, 256)  # in pixels

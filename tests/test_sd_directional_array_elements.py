@@ -53,7 +53,7 @@ def test_sd_directional_array_elements():
     Nv = len(arc_indices)
 
     # calculate angles between grid points in the arc and the centre of the grid
-    arc_angles = np.arctan((matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1)))  # -1 compatibility
+    arc_angles = np.arctan(matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1))  # -1 compatibility
 
     # sort the angles into ascending order, and adjust the indices accordingly
     sorted_index = arc_angles.ravel().argsort()

@@ -123,7 +123,7 @@ def binaries_present() -> bool:
         for binary_name in URL_DICT[PLATFORM][binary_type]:
             binary_list.append((binary_name.split("/")[-1], binary_type))
 
-    missing_binaries: List[str] = []
+    missing_binaries: list[str] = []
 
     for binary_name, binary_type in binary_list:
         if not _is_binary_present(binary_name, binary_type):

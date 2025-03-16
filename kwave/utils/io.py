@@ -2,7 +2,6 @@ import os
 import platform
 import socket
 from datetime import datetime
-from typing import Optional
 
 import cv2
 import h5py
@@ -188,7 +187,7 @@ def write_matrix(filename, matrix: np.ndarray, matrix_name: str, compression_lev
         assign_str_attr(f[f"/{matrix_name}"].attrs, h5_literals.DATA_TYPE_ATT_NAME, data_type_c)
 
 
-def write_attributes(filename: str, file_description: Optional[str] = None) -> None:
+def write_attributes(filename: str, file_description: str | None = None) -> None:
     """
     Write attributes to a HDF5 file.
 

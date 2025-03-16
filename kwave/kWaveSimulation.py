@@ -29,7 +29,7 @@ from kwave.utils.matrix import num_dim2
 
 
 @dataclass
-class kWaveSimulation(object):
+class kWaveSimulation:
     def __init__(
         self, kgrid: kWaveGrid, source: kSource, sensor: NotATransducer, medium: kWaveMedium, simulation_options: SimulationOptions
     ):
@@ -1063,9 +1063,7 @@ class kWaveSimulation(object):
         # rather than creating them in double precision and then casting them
         if opt.data_cast == "off":
             precision = "double"
-        elif opt.data_cast == "single":
-            precision = "single"
-        elif opt.data_cast == "gsingle":
+        elif opt.data_cast == "single" or opt.data_cast == "gsingle":
             precision = "single"
         elif opt.data_cast == "gdouble":
             precision = "double"

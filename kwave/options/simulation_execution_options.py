@@ -1,7 +1,6 @@
 import os
 import warnings
 from pathlib import Path
-from typing import Optional, Union
 
 from kwave import BINARY_DIR, PLATFORM
 from kwave.ksensor import kSensor
@@ -15,17 +14,17 @@ class SimulationExecutionOptions:
     def __init__(
         self,
         is_gpu_simulation: bool = False,
-        binary_path: Optional[str] = None,
-        binary_dir: Optional[str] = None,
-        binary_name: Optional[str] = None,
-        kwave_function_name: Optional[str] = "kspaceFirstOrder3D",
+        binary_path: str | None = None,
+        binary_dir: str | None = None,
+        binary_name: str | None = None,
+        kwave_function_name: str | None = "kspaceFirstOrder3D",
         delete_data: bool = True,
-        device_num: Optional[int] = None,
-        num_threads: Optional[int] = None,
-        thread_binding: Optional[bool] = None,
-        system_call: Optional[str] = None,
+        device_num: int | None = None,
+        num_threads: int | None = None,
+        thread_binding: bool | None = None,
+        system_call: str | None = None,
         verbose_level: int = 0,
-        auto_chunking: Optional[bool] = True,
+        auto_chunking: bool | None = True,
         show_sim_log: bool = True,
     ):
         self.is_gpu_simulation = is_gpu_simulation
@@ -43,11 +42,11 @@ class SimulationExecutionOptions:
         self.show_sim_log = show_sim_log
 
     @property
-    def num_threads(self) -> Union[int, str]:
+    def num_threads(self) -> int | str:
         return self._num_threads
 
     @num_threads.setter
-    def num_threads(self, value: Union[int, str]):
+    def num_threads(self, value: int | str):
         cpu_count = os.cpu_count()
         if cpu_count is None:
             raise RuntimeError("Unable to determine the number of CPUs on this system. Please specify the number of threads explicitly.")
@@ -81,11 +80,11 @@ class SimulationExecutionOptions:
         self._verbose_level = value
 
     @property
-    def is_gpu_simulation(self) -> Optional[bool]:
+    def is_gpu_simulation(self) -> bool | None:
         return self._is_gpu_simulation
 
     @is_gpu_simulation.setter
-    def is_gpu_simulation(self, value: Optional[bool]):
+    def is_gpu_simulation(self, value: bool | None):
         "Set the flag to enable default GPU simulation. This option will supersede custom binary paths."
         self._is_gpu_simulation = value
         # Automatically update the binary name based on the GPU simulation flag
@@ -155,11 +154,11 @@ class SimulationExecutionOptions:
         self._binary_dir = Path(value)
 
     @property
-    def device_num(self) -> Optional[int]:
+    def device_num(self) -> int | None:
         return self._device_num
 
     @device_num.setter
-    def device_num(self, value: Optional[int]):
+    def device_num(self, value: int | None):
         if value is not None and value < 0:
             raise ValueError("Device number must be non-negative")
         self._device_num = value

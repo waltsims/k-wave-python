@@ -9,7 +9,7 @@ import numpy as np
 from deepdiff import DeepDiff
 
 
-class H5Summary(object):
+class H5Summary:
     def __init__(self, summary: dict):
         self.summary = summary
 
@@ -49,7 +49,7 @@ class H5Summary(object):
     @staticmethod
     def load(name: str):
         path = H5Summary._get_json_filepath(name)
-        with open(path, "r") as json_file:
+        with open(path) as json_file:
             summary = json.load(json_file)
             return H5Summary(summary)
 

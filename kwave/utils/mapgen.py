@@ -343,7 +343,7 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
 
     """
 
-    if 0 >= y or y >= 3:
+    if y <= 0 or y >= 3:
         logging.log(logging.WARN, f"{UserWarning.__name__}: y must be within the interval (0,3)")
         warnings.warn("y must be within the interval (0,3)", UserWarning)
         c_kk = c0 * np.ones_like(w)
@@ -696,7 +696,7 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.
     center.y = center.y if center.y != 0 else np.floor(grid_size.y / 2).astype(int) + 1
 
     # check the inputs
-    assert np.all(0 < center) and np.all(center <= grid_size), "Disc center must be within grid."
+    assert np.all(center > 0) and np.all(center <= grid_size), "Disc center must be within grid."
 
     # create empty matrix
     disc = np.zeros(grid_size, dtype=bool)
@@ -748,9 +748,7 @@ def make_circle(
     # define literals
     MAGNITUDE = 1
 
-    if arc_angle is None:
-        arc_angle = 2 * np.pi
-    elif arc_angle > 2 * np.pi:
+    if arc_angle is None or arc_angle > 2 * np.pi:
         arc_angle = 2 * np.pi
     elif arc_angle < 0:
         arc_angle = 0
@@ -779,7 +777,7 @@ def make_circle(
     # draw the remaining cardinal points
     px = [cx, cx + y, cx - y]
     py = [cy + y, cy, cy]
-    for point_index, (px_i, py_i) in enumerate(zip(px, py)):
+    for point_index, (px_i, py_i) in enumerate(zip(px, py, strict=False)):
         # check whether the point is within the arc made by arc_angle, and lies
         # within the grid
         if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
@@ -801,7 +799,7 @@ def make_circle(
         py = [y + cy, x + cy, -x + cy, -y + cy, -y + cy, -x + cy, x + cy, y + cy]
 
         # loop through each point
-        for point_index, (px_i, py_i) in enumerate(zip(px, py)):
+        for point_index, (px_i, py_i) in enumerate(zip(px, py, strict=False)):
             # check whether the point is within the arc made by arc_angle, and
             # lies within the grid
             if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:

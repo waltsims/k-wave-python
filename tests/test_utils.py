@@ -159,8 +159,8 @@ def test_get_bli():
 
 
 def test_power_kramers_kronig():
-    assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 2.5)
-    assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 1)
+    assert power_law_kramers_kronig(1, 1, 1540, 1, 2.5) == 1540
+    assert power_law_kramers_kronig(1, 1, 1540, 1, 1) == 1540
     with pytest.warns(UserWarning):
         c = power_law_kramers_kronig(1, 1, 1540, 1, 4)
         assert c == 1540

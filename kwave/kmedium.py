@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 
@@ -8,7 +7,7 @@ import kwave.utils.checks
 
 
 @dataclass
-class kWaveMedium(object):
+class kWaveMedium:
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
     sound_speed: np.array
     # reference sound speed used within the k-space operator (phase correction term) [m/s]
@@ -76,7 +75,7 @@ class kWaveMedium(object):
         if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):
             raise ValueError("medium.alpha_coeff must be non-negative and real.")
 
-    def is_defined(self, *fields) -> List[bool]:
+    def is_defined(self, *fields) -> list[bool]:
         """
         Check if the field(s) are defined or None
 

@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipy
@@ -56,12 +55,12 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
 def spect(
     func: np.ndarray,
     Fs: float,
-    dim: Optional[Union[int, str]] = "auto",
-    fft_len: Optional[int] = 0,
-    power_two: Optional[bool] = False,
-    unwrap_phase: Optional[bool] = False,
-    window: Optional[str] = "Rectangular",
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    dim: int | str | None = "auto",
+    fft_len: int | None = 0,
+    power_two: bool | None = False,
+    unwrap_phase: bool | None = False,
+    window: str | None = "Rectangular",
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculates the spectrum of a signal.
 
@@ -157,8 +156,8 @@ def spect(
 
 
 def extract_amp_phase(
-    data: np.ndarray, Fs: float, source_freq: float, dim: Tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    data: np.ndarray, Fs: float, source_freq: float, dim: tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
 
@@ -286,7 +285,7 @@ def tenenbaum_sharpness(im):
     #     raise ValueError("Invalid number of dimensions in im")
 
 
-def sharpness(im: np.ndarray, mode: Optional[str] = "Brenner") -> float:
+def sharpness(im: np.ndarray, mode: str | None = "Brenner") -> float:
     """
     Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.
 
@@ -357,8 +356,8 @@ def fwhm(f, x):
 
 
 def gaussian_filter(
-    signal: Union[np.ndarray, List[float]], Fs: float, frequency: float, bandwidth: float
-) -> Union[np.ndarray, List[float]]:
+    signal: np.ndarray | list[float], Fs: float, frequency: float, bandwidth: float
+) -> np.ndarray | list[float]:
     """
     Applies a frequency domain Gaussian filter with the
     specified center frequency and percentage bandwidth to the input
@@ -403,13 +402,13 @@ def filter_time_series(
     kgrid: "kWaveGrid",
     medium: "kWaveMedium",
     signal: np.ndarray,
-    ppw: Optional[int] = 3,
-    rppw: Optional[int] = 0,
-    stop_band_atten: Optional[int] = 60,
-    transition_width: Optional[float] = 0.1,
-    zerophase: Optional[bool] = False,
-    plot_spectrums: Optional[bool] = False,
-    plot_signals: Optional[bool] = False,
+    ppw: int | None = 3,
+    rppw: int | None = 0,
+    stop_band_atten: int | None = 60,
+    transition_width: float | None = 0.1,
+    zerophase: bool | None = False,
+    plot_spectrums: bool | None = False,
+    plot_signals: bool | None = False,
 ) -> np.ndarray:
     """
     Filters a time-domain signal using the Kaiser windowing method.
@@ -551,9 +550,9 @@ def apply_filter(
     Fs: float,
     cutoff_f: float,
     filter_type: str,
-    zero_phase: Optional[bool] = False,
-    transition_width: Optional[float] = 0.1,
-    stop_band_atten: Optional[int] = 60,
+    zero_phase: bool | None = False,
+    transition_width: float | None = 0.1,
+    stop_band_atten: int | None = 60,
 ) -> np.ndarray:
     """
     Filters an input signal using a FIR filter with Kaiser window coefficients based on the specified cut-off frequency and filter type.
@@ -659,7 +658,7 @@ def apply_filter(
     return filtered_signal[np.newaxis]
 
 
-def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Optional[str] = "Blackman") -> np.ndarray:
+def smooth(a: np.ndarray, restore_max: bool | None = False, window_type: str | None = "Blackman") -> np.ndarray:
     """
     Smooths a matrix.
 

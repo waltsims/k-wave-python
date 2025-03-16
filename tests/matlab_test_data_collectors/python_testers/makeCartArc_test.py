@@ -42,6 +42,6 @@ def test_makeCartArc():
         # test floating point diameter
         _ = make_cart_arc(arc_pos, radius, float(diameter), focus_pos, num_points)
 
-        assert np.allclose(expected_value, cart_arc), "Step {} of {} failed!".format(i, collected_values_file)
+        assert np.allclose(expected_value, cart_arc), f"Step {i} of {collected_values_file} failed!"
 
     logging.log(logging.INFO, "makeCartArc(..) works as expected!")

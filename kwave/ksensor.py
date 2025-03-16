@@ -5,7 +5,7 @@ import numpy as np
 from kwave.utils.matrix import expand_matrix
 
 
-class kSensor(object):
+class kSensor:
     def __init__(self, mask=None, record=None):
         self._mask = mask
         # cell array of the acoustic parameters to record in the form Recorder
@@ -61,7 +61,7 @@ class kSensor(object):
 
 
 @dataclass
-class kSensorDirectivity(object):
+class kSensorDirectivity:
     #: matrix of directivity angles (direction of maximum
     #: response) for each sensor element defined in
     #: sensor.mask. The angles are in radians where 0 = max

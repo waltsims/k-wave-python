@@ -16,7 +16,7 @@ def make_pos_int(val):
     return np.abs(val).astype(int)
 
 
-class kWaveTransducerSimple(object):
+class kWaveTransducerSimple:
     def __init__(
         self,
         kgrid: kWaveGrid,

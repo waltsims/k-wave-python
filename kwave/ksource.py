@@ -8,7 +8,7 @@ from kwave.utils.matrix import num_dim2
 
 
 @dataclass
-class kSource(object):
+class kSource:
     _p0 = None
     #: time varying pressure at each of the source positions given by source.p_mask
     p = None
