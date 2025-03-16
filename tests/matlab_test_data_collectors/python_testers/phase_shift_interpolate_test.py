@@ -1,12 +1,12 @@
 import logging
 import os
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from kwave.utils.math import phase_shift_interpolate, fourier_shift
+from kwave.utils.math import fourier_shift, phase_shift_interpolate
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 

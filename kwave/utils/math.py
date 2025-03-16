@@ -1,26 +1,25 @@
 import math
+import warnings
+from functools import wraps
 from itertools import compress
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from numpy.fft import fft, ifft, ifftshift
-from numpy.fft import ifftshift, fft, ifft
-from scipy.spatial.transform import Rotation
-from scipy.fft import fftshift
-from functools import wraps
-import warnings
-from scipy import ndimage
 from deprecation import deprecated
+from numpy.fft import fft, ifft, ifftshift
+from scipy import ndimage
+from scipy.fft import fftshift
+from scipy.spatial.transform import Rotation
 
-from kwave.data import Vector
 from kwave import __version__
+from kwave.data import Vector
 
 
 @deprecated(
     deprecated_in="0.4.1",
     removed_in="0.5.0",
     current_version=__version__,
-    details="Use scipy.spatial.transform.Rotation.from_euler('x', angle, degrees=True).as_matrix() instead"
+    details="Use scipy.spatial.transform.Rotation.from_euler('x', angle, degrees=True).as_matrix() instead",
 )
 def Rx(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the x-axis.
@@ -38,7 +37,7 @@ def Rx(theta: float) -> np.ndarray:
     deprecated_in="0.4.1",
     removed_in="0.5.0",
     current_version=__version__,
-    details="Use scipy.spatial.transform.Rotation.from_euler('y', angle, degrees=True).as_matrix() instead"
+    details="Use scipy.spatial.transform.Rotation.from_euler('y', angle, degrees=True).as_matrix() instead",
 )
 def Ry(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the y-axis.
@@ -56,7 +55,7 @@ def Ry(theta: float) -> np.ndarray:
     deprecated_in="0.4.1",
     removed_in="0.5.0",
     current_version=__version__,
-    details="Use scipy.spatial.transform.Rotation.from_euler('z', angle, degrees=True).as_matrix() instead"
+    details="Use scipy.spatial.transform.Rotation.from_euler('z', angle, degrees=True).as_matrix() instead",
 )
 def Rz(theta: float) -> np.ndarray:
     """Create a rotation matrix for rotation about the z-axis.
@@ -74,7 +73,7 @@ def Rz(theta: float) -> np.ndarray:
     deprecated_in="0.4.1",
     removed_in="0.5.0",
     current_version=__version__,
-    details="Use make_affine() instead. It provides the same functionality with a clearer name and better documentation."
+    details="Use make_affine() instead. It provides the same functionality with a clearer name and better documentation.",
 )
 def get_affine_matrix(translation: Vector, rotation: Union[float, List[float]], seq: str = "xyz") -> np.ndarray:
     return make_affine(translation, rotation, seq)
@@ -223,7 +222,7 @@ def next_pow2(n: int) -> int:
     return np.log2(n + 1)
 
 
-def     phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
+def phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
     """
     Interpolates array data using phase shifts in the Fourier domain.
 
@@ -285,7 +284,7 @@ def     phase_shift_interpolate(data: np.ndarray, shift: float, shift_dim: Optio
     deprecated_in="0.4.1",
     removed_in="0.5.0",
     current_version=__version__,
-    details="This function has been renamed to phase_shift_interpolate() to better reflect its functionality."
+    details="This function has been renamed to phase_shift_interpolate() to better reflect its functionality.",
 )
 def fourier_shift(data: np.ndarray, shift: float, shift_dim: Optional[int] = None) -> np.ndarray:
     """Wrapper for phase_shift_interpolate. See its documentation for details."""

@@ -11,21 +11,17 @@ from beartype.typing import List, Optional, Tuple, Union, cast
 from jaxtyping import Complex, Float, Int, Integer, Real
 from scipy import optimize
 from scipy.spatial.transform import Rotation
+
 import kwave.utils.typing as kt
+from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
 
 from ..data import Vector
 from .conversion import db2neper, neper2db
 from .data import scale_SI
 from .math import Rx, Ry, Rz, compute_linear_transform, cosd, sind
 from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
-from .math import cosd, sind
-from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
-from ..data import Vector
-
-import kwave.utils.typing as kt
-from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
