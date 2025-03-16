@@ -10,7 +10,8 @@ import json
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-VERSION = "0.4.0"
+VERSION = "0.4.1"  # Used by hatchling for package versioning
+__version__ = VERSION  # Standard Python package version attribute
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
