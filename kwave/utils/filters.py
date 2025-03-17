@@ -1,10 +1,12 @@
 import logging
-from typing import Optional, Union, Tuple, List, Any
+from typing import Optional, Union, Tuple, List
 
 import numpy as np
 import scipy
 from scipy.fftpack import fft, ifft, ifftshift, fftshift
 from scipy.signal import lfilter, convolve
+
+from kwave.utils.conversion import create_index_at_dim
 
 from .checks import is_number
 from .data import scale_SI
@@ -13,21 +15,6 @@ from .matrix import num_dim, num_dim2
 from .signals import get_win
 from ..kgrid import kWaveGrid
 from ..kmedium import kWaveMedium
-
-
-def create_index_at_dim(ndim: int, dim: int, index_value: Any) -> tuple:
-    """
-    Create a tuple of slice objects with a specific index value at the specified dimension.
-
-    Args:
-        ndim: Number of dimensions in the array
-        dim: The dimension where the specific index should be placed
-        index_value: The index value to place at the specified dimension
-
-    Returns:
-        A tuple of slice objects with the index value at the specified dimension
-    """
-    return tuple(index_value if i == dim else slice(None) for i in range(ndim))
 
 
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
