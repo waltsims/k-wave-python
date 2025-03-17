@@ -3,20 +3,19 @@ from math import floor
 
 import numpy as np
 import scipy
-from numpy.fft import ifftshift, fft, ifft
-
 from beartype import beartype as typechecker
-from beartype.typing import Union, List, Optional, Tuple
-from jaxtyping import Int, Bool
+from beartype.typing import List, Optional, Tuple, Union
+from jaxtyping import Bool, Int
+from numpy.fft import fft, ifft, ifftshift
+
+import kwave.utils.typing as kt
 
 from .conversion import freq2wavenumber
 from .data import scale_SI
 from .mapgen import ndgrid
-from .math import sinc, gaussian
-from .matlab import matlab_mask, unflatten_matlab_mask, rem
+from .math import gaussian, sinc
+from .matlab import matlab_mask, rem, unflatten_matlab_mask
 from .matrix import broadcast_axis, num_dim
-
-import kwave.utils.typing as kt
 
 
 def add_noise(signal: np.ndarray, snr: float, mode="rms"):

@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import RegularGridInterpolator
+
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -8,13 +12,8 @@ from kwave.kspacePlaneRecon import kspacePlaneRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.colormap import get_color_map
-from kwave.utils.mapgen import make_ball
 from kwave.utils.filters import smooth
-
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.interpolate import RegularGridInterpolator
-
+from kwave.utils.mapgen import make_ball
 
 # 3D FFT Reconstruction For A Planar Sensor Example
 
@@ -26,7 +25,6 @@ from scipy.interpolate import RegularGridInterpolator
 
 
 def main():
-
     # --------------------
     # SIMULATION
     # --------------------
@@ -58,26 +56,21 @@ def main():
     sensor.mask = sensor_mask
 
     # set the input arguments
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        pml_size=PML_size,
-        pml_inside=False,
-        smooth_p0=False,
-        data_cast='single'
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, pml_size=PML_size, pml_inside=False, smooth_p0=False, data_cast="single")
 
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
     # run the simulation
     sensor_data = kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data['p'].T
+    sensor_data = sensor_data["p"].T
 
     # reshape sensor data to y, z, t
     sensor_data_rs = sensor_data.reshape(N[1], N[2], kgrid.Nt)
 
     # reconstruct the initial pressure
-    p_xyz = kspacePlaneRecon(sensor_data_rs, kgrid.dy, kgrid.dz, kgrid.dt.item(),
-                             medium.sound_speed.item(), data_order='yzt', pos_cond=True)
+    p_xyz = kspacePlaneRecon(
+        sensor_data_rs, kgrid.dy, kgrid.dz, kgrid.dt.item(), medium.sound_speed.item(), data_order="yzt", pos_cond=True
+    )
 
     # define a k-space grid using the dimensions of p_xyz
     N_recon = Vector(p_xyz.shape)
@@ -89,17 +82,18 @@ def main():
 
     # resample the p_xyz to be the same size as p0
     interp_func = RegularGridInterpolator(
-        (kgrid_recon.x_vec[:, 0] - kgrid_recon.x_vec[:, 0].min(),
-         kgrid_recon.y_vec[:, 0] - kgrid_recon.y_vec[:, 0].min(),
-         kgrid_recon.z_vec[:, 0] - kgrid_recon.z_vec[:, 0].min()),
-        p_xyz, method='linear'
+        (
+            kgrid_recon.x_vec[:, 0] - kgrid_recon.x_vec[:, 0].min(),
+            kgrid_recon.y_vec[:, 0] - kgrid_recon.y_vec[:, 0].min(),
+            kgrid_recon.z_vec[:, 0] - kgrid_recon.z_vec[:, 0].min(),
+        ),
+        p_xyz,
+        method="linear",
     )
-    query_points = np.stack((kgrid_interp.x - kgrid_interp.x.min(),
-                             kgrid_interp.y - kgrid_interp.y.min(),
-                             kgrid_interp.z - kgrid_interp.z.min()),
-                            axis=-1)
+    query_points = np.stack(
+        (kgrid_interp.x - kgrid_interp.x.min(), kgrid_interp.y - kgrid_interp.y.min(), kgrid_interp.z - kgrid_interp.z.min()), axis=-1
+    )
     p_xyz_rs = interp_func(query_points)
-
 
     # --------------------
     # VISUALIZATION
@@ -112,52 +106,100 @@ def main():
     # plot the initial pressure
     plot_scale = [-10, 10]
     fig, axs = plt.subplots(2, 2)
-    axs[0, 0].imshow(p0[:, :, N[2] // 2],
-                     extent=[kgrid_interp.y_vec.min() * 1e3, kgrid_interp.y_vec.max() * 1e3,
-                             kgrid_interp.x_vec.max() * 1e3, kgrid_interp.x_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[0, 0].set_title('x-y plane')
+    axs[0, 0].imshow(
+        p0[:, :, N[2] // 2],
+        extent=[
+            kgrid_interp.y_vec.min() * 1e3,
+            kgrid_interp.y_vec.max() * 1e3,
+            kgrid_interp.x_vec.max() * 1e3,
+            kgrid_interp.x_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[0, 0].set_title("x-y plane")
 
-    axs[0, 1].imshow(p0[:, N[1] // 2, :],
-                     extent=[kgrid_interp.z_vec.min() * 1e3, kgrid_interp.z_vec.max() * 1e3,
-                             kgrid_interp.x_vec.max() * 1e3, kgrid_interp.x_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[0, 1].set_title('x-z plane')
+    axs[0, 1].imshow(
+        p0[:, N[1] // 2, :],
+        extent=[
+            kgrid_interp.z_vec.min() * 1e3,
+            kgrid_interp.z_vec.max() * 1e3,
+            kgrid_interp.x_vec.max() * 1e3,
+            kgrid_interp.x_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[0, 1].set_title("x-z plane")
 
-    axs[1, 0].imshow(p0[N[0] // 2, :, :],
-                     extent=[kgrid_interp.z_vec.min() * 1e3, kgrid_interp.z_vec.max() * 1e3,
-                             kgrid_interp.y_vec.max() * 1e3, kgrid_interp.y_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[1, 0].set_title('y-z plane')
+    axs[1, 0].imshow(
+        p0[N[0] // 2, :, :],
+        extent=[
+            kgrid_interp.z_vec.min() * 1e3,
+            kgrid_interp.z_vec.max() * 1e3,
+            kgrid_interp.y_vec.max() * 1e3,
+            kgrid_interp.y_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[1, 0].set_title("y-z plane")
 
-    axs[1, 1].axis('off')
-    axs[1, 1].set_title('(All axes in mm)')
+    axs[1, 1].axis("off")
+    axs[1, 1].set_title("(All axes in mm)")
     plt.show()
 
     # plot the reconstructed initial pressure
     fig, axs = plt.subplots(2, 2)
-    axs[0, 0].imshow(p_xyz_rs[:, :, N[2] // 2],
-                     extent=[kgrid_interp.y_vec.min() * 1e3, kgrid_interp.y_vec.max() * 1e3,
-                             kgrid_interp.x_vec.max() * 1e3, kgrid_interp.x_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[0, 0].set_title('x-y plane')
+    axs[0, 0].imshow(
+        p_xyz_rs[:, :, N[2] // 2],
+        extent=[
+            kgrid_interp.y_vec.min() * 1e3,
+            kgrid_interp.y_vec.max() * 1e3,
+            kgrid_interp.x_vec.max() * 1e3,
+            kgrid_interp.x_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[0, 0].set_title("x-y plane")
 
-    axs[0, 1].imshow(p_xyz_rs[:, N[1] // 2, :],
-                     extent=[kgrid_interp.z_vec.min() * 1e3, kgrid_interp.z_vec.max() * 1e3,
-                             kgrid_interp.x_vec.max() * 1e3, kgrid_interp.x_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[0, 1].set_title('x-z plane')
+    axs[0, 1].imshow(
+        p_xyz_rs[:, N[1] // 2, :],
+        extent=[
+            kgrid_interp.z_vec.min() * 1e3,
+            kgrid_interp.z_vec.max() * 1e3,
+            kgrid_interp.x_vec.max() * 1e3,
+            kgrid_interp.x_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[0, 1].set_title("x-z plane")
 
-    axs[1, 0].imshow(p_xyz_rs[N[0] // 2, :, :],
-                     extent=[kgrid_interp.z_vec.min() * 1e3, kgrid_interp.z_vec.max() * 1e3,
-                             kgrid_interp.y_vec.max() * 1e3, kgrid_interp.y_vec.min() * 1e3],
-                     vmin=plot_scale[0], vmax=plot_scale[1], cmap=get_color_map())
-    axs[1, 0].set_title('y-z plane')
+    axs[1, 0].imshow(
+        p_xyz_rs[N[0] // 2, :, :],
+        extent=[
+            kgrid_interp.z_vec.min() * 1e3,
+            kgrid_interp.z_vec.max() * 1e3,
+            kgrid_interp.y_vec.max() * 1e3,
+            kgrid_interp.y_vec.min() * 1e3,
+        ],
+        vmin=plot_scale[0],
+        vmax=plot_scale[1],
+        cmap=get_color_map(),
+    )
+    axs[1, 0].set_title("y-z plane")
 
-    axs[1, 1].axis('off')
-    axs[1, 1].set_title('(All axes in mm)')
+    axs[1, 1].axis("off")
+    axs[1, 1].set_title("(All axes in mm)")
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

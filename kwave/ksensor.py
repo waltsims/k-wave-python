@@ -14,7 +14,7 @@ class kSensor(object):
         # time index at which the sensor should start recording the data specified by sensor.record
         self._record_start_index = 1
 
-        # Directivity of the individiual sensor points
+        # Directivity of the individual sensor points
         self.directivity = None
 
         # time varying pressure enforced as a Dirichlet boundary condition over sensor.mask

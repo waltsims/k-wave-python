@@ -5,11 +5,11 @@ import numpy as np
 import pytest
 
 from kwave.utils.conversion import db2neper, neper2db
-from kwave.utils.filters import extract_amp_phase, spect, apply_filter
+from kwave.utils.filters import apply_filter, extract_amp_phase, spect
 from kwave.utils.interp import get_bli
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
-from kwave.utils.matrix import gradient_fd, resize, num_dim, trim_zeros
-from kwave.utils.signals import tone_burst, add_noise, gradient_spect
+from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
+from kwave.utils.signals import add_noise, gradient_spect, tone_burst
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
@@ -220,8 +220,8 @@ def test_power_kramers_kronig():
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 2.5)
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 1)
     with pytest.warns(UserWarning):
-        ans = power_law_kramers_kronig(1, 1, 1540, 1, 4)
-        assert ans == 1540
+        c = power_law_kramers_kronig(1, 1, 1540, 1, 4)
+        assert c == 1540
     assert abs(-1.4311 - power_law_kramers_kronig(3, 1, 1540, 1, 1)) < 0.001
     assert abs(1.4285 - power_law_kramers_kronig(1, 3, 1540, 1, 1)) < 0.001
 

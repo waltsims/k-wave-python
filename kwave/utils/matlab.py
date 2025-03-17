@@ -1,6 +1,7 @@
-from typing import Tuple, Union, Optional, List
-from beartype import beartype as typechecker
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
+from beartype import beartype as typechecker
 
 
 def rem(x, y, rtol=1e-05, atol=1e-08):

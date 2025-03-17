@@ -9,18 +9,16 @@ import numpy as np
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-from kwave.ksensor import kSensor
-from kwave.ktransducer import kWaveTransducerSimple, NotATransducer
-from kwave.kWaveSimulation import SimulationOptions
 from kwave.kmedium import kWaveMedium
-from kwave.utils.filters import spect
-
+from kwave.ksensor import kSensor
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
+from kwave.kWaveSimulation import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
+from kwave.utils.filters import spect
 from kwave.utils.math import find_closest
 from kwave.utils.signals import tone_burst
-
 
 # In[ ]:
 

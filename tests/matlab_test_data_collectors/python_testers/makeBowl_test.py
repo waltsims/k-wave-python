@@ -1,12 +1,12 @@
-import pytest
-from kwave.data import Vector
-from kwave.utils.mapgen import make_bowl
-
 import logging
-import numpy as np
 import os
 from pathlib import Path
 
+import numpy as np
+import pytest
+
+from kwave.data import Vector
+from kwave.utils.mapgen import make_bowl
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 

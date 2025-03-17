@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.interpolate import RegularGridInterpolator
 
 from kwave.data import Vector
@@ -13,9 +13,8 @@ from kwave.kspaceLineRecon import kspaceLineRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.colormap import get_color_map
-from kwave.utils.mapgen import make_disc
 from kwave.utils.filters import smooth
-
+from kwave.utils.mapgen import make_disc
 
 # 2D FFT Reconstruction For A Line Sensor Example
 
@@ -27,7 +26,6 @@ from kwave.utils.filters import smooth
 
 
 def main():
-
     # --------------------
     # SIMULATION
     # --------------------
@@ -77,11 +75,10 @@ def main():
 
     # run the simulation
     sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data['p'].T
+    sensor_data = sensor_data["p"].T
 
     # reconstruct the initial pressure
-    p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(),
-                           pos_cond=True, interp='linear')
+    p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear")
 
     # define a second k-space grid using the dimensions of p_xy
     N_recon = Vector(p_xy.shape)
@@ -90,12 +87,10 @@ def main():
 
     # resample p_xy to be the same size as source.p0
     interp_func = RegularGridInterpolator(
-        (kgrid_recon.x_vec[:, 0] - kgrid_recon.x_vec.min(), kgrid_recon.y_vec[:, 0]),
-        p_xy, method='linear'
+        (kgrid_recon.x_vec[:, 0] - kgrid_recon.x_vec.min(), kgrid_recon.y_vec[:, 0]), p_xy, method="linear"
     )
     query_points = np.stack((kgrid.x - kgrid.x.min(), kgrid.y), axis=-1)
     p_xy_rs = interp_func(query_points)
-
 
     # --------------------
     # VISUALIZATION
@@ -105,46 +100,55 @@ def main():
 
     # plot the initial pressure and sensor distribution
     fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(p0 + sensor.mask[PML_size:-PML_size, PML_size:-PML_size] * disc_magnitude,
-                   extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
-                   vmin=-disc_magnitude, vmax=disc_magnitude, cmap=cmap)
+    im = ax.imshow(
+        p0 + sensor.mask[PML_size:-PML_size, PML_size:-PML_size] * disc_magnitude,
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        vmin=-disc_magnitude,
+        vmax=disc_magnitude,
+        cmap=cmap,
+    )
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
-    ax.set_ylabel('x-position [mm]')
-    ax.set_xlabel('y-position [mm]')
+    ax.set_ylabel("x-position [mm]")
+    ax.set_xlabel("y-position [mm]")
     fig.colorbar(im, cax=cax)
     plt.show()
 
     fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(sensor_data, vmin=-1, vmax=1, cmap=cmap, aspect='auto')
+    im = ax.imshow(sensor_data, vmin=-1, vmax=1, cmap=cmap, aspect="auto")
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
-    ax.set_ylabel('Sensor Position')
-    ax.set_xlabel('Time Step')
+    ax.set_ylabel("Sensor Position")
+    ax.set_xlabel("Time Step")
     fig.colorbar(im, cax=cax)
     plt.show()
 
     # plot the reconstructed initial pressure
     fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(p_xy_rs,
-                   extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
-                   vmin=-disc_magnitude, vmax=disc_magnitude, cmap=cmap)
+    im = ax.imshow(
+        p_xy_rs,
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        vmin=-disc_magnitude,
+        vmax=disc_magnitude,
+        cmap=cmap,
+    )
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
-    ax.set_ylabel('x-position [mm]')
-    ax.set_xlabel('y-position [mm]')
+    ax.set_ylabel("x-position [mm]")
+    ax.set_xlabel("y-position [mm]")
     fig.colorbar(im, cax=cax)
     plt.show()
 
     # plot a profile for comparison
-    plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], 'k-', label='Initial Pressure')
-    plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], 'r--', label='Reconstructed Pressure')
-    plt.xlabel('y-position [mm]')
-    plt.ylabel('Pressure')
+    plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], "k-", label="Initial Pressure")
+    plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], "r--", label="Reconstructed Pressure")
+    plt.xlabel("y-position [mm]")
+    plt.ylabel("Pressure")
     plt.legend()
-    plt.axis('tight')
+    plt.axis("tight")
     plt.ylim([0, 5.1])
     plt.show()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

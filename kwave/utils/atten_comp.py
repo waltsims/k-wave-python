@@ -1,12 +1,12 @@
 import logging
+
 import numpy as np
-from matplotlib import pyplot as plt
 from beartype import beartype as typechecker
 from jaxtyping import Float
+from matplotlib import pyplot as plt
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.math import find_closest
-
 
 # =========================================================================
 # FITTING FUNCTION

@@ -1,10 +1,11 @@
 import logging
 
 import numpy as np
-from scipy.interpolate import interpn, interp1d
 from beartype import beartype as typechecker
-from beartype.typing import Union, List, Tuple, Optional
-from jaxtyping import Int, Num, Shaped, Real, Bool
+from beartype.typing import List, Optional, Tuple, Union
+from jaxtyping import Bool, Int, Num, Real, Shaped
+from scipy.interpolate import interp1d, interpn
+
 import kwave.utils.typing as kt
 
 from .data import scale_time
