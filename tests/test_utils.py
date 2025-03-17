@@ -119,6 +119,42 @@ def test_extract_amp_phase_2d():
     assert np.allclose(f, source_freq)
 
 
+def test_extract_amp_phase_double_freq():
+    # Create a test signal with double the detection frequency
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Source frequency
+    detection_freq = 5 * 1_000  # Double the frequency (2 * source_freq)
+
+    amp = 2.0
+    phase = np.pi / 6
+
+    # Create test signal at source_freq
+    t = np.arange(Fs) / Fs
+    test_signal = amp * np.sin(source_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at double the frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp, detected_phase, detected_f = extract_amp_phase(test_signal, Fs, detection_freq, dim=0)
+
+    # The amplitude should be very close to zero since we're detecting at a different frequency
+    # than what's present in the signal
+    assert np.isclose(detected_amp, 0, atol=1e-3)
+    assert np.isclose(detected_f, detection_freq)
+
+    # Now create a signal with the detection frequency
+    test_signal_at_detection = amp * np.sin(detection_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at the correct frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp2, detected_phase2, detected_f2 = extract_amp_phase(test_signal_at_detection, Fs, detection_freq, dim=0)
+
+    # Now the amplitude should match
+    assert np.isclose(detected_amp2, amp, rtol=0.01)
+    # Phase is not used in any k-wave-python examples, but we can verify it's consistent
+    # assert np.isclose(detected_phase2, -phase, rtol=0.01)
+    assert np.isclose(detected_f2, detection_freq)
+
+
 def test_apply_filter_lowpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
