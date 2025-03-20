@@ -6,8 +6,8 @@ import scipy
 from scipy.fftpack import fft, fftshift, ifft, ifftshift
 from scipy.signal import convolve, lfilter
 
-from ..kgrid import kWaveGrid
-from ..kmedium import kWaveMedium
+from kwave.utils.conversion import create_index_at_dim
+
 from .checks import is_number
 from .data import scale_SI
 from .math import find_closest, gaussian, next_pow2, norm_var, sinc
@@ -24,31 +24,26 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
     Args:
         func_fft: The FFT of the function to be corrected.
         fft_len: The length of the FFT.
-        dim: The number of dimensions of `func_fft`.
+        dim: The dimension along which to apply the correction.
 
     Returns:
         The corrected FFT of the function.
     """
+    # Determine the slice to use based on FFT length
     if fft_len % 2:
-        # odd FFT length switch dim case
-        if dim == 0:
-            func_fft[1:, :] = func_fft[1:, :] * 2
-        elif dim == 1:
-            func_fft[:, 1:] = func_fft[:, 1:] * 2
-        elif dim == 2:
-            func_fft[:, :, 1:] = func_fft[:, :, 1:] * 2
-        elif dim == 3:
-            func_fft[:, :, :, 1:] = func_fft[:, :, :, 1:] * 2
+        # odd FFT length - multiply all elements except the first one by 2
+        dim_slice = slice(1, None)
     else:
-        # even FFT length
-        if dim == 0:
-            func_fft[1:-1] = func_fft[1:-1] * 2
-        elif dim == 1:
-            func_fft[:, 1:-1] = func_fft[:, 1:-1] * 2
-        elif dim == 2:
-            func_fft[:, :, 1:-1] = func_fft[:, :, 1:-1] * 2
-        elif dim == 3:
-            func_fft[:, :, :, 1:-1] = func_fft[:, :, :, 1:-1] * 2
+        # even FFT length - multiply all elements except the first and last ones by 2
+        dim_slice = slice(1, -1)
+
+    # Create a slice tuple with the appropriate slice at the specified dimension
+    idx_all = [slice(None)] * func_fft.ndim
+    idx_all[dim] = dim_slice
+    idx_tuple = tuple(idx_all)
+
+    # Apply the correction
+    func_fft[idx_tuple] = func_fft[idx_tuple] * 2
 
     return func_fft
 
@@ -197,7 +192,6 @@ def extract_amp_phase(
 
     # compute amplitude and phase spectra
     f, func_as, func_ps = spect(data, Fs, fft_len=fft_padding * data.shape[dim], dim=dim)
-
     # correct for coherent gain
     func_as = func_as / coherent_gain
 
@@ -209,20 +203,10 @@ def extract_amp_phase(
     sz[dim - 1] = 1
 
     # extract amplitude and relative phase at freq_index
-    if dim == 0:
-        amp = func_as[f_index]
-        phase = func_ps[f_index]
-    elif dim == 1:
-        amp = func_as[:, f_index]
-        phase = func_ps[:, f_index]
-    elif dim == 2:
-        amp = func_as[:, :, f_index]
-        phase = func_ps[:, :, f_index]
-    elif dim == 3:
-        amp = func_as[:, :, :, f_index]
-        phase = func_ps[:, :, :, f_index]
-    else:
-        raise ValueError("dim must be 0, 1, 2, or 3")
+    # Create a tuple of slice objects with the frequency index at the correct dimension
+    idx = create_index_at_dim(func_as.ndim, dim, f_index)
+    amp = func_as[idx]
+    phase = func_ps[idx]
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
 
