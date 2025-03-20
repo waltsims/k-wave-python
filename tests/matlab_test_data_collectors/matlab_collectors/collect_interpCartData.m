@@ -54,19 +54,11 @@ for idx=1:length(all_params)
         interp_method = params{end};
         % create the time array
         kgrid.makeTime(medium_sound_speed);
-        
         % mock the simulation
-
-        % Create a base sine wave
-        base_wave = sin(2 * pi * [1:kgrid.Nt] );
-        % Create a phase shift for each sensor point
         phase_shifts = linspace(0, 2 * pi, num_sensor_points);
-        % Create a matrix of sine waves with incremental phase shifts
-        sensor_data = repmat(base_wave, num_sensor_points, 1) .* cos(phase_shifts');
-        
+        sensor_data = sin(2 * pi * [1:kgrid.Nt]/ kgrid.Nt + repmat(phase_shifts', 1, kgrid.Nt));
         % smooth the initial pressure distribution and restore the magnitude
         p0 = smooth(p0_binary, true);
-
         % interpolate data to remove the gaps and assign to time reversal data
         trbd = interpCartData(kgrid, sensor_data, sensor_mask, binary_sensor_mask);
         recorder.recordVariable('trbd', trbd); 
