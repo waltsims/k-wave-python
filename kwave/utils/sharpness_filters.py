@@ -1,7 +1,7 @@
 from typing import Optional
 
 import numpy as np
-from scipy.ndimage import convolve
+from scipy.signal import convolve
 
 
 def brenner_sharpness(im):
