@@ -1,23 +1,21 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from copy import deepcopy
 
-from kwave.data import Vector
+import matplotlib.pyplot as plt
+import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import extract_amp_phase
+from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import focused_bowl_oneil
 from kwave.utils.math import round_even
-from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import create_cw_signals
-
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-
-from kwave.options.simulation_options import SimulationOptions
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
 # Modelling A Focused Bowl Transducer In 3D Example
 
@@ -181,12 +179,10 @@ x_ref = np.arange(0.0, x_max + delta_x, delta_x)
 Z = source_amp / (c0 * rho0)
 
 # calculate analytical solution
-p_ref_axial, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, 
-                                       rho0, axial_positions=x_ref)
+p_ref_axial, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, rho0, axial_positions=x_ref)
 
 # calculate analytical solution at exactly the same points as the simulation
-p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, 
-                                          rho0, axial_positions=np.squeeze(x_vec))
+p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source_f0, c0, rho0, axial_positions=np.squeeze(x_vec))
 
 L2_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=2)
 Linf_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=np.inf)

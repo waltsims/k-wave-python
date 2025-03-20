@@ -3,17 +3,17 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.utils.kwave_array import kWaveArray
-from kwave.utils.signals import create_cw_signals
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.kwave_array import kWaveArray
+from kwave.utils.signals import create_cw_signals
+
 # from kwave.utils.mapgen import make_disc
 # from tests.diff_utils import compare_against_ref
 
@@ -62,7 +62,7 @@ def test_ivp_axisymmetric_karray_simulation():
     # create time varying continuous wave source
     source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, source_mag, source_phase)
 
-    # create empty kWaveArray this specfies the transducer properties in
+    # create empty kWaveArray this specifies the transducer properties in
     # axisymmetric coordinate system
     karray = kWaveArray(axisymmetric=True, bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate, single_precision=True)
 

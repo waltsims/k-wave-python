@@ -25,13 +25,14 @@ classifiers = [
 ]
 dependencies = [
     "h5py==3.13.0",
-    "scipy==1.15.1",
+    "scipy==1.15.2",
     "opencv-python==4.11.0.86",
-    "deepdiff==8.2.0",
+    "deepdiff==8.3.0",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.0",
+    "matplotlib==3.10.1",
     "beartype==0.19.0",
-    "jaxtyping==0.2.38"
+    "jaxtyping==0.2.38",
+    "deprecation>=2.1.0"
 ]
 
 [project.urls]
@@ -81,7 +82,8 @@ testpaths = ["tests"]
 filterwarnings = [
     "error::DeprecationWarning",
     "error::PendingDeprecationWarning",
-    "ignore::DeprecationWarning:kwave",
+    "ignore::deprecation.DeprecatedWarning",
+    "ignore::DeprecationWarning:kwave"
 ]
 
 [tool.coverage.run]
@@ -100,7 +102,13 @@ omit = [
 line-length = 140
 # F821 needed to avoid false-positives in nested functions, F722 due to jaxtyping 
 lint.ignore = ["F821", "F722"]
-lint.select = ["NPY201"]
+lint.select = ["NPY201", "I"]
+
+# Configure isort rules
+[tool.ruff.lint.isort]
+known-first-party = ["kwave", "examples"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
 [tool.ruff.lint.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
 "kwave/ksource.py" = ["F821"]

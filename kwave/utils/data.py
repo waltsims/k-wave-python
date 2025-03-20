@@ -1,11 +1,11 @@
 from datetime import datetime
 from math import floor
-from beartype.typing import Tuple, Union, Optional
-from beartype import beartype as typechecker
 
 import numpy as np
-from kwave.data import Vector
+from beartype import beartype as typechecker
+from beartype.typing import Optional, Tuple, Union
 
+from kwave.data import Vector
 from kwave.utils.typing import NUMERIC_WITH_COMPLEX
 
 

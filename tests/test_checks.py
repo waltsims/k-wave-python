@@ -1,19 +1,20 @@
 import unittest
 from unittest.mock import patch
+
 import numpy as np
 import pytest
+
 import kwave
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
+from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-
-from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions as ExecutionOptions
-from kwave.utils.signals import tone_burst
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.matlab import rem
+from kwave.utils.signals import tone_burst
 
 
 class TestUltrasoundSimulation(unittest.TestCase):
