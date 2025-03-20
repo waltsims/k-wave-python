@@ -357,22 +357,6 @@ def sinc(x: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
     return np.sinc(x / np.pi)
 
 
-def norm_var(im: np.ndarray) -> float:
-    """
-    Calculates the normalized variance of an array of values.
-
-    Args:
-        im: The input array.
-
-    Returns:
-        The normalized variance of im.
-
-    """
-    mu = np.mean(im)
-    s = np.sum((im - mu) ** 2) / mu
-    return s
-
-
 def gaussian(
     x: Union[int, float, np.ndarray],
     magnitude: Optional[Union[int, float]] = None,
