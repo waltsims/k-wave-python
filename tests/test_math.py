@@ -91,11 +91,11 @@ class TestMath:
         # Test deprecation warning
         with pytest.warns(DeprecationWarning, match="get_affine_matrix is deprecated as of 0.4.1") as warns:
             old_result = get_affine_matrix(translation, rotation)
-            
+
         # Verify warning details
         assert len(warns) == 1
         assert "will be removed in 0.5.0" in str(warns[0].message)
-        
+
         # Test functional equivalence
         new_result = make_affine(translation, rotation)
         assert np.allclose(old_result, new_result)
@@ -111,11 +111,11 @@ class TestMath:
         # Test deprecation warning
         with pytest.warns(DeprecationWarning, match="fourier_shift is deprecated as of 0.4.1") as warns:
             old_result = fourier_shift(signal, shift)
-            
+
         # Verify warning details
         assert len(warns) == 1
         assert "will be removed in 0.5.0" in str(warns[0].message)
-        
+
         # Test functional equivalence
         new_result = phase_shift_interpolate(signal, shift)
         assert np.allclose(old_result, new_result)
