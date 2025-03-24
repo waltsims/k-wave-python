@@ -12,10 +12,22 @@ jobs:
       example_paths: ${{ steps.find-examples.outputs.examples }}
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Install jq
+        run: |
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          fi
+      
       - id: find-examples
         run: |
           # Find all Python files in examples subdirectories
-          EXAMPLES=$(find examples -name "*.py" -not -path "*/\.*" | jq -R -s -c 'split("\n")[:-1]')
+          if ! EXAMPLES=$(find examples -name "*.py" -not -path "*/\.*" | jq -R -s -c 'split("\n")[:-1]'); then
+            echo "Error: Failed to find examples"
+            exit 1
+          fi
+          echo "Found examples: $EXAMPLES"
           echo "examples=$EXAMPLES" >> "$GITHUB_OUTPUT"
 
   run-examples:
@@ -30,6 +42,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,4 +65,8 @@ jobs:
           KWAVE_FORCE_CPU: 1
         run: |
           echo "Running example: ${{ matrix.example }}"
+          if [ ! -f "${{ matrix.example }}" ]; then
+            echo "Error: Example file not found: ${{ matrix.example }}"
+            exit 1
+          fi
           python "${{ matrix.example }}" 
