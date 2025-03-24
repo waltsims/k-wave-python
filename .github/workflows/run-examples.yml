@@ -6,9 +6,26 @@ on:
   workflow_dispatch:      # Manual trigger
 
 jobs:
-  run-examples:
+  discover-examples:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # 6 hour timeout
+    outputs:
+      example_paths: ${{ steps.find-examples.outputs.examples }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find-examples
+        run: |
+          # Find all Python files in examples subdirectories
+          EXAMPLES=$(find examples -name "*.py" -not -path "*/\.*" | jq -R -s -c 'split("\n")[:-1]')
+          echo "examples=$EXAMPLES" >> "$GITHUB_OUTPUT"
+
+  run-examples:
+    needs: discover-examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 60  # 1 hour timeout per example
+    strategy:
+      fail-fast: false  # Continue running other examples even if one fails
+      matrix:
+        example: ${{ fromJson(needs.discover-examples.outputs.example_paths) }}
     
     steps:
       - name: Checkout repository
@@ -26,7 +43,9 @@ jobs:
           # Install the package with example dependencies
           pip install -e ".[example]"
 
-      - name: Run examples
+      - name: Run example
         env:
           KWAVE_FORCE_CPU: 1
-        run: make run-examples 
+        run: |
+          echo "Running example: ${{ matrix.example }}"
+          python "${{ matrix.example }}" 
