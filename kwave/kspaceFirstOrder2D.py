@@ -142,148 +142,59 @@ def kspaceFirstOrder2D(
     execution_options: SimulationExecutionOptions,
 ):
     """
-    2D time-domain simulation of wave propagation.
+    2D time-domain simulation of wave propagation using k-space pseudospectral method.
 
-    kspaceFirstOrder2D simulates the time-domain propagation of
-    compressional waves through a two-dimensional homogeneous or
-    heterogeneous acoustic medium given four input structures: kgrid,
-    medium, source, and sensor. The computation is based on a first-order
-    k-space model which accounts for power law absorption and a
-    heterogeneous sound speed and density. If medium.BonA is specified,
-    cumulative nonlinear effects are also modelled. At each time-step
-    (defined by kgrid.dt and kgrid.Nt or kgrid.t_array), the acoustic
-    field parameters at the positions defined by sensor.mask are recorded
-    and stored. If kgrid.t_array is set to 'auto', this array is
-    automatically generated using the makeTime method of the kWaveGrid
-    class. An anisotropic absorbing boundary layer called a perfectly
-    matched layer (PML) is implemented to prevent waves that leave one
-    side of the domain being reintroduced from the opposite side (a
-    consequence of using the FFT to compute the spatial derivatives in
-    the wave equation). This allows infinite domain simulations to be
-    computed using small computational grids.
+    This simulation function performs time-domain acoustic simulations in 2D homogeneous and
+    heterogeneous media. The function is based on a k-space pseudospectral method where spatial
+    derivatives are calculated using the Fourier collocation spectral method, and temporal
+    derivatives are calculated using a k-space corrected finite-difference scheme.
 
-    For a homogeneous medium the formulation is exact and the time-steps
-    are only limited by the effectiveness of the perfectly matched layer.
-    For a heterogeneous medium, the solution represents a leap-frog
-    pseudospectral method with a k-space correction that improves the
-    accuracy of computing the temporal derivatives. This allows larger
-    time-steps to be taken for the same level of accuracy compared to
-    conventional pseudospectral time-domain methods. The computational
-    grids are staggered both spatially and temporally.
+    .. warning::
+       The time reversal functionality (using sensor.time_reversal_boundary_data) is deprecated.
+       Please use the :class:`TimeReversal` class from kwave.reconstruction instead.
 
-    An initial pressure distribution can be specified by assigning a
-    matrix (the same size as the computational grid) of arbitrary numeric
-    values to source.p0. A time varying pressure source can similarly be
-    specified by assigning a binary matrix (i.e., a matrix of 1's and 0's
-    with the same dimensions as the computational grid) to source.p_mask
-    where the 1's represent the grid points that form part of the source.
-    The time varying input signals are then assigned to source.p. This
-    can be a single time series (in which case it is applied to all
-    source elements), or a matrix of time series following the source
-    elements using MATLAB's standard column-wise linear matrix index
-    ordering. A time varying velocity source can be specified in an
-    analogous fashion, where the source location is specified by
-    source.u_mask, and the time varying input velocity is assigned to
-    source.ux and source.uy.
+    Key Features:
+    ------------
+    - Support for both homogeneous and heterogeneous media
+    - Perfectly matched layer (PML) boundary conditions
+    - Flexible source and sensor configurations
+    - Support for absorption and nonlinearity
+    - Time-varying source terms
+    - Various sensor types (point, line)
+    - Binary and Cartesian sensor masks
+    - Recording of pressure, velocity, and intensity
 
-    The field values are returned as arrays of time series at the sensor
-    locations defined by sensor.mask. This can be defined in three
-    different ways. (1) As a binary matrix (i.e., a matrix of 1's and 0's
-    with the same dimensions as the computational grid) representing the
-    grid points within the computational grid that will collect the data.
-    (2) As the grid coordinates of two opposing corners of a rectangle in
-    the form [x1; y1; x2; y2]. This is equivalent to using a binary
-    sensor mask covering the same region, however, the output is indexed
-    differently as discussed below. (3) As a series of Cartesian
-    coordinates within the grid which specify the location of the
-    pressure values stored at each time step. If the Cartesian
-    coordinates don't exactly match the coordinates of a grid point, the
-    output values are calculated via interpolation. The Cartesian points
-    must be given as a 2 by N matrix corresponding to the x and y
-    positions, respectively, where the Cartesian origin is assumed to be
-    in the center of the grid. If no output is required, the sensor input
-    can be replaced with an empty array [].
-
-    If sensor.mask is given as a set of Cartesian coordinates, the
-    computed sensor_data is returned in the same order. If sensor.mask is
-    given as a binary matrix, sensor_data is returned using MATLAB's
-    standard column-wise linear matrix index ordering. In both cases, the
-    recorded data is indexed as sensor_data(sensor_point_index,
-    time_index). For a binary sensor mask, the field values at a
-    particular time can be restored to the sensor positions within the
-    computation grid using unmaskSensorData. If sensor.mask is given as a
-    list of opposing corners of a rectangle, the recorded data is indexed
-    as sensor_data(rect_index).p(x_index, y_index, time_index), where
-    x_index and y_index correspond to the grid index within the
-    rectangle, and rect_index corresponds to the number of rectangles if
-    more than one is specified.
-
-    By default, the recorded acoustic pressure field is passed directly
-    to the output sensor_data. However, other acoustic parameters can
-    also be recorded by setting sensor.record to a cell array of the form
-    {'p', 'u', 'p_max', ...}. For example, both the particle velocity and
-    the acoustic pressure can be returned by setting sensor.record =
-    {'p', 'u'}. If sensor.record is given, the output sensor_data is
-    returned as a structure with the different outputs appended as
-    structure fields. For example, if sensor.record = {'p', 'p_final',
-    'p_max', 'u'}, the output would contain fields sensor_data.p,
-    sensor_data.p_final, sensor_data.p_max, sensor_data.ux, and
-    sensor_data.uy. Most of the output parameters are recorded at the
-    given sensor positions and are indexed as
-    sensor_data.field(sensor_point_index, time_index) or
-    sensor_data(rect_index).field(x_index, y_index, time_index) if using
-    a sensor mask defined as opposing rectangular corners. The exceptions
-    are the averaged quantities ('p_max', 'p_rms', 'u_max', 'p_rms',
-    'I_avg'), the 'all' quantities ('p_max_all', 'p_min_all',
-    'u_max_all', 'u_min_all'), and the final quantities ('p_final',
-    'u_final'). The averaged quantities are indexed as
-    sensor_data.p_max(sensor_point_index) or
-    sensor_data(rect_index).p_max(x_index, y_index) if using rectangular
-    corners, while the final and 'all' quantities are returned over the
-    entire grid and are always indexed as sensor_data.p_final(nx, ny),
-    regardless of the type of sensor mask.
-
-    kspaceFirstOrder2D may also be used for time reversal image
-    reconstruction by assigning the time varying pressure recorded over
-    an arbitrary sensor surface to the input field
-    sensor.time_reversal_boundary_data. This data is then enforced in
-    time reversed order as a time varying Dirichlet boundary condition
-    over the sensor surface given by sensor.mask. The boundary data must
-    be indexed as sensor.time_reversal_boundary_data(sensor_point_index,
-    time_index). If sensor.mask is given as a set of Cartesian
-    coordinates, the boundary data must be given in the same order. An
-    equivalent binary sensor mask (computed using nearest neighbour
-    interpolation) is then used to place the pressure values into the
-    computational grid at each time step. If sensor.mask is given as a
-    binary matrix of sensor points, the boundary data must be ordered
-    using MATLAB's standard column-wise linear matrix indexing. If no
-    additional inputs are required, the source input can be replaced with
-    an empty array [].
-
-    Acoustic attenuation compensation can also be included during time
-    reversal image reconstruction by assigning the absorption parameters
-    medium.alpha_coeff and medium.alpha_power and reversing the sign of
-    the absorption term by setting medium.alpha_sign = [-1, 1]. This
-    forces the propagating waves to grow according to the absorption
-    parameters instead of decay. The reconstruction should then be
-    regularised by assigning a filter to medium.alpha_filter (this can be
-    created using getAlphaFilter).
-
-    Note: To run a simple photoacoustic image reconstruction example
-    using time reversal (that commits the 'inverse crime' of using the
-    same numerical parameters and model for data simulation and image
-    reconstruction), the sensor_data returned from a k-Wave simulation
-    can be passed directly to sensor.time_reversal_boundary_data with the
-    input fields source.p0 and source.p removed or set to zero.
-
-    Args:
-        kgrid: kWaveGrid instance
-        medium: kWaveMedium instance
-        source: kWaveSource instance
-        sensor: kWaveSensor instance or None
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor, None]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
 
     Returns:
+    --------
+    np.ndarray
+        Recorded sensor data based on the sensor.record settings
 
+    Notes:
+    ------
+    1. The simulation is based on coupled first-order equations for wave propagation.
+    2. The time step is chosen based on the CFL stability criterion.
+    3. For time reversal reconstruction, use the TimeReversal class from kwave.reconstruction.
+    4. GPU execution requires the C++/CUDA binary from k-wave.org.
+
+    See Also:
+    ---------
+    kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
+    kspaceFirstOrder3D : 3D version of this simulation function
     """
     # start the timer and store the start time
     TicToc.tic()

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Union
 
 import numpy as np
 from deprecated import deprecated
@@ -28,40 +28,51 @@ def kspaceFirstOrder3DG(
     execution_options: SimulationExecutionOptions,
 ):
     """
-    3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
+    3D time-domain simulation of wave propagation using k-space pseudospectral method.
 
-    kspaceFirstOrder3DG provides a blind interface to the C++/CUDA
-    version of kspaceFirstOrder3D (called kspaceFirstOrder-CUDA) in the
-    same way as kspaceFirstOrder3DC. Note, the C++ code does not support
-    all input options, and all display options are ignored (only command
-    line outputs are given). See the k-Wave user manual for more
-    information.
+    This simulation function performs time-domain acoustic simulations in 3D homogeneous and
+    heterogeneous media. The function is based on a k-space pseudospectral method where spatial
+    derivatives are calculated using the Fourier collocation spectral method, and temporal
+    derivatives are calculated using a k-space corrected finite-difference scheme.
 
-    The function works by appending the optional input 'save_to_disk' to
-    the user inputs and then calling kspaceFirstOrder3D to save the input
-    files to disk. The contents of sensor.record (if set) are parsed as
-    input flags, and the C++ code is run using the system command. The
-    output files are then automatically loaded from disk and returned in
-    the same fashion as kspaceFirstOrder3D. The input and output files
-    are saved to the temporary directory native to the operating system,
-    and are deleted after the function runs.
+    Key Features:
+    ------------
+    - Support for both homogeneous and heterogeneous media
+    - Perfectly matched layer (PML) boundary conditions
+    - Flexible source and sensor configurations
+    - Support for absorption and nonlinearity
+    - Time-varying source terms
+    - Various sensor types (point, line, plane)
+    - Binary and Cartesian sensor masks
+    - Recording of pressure, velocity, and intensity
 
-    This function requires the C++ binary/executable of
-    kspaceFirstOrder-CUDA to be downloaded from
-    http://www.k-wave.org/download.php and placed in the "binaries"
-    directory of the k-Wave toolbox. Alternatively, the name and location
-    of the binary can be specified using the optional input parameters
-    'BinaryName' and 'BinariesPath'.
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
 
-    This function is essentially a wrapper and directly uses the capabilities
-    of kspaceFirstOrder3DC by replacing the binary name with the name of the
-    GPU binary.
+    Notes:
+    ------
+    1. The simulation is based on coupled first-order equations for wave propagation.
+    2. The time step is chosen based on the CFL stability criterion.
+    3. For time reversal, use the TimeReversal class from kwave.reconstruction instead
+       of the deprecated sensor.time_reversal_boundary_data.
+    4. GPU execution requires the C++/CUDA binary from k-wave.org.
 
-    Args:
-        **kwargs:
-
-    Returns:
-
+    See Also:
+    ---------
+    kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
+    kspaceFirstOrder2D : 2D version of this simulation function
     """
     execution_options.is_gpu_simulation = True
     assert execution_options.is_gpu_simulation, "kspaceFirstOrder2DG can only be used for GPU simulations"
@@ -124,7 +135,6 @@ def kspaceFirstOrder3DC(
     return sensor_data
 
 
-@deprecated(version="0.4.1", reason="Use TimeReversal class instead. This parameter will be removed in v0.5.", action="once")
 def kspaceFirstOrder3D(
     kgrid: kWaveGrid,
     source: kSource,
@@ -133,15 +143,59 @@ def kspaceFirstOrder3D(
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
     time_rev: bool = False,  # deprecated parameter
-) -> Dict[str, Any]:
+):
     """
-    DEPRECATED: Use TimeReversal class instead.
+    3D time-domain simulation of wave propagation using k-space pseudospectral method.
 
-    The time_rev parameter will be removed in v0.5. Please migrate to the new TimeReversal class:
+    This simulation function performs time-domain acoustic simulations in 3D homogeneous and
+    heterogeneous media. The function is based on a k-space pseudospectral method where spatial
+    derivatives are calculated using the Fourier collocation spectral method, and temporal
+    derivatives are calculated using a k-space corrected finite-difference scheme.
 
-    from kwave.reconstruction.time_reversal import TimeReversal
-    tr = TimeReversal(kgrid, medium, sensor)
-    p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
+    .. warning::
+       The time reversal functionality (using sensor.time_reversal_boundary_data) is deprecated.
+       Please use the :class:`TimeReversal` class from kwave.reconstruction instead.
+       The time_rev parameter will be removed in v2.0.
+
+    Key Features:
+    ------------
+    - Support for both homogeneous and heterogeneous media
+    - Perfectly matched layer (PML) boundary conditions
+    - Flexible source and sensor configurations
+    - Support for absorption and nonlinearity
+    - Time-varying source terms
+    - Various sensor types (point, line, plane)
+    - Binary and Cartesian sensor masks
+    - Recording of pressure, velocity, and intensity
+
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
+    time_rev : bool, optional
+        Deprecated parameter for time reversal mode. Use TimeReversal class instead.
+
+    Notes:
+    ------
+    1. The simulation is based on coupled first-order equations for wave propagation.
+    2. The time step is chosen based on the CFL stability criterion.
+    3. For time reversal reconstruction, use the TimeReversal class from kwave.reconstruction.
+    4. GPU execution requires the C++/CUDA binary from k-wave.org.
+
+    See Also:
+    ---------
+    kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
+    kspaceFirstOrder2D : 2D version of this simulation function
     """
     if time_rev:
         import warnings
