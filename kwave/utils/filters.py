@@ -6,8 +6,8 @@ import scipy
 from scipy.fftpack import fft, fftshift, ifft, ifftshift
 from scipy.signal import lfilter
 
-from ..kgrid import kWaveGrid
-from ..kmedium import kWaveMedium
+from kwave.utils.conversion import create_index_at_dim
+
 from .checks import is_number
 from .data import scale_SI
 from .math import find_closest, gaussian, next_pow2, sinc
@@ -24,7 +24,7 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
     Args:
         func_fft: The FFT of the function to be corrected.
         fft_len: The length of the FFT.
-        dim: The number of dimensions of `func_fft`.
+        dim: The dimension along which to apply the correction.
 
     Returns:
         None, modifies the input array in place to have the corrected FFT of the function.
@@ -186,7 +186,7 @@ def extract_amp_phase(
     data = win * data
 
     # compute amplitude and phase spectra
-    f, func_as, func_ps = spect(data, fs, fft_len=fft_padding * data.shape[dim], dim=dim)
+    f, func_as, func_ps = spect(data, Fs, fft_len=fft_padding * data.shape[dim], dim=dim)
 
     # correct for coherent gain
     func_as = func_as / coherent_gain
@@ -199,20 +199,10 @@ def extract_amp_phase(
     sz[dim - 1] = 1
 
     # extract amplitude and relative phase at freq_index
-    if dim == 0:
-        amp = func_as[f_index]
-        phase = func_ps[f_index]
-    elif dim == 1:
-        amp = func_as[:, f_index]
-        phase = func_ps[:, f_index]
-    elif dim == 2:
-        amp = func_as[:, :, f_index]
-        phase = func_ps[:, :, f_index]
-    elif dim == 3:
-        amp = func_as[:, :, :, f_index]
-        phase = func_ps[:, :, :, f_index]
-    else:
-        raise ValueError("dim must be 0, 1, 2, or 3")
+    # Create a tuple of slice objects with the frequency index at the correct dimension
+    idx = create_index_at_dim(func_as.ndim, dim, f_index)
+    amp = func_as[idx]
+    phase = func_ps[idx]
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
 
