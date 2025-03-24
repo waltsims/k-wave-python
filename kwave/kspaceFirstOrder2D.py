@@ -23,7 +23,7 @@ from kwave.utils.tictoc import TicToc
 def kspace_first_order_2d_gpu(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: NotATransducer,
+    sensor: Union[NotATransducer, kSensor, None],
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
@@ -72,7 +72,7 @@ def kspace_first_order_2d_gpu(
 def kspaceFirstOrder2DC(
     kgrid: kWaveGrid,
     source: kSource,
-    sensor: Union[NotATransducer, kSensor],
+    sensor: Union[NotATransducer, kSensor, None],
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,

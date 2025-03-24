@@ -11,15 +11,16 @@ class kSensor:
     Sensor class for k-Wave simulations.
     """
 
-    def __init__(self, mask=None):
+    def __init__(self, mask=None, record=None):
         """
         Initialize a kSensor object.
 
         Args:
             mask: Binary matrix or a set of Cartesian points where the pressure is recorded at each time-step
+            record: List of parameters to record (e.g., ["p", "p_final"])
         """
         self._mask = mask
-        self.record = None
+        self.record = record
         # cell array of the acoustic parameters to record in the form Recorder
         self._record_start_index = 1
 
@@ -70,7 +71,7 @@ class kSensor:
         self._record_start_index = int(round(val))
 
     @property
-    @deprecated(version="0.5", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
     def time_reversal_boundary_data(self) -> np.ndarray:
         """
         DEPRECATED: Use TimeReversal class instead.
@@ -84,7 +85,7 @@ class kSensor:
         return self._time_reversal_boundary_data
 
     @time_reversal_boundary_data.setter
-    @deprecated(version="0.5", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
     def time_reversal_boundary_data(self, value: np.ndarray):
         """
         DEPRECATED: Use TimeReversal class instead.

@@ -124,7 +124,7 @@ def kspaceFirstOrder3DC(
     return sensor_data
 
 
-@deprecated(version="1.0", reason="Use TimeReversal class instead. This parameter will be removed in v2.0.", action="once")
+@deprecated(version="0.4.1", reason="Use TimeReversal class instead. This parameter will be removed in v0.5.", action="once")
 def kspaceFirstOrder3D(
     kgrid: kWaveGrid,
     source: kSource,
@@ -137,7 +137,7 @@ def kspaceFirstOrder3D(
     """
     DEPRECATED: Use TimeReversal class instead.
 
-    The time_rev parameter will be removed in v2.0. Please migrate to the new TimeReversal class:
+    The time_rev parameter will be removed in v0.5. Please migrate to the new TimeReversal class:
 
     from kwave.reconstruction.time_reversal import TimeReversal
     tr = TimeReversal(kgrid, medium, sensor)

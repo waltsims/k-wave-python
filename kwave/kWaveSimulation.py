@@ -192,12 +192,12 @@ class kWaveSimulation(object):
         return self.kgrid.nonuniform
 
     @property
-    @deprecated(version="1.0", reason="Use TimeReversal class instead. This property will be removed in v2.0.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
     def time_rev(self) -> bool:
         """
         DEPRECATED: Use TimeReversal class instead.
 
-        This property will be removed in v2.0. Please migrate to the new TimeReversal class:
+        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
 
         from kwave.reconstruction import TimeReversal
         tr = TimeReversal(kgrid, medium, sensor)
@@ -1499,12 +1499,12 @@ class kWaveSimulation(object):
         #     self.record = Recorder()
         self.record.set_index_variables(self.kgrid, pml_size, pml_inside, is_axisymmetric)
 
-    @deprecated(version="1.0", reason="Use TimeReversal class instead. This method will be removed in v2.0.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This method will be removed in v0.5.", action="once")
     def check_time_reversal(self) -> bool:
         """
         DEPRECATED: Use TimeReversal class instead.
 
-        This method will be removed in v2.0. Please migrate to the new TimeReversal class:
+        This method will be removed in v0.5. Please migrate to the new TimeReversal class:
 
         from kwave.reconstruction import TimeReversal
         tr = TimeReversal(kgrid, medium, sensor)

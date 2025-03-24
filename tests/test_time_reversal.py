@@ -11,6 +11,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+from kwave.kWaveSimulation import kWaveSimulation
 from kwave.options import SimulationExecutionOptions, SimulationOptions
 from kwave.reconstruction import TimeReversal
 
@@ -247,12 +248,35 @@ def test_deprecation_warnings():
     sensor = kSensor(mask=np.ones((100, 100), dtype=bool))
 
     # Test property deprecation
-    with pytest.warns(DeprecationWarning, match="Use TimeReversal class instead"):
+    with pytest.warns(DeprecationWarning, match="Call to deprecated function.*time_reversal_boundary_data") as warns:
         # Test getter
         _ = sensor.time_reversal_boundary_data
+        assert len(warns) == 1
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
 
         # Test setter
         sensor.time_reversal_boundary_data = np.random.rand(10, 100)
+        assert len(warns) == 2
+        assert "Deprecated since version 0.4.1" in str(warns[1].message)
+
+    # Test method deprecation
+    simulation = kWaveSimulation(kgrid, None, sensor, medium, SimulationOptions())
+    with pytest.warns(DeprecationWarning) as warns:
+        _ = simulation.check_time_reversal()
+        # We expect 3 warnings:
+        # 1. check_time_reversal method
+        # 2. time_rev property
+        # 3. time_reversal_boundary_data property
+        assert len(warns) == 3
+
+        # Verify each warning
+        warning_messages = [str(w.message) for w in warns]
+        assert any("Call to deprecated method check_time_reversal" in msg for msg in warning_messages)
+        assert any("Call to deprecated function (or staticmethod) time_rev" in msg for msg in warning_messages)
+        assert any("Call to deprecated function (or staticmethod) time_reversal_boundary_data" in msg for msg in warning_messages)
+
+        # Verify all warnings have correct version
+        assert all("Deprecated since version 0.4.1" in msg for msg in warning_messages)
 
 
 def test_time_reversal_performance():
