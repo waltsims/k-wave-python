@@ -192,24 +192,14 @@ class kWaveSimulation(object):
         return self.kgrid.nonuniform
 
     @property
-    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def time_rev(self) -> bool:
-        """
-        DEPRECATED: Use TimeReversal class instead.
-
-        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
-
-        from kwave.reconstruction import TimeReversal
-        tr = TimeReversal(kgrid, medium, sensor)
-        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
-        """
-        if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
-                return True
-        else:
-            return self.userarg_time_rev
+        if self.sensor and not isinstance(self.sensor, NotATransducer):
+            return not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None
+        return self.userarg_time_rev
 
     @property
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def elastic_time_rev(self):
         """
         Returns:
@@ -1499,15 +1489,6 @@ class kWaveSimulation(object):
         #     self.record = Recorder()
         self.record.set_index_variables(self.kgrid, pml_size, pml_inside, is_axisymmetric)
 
-    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This method will be removed in v0.5.", action="once")
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def check_time_reversal(self) -> bool:
-        """
-        DEPRECATED: Use TimeReversal class instead.
-
-        This method will be removed in v0.5. Please migrate to the new TimeReversal class:
-
-        from kwave.reconstruction import TimeReversal
-        tr = TimeReversal(kgrid, medium, sensor)
-        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
-        """
         return self.time_rev

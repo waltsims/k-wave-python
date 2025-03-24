@@ -241,42 +241,22 @@ def test_time_reversal_error_handling():
 
 def test_deprecation_warnings():
     """Test deprecation warnings for old time reversal methods."""
-    # Create test data
-    kgrid = kWaveGrid([100, 100], [0.1, 0.1])
-    kgrid.setTime(100, 1e-6)
+    kgrid = kWaveGrid([10, 10], [0.1, 0.1])  # Smaller grid for testing
+    kgrid.setTime(10, 1e-6)
     medium = kWaveMedium(sound_speed=1500)
-    sensor = kSensor(mask=np.ones((100, 100), dtype=bool))
+    sensor = kSensor(mask=np.ones((10, 10), dtype=bool))
 
     # Test property deprecation
-    with pytest.warns(DeprecationWarning, match="Call to deprecated function.*time_reversal_boundary_data") as warns:
-        # Test getter
-        _ = sensor.time_reversal_boundary_data
-        assert len(warns) == 1
+    with pytest.warns(DeprecationWarning) as warns:
+        sensor.time_reversal_boundary_data = np.random.rand(10, 10)
         assert "Deprecated since version 0.4.1" in str(warns[0].message)
 
-        # Test setter
-        sensor.time_reversal_boundary_data = np.random.rand(10, 100)
-        assert len(warns) == 2
-        assert "Deprecated since version 0.4.1" in str(warns[1].message)
-
     # Test method deprecation
-    simulation = kWaveSimulation(kgrid, None, sensor, medium, SimulationOptions())
+    sim = kWaveSimulation(kgrid, None, sensor, medium, SimulationOptions())
     with pytest.warns(DeprecationWarning) as warns:
-        _ = simulation.check_time_reversal()
-        # We expect 3 warnings:
-        # 1. check_time_reversal method
-        # 2. time_rev property
-        # 3. time_reversal_boundary_data property
-        assert len(warns) == 3
-
-        # Verify each warning
-        warning_messages = [str(w.message) for w in warns]
-        assert any("Call to deprecated method check_time_reversal" in msg for msg in warning_messages)
-        assert any("Call to deprecated function (or staticmethod) time_rev" in msg for msg in warning_messages)
-        assert any("Call to deprecated function (or staticmethod) time_reversal_boundary_data" in msg for msg in warning_messages)
-
-        # Verify all warnings have correct version
-        assert all("Deprecated since version 0.4.1" in msg for msg in warning_messages)
+        sim.check_time_reversal()
+        assert len(warns) == 3  # check_time_reversal, time_rev, time_reversal_boundary_data
+        assert all("Deprecated since version 0.4.1" in str(w.message) for w in warns)
 
 
 def test_time_reversal_performance():

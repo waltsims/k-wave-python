@@ -31,7 +31,7 @@ class kSensor:
         # of a frequency domain Gaussian filter applied to the sensor_data
         self.frequency_response = None
 
-        # DEPRECATED: Will be removed in v2.0
+        # DEPRECATED: Will be removed in v0.5
         self._time_reversal_boundary_data = None
 
     @property
@@ -71,31 +71,13 @@ class kSensor:
         self._record_start_index = int(round(val))
 
     @property
-    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
-    def time_reversal_boundary_data(self) -> np.ndarray:
-        """
-        DEPRECATED: Use TimeReversal class instead.
-
-        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
-
-        from kwave.reconstruction import TimeReversal
-        tr = TimeReversal(kgrid, medium, sensor)
-        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
-        """
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
+    def time_reversal_boundary_data(self):
         return self._time_reversal_boundary_data
 
     @time_reversal_boundary_data.setter
-    @deprecated(version="0.4.1", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
-    def time_reversal_boundary_data(self, value: np.ndarray):
-        """
-        DEPRECATED: Use TimeReversal class instead.
-
-        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
-
-        from kwave.reconstruction import TimeReversal
-        tr = TimeReversal(kgrid, medium, sensor)
-        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
-        """
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
+    def time_reversal_boundary_data(self, value):
         self._time_reversal_boundary_data = value
 
 
