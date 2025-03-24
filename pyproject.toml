@@ -30,7 +30,7 @@ dependencies = [
     "deepdiff==8.4.1",
     "numpy>=1.22.2,<2.3.0",
     "matplotlib==3.10.1",
-    "beartype==0.19.0",
+    "beartype==0.20.2",
     "jaxtyping==0.2.38",
     "deprecation>=2.1.0"
 ]
