@@ -9,6 +9,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.reconstruction.time_reversal import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
@@ -71,26 +72,17 @@ def main():
 
     # run the simulation
     sensor_data = kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data["p"].T
+    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
 
-    # reset the initial pressure
+    # reset the initial pressure and sensor
     source = kSource()
     sensor = kSensor()
     sensor.mask = np.zeros(N)
     sensor.mask[0] = 1
 
-    # assign the time reversal data
-    sensor.time_reversal_boundary_data = sensor_data
-
-    # run the time-reversal reconstruction
-    p0_recon = kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    p0_recon = p0_recon["p_final"].T
-
-    # add first order compensation for only recording over a half plane
-    p0_recon = 2 * p0_recon
-
-    # apply a positivity condition
-    p0_recon[p0_recon < 0] = 0
+    # create time reversal handler and run reconstruction
+    tr = TimeReversal(kgrid, medium, sensor)
+    p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
 
     # VISUALIZATION
     cmap = get_color_map()

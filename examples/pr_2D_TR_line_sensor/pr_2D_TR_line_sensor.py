@@ -77,7 +77,7 @@ def main():
 
     # run the simulation
     sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data["p"].T
+    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
 
     # reset the initial pressure and sensor
     source = kSource()
@@ -90,7 +90,9 @@ def main():
     p0_recon = tr(kspaceFirstOrder2D, simulation_options, execution_options)
 
     # repeat the FFT reconstruction for comparison
-    p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear")
+    p_xy = kspaceLineRecon(
+        sensor.recorded_pressure.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear"
+    )
 
     # define a second k-space grid using the dimensions of p_xy
     N_recon = Vector(p_xy.shape)

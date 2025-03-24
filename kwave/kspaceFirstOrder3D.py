@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Dict, Union
 
 import numpy as np
 from deprecated import deprecated
@@ -133,13 +133,13 @@ def kspaceFirstOrder3D(
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
     time_rev: bool = False,  # deprecated parameter
-):
+) -> Dict[str, Any]:
     """
     DEPRECATED: Use TimeReversal class instead.
 
     The time_rev parameter will be removed in v2.0. Please migrate to the new TimeReversal class:
 
-    from kwave.reconstruction import TimeReversal
+    from kwave.reconstruction.time_reversal import TimeReversal
     tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
     """

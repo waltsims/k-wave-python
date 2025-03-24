@@ -96,10 +96,13 @@ class TestSimulation(unittest.TestCase):
         def mock_simulation(*args, **kwargs):
             return {"p_final": np.ones((100, 100))}
 
+        # Set up recorded pressure data
+        sensor.recorded_pressure = np.ones((100, 100))  # Mock recorded pressure data
+
         # Run reconstruction
         p0_recon = tr(mock_simulation, simulation_options, execution_options)
 
-        # Check output
+        # Verify reconstruction
         assert p0_recon.shape == (100, 100)
         assert np.all(p0_recon >= 0)  # Check positivity condition
         assert np.all(p0_recon <= 2.0)  # Check compensation factor
