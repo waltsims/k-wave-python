@@ -27,35 +27,44 @@ def kspace_first_order_2d_gpu(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-) -> np.ndarray:
+) -> Union[np.ndarray, dict]:
     """
-    2D ime-domain simulation of wave propagation on a GPU using C++ CUDA code.
+    2D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
-    kspaceFirstOrder2DG provides a blind interface to the C++/CUDA
-    version of kspaceFirstOrder2D (called kspaceFirstOrder-CUDA) in the
-    same way as kspaceFirstOrder3DC. Note, the C++ code does not support
-    all input options, and all display options are ignored (only command
-    line outputs are given). See the k-Wave user manual for more
-    information.
-    The function works by appending the optional input 'save_to_disk' to
-    the user inputs and then calling kspaceFirstOrder2D to save the input
-    files to disk. The contents of sensor.record (if set) are parsed as
-    input flags, and the C++ code is run using the system command. The
-    output files are then automatically loaded from disk and returned in
-    the same fashion as kspaceFirstOrder2D. The input and output files
-    are saved to the temporary directory native to the operating system,
-    and are deleted after the function runs.
-    This function requires the C++ binary/executable of
-    kspaceFirstOrder-CUDA to be downloaded from
-    http://www.k-wave.org/download.php and placed in the "binaries"
-    directory of the k-Wave toolbox (the 2D and 3D code use the same
-    binary). Alternatively, the name and location of the binary can be
-    specified using the optional input parameters 'BinaryName' and
-    'BinariesPath'.
+    This function provides a blind interface to the C++/CUDA version of kspaceFirstOrder2D
+    (called kspaceFirstOrder-CUDA). The function works by saving the input files to disk,
+    running the C++/CUDA simulation, and loading the output files back into Python.
 
-    This function is essentially a wrapper and directly uses the capabilities
-    of kspaceFirstOrder3DC by replacing the binary name with the name of the
-    GPU binary.
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor, None]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
+
+    Returns:
+    --------
+    Union[np.ndarray, dict]
+        Either:
+        - A numpy array containing the recorded sensor data if sensor.record is set
+        - A dictionary containing simulation metadata if sensor.record is not set
+
+    Notes:
+    ------
+    The GPU version uses the same binary for both 2D and 3D simulations.
+    Required binaries are automatically downloaded and managed by k-wave-python.
+
+    See Also:
+    ---------
+    kspaceFirstOrder2D : CPU version of this simulation function
     """
     execution_options.is_gpu_simulation = True  # force to GPU
     assert isinstance(kgrid, kWaveGrid), "kgrid must be a kWaveGrid object"
@@ -80,49 +89,45 @@ def kspaceFirstOrder2DC(
     """
     2D time-domain simulation of wave propagation using C++ code.
 
-    kspaceFirstOrder2DC provides a blind interface to the C++ version of
-    kspaceFirstOrder2D (called kspaceFirstOrder-OMP) in the same way as
-    kspaceFirstOrder3DC. Note, the C++ code does not support all input
-    options, and all display options are ignored (only command line
-    outputs are given). See the k-Wave user manual for more information.
-    The function works by appending the optional input 'save_to_disk' to
-    the user inputs and then calling kspaceFirstOrder2D to save the input
-    files to disk. The contents of sensor.record (if set) are parsed as
-    input flags, and the C++ code is run using the system command. The
-    output files are then automatically loaded from disk and returned in
-    the same fashion as kspaceFirstOrder2D. The input and output files
-    are saved to the temporary directory native to the operating system,
-    and are deleted after the function runs.
-    For small simulations, running the simulation on a smaller number of
-    cores can improve performance as the matrices are often small enough
-    to fit within cache. It is recommended to adjust the value of
-    'NumThreads' to optimise performance for a given simulation size and
-    computer hardware. By default, simulations smaller than 128^2 are
-    set to run using a single thread (this behaviour can be over-ridden
-    using the 'NumThreads' option). In some circumstances, for very small
-    simulations, the C++ code can be slower than the MATLAB code.
-    This function requires the C++ binary/executable of
-    kspaceFirstOrder-OMP to be downloaded from
-    http://www.k-wave.org/download.php and placed in the "binaries"
-    directory of the k-Wave toolbox (the same binary is used for
-    simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,
-    the name and location of the binary can be  specified using the
-    optional input parameters 'BinaryName' and 'BinariesPath'.
+    This function provides a blind interface to the C++ version of kspaceFirstOrder2D
+    (called kspaceFirstOrder-OMP). The function works by saving the input files to disk,
+    running the C++ simulation, and loading the output files back into Python.
 
-    This function is essentially a wrapper and directly uses the capabilities
-    of kspaceFirstOrder3DC by replacing the binary name with the name of the
-    GPU binary.
+    For small simulations, running the simulation on a smaller number of cores can improve
+    performance as the matrices are often small enough to fit within cache. It is recommended
+    to adjust the value of 'NumThreads' to optimize performance for a given simulation size
+    and computer hardware. By default, simulations smaller than 128^2 are set to run using
+    a single thread (this behavior can be over-ridden using the 'NumThreads' option).
 
-    Args:
-        kgrid: kWaveGrid instance
-        source: kWaveSource instance
-        sensor: NotATransducer or kSensor instance or None
-        medium: kWaveMedium instance
-        simulation_options: SimulationOptions instance
-        execution_options: SimulationExecutionOptions instance
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor, None]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
 
     Returns:
-        Sensor data as a numpy array
+    --------
+    np.ndarray
+        Recorded sensor data based on the sensor.record settings
+
+    Notes:
+    ------
+    1. Required binaries are automatically downloaded and managed by k-wave-python
+    2. The same binary is used for 2D, 3D, and axisymmetric simulations
+    3. For very small simulations, the C++ code can be slower than the Python code
+
+    See Also:
+    ---------
+    kspaceFirstOrder2D : Main simulation function
     """
     execution_options.is_gpu_simulation = False  # force to CPU
     # generate the input file and save to disk
@@ -189,7 +194,6 @@ def kspaceFirstOrder2D(
     1. The simulation is based on coupled first-order equations for wave propagation.
     2. The time step is chosen based on the CFL stability criterion.
     3. For time reversal reconstruction, use the TimeReversal class from kwave.reconstruction.
-    4. GPU execution requires the C++/CUDA binary from k-wave.org.
 
     See Also:
     ---------

@@ -26,25 +26,13 @@ def kspaceFirstOrder3DG(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> Union[np.ndarray, dict]:
     """
-    3D time-domain simulation of wave propagation using k-space pseudospectral method.
+    3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
-    This simulation function performs time-domain acoustic simulations in 3D homogeneous and
-    heterogeneous media. The function is based on a k-space pseudospectral method where spatial
-    derivatives are calculated using the Fourier collocation spectral method, and temporal
-    derivatives are calculated using a k-space corrected finite-difference scheme.
-
-    Key Features:
-    ------------
-    - Support for both homogeneous and heterogeneous media
-    - Perfectly matched layer (PML) boundary conditions
-    - Flexible source and sensor configurations
-    - Support for absorption and nonlinearity
-    - Time-varying source terms
-    - Various sensor types (point, line, plane)
-    - Binary and Cartesian sensor masks
-    - Recording of pressure, velocity, and intensity
+    This function provides a blind interface to the C++/CUDA version of kspaceFirstOrder3D
+    (called kspaceFirstOrder-CUDA). The function works by saving the input files to disk,
+    running the C++/CUDA simulation, and loading the output files back into Python.
 
     Parameters:
     -----------
@@ -61,18 +49,21 @@ def kspaceFirstOrder3DG(
     execution_options : SimulationExecutionOptions
         Options controlling execution environment (CPU/GPU)
 
+    Returns:
+    --------
+    Union[np.ndarray, dict]
+        Either:
+        - A numpy array containing the recorded sensor data if sensor.record is set
+        - A dictionary containing simulation metadata if sensor.record is not set
+
     Notes:
     ------
-    1. The simulation is based on coupled first-order equations for wave propagation.
-    2. The time step is chosen based on the CFL stability criterion.
-    3. For time reversal, use the TimeReversal class from kwave.reconstruction instead
-       of the deprecated sensor.time_reversal_boundary_data.
-    4. GPU execution requires the C++/CUDA binary from k-wave.org.
+    1. The GPU version uses the same binary for both 2D and 3D simulations
+    2. Required binaries are automatically downloaded and managed by k-wave-python
 
     See Also:
     ---------
-    kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
-    kspaceFirstOrder2D : 2D version of this simulation function
+    kspaceFirstOrder3D : CPU version of this simulation function
     """
     execution_options.is_gpu_simulation = True
     assert execution_options.is_gpu_simulation, "kspaceFirstOrder2DG can only be used for GPU simulations"
@@ -93,39 +84,42 @@ def kspaceFirstOrder3DC(
     """
     3D time-domain simulation of wave propagation using C++ code.
 
-    kspaceFirstOrder3DC provides a blind interface to the C++ version of
-    kspaceFirstOrder3D (called kspaceFirstOrder-OMP). Note, the C++ code
-    does not support all input options, and all display options are
-    ignored (only command line outputs are given). See the k-Wave user
-    manual for more information.
+    This function provides a blind interface to the C++ version of kspaceFirstOrder3D
+    (called kspaceFirstOrder-OMP). The function works by saving the input files to disk,
+    running the C++ simulation, and loading the output files back into Python.
 
-    The function works by appending the optional input 'save_to_disk' to
-    the user inputs and then calling kspaceFirstOrder3D to save the input
-    files to disk. The contents of sensor.record (if set) are parsed as
-    input flags, and the C++ code is run using the system command. The
-    output files are then automatically loaded from disk and returned in
-    the same fashion as kspaceFirstOrder3D. The input and output files
-    are saved to the temporary directory native to the operating system,
-    and are deleted after the function runs.
+    For large simulations, it's recommended to adjust the 'NumThreads' parameter in
+    execution_options to optimize performance for your specific hardware configuration.
 
-    This function is not recommended for large simulations, as the input
-    variables will reside twice in main memory (once in MATLAB, and once
-    in C++). For large simulations, the C++ code should be called outside
-    of MATLAB. See the k-Wave manual for more information.
-
-    This function requires the C++ binary/executable of
-    kspaceFirstOrder-OMP to be downloaded from
-    http://www.k-wave.org/download.php and placed in the "binaries"
-    directory of the k-Wave toolbox (the same binary is used for
-    simulations in 2D, 3D, and axisymmetric coordinates). Alternatively,
-    the name and  location of the binary can be specified using the
-    optional input parameters 'BinaryName' and 'BinariesPath'.
-
-    Args:
-        **kwargs:
+    Parameters:
+    -----------
+    kgrid : kWaveGrid
+        Grid object containing Cartesian and k-space grid fields
+    source : kSource
+        Source object containing details of acoustic sources
+    sensor : Union[NotATransducer, kSensor]
+        Sensor object for recording the acoustic field
+    medium : kWaveMedium
+        Medium properties including sound speed, density, etc.
+    simulation_options : SimulationOptions
+        Simulation settings and flags
+    execution_options : SimulationExecutionOptions
+        Options controlling execution environment (CPU/GPU)
 
     Returns:
+    --------
+    np.ndarray
+        Recorded sensor data based on the sensor.record settings
 
+    Notes:
+    ------
+    1. Required binaries are automatically downloaded and managed by k-wave-python
+    2. The same binary is used for 2D, 3D, and axisymmetric simulations
+    3. For large simulations, consider adjusting memory usage via chunking options
+
+    See Also:
+    ---------
+    kspaceFirstOrder3D : Main simulation function
     """
     execution_options.is_gpu_simulation = False
     # generate the input file and save to disk
