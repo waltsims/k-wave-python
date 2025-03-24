@@ -12,7 +12,7 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kspaceLineRecon import kspaceLineRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.time_reversal import TimeReversal
+from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
