@@ -186,7 +186,7 @@ def extract_amp_phase(
     data = win * data
 
     # compute amplitude and phase spectra
-    f, func_as, func_ps = spect(data, Fs, fft_len=fft_padding * data.shape[dim], dim=dim)
+    f, func_as, func_ps = spect(data, fs, fft_len=fft_padding * data.shape[dim], dim=dim)
 
     # correct for coherent gain
     func_as = func_as / coherent_gain
