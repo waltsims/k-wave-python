@@ -82,7 +82,7 @@ def test_extract_amp_phase():
     # odd length signal
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     assert np.shape(np.squeeze(test_signal))[0] % 2 != 0
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10**6)
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=10_000_000, source_freq=2.5 * 10**6)
     a, b, c = 0.6547, -1.8035, 2.5926e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
@@ -90,7 +90,7 @@ def test_extract_amp_phase():
     # even length signal
     test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=5, envelope="Gaussian")
     assert np.shape(np.squeeze(test_signal))[0] % 2 == 0
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=18_000_000, source_freq=6_000_000)
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=18_000_000, source_freq=6_000_000)
     a, b, c = 0.6591, -1.5708, 6.000e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
@@ -157,7 +157,7 @@ def test_extract_amp_phase_double_freq():
 
 def test_apply_filter_lowpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="LowPass")
     expected_signal = [
         0.00000000e00,
         2.76028757e-24,
@@ -175,7 +175,7 @@ def test_apply_filter_lowpass():
 
 def test_apply_filter_highpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="HighPass")
     expected_signal = [
         0.00000000e00,
         1.40844920e-10,
@@ -193,7 +193,7 @@ def test_apply_filter_highpass():
 
 def test_apply_filter_bandpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
