@@ -1,27 +1,37 @@
 from dataclasses import dataclass
 
 import numpy as np
+from deprecated import deprecated
 
 from kwave.utils.matrix import expand_matrix
 
 
-class kSensor(object):
-    def __init__(self, mask=None, record=None):
+class kSensor:
+    """
+    Sensor class for k-Wave simulations.
+    """
+
+    def __init__(self, mask=None):
+        """
+        Initialize a kSensor object.
+
+        Args:
+            mask: Binary matrix or a set of Cartesian points where the pressure is recorded at each time-step
+        """
         self._mask = mask
+        self.record = None
         # cell array of the acoustic parameters to record in the form Recorder
-        self.record = record
-        # record the time series from the beginning by default
-        # time index at which the sensor should start recording the data specified by sensor.record
         self._record_start_index = 1
 
         # Directivity of the individual sensor points
         self.directivity = None
 
-        # time varying pressure enforced as a Dirichlet boundary condition over sensor.mask
-        self.time_reversal_boundary_data = None
         # two element array specifying the center frequency and percentage bandwidth
         # of a frequency domain Gaussian filter applied to the sensor_data
         self.frequency_response = None
+
+        # DEPRECATED: Will be removed in v2.0
+        self._time_reversal_boundary_data = None
 
     @property
     def mask(self):
@@ -58,6 +68,34 @@ class kSensor(object):
     def record_start_index(self, val):
         # force the user index to be an integer
         self._record_start_index = int(round(val))
+
+    @property
+    @deprecated(version="0.5", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
+    def time_reversal_boundary_data(self) -> np.ndarray:
+        """
+        DEPRECATED: Use TimeReversal class instead.
+
+        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
+
+        from kwave.reconstruction import TimeReversal
+        tr = TimeReversal(kgrid, medium, sensor)
+        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
+        """
+        return self._time_reversal_boundary_data
+
+    @time_reversal_boundary_data.setter
+    @deprecated(version="0.5", reason="Use TimeReversal class instead. This property will be removed in v0.5.", action="once")
+    def time_reversal_boundary_data(self, value: np.ndarray):
+        """
+        DEPRECATED: Use TimeReversal class instead.
+
+        This property will be removed in v0.5. Please migrate to the new TimeReversal class:
+
+        from kwave.reconstruction import TimeReversal
+        tr = TimeReversal(kgrid, medium, sensor)
+        p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
+        """
+        self._time_reversal_boundary_data = value
 
 
 @dataclass

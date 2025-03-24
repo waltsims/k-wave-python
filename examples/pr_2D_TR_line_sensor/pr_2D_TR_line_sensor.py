@@ -12,6 +12,7 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kspaceLineRecon import kspaceLineRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.time_reversal import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
@@ -84,15 +85,9 @@ def main():
     sensor.mask = np.zeros(N)
     sensor.mask[0] = 1
 
-    # assign the time reversal data
-    sensor.time_reversal_boundary_data = sensor_data
-
-    # run the time reversal reconstruction
-    p0_recon = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    p0_recon = p0_recon["p_final"].T
-
-    # add first order compensation for only recording over a half plane
-    p0_recon = 2 * p0_recon
+    # create time reversal handler and run reconstruction
+    tr = TimeReversal(kgrid, medium, sensor)
+    p0_recon = tr(kspaceFirstOrder2D, simulation_options, execution_options)
 
     # repeat the FFT reconstruction for comparison
     p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear")

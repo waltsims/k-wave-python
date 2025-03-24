@@ -1,6 +1,7 @@
 from typing import Union
 
 import numpy as np
+from beartype import beartype as typechecker
 
 from kwave.executor import Executor
 from kwave.kgrid import kWaveGrid
@@ -18,6 +19,7 @@ from kwave.utils.pml import get_pml
 from kwave.utils.tictoc import TicToc
 
 
+@typechecker
 def kspace_first_order_2d_gpu(
     kgrid: kWaveGrid,
     source: kSource,
@@ -130,6 +132,7 @@ def kspaceFirstOrder2DC(
     return sensor_data
 
 
+@typechecker
 def kspaceFirstOrder2D(
     kgrid: kWaveGrid,
     source: kSource,
