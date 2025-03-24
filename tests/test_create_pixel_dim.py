@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 
 from kwave.utils.mapgen import create_pixel_dim
