@@ -5,7 +5,7 @@ from itertools import compress
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from deprecation import deprecated
+from deprecated import deprecated
 from numpy.fft import fft, ifft, ifftshift
 from scipy import ndimage
 from scipy.fft import fftshift
