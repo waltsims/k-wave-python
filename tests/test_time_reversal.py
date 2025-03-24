@@ -293,3 +293,171 @@ def test_time_reversal_performance():
 
     # Check performance (should complete within 1 second for this small grid)
     assert duration < 1.0, f"Reconstruction took {duration:.2f} seconds, expected < 1.0 seconds"
+
+
+def test_time_reversal_invalid_inputs():
+    """Test TimeReversal class with invalid inputs."""
+    # Create basic grid
+    Nx = 10
+    dx = 1e-4
+    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+    kgrid.makeTime(1500)  # Use makeTime with sound speed
+
+    # Create medium
+    medium = kWaveMedium(sound_speed=1500)
+
+    # Test invalid t_array
+    kgrid_invalid = kWaveGrid([Nx, Nx], [dx, dx])
+    kgrid_invalid.t_array = "auto"  # This sets both Nt and dt to "auto"
+    sensor = kSensor(mask=np.zeros((Nx, Nx)))
+    sensor.mask[0, 0] = 1
+    with pytest.raises(ValueError, match="t_array must be explicitly set for time reversal"):
+        TimeReversal(kgrid_invalid, medium, sensor)
+
+    # Test invalid compensation factor
+    with pytest.raises(ValueError, match="compensation_factor must be positive"):
+        TimeReversal(kgrid, medium, sensor, compensation_factor=0)
+
+    # Test empty sensor mask
+    sensor_empty = kSensor(mask=np.zeros((Nx, Nx)))
+    with pytest.raises(ValueError, match="Sensor mask must have at least one active point"):
+        TimeReversal(kgrid, medium, sensor_empty)
+
+    # Test mismatched sensor mask shape
+    sensor_wrong_shape = kSensor(mask=np.zeros((Nx + 1, Nx)))
+    sensor_wrong_shape.mask[0, 0] = 1  # Set at least one active point
+    with pytest.raises(ValueError, match="Sensor mask shape .* does not match grid dimensions"):
+        TimeReversal(kgrid, medium, sensor_wrong_shape)
+
+
+def test_time_reversal_invalid_call_params():
+    """Test TimeReversal.__call__ with invalid parameters."""
+    # Create basic grid
+    Nx = 10
+    dx = 1e-4
+    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+    kgrid.makeTime(1500)  # Use makeTime with sound speed
+
+    # Create medium and sensor
+    medium = kWaveMedium(sound_speed=1500)
+    sensor = kSensor(mask=np.zeros((Nx, Nx)))
+    sensor.mask[0, 0] = 1
+
+    # Create TimeReversal instance
+    tr = TimeReversal(kgrid, medium, sensor)
+
+    # Test missing simulation function
+    with pytest.raises(ValueError, match="simulation_function must be provided"):
+        tr(None, SimulationOptions(), SimulationExecutionOptions())
+
+    # Test missing simulation options
+    with pytest.raises(ValueError, match="simulation_options must be provided"):
+        tr(kspaceFirstOrder2D, None, SimulationExecutionOptions())
+
+    # Test missing execution options
+    with pytest.raises(ValueError, match="execution_options must be provided"):
+        tr(kspaceFirstOrder2D, SimulationOptions(), None)
+
+    # Test missing recorded pressure data
+    with pytest.raises(ValueError, match="Sensor must have recorded pressure data"):
+        tr(kspaceFirstOrder2D, SimulationOptions(), SimulationExecutionOptions())
+
+
+def test_time_reversal_non_dict_result():
+    """Test TimeReversal with non-dictionary simulation result."""
+    # Create basic grid
+    Nx = 10
+    dx = 1e-4
+    kgrid = kWaveGrid([Nx, Nx], [dx, dx])
+    kgrid.makeTime(1500)  # Use makeTime with sound speed
+
+    # Create medium and sensor
+    medium = kWaveMedium(sound_speed=1500)
+    sensor = kSensor(mask=np.zeros((Nx, Nx)))
+    sensor.mask[0, 0] = 1
+    sensor.recorded_pressure = np.random.rand(1, 10)  # Add recorded pressure data
+
+    # Create TimeReversal instance
+    tr = TimeReversal(kgrid, medium, sensor)
+
+    # Mock simulation function that returns ndarray instead of dict
+    def mock_simulation(*args):
+        return np.ones((Nx, Nx))
+
+    # Run reconstruction
+    result = tr(mock_simulation, SimulationOptions(), SimulationExecutionOptions())
+    assert isinstance(result, np.ndarray)
+    assert result.shape == (Nx, Nx)
+    assert np.all(result >= 0)  # Check positivity condition
+
+
+class MockGrid:
+    def __init__(self):
+        self.N = np.array([10, 10])
+
+    @property
+    def t_array(self):
+        return "invalid"
+
+
+def test_time_reversal_invalid_t_array_string():
+    # Create grid with invalid t_array
+    kgrid = MockGrid()
+
+    # Create medium and sensor
+    medium = kWaveMedium(sound_speed=1500)
+    sensor = kSensor()
+    sensor.mask = np.zeros((10, 10))
+    sensor.mask[0, 0] = 1  # Set at least one active point
+
+    # Test that TimeReversal raises ValueError for invalid t_array string
+    with pytest.raises(ValueError, match="Invalid t_array value: invalid"):
+        TimeReversal(kgrid, medium, sensor)
+
+
+class MockGridAuto:
+    def __init__(self):
+        self.N = np.array([10, 10])
+
+    @property
+    def t_array(self):
+        return "auto"
+
+
+def test_time_reversal_auto_t_array():
+    # Create grid with t_array="auto"
+    kgrid = MockGridAuto()
+
+    # Create medium and sensor
+    medium = kWaveMedium(sound_speed=1500)
+    sensor = kSensor()
+    sensor.mask = np.zeros((10, 10))
+    sensor.mask[0, 0] = 1  # Set at least one active point
+
+    # Test that TimeReversal raises ValueError for "auto" t_array
+    with pytest.raises(ValueError, match="t_array must be explicitly set for time reversal"):
+        TimeReversal(kgrid, medium, sensor)
+
+
+class MockGridNone:
+    def __init__(self):
+        self.N = np.array([10, 10])
+
+    @property
+    def t_array(self):
+        return None
+
+
+def test_time_reversal_none_t_array():
+    # Create grid with t_array=None
+    kgrid = MockGridNone()
+
+    # Create medium and sensor
+    medium = kWaveMedium(sound_speed=1500)
+    sensor = kSensor()
+    sensor.mask = np.zeros((10, 10))
+    sensor.mask[0, 0] = 1  # Set at least one active point
+
+    # Test that TimeReversal raises ValueError for None t_array
+    with pytest.raises(ValueError, match="t_array must be explicitly set for time reversal"):
+        TimeReversal(kgrid, medium, sensor)
