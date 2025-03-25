@@ -149,7 +149,7 @@ def main():
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
         p0_recon.T,
-        extent=[kgrid.y_vec.max() * 1e3, kgrid.y_vec.min() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
         cmap=cmap,

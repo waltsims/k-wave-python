@@ -120,14 +120,17 @@ class TimeReversal:
         if not hasattr(self.sensor, "recorded_pressure") or self.sensor.recorded_pressure is None:
             raise ValueError("Sensor must have recorded pressure data. Run a forward simulation first.")
 
+        _passed_record = self.sensor.record
+        if _passed_record is None:
+            _passed_record = []
+        if "p_final" not in _passed_record:
+            _passed_record.append("p_final")
+
         # Create source and sensor for reconstruction
         self._source = kSource()
         self._source.p_mask = self.sensor.mask  # Use sensor mask as source mask
         self._source.p = np.flip(self.sensor.recorded_pressure, axis=1)  # Time-reverse the recorded pressure
         self._source.p_mode = "dirichlet"  # Use dirichlet boundary condition
-        _passed_record = self.sensor.record
-        if "p_final" not in _passed_record:
-            _passed_record.append("p_final")
         self._new_sensor = kSensor(mask=self.sensor.mask, record=_passed_record)
 
         # Run reconstruction

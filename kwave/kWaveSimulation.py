@@ -1515,7 +1515,9 @@ class kWaveSimulation(object):
             return True
 
         # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
-        pml_size = self.options.pml_size
+        if pml_size := self.options.pml_size is None:
+            return False
+
         if len(pml_size) == 1:
             # make pml_size a vector type
             pml_size = Vector(np.tile(pml_size, kgrid_dim))
