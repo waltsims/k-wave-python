@@ -91,6 +91,12 @@ class TimeReversal:
         if not np.array_equal(sensor.mask.shape, kgrid.N):
             raise ValueError(f"Sensor mask shape {sensor.mask.shape} does not match grid dimensions {kgrid.N}")
 
+        self._passed_record = self.sensor.record
+        if self._passed_record is None:
+            self._passed_record = []
+        if "p_final" not in self._passed_record:
+            self._passed_record.append("p_final")
+
     def __call__(
         self, simulation_function: Callable, simulation_options: SimulationOptions, execution_options: SimulationExecutionOptions
     ) -> np.ndarray:
@@ -120,18 +126,12 @@ class TimeReversal:
         if not hasattr(self.sensor, "recorded_pressure") or self.sensor.recorded_pressure is None:
             raise ValueError("Sensor must have recorded pressure data. Run a forward simulation first.")
 
-        _passed_record = self.sensor.record
-        if _passed_record is None:
-            _passed_record = []
-        if "p_final" not in _passed_record:
-            _passed_record.append("p_final")
-
         # Create source and sensor for reconstruction
         self._source = kSource()
         self._source.p_mask = self.sensor.mask  # Use sensor mask as source mask
         self._source.p = np.flip(self.sensor.recorded_pressure, axis=1)  # Time-reverse the recorded pressure
         self._source.p_mode = "dirichlet"  # Use dirichlet boundary condition
-        self._new_sensor = kSensor(mask=self.sensor.mask, record=_passed_record)
+        self._new_sensor = kSensor(mask=self.sensor.mask, record=self._passed_record)
 
         # Run reconstruction
         result = simulation_function(self.kgrid, self._source, self._new_sensor, self.medium, simulation_options, execution_options)
