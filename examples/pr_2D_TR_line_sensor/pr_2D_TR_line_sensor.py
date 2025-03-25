@@ -117,27 +117,13 @@ def main():
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
         p0 + sensor.mask * disc_magnitude,
-        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
-        vmin=-disc_magnitude,
-        vmax=disc_magnitude,
-        cmap=cmap,
-    )
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="3%", pad="2%")
-    ax.set_ylabel("x-position [mm]")
-    ax.set_xlabel("y-position [mm]")
-    fig.colorbar(im, cax=cax)
-    plt.show()
-
-    # Plot the reconstructed initial pressure
-    fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(
-        p0_recon.T,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
         cmap=cmap,
     )
+    title = "Initial Pressure and Sensor Distribution"
+    ax.set_title(title)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel("x-position [mm]")
@@ -154,6 +140,24 @@ def main():
         vmax=disc_magnitude,
         cmap=cmap,
     )
+    title = "Time Reversal Reconstruction with Positivity Condition"
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad="2%")
+    ax.set_ylabel("x-position [mm]")
+    ax.set_xlabel("y-position [mm]")
+    fig.colorbar(im, cax=cax)
+    plt.show()
+
+    fig, ax = plt.subplots(1, 1)
+    im = ax.imshow(
+        p0_recon.T,
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
+        vmin=-disc_magnitude,
+        vmax=disc_magnitude,
+        cmap=cmap,
+    )
+    title = "FFT Reconstruction"
+    ax.set_title(title)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel("x-position [mm]")
@@ -163,7 +167,7 @@ def main():
 
     # Plot a profile for comparison
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], "k-", label="Initial Pressure")
-    plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs.T[disc_pos[0], :], "r--", label="FFT Reconstruction")
+    plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], "r--", label="FFT Reconstruction")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0_recon.T[disc_pos[0], :], "b:", label="Time Reversal")
 
     plt.xlabel("y-position [mm]")
