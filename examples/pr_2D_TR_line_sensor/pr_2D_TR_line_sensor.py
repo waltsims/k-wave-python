@@ -79,11 +79,8 @@ def main():
     sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
     sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
 
-    # reset the initial pressure and sensor
+    # reset only the initial pressure, keep the sensor with recorded data
     source = kSource()
-    sensor = kSensor()
-    sensor.mask = np.zeros(N)
-    sensor.mask[0] = 1
 
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
