@@ -132,7 +132,7 @@ def main():
     # Plot the reconstructed initial pressure
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
-        p0_recon,
+        p0_recon.T,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
@@ -145,14 +145,11 @@ def main():
     fig.colorbar(im, cax=cax)
     plt.show()
 
-    # Apply a positivity condition
-    p0_recon[p0_recon < 0] = 0
-
     # Plot the reconstructed initial pressure with positivity condition
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
-        p0_recon,
-        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        p0_recon.T,
+        extent=[kgrid.y_vec.max() * 1e3, kgrid.y_vec.min() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
         cmap=cmap,
