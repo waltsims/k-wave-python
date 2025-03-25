@@ -89,12 +89,6 @@ def main():
     tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
 
-    # add first order compensation for only recording over a half plane
-    p0_recon = 2 * p0_recon
-
-    # apply a positivity condition
-    p0_recon[p0_recon < 0] = 0
-
     # --------------------
     # VISUALIZATION
     # --------------------
