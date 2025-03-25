@@ -42,6 +42,9 @@ def main():
         sound_speed=1500,  # [m/s]
     )
 
+    # set the time array
+    kgrid.makeTime(medium.sound_speed)
+
     # create initial pressure distribution using makeDisc
     disc_magnitude = 5  # [Pa]
     disc_pos = Vector([60, 140])  # [grid points]
@@ -61,9 +64,11 @@ def main():
 
     # define a binary line sensor
     sensor = kSensor()
-    sensor.mask = np.zeros(N)
-    sensor.mask[0] = 1
-
+    # Create mask for inner grid (without PML)
+    inner_mask = np.zeros((N[0], N[1]), dtype=bool)
+    inner_mask[0, :] = 1  # Line sensor along the first row
+    sensor.mask = inner_mask
+    sensor.record = ["p", "p_final"]
     # set the input arguments: force the PML to be outside the computational
     # grid; switch off p0 smoothing within kspaceFirstOrder2D
     simulation_options = SimulationOptions(
@@ -81,15 +86,14 @@ def main():
 
     # reset only the initial pressure, keep the sensor with recorded data
     source = kSource()
-
+    # remove padding from sensor mask
+    sensor.mask = sensor.mask[PML_size:-PML_size, PML_size:-PML_size]
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder2D, simulation_options, execution_options)
 
     # repeat the FFT reconstruction for comparison
-    p_xy = kspaceLineRecon(
-        sensor.recorded_pressure.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear"
-    )
+    p_xy = kspaceLineRecon(sensor_data["p"], dy=d[1], dt=kgrid.dt, c=medium.sound_speed.item(), pos_cond=True, interp="linear")
 
     # define a second k-space grid using the dimensions of p_xy
     N_recon = Vector(p_xy.shape)
@@ -164,6 +168,7 @@ def main():
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], "k-", label="Initial Pressure")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], "r--", label="FFT Reconstruction")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0_recon[disc_pos[0], :], "b:", label="Time Reversal")
+
     plt.xlabel("y-position [mm]")
     plt.ylabel("Pressure")
     plt.legend()

@@ -125,8 +125,10 @@ class TimeReversal:
         self._source.p_mask = self.sensor.mask  # Use sensor mask as source mask
         self._source.p = np.flip(self.sensor.recorded_pressure, axis=1)  # Time-reverse the recorded pressure
         self._source.p_mode = "dirichlet"  # Use dirichlet boundary condition
-
-        self._new_sensor = kSensor(mask=self.sensor.mask)
+        _passed_record = self.sensor.record
+        if "p_final" not in _passed_record:
+            _passed_record.append("p_final")
+        self._new_sensor = kSensor(mask=self.sensor.mask, record=_passed_record)
 
         # Run reconstruction
         result = simulation_function(self.kgrid, self._source, self._new_sensor, self.medium, simulation_options, execution_options)

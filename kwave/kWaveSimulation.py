@@ -1,4 +1,5 @@
 import logging
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -57,6 +58,7 @@ class kWaveSimulation(object):
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
         if self.sensor.time_reversal_boundary_data is not None:
+            warnings.warn("Time reversal simulation is deprecated. Use TimeReversal class instead.")
             # define a new source structure
             self.source = kSource()
             self.source.p_mask = self.sensor.mask
@@ -622,7 +624,7 @@ class kWaveSimulation(object):
             ), "sensor must be defined as an object of the kSensor or kWaveTransducer class."
 
             # check if sensor is a transducer, otherwise check input fields
-            if not isinstance(self.sensor, NotATransducer):
+            if isinstance(self.sensor, kSensor):
                 if kgrid_dim == 2:
                     # check for sensor directivity input and set flag
                     directivity = self.sensor.directivity
@@ -672,9 +674,7 @@ class kWaveSimulation(object):
                 # check if sensor mask is a binary grid, a set of cuboid corners,
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
-                    if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
-                        kgrid_dim != 3 and (self.sensor.mask.shape == self.kgrid.k.shape)
-                    ):
+                    if self._is_binary_sensor_mask(kgrid_dim):
                         # check the grid is binary
                         assert self.sensor.mask.sum() == (
                             self.sensor.mask.size - (self.sensor.mask == 0).sum()
@@ -683,7 +683,7 @@ class kWaveSimulation(object):
                         # check the grid is not empty
                         assert self.sensor.mask.sum() != 0, "sensor.mask must be a binary grid with at least one element set to 1."
 
-                    elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
+                    elif self._is_cuboid_corners_mask(kgrid_dim):
                         # make sure the points are integers
                         assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
 
@@ -1492,3 +1492,57 @@ class kWaveSimulation(object):
     @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def check_time_reversal(self) -> bool:
         return self.time_rev
+
+    def _is_binary_sensor_mask(self, kgrid_dim: int) -> bool:
+        """
+        Check if the sensor mask is a binary grid matching the kgrid dimensions.
+        Takes into account that the PML may have been added to the sensor mask.
+
+        Args:
+            kgrid_dim: Dimensionality of the kWaveGrid
+
+        Returns:
+            bool: True if the sensor mask is a binary grid matching kgrid dimensions
+        """
+        # Get the grid shape without PML
+        grid_shape = self.kgrid.k.shape
+
+        # Get the sensor mask shape
+        mask_shape = self.sensor.mask.shape
+
+        # If shapes match exactly, it's a binary mask
+        if mask_shape == grid_shape:
+            return True
+
+        # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
+        pml_size = self.options.pml_size
+        if len(pml_size) == 1:
+            # make pml_size a vector type
+            pml_size = Vector(np.tile(pml_size, kgrid_dim))
+
+        if kgrid_dim == 1:
+            expected_shape = (grid_shape[0] + 2 * pml_size.x,)
+        elif kgrid_dim == 2:
+            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y)
+        else:  # 3D
+            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y, grid_shape[2] + 2 * pml_size.z)
+
+        return mask_shape == expected_shape
+
+    def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
+        """
+        Check if the sensor mask is defined as cuboid corners.
+        For 2D: shape should be (4, N) for [x1, y1, x2, y2; ...]
+        For 3D: shape should be (6, N) for [x1, y1, z1, x2, y2, z2; ...]
+
+        Args:
+            kgrid_dim: Dimensionality of the kWaveGrid (2 or 3)
+
+        Returns:
+            bool: True if the sensor mask is defined as cuboid corners
+        """
+        if kgrid_dim == 2:
+            return self.sensor.mask.shape[0] == 4  # [x1, y1, x2, y2]
+        elif kgrid_dim == 3:
+            return self.sensor.mask.shape[0] == 6  # [x1, y1, z1, x2, y2, z2]
+        return False  # Not valid for 1D or other dimensions
