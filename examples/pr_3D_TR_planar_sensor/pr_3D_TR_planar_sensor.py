@@ -10,7 +10,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.reconstruction.time_reversal import TimeReversal
+from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
@@ -36,23 +36,15 @@ def main():
 
     # create the computational grid
     PML_size = 10  # size of the PML in grid points
-
-    # grid dimensions of main domain (without PML)
-    Nx = 32 * scale  # number of grid points in the x direction
-    Ny = 64 * scale  # number of grid points in the y direction
-    Nz = 64 * scale  # number of grid points in the z direction
-
-    dx = 0.2e-3 / scale  # grid point spacing in the x direction [m]
-    dy = 0.2e-3 / scale  # grid point spacing in the y direction [m]
-    dz = 0.2e-3 / scale  # grid point spacing in the z direction [m]
-
-    # Create grid for main computation domain (without PML)
-    N = Vector([Nx, Ny, Nz])
-    d = Vector([dx, dy, dz])
+    N = Vector([32 * scale, 64 * scale, 64 * scale])  # number of grid points
+    d = Vector([0.2e-3 / scale, 0.2e-3 / scale, 0.2e-3 / scale])  # grid point spacing [m]
     kgrid = kWaveGrid(N, d)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)  # [m/s]
+
+    # create the time array
+    kgrid.makeTime(medium.sound_speed)
 
     # create initial pressure distribution using makeBall
     ball_magnitude = 10  # [Pa]
@@ -68,31 +60,18 @@ def main():
 
     # define a binary planar sensor
     sensor = kSensor()
-    # Create sensor mask in main domain
-    sensor.mask = np.zeros((Nx, Ny, Nz))
-    sensor.mask[0, :, :] = 1  # Set first x-plane to 1
+    # Create sensor mask for inner grid (without PML)
+    inner_mask = np.zeros((N[0], N[1], N[2]), dtype=bool)
+    inner_mask[0, :, :] = 1  # Planar sensor along the first x-plane
+    sensor.mask = inner_mask
     sensor.record = ["p", "p_final"]
-
-    # Now pad the grid with PML
-    pad_size = ((PML_size, PML_size), (PML_size, PML_size), (PML_size, PML_size))
-
-    # Update grid dimensions after padding
-    N_with_pml = Vector([n + 2 * PML_size for n in [Nx, Ny, Nz]])
-    kgrid = kWaveGrid(N_with_pml, d)
-
-    # Pad the source and sensor
-    source.p0 = np.pad(p0, pad_size, mode="constant")
-    sensor.mask = np.pad(sensor.mask, pad_size, mode="constant")
-
-    # create the time array
-    kgrid.makeTime(medium.sound_speed)
 
     # set the input arguments
     simulation_options = SimulationOptions(
-        save_to_disk=True,
-        pml_size=PML_size,
         pml_inside=False,
+        pml_size=PML_size,
         smooth_p0=False,
+        save_to_disk=True,
         data_cast="single",
     )
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
@@ -103,6 +82,8 @@ def main():
 
     # reset only the initial pressure source
     source = kSource()
+    # remove padding from sensor mask
+    sensor.mask = sensor.mask[PML_size:-PML_size, PML_size:-PML_size, PML_size:-PML_size]
 
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
@@ -183,7 +164,7 @@ def main():
 
     # x-y plane
     im = axs[0, 0].imshow(
-        p0_recon[:, :, N[2] // 2],
+        p0_recon[N[2] // 2, :, :].T,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],
@@ -199,7 +180,7 @@ def main():
 
     # x-z plane
     im = axs[0, 1].imshow(
-        p0_recon[:, N[1] // 2, :],
+        p0_recon[:, N[1] // 2, :].T,
         extent=[kgrid.z_vec.min() * 1e3, kgrid.z_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],
@@ -215,7 +196,7 @@ def main():
 
     # y-z plane
     im = axs[1, 0].imshow(
-        p0_recon[N[0] // 2, :, :],
+        p0_recon[:, :, N[0] // 2].T,
         extent=[kgrid.z_vec.min() * 1e3, kgrid.z_vec.max() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.y_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],
