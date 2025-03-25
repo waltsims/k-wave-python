@@ -33,8 +33,19 @@ def main():
 
     # create the computational grid
     PML_size = 10  # size of the PML in grid points
-    N = Vector([32, 64, 64]) * scale - 2 * PML_size  # number of grid points
-    d = Vector([0.2e-3, 0.2e-3, 0.2e-3]) / scale  # grid point spacing [m]
+
+    # grid dimensions of main domain (without PML)
+    Nx = 32 * scale  # number of grid points in the x direction
+    Ny = 64 * scale  # number of grid points in the y direction
+    Nz = 64 * scale  # number of grid points in the z direction
+
+    dx = 0.2e-3 / scale  # grid point spacing in the x direction [m]
+    dy = 0.2e-3 / scale  # grid point spacing in the y direction [m]
+    dz = 0.2e-3 / scale  # grid point spacing in the z direction [m]
+
+    # Create grid for main computation domain (without PML)
+    N = Vector([Nx, Ny, Nz])
+    d = Vector([dx, dy, dz])
     kgrid = kWaveGrid(N, d)
 
     # define the properties of the propagation medium
@@ -54,8 +65,20 @@ def main():
 
     # define a binary planar sensor
     sensor = kSensor()
-    sensor.mask = np.zeros(N)
-    sensor.mask[0] = 1
+    # Create sensor mask in main domain
+    sensor.mask = np.zeros((Nx, Ny, Nz))
+    sensor.mask[0, :, :] = 1  # Set first x-plane to 1
+
+    # Now pad the grid with PML
+    pad_size = ((PML_size, PML_size), (PML_size, PML_size), (PML_size, PML_size))
+
+    # Update grid dimensions after padding
+    N_with_pml = Vector([n + 2 * PML_size for n in [Nx, Ny, Nz]])
+    kgrid = kWaveGrid(N_with_pml, d)
+
+    # Pad the source and sensor
+    source.p0 = np.pad(p0, pad_size, mode="constant")
+    sensor.mask = np.pad(sensor.mask, pad_size, mode="constant")
 
     # create the time array
     kgrid.makeTime(medium.sound_speed)
@@ -80,6 +103,12 @@ def main():
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
+
+    # add first order compensation for only recording over a half plane
+    p0_recon = 2 * p0_recon
+
+    # apply a positivity condition
+    p0_recon[p0_recon < 0] = 0
 
     # VISUALIZATION
     cmap = get_color_map()
