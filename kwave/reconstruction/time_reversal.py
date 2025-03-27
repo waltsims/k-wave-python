@@ -127,6 +127,7 @@ class TimeReversal:
             raise ValueError("Sensor must have recorded pressure data. Run a forward simulation first.")
 
         # Create source and sensor for reconstruction
+        # The source is created with the same mask as the sensor and the recorded pressure is time-reversed and used as the source pressure.
         self._source = kSource()
         self._source.p_mask = self.sensor.mask  # Use sensor mask as source mask
         self._source.p = np.flip(self.sensor.recorded_pressure, axis=1)  # Time-reverse the recorded pressure
