@@ -58,7 +58,9 @@ class kWaveSimulation(object):
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
         if self.sensor.time_reversal_boundary_data is not None:
-            warnings.warn("Time reversal simulation is deprecated. Use TimeReversal class instead.")
+            warnings.warn(
+                "Time reversal simulation is deprecated. Use TimeReversal class instead. See examples/pr_2D_TR_line_sensor/pr_2D_TR_line_sensor.py for an example."
+            )
             # define a new source structure
             self.source = kSource()
             self.source.p_mask = self.sensor.mask
