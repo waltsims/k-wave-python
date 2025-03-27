@@ -61,9 +61,8 @@ def main():
     # define a binary planar sensor
     sensor = kSensor()
     # Create sensor mask for inner grid (without PML)
-    inner_mask = np.zeros((N[0], N[1], N[2]), dtype=bool)
-    inner_mask[0, :, :] = 1  # Planar sensor along the first x-plane
-    sensor.mask = inner_mask
+    sensor.mask = np.zeros(N, dtype=bool)
+    sensor.mask[0, :, :] = 1  # Planar sensor along the first x-plane
     sensor.record = ["p", "p_final"]
 
     # set the input arguments
@@ -82,7 +81,7 @@ def main():
 
     # reset only the initial pressure source
     source = kSource()
-    # remove padding from sensor mask
+    # remove padding from sensor mask (TODO: this should be done within the simulation. Add an issue.)
     sensor.mask = sensor.mask[PML_size:-PML_size, PML_size:-PML_size, PML_size:-PML_size]
 
     # create time reversal handler and run reconstruction
@@ -158,7 +157,7 @@ def main():
 
     # x-y plane
     im = axs[0, 0].imshow(
-        p0_recon[N[2] // 2, :, :].T,
+        p0_recon[:, :, N[2] // 2],
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],
@@ -174,7 +173,7 @@ def main():
 
     # x-z plane
     im = axs[0, 1].imshow(
-        p0_recon[:, N[1] // 2, :].T,
+        p0_recon[:, N[1] // 2, :],
         extent=[kgrid.z_vec.min() * 1e3, kgrid.z_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],
@@ -190,7 +189,7 @@ def main():
 
     # y-z plane
     im = axs[1, 0].imshow(
-        p0_recon[:, :, N[0] // 2].T,
+        p0_recon[N[0] // 2, :, :],
         extent=[kgrid.z_vec.min() * 1e3, kgrid.z_vec.max() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.y_vec.min() * 1e3],
         vmin=plot_scale[0],
         vmax=plot_scale[1],

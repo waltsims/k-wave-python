@@ -122,7 +122,7 @@ class TimeReversal:
         if execution_options is None:
             raise ValueError("execution_options must be provided")
 
-        # Validate sensor has recorded pressure data
+        # 'recorded_pressure' is used as boundary data for time reversal reconstruction
         if not hasattr(self.sensor, "recorded_pressure") or self.sensor.recorded_pressure is None:
             raise ValueError("Sensor must have recorded pressure data. Run a forward simulation first.")
 
@@ -146,4 +146,4 @@ class TimeReversal:
         p0_recon = self.compensation_factor * p0_recon
         p0_recon[p0_recon < 0] = 0  # Apply positivity condition
 
-        return p0_recon
+        return p0_recon.T  # Transpose since the values returned from the simulation function are transposed.
