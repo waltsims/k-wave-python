@@ -134,7 +134,7 @@ def main():
     # Plot the reconstructed initial pressure with positivity condition
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
-        p0_recon.T,
+        p0_recon,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
@@ -150,7 +150,7 @@ def main():
 
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
-        p0_recon.T,
+        p0_recon,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
@@ -168,7 +168,7 @@ def main():
     # Plot a profile for comparison
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], "k-", label="Initial Pressure")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], "r--", label="FFT Reconstruction")
-    plt.plot(kgrid.y_vec[:, 0] * 1e3, p0_recon.T[disc_pos[0], :], "b:", label="Time Reversal")
+    plt.plot(kgrid.y_vec[:, 0] * 1e3, p0_recon[disc_pos[0], :], "b:", label="Time Reversal")
 
     plt.xlabel("y-position [mm]")
     plt.ylabel("Pressure")
