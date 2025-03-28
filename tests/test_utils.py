@@ -4,13 +4,44 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kwave.utils.conversion import db2neper, neper2db
+from kwave.kgrid import kWaveGrid
+from kwave.utils.conversion import db2neper, grid2cart, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
 from kwave.utils.interp import get_bli
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
+
+def test_grid2cart():
+    kgrid = kWaveGrid(
+        [1000, 100, 10],
+        [1, 1, 1],
+    )
+    binary_sensor_mask = np.zeros((1000, 100, 10))
+    binary_sensor_mask[50, 50, 4] = 1
+    binary_sensor_mask[99, 99, 9] = 1
+
+    cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
+    assert cart_bsm.shape == (3, 2), f"grid2cart did not return a 3x2 array. Shape is {cart_bsm.shape}"
+    print(cart_bsm)
+    expected_cart_bsm = np.array([[-450, 0, -1], [-401, 49, 4]]).T
+    print(expected_cart_bsm)
+    assert np.all(cart_bsm == expected_cart_bsm)
+
+
+def test_grid2cart_origin():
+    kgrid = kWaveGrid(
+        [1000, 100, 10],
+        [1, 1, 1],
+    )
+    binary_sensor_mask = np.zeros((1000, 100, 10))
+    binary_sensor_mask[500, 50, 5] = 1  # equivalent index in matlab is [501, 51, 6] for mask origin
+    cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
+    print(cart_bsm)
+    print(order_index)
+    assert np.all(cart_bsm == 0), "origin location was incorrect"
 
 
 def test_nepers2db():
