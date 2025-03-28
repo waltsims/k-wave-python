@@ -42,7 +42,11 @@ def test_interpcartdata():
         kgrid.set_props(kgrid_props)
 
         trbd_py = interp_cart_data(
-            kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask, interp=interp_method
+            kgrid,
+            cart_sensor_data=sensor_data,
+            cart_sensor_mask=sensor_mask,
+            binary_sensor_mask=binary_sensor_mask.astype(bool),
+            interp=interp_method,
         )
 
         assert np.allclose(trbd, trbd_py)

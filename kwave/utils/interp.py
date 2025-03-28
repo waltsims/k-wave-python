@@ -203,11 +203,11 @@ def interp_cart_data(
     kgrid: kWaveGrid,
     cart_sensor_data: Float[np.ndarray, "pos_idx time"],
     cart_sensor_mask: Float[np.ndarray, "dim pos_idx"],
-    binary_sensor_mask: Bool[np.ndarray, "kx ky kz"],
+    binary_sensor_mask: Bool[np.ndarray, "kx ..."],
     interp="nearest",
 ):
     """
-    Maps cartisian sensor data to a binary sensor mask.
+    Maps cartesian sensor data to a binary sensor mask.
     Sensor data is defined in cartesian coordinates and measured over time.
     The binary sensor mask measurements are interpolated from the cartesian sensor data.
     The spacing of the binary sensor mask is defined by the k-Wave grid object kgrid.
@@ -256,6 +256,16 @@ def interp_cart_data(
     # Check dimensionality of data passed
     if kgrid.dim not in [2, 3]:
         raise ValueError("Data must be two- or three-dimensional.")
+
+    if kgrid.dim != cart_sensor_mask.shape[0]:
+        raise ValueError(
+            f"Cartesian sensor mask must have the same dimensionality as the k-Wave grid. Kgrid dim: {kgrid.dim}, cart_sensor_mask dim: {cart_sensor_mask.shape[0]}"
+        )
+
+    if kgrid.dim != len(binary_sensor_mask.shape) - 1:
+        raise ValueError(
+            f"Binary sensor mask must have the same dimensionality as the k-Wave grid. KGrid dim: {kgrid.dim}, binary_sensor_mask dim: {len(binary_sensor_mask.shape) - 1}"
+        )
 
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
 
