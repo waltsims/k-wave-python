@@ -36,8 +36,8 @@ def main():
 
     # create the computational grid
     PML_size = 10  # size of the PML in grid points
-    N = Vector([32 * scale, 64 * scale, 64 * scale])  # number of grid points
-    d = Vector([0.2e-3 / scale, 0.2e-3 / scale, 0.2e-3 / scale])  # grid point spacing [m]
+    N = Vector([32, 64, 64]) * scale  # number of grid points
+    d = Vector([0.2e-3, 0.2e-3, 0.2e-3]) / scale  # grid point spacing [m]
     kgrid = kWaveGrid(N, d)
 
     # define the properties of the propagation medium
