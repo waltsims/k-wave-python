@@ -65,7 +65,7 @@ def main():
     # define a binary line sensor
     sensor = kSensor()
     # Create mask for inner grid (without PML)
-    inner_mask = np.zeros((N[0], N[1]), dtype=bool)
+    inner_mask = np.zeros(N, dtype=bool)
     inner_mask[0, :] = 1  # Line sensor along the first row
     sensor.mask = inner_mask
     sensor.record = ["p", "p_final"]
