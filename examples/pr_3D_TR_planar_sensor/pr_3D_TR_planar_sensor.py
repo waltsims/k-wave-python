@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -76,13 +78,11 @@ def main():
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
     # run the simulation
-    sensor_data = kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    sensor_data = kspaceFirstOrder3D(kgrid, source, deepcopy(sensor), medium, simulation_options, execution_options)
     sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
 
     # reset only the initial pressure source
     source = kSource()
-    # remove padding from sensor mask (TODO: this should be done within the simulation. Add an issue.)
-    sensor.mask = sensor.mask[PML_size:-PML_size, PML_size:-PML_size, PML_size:-PML_size]
 
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
