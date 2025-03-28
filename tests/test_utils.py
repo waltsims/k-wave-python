@@ -7,7 +7,7 @@ import pytest
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import db2neper, grid2cart, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
-from kwave.utils.interp import get_bli
+from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
@@ -42,6 +42,42 @@ def test_grid2cart_origin():
     print(cart_bsm)
     print(order_index)
     assert np.all(cart_bsm == 0), "origin location was incorrect"
+
+
+def test_interp_cart_data_2_points_linear():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 7] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32)  # sensor at the origin
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)  # 3 time steps
+    print(cart_sensor_data)
+    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, "linear")
+    # TODO: find expected value from matlab. In this case we revert to nearest because point is not between p1 and p2.
+    print(interp_data)
+
+
+def test_interp_cart_data_2_points_nearest():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 7] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32)  # sensor at the origin
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)  # 3 time steps
+    print(cart_sensor_data)
+    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+    # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
+    print(interp_data)
+
+
+def test_interp_cart_data_1_point_nearest():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 6] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)  # sensor at the origin
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)  # 3 time steps
+    print(cart_sensor_data)
+    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+    assert np.allclose(interp_data, cart_sensor_data)
+    print(interp_data)
 
 
 def test_nepers2db():
@@ -388,3 +424,9 @@ def test_trim_zeros():
         mat_trimmed, ind = trim_zeros(mat)
 
     # TODO: generalize to N-D case
+
+
+if __name__ == "__main__":
+    test_interp_cart_data_1_point_nearest()
+    test_interp_cart_data_2_points_nearest()
+    test_interp_cart_data_2_points_linear()

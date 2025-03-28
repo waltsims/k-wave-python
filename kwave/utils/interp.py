@@ -3,9 +3,12 @@ import logging
 import numpy as np
 from beartype import beartype as typechecker
 from beartype.typing import List, Optional, Tuple, Union
+from jaxtyping import Bool, Float
 from numpy.fft import fft, fftshift
 from scipy.interpolate import interpn
 from scipy.signal import resample
+
+from kwave.kgrid import kWaveGrid
 
 from .conversion import grid2cart
 from .data import scale_time
@@ -195,14 +198,19 @@ def get_bli(
     return bli, x_fine
 
 
-def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, interp="nearest"):
+@typechecker
+def interp_cart_data(
+    kgrid: kWaveGrid,
+    cart_sensor_data: Float[np.ndarray, "pos_idx time"],
+    cart_sensor_mask: Float[np.ndarray, "dim pos_idx"],
+    binary_sensor_mask: Bool[np.ndarray, "kx ky kz"],
+    interp="nearest",
+):
     """
-    Takes a matrix of time-series data recorded over a set
-    of Cartesian sensor points given by cart_sensor_mask and computes the
-    equivalent time-series at each sensor position on the binary sensor
-    mask binary_sensor_mask using interpolation. The properties of
-    binary_sensor_mask are defined by the k-Wave grid object kgrid.
-    Two and three-dimensional data are supported.
+    Maps cartisian sensor data to a binary sensor mask.
+    Sensor data is defined in cartesian coordinates and measured over time.
+    The binary sensor mask measurements are interpolated from the cartesian sensor data.
+    The spacing of the binary sensor mask is defined by the k-Wave grid object kgrid.
 
     Usage:
         binary_sensor_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
@@ -235,7 +243,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
 
     # extract the number of data points
     num_cart_data_points, num_time_points = cart_sensor_data.shape
-    num_binary_sensor_points = np.sum(binary_sensor_mask.flatten())
+    num_binary_sensor_points = np.sum(binary_sensor_mask.flatten(), dtype=np.int32)
 
     # update command line status
     logging.log(logging.INFO, "Interpolating Cartesian sensor data...")
@@ -251,10 +259,13 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
 
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
 
+    if len(cart_bsm.shape) == 1:
+        cart_bsm = cart_bsm[:, None]
+
     # nearest neighbour interpolation of the data points
     for point_index in range(num_binary_sensor_points):
-        # find the measured data point that is closest
-        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask[: kgrid.dim, :].T, ord=2, axis=1)
+        # find the measured data point that is closest to the new binary sensor point
+        dist = np.linalg.norm(cart_bsm[:, point_index] - cart_sensor_mask, ord=2, axis=1)
         if interp == "nearest":
             dist_min_index = np.argmin(dist)
 
@@ -262,18 +273,35 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             binary_sensor_data[point_index, :] = cart_sensor_data[dist_min_index, :]
 
         elif interp == "linear":
-            # raise NotImplementedError
-            # append the distance information onto the data set
-            cart_sensor_data_ro = cart_sensor_data
-            np.append(cart_sensor_data_ro, dist[:, None], axis=1)
-            new_col_pos = -1
+            # There must be more than 2 points
+            if cart_sensor_data.shape[0] < 2:
+                raise ValueError("Not enough points to interpolate.")
 
-            # reorder the data set based on distance information
-            cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
+            indices = np.argsort(dist)
 
-            # linearly interpolate between the two closest points
-            perc = cart_sensor_data_ro[2, new_col_pos] / (cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
-            binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + (1 - perc) * cart_sensor_data_ro[2, :]
+            # Get coordinates of the two closest points
+            p1 = cart_sensor_mask[indices[0]]
+            p2 = cart_sensor_mask[indices[1]]
+
+            p_target = cart_bsm[:, point_index]
+
+            # Check if target point is between p1 and p2 by projecting onto the line
+            # Vector from p1 to p2
+            v = p2 - p1
+            # Vector from p1 to target
+            w = p_target - p1
+
+            # Project w onto v
+            c1 = np.dot(w, v) / np.dot(v, v)
+
+            # If c1 is between 0 and 1, point is between p1 and p2
+            if 0 <= c1 <= 1:
+                # Linear interpolation
+                binary_sensor_data[point_index, :] = (1 - c1) * cart_sensor_data[indices[0], :] + c1 * cart_sensor_data[indices[1], :]
+            else:
+                # Point is not between p1 and p2
+                # Option 1: Use nearest neighbor
+                binary_sensor_data[point_index, :] = cart_sensor_data[indices[0], :]
 
         else:
             raise ValueError("Unknown interpolation option.")
