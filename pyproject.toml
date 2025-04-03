@@ -31,7 +31,7 @@ dependencies = [
     "numpy>=1.22.2,<2.3.0",
     "matplotlib==3.10.1",
     "beartype==0.20.2",
-    "jaxtyping==0.2.38",
+    "jaxtyping==0.3.1",
     "deprecated>=1.2.14"
 ]
 
