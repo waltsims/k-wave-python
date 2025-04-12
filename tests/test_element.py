@@ -19,8 +19,13 @@ def test_element_equality_is_true():
 
 def test_element_equality_is_false():
     element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    # position field differs in element 2
     element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[2, 2, 2])
     assert element1 != element2
+
+    # measure field differs in element 3
+    element3 = Element(group_id=0, type="rect", dim=2, active=True, measure=2, position=[1, 1, 1])
+    assert element1 != element3
 
 
 def test_element_is_approximately_equal():
