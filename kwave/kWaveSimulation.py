@@ -1,27 +1,29 @@
 import logging
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
+from deprecated import deprecated
 
 from kwave.data import Vector
-from kwave.kWaveSimulation_helper import (
-    display_simulation_params,
-    set_sound_speed_ref,
-    expand_grid_matrices,
-    create_absorption_variables,
-    scale_source_terms_func,
-)
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
+from kwave.kWaveSimulation_helper import (
+    create_absorption_variables,
+    display_simulation_params,
+    expand_grid_matrices,
+    scale_source_terms_func,
+    set_sound_speed_ref,
+)
 from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.recorder import Recorder
 from kwave.utils.checks import check_stability
 from kwave.utils.colormap import get_color_map
-from kwave.utils.conversion import cast_to_type, cart2grid
-from kwave.utils.data import get_smallest_possible_type, get_date_string
+from kwave.utils.conversion import cart2grid, cast_to_type
+from kwave.utils.data import get_date_string, get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import smooth
 from kwave.utils.matlab import matlab_find, matlab_mask
@@ -44,19 +46,36 @@ class kWaveSimulation(object):
         # FLAGS WHICH DEPEND ON USER INPUTS (THESE SHOULD NOT BE MODIFIED)
         # =========================================================================
         # flags which control the characteristics of the sensor
+        #: Whether the sensor sensor mask is defined by cuboid corners
         #: Whether time reversal simulation is enabled
+
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
         if self.sensor.time_reversal_boundary_data is not None:
+            warnings.warn(
+                "Time reversal simulation is deprecated. Use TimeReversal class instead. See examples/pr_2D_TR_line_sensor/pr_2D_TR_line_sensor.py for an example."
+            )
             # define a new source structure
-            source = {"p_mask": self.sensor.p_mask, "p": np.flip(self.sensor.time_reversal_boundary_data, 2), "p_mode": "dirichlet"}
+            self.source = kSource()
+            self.source.p_mask = self.sensor.mask
+            self.source.p = np.flip(self.sensor.time_reversal_boundary_data, 1)
+            self.source.p_mode = "dirichlet"
 
             # define a new sensor structure
             Nx, Ny, Nz = self.kgrid.Nx, self.kgrid.Ny, self.kgrid.Nz
-            sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
+            self.sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
+
             # set time reversal flag
             self.userarg_time_rev = True
+
+            self.record = Recorder()
+            self.record.p = False
         else:
             # set time reversal flag
             self.userarg_time_rev = False
@@ -68,12 +87,6 @@ class kWaveSimulation(object):
 
             #: Whether the sensor.mask is binary
             self.binary_sensor_mask = True
-
-            # check if the sensor mask is defined as a list of cuboid corners
-            if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
-                self.userarg_cuboid_corners = True
-            else:
-                self.userarg_cuboid_corners = False
 
             #: If tse sensor is an object of the kWaveTransducer class
             self.transducer_sensor = False
@@ -160,8 +173,8 @@ class kWaveSimulation(object):
 
         """
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
-        if not any(self.record.is_set(fields)) and not self.time_rev:
-            return False
+        if not (isinstance(self.sensor, NotATransducer) or any(self.record.is_set(fields)) or self.time_rev):
+            return True
         return False
 
     @property
@@ -183,19 +196,14 @@ class kWaveSimulation(object):
         return self.kgrid.nonuniform
 
     @property
-    def time_rev(self):
-        """
-        Returns:
-            True for time reversal simulaions using sensor.time_reversal_boundary_data
-
-        """
-        if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
-            if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
-                return True
-        else:
-            return self.userarg_time_rev
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
+    def time_rev(self) -> bool:
+        if self.sensor and not isinstance(self.sensor, NotATransducer):
+            return not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None
+        return self.userarg_time_rev
 
     @property
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def elastic_time_rev(self):
         """
         Returns:
@@ -618,7 +626,7 @@ class kWaveSimulation(object):
             ), "sensor must be defined as an object of the kSensor or kWaveTransducer class."
 
             # check if sensor is a transducer, otherwise check input fields
-            if not isinstance(self.sensor, NotATransducer):
+            if isinstance(self.sensor, kSensor):
                 if kgrid_dim == 2:
                     # check for sensor directivity input and set flag
                     directivity = self.sensor.directivity
@@ -668,9 +676,7 @@ class kWaveSimulation(object):
                 # check if sensor mask is a binary grid, a set of cuboid corners,
                 # or a set of Cartesian interpolation points
                 if not self.blank_sensor:
-                    if (kgrid_dim == 3 and num_dim2(self.sensor.mask) == 3) or (
-                        kgrid_dim != 3 and (self.sensor.mask.shape == self.kgrid.k.shape)
-                    ):
+                    if self._is_binary_sensor_mask(kgrid_dim):
                         # check the grid is binary
                         assert self.sensor.mask.sum() == (
                             self.sensor.mask.size - (self.sensor.mask == 0).sum()
@@ -679,7 +685,7 @@ class kWaveSimulation(object):
                         # check the grid is not empty
                         assert self.sensor.mask.sum() != 0, "sensor.mask must be a binary grid with at least one element set to 1."
 
-                    elif self.sensor.mask.shape[0] == 2 * kgrid_dim:
+                    elif self._is_cuboid_corners_mask(kgrid_dim):
                         # make sure the points are integers
                         assert np.all(self.sensor.mask % 1 == 0), "sensor.mask cuboid corner indices must be integers."
 
@@ -1004,7 +1010,7 @@ class kWaveSimulation(object):
             None
         """
 
-        # check kgrid for t_array existance, and create if not defined
+        # check kgrid for t_array existence, and create if not defined
         if isinstance(self.kgrid.t_array, str) and self.kgrid.t_array == "auto":
             # check for time reversal mode
             if self.time_rev:
@@ -1102,7 +1108,7 @@ class kWaveSimulation(object):
         if not user_medium_density_input and self.medium.is_nonlinear():
             raise ValueError("medium.density must be explicitly defined if medium.BonA is specified.")
 
-        # check sensor compatability options for flgs.compute_directivity
+        # check sensor compatibility options for flgs.compute_directivity
         if self.use_sensor and k_dim == 2 and self.compute_directivity and not self.binary_sensor_mask and opt.cartesian_interp == "linear":
             raise ValueError(
                 "sensor directivity fields are only compatible " "with binary sensor masks or " "CartInterp" " set to " "nearest" "."
@@ -1157,7 +1163,7 @@ class kWaveSimulation(object):
             # display a warning only if using WSWS symmetry (not WSWA-FFT)
             if self.options.radial_symmetry.startswith("WSWS"):
                 logging.log(
-                    logging.WARN, "  Optional input " "RadialSymmetry" " changed to " "WSWA" " for compatability with " "SaveToDisk" "."
+                    logging.WARN, "  Optional input " "RadialSymmetry" " changed to " "WSWA" " for compatibility with " "SaveToDisk" "."
                 )
 
             # update setting
@@ -1311,7 +1317,7 @@ class kWaveSimulation(object):
         """
         # define the output variables and mask indices if using the sensor
         if self.use_sensor:
-            if not self.blank_sensor or isinstance(self.options.save_to_disk, str):
+            if not self.blank_sensor or self.options.save_to_disk:
                 if self.cuboid_corners:
                     # create empty list of sensor indices
                     self.sensor_mask_index = []
@@ -1451,7 +1457,7 @@ class kWaveSimulation(object):
         input 'PlotPML' is set to false
 
         Args:
-            kgrid_dim: kWaveGrid dimensinality
+            kgrid_dim: kWaveGrid dimensionality
             kgrid_N: kWaveGrid size in each direction
             pml_size: Size of the PML
             pml_inside: Whether the PML is inside the grid defined by the user
@@ -1484,3 +1490,63 @@ class kWaveSimulation(object):
         # if self.record is None:
         #     self.record = Recorder()
         self.record.set_index_variables(self.kgrid, pml_size, pml_inside, is_axisymmetric)
+
+    @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
+    def check_time_reversal(self) -> bool:
+        return self.time_rev
+
+    def _is_binary_sensor_mask(self, kgrid_dim: int) -> bool:
+        """
+        Check if the sensor mask is a binary grid matching the kgrid dimensions.
+        Takes into account that the PML may have been added to the sensor mask.
+
+        Args:
+            kgrid_dim: Dimensionality of the kWaveGrid
+
+        Returns:
+            bool: True if the sensor mask is a binary grid matching kgrid dimensions
+        """
+        # Get the grid shape without PML
+        grid_shape = self.kgrid.k.shape
+
+        # Get the sensor mask shape
+        mask_shape = self.sensor.mask.shape
+
+        # If shapes match exactly, it's a binary mask
+        if mask_shape == grid_shape:
+            return True
+
+        # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
+        if pml_size := self.options.pml_size is None:
+            return False
+
+        if len(pml_size) == 1:
+            # make pml_size a vector type
+            pml_size = Vector(np.tile(pml_size, kgrid_dim))
+
+        if kgrid_dim == 1:
+            expected_shape = (grid_shape[0] + 2 * pml_size.x,)
+        elif kgrid_dim == 2:
+            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y)
+        else:  # 3D
+            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y, grid_shape[2] + 2 * pml_size.z)
+
+        return mask_shape == expected_shape
+
+    def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
+        """
+        Check if the sensor mask is defined as cuboid corners.
+        For 2D: shape should be (4, N) for [x1, y1, x2, y2; ...]
+        For 3D: shape should be (6, N) for [x1, y1, z1, x2, y2, z2; ...]
+
+        Args:
+            kgrid_dim: Dimensionality of the kWaveGrid (2 or 3)
+
+        Returns:
+            bool: True if the sensor mask is defined as cuboid corners
+        """
+        if kgrid_dim == 2:
+            return self.sensor.mask.shape[0] == 4  # [x1, y1, x2, y2]
+        elif kgrid_dim == 3:
+            return self.sensor.mask.shape[0] == 6  # [x1, y1, z1, x2, y2, z2]
+        return False  # Not valid for 1D or other dimensions

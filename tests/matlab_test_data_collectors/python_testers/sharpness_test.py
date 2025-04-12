@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kwave.utils.filters import sharpness
+from kwave.utils.sharpness_filters import sharpness
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 

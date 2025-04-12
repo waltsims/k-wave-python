@@ -1,6 +1,7 @@
-from typing import Tuple, Union, Optional, List
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
+from beartype import beartype as typechecker
 
 
 def rem(x, y, rtol=1e-05, atol=1e-08):
@@ -75,6 +76,7 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "ne
     return np.expand_dims(arr, -1)  # compatibility, n => [n, 1]
 
 
+@typechecker
 def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> np.ndarray:
     """
     Applies a mask to an array and returns the masked elements.
@@ -89,10 +91,14 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -
 
     """
 
+    if mask.dtype == "uint8":
+        mask = mask.astype("int8")
+
     if diff is None:
-        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F")], axis=-1)  # compatibility, n => [n, 1]
+        flat_mask = mask.ravel(order="F")
     else:
-        return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F") + diff], axis=-1)  # compatibility, n => [n, 1]
+        flat_mask = mask.ravel(order="F") + diff
+    return np.expand_dims(arr.ravel(order="F")[flat_mask], axis=-1)  # compatibility, n => [n, 1]
 
 
 def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[Union[int, np.ndarray], ...]:

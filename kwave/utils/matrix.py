@@ -1,10 +1,11 @@
 import logging
 
 import numpy as np
-from scipy.interpolate import interpn, interp1d
 from beartype import beartype as typechecker
-from beartype.typing import Union, List, Tuple, Optional
-from jaxtyping import Int, Num, Shaped, Real, Bool
+from beartype.typing import List, Optional, Tuple, Union
+from jaxtyping import Bool, Int, Num, Real, Shaped
+from scipy.interpolate import interp1d, interpn
+
 import kwave.utils.typing as kt
 
 from .data import scale_time
@@ -143,7 +144,7 @@ def expand_matrix(
         opts["pad_width"] = exp_coeff
     elif len(matrix.shape) == 2:
         if n_coeff == 2:
-            opts["pad_width"] = exp_coeff
+            opts["pad_width"] = [(exp_coeff[0],), (exp_coeff[1],)]
         if n_coeff == 4:
             opts["pad_width"] = [(exp_coeff[0], exp_coeff[1]), (exp_coeff[2], exp_coeff[3])]
     elif len(matrix.shape) == 3:

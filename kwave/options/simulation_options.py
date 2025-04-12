@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from tempfile import gettempdir
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 
@@ -305,7 +305,7 @@ class SimulationOptions(object):
             elif kgrid.dim == 2:
                 options.pml_x_alpha = val[0]
                 options.pml_y_alpha = val[-1]
-            elif kgrid.dim == 2:
+            elif kgrid.dim == 3:
                 options.pml_x_alpha = val[0]
                 options.pml_y_alpha = val[len(val) // 2]
                 options.pml_z_alpha = val[-1]

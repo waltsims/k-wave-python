@@ -11,12 +11,11 @@ authors:
     orcid: 'https://orcid.org/0000-0002-8514-8279'
   - family-names: Simson
     given-names: Walter
-    email: wsimson@stanford.edu
-    affiliation: Stanford University
+    email: walter.a.simson@gmail.com
     orcid: 'https://orcid.org/0000-0002-2801-8646'
 identifiers:
   - type: doi
     value: 10.5281/zenodo.10719460
     description: Zenodo DOI
 repository-code: 'https://github.com/waltsims/k-wave-python'
-license: GPL-3.0
+license: LGPL-3.0

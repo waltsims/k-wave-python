@@ -1,8 +1,8 @@
 clear all;
-
+% ensure k-wave is on the path
+addpath(genpath('../../../k-wave'));
 directory = pwd + "/matlab_collectors";
 files = getListOfFiles(directory);
-% remove this file.
 
 for idx=1:length(files)
         % ensure collected value directory has been created
@@ -10,9 +10,9 @@ for idx=1:length(files)
         collected_value_dir = pwd + ...
             "/matlab_collectors/collectedValues/" + file_parts(2);
         mkdir(collected_value_dir)
-        % run value collector
-        run(fullfile(directory, files{idx}));
-        clearvars -except idx files directory
+    % run value collector
+    run(fullfile(directory, files{idx}));
+    clearvars -except idx files directory
 end
 
 if ~isRunningInCI()

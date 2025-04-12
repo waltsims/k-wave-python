@@ -3,16 +3,15 @@ import math
 from typing import Any
 
 import numpy as np
-from numpy import ndarray
 from beartype import beartype as typechecker
 from beartype.typing import Tuple, Union
-from jaxtyping import Real, Float, Num
+from jaxtyping import Float, Num, Real
+from numpy import ndarray
 
+import kwave.utils.typing as kt
 from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
-
-import kwave.utils.typing as kt
 
 
 @typechecker
@@ -490,3 +489,18 @@ def find_closest(array: ndarray, value: Num[kt.ScalarLike, ""]):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
+
+
+def create_index_at_dim(ndim: int, dim: int, index_value: Any) -> tuple:
+    """
+    Create a tuple of slice objects with a specific index value at the specified dimension.
+
+    Args:
+        ndim: Number of dimensions in the array
+        dim: The dimension where the specific index should be placed
+        index_value: The index value to place at the specified dimension
+
+    Returns:
+        A tuple of slice objects with the index value at the specified dimension
+    """
+    return tuple(index_value if i == dim else slice(None) for i in range(ndim))

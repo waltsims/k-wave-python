@@ -1,18 +1,18 @@
 import logging
-from typing import Optional, Union, Tuple, List
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipy
-from scipy.fftpack import fft, ifft, ifftshift, fftshift
-from scipy.signal import lfilter, convolve
+from scipy.fftpack import fft, fftshift, ifft, ifftshift
+from scipy.signal import lfilter
+
+from kwave.utils.conversion import create_index_at_dim
 
 from .checks import is_number
 from .data import scale_SI
-from .math import find_closest, sinc, next_pow2, norm_var, gaussian
+from .math import find_closest, gaussian, next_pow2, sinc
 from .matrix import num_dim, num_dim2
 from .signals import get_win
-from ..kgrid import kWaveGrid
-from ..kmedium import kWaveMedium
 
 
 def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.ndarray:
@@ -24,38 +24,28 @@ def single_sided_correction(func_fft: np.ndarray, fft_len: int, dim: int) -> np.
     Args:
         func_fft: The FFT of the function to be corrected.
         fft_len: The length of the FFT.
-        dim: The number of dimensions of `func_fft`.
+        dim: The dimension along which to apply the correction.
 
     Returns:
-        The corrected FFT of the function.
+        None, modifies the input array in place to have the corrected FFT of the function.
     """
-    if fft_len % 2:
-        # odd FFT length switch dim case
-        if dim == 0:
-            func_fft[1:, :] = func_fft[1:, :] * 2
-        elif dim == 1:
-            func_fft[:, 1:] = func_fft[:, 1:] * 2
-        elif dim == 2:
-            func_fft[:, :, 1:] = func_fft[:, :, 1:] * 2
-        elif dim == 3:
-            func_fft[:, :, :, 1:] = func_fft[:, :, :, 1:] * 2
-    else:
-        # even FFT length
-        if dim == 0:
-            func_fft[1:-1] = func_fft[1:-1] * 2
-        elif dim == 1:
-            func_fft[:, 1:-1] = func_fft[:, 1:-1] * 2
-        elif dim == 2:
-            func_fft[:, :, 1:-1] = func_fft[:, :, 1:-1] * 2
-        elif dim == 3:
-            func_fft[:, :, :, 1:-1] = func_fft[:, :, :, 1:-1] * 2
+    # Create a slice object for each dimension
+    slices = [slice(None)] * func_fft.ndim
 
-    return func_fft
+    if fft_len % 2:  # odd FFT length
+        # Set slice for the specified dimension to select all elements except the first
+        slices[dim] = slice(1, None)
+    else:  # even FFT length
+        # Set slice for the specified dimension to select all elements except first and last
+        slices[dim] = slice(1, -1)
+
+    # Apply the slicing and multiply by 2
+    func_fft[tuple(slices)] *= 2
 
 
 def spect(
     func: np.ndarray,
-    Fs: float,
+    fs: float,
     dim: Optional[Union[int, str]] = "auto",
     fft_len: Optional[int] = 0,
     power_two: Optional[bool] = False,
@@ -67,7 +57,7 @@ def spect(
 
     Args:
         func: The signal to analyse.
-        Fs: The sampling frequency in Hz.
+        fs: The sampling frequency in Hz.
         dim: The dimension over which the spectrum is calculated. Defaults to 'auto'.
         fft_len: The length of the FFT. If the set length is smaller than the signal length, the default value is used
                  instead (default = signal length).
@@ -98,18 +88,15 @@ def spect(
 
     # automatically set dimension to first non - singleton dimension
     if dim == "auto":
-        dim_index = 0
-        while dim_index <= len(sz):
-            if sz[dim_index] > 1:
-                dim = dim_index
-                break
-            dim_index = dim_index + 1
+        dim = np.argmax(np.array(sz) > 1)
+        if sz[dim] <= 1:
+            raise ValueError("All dimensions are singleton; unable to determine valid dimension.")
 
     # assign the number of points being analysed
     func_length = sz[dim]
 
     # set the length of the FFT
-    if not fft_len > func_length:
+    if fft_len <= 0 or fft_len < func_length:
         if power_two:
             # find an appropriate FFT length of the form 2 ^ N that is equal to or
             # larger than the length of the input signal
@@ -119,34 +106,32 @@ def spect(
             fft_len = func_length
 
     # window the signal, reshaping the window to be in the correct direction
-    win, coherent_gain = get_win(func_length, window, symmetric=False)
-    win = np.reshape(win, tuple(([1] * dim + [func_length] + [1] * (len(sz) - 2))))
+    win, coherent_gain = get_win(func_length, type_=window, symmetric=False)
+    win_shape = [1] * len(sz)
+    win_shape[dim] = func_length
+    win = np.reshape(win, tuple(win_shape))
     func = win * func
 
     # compute the fft using the defined FFT length, if fft_len >
     # func_length, the input signal is padded with zeros
-    func_fft = fft(func, fft_len, dim)
+    func_fft = np.fft.fft(func, n=fft_len, axis=dim)
 
     # correct for the magnitude scaling of the FFT and the coherent gain of the
     # window(note that the correction is equal to func_length NOT fft_len)
-    func_fft = func_fft / (func_length * coherent_gain)
+    epsilon = 1e-10  # Small value to prevent division by zero
+    func_fft = func_fft / (func_length * coherent_gain + epsilon)
 
     # reduce to a single sided spectrum where the number of unique points for
     # even numbered FFT lengths is given by N / 2 + 1, and for odd(N + 1) / 2
     num_unique_pts = int(np.ceil((fft_len + 1) / 2))
-    if dim == 0:
-        func_fft = func_fft[0:num_unique_pts]
-    elif dim == 1:
-        func_fft = func_fft[:, 0:num_unique_pts]
-    elif dim == 2:
-        func_fft = func_fft[:, :, 0:num_unique_pts]
-    elif dim == 3:
-        func_fft = func_fft[:, :, :, 0:num_unique_pts]
+    slicing = [slice(None)] * len(sz)
+    slicing[dim] = slice(0, num_unique_pts)
+    func_fft = func_fft[tuple(slicing)]
 
-    func_fft = single_sided_correction(func_fft, fft_len, dim)
+    single_sided_correction(func_fft, fft_len, dim)
 
     # create the frequency axis variable
-    f = np.arange(0, func_fft.shape[dim]) * Fs / fft_len
+    f = np.arange(0, num_unique_pts) * fs / fft_len
 
     # calculate the amplitude spectrum
     func_as = np.abs(func_fft)
@@ -156,13 +141,13 @@ def spect(
 
     # unwrap the phase spectrum if required
     if unwrap_phase:
-        func_ps = scipy.unwrap(func_ps, [], dim)
+        func_ps = np.unwrap(func_ps, axis=dim)
 
     return f, func_as, func_ps
 
 
 def extract_amp_phase(
-    data: np.ndarray, Fs: float, source_freq: float, dim: Tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
+    data: np.ndarray, fs: float, source_freq: float, dim: Tuple[str, int] = "auto", fft_padding: int = 3, window: str = "Hanning"
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Extract the amplitude and phase information at a specified frequency from a vector or matrix of time series data.
@@ -173,7 +158,7 @@ def extract_amp_phase(
 
     Args:
         data: Matrix of time signals [s]
-        Fs: Sampling frequency [Hz]
+        fs: Sampling frequency [Hz]
         source_freq: Frequency at which the amplitude and phase should be extracted [Hz]
         dim: The time dimension of the input data. If 'auto', the highest non-singleton dimension is used.
         fft_padding: The amount of zero padding to apply to the FFT.
@@ -201,7 +186,7 @@ def extract_amp_phase(
     data = win * data
 
     # compute amplitude and phase spectra
-    f, func_as, func_ps = spect(data, Fs, fft_len=fft_padding * data.shape[dim], dim=dim)
+    f, func_as, func_ps = spect(data, fs, fft_len=fft_padding * data.shape[dim], dim=dim)
 
     # correct for coherent gain
     func_as = func_as / coherent_gain
@@ -214,115 +199,12 @@ def extract_amp_phase(
     sz[dim - 1] = 1
 
     # extract amplitude and relative phase at freq_index
-    if dim == 0:
-        amp = func_as[f_index]
-        phase = func_ps[f_index]
-    elif dim == 1:
-        amp = func_as[:, f_index]
-        phase = func_ps[:, f_index]
-    elif dim == 2:
-        amp = func_as[:, :, f_index]
-        phase = func_ps[:, :, f_index]
-    elif dim == 3:
-        amp = func_as[:, :, :, f_index]
-        phase = func_ps[:, :, :, f_index]
-    else:
-        raise ValueError("dim must be 0, 1, 2, or 3")
+    # Create a tuple of slice objects with the frequency index at the correct dimension
+    idx = create_index_at_dim(func_as.ndim, dim, f_index)
+    amp = func_as[idx]
+    phase = func_ps[idx]
 
     return amp.squeeze(), phase.squeeze(), f[f_index]
-
-
-def brenner_sharpness(im):
-    num_dim = im.ndim
-    if num_dim == 2:
-        # compute metric
-        bren_x = (im[:-2, :] - im[2:, :]) ** 2
-        bren_y = (im[:, :-2] - im[:, 2:]) ** 2
-        s = np.sum(bren_x) + np.sum(bren_y)
-    elif num_dim == 3:
-        # compute metric
-        bren_x = (im[:-2, :, :] - im[2:, :, :]) ** 2
-        bren_y = (im[:, :-2, :] - im[:, 2:, :]) ** 2
-        bren_z = (im[:, :, :-2] - im[:, :, 2:]) ** 2
-        s = np.sum(bren_x) + np.sum(bren_y) + np.sum(bren_z)
-    return s
-
-
-def tenenbaum_sharpness(im):
-    num_dim = im.ndim
-    if num_dim == 2:
-        # define the 2D sobel gradient operator
-        sobel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-
-        # compute metric
-        s = (convolve(sobel, im) ** 2 + convolve(sobel.T, im) ** 2).sum()
-    elif num_dim == 3:
-        # define the 3D sobel gradient operator
-        sobel3D = np.zeros((3, 3, 3))
-        sobel3D[:, :, 0] = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
-        sobel3D[:, :, 2] = -sobel3D[:, :, 0]
-
-        # compute metric
-        s = (
-            convolve(im, sobel3D) ** 2
-            + convolve(im, np.transpose(sobel3D, (2, 0, 1))) ** 2
-            + convolve(im, np.transpose(sobel3D, (1, 2, 0))) ** 2
-        ).sum()
-    return s
-
-    # TODO: get this passing the tests
-    # NOTE: Walter thinks this is the proper way to do this, but it doesn't match the MATLAB version
-    # num_dim = im.ndim
-    # if num_dim == 2:
-    #     # compute metric
-    #     sx = sobel(im, axis=0, mode='constant')
-    #     sy = sobel(im, axis=1, mode='constant')
-    #     s = (sx ** 2) + (sy ** 2)
-    #     s = np.sum(s)
-    #
-    # elif num_dim == 3:
-    #     # compute metric
-    #     sx = sobel(im, axis=0, mode='constant')
-    #     sy = sobel(im, axis=1, mode='constant')
-    #     sz = sobel(im, axis=2, mode='constant')
-    #     s = (sx ** 2) + (sy ** 2) + (sz ** 2)
-    #     s = np.sum(s)
-    # else:
-    #     raise ValueError("Invalid number of dimensions in im")
-
-
-def sharpness(im: np.ndarray, mode: Optional[str] = "Brenner") -> float:
-    """
-    Returns a scalar metric related to the sharpness of a 2D or 3D image matrix.
-
-    Args:
-        im: The image matrix.
-        metric: The metric to use. Defaults to "Brenner".
-
-    Returns:
-        A scalar sharpness metric.
-
-    Raises:
-        AssertionError: If `im` is not a NumPy array.
-
-    References:
-        B. E. Treeby, T. K. Varslot, E. Z. Zhang, J. G. Laufer, and P. C. Beard, "Automatic sound speed selection in
-        photoacoustic image reconstruction using an autofocus approach," J. Biomed. Opt., vol. 16, no. 9, p. 090501, 2011.
-
-    """
-
-    assert isinstance(im, np.ndarray), "Argument im must be of type numpy array"
-
-    if mode == "Brenner":
-        metric = brenner_sharpness(im)
-    elif mode == "Tenenbaum":
-        metric = tenenbaum_sharpness(im)
-    elif mode == "NormVariance":
-        metric = norm_var(im)
-    else:
-        raise ValueError("Unrecognized sharpness metric passed. Valid values are ['Brenner', 'Tanenbaum', 'NormVariance']")
-
-    return metric
 
 
 def fwhm(f, x):
@@ -362,7 +244,7 @@ def fwhm(f, x):
 
 
 def gaussian_filter(
-    signal: Union[np.ndarray, List[float]], Fs: float, frequency: float, bandwidth: float
+    signal: Union[np.ndarray, List[float]], fs: float, frequency: float, bandwidth: float
 ) -> Union[np.ndarray, List[float]]:
     """
     Applies a frequency domain Gaussian filter with the
@@ -372,7 +254,7 @@ def gaussian_filter(
 
     Args:
         signal:         Signal to filter [channel, samples]
-        Fs:             Sampling frequency [Hz]
+        fs:             Sampling frequency [Hz]
         frequency:      Center frequency of filter [Hz]
         bandwidth:      Bandwidth of filter in percentage
 
@@ -383,9 +265,9 @@ def gaussian_filter(
 
     N = signal.shape[-1]
     if N % 2 == 0:
-        f = np.arange(-N / 2, N / 2) * Fs / N
+        f = np.arange(-N / 2, N / 2) * fs / N
     else:
-        f = np.arange(-(N - 1) / 2, (N - 1) / 2 + 1) * Fs / N
+        f = np.arange(-(N - 1) / 2, (N - 1) / 2 + 1) * fs / N
 
     mean = frequency
     variance = (bandwidth / 100 * frequency / (2 * np.sqrt(2 * np.log(2)))) ** 2
@@ -477,9 +359,9 @@ def filter_time_series(
     assert not isinstance(kgrid.t_array, str) or kgrid.t_array != "auto", "kgrid.t_array must be explicitly defined."
 
     # compute the sampling frequency
-    Fs = 1 / kgrid.dt
+    fs = 1 / kgrid.dt
 
-    # extract the minium sound speed
+    # extract the minimum sound speed
     if medium.sound_speed is not None:
         # for the fluid code, use medium.sound_speed
         c0 = medium.sound_speed.min()
@@ -511,7 +393,7 @@ def filter_time_series(
     if ppw != 0:
         filtered_signal = apply_filter(
             signal,
-            Fs,
+            fs,
             float(filter_cutoff_f),
             "LowPass",
             zero_phase=zerophase,
@@ -553,7 +435,7 @@ def filter_time_series(
 
 def apply_filter(
     signal: np.ndarray,
-    Fs: float,
+    fs: float,
     cutoff_f: float,
     filter_type: str,
     zero_phase: Optional[bool] = False,
@@ -566,7 +448,7 @@ def apply_filter(
 
     Args:
         signal: The input signal.
-        Fs: The sampling frequency of the signal.
+        fs: The sampling frequency of the signal.
         cutoff_f: The cut-off frequency of the filter.
         filter_type: The type of filter to apply, either 'HighPass', 'LowPass' or 'BandPass'.
         zero_phase: Whether to apply a zero-phase filter. Defaults to False.
@@ -585,13 +467,13 @@ def apply_filter(
 
         # apply the low pass filter
         func_filt_lp = apply_filter(
-            signal, Fs, cutoff_f[1], "LowPass", stop_band_atten=stop_band_atten, transition_width=transition_width, zero_phase=zero_phase
+            signal, fs, cutoff_f[1], "LowPass", stop_band_atten=stop_band_atten, transition_width=transition_width, zero_phase=zero_phase
         )
 
         # apply the high pass filter
         filtered_signal = apply_filter(
             func_filt_lp,
-            Fs,
+            fs,
             cutoff_f[0],
             "HighPass",
             stop_band_atten=stop_band_atten,
@@ -605,7 +487,7 @@ def apply_filter(
             high_pass = False
         elif filter_type == "HighPass":
             high_pass = True
-            cutoff_f = Fs / 2 - cutoff_f
+            cutoff_f = fs / 2 - cutoff_f
         else:
             raise ValueError(f'Unknown filter type {filter_type}. Options are "LowPass, HighPass, BandPass"')
 
@@ -623,7 +505,7 @@ def apply_filter(
         N = int(N)
 
         # construct impulse response of ideal bandpass filter h(n), a sinc function
-        fc = cutoff_f / Fs  # normalised cut-off
+        fc = cutoff_f / fs  # normalised cut-off
         n = np.arange(-N / 2, N / 2)
         h = 2 * fc * sinc(2 * np.pi * fc * n)
 

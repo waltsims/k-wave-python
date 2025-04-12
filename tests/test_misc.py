@@ -1,6 +1,6 @@
 import numpy as np
 
-from kwave.utils.math import round_odd, round_even, find_closest
+from kwave.utils.math import find_closest, round_even, round_odd
 
 
 def test_round_odd_down():

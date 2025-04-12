@@ -1,5 +1,6 @@
-import numpy as np
 import logging
+
+import numpy as np
 
 from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor
@@ -303,7 +304,7 @@ class NotATransducer(kSensor):
     @property
     def mask(self):
         """
-        Allow mask query to allow compatability with regular sensor structure - return the active sensor mask
+        Allow mask query to allow compatibility with regular sensor structure - return the active sensor mask
 
         """
 
@@ -644,7 +645,7 @@ class NotATransducer(kSensor):
             ].min()  # -1s compatibility
         else:
             mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += self.stored_beamforming_delays_offset  # -1s compatibility
-        return mask.astype(np.uint8)
+        return mask.astype(np.uint16)
 
     @property
     def elevation_beamforming_delays(self):
