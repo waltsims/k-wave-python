@@ -11,28 +11,50 @@ from tests.matlab_test_data_collectors.python_testers.utils.check_equality impor
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-def test_element():
-    element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
-    # element2 has a very similar position to element 1 but with a small numerical difference
-    element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001])
-    # element3 is the same as element 1 but belongs to a differnet group
-    element3 = Element(group_id=1, type="rect", dim=2, active=True, measure=2, position=[1, 1, 1])
-    # element4 is the same as element 1 but has a differnet position
-    element4 = Element(group_id=0, type="rect", dim=2, active=True, measure=2, position=[2, 2, 2])
-    # element 4 is not an element
-    element5 = "not an element"
+   def test_element_is_close():
+    base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    
+    # Test cases
+    assert base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1]))
+    assert base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001]))
+    assert not base_element.is_close(Element(group_id=1, type="rect", dim=2, active=True, measure=2, position=[1, 1, 1]))
+    assert not base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[2, 2, 2]))
+    assert not base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, float('nan')]))
+    assert not base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, float('inf')]))
+    assert not base_element.is_close(Element(group_id=0, type="annular", dim=2, active=True, measure=1, position=[1, 1, 1]))
 
+def test_element_is_close_nan():
+    nan_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, float('nan')])
+    assert nan_element.is_close(nan_element, equal_nan=True)
+    assert not nan_element.is_close(nan_element, equal_nan=False)
+
+def test_element_is_close_boundary():
+    base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    boundary_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1 + 1.1e-5])
+    assert not base_element.is_close(boundary_element)
+    assert base_element.is_close(boundary_element, rtol=1.2e-5)
+
+def test_element_is_close_consistency():
+    base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    other_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001])
+    assert base_element.is_close(other_element) == np.allclose(base_element.position, other_element.position)
+    assert base_element.is_close(other_element) == base_element.is_close(other_element, rtol=1e-05, atol=1e-08, equal_nan=False)
+
+def test_element_is_close_type_error():
+    element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    
+    with pytest.raises(TypeError, match=r"not an element with <class 'str'> is not of type Element"):
+        element.is_close("not an element")
+
+def test_element_equality():
+    element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001])
+    element3 = Element(group_id=1, type="rect", dim=2, active=True, measure=2, position=[1, 1, 1])
+    
     assert element1 == element1
     assert element1 != element2
-    assert element1.is_close(element2)
     assert element1 != element3
-    assert not element1.is_close(element3)
-    assert element1 != element4
-    assert not element1.is_close(element4)
-    with pytest.raises(TypeError):
-        element1 != element5
-    with pytest.raises(TypeError):
-        element1.is_close(element5)
+
 
 
 def test_kwave_array():
