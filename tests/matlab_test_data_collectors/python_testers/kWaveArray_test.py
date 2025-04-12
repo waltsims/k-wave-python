@@ -11,7 +11,7 @@ from tests.matlab_test_data_collectors.python_testers.utils.check_equality impor
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
-   def test_element_is_close():
+def test_element_is_approximately_equal():
     base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
     
     # Test cases
@@ -23,24 +23,24 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
     assert not base_element.is_close(Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, float('inf')]))
     assert not base_element.is_close(Element(group_id=0, type="annular", dim=2, active=True, measure=1, position=[1, 1, 1]))
 
-def test_element_is_close_nan():
+def test_element_is_approximately_equal_nan():
     nan_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, float('nan')])
     assert nan_element.is_close(nan_element, equal_nan=True)
     assert not nan_element.is_close(nan_element, equal_nan=False)
 
-def test_element_is_close_boundary():
+def test_element_is_approximately_equal_boundary():
     base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
     boundary_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1 + 1.1e-5])
     assert not base_element.is_close(boundary_element)
     assert base_element.is_close(boundary_element, rtol=1.2e-5)
 
-def test_element_is_close_consistency():
+def test_element_is_approximately_equal_consistency():
     base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
     other_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1.000001])
     assert base_element.is_close(other_element) == np.allclose(base_element.position, other_element.position)
     assert base_element.is_close(other_element) == base_element.is_close(other_element, rtol=1e-05, atol=1e-08, equal_nan=False)
 
-def test_element_is_close_type_error():
+def test_element_is_approximately_equal_type_error():
     element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
     
     with pytest.raises(TypeError, match=r"not an element with <class 'str'> is not of type Element"):
