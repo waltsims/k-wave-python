@@ -111,11 +111,11 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= actual.is_close(expected)
+                    are_equal &= actual.is_approximately_equal(expected)
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= actual.is_close(expected)
+                    are_equal &= actual.is_approximately_equal(expected)
         else:
             actual_value = np.squeeze(actual_value)
             expected_value = np.array(expected_value)
