@@ -4,6 +4,25 @@ import pytest
 from kwave.utils.kwave_array import Element
 
 
+def test_element_equality_type_error():
+    element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+
+    with pytest.raises(TypeError, match=r"not an element with <class 'str'> is not of type Element"):
+        element == "not an element"
+
+
+def test_element_equality_is_true():
+    element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    assert element1 == element2
+
+
+def test_element_equality_is_false():
+    element1 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
+    element2 = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[2, 2, 2])
+    assert element1 != element2
+
+
 def test_element_is_approximately_equal():
     base_element = Element(group_id=0, type="rect", dim=2, active=True, measure=1, position=[1, 1, 1])
 
