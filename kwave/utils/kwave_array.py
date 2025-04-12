@@ -90,35 +90,6 @@ class Element:
 
         self.measure = float(self.measure)
 
-    def is_close(self, other: "Element", rtol=1e-05, atol=1e-08, equal_nan=False):
-        """Compares 2 Elements to a certain precision for their numerical
-        fields. This differs from the __eq__ method which requires a perfect
-        match between numerical fields. Works with ints, floats and numpy
-        arrays.
-
-        See numpy.allclose for more details.
-
-        :param other: an instance of Element
-        :param rtol: The relative tolerance parameter, defaults to 1e-05
-        :param atol: The absolute tolerance parameter, defaults to 1e-08
-        :param equal_nan: Whether to compare NaN's as equal, defaults to False
-        :raises ValueError: when other object is not an instance of Element
-        :return: bool
-        """
-        if not isinstance(other, type(self)):
-            raise TypeError(f"{other} with {type(other)} is not of type Element")
-
-        for field in fields(self):
-            self_attr = getattr(self, field.name)
-            other_attr = getattr(other, field.name)
-            if isinstance(self_attr, (float, np.ndarray)):
-                if not np.allclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
-                    return False
-            else:
-                if self_attr != other_attr:
-                    return False
-        return True
-
     def __eq__(self, other):
         """Equality operator that handles all fields but specifically numpy
         arrays.
@@ -135,6 +106,43 @@ class Element:
             other_attr = getattr(other, field.name)
             if isinstance(self_attr, np.ndarray):
                 if not np.array_equal(self_attr, other_attr):
+                    return False
+            else:
+                if self_attr != other_attr:
+                    return False
+        return True
+
+    def is_approximately_equal(self, other: "Element", rtol=1e-05, atol=1e-08, equal_nan=False):
+        """
+        Compares 2 Elements for approxiamte equality.
+        
+        Numerical fields, including arrays, are compared using numpy.allclose 
+        with the specified relative and absolute tolerances. 
+        
+        Non-numerical fields must have exact equality.
+
+        Therefore, should this method returns false, it could be due to 
+        variations in numerical fields outside of atol and rtol, OR due to 
+        non-numerical properties differing.
+         
+        This differs from the __eq__ method which requires a perfect
+        match between all fields.
+
+        :param other: an instance of Element
+        :param rtol: The relative tolerance parameter, defaults to 1e-05
+        :param atol: The absolute tolerance parameter, defaults to 1e-08
+        :param equal_nan: Whether to compare NaN's as equal, defaults to False
+        :raises ValueError: when other object is not an instance of Element
+        :return: bool
+        """
+        if not isinstance(other, type(self)):
+            raise TypeError(f"{other} with {type(other)} is not of type Element")
+
+        for field in fields(self):
+            self_attr = getattr(self, field.name)
+            other_attr = getattr(other, field.name)
+            if isinstance(self_attr, (int, float, np.ndarray)):
+                if not np.allclose(self_attr, other_attr, rtol=rtol, atol=atol, equal_nan=equal_nan):
                     return False
             else:
                 if self_attr != other_attr:

@@ -24,15 +24,15 @@ def test_element():
 
     assert element1 == element1
     assert element1 != element2
-    assert element1.is_close(element2)
+    assert element1.is_approximately_equal(element2)
     assert element1 != element3
-    assert not element1.is_close(element3)
+    assert not element1.is_approximately_equal(element3)
     assert element1 != element4
-    assert not element1.is_close(element4)
+    assert not element1.is_approximately_equal(element4)
     with pytest.raises(TypeError):
         element1 != element5
     with pytest.raises(TypeError):
-        element1.is_close(element5)
+        element1.is_approximately_equal(element5)
 
 
 def test_kwave_array():
