@@ -66,7 +66,7 @@ def kspaceFirstOrder3DG(
     kspaceFirstOrder3D : CPU version of this simulation function
     """
     execution_options.is_gpu_simulation = True
-    assert execution_options.is_gpu_simulation, "kspaceFirstOrder2DG can only be used for GPU simulations"
+    assert execution_options.is_gpu_simulation, "kspaceFirstOrder3DG can only be used for GPU simulations"
     sensor_data = kspaceFirstOrder3D(
         kgrid=kgrid, source=source, sensor=sensor, medium=medium, simulation_options=simulation_options, execution_options=execution_options
     )  # pass inputs to CPU version
