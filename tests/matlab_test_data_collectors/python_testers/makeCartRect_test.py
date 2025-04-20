@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 from kwave.utils.mapgen import make_cart_rect
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader

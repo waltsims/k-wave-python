@@ -1,32 +1,31 @@
 import os
-from pathlib import Path
 import typing
+from pathlib import Path
 from unittest.mock import Mock
 
 import numpy as np
+
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import tol_star
-
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 class kGridMock(Mock):
-
     @property
     def __class__(self) -> type:
         return kWaveGrid
-    
+
     def set_props(self, props):
         self.kprops = props
-    
+
     def __getattr__(self, name: str) -> typing.Any:
-        if name in vars(self.kprops)['_fieldnames']:
+        if name in vars(self.kprops)["_fieldnames"]:
             return self.kprops.__getattribute__(name)
         return super().__getattr__(name)
 
 
 def test_tol_star():
-    reader = TestRecordReader(os.path.join(Path(__file__).parent, 'collectedValues/tolStar.mat'))
+    reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/tolStar.mat"))
 
     for i in range(len(reader)):
         tolerance, kgrid_props, point = reader.expected_value_of("params")

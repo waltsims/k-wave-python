@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 
 from kwave.kmedium import kWaveMedium
@@ -58,7 +59,7 @@ def get_pstd_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
 def get_kspace_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
     """
     in the k-space elastic case, there are two reference sound speeds for
-    the compressional and shear waves, so compute them seperately
+    the compressional and shear waves, so compute them separately
     Args:
         medium:
 

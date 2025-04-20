@@ -1,13 +1,13 @@
-from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
-from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
-from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
 
 import kwave.data
 from kwave.kgrid import kWaveGrid
 from kwave.utils.kwave_array import kWaveArray
+from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality, check_kwave_array_equality
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_linear_array_transducer():

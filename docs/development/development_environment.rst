@@ -24,11 +24,12 @@ Ensure pre-commit is configured by running the following command:
 Running Tests
 =======================
 Assuming matlab is installed locally, and `k-wave <https://github.com/ucl-bug/k-wave>` is installed in a parallel directory, testing can be performed using the make file located in the project root.
+
 .. code-block:: bash
 
     make test
 
-This process will first generate refernce files in matlab and run the complete python test suite against them.
+This process will first generate reference files in matlab and run the complete python test suite against them.
 
 To run the tests manually after reference generation, use the following command:    
 
@@ -43,7 +44,9 @@ To run the tests with coverage, use the following command:
     coverage run
 
 To run all examples, to ensure they still run after changes use the following command:
+
 .. code-block:: bash
+
     make run-examples
 
 or
@@ -87,7 +90,7 @@ These tests are located in the ``tests`` directory. The comparison between ``mat
 #. Open desired example in matlab, e.g. `example_pr_2D_TR_directional_sensors.m <https://github.com/ucl-bug/k-wave/blob/main/k-Wave/examples/example_pr_2D_TR_directional_sensors.m>`_
 #. Find the lines where the call to one of the `kSpaceFirstOrder-family` function is made. For example,
 
-    .. code-block:: python
+    .. code-block:: matlab
     
         input_args = {'PMLInside', false, 'PMLSize', PML_size, 'PlotPML', false, 'Smooth', false};
         sensor_data = kspaceFirstOrder2D(kgrid, medium, source, sensor, input_args{:});
