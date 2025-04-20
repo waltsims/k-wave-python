@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -12,6 +14,7 @@ from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kspaceLineRecon import kspaceLineRecon
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
@@ -41,6 +44,9 @@ def main():
         sound_speed=1500,  # [m/s]
     )
 
+    # set the time array
+    kgrid.makeTime(medium.sound_speed)
+
     # create initial pressure distribution using makeDisc
     disc_magnitude = 5  # [Pa]
     disc_pos = Vector([60, 140])  # [grid points]
@@ -60,9 +66,11 @@ def main():
 
     # define a binary line sensor
     sensor = kSensor()
-    sensor.mask = np.zeros(N)
-    sensor.mask[0] = 1
-
+    # Create mask for inner grid (without PML)
+    inner_mask = np.zeros(N, dtype=bool)
+    inner_mask[0, :] = 1  # Line sensor along the first row
+    sensor.mask = inner_mask
+    sensor.record = ["p", "p_final"]
     # set the input arguments: force the PML to be outside the computational
     # grid; switch off p0 smoothing within kspaceFirstOrder2D
     simulation_options = SimulationOptions(
@@ -75,27 +83,17 @@ def main():
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
     # run the simulation
-    sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data["p"].T
+    sensor_data = kspaceFirstOrder2D(kgrid, source, deepcopy(sensor), medium, simulation_options, execution_options)
+    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
 
-    # reset the initial pressure and sensor
+    # reset only the initial pressure, keep the sensor with recorded data
     source = kSource()
-    sensor = kSensor()
-    sensor.mask = np.zeros(N)
-    sensor.mask[0] = 1
-
-    # assign the time reversal data
-    sensor.time_reversal_boundary_data = sensor_data
-
-    # run the time reversal reconstruction
-    p0_recon = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    p0_recon = p0_recon["p_final"].T
-
-    # add first order compensation for only recording over a half plane
-    p0_recon = 2 * p0_recon
+    # create time reversal handler and run reconstruction
+    tr = TimeReversal(kgrid, medium, sensor)
+    p0_recon = tr(kspaceFirstOrder2D, simulation_options, execution_options)
 
     # repeat the FFT reconstruction for comparison
-    p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear")
+    p_xy = kspaceLineRecon(sensor_data["p"], dy=d[1], dt=kgrid.dt, c=medium.sound_speed.item(), pos_cond=True, interp="linear")
 
     # define a second k-space grid using the dimensions of p_xy
     N_recon = Vector(p_xy.shape)
@@ -119,46 +117,47 @@ def main():
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
         p0 + sensor.mask * disc_magnitude,
-        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
         cmap=cmap,
     )
+    title = "Initial Pressure and Sensor Distribution"
+    ax.set_title(title)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel("x-position [mm]")
     ax.set_xlabel("y-position [mm]")
     fig.colorbar(im, cax=cax)
     plt.show()
-
-    # Plot the reconstructed initial pressure
-    fig, ax = plt.subplots(1, 1)
-    im = ax.imshow(
-        p0_recon,
-        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
-        vmin=-disc_magnitude,
-        vmax=disc_magnitude,
-        cmap=cmap,
-    )
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="3%", pad="2%")
-    ax.set_ylabel("x-position [mm]")
-    ax.set_xlabel("y-position [mm]")
-    fig.colorbar(im, cax=cax)
-    plt.show()
-
-    # Apply a positivity condition
-    p0_recon[p0_recon < 0] = 0
 
     # Plot the reconstructed initial pressure with positivity condition
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
         p0_recon,
-        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,
         cmap=cmap,
     )
+    title = "Time Reversal Reconstruction with Positivity Condition"
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad="2%")
+    ax.set_ylabel("x-position [mm]")
+    ax.set_xlabel("y-position [mm]")
+    fig.colorbar(im, cax=cax)
+    plt.show()
+
+    fig, ax = plt.subplots(1, 1)
+    im = ax.imshow(
+        p0_recon,
+        extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.min() * 1e3, kgrid.x_vec.max() * 1e3],
+        vmin=-disc_magnitude,
+        vmax=disc_magnitude,
+        cmap=cmap,
+    )
+    title = "FFT Reconstruction"
+    ax.set_title(title)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="3%", pad="2%")
     ax.set_ylabel("x-position [mm]")
@@ -170,6 +169,7 @@ def main():
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0[disc_pos[0], :], "k-", label="Initial Pressure")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p_xy_rs[disc_pos[0], :], "r--", label="FFT Reconstruction")
     plt.plot(kgrid.y_vec[:, 0] * 1e3, p0_recon[disc_pos[0], :], "b:", label="Time Reversal")
+
     plt.xlabel("y-position [mm]")
     plt.ylabel("Pressure")
     plt.legend()

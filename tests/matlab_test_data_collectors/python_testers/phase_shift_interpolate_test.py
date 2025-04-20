@@ -51,8 +51,11 @@ def test_fourier_shift_deprecation():
     expected_shifted_data = reader.expected_value_of("shifted_data")
 
     # Test that old function raises deprecation warning but still works
-    with pytest.warns(DeprecationWarning, match="has been renamed to phase_shift_interpolate"):
+    with pytest.warns(DeprecationWarning, match="Call to deprecated function.*fourier_shift") as warns:
         shifted_data = fourier_shift(data, shift, shift_dim)
+        assert len(warns) == 1
+        assert "has been renamed to phase_shift_interpolate" in str(warns[0].message)
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
         assert np.allclose(shifted_data, expected_shifted_data)
 
     logging.log(logging.INFO, "fourier_shift deprecation works as expected!")
