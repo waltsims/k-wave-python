@@ -1,9 +1,12 @@
 import logging
+import numbers
 import platform
 from copy import deepcopy
-from typing import List, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List
 
 import numpy as np
+import scipy
+import scipy.optimize
 
 if TYPE_CHECKING:
     # Found here: https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -11,7 +14,7 @@ if TYPE_CHECKING:
     from kwave.kmedium import kWaveMedium
 
 from .conversion import db2neper
-from .math import sinc, primefactors
+from .math import primefactors, sinc
 
 
 def enforce_fields(dictionary, *fields):
@@ -28,7 +31,7 @@ def enforce_fields(dictionary, *fields):
     """
 
     for f in fields:
-        assert f in dictionary.keys(), [f'The field {f} must be defined in the given dictionary']
+        assert f in dictionary.keys(), [f"The field {f} must be defined in the given dictionary"]
 
 
 def enforce_fields_obj(obj, *fields):
@@ -45,7 +48,7 @@ def enforce_fields_obj(obj, *fields):
     """
 
     for f in fields:
-        assert getattr(obj, f) is not None, f'The field {f} must be not None in the given object'
+        assert getattr(obj, f) is not None, f"The field {f} must be not None in the given object"
 
 
 def check_field_names(dictionary, *fields):
@@ -62,7 +65,7 @@ def check_field_names(dictionary, *fields):
     """
 
     for k in dictionary.keys():
-        assert k in fields, f'The field {k} is not a valid field for the given dictionary'
+        assert k in fields, f"The field {k} is not a valid field for the given dictionary"
 
 
 def check_str_eq(value, target: str) -> bool:
@@ -131,7 +134,56 @@ def is_unix() -> bool:
         True if the current platform is a Unix-like system, False otherwise.
 
     """
-    return platform.system() in ['Linux', 'Darwin']
+    return platform.system() in ["Linux", "Darwin"]
+
+
+def _evaluate_absorbing_dt_stability_limit(kmax, c_ref, medium: "kWaveMedium", xtol=1e-12) -> float:
+    # convert the absorption coefficient to nepers.(rad/s)^-y.m^-1
+    alpha_coeff = db2neper(medium.alpha_coeff, medium.alpha_power)
+
+    # calculate the absorption constant
+    # calculate the absorption constant
+    if medium.alpha_mode != "no_absorption":
+        absorb_tau = -2.0 * alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1.0)
+    else:
+        absorb_tau = np.array([0])
+
+    # calculate the dispersion constant
+    if medium.alpha_mode != "no_dispersion":
+        absorb_eta = 2.0 * alpha_coeff * medium.sound_speed ** (medium.alpha_power) * np.tan(np.pi * medium.alpha_power / 2.0)
+    else:
+        absorb_eta = np.array([0])
+
+    # estimate the timestep required for stability in the absorbing case by
+    # assuming the k-space correction factor, kappa = 1 (note that
+    # absorb_tau and absorb_eta are negative quantities)
+    medium.sound_speed = np.atleast_1d(medium.sound_speed)
+
+    temp1 = 1 - absorb_eta.min() * kmax ** (medium.alpha_power - 1)
+
+    def kappa(dt):
+        return sinc(c_ref * kmax * dt / 2.0)
+
+    def temp2(dt):
+        return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax ** (medium.alpha_power - 1)
+
+    def func_to_solve(dt):
+        return (temp2(dt) + np.sqrt((temp2(dt)) ** 2.0 + 4.0 * temp1)) / (temp1 * kmax * kappa(dt) * medium.sound_speed.max())
+
+    dt_start = func_to_solve(0)
+
+    dt_stability_limit = scipy.optimize.fixed_point(func_to_solve, dt_start, xtol=xtol)
+    return dt_stability_limit
+
+
+def _evaluate_non_absorbing_dt_stability_limit(kmax, c_ref, medium: "kWaveMedium") -> float:
+    if c_ref >= medium.sound_speed.max():
+        # set the timestep to Inf when the model is unconditionally stable
+        dt_stability_limit = float("inf")
+    else:
+        # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
+        dt_stability_limit = 2.0 / (c_ref * kmax) * np.arcsin(c_ref / medium.sound_speed.max())
+    return dt_stability_limit
 
 
 def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
@@ -166,100 +218,32 @@ def check_stability(kgrid: "kWaveGrid", medium: "kWaveMedium") -> float:
     # Instead of making significant changes to the function, we make a deep copy of the argument
     medium = deepcopy(medium)
 
-    # define literals
-    FIXED_POINT_ACCURACY = 1e-12
-
     # find the maximum wavenumber
     kmax = kgrid.k.max()
 
     # calculate the reference sound speed for the fluid code, using the
     # maximum by default which ensures the model is unconditionally stable
-    reductions = {
-        'min': np.min,
-        'max': np.max,
-        'mean': np.mean
-    }
+    reductions = {"min": np.min, "max": np.max, "mean": np.mean}
 
+    # TODO: move this logic to medium
     if medium.sound_speed_ref is not None:
         ss_ref = medium.sound_speed_ref
-        if np.isscalar(ss_ref):
+        if isinstance(ss_ref, numbers.Number):
             c_ref = ss_ref
         else:
             try:
                 c_ref = reductions[ss_ref](medium.sound_speed)
             except KeyError:
-                raise NotImplementedError('Unknown input for medium.sound_speed_ref.')
+                raise NotImplementedError(f"Unknown value of {ss_ref} for medium.sound_speed_ref.")
     else:
-        c_ref = reductions['max'](medium.sound_speed)
+        c_ref = reductions["max"](medium.sound_speed)
 
+    medium.sound_speed = np.atleast_1d(medium.sound_speed)
     # calculate the timesteps required for stability
     if medium.alpha_coeff is None or np.all(medium.alpha_coeff == 0):
-
-        # =====================================================================
-        # NON-ABSORBING CASE
-        # =====================================================================
-
-        medium.sound_speed = np.atleast_1d(medium.sound_speed)
-        if c_ref >= medium.sound_speed.max():
-            # set the timestep to Inf when the model is unconditionally stable
-            dt_stability_limit = float('inf')
-
-        else:
-            # set the timestep required for stability when c_ref~=max(medium.sound_speed(:))
-            dt_stability_limit = 2 / (c_ref * kmax) * np.asin(c_ref / medium.sound_speed.max())
-
+        dt_stability_limit = _evaluate_non_absorbing_dt_stability_limit(kmax, c_ref, medium)
     else:
-
-        # =====================================================================
-        # ABSORBING CASE
-        # =====================================================================
-
-        # convert the absorption coefficient to nepers.(rad/s)^-y.m^-1
-        medium.alpha_coeff = db2neper(medium.alpha_coeff, medium.alpha_power)
-
-        # calculate the absorption constant
-        if medium.alpha_mode == 'no_absorption':
-            absorb_tau = -2 * medium.alpha_coeff * medium.sound_speed ** (medium.alpha_power - 1)
-        else:
-            absorb_tau = np.array([0])
-
-        # calculate the dispersion constant
-        if medium.alpha_mode == 'no_dispersion':
-            absorb_eta = 2 * medium.alpha_coeff * medium.sound_speed ** medium.alpha_power * np.tan(
-                np.pi * medium.alpha_power / 2)
-        else:
-            absorb_eta = np.array([0])
-
-        # estimate the timestep required for stability in the absorbing case by
-        # assuming the k-space correction factor, kappa = 1 (note that
-        # absorb_tau and absorb_eta are negative quantities)
-        medium.sound_speed = np.atleast_1d(medium.sound_speed)
-
-        temp1 = medium.sound_speed.max() * absorb_tau.min() * kmax ** (medium.alpha_power - 1)
-        temp2 = 1 - absorb_eta.min() * kmax ** (medium.alpha_power - 1)
-        dt_estimate = (temp1 + np.sqrt(temp1 ** 2 + 4 * temp2)) / (temp2 * kmax * medium.sound_speed.max())
-
-        # use a fixed point iteration to find the correct timestep, assuming
-        # now that kappa = kappa(dt), using the previous estimate as a starting
-        # point
-
-        # first define the function to iterate
-        def kappa(dt):
-            return sinc(c_ref * kmax * dt / 2)
-
-        def temp3(dt):
-            return medium.sound_speed.max() * absorb_tau.min() * kappa(dt) * kmax ** (medium.alpha_power - 1)
-
-        def func_to_solve(dt):
-            return (temp3(dt) + np.sqrt((temp3(dt)) ** 2 + 4 * temp2)) / (
-                    temp2 * kmax * kappa(dt) * medium.sound_speed.max())
-
-        # run the fixed point iteration
-        dt_stability_limit = dt_estimate
-        dt_old = 0
-        while abs(dt_stability_limit - dt_old) > FIXED_POINT_ACCURACY:
-            dt_old = dt_stability_limit
-            dt_stability_limit = func_to_solve(dt_stability_limit)
+        dt_stability_limit = _evaluate_absorbing_dt_stability_limit(kmax, c_ref, medium)
 
     return dt_stability_limit
 
@@ -283,16 +267,13 @@ def check_factors(min_number: int, max_number: int) -> None:
     # compute the factors and maximum prime factors for each number in the range
     factors = {}
     for n in range(min_number, max_number):
-        factors[n] = {
-            'factors': primefactors(n),
-            'max_prime_factor': max(primefactors(n))
-        }
+        factors[n] = {"factors": primefactors(n), "max_prime_factor": max(primefactors(n))}
 
     # print the numbers that match each maximum prime factor
     for factor in [2, 3, 5, 7]:
-        logging.log(logging.INFO, f'Numbers with a maximum prime factor of {factor}:')
+        logging.log(logging.INFO, f"Numbers with a maximum prime factor of {factor}:")
         for n in range(min_number, max_number):
-            if factors[n]['max_prime_factor'] == factor:
+            if factors[n]["max_prime_factor"] == factor:
                 logging.log(logging.INFO, n)
 
 
@@ -304,7 +285,7 @@ def check_divisible(number: float, divider: float) -> bool:
 
     Args:
         number: Number that's supposed to be divided
-        divider: Divider that should devide the number
+        divider: Divider that should divide the number
 
     Returns:
         True if number is divisible by divider, False otherwise

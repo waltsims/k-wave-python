@@ -1,28 +1,33 @@
-from kwave.data import Vector
-from kwave.utils.mapgen import make_cart_sphere
-
 import logging
-from scipy.io import loadmat
-import numpy as np
 import os
 from pathlib import Path
 
+import numpy as np
+
+from kwave.data import Vector
+from kwave.utils.mapgen import make_cart_sphere
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
 
 def test_makeCartSphere():
-    collected_values_folder = os.path.join(Path(__file__).parent, 'collectedValues/makeCartSphere')
-    num_collected_values = len(os.listdir(collected_values_folder))
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/make_cart_sphere.mat")
+    reader = TestRecordReader(collected_values_file)
 
-    for i in range(num_collected_values):
+    for i in range(len(reader)):
         logging.log(logging.INFO, i)
-        filepath = os.path.join(collected_values_folder, f'{i:06d}.mat')
-        recorded_data = loadmat(filepath, simplify_cells=True)
-
-        radius, num_points, center = recorded_data['params']
+        params = reader.expected_value_of("params")
+        radius = params[0]
+        num_points = params[1]
+        center = params[2]
         center = Vector(center.astype(int))
-        expected_value = recorded_data['sphere']
+        expected_value = reader.expected_value_of("cart_sphere")
 
         sphere = make_cart_sphere(radius, num_points, center)
 
         assert np.allclose(expected_value, sphere)
+        reader.increment()
 
-    logging.log(logging.INFO, 'makeCartSphere(..) works as expected!')
+    logging.log(logging.INFO, "makeCartSphere(..) works as expected!")
+
+    if __name__ == "__main__":
+        test_makeCartSphere()

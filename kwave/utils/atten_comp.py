@@ -1,67 +1,68 @@
 import logging
+
 import numpy as np
+from beartype import beartype as typechecker
+from jaxtyping import Float
 from matplotlib import pyplot as plt
-from beartype import beartype
-from nptyping import NDArray, Float, Shape
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.math import find_closest
-
 
 # =========================================================================
 # FITTING FUNCTION
 # =========================================================================
 
-@beartype
-def constlinfit(x: float, y: float, a: float, b: float, neg_penalty: float=10):
+
+@typechecker
+def constlinfit(x: float, y: float, a: float, b: float, neg_penalty: float = 10):
     error = a * x + b - y
     error[error < 0] = error[error < 0] * neg_penalty
     return sum(abs(error))
 
 
-@beartype
+@typechecker
 def atten_comp(
-        signal: NDArray[Shape["SensorIndex, TimeIndex"], Float], 
-        dt: float, 
-        c: int, 
-        alpha_0: float, 
-        y: float,
-        display_updates: bool=False,
-        distribution: str='Rihaczek',
-        energy_cutoff: float=0.98,
-        freq_multiplier: float=2,
-        filter_cutoff: str='auto',
-        fit_type: str='spline',
-        noise_cutoff: float=0.03,
-        num_splines: int=40,
-        plot_tfd: bool=False,
-        plot_range: str='auto',
-        t0: int=1,
-        taper_ratio: float=0.5,
+    signal: Float[np.ndarray, "SensorIndex TimeIndex"],
+    dt: float,
+    c: int,
+    alpha_0: float,
+    y: float,
+    display_updates: bool = False,
+    distribution: str = "Rihaczek",
+    energy_cutoff: float = 0.98,
+    freq_multiplier: float = 2,
+    filter_cutoff: str = "auto",
+    fit_type: str = "spline",
+    noise_cutoff: float = 0.03,
+    num_splines: int = 40,
+    plot_tfd: bool = False,
+    plot_range: str = "auto",
+    t0: int = 1,
+    taper_ratio: float = 0.5,
 ):
     """
 
-    Args:
-        signal: time series to compensate, indexed as (sensor_index, time_index)
-        dt: time step [s]
-        c: sound speed [m/s]
-        alpha_0: power law absorption prefactor [dB/(MHz^y cm)]
-        y: power law absorption exponent [0 < y < 3, y != 1]
-        display_updates: Boolean controlling whether command line updates
-%       and compute time are printed to the command line
-        distribution: default TF distribution
-        energy_cutoff: cutoff frequency as a [%] of total energy
-        freq_multiplier: used to increase the cutoff_f for a smoother filter
-        filter_cutoff: automatically compute cutoff based on TFD
-        fit_type: default fit type used for smooth distribution
-        noise_cutoff: [%] of signal max, used to threshold the signals
-        num_splines: used for fit_type = 'spline'
-        plot_tfd: plot TFD and cutoff
-        plot_range: plot range
-        t0: index of laser pulse
-        taper_ratio: taper ratio used for Tukey Window
+        Args:
+            signal: time series to compensate, indexed as (sensor_index, time_index)
+            dt: time step [s]
+            c: sound speed [m/s]
+            alpha_0: power law absorption prefactor [dB/(MHz^y cm)]
+            y: power law absorption exponent [0 < y < 3, y != 1]
+            display_updates: Boolean controlling whether command line updates
+    %       and compute time are printed to the command line
+            distribution: default TF distribution
+            energy_cutoff: cutoff frequency as a [%] of total energy
+            freq_multiplier: used to increase the cutoff_f for a smoother filter
+            filter_cutoff: automatically compute cutoff based on TFD
+            fit_type: default fit type used for smooth distribution
+            noise_cutoff: [%] of signal max, used to threshold the signals
+            num_splines: used for fit_type = 'spline'
+            plot_tfd: plot TFD and cutoff
+            plot_range: plot range
+            t0: index of laser pulse
+            taper_ratio: taper ratio used for Tukey Window
 
-    Returns:
+        Returns:
 
     """
     # dynamic range used in TFD plot [dB]
@@ -83,20 +84,18 @@ def atten_comp(
 
     # update command line status
     if display_updates:
-        logging.log(logging.INFO, 'Applying time variant filter...')
+        logging.log(logging.INFO, "Applying time variant filter...")
 
     # check FitType input
-    if fit_type == 'mav':
-
+    if fit_type == "mav":
         # define settings for moving average based on the
         # length of the input signals
         mav_terms = int(round(N * 1e-2))
         mav_terms = mav_terms + (mav_terms % 2)
 
-    elif fit_type not in ['linear', 'spline']:
-
+    elif fit_type not in ["linear", "spline"]:
         # throw error for unknown input
-        raise ValueError('Optional input ''FitType'' must be set to ''spline'', ''mav'', or ''linear''.')
+        raise ValueError("Optional input " "FitType" " must be set to " "spline" ", " "mav" ", or " "linear" ".")
 
     # =========================================================================
     # COMPUTE AVERAGE TIME FREQUENCY DISTRIBUTION (TFD) OF INPUT
@@ -109,43 +108,36 @@ def atten_comp(
     t_array = dt * np.arange(N)
 
     # compute the double-sided frequency axis
-    if N %  2 == 0:
-
+    if N % 2 == 0:
         # N is even
-        f_array = np.arange(-N/2, N/2) * Fs / N
+        f_array = np.arange(-N / 2, N / 2) * Fs / N
 
     else:
-
         # N is odd
         f_array = np.arange(-(N - 1) / 2, (N - 1) / 2) * Fs / N
 
     # compute the TFD if required
-    if filter_cutoff == 'auto' or plot_tfd:
-
+    if filter_cutoff == "auto" or plot_tfd:
         # update display
         if display_updates:
             if num_signals > 1:
-                logging.log(logging.INFO, '  calculating average time-frequency spectrum...')
+                logging.log(logging.INFO, "  calculating average time-frequency spectrum...")
             else:
-                logging.log(logging.INFO, '  calculating time-frequency spectrum...')
+                logging.log(logging.INFO, "  calculating time-frequency spectrum...")
 
         # compute the TFD of the input signal
 
-        if distribution == 'Rihaczek':
+        if distribution == "Rihaczek":
             tfd = np.outer(np.conj(np.fft.fft(signal[:, 0])), signal[:, 0])
             if num_signals > 1:
                 for index in range(1, num_signals):
                     tfd += np.outer(np.conj(np.fft.fft(signal[:, index])), signal[:, index])
             inc = 2 * np.pi / N
-            tfd *= np.exp(
-                np.outer(
-                    -1j * np.arange(0, 2 * np.pi * (1 - 1 / N) + inc, inc),
-                    np.arange(N)
-                )
-            )
+            tfd *= np.exp(np.outer(-1j * np.arange(0, 2 * np.pi * (1 - 1 / N) + inc, inc), np.arange(N)))
             tfd = np.fft.fftshift(tfd, 0) / (N * num_signals)
-        elif distribution == 'Wigner':
-            def qwigner2(x: NDArray[Shape["Dim1"], Float], Fs: float):
+        elif distribution == "Wigner":
+
+            def qwigner2(x: Float[np.ndarray, "Dim1"], Fs: float):
                 raise NotImplementedError
 
             tfd = qwigner2(signal[:, 0], Fs)
@@ -166,11 +158,11 @@ def atten_comp(
     # FIND CUTOFF FREQUENCIES
     # =========================================================================
 
-    @beartype
-    def findClosest(arr: NDArray[Shape["Dim1"], Float], value: float):
+    @typechecker
+    def findClosest(arr: Float[np.ndarray, "Dim1"], value: float):
         return (np.abs(arr - value)).argmin()
 
-    if filter_cutoff == 'auto':  # noqa: F821
+    if filter_cutoff == "auto":  # noqa: F821
         # update display
         if display_updates:
             logging.log(logging.INFO, "finding filter thresholds... ")
@@ -195,29 +187,29 @@ def atten_comp(
 
         if plot_tfd:
             plt.hold(True)
-            plt.plot((np.arange(N) * dt * 1e6, cutoff_freq_array * 1e-6, 'y-'))
-            plt.plot((np.arange(N) * dt * 1e6, -cutoff_freq_array * 1e-6, 'y-'))
+            plt.plot((np.arange(N) * dt * 1e6, cutoff_freq_array * 1e-6, "y-"))
+            plt.plot((np.arange(N) * dt * 1e6, -cutoff_freq_array * 1e-6, "y-"))
             plt.draw()
 
-        if fit_type == 'linear':
+        if fit_type == "linear":
             neg_penalty = 10
             x0 = np.array([-f_array_hs[-1] / N, f_array_hs[int(len(f_array_hs) / 2)]])
             opt_vals = opt.fmin(constlinfit, x0, args=(1, N, cutoff_freq_array, neg_penalty))  # noqa: F821
             x = np.array(list(range(1, N + 1)))
             cutoff_freq_array = opt_vals[0] * x + opt_vals[1]
 
-        elif fit_type == 'spline':
-            pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, 'r')  # noqa: F821
+        elif fit_type == "spline":
+            pp = splinefit(list(range(1, N + 1)), cutoff_freq_array, num_splines, "r")  # noqa: F821
             cutoff_freq_array = ppval(pp, list(range(1, N + 1)))  # noqa: F821
 
-        elif fit_type == 'mav':
-            cutoff_freq_array = np.convolve(cutoff_freq_array, np.ones(mav_terms) / mav_terms, mode='same')
+        elif fit_type == "mav":
+            cutoff_freq_array = np.convolve(cutoff_freq_array, np.ones(mav_terms) / mav_terms, mode="same")
             cutoff_freq_array = np.roll(cutoff_freq_array, int(-(mav_terms // 2)))
 
-        elif fit_type == 'off':
+        elif fit_type == "off":
             pass
         else:
-            raise ValueError('unknown fit_type setting')
+            raise ValueError("unknown fit_type setting")
 
     else:
         assert not isinstance(filter_cutoff, str)
@@ -233,13 +225,13 @@ def atten_comp(
     # Plot final threshold
     if plot_tfd:
         # Plot
-        plt.plot(t_array * 1e6, cutoff_freq_array * 1e-6, 'w--', label='cutoff_frequency')
-        plt.plot(t_array * 1e6, -cutoff_freq_array * 1e-6, 'w--', label='cutoff_frequency')
+        plt.plot(t_array * 1e6, cutoff_freq_array * 1e-6, "w--", label="cutoff_frequency")
+        plt.plot(t_array * 1e6, -cutoff_freq_array * 1e-6, "w--", label="cutoff_frequency")
 
         # Set the plot range
         if isinstance(plot_range, (int, float)):
             plt.ylim(plot_range)
-        elif plot_range == 'auto' and (PLOT_RANGE_MULT * np.amax(cutoff_freq_array) < f_array[-1]):
+        elif plot_range == "auto" and (PLOT_RANGE_MULT * np.amax(cutoff_freq_array) < f_array[-1]):
             plt.ylim(PLOT_RANGE_MULT * np.amax(cutoff_freq_array) * [-1, 1] * 1e-6)
         plt.show()
 
@@ -258,18 +250,18 @@ def atten_comp(
     # Check if f_array and dist_vec are valid
     assert f_array is not None and len(f_array) > 0, "f_array must have non-zero length."
     assert dist_vec is not None and len(dist_vec) > 0, "dist_vec must have non-zero length."
-    
+
     # Create the time variant filter
     f_mat, dist_mat = np.meshgrid(f_array, dist_vec)
 
-    assert y != 1, "A power exponent [y] of 1 is not valid." # this is a duplicate assertion to attempt to remove a warning
+    assert y != 1, "A power exponent [y] of 1 is not valid."  # this is a duplicate assertion to attempt to remove a warning
 
     # Add conditionals or use np.where to manage zero and NaN
     part_1 = (2 * np.pi * np.abs(f_mat)) ** y
     part_2 = 1j * np.tan(np.pi * y / 2)
-    part_3 = (2 * np.pi * f_mat)
+    part_3 = 2 * np.pi * f_mat
     part_4 = (2 * np.pi * np.abs(f_mat)) ** (y - 1)
-    
+
     tv_filter = alpha_0 * dist_mat * (part_1 - part_2 * part_3 * part_4)
 
     # convert cutoff frequency to a window size
@@ -278,7 +270,6 @@ def atten_comp(
 
     # loop through each time/distance and create a row of the filter
     for t_index in range(N):
-
         # get the filter cutoff freq
         cutoff_freq = cutoff_freq_array[t_index]
         N_win = int(N_win_array[t_index])
@@ -287,7 +278,7 @@ def atten_comp(
             # create window
             win = np.zeros(N)
             win_pos = int(np.ceil((N - N_win) / 2)) + 1
-            win[win_pos: win_pos + N_win] = np.tukey(N_win, taper_ratio)
+            win[win_pos : win_pos + N_win] = np.tukey(N_win, taper_ratio)
 
             # window row of tv_filter
             tv_filter[t_index, :] *= win

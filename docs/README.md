@@ -1,6 +1,9 @@
 # k-Wave-python
+
+[![Support](https://dcbadge.vercel.app/api/server/Yq5Qj6D9vN?style=flat)](https://discord.gg/Yq5Qj6D9vN)
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
 
 This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
@@ -12,6 +15,18 @@ for medical imaging, algorithmic prototyping, and testing. Many tools and method
 be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
 to leverage pythonic practices.
 
+## Getting started
+
+![](_static/example_bmode.png)
+
+A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
+
+This example file steps through the process of:
+ 1. Generating a simulation medium
+ 2. Configuring a transducer
+ 3. Running the simulation
+ 4. Reconstructing the simulation
+
 ## Installation
 
 To install the most recent build of k-Wave-python from PyPI, run:
@@ -22,33 +37,6 @@ pip install k-wave-python
 
 After installing the Python package, the required binaries will be downloaded and installed the first time you run a
 simulation.
-
-## Getting started
-
-![](_static/example_bmode.png)
-
-After installation, run the B-mode reconstruction example in the `examples` directory of the repository:
-
-```bash
-git clone https://github.com/waltsims/k-wave-python
-cd k-wave-python
-git checkout v0.3.1
-pip install '.[example]' 
-python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
-```
-
-This example file steps through the process of:
- 1. Generating a simulation medium
- 2. Configuring a transducer
- 3. Running the simulation
- 4. Reconstructing the simulation
-
-### Requirements
-This example expects an NVIDIA GPU by default to simulate with k-Wave.
-
-To test the reconstruction on a machine with a GPU,
-set `RUN_SIMULATION` [on line 30 of `bmode_reconstruction_example.py`](https://github.com/waltsims/k-wave-python/blob/master/examples/bmode_reconstruction_example.py#L30)
-to `True`, and the example will run without the pre-computed data.
 
 ## Development
 
@@ -67,6 +55,15 @@ found [here](https://k-wave-python.readthedocs.io/en/latest/development/developm
 
 The documentation for k-wave-python can be found [here](https://k-wave-python.readthedocs.io/en/latest/).
 
+## Citation
+```bibtex
+@software{k-Wave-Python,
+author = {Yagubbbayli, Farid and Sinden, David and Simson, Walter},
+license = {GPL-3.0},
+title = {{k-Wave-Python}},
+url = {https://github.com/waltsims/k-wave-python}
+}
+```
 ## Contact
 
 e-mail [wsimson@stanford.edu](mailto:wsimson@stanford.edu).

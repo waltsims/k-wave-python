@@ -6,40 +6,40 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'k-Wave-python'
-copyright = '2022, Walter Simson, Farid Yagubbayli'
-author = 'Walter Simson, Farid Yagubbayli'
-version = '0.3.1'
+project = "k-Wave-python"
+copyright = "2024, Walter Simson, Farid Yagubbayli"
+author = "Walter Simson, Farid Yagubbayli"
+version = "0.3.3"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.githubpages',
-    'sphinx_toolbox.code',
-    'sphinx_copybutton',
-    'sphinx.ext.coverage',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    "m2r2"
+    "sphinx.ext.autodoc",
+    "sphinx.ext.githubpages",
+    "sphinx_toolbox.code",
+    "sphinx_copybutton",
+    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx_mdinclude",
 ]
 
 source_suffix = [".rst", ".md"]
-templates_path = ['_templates']
-exclude_patterns = ['README.md', '_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["README.md", "_build", "Thumbs.db", ".DS_Store"]
 
-language = 'en'
+language = "en"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-html_theme = 'furo'
+html_theme = "furo"
 html_theme_options = {
     "source_repository": "https://github.com/waltsims/k-wave-python",
     "source_branch": "master",
     "source_directory": "docs/",
 }
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # -- Options for todo extension ----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/todo.html#configuration

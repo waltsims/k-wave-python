@@ -2,10 +2,10 @@ import logging
 import time
 
 import numpy as np
-from matplotlib import pyplot as plt
-from beartype import beartype
+from beartype import beartype as typechecker
 from beartype.typing import Dict, Union
-from nptyping import NDArray, Float, Shape
+from jaxtyping import Float
+from matplotlib import pyplot as plt
 
 from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_SI, scale_time
@@ -14,23 +14,23 @@ from kwave.utils.matrix import expand_matrix
 from kwave.utils.tictoc import TicToc
 
 
-@beartype
+@typechecker
 def angular_spectrum(
-        input_plane: NDArray[Shape["Dim1, Dim2, Dim3"], Float], 
-        dx: float, 
-        dt: float, 
-        z_pos: float, 
-        medium: Union[Dict, int],
-        angular_restriction: bool=True,
-        grid_expansion: int=0,
-        fft_length: str='auto',
-        data_cast: str='off',
-        data_recast: bool=False,
-        reverse_proj: bool=False,
-        absorbing: bool=False,
-        plot_updates: bool=False,
-        loops_for_time_est: int=5,
-        record_time_series: bool=False
+    input_plane: Float[np.ndarray, "Dim1 Dim2 Dim3"],
+    dx: float,
+    dt: float,
+    z_pos: float,
+    medium: Union[Dict, int],
+    angular_restriction: bool = True,
+    grid_expansion: int = 0,
+    fft_length: str = "auto",
+    data_cast: str = "off",
+    data_recast: bool = False,
+    reverse_proj: bool = False,
+    absorbing: bool = False,
+    plot_updates: bool = False,
+    loops_for_time_est: int = 5,
+    record_time_series: bool = False,
 ):
     """
     Projects a 2D input plane (given as a 3D matrix of
@@ -93,44 +93,41 @@ def angular_spectrum(
     # check list of valid inputs
     if not isinstance(data_cast, str):
         raise ValueError("Optional input 'data_cast' must be a string.")
-    elif data_cast not in ['off', 'double', 'single', 'gpuArray-single', 'gpuArray-double']:
+    elif data_cast not in ["off", "double", "single", "gpuArray-single", "gpuArray-double"]:
         raise ValueError("Invalid input for 'data_cast'.")
 
     # replace double with off
-    if data_cast == 'double':
-        data_cast = 'off'
+    if data_cast == "double":
+        data_cast = "off"
 
     # create empty string to hold extra cast variable for use
     # with the parallel computing toolbox
-    data_cast_prepend = ''
+    data_cast_prepend = ""
 
     # replace PCT options with gpuArray
-    if data_cast == 'gpuArray-single':
-        data_cast = 'gpuArray'
-        data_cast_prepend = 'single'
-    elif data_cast == 'gpuArray-double':
-        data_cast = 'gpuArray'
+    if data_cast == "gpuArray-single":
+        data_cast = "gpuArray"
+        data_cast_prepend = "single"
+    elif data_cast == "gpuArray-double":
+        data_cast = "gpuArray"
 
-    if data_cast == 'gpuArray':
-        raise NotImplementedError('processing with GPU is not supported in the Python implementation of the kWave')
+    if data_cast == "gpuArray":
+        raise NotImplementedError("processing with GPU is not supported in the Python implementation of the kWave")
 
     # check for structured medium input
     if isinstance(medium, dict):
-
         # force the sound speed to be defined
-        if 'sound_speed' not in medium:
+        if "sound_speed" not in medium:
             raise ValueError("medium.sound_speed must be defined when specifying medium properties using a dictionary.")
 
         # assign the sound speed
-        c0 = medium['sound_speed']
+        c0 = medium["sound_speed"]
 
         # assign the absorption
-        if 'alpha_coeff' in medium or 'alpha_power' in medium:
-
+        if "alpha_coeff" in medium or "alpha_power" in medium:
             # enforce both absorption parameters
-            if 'alpha_coeff' not in medium or 'alpha_power' not in medium:
-                raise ValueError(
-                    "Both medium.alpha_coeff and medium.alpha_power must be defined for an absorbing medium.")
+            if "alpha_coeff" not in medium or "alpha_power" not in medium:
+                raise ValueError("Both medium.alpha_coeff and medium.alpha_power must be defined for an absorbing medium.")
 
             # assign flag
             absorbing = True
@@ -142,7 +139,8 @@ def angular_spectrum(
     # check time step is sufficient
     if (c0 * dt / dx) > 1:
         raise ValueError(
-            "Maximum supported frequency in temporal sampling is lower than maximum supported frequency in spatial sample (CFL > 1).")
+            "Maximum supported frequency in temporal sampling is lower than maximum supported frequency in spatial sample (CFL > 1)."
+        )
 
     # get grid size
     Nx, Ny, Nt = input_plane.shape
@@ -157,7 +155,7 @@ def angular_spectrum(
     scale, scale, prefix, _ = scale_SI(min(Nx * dx, Ny * dx))
 
     # update command line status
-    logging.log(logging.INFO, 'Running angular spectrum projection...')
+    logging.log(logging.INFO, "Running angular spectrum projection...")
     logging.log(logging.INFO, f"  start time: {TicToc.start_time}")
     logging.log(logging.INFO, f"  input plane size: {Nx} by {Ny} grid points ({scale * Nx * dx} by {scale * Ny * dx} {prefix}m)")
     logging.log(logging.INFO, f"  grid expansion: {grid_expansion} grid points")
@@ -172,7 +170,7 @@ def angular_spectrum(
         Nx, Ny, Nt = input_plane.shape
 
     # get FFT size
-    if isinstance(fft_length, str) and fft_length == 'auto':
+    if isinstance(fft_length, str) and fft_length == "auto":
         fft_length = int(2 ** (next_pow2(max([Nx, Ny])) + 1))
 
     # update command line status
@@ -185,7 +183,7 @@ def angular_spectrum(
     if N % 2 == 0:
         k_vec = np.arange(-N // 2, N // 2) * 2 * np.pi / (N * dx)
     else:
-        k_vec = np.arange(-(N - 1) // 2, (N-1) // 2 + 1) * 2 * np.pi / (N * dx)
+        k_vec = np.arange(-(N - 1) // 2, (N - 1) // 2 + 1) * 2 * np.pi / (N * dx)
 
     # force middle value
     # force middle value to be zero in case 1/Nx is a recurring
@@ -196,10 +194,10 @@ def angular_spectrum(
     k_vec = np.fft.ifftshift(k_vec)
 
     # create wavenumber grids
-    ky, kx = np.meshgrid(k_vec, k_vec, indexing='ij')
+    ky, kx = np.meshgrid(k_vec, k_vec, indexing="ij")
 
     # precompute term for angular restriction
-    sqrt_kx2_ky2 = np.sqrt(kx ** 2 + ky ** 2)
+    sqrt_kx2_ky2 = np.sqrt(kx**2 + ky**2)
 
     # preallocate maximum pressure output
     pressure_max = np.zeros((Nx, Ny, Nz))
@@ -225,27 +223,27 @@ def angular_spectrum(
     # Preallocate loop variable
     pressure_time_step = np.zeros((Nx, Ny, len(f_vec)), dtype=np.complex128)
 
-    if data_cast != 'off':
-        logging.log(logging.INFO, f'  casting variables to {data_cast} type...')
+    if data_cast != "off":
+        logging.log(logging.INFO, f"  casting variables to {data_cast} type...")
 
         # List of variables to cast
-        cast_variables = ['kx', 'ky', 'z_pos', 'input_plane_w_fft', 'pressure_max', 'pressure_time_step']
+        cast_variables = ["kx", "ky", "z_pos", "input_plane_w_fft", "pressure_max", "pressure_time_step"]
 
         # Additional variable if storing snapshots
         if record_time_series:
-            cast_variables.append('pressure_time')
+            cast_variables.append("pressure_time")
 
         # Additional variables used if absorbing
         if absorbing:
-            cast_variables.append('k')
+            cast_variables.append("k")
 
         # Additional variables used for angular restriction
         if angular_restriction:
-            cast_variables.extend(['sqrt_kx2_ky2', 'fft_length', 'dx'])
+            cast_variables.extend(["sqrt_kx2_ky2", "fft_length", "dx"])
 
         # Loop through, and change data type
         for var_name in cast_variables:
-            exec(f'{var_name} = {data_cast}({data_cast_prepend}({var_name}))')
+            exec(f"{var_name} = {data_cast}({data_cast_prepend}({var_name}))")
 
     # Open figure window
     if plot_updates:
@@ -253,18 +251,16 @@ def angular_spectrum(
         plt.show()
 
     # Update command line status
-    logging.log(logging.INFO, f'  precomputation completed in {scale_time(TicToc.toc())}')
-    logging.log(logging.INFO, '  starting z-step loop...')
+    logging.log(logging.INFO, f"  precomputation completed in {scale_time(TicToc.toc())}")
+    logging.log(logging.INFO, "  starting z-step loop...")
 
     # Loop over z-positions
     for z_index in range(Nz):
-
         # Get current z value
         z = z_pos[z_index]
 
         # If set to zero, just store the input plane
         if z == 0:
-
             # Store maximum pressure
             pressure_max[:, :, z_index] = np.max(input_plane, axis=2)
 
@@ -273,25 +269,21 @@ def angular_spectrum(
                 pressure_time[:, :, :, z_index] = input_plane
 
         else:
-
             # Loop over frequencies
             for f_index in range(len(f_vec_prop)):
-
                 # Compute wavenumber at driving frequency
                 k = 2 * np.pi * f_vec[f_index] / c0
 
                 # Compute wavenumber grid
-                kz = np.sqrt(k ** 2 - ((kx ** 2) + (ky ** 2)).astype(complex))
+                kz = np.sqrt(k**2 - ((kx**2) + (ky**2)).astype(complex))
 
                 # Compute spectral propagator (Eq. 6)
                 H = np.conj(np.exp(1j * z * kz))
 
                 # Account for attenuation (Eq. 11)
                 if absorbing:
-
                     # Convert attenuation to Np/m
-                    alpha_Np = db2neper(medium.alpha_coeff, medium.alpha_power) * (
-                                2 * np.pi * f_vec[f_index]) ** medium.alpha_power
+                    alpha_Np = db2neper(medium.alpha_coeff, medium.alpha_power) * (2 * np.pi * f_vec[f_index]) ** medium.alpha_power
 
                     # Apply attenuation to propagator
                     if alpha_Np != 0:
@@ -303,7 +295,7 @@ def angular_spectrum(
                     D = (fft_length - 1) * dx
 
                     # Compute angular threshold (Eq. 10)
-                    kc = k * np.sqrt(0.5 * D ** 2 / (0.5 * D ** 2 + z ** 2))
+                    kc = k * np.sqrt(0.5 * D**2 / (0.5 * D**2 + z**2))
 
                     # Apply threshold to propagator
                     H[sqrt_kx2_ky2 > kc] = 0
@@ -343,10 +335,10 @@ def angular_spectrum(
             # Update command line status
             if z_index == loops_for_time_est:
                 est_sim_time = scale_time(TicToc.toc() * Nz / z_index)
-                logging.log(logging.INFO, f'  estimated simulation time {est_sim_time}  ...')
+                logging.log(logging.INFO, f"  estimated simulation time {est_sim_time}  ...")
 
     # update command line status
-    logging.log(logging.INFO, f'  simulation completed in {time.perf_counter() - TicToc.start_time}')
+    logging.log(logging.INFO, f"  simulation completed in {time.perf_counter() - TicToc.start_time}")
 
     # == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == =
     # POST PROCESSING
@@ -362,17 +354,17 @@ def angular_spectrum(
     # Trim grid expansion
     if grid_expansion > 0:
         pressure_max = pressure_max[
-                       grid_expansion: -grid_expansion,
-                       grid_expansion: -grid_expansion,
-                       :,
-                       ]
+            grid_expansion:-grid_expansion,
+            grid_expansion:-grid_expansion,
+            :,
+        ]
         if record_time_series:
             pressure_time = pressure_time[
-                            grid_expansion: -grid_expansion,
-                            grid_expansion: -grid_expansion,
-                            :,
-                            :,
-                            ]
+                grid_expansion:-grid_expansion,
+                grid_expansion:-grid_expansion,
+                :,
+                :,
+            ]
 
     # Reverse time signals and grid if stepping backwards
     if reverse_proj:

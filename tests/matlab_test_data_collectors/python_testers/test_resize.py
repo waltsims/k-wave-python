@@ -9,19 +9,22 @@ from tests.matlab_test_data_collectors.python_testers.utils.record_reader import
 
 
 def test_resize():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/resize.mat')
+    test_record_path = os.path.join(Path(__file__).parent, "collectedValues/resize.mat")
     reader = TestRecordReader(test_record_path)
 
     for i in range(len(reader)):
-        volume = reader.expected_value_of('volume')
-        expected_resized_volume = reader.expected_value_of('resized_volume')
-        new_size = reader.expected_value_of('new_size')
-        method = reader.expected_value_of('method')  # TODO: does not work for spline cases
+        volume = reader.expected_value_of("volume")
+        expected_resized_volume = reader.expected_value_of("resized_volume")
+        new_size = reader.expected_value_of("new_size")
+        method = reader.expected_value_of("method")  # TODO: does not work for spline cases
 
         resized_volume = resize(volume, new_size, interp_mode=method)
 
-        assert np.allclose(expected_resized_volume,
-                           resized_volume), f"Results do not match for {i + 1} dimensional case."
+        assert np.allclose(expected_resized_volume, resized_volume), f"Results do not match for {i + 1} dimensional case."
         reader.increment()
 
-    logging.log(logging.INFO, 'resize(..) works as expected!')
+    logging.log(logging.INFO, "resize(..) works as expected!")
+
+
+if __name__ == "__main__":
+    test_resize()

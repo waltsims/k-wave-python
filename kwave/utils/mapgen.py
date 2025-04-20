@@ -1,25 +1,27 @@
 import logging
 import math
-from math import floor
 import warnings
+from math import floor
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+from beartype import beartype as typechecker
+from beartype.typing import List, Optional, Tuple, Union, cast
+from jaxtyping import Complex, Float, Int, Integer, Real
 from scipy import optimize
-from beartype import beartype
-from beartype.typing import Union, List, Tuple, cast, Optional
-from nptyping import NDArray, Float, Shape, Complex, Int, Number
-
-from .conversion import db2neper, neper2db
-from .data import scale_SI
-from .math import cosd, sind, Rz, Ry, Rx, compute_linear_transform
-from .matlab import matlab_assign, matlab_find, ind2sub, sub2ind
-from .matrix import max_nd
-from .tictoc import TicToc
-from ..data import Vector
+from scipy.spatial.transform import Rotation
 
 import kwave.utils.typing as kt
+from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
+
+from ..data import Vector
+from .conversion import db2neper, neper2db
+from .data import scale_SI
+from .math import Rx, Ry, Rz, compute_linear_transform, cosd, sind
+from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
+from .matrix import max_nd
+from .tictoc import TicToc
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
@@ -27,8 +29,9 @@ GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
 
 
-def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False,
-                   use_spiral: bool = False) -> np.ndarray:
+def make_cart_disc(
+    disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False, use_spiral: bool = False
+) -> np.ndarray:
     """
     Create evenly distributed Cartesian points covering a disc.
 
@@ -47,7 +50,6 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         disc: 2 x num_points or 3 x num_points array of Cartesian coordinates.
     """
 
-
     # check input values
     if radius <= 0:
         raise ValueError("The radius must be positive.")
@@ -55,7 +57,7 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     def make_spiral_circle_points(num_points: int, radius: float) -> np.ndarray:
         # compute spiral parameters
         theta = lambda t: GOLDEN_ANGLE * t
-        C = np.pi * radius ** 2 / (num_points - 1)
+        C = np.pi * radius**2 / (num_points - 1)
         r = lambda t: np.sqrt(C * t / np.pi)
 
         # compute canonical spiral points
@@ -64,15 +66,14 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         return p0
 
     def make_concentric_circle_points(num_points: int, radius: float) -> Tuple[np.ndarray, int]:
-
-        assert num_points >= 1, "The number of points must be greater or equal to 1." 
+        assert num_points >= 1, "The number of points must be greater or equal to 1."
 
         num_radial = int(np.ceil(np.sqrt(num_points / np.pi)))
-       
+
         try:
             d_radial = radius / (num_radial - 1)
         except ZeroDivisionError:
-            d_radial = float('inf')
+            d_radial = float("inf")
 
         r = np.arange(num_radial) * (radius - d_radial / 2) / (num_radial - 1)
 
@@ -96,7 +97,6 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         return points, num_points
 
     if use_spiral:
-
         p0 = make_spiral_circle_points(num_points, radius)
 
     else:
@@ -131,7 +131,7 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
         # create the figure
         if len(disc_pos) == 2:
             plt.figure()
-            plt.plot(disc[1, :] * scale, disc[0, :] * scale, '.')
+            plt.plot(disc[1, :] * scale, disc[0, :] * scale, ".")
             plt.gca().invert_yaxis()
             plt.xlabel(f"y-position [{prefix}m]")
             plt.ylabel(f"x-position [{prefix}m]")
@@ -150,15 +150,10 @@ def make_cart_disc(disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, n
     return np.squeeze(disc)
 
 
-@beartype
+@typechecker
 def make_cart_bowl(
-    bowl_pos: np.ndarray, 
-    radius: float, 
-    diameter: float, 
-    focus_pos: np.ndarray, 
-    num_points: int,
-    plot_bowl: Optional[bool] = False
-) -> NDArray[Shape["3, NumPoints"], Float]:
+    bowl_pos: np.ndarray, radius: float, diameter: float, focus_pos: np.ndarray, num_points: int, plot_bowl: Optional[bool] = False
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Create evenly distributed Cartesian points covering a bowl.
 
@@ -207,9 +202,7 @@ def make_cart_bowl(
 
     # compute canonical spiral points
     t = np.linspace(0, num_points - 1, num_points)
-    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)),
-                   np.sin(theta(t)) * np.sin(varphi(t)),
-                   np.cos(varphi(t))])
+    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)), np.sin(theta(t)) * np.sin(varphi(t)), np.cos(varphi(t))])
     p0 = radius * p0
 
     # linearly transform the canonical spiral points to give bowl in correct orientation
@@ -227,11 +220,11 @@ def make_cart_bowl(
 
         # create the figure
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
         ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale)
-        ax.set_xlabel('[' + prefix + unit + ']')
-        ax.set_ylabel('[' + prefix + unit + ']')
-        ax.set_zlabel('[' + prefix + unit + ']')
+        ax.set_xlabel("[" + prefix + unit + "]")
+        ax.set_ylabel("[" + prefix + unit + "]")
+        ax.set_zlabel("[" + prefix + unit + "]")
         ax.set_box_aspect([1, 1, 1])
         plt.grid(True)
         plt.show()
@@ -239,7 +232,7 @@ def make_cart_bowl(
     return bowl
 
 
-def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'linear') -> np.ndarray:
+def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = "linear") -> np.ndarray:
     """
     Generate a row vector of either logarithmically or linearly spaced points between `start` and `stop`.
 
@@ -263,18 +256,17 @@ def get_spaced_points(start: float, stop: float, n: int = 100, spacing: str = 'l
     """
 
     if stop <= start:
-        raise ValueError('`stop` must be larger than `start`.')
+        raise ValueError("`stop` must be larger than `start`.")
 
-    if spacing == 'linear':
+    if spacing == "linear":
         return np.linspace(start, stop, num=n)
-    elif spacing == 'log':
+    elif spacing == "log":
         return np.geomspace(start, stop, num=n)
     else:
         raise ValueError(f"`spacing` {spacing} is not a valid argument. Choose from 'linear' or 'log'.")
 
 
-def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: float, plot_fit: bool = False) -> Tuple[
-    float, float]:
+def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: float, plot_fit: bool = False) -> Tuple[float, float]:
     """
     Calculate absorption parameters that fit a power law over a given frequency range.
 
@@ -309,15 +301,15 @@ def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: fl
     # convert user defined a0 to Nepers/((rad/s)^y m)
     a0_np = db2neper(a0, y)
 
-    desired_absorption = a0_np * w ** y
+    desired_absorption = a0_np * w**y
 
     def abs_func(trial_vals):
         """Second-order absorption error"""
         a0_np_trial, y_trial = trial_vals
 
-        actual_absorption = a0_np_trial * w ** y_trial / (1 - (y_trial + 1) *
-                                                          a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (
-                                                                  y_trial - 1))
+        actual_absorption = (
+            a0_np_trial * w**y_trial / (1 - (y_trial + 1) * a0_np_trial * c0 * np.tan(np.pi * y_trial / 2) * w ** (y_trial - 1))
+        )
 
         absorption_error = np.sqrt(np.sum((desired_absorption - actual_absorption) ** 2))
 
@@ -367,11 +359,11 @@ def power_law_kramers_kronig(w: np.ndarray, w0: float, c0: float, a0: float, y: 
     return c_kk
 
 
-def water_absorption(f, temp):
+def water_absorption(f: float, temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
     Calculates the ultrasonic absorption in distilled
     water at a given temperature and frequency using a 7 th order
-    polynomial fitted to the data given by np.pinkerton(1949).
+    polynomial fitted to the data given by Pinkerton (1949).
 
 
     Args:
@@ -385,33 +377,42 @@ def water_absorption(f, temp):
         >>> abs = waterAbsorption(f, T)
 
     References:
-        [1] np.pinkerton(1949) "The Absorption of Ultrasonic Waves in Liquids
-        and its Relation to Molecular Constitution, " Proceedings of the
-        Physical Society.Section B, 2, 129 - 141
+        [1] J. M. M. Pinkerton (1949) "The Absorption of Ultrasonic Waves in Liquids and its
+                                        Relation to Molecular Constitution,"
+        Proceedings of the Physical Society. Section B, 2, 129-141
 
     """
 
     NEPER2DB = 8.686
     # check temperature is within range
-    if not 0 <= temp <= 60:
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 60.0)]):
         raise Warning("Temperature outside range of experimental data")
 
     # conversion factor between Nepers and dB NEPER2DB = 8.686;
     # coefficients for 7th order polynomial fit
-    a = [56.723531840522710, -2.899633796917384, 0.099253401567561, -0.002067402501557, 2.189417428917596e-005,
-         -6.210860973978427e-008, -6.402634551821596e-010, 3.869387679459408e-012]
+    a = [
+        56.723531840522710,
+        -2.899633796917384,
+        0.099253401567561,
+        -0.002067402501557,
+        2.189417428917596e-005,
+        -6.210860973978427e-008,
+        -6.402634551821596e-010,
+        3.869387679459408e-012,
+    ]
 
     # compute absorption
-    a_on_fsqr = (a[0] + a[1] * temp + a[2] * temp ** 2 + a[3] * temp ** 3 + a[4] * temp ** 4 + a[5] * temp ** 5 + a[
-        6] * temp ** 6 + a[7] * temp ** 7) * 1e-17
+    a_on_fsqr = (
+        a[0] + a[1] * temp + a[2] * temp**2 + a[3] * temp**3 + a[4] * temp**4 + a[5] * temp**5 + a[6] * temp**6 + a[7] * temp**7
+    ) * 1e-17
 
-    abs = NEPER2DB * 1e12 * f ** 2 * a_on_fsqr
+    abs = NEPER2DB * 1e12 * f**2 * a_on_fsqr
     return abs
 
 
-def water_sound_speed(temp: float) -> float:
+def water_sound_speed(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
-    Calculate the sound speed in distilled water with temperature.
+    Calculate the sound speed in distilled water with temperature according to Marczak (1997)
 
     Args:
         temp: The temperature of the water in degrees Celsius.
@@ -423,13 +424,13 @@ def water_sound_speed(temp: float) -> float:
         ValueError: if `temp` is not between 0 and 95
 
     References:
-        Marczak, R. (1997). The sound velocity in water as a function of temperature.
-                        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
+        [1] R. Marczak (1997). "The sound velocity in water as a function of temperature".
+        Journal of Research of the National Institute of Standards and Technology, 102(6), 561-567.
 
     """
 
     # check limits
-    if not (0 <= temp <= 95):
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 95.0)]):
         raise ValueError("`temp` must be between 0 and 95.")
 
     # find value
@@ -438,7 +439,7 @@ def water_sound_speed(temp: float) -> float:
     return c
 
 
-def water_density(temp: float) -> float:
+def water_density(temp: Union[kt.NUMERIC, np.ndarray]) -> Union[kt.NUMERIC, np.ndarray]:
     """
     Calculate the density of air-saturated water with temperature.
 
@@ -455,21 +456,21 @@ def water_density(temp: float) -> float:
         ValueError: if `temp` is not between 5 and 40
 
     References:
-        [1] F.E. Jones and G.L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
-        J. Res. Natl. Inst.Stand.Technol., 97(3), 335-340.
+        [1] F. E. Jones and G. L. Harris (1992) "ITS-90 Density of Water Formulation for Volumetric Standards Calibration,"
+        Journal of Research of the National Institute of Standards and Technology, 97(3), 335-340.
 
     """
 
     # check limits
-    if not (5 <= temp <= 40):
+    if not np.all([np.all(np.asarray(temp) >= 5.0), np.all(np.asarray(temp) <= 40.0)]):
         raise ValueError("`temp` must be between 5 and 40.")
 
     # calculate density of air-saturated water
-    density = 999.84847 + 6.337563e-2 * temp - 8.523829e-3 * temp ** 2 + 6.943248e-5 * temp ** 3 - 3.821216e-7 * temp ** 4
+    density = 999.84847 + 6.337563e-2 * temp - 8.523829e-3 * temp**2 + 6.943248e-5 * temp**3 - 3.821216e-7 * temp**4
     return density
 
 
-def water_non_linearity(temp: float) -> float:
+def water_non_linearity(temp: Union[float, kt.NP_DOMAIN]) -> Union[float, kt.NP_DOMAIN]:
     """
      Calculates the parameter of nonlinearity B/A at a
      given temperature using a fourth-order polynomial fitted to the data
@@ -485,13 +486,14 @@ def water_non_linearity(temp: float) -> float:
          >>> BonA = waterNonlinearity(T)
 
      References:
-         [1] R. T Beyer (1960) "Parameter of nonlinearity in fluids," J.
-         Acoust. Soc. Am., 32(6), 719-721.
+         [1] R. T. Beyer (1960) "Parameter of nonlinearity in fluids,"
+         J. Acoust. Soc. Am., 32(6), 719-721.
 
     """
 
     # check limits
-    assert 0 <= temp <= 100, "Temp must be between 0 and 100."
+    if not np.all([np.all(temp >= 0.0), np.all(temp <= 100.0)]):
+        raise ValueError("`temp` must be between 0 and 100.")
 
     # find value
     p = [-4.587913769504693e-08, 1.047843302423604e-05, -9.355518377254833e-04, 5.380874771364909e-2, 4.186533937275504]
@@ -499,13 +501,9 @@ def water_non_linearity(temp: float) -> float:
     return BonA
 
 
-@beartype
+@typechecker
 def make_ball(
-        grid_size: Vector, 
-        ball_center: Vector, 
-        radius: int, 
-        plot_ball: bool = False,
-        binary: bool = False
+    grid_size: Vector, ball_center: Vector, radius: int, plot_ball: bool = False, binary: bool = False
 ) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Creates a binary map of a filled ball within a 3D grid.
@@ -556,13 +554,10 @@ def make_ball(
     return ball
 
 
-@beartype
+@typechecker
 def make_cart_sphere(
-    radius: Union[float, int], 
-    num_points: int, 
-    center_pos: Vector = Vector([0, 0, 0]),
-    plot_sphere: bool = False
-) -> NDArray[Shape["3, NumPoints"], Float]:
+    radius: Union[float, int], num_points: int, center_pos: Vector = Vector([0, 0, 0]), plot_sphere: bool = False
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
 
@@ -581,7 +576,7 @@ def make_cart_sphere(
     off = 2 / num_points
     k = np.arange(0, num_points)
     y = k * off - 1 + (off / 2)
-    r = np.sqrt(1 - (y ** 2))
+    r = np.sqrt(1 - (y**2))
     phi = k * inc
 
     if num_points <= 0:
@@ -600,13 +595,13 @@ def make_cart_sphere(
 
         # create the figure
         plt.figure()
-        plt.style.use('seaborn-poster')
-        ax = plt.axes(projection='3d')
-        ax.plot3D(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, '.')
+        plt.style.use("seaborn-poster")
+        ax = plt.axes(projection="3d")
+        ax.plot3D(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, ".")
         ax.set_xlabel(f"[{prefix} m]")
         ax.set_ylabel(f"[{prefix} m]")
         ax.set_zlabel(f"[{prefix} m]")
-        ax.axis('auto')
+        ax.axis("auto")
         ax.grid()
         plt.show()
 
@@ -614,12 +609,8 @@ def make_cart_sphere(
 
 
 def make_cart_circle(
-    radius: float, 
-    num_points: int, 
-    center_pos: Vector = Vector([0, 0]),
-    arc_angle: float = 2 * np.pi, 
-    plot_circle: bool = False
-) -> NDArray[Shape["2, NumPoints"], Float]:
+    radius: float, num_points: int, center_pos: Vector = Vector([0, 0]), arc_angle: float = 2 * np.pi, plot_circle: bool = False
+) -> Float[np.ndarray, "2 NumPoints"]:
     """
     Create a set of points in cartesian coordinates defining a circle or arc.
 
@@ -661,22 +652,17 @@ def make_cart_circle(
 
         # create the figure
         plt.figure()
-        plt.plot(circle[1, :] * scale, circle[0, :] * scale, 'b.')
+        plt.plot(circle[1, :] * scale, circle[0, :] * scale, "b.")
         plt.xlabel([f"y-position [{prefix} m]"])
         plt.ylabel([f"x-position [{prefix} m]"])
-        plt.axis('equal')
+        plt.axis("equal")
         plt.show()
 
     return np.squeeze(circle)
 
 
-@beartype
-def make_disc(
-    grid_size: Vector, 
-    center: Vector, 
-    radius, 
-    plot_disc=False
-) -> kt.NP_ARRAY_BOOL_2D:
+@typechecker
+def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.NP_ARRAY_BOOL_2D:
     """
     Create a binary map of a filled disc within a 2D grid.
 
@@ -697,8 +683,8 @@ def make_disc(
 
     """
 
-    assert len(grid_size) == 2, 'Grid size must be 2D.'
-    assert len(center) == 2, 'Center must be 2D.'
+    assert len(grid_size) == 2, "Grid size must be 2D."
+    assert len(center) == 2, "Center must be 2D."
 
     # define literals
     MAGNITUDE = 1
@@ -712,7 +698,7 @@ def make_disc(
     center.y = center.y if center.y != 0 else np.floor(grid_size.y / 2).astype(int) + 1
 
     # check the inputs
-    assert np.all(0 < center) and np.all(center <= grid_size), 'Disc center must be within grid.'
+    assert np.all(0 < center) and np.all(center <= grid_size), "Disc center must be within grid."
 
     # create empty matrix
     disc = np.zeros(grid_size, dtype=bool)
@@ -733,13 +719,9 @@ def make_disc(
     return disc
 
 
-@beartype
+@typechecker
 def make_circle(
-        grid_size: Vector, 
-        center: Vector, 
-        radius: Union[int, Int, Float], 
-        arc_angle: Optional[float] = None,
-        plot_circle: bool = False
+    grid_size: Vector, center: Vector, radius: Real[kt.ScalarLike, ""], arc_angle: Optional[float] = None, plot_circle: bool = False
 ) -> kt.NP_ARRAY_INT_2D:
     """
     Create a binary map of a circle within a 2D grid.
@@ -803,13 +785,11 @@ def make_circle(
         # check whether the point is within the arc made by arc_angle, and lies
         # within the grid
         if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
-            if (px_i >= 1) and (px_i <= grid_size.x) and (py_i >= 1) and (
-                    py_i <= grid_size.y):
+            if (px_i >= 1) and (px_i <= grid_size.x) and (py_i >= 1) and (py_i <= grid_size.y):
                 circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     # loop through the remaining points using the midpoint circle algorithm
     while x < (y - 1):
-
         x = x + 1
         if d < 0:
             d = d + x + x + 1
@@ -824,7 +804,6 @@ def make_circle(
 
         # loop through each point
         for point_index, (px_i, py_i) in enumerate(zip(px, py)):
-
             # check whether the point is within the arc made by arc_angle, and
             # lies within the grid
             if (np.arctan2(px_i - cx, py_i - cy) + np.pi) <= arc_angle:
@@ -832,15 +811,15 @@ def make_circle(
                     circle[px_i - 1, py_i - 1] = MAGNITUDE
 
     if plot_circle:
-        plt.imshow(circle, cmap='gray_r')
-        plt.ylabel('x-position [grid points]')
-        plt.xlabel('y-position [grid points]')
+        plt.imshow(circle, cmap="gray_r")
+        plt.ylabel("x-position [grid points]")
+        plt.xlabel("y-position [grid points]")
         plt.show()
 
     return circle
 
 
-def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.ndarray:
+def make_pixel_map(grid_size: Vector, shift=None, origin_size="single") -> np.ndarray:
     """
     Generates a matrix with values of the distance of each pixel from the center of a grid.
 
@@ -879,7 +858,7 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
          the final row and column.
 
     """
-    assert len(grid_size) == 2 or len(grid_size) == 3, 'Grid size must be a 2 or 3 element vector.'
+    assert len(grid_size) == 2 or len(grid_size) == 3, "Grid size must be a 2 or 3 element vector."
 
     # define defaults
     shift_def = 1
@@ -896,10 +875,11 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
         shift = [shift_def] * map_dimension
 
     # catch input errors
-    assert origin_size in ['single', 'double'], 'Unknown setting for optional input Center.'
+    assert origin_size in ["single", "double"], "Unknown setting for optional input Center."
 
-    assert len(shift) == map_dimension, \
-        f'Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters.'
+    assert (
+        len(shift) == map_dimension
+    ), f"Optional input Shift must have {map_dimension} elements for {map_dimension} dimensional input parameters."
 
     if map_dimension == 2:
         # create the maps for each dimension
@@ -907,10 +887,10 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
         ny = create_pixel_dim(Ny, origin_size, shift[1])
 
         # create plaid grids
-        r_x, r_y = np.meshgrid(nx, ny, indexing='ij')
+        r_x, r_y = np.meshgrid(nx, ny, indexing="ij")
 
         # extract the pixel radius
-        r = np.sqrt(r_x ** 2 + r_y ** 2)
+        r = np.sqrt(r_x**2 + r_y**2)
     if map_dimension == 3:
         # create the maps for each dimension
         nx = create_pixel_dim(Nx, origin_size, shift[0])
@@ -918,10 +898,10 @@ def make_pixel_map(grid_size: Vector, shift=None, origin_size='single') -> np.nd
         nz = create_pixel_dim(Nz, origin_size, shift[2])
 
         # create plaid grids
-        r_x, r_y, r_z = np.meshgrid(nx, ny, nz, indexing='ij')
+        r_x, r_y, r_z = np.meshgrid(nx, ny, nz, indexing="ij")
 
         # extract the pixel radius
-        r = np.sqrt(r_x ** 2 + r_y ** 2 + r_z ** 2)
+        r = np.sqrt(r_x**2 + r_y**2 + r_z**2)
     return r
 
 
@@ -943,10 +923,8 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 
     # grid dimension has an even number of points
     if Nx % 2 == 0:
-
         # pixel numbering has a single centre point
-        if origin_size == 'single':
-
+        if origin_size == "single":
             # centre point is shifted towards the final pixel
             if shift == 1:
                 nx = np.arange(-Nx / 2, Nx / 2 - 1 + 1, 1)
@@ -957,18 +935,16 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
 
         # pixel numbering has a double centre point
         else:
-            nx = np.hstack([np.arange(-Nx / 2 + 1, 0 + 1, 1), np.arange(0, -Nx / 2 - 1 + 1, 1)])
+            nx = np.hstack([np.arange(-Nx / 2 + 1, 0 + 1, 1), np.arange(0, Nx / 2 - 1 + 1, 1)])
 
     # grid dimension has an odd number of points
     else:
-
         # pixel numbering has a single centre point
-        if origin_size == 'single':
+        if origin_size == "single":
             nx = np.arange(-(Nx - 1) / 2, (Nx - 1) / 2 + 1, 1)
 
         # pixel numbering has a double centre point
         else:
-
             # centre point is shifted towards the final pixel
             if shift == 1:
                 nx = np.hstack([np.arange(-(Nx - 1) / 2, 0 + 1, 1), np.arange(0, (Nx - 1) / 2 - 1 + 1, 1)])
@@ -979,13 +955,13 @@ def create_pixel_dim(Nx: int, origin_size: float, shift: float) -> Tuple[np.ndar
     return nx
 
 
-@beartype
+@typechecker
 def make_line(
-        grid_size: Vector,
-        startpoint: Union[Tuple[Int, Int], NDArray[Shape['2'], Int]],
-        endpoint: Optional[Union[Tuple[Int, Int], NDArray[Shape['2'], Int]]] = None,
-        angle: Optional[float] = None,
-        length: Optional[int] = None
+    grid_size: Vector,
+    startpoint: Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]],
+    endpoint: Optional[Union[Tuple[Int[kt.ScalarLike, ""], Int[kt.ScalarLike, ""]], Int[np.ndarray, "2"]]] = None,
+    angle: Optional[Float[kt.ScalarLike, ""]] = None,
+    length: Optional[Int[kt.ScalarLike, ""]] = None,
 ) -> kt.NP_ARRAY_BOOL_2D:
     """
     Generate a line shape with a given start and end point, angle, or length.
@@ -1004,55 +980,53 @@ def make_line(
         line: A 2D array of the same size as the input parameters,
                 with a value of 1 for pixels that are part of the line and 0 for pixels that are not.
     """
-    assert len(grid_size) == 2, 'Grid size must be a 2-element vector.'
+    assert len(grid_size) == 2, "Grid size must be a 2-element vector."
 
     startpoint = np.array(startpoint, dtype=int)
     if endpoint is not None:
         endpoint = np.array(endpoint, dtype=int)
 
     if len(startpoint) != 2:
-        raise ValueError('startpoint should be a two-element vector.')
+        raise ValueError("startpoint should be a two-element vector.")
 
     if np.any(startpoint < 1) or startpoint[0] > grid_size.x or startpoint[1] > grid_size.y:
-        ValueError('The starting point must lie within the grid, between [1 1] and [grid_size.x grid_size.y].')
+        ValueError("The starting point must lie within the grid, between [1 1] and [grid_size.x grid_size.y].")
 
     # =========================================================================
     # LINE BETWEEN TWO POINTS OR ANGLED LINE?
     # =========================================================================
 
     if endpoint is not None:
-        linetype = 'AtoB'
+        linetype = "AtoB"
         a, b = startpoint, endpoint
 
         # Addition => Fix Matlab2Python indexing
         a -= 1
         b -= 1
     else:
-        linetype = 'angled'
+        linetype = "angled"
         angle, linelength = angle, length
 
     # =========================================================================
     # MORE INPUT CHECKING
     # =========================================================================
 
-    if linetype == 'AtoB':
-
+    if linetype == "AtoB":
         # a and b must be different points
         if np.all(a == b):
-            raise ValueError('The first and last points cannot be the same.')
+            raise ValueError("The first and last points cannot be the same.")
 
         # end point must be a two-element row vector
         if len(b) != 2:
-            raise ValueError('endpoint should be a two-element vector.')
+            raise ValueError("endpoint should be a two-element vector.")
 
         # a and b must be within the grid
         xx = np.array([a[0], b[0]], dtype=int)
         yy = np.array([a[1], b[1]], dtype=int)
         if np.any(a < 0) or np.any(b < 0) or np.any(xx > grid_size.x - 1) or np.any(yy > grid_size.y - 1):
-            raise ValueError('Both the start and end points must lie within the grid.')
+            raise ValueError("Both the start and end points must lie within the grid.")
 
-    if linetype == 'angled':
-
+    if linetype == "angled":
         # angle must lie between -np.pi and np.pi
         angle = angle % (2 * np.pi)
         if angle > np.pi:
@@ -1064,8 +1038,7 @@ def make_line(
     # CALCULATE A LINE FROM A TO B
     # =========================================================================
 
-    if linetype == 'AtoB':
-
+    if linetype == "AtoB":
         # define an empty grid to hold the line
         line = np.zeros(grid_size, dtype=bool)
 
@@ -1074,7 +1047,6 @@ def make_line(
         c = a[1] - m * a[0]  # where the line crosses the y axis
 
         if abs(m) < 1:
-
             # start at the end with the smallest value of x
             if a[0] < b[0]:
                 x, y = a
@@ -1104,7 +1076,6 @@ def make_line(
                 line[x - 1, y - 1] = 1
 
         elif not np.isinf(abs(m)):
-
             # start at the end with the smallest value of y
             if a[1] < b[1]:
                 x = a[0]
@@ -1136,7 +1107,6 @@ def make_line(
                 line[x, y] = 1
 
         else:  # m = +-Inf
-
             # start at the end with the smallest value of y
             if a[1] < b[1]:
                 x = a[0]
@@ -1161,8 +1131,7 @@ def make_line(
     # CALCULATE AN ANGLED LINE
     # =========================================================================
 
-    elif linetype == 'angled':
-
+    elif linetype == "angled":
         # define an empty grid to hold the line
         line = np.zeros(grid_size, dtype=bool)
 
@@ -1176,9 +1145,7 @@ def make_line(
         line_length = 0
 
         if abs(angle) == np.pi:
-
             while line_length < linelength:
-
                 # next point
                 y = y + 1
 
@@ -1193,13 +1160,11 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif (angle < np.pi) and (angle > np.pi / 2):
-
             # define the equation of the line
             m = -np.tan(angle - np.pi / 2)  # gradient of the line
             c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
-
                 # next points to try are
                 poss_x = np.array([x - 1, x - 1, x])
                 poss_y = np.array([y, y + 1, y + 1])
@@ -1224,9 +1189,7 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif angle == np.pi / 2:
-
             while line_length < linelength:
-
                 # next point
                 x = x - 1
 
@@ -1241,13 +1204,11 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif (angle < np.pi / 2) and (angle > 0):
-
             # define the equation of the line
             m = np.tan(np.pi / 2 - angle)  # gradient of the line
             c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
-
                 # next points to try are
                 poss_x = np.array([x - 1, x - 1, x])
                 poss_y = np.array([y, y - 1, y - 1])
@@ -1272,9 +1233,7 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif angle == 0:
-
             while line_length < linelength:
-
                 # next point
                 y = y - 1
 
@@ -1289,13 +1248,11 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif (angle < 0) and (angle > -np.pi / 2):
-
             # define the equation of the line
             m = -np.tan(np.pi / 2 + angle)  # gradient of the line
             c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
-
                 # next points to try are
                 poss_x = np.array([x + 1, x + 1, x])
                 poss_y = np.array([y, y - 1, y - 1])
@@ -1320,9 +1277,7 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif angle == -np.pi / 2:
-
             while line_length < linelength:
-
                 # next point
                 x = x + 1
 
@@ -1337,13 +1292,11 @@ def make_line(
                 line_length = np.sqrt((x - startpoint[0]) ** 2 + (y - startpoint[1]) ** 2)
 
         elif (angle < -np.pi / 2) and (angle > -np.pi):
-
             # define the equation of the line
             m = np.tan(-angle - np.pi / 2)  # gradient of the line
             c = y - m * x  # where the line crosses the y axis
 
             while line_length < linelength:
-
                 # next points to try are
                 poss_x = np.array([x + 1, x + 1, x])
                 poss_y = np.array([y, y + 1, y + 1])
@@ -1370,13 +1323,9 @@ def make_line(
     return line
 
 
-@beartype
+@typechecker
 def make_arc(
-        grid_size: Vector, 
-        arc_pos: np.ndarray, 
-        radius: Union[int, float], 
-        diameter: Union[Int, int], 
-        focus_pos: Vector
+    grid_size: Vector, arc_pos: np.ndarray, radius: Real[kt.ScalarLike, ""], diameter: Int[kt.ScalarLike, ""], focus_pos: Vector
 ) -> Union[kt.NP_ARRAY_INT_2D, kt.NP_ARRAY_BOOL_2D]:
     """
     Generates an arc shape with a given radius, diameter, and focus position.
@@ -1391,9 +1340,9 @@ def make_arc(
     Returns:
         np.ndarray: A 2D array with the arc shape.
     """
-    assert len(grid_size) == 2, 'The grid size must be a 2D vector.'
-    assert len(arc_pos) == 2, 'The arc position must be a 2D vector.'
-    assert len(focus_pos) == 2, 'The focus position must be a 2D vector.'
+    assert len(grid_size) == 2, "The grid size must be a 2D vector."
+    assert len(arc_pos) == 2, "The arc position must be a 2D vector."
+    assert len(focus_pos) == 2, "The focus position must be a 2D vector."
 
     # force integer input values
     grid_size = grid_size.round().astype(int)
@@ -1408,24 +1357,24 @@ def make_arc(
 
     # check the input ranges
     if np.any(grid_size < 1):
-        raise ValueError('The grid size must be positive.')
+        raise ValueError("The grid size must be positive.")
     if radius <= 0:
-        raise ValueError('The radius must be positive.')
+        raise ValueError("The radius must be positive.")
 
     if diameter <= 0:
-        raise ValueError('The diameter must be positive.')
+        raise ValueError("The diameter must be positive.")
 
     if np.any(arc_pos < 1) or np.any(arc_pos > grid_size):
-        raise ValueError('The centre of the arc must be within the grid.')
+        raise ValueError("The centre of the arc must be within the grid.")
 
     if diameter > 2 * radius:
-        raise ValueError('The diameter of the arc must be less than twice the radius of curvature.')
+        raise ValueError("The diameter of the arc must be less than twice the radius of curvature.")
 
     if diameter % 2 != 1:
-        raise ValueError('The diameter must be an odd number of grid points.')
+        raise ValueError("The diameter must be an odd number of grid points.")
 
     if np.all(arc_pos == focus_pos):
-        raise ValueError('The focus_pos must be different to the arc_pos.')
+        raise ValueError("The focus_pos must be different to the arc_pos.")
 
     # assign variable names to vector components
     Nx, Ny = grid_size
@@ -1437,7 +1386,6 @@ def make_arc(
     # =========================================================================
 
     if not np.isinf(radius):
-
         # find half the arc angle
         half_arc_angle = np.arcsin(diameter / 2 / radius)
 
@@ -1457,11 +1405,10 @@ def make_arc(
         l1 = np.sqrt(sum((arc_pos - c) ** 2))
 
         # extract all points that form part of the arc
-        arc_ind = matlab_find(arc, mode='eq', val=1)
+        arc_ind = matlab_find(arc, mode="eq", val=1)
 
         # loop through the arc points
         for arc_ind_i in arc_ind:
-
             # extract the indices of the current point
             x_ind, y_ind = ind2sub([Nx, Ny], arc_ind_i)
             p = np.array([x_ind, y_ind])
@@ -1481,14 +1428,13 @@ def make_arc(
             if theta > half_arc_angle:
                 arc = matlab_assign(arc, arc_ind_i - 1, 0)
     else:
-
         # calculate arc direction angle, then rotate by 90 degrees
         ang = np.arctan((fx - ax) / (fy - ay)) + np.pi / 2
 
         # draw lines to create arc with infinite radius
         arc = np.logical_or(
             make_line(grid_size, arc_pos, endpoint=None, angle=ang, length=(diameter - 1) // 2),
-            make_line(grid_size, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2)
+            make_line(grid_size, arc_pos, endpoint=None, angle=(ang + np.pi), length=(diameter - 1) // 2),
         )
     return arc
 
@@ -1512,7 +1458,7 @@ def make_pixel_map_point(grid_size: Vector, centre_pos: np.ndarray) -> np.ndarra
 
     # check that centre_pos has the same dimensions
     if len(grid_size) != len(centre_pos):
-        raise ValueError('The inputs centre_pos and grid_size must have the same number of dimensions.')
+        raise ValueError("The inputs centre_pos and grid_size must have the same number of dimensions.")
 
     if num_dim == 2:
         # assign inputs and force to be integers
@@ -1525,12 +1471,11 @@ def make_pixel_map_point(grid_size: Vector, centre_pos: np.ndarray) -> np.ndarra
 
         # combine index matrices
         pixel_map = np.zeros((Nx, Ny))
-        pixel_map += (nx ** 2)[:, None]
-        pixel_map += (ny ** 2)[None, :]
+        pixel_map += (nx**2)[:, None]
+        pixel_map += (ny**2)[None, :]
         pixel_map = np.sqrt(pixel_map)
 
     elif num_dim == 3:
-
         # assign inputs and force to be integers
         Nx, Ny, Nz = grid_size.astype(int)
         cx, cy, cz = centre_pos.astype(int)
@@ -1542,14 +1487,14 @@ def make_pixel_map_point(grid_size: Vector, centre_pos: np.ndarray) -> np.ndarra
 
         # combine index matrices
         pixel_map = np.zeros((Nx, Ny, Nz))
-        pixel_map += (nx ** 2)[:, None, None]
-        pixel_map += (ny ** 2)[None, :, None]
-        pixel_map += (nz ** 2)[None, None, :]
+        pixel_map += (nx**2)[:, None, None]
+        pixel_map += (ny**2)[None, :, None]
+        pixel_map += (nz**2)[None, None, :]
         pixel_map = np.sqrt(pixel_map)
 
     else:
         # throw error
-        raise ValueError('Grid size must be 2 or 3D.')
+        raise ValueError("Grid size must be 2 or 3D.")
 
     return pixel_map
 
@@ -1570,7 +1515,7 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
         ValueError: If the normal vector is zero.
     """  # error checking
     if np.all(normal == 0):
-        raise ValueError('Normal vector should not be zero.')
+        raise ValueError("Normal vector should not be zero.")
 
     # check for number of dimensions
     num_dim = len(grid_size)
@@ -1587,42 +1532,39 @@ def make_pixel_map_plane(grid_size: Vector, normal: np.ndarray, point: np.ndarra
 
         # calculate distance according to Eq. (6) at
         # http://mathworld.wolfram.com/Point-PlaneDistance.html
-        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny) / np.sqrt(sum(normal ** 2))
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny) / np.sqrt(sum(normal**2))
 
     elif num_dim == 3:
-
         # assign inputs and force to be integers
         Nx = np.round(grid_size[0])
         Ny = np.round(grid_size[1])
         Nz = np.round(grid_size[2])
 
         # create coordinate meshes
-        px, py, pz = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1), indexing='ij')
-        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0], np.ones(Ny) * point[1], np.ones(Nz) * point[2],
-                                             indexing='ij')
-        nx, ny, nz = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2],
-                                 indexing='ij')
+        px, py, pz = np.meshgrid(np.arange(1, Nx + 1), np.arange(1, Ny + 1), np.arange(1, Nz + 1), indexing="ij")
+        pointx, pointy, pointz = np.meshgrid(np.ones(Nx) * point[0], np.ones(Ny) * point[1], np.ones(Nz) * point[2], indexing="ij")
+        nx, ny, nz = np.meshgrid(np.ones(Nx) * normal[0], np.ones(Ny) * normal[1], np.ones(Nz) * normal[2], indexing="ij")
 
         # calculate distance according to Eq. (6) at
         # http://mathworld.wolfram.com/Point-PlaneDistance.html
-        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny + (pz - pointz) * nz) / np.sqrt(sum(normal ** 2))
+        pixel_map = np.abs((px - pointx) * nx + (py - pointy) * ny + (pz - pointz) * nz) / np.sqrt(sum(normal**2))
 
     else:
         # throw error
-        raise ValueError('Grid size must be 2 or 3D.')
+        raise ValueError("Grid size must be 2 or 3D.")
 
     return pixel_map
 
 
-@beartype
+@typechecker
 def make_bowl(
-    grid_size: Vector, 
-    bowl_pos: Vector, 
-    radius: Union[int, float], 
-    diameter: Union[Number, int, float],
-    focus_pos: Vector, 
-    binary: bool = False, 
-    remove_overlap: bool = False
+    grid_size: Vector,
+    bowl_pos: Vector,
+    radius: Union[int, float],
+    diameter: Real[kt.ScalarLike, ""],
+    focus_pos: Vector,
+    binary: bool = False,
+    remove_overlap: bool = False,
 ) -> Union[kt.NP_ARRAY_BOOL_3D, kt.NP_ARRAY_INT_3D]:
     """
     Generate a matrix representing a bowl-shaped object in 3D space.
@@ -1646,9 +1588,9 @@ def make_bowl(
     Raises:
         ValueError: if any of the input arguments are outside the valid range
     """
-    assert len(grid_size) == 3, 'Grid size must be 3D.'
-    assert len(bowl_pos) == 3, 'Bowl position must be 3D.'
-    assert len(focus_pos) == 3, 'Focus position must be 3D.'
+    assert len(grid_size) == 3, "Grid size must be 3D."
+    assert len(bowl_pos) == 3, "Bowl position must be 3D."
+    assert len(focus_pos) == 3, "Focus position must be 3D."
 
     # =========================================================================
     # DEFINE LITERALS
@@ -1674,19 +1616,19 @@ def make_bowl(
 
     # check the input ranges
     if np.any(grid_size < 1):
-        raise ValueError('The grid size must be positive.')
+        raise ValueError("The grid size must be positive.")
     if np.any(bowl_pos < 1) or np.any(bowl_pos > grid_size):
-        raise ValueError('The centre of the bowl must be within the grid.')
+        raise ValueError("The centre of the bowl must be within the grid.")
     if radius <= 0:
-        raise ValueError('The radius must be positive.')
+        raise ValueError("The radius must be positive.")
     if diameter <= 0:
-        raise ValueError('The diameter must be positive.')
+        raise ValueError("The diameter must be positive.")
     if diameter > (2 * radius):
-        raise ValueError('The diameter of the bowl must be less than twice the radius of curvature.')
+        raise ValueError("The diameter of the bowl must be less than twice the radius of curvature.")
     if diameter % 2 == 0:
-        raise ValueError('The diameter must be an odd number of grid points.')
+        raise ValueError("The diameter must be an odd number of grid points.")
     if np.all(bowl_pos == focus_pos):
-        raise ValueError('The focus_pos must be different to the bowl_pos.')
+        raise ValueError("The focus_pos must be different to the bowl_pos.")
 
     # =========================================================================
     # BOUND THE GRID TO SPEED UP CALCULATION
@@ -1721,7 +1663,6 @@ def make_bowl(
     # =========================================================================
 
     if not np.isinf(radius):
-
         # find half the arc angle
         half_arc_angle = np.arcsin(diameter / (2 * radius))
 
@@ -1739,7 +1680,6 @@ def make_bowl(
         search_radius = radius
 
     else:
-
         # generate matrix with distance from the centre
         pixel_map = make_pixel_map_plane(grid_size_sm, bowl_pos_sm - focus_pos_sm, bowl_pos_sm)
 
@@ -1766,8 +1706,8 @@ def make_bowl(
 
     # use these subscripts to extract the x-index of the grid points that lie
     # on the bowl surface
-    x_ind_forw = index_forw.flatten(order='F')[yz_ind_forw - 1] + 1
-    x_ind_back = index_back.flatten(order='F')[yz_ind_back - 1] + 1
+    x_ind_forw = index_forw.flatten(order="F")[yz_ind_forw - 1] + 1
+    x_ind_back = index_back.flatten(order="F")[yz_ind_back - 1] + 1
 
     # convert the linear index to equivalent subscript values
     y_ind_forw, z_ind_forw = ind2sub([Ny, Nz], yz_ind_forw)
@@ -1804,8 +1744,8 @@ def make_bowl(
 
     # use these subscripts to extract the y-index of the grid points that lie
     # on the bowl surface
-    y_ind_forw = index_forw.flatten(order='F')[zx_ind_forw - 1] + 1
-    y_ind_back = index_back.flatten(order='F')[zx_ind_back - 1] + 1
+    y_ind_forw = index_forw.flatten(order="F")[zx_ind_forw - 1] + 1
+    y_ind_back = index_back.flatten(order="F")[zx_ind_back - 1] + 1
 
     # convert the linear index to equivalent subscript values
     z_ind_forw, x_ind_forw = ind2sub([Nz, Nx], zx_ind_forw)
@@ -1842,8 +1782,8 @@ def make_bowl(
 
     # use these subscripts to extract the z-index of the grid points that lie
     # on the bowl surface
-    z_ind_forw = index_forw.flatten(order='F')[xy_ind_forw - 1] + 1
-    z_ind_back = index_back.flatten(order='F')[xy_ind_back - 1] + 1
+    z_ind_forw = index_forw.flatten(order="F")[xy_ind_forw - 1] + 1
+    z_ind_back = index_back.flatten(order="F")[xy_ind_back - 1] + 1
 
     # convert the linear index to equivalent subscript values
     x_ind_forw, y_ind_forw = ind2sub([Nx, Ny], xy_ind_forw)
@@ -1863,7 +1803,6 @@ def make_bowl(
 
     # remove grid points within the sphere that do not form part of the bowl
     if not np.isinf(radius):
-
         # form vector from the geometric bowl centre to the back of the bowl
         v1 = bowl_pos_sm - c
 
@@ -1873,7 +1812,6 @@ def make_bowl(
         # loop through the non-zero elements in the bowl matrix
         bowl_ind = matlab_find(bowl_sm == 1)[:, 0]
         for bowl_ind_i in bowl_ind:
-
             # extract the indices of the current point
             x_ind, y_ind, z_ind = ind2sub([Nx, Ny, Nz], bowl_ind_i)
             p = np.array([x_ind, y_ind, z_ind])
@@ -1898,7 +1836,6 @@ def make_bowl(
                 bowl_sm = matlab_assign(bowl_sm, bowl_ind_i - 1, 0)
 
     else:
-
         # form a distance map from the centre of the disc
         pixelMapPoint = make_pixel_map_point(grid_size_sm, bowl_pos_sm)
 
@@ -1910,7 +1847,6 @@ def make_bowl(
     # =========================================================================
 
     if remove_overlap:
-
         # define the shapes that capture the overlapped points, along with the
         # corresponding mask of which point to delete
         overlap_shapes = []
@@ -2033,17 +1969,9 @@ def make_bowl(
         deleted_points = 0
 
         # set list of possible permutations
-        perm_list = [
-            [0, 1, 2],
-            [0, 2, 1],
-            [1, 2, 0],
-            [1, 0, 2],
-            [2, 0, 1],
-            [2, 1, 0]
-        ]
+        perm_list = [[0, 1, 2], [0, 2, 1], [1, 2, 0], [1, 0, 2], [2, 0, 1], [2, 1, 0]]
 
         while points_remaining:
-
             # get linear index of non-zero bowl elements
             index_mat = matlab_find(bowl_sm > 0)[:, 0]
 
@@ -2054,29 +1982,24 @@ def make_bowl(
             # more than 8 neighbours
             index = 0
             for index, index_mat_i in enumerate(index_mat):
-
                 # extract subscripts for current point
                 cx, cy, cz = ind2sub([Nx, Ny, Nz], index_mat_i)
 
                 # ignore edge points
                 if (cx > 1) and (cx < Nx) and (cy > 1) and (cy < Ny) and (cz > 1) and (cz < Nz):
-
                     # extract local region around current point
-                    region = bowl_sm[cx - 1:cx + 1, cy - 1:cy + 1, cz - 1:cz + 1]  # FARID might not work
+                    region = bowl_sm[cx - 1 : cx + 1, cy - 1 : cy + 1, cz - 1 : cz + 1]  # FARID might not work
 
                     # if there's more than 8 neighbours, check the point for
                     # deletion
                     if (region.sum() - 1) > 8:
-
                         # loop through the different shapes
                         for shape_index in range(len(overlap_shapes)):
-
                             # check every permutation of the shape, and apply the
                             # deletion mask if the pattern matches
 
                             # loop through possible shape permutations
                             for ind1 in range(len(perm_list)):
-
                                 # get shape and delete mask
                                 overlap_s = overlap_shapes[shape_index]
                                 overlap_d = overlap_delete[shape_index]
@@ -2087,7 +2010,6 @@ def make_bowl(
 
                                 # loop through possible shape reflections
                                 for ind2 in range(1, 8):
-
                                     # flipfunc the shape
                                     if ind2 == 2:
                                         overlap_s = np.flip(overlap_s, axis=0)
@@ -2110,7 +2032,6 @@ def make_bowl(
 
                                     # rotate the shape 4 x 90 degrees
                                     for ind3 in range(4):
-
                                         # check if the shape matches
                                         if np.all(overlap_s == region):
                                             delete_point = True
@@ -2134,10 +2055,9 @@ def make_bowl(
                             # remove point from bowl if required, and update
                             # counter
                             if delete_point:
-                                bowl_sm[cx - 1:cx + 1, cy - 1:cy + 1, cz - 1:cz + 1] = bowl_sm[cx - 1:cx + 1,
-                                                                                       cy - 1:cy + 1,
-                                                                                       cz - 1:cz + 1] * np.bitwise_not(
-                                    overlap_d).astype(float)  # Farid won't work probably
+                                bowl_sm[cx - 1 : cx + 1, cy - 1 : cy + 1, cz - 1 : cz + 1] = bowl_sm[
+                                    cx - 1 : cx + 1, cy - 1 : cy + 1, cz - 1 : cz + 1
+                                ] * np.bitwise_not(overlap_d).astype(float)  # Farid won't work probably
                                 deleted_points = deleted_points + 1
                                 break
 
@@ -2152,7 +2072,7 @@ def make_bowl(
 
         # display status
         if deleted_points:
-            logging.log(logging.INFO, '{deleted_points} overlapped points removed from bowl')
+            logging.log(logging.INFO, "{deleted_points} overlapped points removed from bowl")
 
     # =========================================================================
     # PLACE BOWL WITHIN LARGER GRID
@@ -2174,13 +2094,13 @@ def make_bowl(
 
     # truncate bounding box if it falls outside the grid
     if x1 < 0:
-        bowl_sm = bowl_sm[abs(x1):, :, :]
+        bowl_sm = bowl_sm[abs(x1) :, :, :]
         x1 = 0
     if y1 < 0:
-        bowl_sm = bowl_sm[:, abs(y1):, :]
+        bowl_sm = bowl_sm[:, abs(y1) :, :]
         y1 = 0
     if z1 < 0:
-        bowl_sm = bowl_sm[:, :, abs(z1):]
+        bowl_sm = bowl_sm[:, :, abs(z1) :]
         z1 = 0
     if x2 >= grid_size[0]:
         to_delete = x2 - grid_size[0]
@@ -2202,13 +2122,13 @@ def make_bowl(
 
 
 def make_multi_bowl(
-    grid_size: Vector, 
-    bowl_pos: List[Tuple[int, int]], 
-    radius: int, 
+    grid_size: Vector,
+    bowl_pos: List[Tuple[int, int]],
+    radius: int,
     diameter: int,
     focus_pos: Tuple[int, int],
     binary: bool = False,
-    remove_overlap: bool = False
+    remove_overlap: bool = False,
 ) -> Tuple[np.ndarray, List[np.ndarray]]:
     """
     Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
@@ -2230,13 +2150,13 @@ def make_multi_bowl(
 
     # check inputs
     if bowl_pos.shape[-1] != 3:
-        raise ValueError('bowl_pos should contain 3 columns, with [bx, by, bz] in each row.')
+        raise ValueError("bowl_pos should contain 3 columns, with [bx, by, bz] in each row.")
 
     if len(radius) != 1 and len(radius) != bowl_pos.shape[0]:
-        raise ValueError('The number of rows in bowl_pos and radius does not match.')
+        raise ValueError("The number of rows in bowl_pos and radius does not match.")
 
     if len(diameter) != 1 and len(diameter) != bowl_pos.shape[0]:
-        raise ValueError('The number of rows in bowl_pos and diameter does not match.')
+        raise ValueError("The number of rows in bowl_pos and diameter does not match.")
 
     # force integer grid size values
     grid_size = np.round(grid_size).astype(int)
@@ -2259,13 +2179,12 @@ def make_multi_bowl(
 
     # loop for calling make_bowl
     for bowl_index in range(bowl_pos.shape[0]):
-
         # update command line status
         if bowl_index == 1:
             TicToc.tic()
         else:
             TicToc.toc(reset=True)
-        logging.log(logging.INFO, f'Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ')
+        logging.log(logging.INFO, f"Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ")
 
         # get parameters for current bowl
         if bowl_pos.shape[0] > 1:
@@ -2291,10 +2210,7 @@ def make_multi_bowl(
         focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
-        new_bowl = make_bowl(
-            grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k,
-            remove_overlap=remove_overlap, binary=binary
-        )
+        new_bowl = make_bowl(grid_size, bowl_pos_k, radius_k, diameter_k, focus_pos_k, remove_overlap=remove_overlap, binary=binary)
 
         # add bowl to bowl matrix
         bowls = bowls + new_bowl
@@ -2308,7 +2224,7 @@ def make_multi_bowl(
     max_nd_val, _ = max_nd(bowls)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'{max_nd_val - 1} bowls are overlapping')
+        logging.log(logging.WARN, f"{max_nd_val - 1} bowls are overlapping")
 
         # force the output to be binary
         bowls[bowls != 0] = 1
@@ -2316,13 +2232,9 @@ def make_multi_bowl(
     return bowls, bowls_labelled
 
 
-@beartype
+@typechecker
 def make_multi_arc(
-    grid_size: Vector,
-    arc_pos: np.ndarray,
-    radius: Union[int, np.ndarray],
-    diameter: Union[int, np.ndarray], 
-    focus_pos: np.ndarray
+    grid_size: Vector, arc_pos: np.ndarray, radius: Union[int, np.ndarray], diameter: Union[int, np.ndarray], focus_pos: np.ndarray
 ) -> Tuple[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_2D]:
     """
     Generates a multi-arc mask for an image given the size of the grid,
@@ -2345,13 +2257,13 @@ def make_multi_arc(
     """
     # check inputs
     if arc_pos.shape[-1] != 2:
-        raise ValueError('arc_pos should contain 2 columns, with [ax, ay] in each row.')
+        raise ValueError("arc_pos should contain 2 columns, with [ax, ay] in each row.")
 
     if len(radius) != 1 and len(radius) != arc_pos.shape[0]:
-        raise ValueError('The number of rows in arc_pos and radius does not match.')
+        raise ValueError("The number of rows in arc_pos and radius does not match.")
 
     if len(diameter) != 1 and len(diameter) != arc_pos.shape[0]:
-        raise ValueError('The number of rows in arc_pos and diameter does not match.')
+        raise ValueError("The number of rows in arc_pos and diameter does not match.")
 
     # force integer grid size values
     grid_size = grid_size.round().astype(int)
@@ -2370,7 +2282,6 @@ def make_multi_arc(
 
     # loop for calling make_arc
     for k in range(arc_pos.shape[0]):
-
         # get parameters for current arc
         if arc_pos.shape[0] > 1:
             arc_pos_k = arc_pos[k]
@@ -2405,7 +2316,7 @@ def make_multi_arc(
     max_nd_val, _ = max_nd(arcs)
     if max_nd_val > 1:
         # display warning
-        logging.log(logging.WARN,  f'{max_nd_val - 1} arcs are overlapping')
+        logging.log(logging.WARN, f"{max_nd_val - 1} arcs are overlapping")
 
         # force the output to be binary
         arcs[arcs != 0] = 1
@@ -2413,12 +2324,9 @@ def make_multi_arc(
     return arcs, arcs_labelled
 
 
-@beartype
+@typechecker
 def make_sphere(
-    grid_size: Vector, 
-    radius: Union[float, int], 
-    plot_sphere: bool = False,
-    binary: bool = False
+    grid_size: Vector, radius: Union[float, int], plot_sphere: bool = False, binary: bool = False
 ) -> Union[kt.NP_ARRAY_INT_3D, kt.NP_ARRAY_BOOL_3D]:
     """
     Generates a sphere mask for a 3D grid given the dimensions of the grid, the radius of the sphere,
@@ -2433,7 +2341,7 @@ def make_sphere(
     Returns:
         sphere: The sphere mask as a NumPy array.
     """
-    assert len(grid_size) == 3, 'grid_size must be a 3D vector'
+    assert len(grid_size) == 3, "grid_size must be a 3D vector"
 
     # enforce a centered sphere
     center = np.floor(grid_size / 2).astype(int) + 1
@@ -2444,14 +2352,13 @@ def make_sphere(
     else:
         sphere = np.zeros(grid_size, dtype=int)
 
-    # create a guide circle from which the individal radii can be extracted
+    # create a guide circle from which the individual radii can be extracted
     guide_circle = make_circle(np.flip(grid_size[:2]), np.flip(center[:2]), radius)
 
     # step through the guide circle points and create partially filled discs
     centerpoints = np.arange(center.x - radius, center.x + 1)
     reflection_offset = np.arange(len(centerpoints), 1, -1)
     for centerpoint_index in range(len(centerpoints)):
-
         # extract the current row from the guide circle
         row_data = guide_circle[:, centerpoints[centerpoint_index] - 1]
 
@@ -2473,7 +2380,6 @@ def make_sphere(
         # fill in the circle line by line
         fill_centerpoints = np.arange(center.z - swept_radius, center.z + swept_radius + 1).astype(int)
         for fill_centerpoints_i in fill_centerpoints:
-
             # extract the first row
             row_data = circle[:, fill_centerpoints_i - 1]
 
@@ -2489,8 +2395,7 @@ def make_sphere(
 
             # fill in the line
             if start_index != stop_index and (stop_index - start_index) >= num_points:
-                circle_fill[(start_index + num_points // 2) - 1:stop_index - (num_points // 2),
-                fill_centerpoints_i - 1] = 1
+                circle_fill[(start_index + num_points // 2) - 1 : stop_index - (num_points // 2), fill_centerpoints_i - 1] = 1
 
         # remove points from the filled circle that existed in the previous
         # layer
@@ -2506,9 +2411,7 @@ def make_sphere(
 
         # create the other half of the sphere at the same time
         if centerpoint_index != len(centerpoints) - 1:
-            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[
-                                                                                centerpoints[centerpoint_index] - 1, :,
-                                                                                :]
+            sphere[center.x + reflection_offset[centerpoint_index] - 2, :, :] = sphere[centerpoints[centerpoint_index] - 1, :, :]
 
     # plot results
     if plot_sphere:
@@ -2516,13 +2419,13 @@ def make_sphere(
     return sphere
 
 
-@beartype
+@typechecker
 def make_spherical_section(
-    radius: Union[float, int], 
-    height: Union[float, int], 
-    width: Optional[Union[float, int]] = None, 
+    radius: Real[kt.ScalarLike, ""],
+    height: Real[kt.ScalarLike, ""],
+    width: Optional[Real[kt.ScalarLike, ""]] = None,
     plot_section: bool = False,
-    binary: bool = False
+    binary: bool = False,
 ) -> Tuple:
     """
     Generates a spherical section mask given the radius and height of the section and
@@ -2549,11 +2452,11 @@ def make_spherical_section(
     radius = int(radius)
     height = int(height)
 
-    use_width = (width is not None)
+    use_width = width is not None
     if use_width:
         width = int(width)
         if width % 2 == 0:
-            raise ValueError('Input width must be an odd number.')
+            raise ValueError("Input width must be an odd number.")
 
     # calculate minimum grid dimensions to fit entire sphere
     Nx = 2 * radius + 1
@@ -2579,10 +2482,9 @@ def make_spherical_section(
 
     # also truncate to given width if defined by user
     if use_width:
-
         # check the value is appropriate
         if width > length:
-            raise ValueError('Input for width must be less than or equal to transducer length.')
+            raise ValueError("Input for width must be less than or equal to transducer length.")
 
         # calculate offset
         offset = int((length - width) / 2)
@@ -2601,13 +2503,12 @@ def make_spherical_section(
     # double check there there is only one value of spherical section in
     # each matrix column
     if mx.sum() != ss.sum():
-        raise ValueError(
-            'mean neighbour distance cannot be calculated uniquely due to overlapping points in the x-direction')
+        raise ValueError("mean neighbour distance cannot be calculated uniquely due to overlapping points in the x-direction")
 
     # calculate average distance to grid point neighbours in the flat case
     x_dist = np.tile([1, 0, 1], [3, 1])
     y_dist = x_dist.T
-    flat_dist = np.sqrt(x_dist ** 2 + y_dist ** 2)
+    flat_dist = np.sqrt(x_dist**2 + y_dist**2)
     flat_dist = np.mean(flat_dist)
 
     # compute distance map
@@ -2615,30 +2516,29 @@ def make_spherical_section(
     sz = mx_ind.shape
     for m in range(sz[0]):
         for n in range(sz[1]):
-
             # clear map
             local_heights = np.zeros((3, 3))
 
             # extract the height (x-distance) of the 8 neighbouring grid
             # points
             if m == 0 and n == 0:
-                local_heights[1:3, 1:3] = mx_ind[m:m + 2, n:n + 2]
+                local_heights[1:3, 1:3] = mx_ind[m : m + 2, n : n + 2]
             elif m == (sz[0] - 1) and n == (sz[1] - 1):
-                local_heights[0:2, 0:2] = mx_ind[m - 1:m + 1, n - 1:n + 1]
+                local_heights[0:2, 0:2] = mx_ind[m - 1 : m + 1, n - 1 : n + 1]
             elif m == 0 and n == (sz[1] - 1):
-                local_heights[1:3, 0:2] = mx_ind[m:m + 2, n - 1:n + 1]
+                local_heights[1:3, 0:2] = mx_ind[m : m + 2, n - 1 : n + 1]
             elif m == (sz[0] - 1) and n == 0:
-                local_heights[0:2, 1:3] = mx_ind[m - 1:m + 1, n:n + 2]
+                local_heights[0:2, 1:3] = mx_ind[m - 1 : m + 1, n : n + 2]
             elif m == 0:
-                local_heights[1:3, :] = mx_ind[m:m + 2, n - 1:n + 2]
+                local_heights[1:3, :] = mx_ind[m : m + 2, n - 1 : n + 2]
             elif m == (sz[0] - 1):
-                local_heights[0:2, :] = mx_ind[m - 1:m + 1, n - 1:n + 2]
+                local_heights[0:2, :] = mx_ind[m - 1 : m + 1, n - 1 : n + 2]
             elif n == 0:
-                local_heights[:, 1:3] = mx_ind[m - 1:m + 2, n:n + 2]
+                local_heights[:, 1:3] = mx_ind[m - 1 : m + 2, n : n + 2]
             elif n == (sz[1] - 1):
-                local_heights[:, 0:2] = mx_ind[m - 1:m + 2, n - 1:n + 1]
+                local_heights[:, 0:2] = mx_ind[m - 1 : m + 2, n - 1 : n + 1]
             else:
-                local_heights = mx_ind[m - 1:m + 2, n - 1:n + 2]
+                local_heights = mx_ind[m - 1 : m + 2, n - 1 : n + 2]
 
             # compute average variation from center
             local_heights_var = abs(local_heights - local_heights[1, 1])
@@ -2647,7 +2547,7 @@ def make_spherical_section(
             local_heights_var[local_heights == 0] = 0
 
             # calculate total distance from centre
-            dist = np.sqrt(x_dist ** 2 + y_dist ** 2 + local_heights_var ** 2)
+            dist = np.sqrt(x_dist**2 + y_dist**2 + local_heights_var**2)
 
             # average and store as a ratio
             dist_map[m, n] = 1 + (np.mean(dist) - flat_dist) / flat_dist
@@ -2662,16 +2562,14 @@ def make_spherical_section(
     return ss, dist_map
 
 
-@beartype
+@typechecker
 def make_cart_rect(
-    rect_pos, 
-    Lx: Union[float, int], 
-    Ly: Union[float, int], 
-    theta: Optional[Union[
-        int, float, List, 
-        kt.NP_ARRAY_INT_1D, kt.NP_ARRAY_FLOAT_1D]]=None, 
-    num_points: int=0, 
-    plot_rect: bool=False
+    rect_pos,
+    Lx: Real[kt.ScalarLike, ""],
+    Ly: Real[kt.ScalarLike, ""],
+    theta: Optional[Union[Real[kt.ScalarLike, ""], List, Integer[np.ndarray, "..."], Float[np.ndarray, "..."]]] = None,
+    num_points: int = 0,
+    plot_rect: bool = False,
 ) -> Union[kt.NP_ARRAY_FLOAT_2D, kt.NP_ARRAY_FLOAT_3D]:
     """
     Create evenly distributed Cartesian points covering a rectangle.
@@ -2702,7 +2600,7 @@ def make_cart_rect(
     # Compute canonical rectangle points ([-1, 1] x [-1, 1], z=0 plane)
     p_x = np.linspace(-1 + d_x / 2, 1 - d_x / 2, npts_x)
     p_y = np.linspace(-1 + d_y / 2, 1 - d_y / 2, npts_y)
-    P_x, P_y = np.meshgrid(p_x, p_y, indexing='ij')
+    P_x, P_y = np.meshgrid(p_x, p_y, indexing="ij")
     p0 = np.stack((P_x.flatten(), P_y.flatten()), axis=0)
 
     # Add z-dimension points if in 3D
@@ -2711,7 +2609,6 @@ def make_cart_rect(
 
     # Transform the canonical rectangle points to give the specified rectangle
     if len(rect_pos) == 2:
-
         # Scaling transformation
         S = np.array([[Lx, 0], [0, Ly]]) / 2
 
@@ -2719,11 +2616,9 @@ def make_cart_rect(
         if theta is None:
             R = np.eye(2)
         else:
-            R = np.array([[cosd(theta), -sind(theta)],
-                          [sind(theta), cosd(theta)]])
+            R = np.array([[cosd(theta), -sind(theta)], [sind(theta), cosd(theta)]])
 
     else:
-
         # Scaling transformation
         S = np.array([[Lx, 0, 0], [0, Ly, 0], [0, 0, 2]]) / 2
 
@@ -2732,8 +2627,8 @@ def make_cart_rect(
             # No rotation
             R = np.eye(3)
         else:
-            # Using intrinsic rotations chain from right to left (z-y'-z'' rotations)
-            R = np.dot(Rz(theta[2]), np.dot(Ry(theta[1]), Rx(theta[0])))
+            # Using intrinsic rotations chain from right to left (xyz rotations)
+            R = Rotation.from_euler("xyz", theta, degrees=True).as_matrix()
 
     # Combine scaling and rotation matrices
     A = np.dot(R, S)
@@ -2747,25 +2642,17 @@ def make_cart_rect(
     return rect
 
 
-@beartype
+@typechecker
 def focused_bowl_oneil(
-    radius: float, 
-    diameter: float, 
-    velocity: float, 
-    frequency: int, 
-    sound_speed: int,
-    density: int, 
-    axial_positions: Optional[
-        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
-    ] = None,
-    lateral_positions: Optional[
-        Union[kt.NP_ARRAY_FLOAT_1D, float, List]
-    ] = None
-) -> Tuple[
-    Optional[kt.NP_ARRAY_FLOAT_1D], 
-    Optional[kt.NP_ARRAY_FLOAT_1D], 
-    Optional[kt.NP_ARRAY_COMPLEX_1D]
-]:
+    radius: kt.NUMERIC,
+    diameter: kt.NUMERIC,
+    velocity: kt.NUMERIC,
+    frequency: kt.NUMERIC,
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC,
+    axial_positions: Optional[Union[kt.NP_ARRAY_FLOAT_1D, float, List]] = None,
+    lateral_positions: Optional[Union[kt.NP_ARRAY_FLOAT_1D, float, List]] = None,
+) -> Tuple[Optional[kt.NP_ARRAY_FLOAT_1D], Optional[kt.NP_ARRAY_FLOAT_1D], Optional[kt.NP_ARRAY_COMPLEX_1D]]:
     """
     Calculates O'Neil's solution for the axial and lateral pressure amplitude generated by a focused bowl transducer.
 
@@ -2810,11 +2697,8 @@ def focused_bowl_oneil(
 
     float_eps = np.finfo(float).eps
 
-    # @beartype  => could not figure out what's wrong with type annotation here, revisit in the future
-    def calculate_axial_pressure() -> Tuple[
-                                        NDArray[Shape["N"], Float], 
-                                        NDArray[Shape["N"], Complex]
-                                    ]:
+    # @typechecker  => could not figure out what's wrong with type annotation here, revisit in the future
+    def calculate_axial_pressure() -> Tuple[Float[np.ndarray, "N"], Complex[np.ndarray, "N"]]:
         # calculate distances
         B = np.sqrt((axial_positions - h) ** 2 + (diameter / 2) ** 2)
         d = B - axial_positions
@@ -2834,13 +2718,13 @@ def focused_bowl_oneil(
 
         return axial_pressure, complex_axial_pressure
 
-    @beartype
-    def calculate_lateral_pressure() -> NDArray[Shape["N"], Float]:
+    @typechecker
+    def calculate_lateral_pressure() -> Float[np.ndarray, "N"]:
         # calculate magnitude of the lateral pressure at the geometric focus
         Z = k * lateral_positions * diameter / (2 * radius)
         # TODO: this should work
         # assert np.all(Z) > 0, 'Z must be greater than 0'
-        lateral_pressure = 2. * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
+        lateral_pressure = 2.0 * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
 
         # replace origin with limit
         lateral_pressure[lateral_positions == 0] = density * sound_speed * velocity * k * h
@@ -2850,7 +2734,7 @@ def focused_bowl_oneil(
     k = 2 * np.pi * frequency / sound_speed
 
     # height of rim
-    h = radius - np.sqrt(radius ** 2 - (diameter / 2) ** 2)
+    h = radius - np.sqrt(radius**2 - (diameter / 2) ** 2)
 
     p_axial = None
     p_lateral = None
@@ -2863,19 +2747,130 @@ def focused_bowl_oneil(
     return p_axial, p_lateral, p_axial_complex
 
 
+@typechecker
+def focused_annulus_oneil(
+    radius: float,
+    diameter: Union[Float[np.ndarray, "NumElements 2"], Float[np.ndarray, "2 NumElements"]],
+    amplitude: Float[np.ndarray, "NumElements"],
+    phase: Float[np.ndarray, "NumElements"],
+    frequency: kt.NUMERIC,
+    sound_speed: kt.NUMERIC,
+    density: kt.NUMERIC,
+    axial_positions: Union[kt.NP_ARRAY_FLOAT_1D, float, list],
+) -> Union[kt.NP_ARRAY_FLOAT_1D, float]:
+    """Compute axial pressure for focused annulus transducer using O'Neil's solution
+
+    focused_annulus_oneil calculates the axial pressure for a focused
+    annular transducer using O'Neil's solution (O'Neil, H. Theory of
+    focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526, 1949). The
+    annuluar elements are uniformly driven by a continuous wave sinusoid
+    at a given frequency and normal surface velocity.
+
+    The solution is evaluated at the positions (along the beam axis) given
+    by axial_position. Where 0 corresponds to the transducer surface.
+
+    Note, O'Neil's formulae are derived under the assumptions of the
+    Rayleigh integral, which are valid when the transducer diameter is
+    large compared to both the transducer height and the acoustic
+    wavelength.
+
+    Example:
+        # define transducer parameters
+        radius = 140e-3  # [m]
+        diameter = 120e-3  # [m]
+        velocity = 100e-3  # [m / s]
+        frequency = 1e6  # [Hz]
+        sound_speed = 1500  # [m / s]
+        density = 1000  # [kg / m^3]
+
+        # define position vectors
+        axial_position = np.arange(0, 250e-3 + 1e-4, 1e-4)  # [m]
+        p_axial = focused_annulus_oneil(radius, diameter, amplitude, phase, frequency, sound_speed, density, axial_position)
+
+    Args:
+        radius: transducer radius of curvature [m]
+        diameter: 2 x num_elements array containing pairs of inner and outer aperture diameter
+                  (diameter of opening) [m].
+        amplitude: array containing the normal surface velocities for each element [m/s]
+        phase: array containing the phase for each element [rad]
+        frequency: driving frequency [Hz]
+        sound_speed: speed of sound in the propagating medium [m/s]
+        density: density in the propagating medium [kg/m^3]
+        axial_positions: vector of positions along the beam axis where the
+                         pressure amplitude is calculated [m]
+
+    Returns:
+        p_axial: pressure amplitude at the positions specified by axial_position [Pa]
+
+    References:
+        O'Neil, H. (1949). Theory of focusing radiators. J. Acoust. Soc. Am., 21(5), 516-526.
+
+    See also focused_bowl_oneil.
+    """
+
+    if not np.greater_equal(diameter, np.zeros_like(diameter)).all() or not np.isreal(diameter).all() or not np.isfinite(diameter).all():
+        raise ValueError("wrong values in diameter object")
+
+    if not np.all(np.isfinite(amplitude)):
+        raise ValueError("amplitude contains an np.inf")
+    if not np.all(np.isfinite(frequency)):
+        raise ValueError("frequency contains an np.inf")
+
+    # set the number of elements in annular array
+    num_elements: int = np.size(amplitude)
+
+    if (radius <= 0.0) or not np.isreal(radius) or not np.isfinite(radius):
+        raise ValueError("radius is incorrect")
+
+    if ((phase < -np.pi).any() or (phase > np.pi).any()) or not np.isreal(phase).any() or not np.isfinite(phase).all():
+        raise ValueError("phase is incorrect")
+
+    if np.shape(diameter)[0] != 2:
+        diameter = np.transpose(diameter)
+
+    # pre-allocate output
+    p_axial = np.zeros(np.shape(axial_positions))
+
+    # loop over elements and sum fields
+    for ind in range(num_elements):
+        # get complex pressure for bowls with inner and outer aperture diameter
+        if diameter[0, ind] == 0:
+            p_el_inner = 0.0 + 0.0j
+        else:
+            _, _, p_el_inner = focused_bowl_oneil(
+                radius, diameter[0, ind], amplitude[ind], frequency, sound_speed, density, axial_positions=axial_positions
+            )
+
+        _, _, p_el_outer = focused_bowl_oneil(
+            radius, diameter[1, ind], amplitude[ind], frequency, sound_speed, density, axial_positions=axial_positions
+        )
+
+        # pressure for annular element
+        p_el = p_el_outer - p_el_inner
+
+        # account for phase
+        p_el = np.abs(p_el) * np.exp(1.0j * (np.angle(p_el) + phase[ind]))
+
+        # add to complete response
+        p_axial = p_axial + p_el
+
+    # take magnitude of complete response
+    return np.abs(p_axial)
+
+
 def ndgrid(*args):
-    return np.array(np.meshgrid(*args, indexing='ij'))
+    return np.array(np.meshgrid(*args, indexing="ij"))
 
 
 def trim_cart_points(kgrid, points: np.ndarray):
     """
-        trim_cart_points filters a dim x num_points array of Cartesian points
-        so that only those within the bounds of a given kgrid remain.
-        :param kgrid: Object of the kWaveGrid class defining the Cartesian
-                      and k-space grid fields.
-        :param points: dim x num_points array of Cartesian coordinates to trim [m].
-        :return: dim x num_points array of Cartesian coordinates that lie within the grid defined by kgrid [m].
-        """
+    trim_cart_points filters a dim x num_points array of Cartesian points
+    so that only those within the bounds of a given kgrid remain.
+    :param kgrid: Object of the kWaveGrid class defining the Cartesian
+                  and k-space grid fields.
+    :param points: dim x num_points array of Cartesian coordinates to trim [m].
+    :return: dim x num_points array of Cartesian coordinates that lie within the grid defined by kgrid [m].
+    """
 
     # find indices for points within the simulation domain
     ind_x = (points[0, :] >= kgrid.x_vec[0]) & (points[0, :] <= kgrid.x_vec[-1])
@@ -2900,15 +2895,15 @@ def trim_cart_points(kgrid, points: np.ndarray):
     return points
 
 
-@beartype
+@typechecker
 def make_cart_arc(
-    arc_pos: Vector, 
-    radius: Union[float, int], 
-    diameter: int, 
-    focus_pos: Vector, 
+    arc_pos: Float[np.ndarray, "2"],
+    radius: Union[float, int],
+    diameter: Union[float, int],
+    focus_pos: Float[np.ndarray, "2"],
     num_points: int,
-    plot_arc: bool = False
-) -> NDArray[Shape["2, NumPoints"], Float]:
+    plot_arc: bool = False,
+) -> Float[np.ndarray, "2 NumPoints"]:
     """
     make_cart_arc creates a 2 x num_points array of the Cartesian
     coordinates of points evenly distributed over an arc. The midpoint of
@@ -2971,7 +2966,7 @@ def make_cart_arc(
 
         # Create the figure
         plt.figure()
-        plt.plot(arc[1, :] * scale, arc[0, :] * scale, 'b.')
+        plt.plot(arc[1, :] * scale, arc[0, :] * scale, "b.")
         plt.gca().invert_yaxis()
         plt.xlabel(f"y-position [{prefix}m]")
         plt.ylabel(f"x-position [{prefix}m]")
@@ -2981,11 +2976,7 @@ def make_cart_arc(
     return arc
 
 
-def compute_linear_transform2D(
-    arc_pos: Vector, 
-    radius: float, 
-    focus_pos: Vector
-) -> Tuple[np.ndarray, np.ndarray]:
+def compute_linear_transform2D(arc_pos: Vector, radius: float, focus_pos: Vector) -> Tuple[np.ndarray, np.ndarray]:
     """
 
     Compute a rotation matrix to transform the computed arc points to the orientation
@@ -3023,17 +3014,17 @@ def compute_linear_transform2D(
     return R, b
 
 
-@beartype
+@typechecker
 def make_cart_spherical_segment(
-    bowl_pos: NDArray[Shape["3"], Int], 
-    radius: Union[float, int], 
-    inner_diameter: Union[float, int], 
+    bowl_pos: Float[np.ndarray, "3"],
+    radius: Union[float, int],
+    inner_diameter: Union[float, int],
     outer_diameter: Union[float, int],
-    focus_pos: NDArray[Shape["3"], Int], 
-    num_points: int, 
+    focus_pos: Float[np.ndarray, "3"],
+    num_points: int,
     plot_bowl: Optional[bool] = False,
-    num_points_inner: int = 0
-) -> NDArray[Shape["3, NumPoints"], Float]:
+    num_points_inner: int = 0,
+) -> Float[np.ndarray, "3 NumPoints"]:
     """
     Create evenly distributed Cartesian points covering a spherical segment.
 
@@ -3094,9 +3085,7 @@ def make_cart_spherical_segment(
         t = np.linspace(t_start, num_points - 1, num_points)
 
     # compute canonical spiral points
-    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)),
-                   np.sin(theta(t)) * np.sin(varphi(t)),
-                   np.cos(varphi(t))])
+    p0 = np.array([np.cos(theta(t)) * np.sin(varphi(t)), np.sin(theta(t)) * np.sin(varphi(t)), np.cos(varphi(t))])
     p0 = radius * p0
 
     # linearly transform the canonical spiral points to give bowl in correct orientation
@@ -3112,11 +3101,11 @@ def make_cart_spherical_segment(
 
         # create the figure
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
         ax.scatter(segment[0] * scale, segment[1] * scale, segment[2] * scale)
-        ax.set_xlabel('[' + prefix + 'm]')
-        ax.set_ylabel('[' + prefix + 'm]')
-        ax.set_zlabel('[' + prefix + 'm]')
+        ax.set_xlabel("[" + prefix + "m]")
+        ax.set_ylabel("[" + prefix + "m]")
+        ax.set_zlabel("[" + prefix + "m]")
         ax.set_box_aspect([1, 1, 1])
         plt.grid(True)
         plt.show()

@@ -13,7 +13,6 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -50,12 +49,11 @@ def test_sd_directional_array_elements():
     arc = make_circle(grid_size, grid_size // 2, semicircle_radius, np.pi)
 
     # find total number and indices of the grid points constituting the semicircle
-    arc_indices = matlab_find(arc, val=1, mode='eq')
+    arc_indices = matlab_find(arc, val=1, mode="eq")
     Nv = len(arc_indices)
 
     # calculate angles between grid points in the arc and the centre of the grid
-    arc_angles = np.arctan(
-        (matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1)))  # -1 compatibility
+    arc_angles = np.arctan((matlab_mask(kgrid.y, arc_indices) / matlab_mask(kgrid.x, arc_indices - 1)))  # -1 compatibility
 
     # sort the angles into ascending order, and adjust the indices accordingly
     sorted_index = arc_angles.ravel().argsort()
@@ -67,7 +65,7 @@ def test_sd_directional_array_elements():
     for loop in range(1, Ne + 1):
         # get the indices of the grid points belonging to the current element
         # (there is a two grid point gap between the elements)
-        voxel_indices = sorted_arc_indices[((loop - 1) * Nv // Ne) + 1:(loop * Nv // Ne) - 1] - 1  # -1 compatibility
+        voxel_indices = sorted_arc_indices[((loop - 1) * Nv // Ne) + 1 : (loop * Nv // Ne) - 1] - 1  # -1 compatibility
 
         # add the element to the sensor.mask
         sensor_mask[unflatten_matlab_mask(sensor_mask, voxel_indices)] = 1
@@ -92,7 +90,7 @@ def test_sd_directional_array_elements():
     # source continues up to the edge of the domain (and from there infinitely,
     # because of the periodic assumption implicit in pseudospectral methods)
     # input arguments
-    input_filename = 'example_sd_direct_input.h5'
+    input_filename = "example_sd_direct_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -101,7 +99,7 @@ def test_sd_directional_array_elements():
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
-        save_to_disk_exit=True
+        save_to_disk_exit=True,
     )
     # run the simulation
     kspaceFirstOrder2DC(
@@ -110,7 +108,7 @@ def test_sd_directional_array_elements():
         source=deepcopy(source),
         sensor=deepcopy(sensor),
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_sd_directional_array_elements', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_sd_directional_array_elements", input_file_full_path), "Files do not match!"

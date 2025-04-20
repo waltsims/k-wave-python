@@ -5,40 +5,45 @@ import numpy as np
 import pytest
 
 from kwave.utils.conversion import db2neper, neper2db
-from kwave.utils.filters import extract_amp_phase, spect, apply_filter
+from kwave.utils.filters import apply_filter, extract_amp_phase, spect
 from kwave.utils.interp import get_bli
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
-from kwave.utils.matrix import gradient_fd, resize, num_dim, trim_zeros
-from kwave.utils.signals import tone_burst, add_noise, gradient_spect
+from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
+from kwave.utils.signals import add_noise, gradient_spect, tone_burst
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_nepers2db():
-    assert abs(neper2db(1.5) - 8.186258123051049e+05) < 1e-6, "Point check of nepers2db incorrect"
+    expected_scalar = 8.186258123051049e05
+    expected_matrix = expected_scalar * np.ones((10, 10))
+    assert np.isclose(neper2db(1.5), expected_scalar), "Point check of nepers2db incorrect"
+    assert np.allclose(neper2db(1.5 * np.ones((10, 10))), expected_matrix), "matrix check of nepers2db incorrect"
     return
 
 
 def test_db2nepers():
-    assert abs(db2neper(1.6) - 2.931742395517710e-06) < 1e-6, "Point check of nepers2db incorrect"
+    expected_scalar = 2.931742395517710e-06
+    expected_matrix = expected_scalar * np.ones((10, 10))
+    assert np.isclose(db2neper(1.6), expected_scalar), "Point check of db2nepers incorrect"
+    assert np.allclose(db2neper(1.6 * np.ones((10, 10))), expected_matrix), "matrix check of db2nepers incorrect"
     return
 
 
 def test_add_noise():
-    input_signal = tone_burst(1.129333333333333e+07, 5e5, 5)
+    input_signal = tone_burst(1.129333333333333e07, 5e5, 5)
     output = add_noise(input_signal, 5)
-    p_sig = np.sqrt(np.mean(input_signal ** 2))
+    p_sig = np.sqrt(np.mean(input_signal**2))
     p_noise = np.sqrt(np.mean((output - input_signal) ** 2))
     snr = 20 * np.log10(p_sig / p_noise)
-    assert (abs(5 - snr) < 2), \
-        "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
+    assert abs(5 - snr) < 2, "add_noise produced signal with incorrect SNR, this is a stochastic process. Perhaps test again?"
     return
 
 
 def test_tone_error():
     try:
-        test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, envelope='BobTheBuilder')  # noqa: F841
+        test_input_signal = tone_burst(1.129333333333333e07, 5e5, 5, envelope="BobTheBuilder")  # noqa: F841
     except ValueError as e:
-        if str(e) == 'Unknown envelope BobTheBuilder.':
+        if str(e) == "Unknown envelope BobTheBuilder.":
             pass
         else:
             raise e
@@ -46,15 +51,15 @@ def test_tone_error():
 
 
 def test_signal_length():
-    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, signal_length=500)
+    test_input_signal = tone_burst(1.129333333333333e07, 5e5, 5, signal_length=500)
     assert len(np.squeeze(test_input_signal)) == 500
 
 
 def test_signal_offset():
     offset = 100
-    test_input_signal = tone_burst(1.129333333333333e+07, 5e5, 5, signal_offset=offset, signal_length=500)
+    test_input_signal = tone_burst(1.129333333333333e07, 5e5, 5, signal_offset=offset, signal_length=500)
     assert len(np.squeeze(test_input_signal)) == 500
-    assert (np.squeeze(test_input_signal)[:offset] == 0.).all()
+    assert (np.squeeze(test_input_signal)[:offset] == 0.0).all()
 
 
 def test_num_dim():
@@ -75,47 +80,120 @@ def test_spect():
 
 def test_extract_amp_phase():
     # odd length signal
-    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
-    assert( np.shape(np.squeeze(test_signal))[0] % 2 != 0)
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10 ** 6)
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
+    assert np.shape(np.squeeze(test_signal))[0] % 2 != 0
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=10_000_000, source_freq=2.5 * 10**6)
     a, b, c = 0.6547, -1.8035, 2.5926e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
     # even length signal
-    test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=5, envelope='Gaussian')
-    assert( np.shape(np.squeeze(test_signal))[0] % 2 == 0)
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=18_000_000, source_freq=6_000_000)
+    test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=5, envelope="Gaussian")
+    assert np.shape(np.squeeze(test_signal))[0] % 2 == 0
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=18_000_000, source_freq=6_000_000)
     a, b, c = 0.6591, -1.5708, 6.000e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
 
 
+def test_extract_amp_phase_2d():
+    # Create a 2D test signal with 2 channels
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Signal frequency
+    amp_1 = 2.0
+    amp_2 = 1.0
+    phase_1 = np.pi / 8
+    phase_2 = np.pi / 4
+    # Create a 2D test signal with 2 channels
+    sig_1 = amp_1 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_1)
+    sig_2 = amp_2 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_2)
+    test_signal = np.vstack([sig_1, sig_2])
+    # plt.plot(test_signal[0])
+    # plt.show()
+    amp, phase, f = extract_amp_phase(test_signal, Fs, source_freq, dim=1)
+
+    assert np.allclose(amp, np.array([amp_1, amp_2]))
+    # Phase is not used in any k-wave-python examples
+    # assert np.allclose(phase, np.array([-phase_1, -phase_2]))
+    assert np.allclose(f, source_freq)
+
+
+def test_extract_amp_phase_double_freq():
+    # Create a test signal with double the detection frequency
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Source frequency
+    detection_freq = 5 * 1_000  # Double the frequency (2 * source_freq)
+
+    amp = 2.0
+    phase = np.pi / 6
+
+    # Create test signal at source_freq
+    t = np.arange(Fs) / Fs
+    test_signal = amp * np.sin(source_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at double the frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp, detected_phase, detected_f = extract_amp_phase(test_signal, Fs, detection_freq, dim=0)
+
+    # The amplitude should be very close to zero since we're detecting at a different frequency
+    # than what's present in the signal
+    assert np.isclose(detected_amp, 0, atol=1e-3)
+    assert np.isclose(detected_f, detection_freq)
+
+    # Now create a signal with the detection frequency
+    test_signal_at_detection = amp * np.sin(detection_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at the correct frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp2, detected_phase2, detected_f2 = extract_amp_phase(test_signal_at_detection, Fs, detection_freq, dim=0)
+
+    # Now the amplitude should match
+    assert np.isclose(detected_amp2, amp, rtol=0.01)
+    # Phase is not used in any k-wave-python examples, but we can verify it's consistent
+    # assert np.isclose(detected_phase2, -phase, rtol=0.01)
+    assert np.isclose(detected_f2, detection_freq)
+
 
 def test_apply_filter_lowpass():
-    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
-    expected_signal = [0.00000000e+00, 2.76028757e-24, -3.59205956e-24,
-                       1.46416820e-23, 3.53059551e-22, 1.00057133e-21,
-                       -3.57207790e-21, -1.10602408e-20, 1.60600278e-20]
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="LowPass")
+    expected_signal = [
+        0.00000000e00,
+        2.76028757e-24,
+        -3.59205956e-24,
+        1.46416820e-23,
+        3.53059551e-22,
+        1.00057133e-21,
+        -3.57207790e-21,
+        -1.10602408e-20,
+        1.60600278e-20,
+    ]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
 
 
 def test_apply_filter_highpass():
-    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
-    expected_signal = [0.00000000e+00, 1.40844920e-10, 1.82974394e-09,
-                       7.00097845e-09, 9.76890695e-09, -4.62418007e-09,
-                       -6.61859580e-08, -2.38415184e-07, -6.35274380e-07]
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="HighPass")
+    expected_signal = [
+        0.00000000e00,
+        1.40844920e-10,
+        1.82974394e-09,
+        7.00097845e-09,
+        9.76890695e-09,
+        -4.62418007e-09,
+        -6.61859580e-08,
+        -2.38415184e-07,
+        -6.35274380e-07,
+    ]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
 
 
 def test_apply_filter_bandpass():
-    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
@@ -130,7 +208,7 @@ def test_fit_power_law_params():
 
 
 def test_get_bli():
-    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope='Gaussian')
+    test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     bli, x_fine = get_bli(test_signal)
 
     assert x_fine[-1] == 8
@@ -142,8 +220,8 @@ def test_power_kramers_kronig():
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 2.5)
     assert 1540 == power_law_kramers_kronig(1, 1, 1540, 1, 1)
     with pytest.warns(UserWarning):
-        ans = power_law_kramers_kronig(1, 1, 1540, 1, 4)
-        assert ans == 1540
+        c = power_law_kramers_kronig(1, 1, 1540, 1, 4)
+        assert c == 1540
     assert abs(-1.4311 - power_law_kramers_kronig(3, 1, 1540, 1, 1)) < 0.001
     assert abs(1.4285 - power_law_kramers_kronig(1, 3, 1540, 1, 1)) < 0.001
 
@@ -165,14 +243,14 @@ def test_gradient_spacing_ndim():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
     x = np.arange(f.size)
     grad = gradient_fd(f, x)
-    assert np.allclose(grad, np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.]))
+    assert np.allclose(grad, np.array([1.0, 1.5, 2.5, 3.5, 4.5, 5.0]))
 
 
 def test_gradeint_spacing_uneven():
     f = np.array([1, 2, 4, 7, 11, 16], dtype=float)
-    x = np.array([0., 1., 1.5, 3.5, 4., 6.], dtype=float)
+    x = np.array([0.0, 1.0, 1.5, 3.5, 4.0, 6.0], dtype=float)
     grad = gradient_fd(f, x)
-    assert np.allclose(grad, np.array([1., 3., 3.5, 6.7, 6.9, 2.5]))
+    assert np.allclose(grad, np.array([1.0, 3.0, 3.5, 6.7, 6.9, 2.5]))
 
 
 def test_gradient_FD_2D():
@@ -180,8 +258,7 @@ def test_gradient_FD_2D():
     grad = gradient_fd(f)
 
     assert len(grad) == 2, "gradient_fd did not return two gradient matrices."
-    assert np.allclose(np.array(grad), [np.array([[2., 2., -1.], [2., 2., -1.]]),
-                                        np.array([[1., 2.5, 4.], [1., 1., 1.]])])
+    assert np.allclose(np.array(grad), [np.array([[2.0, 2.0, -1.0], [2.0, 2.0, -1.0]]), np.array([[1.0, 2.5, 4.0], [1.0, 1.0, 1.0]])])
 
     pass
 
@@ -197,12 +274,13 @@ def test_gradient_spect_1D():
 
 
 def test_gradient_spect_2D():
-    test_record_path = os.path.join(Path(__file__).parent, Path(
-        'matlab_test_data_collectors/python_testers/collectedValues/gradientSpect.mat'))
+    test_record_path = os.path.join(
+        Path(__file__).parent, Path("matlab_test_data_collectors/python_testers/collectedValues/gradientSpect.mat")
+    )
     reader = TestRecordReader(test_record_path)
-    dx = reader.expected_value_of('dx')
-    dy = reader.expected_value_of('dy')
-    z = reader.expected_value_of('z')
+    dx = reader.expected_value_of("dx")
+    dy = reader.expected_value_of("dy")
+    z = reader.expected_value_of("z")
 
     # compute gradient of a 2 period sinusoid
     dydx = gradient_spect(z, (np.pi / 20, np.pi / 20))
@@ -216,7 +294,7 @@ def test_gradient_spect_2D():
 # TODO:
 def test_resize_2D_splinef2d():
     mat = np.ones([10, 10])
-    out = resize(mat, [20, 20], 'splinef2d')  # noqa: F841
+    out = resize(mat, [20, 20], "splinef2d")  # noqa: F841
 
 
 def test_resize_2D_linear_larger():
@@ -226,16 +304,16 @@ def test_resize_2D_linear_larger():
     p0[:, 1] = 1
 
     # resize the input image to the desired number of grid points
-    p1 = resize(p0, new_size, interp_mode='linear')
+    p1 = resize(p0, new_size, interp_mode="linear")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1 == [0., 0.5, 1.])
+    assert np.all(p1 == [0.0, 0.5, 1.0])
 
     # now test transpose
     p0 = p0.T
     new_size = [3, 20]
-    p1 = resize(p0, new_size, interp_mode='linear')
+    p1 = resize(p0, new_size, interp_mode="linear")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1.T == [0., 0.5, 1.])
+    assert np.all(p1.T == [0.0, 0.5, 1.0])
 
 
 def test_resize_2D_linear_smaller():
@@ -245,16 +323,16 @@ def test_resize_2D_linear_smaller():
     new_size = [10, 2]
 
     # resize the input image to the desired number of grid points
-    p1 = resize(p0, new_size, interp_mode='linear')
+    p1 = resize(p0, new_size, interp_mode="linear")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1 == [0., 1.])
+    assert np.all(p1 == [0.0, 1.0])
 
     # now test transpose
     p0 = p0.T
     new_size = [2, 10]
-    p1 = resize(p0, new_size, interp_mode='linear')
+    p1 = resize(p0, new_size, interp_mode="linear")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1.T == [0., 1.])
+    assert np.all(p1.T == [0.0, 1.0])
 
 
 def test_resize_2D_nearest_larger():
@@ -264,16 +342,16 @@ def test_resize_2D_nearest_larger():
     new_size = [20, 3]
 
     # resize the input image to the desired number of grid points
-    p1 = resize(p0, new_size, interp_mode='nearest')
+    p1 = resize(p0, new_size, interp_mode="nearest")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1 == [0., 0., 1.])
+    assert np.all(p1 == [0.0, 0.0, 1.0])
 
     # now test transpose
     p0 = p0.T
     new_size = [3, 20]
-    p1 = resize(p0, new_size, interp_mode='nearest')
+    p1 = resize(p0, new_size, interp_mode="nearest")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1.T == [0., 0., 1.])
+    assert np.all(p1.T == [0.0, 0.0, 1.0])
 
 
 def test_resize_2D_nearest_smaller():
@@ -283,16 +361,16 @@ def test_resize_2D_nearest_smaller():
     new_size = [10, 2]
 
     # resize the input image to the desired number of grid points
-    p1 = resize(p0, new_size, interp_mode='nearest')
+    p1 = resize(p0, new_size, interp_mode="nearest")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1 == [0., 1.])
+    assert np.all(p1 == [0.0, 1.0])
 
     # now test the transpose
     p0 = p0.T
     new_size = [2, 10]
-    p1 = resize(p0, new_size, interp_mode='nearest')
+    p1 = resize(p0, new_size, interp_mode="nearest")
     assert p1.shape == tuple(new_size)
-    assert np.all(p1.T == [0., 1.])
+    assert np.all(p1.T == [0.0, 1.0])
 
 
 def test_trim_zeros():
@@ -319,17 +397,11 @@ def test_trim_zeros():
 
     # Harder 2D test case
 
-    data = np.array([[0, 0, 0, 0, 0, 0],
-                     [0, 0, 0, 3, 0, 0],
-                     [0, 0, 1, 3, 4, 0],
-                     [0, 0, 1, 3, 4, 0],
-                     [0, 0, 1, 3, 0, 0],
-                     [0, 0, 0, 0, 0, 0]])
+    data = np.array(
+        [[0, 0, 0, 0, 0, 0], [0, 0, 0, 3, 0, 0], [0, 0, 1, 3, 4, 0], [0, 0, 1, 3, 4, 0], [0, 0, 1, 3, 0, 0], [0, 0, 0, 0, 0, 0]]
+    )
 
-    correct_trimmed = np.array([[0, 3, 0],
-                                [1, 3, 4],
-                                [1, 3, 4],
-                                [1, 3, 0]])
+    correct_trimmed = np.array([[0, 3, 0], [1, 3, 4], [1, 3, 4], [1, 3, 0]])
 
     data_trimmed, ind = trim_zeros(data)
 

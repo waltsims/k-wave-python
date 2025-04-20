@@ -13,7 +13,6 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -36,22 +35,22 @@ def test_ivp_photoacoustic_waveforms():
     # =========================================================================
 
     # size of the computational grid
-    Nx = 64    # number of grid points in the x (row) direction
-    x = 1e-3   # size of the domain in the x direction [m]
-    dx = x/Nx  # grid point spacing in the x direction [m]
+    Nx = 64  # number of grid points in the x (row) direction
+    x = 1e-3  # size of the domain in the x direction [m]
+    dx = x / Nx  # grid point spacing in the x direction [m]
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)
 
     # size of the initial pressure distribution
-    source_radius = 2              # [grid points]
+    source_radius = 2  # [grid points]
 
     # distance between the centre of the source and the sensor
-    source_sensor_distance = 10    # [grid points]
+    source_sensor_distance = 10  # [grid points]
 
     # time array
-    dt = 2e-9                      # [s]
-    t_end = 300e-9                 # [s]
+    dt = 2e-9  # [s]
+    t_end = 300e-9  # [s]
 
     # =========================================================================
     # ONE DIMENSIONAL SIMULATION
@@ -92,19 +91,15 @@ def test_ivp_photoacoustic_waveforms():
 
     # define a single sensor point
     sensor_mask = np.zeros(grid_size)
-    sensor_mask[grid_size.x//2 - source_sensor_distance - 1, grid_size.y//2 - 1] = 1
+    sensor_mask[grid_size.x // 2 - source_sensor_distance - 1, grid_size.y // 2 - 1] = 1
     sensor = kSensor(sensor_mask)
 
     # run the simulation
-    input_filename = 'example_ivp_pa_input.h5'
+    input_filename = "example_ivp_pa_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
-        data_cast='single',
-        save_to_disk=True,
-        input_filename=input_filename,
-        data_path=pathname,
-        save_to_disk_exit=True
+        data_cast="single", save_to_disk=True, input_filename=input_filename, data_path=pathname, save_to_disk_exit=True
     )
 
     # run the simulation
@@ -114,11 +109,10 @@ def test_ivp_photoacoustic_waveforms():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_ivp_photoacoustic_waveforms/input_1', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_ivp_photoacoustic_waveforms/input_1", input_file_full_path), "Files do not match!"
 
     # =========================================================================
     # THREE DIMENSIONAL SIMULATION
@@ -137,15 +131,11 @@ def test_ivp_photoacoustic_waveforms():
 
     # define a single sensor point
     sensor.mask = np.zeros(grid_size)
-    sensor.mask[grid_size.x//2 - source_sensor_distance - 1, grid_size.y//2 - 1, grid_size.z//2 - 1] = 1
+    sensor.mask[grid_size.x // 2 - source_sensor_distance - 1, grid_size.y // 2 - 1, grid_size.z // 2 - 1] = 1
 
     # run the simulation
     simulation_options = SimulationOptions(
-        data_cast='single',
-        save_to_disk=True,
-        input_filename=input_filename,
-        save_to_disk_exit=True,
-        data_path=pathname
+        data_cast="single", save_to_disk=True, input_filename=input_filename, save_to_disk_exit=True, data_path=pathname
     )
     # run the simulation
     kspaceFirstOrder3DC(
@@ -154,7 +144,6 @@ def test_ivp_photoacoustic_waveforms():
         source=deepcopy(source),
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_ivp_photoacoustic_waveforms/input_2', input_file_full_path), \
-        'Files do not match!'
+    assert compare_against_ref("out_ivp_photoacoustic_waveforms/input_2", input_file_full_path), "Files do not match!"

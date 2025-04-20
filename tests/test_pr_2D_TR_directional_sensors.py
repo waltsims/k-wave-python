@@ -13,11 +13,10 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksensor import kSensorDirectivity, kSensor
+from kwave.ksensor import kSensor, kSensorDirectivity
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
@@ -38,13 +37,13 @@ def test_pr_2D_TR_directional_sensors():
     medium = kWaveMedium(sound_speed=1500)
 
     # create initial pressure distribution using make_disc
-    disc_magnitude = 5         # [Pa]
+    disc_magnitude = 5  # [Pa]
     disc_pos = Vector([60, 140])  # [grid points]
-    disc_radius = 5            # [grid points]
+    disc_radius = 5  # [grid points]
     disc_2 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     disc_pos = Vector([30, 110])  # [grid points]
-    disc_radius = 8            # [grid points]
+    disc_radius = 8  # [grid points]
     disc_1 = disc_magnitude * make_disc(grid_size, disc_pos, disc_radius)
 
     # smooth the initial pressure distribution and restore the magnitude
@@ -65,8 +64,8 @@ def test_pr_2D_TR_directional_sensors():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguements
-    input_filename = 'example_tr_dir_input.h5'
+    # set the input arguments
+    input_filename = "example_tr_dir_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
     simulation_options = SimulationOptions(
@@ -76,7 +75,7 @@ def test_pr_2D_TR_directional_sensors():
         save_to_disk=True,
         input_filename=input_filename,
         data_path=pathname,
-        save_to_disk_exit=True
+        save_to_disk_exit=True,
     )
     # run the simulation
     kspaceFirstOrder2DC(
@@ -85,17 +84,17 @@ def test_pr_2D_TR_directional_sensors():
         source=deepcopy(source),
         sensor=deepcopy(sensor),
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_1', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_pr_2D_TR_directional_sensors/input_1", input_file_full_path), "Files do not match!"
 
     # define the directionality of the sensor elements
     directivity = kSensorDirectivity()
     directivity.angle = np.zeros((kgrid.Nx, kgrid.Ny))
-    directivity.angle[1, :] = 0    	        # max sensitivity in x direction
-    directivity.angle[-1, :] = 0  	        # max sensitivity in x direction
-    directivity.angle[:, 1] = np.pi / 2      # max sensitivity in y direction
-    directivity.angle[:, -1] = np.pi / 2     # max sensitivity in y direction
+    directivity.angle[1, :] = 0  # max sensitivity in x direction
+    directivity.angle[-1, :] = 0  # max sensitivity in x direction
+    directivity.angle[:, 1] = np.pi / 2  # max sensitivity in y direction
+    directivity.angle[:, -1] = np.pi / 2  # max sensitivity in y direction
 
     # define the directivity size
     directivity.size = 20 * kgrid.dx
@@ -109,6 +108,6 @@ def test_pr_2D_TR_directional_sensors():
         source=deepcopy(source),
         sensor=deepcopy(sensor),
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
-    assert compare_against_ref('out_pr_2D_TR_directional_sensors/input_2', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_pr_2D_TR_directional_sensors/input_2", input_file_full_path), "Files do not match!"

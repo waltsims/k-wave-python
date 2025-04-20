@@ -12,7 +12,6 @@ from tempfile import gettempdir
 import numpy as np
 
 # noinspection PyUnresolvedReferences
-import setup_test  # noqa: F401
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -33,18 +32,18 @@ def test_ivp_axisymmetric_simulation():
 
     # define the properties of the propagation medium
     medium = kWaveMedium(
-        sound_speed=1500 * np.ones(grid_size),   # [m/s]
-        density=1000 * np.ones(grid_size)        # [kg/m^3]
+        sound_speed=1500 * np.ones(grid_size),  # [m/s]
+        density=1000 * np.ones(grid_size),  # [kg/m^3]
     )
-    medium.sound_speed[grid_size.x//2-1:, :] = 1800      # [m/s]
-    medium.density[grid_size.x//2-1:, :]     = 1200      # [kg/m^3]
+    medium.sound_speed[grid_size.x // 2 - 1 :, :] = 1800  # [m/s]
+    medium.density[grid_size.x // 2 - 1 :, :] = 1200  # [kg/m^3]
 
     # create initial pressure distribution in the shape of a disc - this is
     # generated on a 2D grid that is doubled in size in the radial (y)
     # direction, and then trimmed so that only half the disc is retained
     source = kSource()
     source.p0 = 10 * make_disc(Vector([grid_size.x, 2 * grid_size.y]), Vector([grid_size.x // 4 + 8, grid_size.y + 1]), 5)
-    source.p0 = source.p0[:, grid_size.y:]
+    source.p0 = source.p0[:, grid_size.y :]
 
     # define a Cartesian sensor mask with points in the shape of a circle
     # REPLACED BY FARID cartesian mask with binary. Otherwise, SaveToDisk doesn't work.
@@ -57,15 +56,10 @@ def test_ivp_axisymmetric_simulation():
     sensor.mask[:, sensor.mask[1, :] < 0] = np.nan
 
     # set the input settings
-    input_filename = 'example_ivp_axisymmetric_input.h5'
+    input_filename = "example_ivp_axisymmetric_input.h5"
     pathname = gettempdir()
     input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        input_filename=input_filename,
-        save_to_disk_exit=True,
-        data_path=pathname
-    )
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, save_to_disk_exit=True, data_path=pathname)
 
     # run the simulation
     kspaceFirstOrderASC(
@@ -74,7 +68,7 @@ def test_ivp_axisymmetric_simulation():
         source=source,
         sensor=sensor,
         simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions()
+        execution_options=SimulationExecutionOptions(),
     )
 
-    assert compare_against_ref('out_ivp_axisymmetric_simulation', input_file_full_path), 'Files do not match!'
+    assert compare_against_ref("out_ivp_axisymmetric_simulation", input_file_full_path), "Files do not match!"

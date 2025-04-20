@@ -1,22 +1,21 @@
 import logging
+
 import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.options.simulation_options import SimulationOptions
 from kwave.ktransducer import NotATransducer
-from kwave.data import Vector
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.matlab import matlab_find
 from kwave.utils.matrix import expand_matrix
 
 
-def expand_grid_matrices(
-        kgrid: kWaveGrid, medium: kWaveMedium, source, sensor, opt: SimulationOptions,
-        values: dotdict, flags: dotdict):
+def expand_grid_matrices(kgrid: kWaveGrid, medium: kWaveMedium, source, sensor, opt: SimulationOptions, values: dotdict, flags: dotdict):
     # update command line status
-    logging.log(logging.INFO, '  expanding computational grid...')
+    logging.log(logging.INFO, "  expanding computational grid...")
 
     #####################
     # Grab values
@@ -24,13 +23,13 @@ def expand_grid_matrices(
 
     # retaining the values for kgrid time array
     pml_size = [opt.pml_x_size, opt.pml_y_size, opt.pml_z_size]
-    pml_size = Vector(pml_size[:kgrid.dim])
+    pml_size = Vector(pml_size[: kgrid.dim])
 
     p_source_pos_index = values.p_source_pos_index
     u_source_pos_index = values.u_source_pos_index
     s_source_pos_index = values.s_source_pos_index
 
-    is_source_sensor_same = (isinstance(sensor, NotATransducer) and sensor == source)
+    is_source_sensor_same = isinstance(sensor, NotATransducer) and sensor == source
 
     #####################
     # Expand Structures
@@ -43,7 +42,7 @@ def expand_grid_matrices(
 
     # update the data type in case adding the PML requires additional index precision
     total_grid_points = kgrid.total_grid_points
-    index_data_type = get_smallest_possible_type(total_grid_points, 'uint', default='double')
+    index_data_type = get_smallest_possible_type(total_grid_points, "uint", default="double")
 
     expand_sensor(sensor, expand_size, flags.use_sensor, flags.blank_sensor)
 
@@ -53,8 +52,7 @@ def expand_grid_matrices(
     expand_medium(medium, expand_size)
 
     p_source_pos_index, u_source_pos_index, s_source_pos_index = expand_source(
-        source, is_source_sensor_same, flags, expand_size, index_data_type,
-        p_source_pos_index, u_source_pos_index, s_source_pos_index
+        source, is_source_sensor_same, flags, expand_size, index_data_type, p_source_pos_index, u_source_pos_index, s_source_pos_index
     )
 
     expand_directivity_angle(kgrid, sensor, expand_size, flags.use_sensor, flags.compute_directivity)
@@ -70,14 +68,14 @@ def expand_kgrid(kgrid, is_axisymmetric, pml_size):
     pml_size = pml_size.squeeze()
 
     if kgrid.dim == 1:
-        new_size            = kgrid.N + 2 * pml_size
+        new_size = kgrid.N + 2 * pml_size
     elif kgrid.dim == 2:
         if is_axisymmetric:
-            new_size        = [kgrid.Nx + 2 * pml_size[0], kgrid.Ny + pml_size[1]]
+            new_size = [kgrid.Nx + 2 * pml_size[0], kgrid.Ny + pml_size[1]]
         else:
-            new_size        = kgrid.N + 2 * pml_size
+            new_size = kgrid.N + 2 * pml_size
     elif kgrid.dim == 3:
-        new_size            = kgrid.N + 2 * pml_size
+        new_size = kgrid.N + 2 * pml_size
     else:
         raise NotImplementedError
 
@@ -106,18 +104,18 @@ def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
 
 
 def expand_medium(medium: kWaveMedium, expand_size):
-    # enlarge the sound speed grids by exting the edge values into the expanded grid
+    # enlarge the sound speed grids by extending the edge values into the expanded grid
     medium.sound_speed = np.atleast_1d(medium.sound_speed)
     if medium.sound_speed.size > 1:
         medium.sound_speed = expand_matrix(medium.sound_speed, expand_size)
 
-    # enlarge the grid of density by exting the edge values into the expanded grid
+    # enlarge the grid of density by extending the edge values into the expanded grid
     medium.density = np.atleast_1d(medium.density)
     if medium.density.size > 1:
         medium.density = expand_matrix(medium.density, expand_size)
 
     # for key in ['alpha_coeff', 'alpha_coeff_compression', 'alpha_coeff_shear', 'BonA']:
-    for key in ['alpha_coeff', 'BonA']:
+    for key in ["alpha_coeff", "BonA"]:
         # enlarge the grid of medium[key] if given
         attr = getattr(medium, key)
         if attr is not None and np.atleast_1d(attr).size > 1:
@@ -130,15 +128,20 @@ def expand_medium(medium: kWaveMedium, expand_size):
 
 
 def expand_source(
-        source, is_source_sensor_same, flags, expand_size, index_data_type,
-        p_source_pos_index, u_source_pos_index, s_source_pos_index):
-
-    p_source_pos_index = expand_pressure_sources(source, expand_size, flags.source_p0, flags.source_p,
-                                                 index_data_type, p_source_pos_index)
+    source, is_source_sensor_same, flags, expand_size, index_data_type, p_source_pos_index, u_source_pos_index, s_source_pos_index
+):
+    p_source_pos_index = expand_pressure_sources(source, expand_size, flags.source_p0, flags.source_p, index_data_type, p_source_pos_index)
 
     u_source_pos_index = expand_velocity_sources(
-        source, expand_size, is_source_sensor_same, index_data_type, u_source_pos_index,
-        flags.source_ux, flags.source_uy, flags.source_uz, flags.transducer_source
+        source,
+        expand_size,
+        is_source_sensor_same,
+        index_data_type,
+        u_source_pos_index,
+        flags.source_ux,
+        flags.source_uy,
+        flags.source_uz,
+        flags.transducer_source,
     )
 
     s_source_pos_index = expand_stress_sources(source, expand_size, flags, index_data_type, s_source_pos_index)
@@ -153,7 +156,6 @@ def expand_pressure_sources(source, expand_size, is_source_p0, is_source_p, inde
 
     # enlarge the pressure source mask if given
     if is_source_p:
-
         # enlarge the pressure source mask
         source.p_mask = expand_matrix(source.p_mask, expand_size, 0)
 
@@ -164,8 +166,15 @@ def expand_pressure_sources(source, expand_size, is_source_p0, is_source_p, inde
 
 
 def expand_velocity_sources(
-        source, expand_size, is_source_sensor_same, index_data_type, u_source_pos_index,
-        is_source_ux, is_source_uy, is_source_uz, is_transducer_source
+    source,
+    expand_size,
+    is_source_sensor_same,
+    index_data_type,
+    u_source_pos_index,
+    is_source_ux,
+    is_source_uy,
+    is_source_uz,
+    is_transducer_source,
 ):
     """
         enlarge the velocity source mask if given
@@ -184,13 +193,10 @@ def expand_velocity_sources(
 
     """
     if is_source_ux or is_source_uy or is_source_uz or is_transducer_source:
-
         # update the source indexing variable
         if isinstance(source, NotATransducer):
-
             # check if the sensor is also the same transducer, if so, don't expand the grid again
             if not is_source_sensor_same:
-
                 # expand the transducer mask
                 source.expand_grid(expand_size)
 
@@ -200,7 +206,6 @@ def expand_velocity_sources(
             # update the indexing variable corresponding to the active elements
             u_source_pos_index = matlab_find(active_elements_mask)
         else:
-
             # enlarge the velocity source mask
             source.u_mask = expand_matrix(source.u_mask, expand_size, 0)
 
@@ -257,11 +262,11 @@ def print_grid_size(kgrid):
     """
     k_Nx, k_Ny, k_Nz = kgrid.Nx, kgrid.Ny, kgrid.Nz
     if kgrid.dim == 1:
-        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'grid points')
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} grid points")
     elif kgrid.dim == 2:
-        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'grid points')
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} grid points")
     elif kgrid.dim == 3:
-        logging.log(logging.INFO, '  computational grid size:', int(k_Nx), 'by', int(k_Ny), 'by', int(k_Nz), 'grid points')
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} by {k_Nz} grid points")
 
 
 def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):

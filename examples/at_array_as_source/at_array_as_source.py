@@ -11,8 +11,8 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.colormap import get_color_map
+from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import tone_burst
 
 
@@ -79,9 +79,9 @@ def main():
 
     # combine source signals into one array
     source_signal = np.zeros((3, max(len(sig1), len(sig2))))
-    source_signal[0, :len(sig1)] = sig1
-    source_signal[1, :len(sig2)] = sig2
-    source_signal[2, :len(sig3)] = sig3
+    source_signal[0, : len(sig1)] = sig1
+    source_signal[1, : len(sig2)] = sig2
+    source_signal[2, : len(sig3)] = sig3
 
     # get distributed source signals (this automatically returns a weighted
     # source signal for each grid point that forms part of the source)
@@ -89,7 +89,7 @@ def main():
 
     simulation_options = SimulationOptions(
         save_to_disk=True,
-        data_cast='single',
+        data_cast="single",
     )
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
     # run k-Wave simulation (no sensor is used for this example)
@@ -103,7 +103,7 @@ def main():
 
     p = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
 
-    p_field = np.reshape(p['p'], (kgrid.Nt, Nx, Ny))
+    p_field = np.reshape(p["p"], (kgrid.Nt, Nx, Ny))
     p_field = np.transpose(p_field, (0, 2, 1))
     # =========================================================================
     # VISUALIZATION
@@ -124,15 +124,15 @@ def main():
     # Function to update the image for each frame
     def update(frame):
         image.set_data(normalized_frames[frame])
-        ax.set_title(f'Frame {frame + 1}/{kgrid.Nt}')
+        ax.set_title(f"Frame {frame + 1}/{kgrid.Nt}")
         return [image]
 
     # Create the animation
     ani = FuncAnimation(fig, update, frames=kgrid.Nt, interval=100)  # Adjust interval as needed (in milliseconds)
 
     # Save the animation as a video file (e.g., MP4)
-    video_filename = 'output_video1.mp4'
-    ani.save('./' + video_filename, writer='ffmpeg', fps=30)  # Adjust FPS as needed
+    video_filename = "output_video1.mp4"
+    ani.save("./" + video_filename, writer="ffmpeg", fps=30)  # Adjust FPS as needed
 
     # Show the animation (optional)
     plt.show()
@@ -150,10 +150,10 @@ def main():
 
     # plot source and pml masks
     plt.figure()
-    plt.imshow(np.logical_not(np.squeeze(source.p_mask | pml_mask)), aspect='auto', cmap='gray')
-    plt.xlabel('x-position [m]')
-    plt.ylabel('y-position [m]')
-    plt.title('Source and PML Masks')
+    plt.imshow(np.logical_not(np.squeeze(source.p_mask | pml_mask)), aspect="auto", cmap="gray")
+    plt.xlabel("x-position [m]")
+    plt.ylabel("y-position [m]")
+    plt.title("Source and PML Masks")
     plt.show()
 
 

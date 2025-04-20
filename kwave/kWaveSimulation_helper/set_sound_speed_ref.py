@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 
 from kwave.kmedium import kWaveMedium
@@ -36,7 +37,7 @@ def get_ordinary_sound_speed_ref(medium):
 
     """
     c_ref = _get_sound_speed_ref(medium.sound_speed_ref, medium.sound_speed)
-    logging.log(logging.INFO, '  reference sound speed: ', c_ref, 'm/s')
+    logging.log(logging.INFO, f"  reference sound speed: {c_ref} m/s")
     return c_ref, None, None
 
 
@@ -51,14 +52,14 @@ def get_pstd_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
 
     """
     c_ref = _get_sound_speed_ref(medium.sound_speed_ref, medium.sound_speed_compression)
-    logging.log(logging.INFO, '  reference sound speed: ', c_ref, 'm/s')
+    logging.log(logging.INFO, f"  reference sound speed: {c_ref} m/s")
     return c_ref, None, None
 
 
 def get_kspace_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
     """
     in the k-space elastic case, there are two reference sound speeds for
-    the compressional and shear waves, so compute them seperately
+    the compressional and shear waves, so compute them separately
     Args:
         medium:
 
@@ -66,20 +67,16 @@ def get_kspace_elastic_sound_speed_ref(medium: kWaveMedium):  # pragma: no cover
 
     """
     c_ref_compression = _get_sound_speed_ref(medium.sound_speed_ref_compression, medium.sound_speed_compression)
-    logging.log(logging.INFO, '  reference sound speed (compression): ', c_ref_compression, 'm/s')
+    logging.log(logging.INFO, f"  reference sound speed (compression): {c_ref_compression} m/s")
 
     c_ref_shear = _get_sound_speed_ref(medium.sound_speed_ref_shear, medium.sound_speed_shear)
-    logging.log(logging.INFO, '  reference sound speed (shear): ', c_ref_shear, 'm/s')
+    logging.log(logging.INFO, f"  reference sound speed (shear): {c_ref_shear} m/s")
 
     return None, c_ref_compression, c_ref_shear
 
 
 def _get_sound_speed_ref(reference, speed):
-    reductions = {
-        'min': np.min,
-        'max': np.max,
-        'mean': np.mean
-    }
+    reductions = {"min": np.min, "max": np.max, "mean": np.mean}
 
     if reference is not None:
         # if reference is defined, check whether it is a scalar or 'reduction'
@@ -88,7 +85,7 @@ def _get_sound_speed_ref(reference, speed):
         else:
             c_ref = reductions[reference](speed)
     else:
-        c_ref = reductions['max'](speed)
+        c_ref = reductions["max"](speed)
 
-    logging.log(logging.INFO, '  reference sound speed: ', c_ref, 'm/s')
+    logging.log(logging.INFO, f"  reference sound speed: {c_ref} m/s")
     return float(c_ref)

@@ -8,8 +8,6 @@ Submodules
    :maxdepth: 4
 
    kwave.kWaveSimulation_helper.create_absorption_variables
-   kwave.kWaveSimulation_helper.create_storage_variables
-   kwave.kWaveSimulation_helper.data_cast
    kwave.kWaveSimulation_helper.display_simulation_params
    kwave.kWaveSimulation_helper.expand_grid_matrices
    kwave.kWaveSimulation_helper.retract_transducer_grid_size

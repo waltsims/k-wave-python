@@ -1,5 +1,6 @@
-import numpy as np
 import logging
+
+import numpy as np
 
 from kwave.kgrid import kWaveGrid
 from kwave.ksensor import kSensor
@@ -16,16 +17,15 @@ def make_pos_int(val):
 
 
 class kWaveTransducerSimple(object):
-
     def __init__(
-            self,
-            kgrid: kWaveGrid,
-            number_elements=128,
-            element_width=1,
-            element_length=20,
-            element_spacing=0,
-            position=None,
-            radius=float('inf')
+        self,
+        kgrid: kWaveGrid,
+        number_elements=128,
+        element_width=1,
+        element_length=20,
+        element_spacing=0,
+        position=None,
+        radius=float("inf"),
     ):
         """
         Args:
@@ -40,8 +40,8 @@ class kWaveTransducerSimple(object):
         """
 
         # allocate the grid size and spacing
-        self.stored_grid_size = [kgrid.Nx, kgrid.Ny, kgrid.Nz]    # size of the grid in which the transducer is defined
-        self.grid_spacing = [kgrid.dx, kgrid.dy, kgrid.dz]        # corresponding grid spacing
+        self.stored_grid_size = [kgrid.Nx, kgrid.Ny, kgrid.Nz]  # size of the grid in which the transducer is defined
+        self.grid_spacing = [kgrid.dx, kgrid.dy, kgrid.dz]  # corresponding grid spacing
 
         self.number_elements = make_pos_int(number_elements)
         self.element_width = make_pos_int(element_width)
@@ -52,22 +52,23 @@ class kWaveTransducerSimple(object):
             position = [1, 1, 1]
         self.position = make_pos_int(position)
 
-        assert np.isinf(radius), 'Only a value of transducer.radius = inf is currently supported'
+        assert np.isinf(radius), "Only a value of transducer.radius = inf is currently supported"
         self.radius = radius
 
         # check the transducer fits into the grid
         if np.sum(self.position == 0):
-            raise ValueError('The defined transducer must be positioned within the grid')
-        elif (self.position[1] + self.number_elements * self.element_width + (
-                self.number_elements - 1) * self.element_spacing) > self.stored_grid_size[1]:
-            raise ValueError('The defined transducer is too large or positioned outside the grid in the y-direction')
+            raise ValueError("The defined transducer must be positioned within the grid")
+        elif (
+            self.position[1] + self.number_elements * self.element_width + (self.number_elements - 1) * self.element_spacing
+        ) > self.stored_grid_size[1]:
+            raise ValueError("The defined transducer is too large or positioned outside the grid in the y-direction")
         elif (self.position[2] + self.element_length) > self.stored_grid_size[2]:
             logging.log(logging.INFO, self.position[2])
             logging.log(logging.INFO, self.element_length)
             logging.log(logging.INFO, self.stored_grid_size[2])
-            raise ValueError('The defined transducer is too large or positioned outside the grid in the z-direction')
+            raise ValueError("The defined transducer is too large or positioned outside the grid in the z-direction")
         elif self.position[0] > self.stored_grid_size[0]:
-            raise ValueError('The defined transducer is positioned outside the grid in the x-direction')
+            raise ValueError("The defined transducer is positioned outside the grid in the x-direction")
 
     @property
     def element_pitch(self):
@@ -87,20 +88,19 @@ class kWaveTransducerSimple(object):
 
 
 class NotATransducer(kSensor):
-
     def __init__(
-            self,
-            transducer: kWaveTransducerSimple,
-            kgrid: kWaveGrid,
-            active_elements=None,
-            focus_distance=float('inf'),
-            elevation_focus_distance=float('inf'),
-            receive_apodization='Rectangular',
-            transmit_apodization='Rectangular',
-            sound_speed=1540,
-            input_signal=None,
-            steering_angle_max=None,
-            steering_angle=None
+        self,
+        transducer: kWaveTransducerSimple,
+        kgrid: kWaveGrid,
+        active_elements=None,
+        focus_distance=float("inf"),
+        elevation_focus_distance=float("inf"),
+        receive_apodization="Rectangular",
+        transmit_apodization="Rectangular",
+        sound_speed=1540,
+        input_signal=None,
+        steering_angle_max=None,
+        steering_angle=None,
     ):
         """
         'time_reversal_boundary_data' and 'record' fields should not be defined
@@ -115,8 +115,8 @@ class NotATransducer(kSensor):
             sound_speed: sound speed used to calculate beamforming delays [m/s]
             focus_distance: focus distance used to calculate beamforming delays [m]
             input_signal:
-            steering_angle_max:
-            steering_angle:
+            steering_angle_max: max steering angle [deg]
+            steering_angle: steering angle [deg]
 
         """
 
@@ -127,19 +127,19 @@ class NotATransducer(kSensor):
         self.record_start_index = 1
         # stored value of appended_zeros (accessed using get and set methods).
         # This is used to set the number of zeros that are appended and prepended to the input signal.
-        self.stored_appended_zeros = 'auto'
+        self.stored_appended_zeros = "auto"
         # stored value of the minimum beamforming delay.
         # This is used to offset the delay mask so that all the delays are >= 0
-        self.stored_beamforming_delays_offset = 'auto'
+        self.stored_beamforming_delays_offset = "auto"
         # stored value of the steering_angle_max (accessed using get and set methods).
         # This can be set by the user and is used to derive the two parameters above.
-        self.stored_steering_angle_max = 'auto'
+        self.stored_steering_angle_max = "auto"
         # stored value of the steering_angle (accessed using get and set methods)
         self.stored_steering_angle = 0
 
         ####################################
         # if the sensor is a transducer, check that the simulation is in 3D
-        assert kgrid.dim == 3, 'Transducer inputs are only compatible with 3D simulations.'
+        assert kgrid.dim == 3, "Transducer inputs are only compatible with 3D simulations."
 
         ####################################
 
@@ -149,7 +149,7 @@ class NotATransducer(kSensor):
         elif kgrid.t_array is not None:
             self.dt = kgrid.t_array[1] - kgrid.t_array[0]
         else:
-            raise ValueError('kgrid.dt or kgrid.t_array must be explicitly defined')
+            raise ValueError("kgrid.dt or kgrid.t_array must be explicitly defined")
 
         if active_elements is None:
             active_elements = np.ones((transducer.number_elements, 1))
@@ -158,24 +158,26 @@ class NotATransducer(kSensor):
         self.elevation_focus_distance = elevation_focus_distance
 
         # check the length of the input
-        assert not is_number(receive_apodization) or len(receive_apodization) == self.number_active_elements, \
-            'The length of the receive apodization input must match the number of active elements'
+        assert (
+            not is_number(receive_apodization) or len(receive_apodization) == self.number_active_elements
+        ), "The length of the receive apodization input must match the number of active elements"
         self.receive_apodization = receive_apodization
 
         # check the length of the input
-        assert not is_number(transmit_apodization) or len(transmit_apodization) == self.number_active_elements, \
-            'The length of the transmit apodization input must match the number of active elements'
+        assert (
+            not is_number(transmit_apodization) or len(transmit_apodization) == self.number_active_elements
+        ), "The length of the transmit apodization input must match the number of active elements"
         self.transmit_apodization = transmit_apodization
 
         # check to see the sound_speed is positive
-        assert sound_speed > 0, 'transducer.sound_speed must be greater than 0'
+        assert sound_speed > 0, "transducer.sound_speed must be greater than 0"
         self.sound_speed = sound_speed
 
         self.focus_distance = focus_distance
 
         if input_signal is not None:
             input_signal = np.squeeze(input_signal)
-            assert input_signal.ndim == 1, 'transducer.input_signal must be a one-dimensional array'
+            assert input_signal.ndim == 1, "transducer.input_signal must be a one-dimensional array"
             self.stored_input_signal = np.atleast_2d(input_signal).T  # force the input signal to be a column vector
 
         if steering_angle_max is not None:
@@ -190,7 +192,7 @@ class NotATransducer(kSensor):
         # assign the data type for the transducer matrix based on the
         # number of different elements (uint8 supports 255 numbers so
         # most of the time this data type will be used)
-        mask_type = get_smallest_possible_type(transducer.number_elements, 'uint')
+        mask_type = get_smallest_possible_type(transducer.number_elements, "uint")
 
         # create an empty transducer mask (the grid points within
         # element 'n' are all given the value 'n')
@@ -219,17 +221,24 @@ class NotATransducer(kSensor):
 
             # assign the grid points within the current element the
             # index of the element
-            self.indexed_mask[element_pos_x, element_pos_y:element_pos_y + transducer.element_width,
-            element_pos_z:element_pos_z + transducer.element_length] = element_index + 1
+            self.indexed_mask[
+                element_pos_x,
+                element_pos_y : element_pos_y + transducer.element_width,
+                element_pos_z : element_pos_z + transducer.element_length,
+            ] = element_index + 1
 
             # assign the individual grid points an index corresponding
             # to their order across the element
-            self.indexed_element_voxel_mask[element_pos_x, element_pos_y:element_pos_y + transducer.element_width,
-            element_pos_z:element_pos_z + transducer.element_length] = element_voxel_index
+            self.indexed_element_voxel_mask[
+                element_pos_x,
+                element_pos_y : element_pos_y + transducer.element_width,
+                element_pos_z : element_pos_z + transducer.element_length,
+            ] = element_voxel_index
 
         # double check the transducer fits within the desired grid size
-        assert (np.array(self.indexed_mask.shape) == transducer.stored_grid_size).all(), \
-            'Desired transducer is larger than the input grid_size'
+        assert (
+            np.array(self.indexed_mask.shape) == transducer.stored_grid_size
+        ).all(), "Desired transducer is larger than the input grid_size"
 
         self.sxx = self.syy = self.szz = self.sxy = self.sxz = self.syz = None
         self.u_mode = self.p_mode = None
@@ -258,18 +267,23 @@ class NotATransducer(kSensor):
 
         # check for focus depth
         if np.isinf(self.focus_distance):
-
             # calculate time delays for a steered beam
-            delay_times = element_pitch * element_index * \
-                          np.sin(self.steering_angle * np.pi / 180) / self.sound_speed  # [s]
+            delay_times = element_pitch * element_index * np.sin(self.steering_angle * np.pi / 180) / self.sound_speed  # [s]
 
         else:
-
             # calculate time delays for a steered and focussed beam
-            delay_times = self.focus_distance / self.sound_speed * (
-                    1 - np.sqrt(1 + (element_index * element_pitch / self.focus_distance) ** 2
-                                - 2 * (element_index * element_pitch / self.focus_distance) * np.sin(
-                self.steering_angle * np.pi / 180)))  # [s]
+            delay_times = (
+                self.focus_distance
+                / self.sound_speed
+                * (
+                    1
+                    - np.sqrt(
+                        1
+                        + (element_index * element_pitch / self.focus_distance) ** 2
+                        - 2 * (element_index * element_pitch / self.focus_distance) * np.sin(self.steering_angle * np.pi / 180)
+                    )
+                )
+            )  # [s]
 
         # convert the delays to be in units of time points
         delay_times = (delay_times / self.dt).round().astype(int)
@@ -290,7 +304,7 @@ class NotATransducer(kSensor):
     @property
     def mask(self):
         """
-        Allow mask query to allow compatability with regular sensor structure - return the active sensor mask
+        Allow mask query to allow compatibility with regular sensor structure - return the active sensor mask
 
         """
 
@@ -330,11 +344,11 @@ class NotATransducer(kSensor):
         steering_angle = float(steering_angle)
 
         # check if the steering angle is between -90 and 90
-        assert -90 < steering_angle < 90, 'Input for steering_angle must be betweeb -90 and 90 degrees.'
+        assert -90 < steering_angle < 90, "Input for steering_angle must be betweeb -90 and 90 degrees."
 
         # check if the steering angle is less than the maximum steering angle
-        if self.stored_steering_angle_max != 'auto' and (abs(steering_angle) > self.stored_steering_angle_max):
-            raise ValueError('Input for steering_angle cannot be greater than steering_angle_max.')
+        if self.stored_steering_angle_max != "auto" and (abs(steering_angle) > self.stored_steering_angle_max):
+            raise ValueError("Input for steering_angle cannot be greater than steering_angle_max.")
 
         # update the stored value
         self.stored_steering_angle = steering_angle
@@ -349,11 +363,12 @@ class NotATransducer(kSensor):
         steering_angle_max = float(steering_angle_max)
 
         # check the steering angle is within range
-        assert -90 < steering_angle_max < 90, 'Input for steering_angle_max must be between -90 and 90.'
+        assert -90 < steering_angle_max < 90, "Input for steering_angle_max must be between -90 and 90."
 
         # check the maximum steering angle is greater than the current steering angle
-        assert self.stored_steering_angle_max == 'auto' or abs(self.stored_steering_angle) <= steering_angle_max, \
-            'Input for steering_angle_max cannot be less than the current steering_angle.'
+        assert (
+            self.stored_steering_angle_max == "auto" or abs(self.stored_steering_angle) <= steering_angle_max
+        ), "Input for steering_angle_max cannot be less than the current steering_angle."
 
         # overwrite the stored value
         self.stored_steering_angle_max = steering_angle_max
@@ -385,7 +400,7 @@ class NotATransducer(kSensor):
         self.stored_appended_zeros = max_delay - min_delay
 
         # set the minimum beamforming delay (converting to a positive number)
-        self.stored_beamforming_delays_offset = - min_delay
+        self.stored_beamforming_delays_offset = -min_delay
 
         # reset the previous value of the steering angle
         self.stored_steering_angle = current_steering_angle
@@ -416,7 +431,7 @@ class NotATransducer(kSensor):
         signal = self.stored_input_signal
 
         # check the signal is not empty
-        assert signal is not None, 'Transducer input signal is not defined'
+        assert signal is not None, "Transducer input signal is not defined"
 
         # automatically prepend and append zeros if the beamforming
         # delay offset is set
@@ -426,8 +441,7 @@ class NotATransducer(kSensor):
         # input signal. Otherwise, calculate how many zeros are needed
         # and prepend and append these.
         stored_appended_zeros = self.stored_appended_zeros
-        if stored_appended_zeros != 'auto':
-
+        if stored_appended_zeros != "auto":
             # use the current value of the beamforming offset to add
             # zeros to the input signal
             signal = np.vstack([np.zeros((stored_appended_zeros, 1)), signal, np.zeros((stored_appended_zeros, 1))])
@@ -448,8 +462,7 @@ class NotATransducer(kSensor):
             # check the number of leading zeros is sufficient given the
             # maximum delay
             if leading_zeros < delay_max + 1:
-
-                logging.log(logging.INFO, f'  prepending transducer.input_signal with {delay_max - leading_zeros + 1} leading zeros')
+                logging.log(logging.INFO, f"  prepending transducer.input_signal with {delay_max - leading_zeros + 1} leading zeros")
 
                 # prepend extra leading zeros
                 signal = np.vstack([np.zeros((delay_max - leading_zeros + 1, 1)), signal])
@@ -457,8 +470,7 @@ class NotATransducer(kSensor):
             # check the number of leading zeros is sufficient given the
             # maximum delay
             if trailing_zeros < delay_max + 1:
-
-                logging.log(logging.INFO, f'  appending transducer.input_signal with {delay_max - trailing_zeros + 1} trailing zeros')
+                logging.log(logging.INFO, f"  appending transducer.input_signal with {delay_max - trailing_zeros + 1} trailing zeros")
 
                 # append extra trailing zeros
                 signal = np.vstack([signal, np.zeros((delay_max - trailing_zeros + 1, 1))])
@@ -531,9 +543,7 @@ class NotATransducer(kSensor):
         retract_size = np.array(retract_size[0]).astype(np.int_)
 
         self.indexed_mask = indexed_mask[
-            retract_size[0]:-retract_size[0],
-            retract_size[1]:-retract_size[1],
-            retract_size[2]:-retract_size[2]
+            retract_size[0] : -retract_size[0], retract_size[1] : -retract_size[1], retract_size[2] : -retract_size[2]
         ]
 
     @property
@@ -557,7 +567,7 @@ class NotATransducer(kSensor):
         # assign the apodization values to every grid point in the transducer
         mask_index = self.indexed_active_elements_mask
         mask_index = mask_index[mask_index != 0]
-        mask[self.active_elements_mask == 1] = apodization[mask_index - 1, 0]   # -1 for conversion
+        mask[self.active_elements_mask == 1] = apodization[mask_index - 1, 0]  # -1 for conversion
         return mask
 
     def get_transmit_apodization(self):
@@ -572,13 +582,13 @@ class NotATransducer(kSensor):
         # is still the correct size (in case the number of active
         # elements has changed)
         if is_number(self.transmit_apodization):
-            assert self.transmit_apodization.size == self.number_active_elements, \
-                'The length of the transmit apodization input must match the number of active elements'
+            assert (
+                self.transmit_apodization.size == self.number_active_elements
+            ), "The length of the transmit apodization input must match the number of active elements"
 
             # assign apodization
             apodization = self.transmit_apodization
         else:
-
             # if the number of active elements is greater than 1,
             # create apodization using getWin, otherwise, assign 1
             if self.number_active_elements > 1:
@@ -606,22 +616,17 @@ class NotATransducer(kSensor):
 
         # calculate azimuth focus delay times provided they are not all zero
         if (not np.isinf(self.focus_distance) or (self.steering_angle != 0)) and (mode is None or mode != 2):
-
             # get the element beamforming delays and reverse
             delay_times = -self.beamforming_delays
 
             # add delay times
             # mask[active_elements_index] = delay_times[indexed_active_elements_mask_copy[active_elements_index]]
             mask[unflatten_matlab_mask(mask, active_elements_index, diff=-1)] = matlab_mask(
-                delay_times,
-                matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1),
-                diff=-1
+                delay_times, matlab_mask(indexed_active_elements_mask_copy, active_elements_index, diff=-1), diff=-1
             ).squeeze()
 
         # calculate elevation focus time delays provided each element is longer than one grid point
-        if not np.isinf(self.elevation_focus_distance) and \
-                (self.transducer.element_length > 1) and (mode is None or mode != 3):
-
+        if not np.isinf(self.elevation_focus_distance) and (self.transducer.element_length > 1) and (mode is None or mode != 3):
             # get elevation beamforming delays
             elevation_delay_times = self.elevation_beamforming_delays
 
@@ -630,18 +635,17 @@ class NotATransducer(kSensor):
 
             # add delay times
             mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += matlab_mask(
-                elevation_delay_times,
-                matlab_mask(element_voxel_mask, active_elements_index - 1) - 1
+                elevation_delay_times, matlab_mask(element_voxel_mask, active_elements_index - 1) - 1
             )[:, 0]  # -1s compatibility
 
         # shift delay times (these should all be >= 0, where a value of 0 means no delay)
-        if self.stored_appended_zeros == 'auto':
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= \
-                mask[unflatten_matlab_mask(mask, active_elements_index - 1)].min()  # -1s compatibility
+        if self.stored_appended_zeros == "auto":
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] -= mask[
+                unflatten_matlab_mask(mask, active_elements_index - 1)
+            ].min()  # -1s compatibility
         else:
-            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += \
-                self.stored_beamforming_delays_offset  # -1s compatibility
-        return mask.astype(np.uint8)
+            mask[unflatten_matlab_mask(mask, active_elements_index - 1)] += self.stored_beamforming_delays_offset  # -1s compatibility
+        return mask.astype(np.uint16)
 
     @property
     def elevation_beamforming_delays(self):
@@ -655,11 +659,9 @@ class NotATransducer(kSensor):
             element_index = np.arange(-(self.transducer.element_length - 1) / 2, (self.transducer.element_length + 1) / 2)
 
             # calculate time delays for a focussed beam
-            delay_times = self.elevation_focus_distance - \
-                          np.sqrt(
-                              (element_index * self.transducer.grid_spacing[2]) ** 2
-                              + self.elevation_focus_distance ** 2
-                          )
+            delay_times = self.elevation_focus_distance - np.sqrt(
+                (element_index * self.transducer.grid_spacing[2]) ** 2 + self.elevation_focus_distance**2
+            )
             delay_times /= self.sound_speed
 
             # convert the delays to be in units of time points and then reverse
@@ -676,8 +678,9 @@ class NotATransducer(kSensor):
         """
         # Example implementation, adjust based on actual logic
         if is_number(self.receive_apodization):
-            assert self.receive_apodization.size == self.number_active_elements, \
-                'The length of the receive apodization input must match the number of active elements'
+            assert (
+                self.receive_apodization.size == self.number_active_elements
+            ), "The length of the receive apodization input must match the number of active elements"
             return self.receive_apodization
         else:
             if self.number_active_elements > 1:
@@ -700,25 +703,30 @@ class NotATransducer(kSensor):
         for element_index in range(self.number_active_elements):
             if delays[element_index] > 0:
                 # Shift element data forwards
-                sensor_data[element_index, :] = np.pad(sensor_data[element_index, delays[element_index]:],
-                                                       (0, delays[element_index]),
-                                                       'constant') * apodization[element_index]
+                sensor_data[element_index, :] = (
+                    np.pad(sensor_data[element_index, delays[element_index] :], (0, delays[element_index]), "constant")
+                    * apodization[element_index]
+                )
             elif delays[element_index] < 0:
                 # Shift element data backwards
-                sensor_data[element_index, :] = np.pad(sensor_data[element_index, :sensor_data.shape[1] + delays[element_index]],
-                                                       (-delays[element_index], 0),
-                                                       'constant') * apodization[element_index]
+                sensor_data[element_index, :] = (
+                    np.pad(
+                        sensor_data[element_index, : sensor_data.shape[1] + delays[element_index]], (-delays[element_index], 0), "constant"
+                    )
+                    * apodization[element_index]
+                )
 
         # Form the line summing across the elements
         line = np.sum(sensor_data, axis=0)
         return line
 
-
     def combine_sensor_data(self, sensor_data):
         # check the data is the correct size
         if sensor_data.shape[0] != (self.number_active_elements * self.transducer.element_width * self.transducer.element_length):
-            raise ValueError('The number of time series in the input sensor_data must '
-                             'match the number of grid points in the active tranducer elements.')
+            raise ValueError(
+                "The number of time series in the input sensor_data must "
+                "match the number of grid points in the active tranducer elements."
+            )
 
         # get index of which element each time series belongs to
         # Tricky things going on here
@@ -729,7 +737,6 @@ class NotATransducer(kSensor):
 
         # check if an elevation focus is set
         if np.isinf(self.elevation_focus_distance):
-
             raise NotImplementedError
 
             # # loop over time series and sum
@@ -738,7 +745,6 @@ class NotATransducer(kSensor):
             # end
 
         else:
-
             # get the elevation delay for each grid point of each
             # active transducer element (this is given in units of grid
             # points)
@@ -751,7 +757,7 @@ class NotATransducer(kSensor):
             for ii in range(len(ind)):
                 # FARID: something nasty can be here
                 end = -dm[ii] if dm[ii] != 0 else sensor_data_sum.shape[-1]
-                sensor_data_sum[ind[ii]-1, 0:end] = sensor_data_sum[ind[ii]-1, 0:end] + sensor_data[ii, dm[ii]:]
+                sensor_data_sum[ind[ii] - 1, 0:end] = sensor_data_sum[ind[ii] - 1, 0:end] + sensor_data[ii, dm[ii] :]
 
         # divide by number of time series in each element
         sensor_data_sum = sensor_data_sum * (1 / (self.transducer.element_width * self.transducer.element_length))

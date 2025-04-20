@@ -1,7 +1,6 @@
-
 import numpy as np
 
-from kwave.utils.math import round_odd, round_even, find_closest
+from kwave.utils.math import find_closest, round_even, round_odd
 
 
 def test_round_odd_down():
@@ -25,4 +24,3 @@ def test_find_closest():
     a_close, idx_close = find_closest(a, 2.1)
     assert a_close == 2
     assert idx_close == (1,)
-

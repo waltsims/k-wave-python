@@ -6,8 +6,8 @@ jobs:
   test_example:
     strategy:
       matrix:
-        os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
-        python-version: [ "3.8", "3.9", "3.10", "3.11"]
+        os: [ "windows-latest", "ubuntu-latest" , "macos-latest"]
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 examples/us_bmode_linear_transducer/us_bmode_linear_transducer.py
       - name: Upload example results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: example_bmode_reconstruction_results_${{ matrix.os }}_${{ matrix.python-version }}
           path: ${{ github.workspace }}/example_bmode.png

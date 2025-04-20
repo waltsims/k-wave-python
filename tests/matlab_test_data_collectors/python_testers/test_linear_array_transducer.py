@@ -1,17 +1,17 @@
-from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
-from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kwave_array_equality
-from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality
-import numpy as np
 import os
 from pathlib import Path
+
+import numpy as np
 
 import kwave.data
 from kwave.kgrid import kWaveGrid
 from kwave.utils.kwave_array import kWaveArray
+from tests.matlab_test_data_collectors.python_testers.utils.check_equality import check_kgrid_equality, check_kwave_array_equality
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_linear_array_transducer():
-    test_record_path = os.path.join(Path(__file__).parent, 'collectedValues/linear_array_transducer.mat')
+    test_record_path = os.path.join(Path(__file__).parent, "collectedValues/linear_array_transducer.mat")
     reader = TestRecordReader(test_record_path)
 
     c0 = 1500
@@ -40,7 +40,7 @@ def test_linear_array_transducer():
     kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dx, dx])
     kgrid.makeTime(c0, cfl, t_end)
 
-    check_kgrid_equality(kgrid, reader.expected_value_of('kgrid'))
+    check_kgrid_equality(kgrid, reader.expected_value_of("kgrid"))
     # SOURCE
     if element_num % 2 != 0:
         centering_offset = np.ceil(element_num / 2)
@@ -48,8 +48,8 @@ def test_linear_array_transducer():
         centering_offset = (element_num + 1) / 2
 
     positional_basis = np.arange(1, element_num + 1) - centering_offset
-    
-    time_delays = -(np.sqrt((positional_basis * element_pitch) ** 2 + source_focus ** 2) - source_focus) / c0
+
+    time_delays = -(np.sqrt((positional_basis * element_pitch) ** 2 + source_focus**2) - source_focus) / c0
     time_delays = time_delays - min(time_delays)
 
     karray = kWaveArray(bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate)
@@ -60,4 +60,4 @@ def test_linear_array_transducer():
 
     karray.set_array_position(translation, rotation)
 
-    check_kwave_array_equality(karray, reader.expected_value_of('karray'))
+    check_kwave_array_equality(karray, reader.expected_value_of("karray"))
