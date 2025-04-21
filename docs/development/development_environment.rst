@@ -72,7 +72,7 @@ Full Test Suite
 Generate reference files with MATLAB and run the complete Python test suite:
 
 .. code-block:: bash
-
+    cd k-wave-python/
     make test
 
 Manual Test Execution
