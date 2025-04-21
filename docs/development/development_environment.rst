@@ -54,7 +54,7 @@ Prerequisites
 
 .. code-block:: text
 
-    ~/projects/
+    <parent_dir>/
     ├── k-wave/
     │   ├── k-Wave/
     │   ├── LICENSE.txt
