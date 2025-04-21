@@ -164,3 +164,27 @@ Process for Creating Reference Files
 
    - Single file: see `lines 92-95 <https://github.com/waltsims/k-wave-python/blob/1f9df5d987d0b3edb1a8a43fad0885d3d6079029/tests/h5_summary.py#L92-L95>`_
    - Multiple files: see `lines 97-106 <https://github.com/waltsims/k-wave-python/blob/1f9df5d987d0b3edb1a8a43fad0885d3d6079029/tests/h5_summary.py#L97-L106>`_
+
+Publishing k-wave-python
+-----------------
+
+`Hatch <https://hatch.pypa.io/latest/>`_ is used to publish k-wave-python to `PyPI <https://pypi.org/>`_. 
+
+.. note::
+    This is only performed by developers with write access to the k-wave-python package on PiPI.
+
+The package can be built using:
+
+.. code-block:: bash
+
+    hatch build
+
+And pushed to the production index with:
+
+.. code-block:: bash
+
+    hatch publish -u __token__
+
+
+
+
