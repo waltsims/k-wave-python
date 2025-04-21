@@ -1,11 +1,12 @@
 import logging
+
 import numpy as np
 
+from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.options.simulation_options import SimulationOptions
 from kwave.ktransducer import NotATransducer
-from kwave.data import Vector
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import get_smallest_possible_type
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.matlab import matlab_find
@@ -103,12 +104,12 @@ def calculate_expand_size(kgrid, is_axisymmetric, pml_size):
 
 
 def expand_medium(medium: kWaveMedium, expand_size):
-    # enlarge the sound speed grids by exting the edge values into the expanded grid
+    # enlarge the sound speed grids by extending the edge values into the expanded grid
     medium.sound_speed = np.atleast_1d(medium.sound_speed)
     if medium.sound_speed.size > 1:
         medium.sound_speed = expand_matrix(medium.sound_speed, expand_size)
 
-    # enlarge the grid of density by exting the edge values into the expanded grid
+    # enlarge the grid of density by extending the edge values into the expanded grid
     medium.density = np.atleast_1d(medium.density)
     if medium.density.size > 1:
         medium.density = expand_matrix(medium.density, expand_size)
@@ -261,11 +262,11 @@ def print_grid_size(kgrid):
     """
     k_Nx, k_Ny, k_Nz = kgrid.Nx, kgrid.Ny, kgrid.Nz
     if kgrid.dim == 1:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} grid points")
     elif kgrid.dim == 2:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "by", int(k_Ny), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} grid points")
     elif kgrid.dim == 3:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "by", int(k_Ny), "by", int(k_Nz), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} by {k_Nz} grid points")
 
 
 def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):

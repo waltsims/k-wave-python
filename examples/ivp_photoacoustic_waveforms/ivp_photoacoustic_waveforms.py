@@ -1,18 +1,17 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
-from kwave.utils.data import scale_SI
-from kwave.utils.mapgen import make_disc, make_ball
+from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-
+from kwave.utils.data import scale_SI
+from kwave.utils.mapgen import make_ball, make_disc
 
 # number of grid points in the x (row) direction
 Nx: int = 64

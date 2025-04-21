@@ -10,23 +10,23 @@ exact in the radial direction.
 and Applications. New York: Acoustical Society of America, 1989.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-
 from copy import deepcopy
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from kwave.data import Vector
-from kwave.utils.math import round_even
-from kwave.utils.kwave_array import kWaveArray
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
-from kwave.utils.signals import create_cw_signals
-from kwave.utils.filters import extract_amp_phase
+from kwave.ksource import kSource
 from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.options.simulation_options import SimulationOptions, SimulationType
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions, SimulationType
+from kwave.utils.filters import extract_amp_phase
+from kwave.utils.kwave_array import kWaveArray
+from kwave.utils.math import round_even
+from kwave.utils.signals import create_cw_signals
 
 # medium parameters
 c0 = 1500.0  # sound speed [m/s]
@@ -95,7 +95,7 @@ kgrid.setTime(Nt, dt)
 # create time varying continuous wave source
 source_sig = create_cw_signals(np.squeeze(kgrid.t_array), source_f0, source_mag, source_phase)
 
-# create empty kWaveArray this specfies the transducer properties in
+# create empty kWaveArray this specifies the transducer properties in
 # axisymmetric coordinate system
 karray = kWaveArray(axisymmetric=True, bli_tolerance=bli_tolerance, upsampling_rate=upsampling_rate, single_precision=True)
 

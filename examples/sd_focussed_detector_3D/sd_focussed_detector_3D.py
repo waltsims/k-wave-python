@@ -5,22 +5,20 @@ import os
 from copy import deepcopy
 from tempfile import gettempdir
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.ktransducer import kSensor
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
-from kwave.utils.mapgen import make_bowl
 from kwave.utils.data import scale_SI
-
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
 from kwave.utils.filters import filter_time_series
-
+from kwave.utils.mapgen import make_bowl
 
 # create the computational grid
 grid_size = Vector([64, 64, 64])  # [grid points]

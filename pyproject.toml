@@ -24,14 +24,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py==3.12.1",
-    "scipy==1.14.1",
-    "opencv-python==4.10.0.84",
-    "deepdiff==8.1.1",
+    "h5py==3.13.0",
+    "scipy==1.15.2",
+    "opencv-python==4.11.0.86",
+    "deepdiff==8.4.2",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.0",
-    "beartype==0.19.0",
-    "jaxtyping==0.2.36"
+    "matplotlib==3.10.1",
+    "beartype==0.20.2",
+    "jaxtyping==0.3.1",
+    "deprecated>=1.2.14"
 ]
 
 [project.urls]
@@ -42,7 +43,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.6.9",
+        "coverage==7.8.0",
         "phantominator",
         "testfixtures==8.3.0",
         "requests==2.32.3"]
@@ -52,7 +53,7 @@ docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-tabs==3.4.7",
     "sphinx-toolbox==3.8.0",
     "furo==2024.8.6"]
-dev = ["pre-commit==4.0.1"]
+dev = ["pre-commit==4.2.0"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
@@ -81,7 +82,8 @@ testpaths = ["tests"]
 filterwarnings = [
     "error::DeprecationWarning",
     "error::PendingDeprecationWarning",
-    "ignore::DeprecationWarning:kwave",
+    "ignore::deprecation.DeprecatedWarning",
+    "ignore::DeprecationWarning:kwave"
 ]
 
 [tool.coverage.run]
@@ -100,7 +102,13 @@ omit = [
 line-length = 140
 # F821 needed to avoid false-positives in nested functions, F722 due to jaxtyping 
 lint.ignore = ["F821", "F722"]
-lint.select = ["NPY201"]
+lint.select = ["NPY201", "I"]
+
+# Configure isort rules
+[tool.ruff.lint.isort]
+known-first-party = ["kwave", "examples"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
 [tool.ruff.lint.per-file-ignores]
 # ksource.py contains a lot of non-ported Matlab code that is not usable.
 "kwave/ksource.py" = ["F821"]

@@ -6,10 +6,12 @@ import pytest
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.kWaveSimulation import kWaveSimulation
-from kwave.options.simulation_options import SimulationOptions
+from kwave.options import SimulationExecutionOptions, SimulationOptions
+from kwave.reconstruction import TimeReversal
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 
@@ -76,25 +78,34 @@ class TestSimulation(unittest.TestCase):
                 assert not val
 
     def test_time_reversal(self):
-        self.sensor.time_reversal_boundary_data = np.zeros((len(self.sensor.mask[0]), self.kgrid.Nt))
+        """Test time reversal reconstruction."""
+        # Create test data
+        kgrid = kWaveGrid([100, 100], [0.1, 0.1])
+        kgrid.setTime(100, 1e-6)
+        medium = kWaveMedium(sound_speed=1500)
+        sensor = kSensor(mask=np.ones((100, 100), dtype=bool))
 
-        k_sim = kWaveSimulation(
-            kgrid=self.kgrid, source=self.source, sensor=self.sensor, medium=self.medium, simulation_options=self.simulation_options
-        )
-        k_sim.input_checking("kspaceFirstOrder2D")
+        # Create simulation options
+        simulation_options = SimulationOptions(save_to_disk=True, save_to_disk_exit=True, pml_inside=False, pml_size=20, data_cast="single")
+        execution_options = SimulationExecutionOptions()
 
-        # source and sensor are replaced when time-reversal is enabled
-        assert not (k_sim.source is self.source)
-        assert not (k_sim.sensor is self.sensor)
+        # Create time reversal handler
+        tr = TimeReversal(kgrid, medium, sensor)
 
-        assert k_sim.userarg_time_rev
+        # Mock simulation function
+        def mock_simulation(*args, **kwargs):
+            return {"p_final": np.ones((100, 100))}
 
-        recorder = k_sim.record.__dict__
-        for key, val in recorder.items():
-            if key == "p_final":
-                assert val
-            elif key.startswith(("p", "u", "I")):
-                assert not val
+        # Set up recorded pressure data
+        sensor.recorded_pressure = np.ones((100, 100))  # Mock recorded pressure data
+
+        # Run reconstruction
+        p0_recon = tr(mock_simulation, simulation_options, execution_options)
+
+        # Verify reconstruction
+        assert p0_recon.shape == (100, 100)
+        assert np.all(p0_recon >= 0)  # Check positivity condition
+        assert np.all(p0_recon <= 2.0)  # Check compensation factor
 
     def test_record_pressure(self):
         self.sensor.record = ["p"]
