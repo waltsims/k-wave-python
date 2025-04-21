@@ -171,7 +171,7 @@ Publishing k-wave-python
 `Hatch <https://hatch.pypa.io/latest/>`_ is used to publish k-wave-python to `PyPI <https://pypi.org/>`_. 
 
 .. note::
-    This is only performed by developers with write access to the k-wave-python package on PiPI.
+    This is only performed by developers with write access to the k-wave-python package on PyPI.
 
 The package can be built using:
 
