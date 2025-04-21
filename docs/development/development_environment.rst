@@ -48,7 +48,21 @@ Testing
 Prerequisites
 ~~~~~~~~~~~~~
 - MATLAB installed locally (see `Alternative to MATLAB`_ if you don't have MATLAB)
-- k-Wave installed in a parallel directory to k-wave-python
+- `k-Wave <https://github.com/ucl-bug/k-wave>`_ installed in a parallel directory to k-wave-python
+
+**Directory structure for parallel installation:**
+
+.. code-block:: text
+
+    ~/projects/
+    ├── k-wave/
+    │   ├── k-Wave/
+    │   ├── LICENSE.txt
+    │   └── README.md
+    └── k-wave-python/
+        ├── kwave/
+        └── ...
+
 
 Running Tests
 ~~~~~~~~~~~~~
