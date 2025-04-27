@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-from deprecation import fail_if_not_removed
 from scipy.spatial.transform import Rotation
 
 from kwave import __version__
@@ -17,7 +16,6 @@ from kwave.utils.math import (
 )
 
 
-@fail_if_not_removed
 def test_make_affine_2d():
     """Test 2D affine transformation."""
     translation = [1, 2]
@@ -37,7 +35,6 @@ def test_make_affine_2d():
     assert np.allclose(matrix[:2, :2], expected_rotation)
 
 
-@fail_if_not_removed
 def test_make_affine_3d():
     """Test 3D affine transformation."""
     translation = [1, 2, 3]
@@ -59,48 +56,45 @@ def test_make_affine_3d():
 class TestMath:
     """Test class for math utility functions."""
 
-    @fail_if_not_removed
     def test_rotation_functions_equivalent(self):
         """Test that Rx, Ry, Rz are equivalent to scipy.spatial.transform.Rotation."""
         angle = 45
 
         # Test Rx
-        with pytest.warns(DeprecationWarning, match="Rx is deprecated as of 0.4.1") as warns:
+        with pytest.warns(DeprecationWarning, match="Call to deprecated function.*Rx") as warns:
             assert np.allclose(Rx(angle), Rotation.from_euler("x", angle, degrees=True).as_matrix())
         assert len(warns) == 1
-        assert "will be removed in 0.5.0" in str(warns[0].message)
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
 
         # Test Ry
-        with pytest.warns(DeprecationWarning, match="Ry is deprecated as of 0.4.1") as warns:
+        with pytest.warns(DeprecationWarning, match="Call to deprecated function.*Ry") as warns:
             assert np.allclose(Ry(angle), Rotation.from_euler("y", angle, degrees=True).as_matrix())
         assert len(warns) == 1
-        assert "will be removed in 0.5.0" in str(warns[0].message)
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
 
         # Test Rz
-        with pytest.warns(DeprecationWarning, match="Rz is deprecated as of 0.4.1") as warns:
+        with pytest.warns(DeprecationWarning, match="Call to deprecated function.*Rz") as warns:
             assert np.allclose(Rz(angle), Rotation.from_euler("z", angle, degrees=True).as_matrix())
         assert len(warns) == 1
-        assert "will be removed in 0.5.0" in str(warns[0].message)
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
 
-    @fail_if_not_removed
     def test_affine_functions_equivalent(self):
         """Test that get_affine_matrix and make_affine are equivalent and properly deprecated."""
         translation = [1, 2, 3]
         rotation = [30, 45, 60]
 
         # Test deprecation warning
-        with pytest.warns(DeprecationWarning, match="get_affine_matrix is deprecated as of 0.4.1") as warns:
+        with pytest.warns(DeprecationWarning, match="Call to deprecated function.*get_affine_matrix") as warns:
             old_result = get_affine_matrix(translation, rotation)
-            
+
         # Verify warning details
         assert len(warns) == 1
-        assert "will be removed in 0.5.0" in str(warns[0].message)
-        
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
+
         # Test functional equivalence
         new_result = make_affine(translation, rotation)
         assert np.allclose(old_result, new_result)
 
-    @fail_if_not_removed
     def test_shift_functions_equivalent(self):
         """Test that fourier_shift and phase_shift_interpolate are equivalent and properly deprecated."""
         # Create test signal
@@ -109,13 +103,13 @@ class TestMath:
         shift = 0.5
 
         # Test deprecation warning
-        with pytest.warns(DeprecationWarning, match="fourier_shift is deprecated as of 0.4.1") as warns:
+        with pytest.warns(DeprecationWarning, match="Call to deprecated function.*fourier_shift") as warns:
             old_result = fourier_shift(signal, shift)
-            
+
         # Verify warning details
         assert len(warns) == 1
-        assert "will be removed in 0.5.0" in str(warns[0].message)
-        
+        assert "Deprecated since version 0.4.1" in str(warns[0].message)
+
         # Test functional equivalence
         new_result = phase_shift_interpolate(signal, shift)
         assert np.allclose(old_result, new_result)

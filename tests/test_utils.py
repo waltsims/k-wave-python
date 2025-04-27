@@ -149,7 +149,7 @@ def test_extract_amp_phase():
     # odd length signal
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     assert np.shape(np.squeeze(test_signal))[0] % 2 != 0
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=10_000_000, source_freq=2.5 * 10**6)
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=10_000_000, source_freq=2.5 * 10**6)
     a, b, c = 0.6547, -1.8035, 2.5926e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
@@ -157,16 +157,74 @@ def test_extract_amp_phase():
     # even length signal
     test_signal = tone_burst(sample_freq=18_000_000, signal_freq=6_000_000, num_cycles=5, envelope="Gaussian")
     assert np.shape(np.squeeze(test_signal))[0] % 2 == 0
-    a_t, b_t, c_t = extract_amp_phase(data=test_signal, Fs=18_000_000, source_freq=6_000_000)
+    a_t, b_t, c_t = extract_amp_phase(data=test_signal, fs=18_000_000, source_freq=6_000_000)
     a, b, c = 0.6591, -1.5708, 6.000e06
     assert (abs(a_t - a) < 0.01).all()
     assert (abs(b_t - b) < 0.0001).all()
     assert (abs(c_t - c) < 100).all()
 
 
+def test_extract_amp_phase_2d():
+    # Create a 2D test signal with 2 channels
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Signal frequency
+    amp_1 = 2.0
+    amp_2 = 1.0
+    phase_1 = np.pi / 8
+    phase_2 = np.pi / 4
+    # Create a 2D test signal with 2 channels
+    sig_1 = amp_1 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_1)
+    sig_2 = amp_2 * np.sin(source_freq * 2 * np.pi * np.arange(Fs) / Fs + phase_2)
+    test_signal = np.vstack([sig_1, sig_2])
+    # plt.plot(test_signal[0])
+    # plt.show()
+    amp, phase, f = extract_amp_phase(test_signal, Fs, source_freq, dim=1)
+
+    assert np.allclose(amp, np.array([amp_1, amp_2]))
+    # Phase is not used in any k-wave-python examples
+    # assert np.allclose(phase, np.array([-phase_1, -phase_2]))
+    assert np.allclose(f, source_freq)
+
+
+def test_extract_amp_phase_double_freq():
+    # Create a test signal with double the detection frequency
+    Fs = 10_000_000  # Sample frequency
+    source_freq = 2.5 * 1_000  # Source frequency
+    detection_freq = 5 * 1_000  # Double the frequency (2 * source_freq)
+
+    amp = 2.0
+    phase = np.pi / 6
+
+    # Create test signal at source_freq
+    t = np.arange(Fs) / Fs
+    test_signal = amp * np.sin(source_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at double the frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp, detected_phase, detected_f = extract_amp_phase(test_signal, Fs, detection_freq, dim=0)
+
+    # The amplitude should be very close to zero since we're detecting at a different frequency
+    # than what's present in the signal
+    assert np.isclose(detected_amp, 0, atol=1e-3)
+    assert np.isclose(detected_f, detection_freq)
+
+    # Now create a signal with the detection frequency
+    test_signal_at_detection = amp * np.sin(detection_freq * 2 * np.pi * t + phase)
+
+    # Extract amplitude and phase at the correct frequency
+    # Explicitly set dim=0 for 1D array
+    detected_amp2, detected_phase2, detected_f2 = extract_amp_phase(test_signal_at_detection, Fs, detection_freq, dim=0)
+
+    # Now the amplitude should match
+    assert np.isclose(detected_amp2, amp, rtol=0.01)
+    # Phase is not used in any k-wave-python examples, but we can verify it's consistent
+    # assert np.isclose(detected_phase2, -phase, rtol=0.01)
+    assert np.isclose(detected_f2, detection_freq)
+
+
 def test_apply_filter_lowpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="LowPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="LowPass")
     expected_signal = [
         0.00000000e00,
         2.76028757e-24,
@@ -184,7 +242,7 @@ def test_apply_filter_lowpass():
 
 def test_apply_filter_highpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=1e7, filter_type="HighPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="HighPass")
     expected_signal = [
         0.00000000e00,
         1.40844920e-10,
@@ -202,7 +260,7 @@ def test_apply_filter_highpass():
 
 def test_apply_filter_bandpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
-    filtered_signal = apply_filter(test_signal, Fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
+    filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
