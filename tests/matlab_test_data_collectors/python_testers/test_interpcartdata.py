@@ -33,8 +33,8 @@ def test_interpcartdata():
         # 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd'
         trbd = reader.expected_value_of("trbd")
         kgrid_props = reader.expected_value_of("kgrid")
-        sensor_data = reader.expected_value_of("sensor_data")
-        sensor_mask = reader.expected_value_of("sensor_mask")
+        sensor_data = reader.expected_value_of("sensor_data").T
+        sensor_mask = reader.expected_value_of("sensor_mask").T
         binary_sensor_mask = reader.expected_value_of("binary_sensor_mask")
         interp_method = reader.expected_value_of("interp_method")
 
