@@ -48,8 +48,8 @@ def test_interp_cart_data_2_points_linear():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
     binary_sensor_mask[501, 51, 7] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32)  # sensor at the origin
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)  # 3 time steps
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32).T  # 3 time steps
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, "linear")
     # TODO: find expected value from matlab. In this case we revert to nearest because point is not between p1 and p2.
@@ -60,8 +60,8 @@ def test_interp_cart_data_2_points_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
     binary_sensor_mask[501, 51, 7] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32)  # sensor at the origin
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)  # 3 time steps
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32).T  # 3 time steps
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
     # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
@@ -72,8 +72,8 @@ def test_interp_cart_data_1_point_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
     binary_sensor_mask[501, 51, 6] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)  # sensor at the origin
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)  # 3 time steps
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32).T  # 3 time steps
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
     assert np.allclose(interp_data, cart_sensor_data)
