@@ -264,7 +264,7 @@ def interp_cart_data(
 
     if kgrid.dim != len(binary_sensor_mask.shape) - 1:
         raise ValueError(
-            f"Binary sensor mask must have the same dimensionality as the k-Wave grid. KGrid dim: {kgrid.dim}, binary_sensor_mask dim: {len(binary_sensor_mask.shape) - 1}"
+            f"Binary sensor mask must have the same dimensionality as the k-Wave grid. KGrid dim: {kgrid.dim}, binary_sensor_mask dim: {len(np.squeeze(binary_sensor_mask).shape)}"
         )
 
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
