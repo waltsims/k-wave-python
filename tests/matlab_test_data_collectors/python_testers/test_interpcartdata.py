@@ -65,7 +65,7 @@ def test_unknown_interp_method():
             kgrid,
             cart_sensor_data=reader.expected_value_of("sensor_data"),
             cart_sensor_mask=reader.expected_value_of("sensor_mask"),
-            binary_sensor_mask=reader.expected_value_of("binary_sensor_mask"),
+            binary_sensor_mask=reader.expected_value_of("binary_sensor_mask").astype(bool),
             interp="unknown",
         )
 
