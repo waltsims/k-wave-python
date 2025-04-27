@@ -41,6 +41,8 @@ def test_interpcartdata():
         kgrid = kGridMock()
         kgrid.set_props(kgrid_props)
 
+        print(kgrid.Nx, kgrid.Ny, kgrid.Nz, np.shape(sensor_data),  np.shape(sensor_mask), np.shape(binary_sensor_mask))
+
         trbd_py = interp_cart_data(
             kgrid,
             cart_sensor_data=sensor_data,
