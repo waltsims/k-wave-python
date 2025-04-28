@@ -37,6 +37,8 @@ class kWaveGrid(object):
         N, spacing = np.atleast_1d(N), np.atleast_1d(spacing)  # if inputs are lists
         assert N.ndim == 1 and spacing.ndim == 1  # ensure no multidimensional lists
         assert (1 <= N.size <= 3) and (1 <= spacing.size <= 3)  # ensure valid dimensionality
+        if spacing.size == 1:
+            spacing = spacing * np.ones(N.size)
         assert N.size == spacing.size, "Size list N and spacing list do not have the same size."
 
         self.N = N.astype(int)  #: grid size in each dimension [grid points]
@@ -725,11 +727,14 @@ class kWaveGrid(object):
         # Ensure at least points_per_wavelength points across the smallest element
         grid_spacing = min_element_width / points_per_wavelength
 
+        # Create a list of grid spacings with the same length as domain_size
+        grid_spacing_list = [grid_spacing] * domain_size.size
+
         # Calculate grid size
         N = np.ceil(domain_size / grid_spacing).astype(int)
 
         # Create grid instance
-        grid = cls(N=N, spacing=grid_spacing)
+        grid = cls(N=N, spacing=grid_spacing_list)
 
         # Note: Time parameters are left as "auto"
         # The user can set them later using makeTime method
@@ -764,7 +769,7 @@ class kWaveGrid(object):
         # Use sound_speed_min for sound_speed_max if not provided
         if sound_speed_max is None:
             sound_speed_max = sound_speed_min
-        if sound_speed_max > 0:
+        if not sound_speed_max > 0:
             raise ValueError("Sound speed must be positive")
 
         # Calculate wavelength
