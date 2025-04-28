@@ -711,7 +711,6 @@ class kWaveGrid(object):
             dimensions: List or array of physical domain sizes [m]
             min_element_width: Width of the smallest resolvable geometry element [m]
             points_per_wavelength: Number of points per wavelength (default=10)
-            cfl: CFL number (default=cls.CFL_DEFAULT)
 
         Returns:
             kWaveGrid instance with appropriate grid size and spacing
