@@ -703,12 +703,12 @@ class kWaveGrid(object):
             return k, M
 
     @classmethod
-    def from_geometry(cls, domain_size, min_element_width, points_per_wavelength=10, cfl=None):
+    def from_geometry(cls, dimensions, min_element_width, points_per_wavelength=10):
         """
         Create a kWaveGrid based on domain dimensions and the smallest resolvable geometry element.
 
         Args:
-            domain_size: List or array of physical domain sizes [m]
+            dimensions: List or array of physical domain sizes [m]
             min_element_width: Width of the smallest resolvable geometry element [m]
             points_per_wavelength: Number of points per wavelength (default=10)
             cfl: CFL number (default=cls.CFL_DEFAULT)
@@ -717,8 +717,8 @@ class kWaveGrid(object):
             kWaveGrid instance with appropriate grid size and spacing
         """
         # Validate input parameters
-        domain_size = np.atleast_1d(domain_size)
-        if not np.all(domain_size > 0):
+        dimensions = np.atleast_1d(dimensions)
+        if not np.all(dimensions > 0):
             raise ValueError("Domain dimensions must be positive")
         if not min_element_width > 0:
             raise ValueError("Minimum element width must be positive")
@@ -728,10 +728,10 @@ class kWaveGrid(object):
         grid_spacing = min_element_width / points_per_wavelength
 
         # Create a list of grid spacings with the same length as domain_size
-        grid_spacing_list = [grid_spacing] * domain_size.size
+        grid_spacing_list = [grid_spacing] * dimensions.size
 
         # Calculate grid size
-        N = np.ceil(domain_size / grid_spacing).astype(int)
+        N = np.ceil(dimensions / grid_spacing).astype(int)
 
         # Create grid instance
         grid = cls(N=N, spacing=grid_spacing_list)
@@ -785,3 +785,15 @@ class kWaveGrid(object):
         grid = cls(N=N, spacing=grid_spacing)
 
         return grid
+
+    @property
+    def x_max(self):
+        return self.x_vec[-1] - self.x_vec[0]
+
+    @property
+    def y_max(self):
+        return self.y_vec[-1] - self.y_vec[0]
+
+    @property
+    def z_max(self):
+        return self.z_vec[-1] - self.z_vec[0]
