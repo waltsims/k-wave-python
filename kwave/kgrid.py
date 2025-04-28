@@ -784,15 +784,3 @@ class kWaveGrid(object):
         grid = cls(N=N, spacing=grid_spacing)
 
         return grid
-
-    @property
-    def x_max(self):
-        return self.x_vec[-1] - self.x_vec[0]
-
-    @property
-    def y_max(self):
-        return self.y_vec[-1] - self.y_vec[0]
-
-    @property
-    def z_max(self):
-        return self.z_vec[-1] - self.z_vec[0]

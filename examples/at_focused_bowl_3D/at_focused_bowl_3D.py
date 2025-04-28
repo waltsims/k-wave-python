@@ -162,8 +162,9 @@ y_vec = kgrid.y_vec
 # calculate the wavenumber
 knumber = 2.0 * np.pi * source_f0 / c0
 
-# define axis
-x_max = kgrid.x_max
+# define the position vectors
+x_ref = np.arange(0.0, kgrid.x_size, kgrid.dx)
+x_max = (kgrid.Nx - 1) * kgrid.dx
 delta_x = x_max / 10000.0
 x_ref = np.arange(0.0, x_max + delta_x, delta_x)
 
