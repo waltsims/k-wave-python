@@ -699,3 +699,84 @@ class kWaveGrid(object):
             # define product of implied period
             M = Mx * My * Mz
             return k, M
+
+    @classmethod
+    def from_geometry(cls, domain_size, min_element_width, points_per_wavelength=10, cfl=None):
+        """
+        Create a kWaveGrid based on domain dimensions and the smallest resolvable geometry element.
+
+        Args:
+            domain_size: List or array of physical domain sizes [m]
+            min_element_width: Width of the smallest resolvable geometry element [m]
+            points_per_wavelength: Number of points per wavelength (default=10)
+            cfl: CFL number (default=cls.CFL_DEFAULT)
+
+        Returns:
+            kWaveGrid instance with appropriate grid size and spacing
+        """
+        # Validate input parameters
+        domain_size = np.atleast_1d(domain_size)
+        if not np.all(domain_size > 0):
+            raise ValueError("Domain dimensions must be positive")
+        if not min_element_width > 0:
+            raise ValueError("Minimum element width must be positive")
+
+        # Calculate grid spacing based on minimum element width
+        # Ensure at least points_per_wavelength points across the smallest element
+        grid_spacing = min_element_width / points_per_wavelength
+
+        # Calculate grid size
+        N = np.ceil(domain_size / grid_spacing).astype(int)
+
+        # Create grid instance
+        grid = cls(N=N, spacing=grid_spacing)
+
+        # Note: Time parameters are left as "auto"
+        # The user can set them later using makeTime method
+
+        return grid
+
+    @classmethod
+    def from_domain(cls, dimensions, frequency, sound_speed_min, sound_speed_max=None, points_per_wavelength=10, cfl=None):
+        """
+        Create a kWaveGrid based on physical dimensions and acoustic properties.
+
+        Args:
+            dimensions: List or array of physical domain sizes [m]
+            frequency: Transmit frequency [Hz]
+            sound_speed_min: Minimum sound speed in the medium [m/s]
+            sound_speed_max: Maximum sound speed in the medium [m/s] (default=sound_speed_min)
+            points_per_wavelength: Number of points per wavelength (default=10)
+            cfl: CFL number (default=cls.CFL_DEFAULT)
+
+        Returns:
+            kWaveGrid instance with appropriate grid size, spacing, and time parameters
+        """
+        # Validate input parameters
+        dimensions = np.atleast_1d(dimensions)
+        if not np.all(dimensions > 0):
+            raise ValueError("Dimensions must be positive")
+        if not frequency > 0:
+            raise ValueError("Frequency must be positive")
+        if not sound_speed_min > 0:
+            raise ValueError("Sound speed must be positive")
+
+        # Use sound_speed_min for sound_speed_max if not provided
+        if sound_speed_max is None:
+            sound_speed_max = sound_speed_min
+        if sound_speed_max > 0:
+            raise ValueError("Sound speed must be positive")
+
+        # Calculate wavelength
+        wavelength = sound_speed_min / frequency
+
+        # Calculate grid spacing
+        grid_spacing = wavelength / points_per_wavelength
+
+        # Calculate grid size
+        N = np.ceil(dimensions / grid_spacing).astype(int)
+
+        # Create grid instance
+        grid = cls(N=N, spacing=grid_spacing)
+
+        return grid
