@@ -88,7 +88,7 @@ class Element:
         arrays.
 
         :param other: an instance of Element
-        :raises ValueError: when other object is not an instance of Element
+        :raises TypeError: when other object is not an instance of Element
         :return: bool
         """
         if not isinstance(other, type(self)):
