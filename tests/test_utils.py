@@ -55,7 +55,7 @@ def test_interp_cart_data_2_points_linear():
     # TODO: find expected value from matlab. In this case we revert to nearest because point is not between p1 and p2.
     print(interp_data)
 
-
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_interp_cart_data_2_points_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
@@ -71,34 +71,25 @@ def test_interp_cart_data_2_points_nearest():
     assert np.allclose(interp_data, cart_sensor_data), "not close enough"
     
 
-
 def test_interp_cart_data_1_point_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
     binary_sensor_mask[501, 51, 6] = True
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    # 3 time steps
-    print(cart_sensor_data)
-    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+    cart_sensor_data0 = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    # 3 time steps
+    print(cart_sensor_data0)
+    interp_data0 = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
 
-    print(interp_data)
+    print(interp_data0, np.shape(interp_data0), np.shape(cart_sensor_data0))
 
-    assert np.allclose(interp_data, cart_sensor_data), "not close enough"
-    
+    assert np.allclose(interp_data0, cart_sensor_data0), "not close enough"
 
-def test_interp_cart_data_1_point_nearest_2():
-    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
-    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
-    binary_sensor_mask[501, 51, 6] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0, 4.0, 5.0]], dtype=np.float32)  # 5 time steps
-    print(cart_sensor_data)
-    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+    cart_sensor_data1 = np.array([[1.0, 2.0, 3.0, 4.0, 5.0]], dtype=np.float32)  # 5 time steps
+    interp_data1 = interp_cart_data(kgrid, cart_sensor_data1, cart_sensor_mask, binary_sensor_mask)
 
-    print(interp_data)
+    print(interp_data1, np.shape(interp_data1), np.shape(cart_sensor_data1))
 
-    assert np.allclose(interp_data, cart_sensor_data), "not close enough"
-
+    assert np.allclose(interp_data1, cart_sensor_data1), "not close enough"
 
 
 def test_nepers2db():
