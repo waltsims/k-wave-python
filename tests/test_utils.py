@@ -65,6 +65,7 @@ def test_interp_cart_data_2_points_nearest():
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
     # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
+    assert np.allclose(interp_data, cart_sensor_data.T), "not close enough"
     print(interp_data)
 
 
@@ -76,7 +77,7 @@ def test_interp_cart_data_1_point_nearest():
     cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32).T  # 3 time steps
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
-    assert np.allclose(interp_data, cart_sensor_data)
+    assert np.allclose(interp_data, cart_sensor_data.T), "not close enough"
     print(interp_data)
 
 
