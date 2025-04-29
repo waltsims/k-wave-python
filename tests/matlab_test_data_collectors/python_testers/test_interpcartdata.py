@@ -25,34 +25,31 @@ class kGridMock(Mock):
             return self.kprops[name]
         return super().__getattr__(name)
 
-# @pytest.mark.skip(reason="Matlab data is inconsistent")
+
 def test_interpcartdata():
     reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/interpCartData.mat"))
 
-    for i in range(len(reader)):
-        if i in [3, 4, 5]: 
-            # 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd'
-            trbd = reader.expected_value_of("trbd")
-            kgrid_props = reader.expected_value_of("kgrid")
-            sensor_data = reader.expected_value_of("sensor_data")
-            sensor_mask = reader.expected_value_of("sensor_mask")
-            binary_sensor_mask = reader.expected_value_of("binary_sensor_mask")
-            interp_method = reader.expected_value_of("interp_method")
+    for _ in range(len(reader)):
+        # 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd'
+        trbd = reader.expected_value_of("trbd")
+        kgrid_props = reader.expected_value_of("kgrid")
+        sensor_data = reader.expected_value_of("sensor_data")
+        sensor_mask = reader.expected_value_of("sensor_mask")
+        binary_sensor_mask = reader.expected_value_of("binary_sensor_mask")
+        interp_method = reader.expected_value_of("interp_method")
 
-            kgrid = kGridMock()
-            kgrid.set_props(kgrid_props)
+        kgrid = kGridMock()
+        kgrid.set_props(kgrid_props)
 
-            print(i, kgrid.Nx, kgrid.Ny, kgrid.Nz, np.shape(sensor_data), np.shape(sensor_mask), np.shape(binary_sensor_mask))
+        trbd_py = interp_cart_data(
+            kgrid,
+            cart_sensor_data=sensor_data,
+            cart_sensor_mask=sensor_mask,
+            binary_sensor_mask=binary_sensor_mask.astype(bool),
+            interp=interp_method,
+        )
 
-            trbd_py = interp_cart_data(
-                kgrid,
-                cart_sensor_data=sensor_data,
-                cart_sensor_mask=sensor_mask,
-                binary_sensor_mask=binary_sensor_mask.astype(bool),
-                interp=interp_method,
-            )
-
-            assert np.allclose(trbd, trbd_py)
+        assert np.allclose(trbd, trbd_py)
         reader.increment()
 
     logging.log(logging.INFO, "cart2grid(..) works as expected!")
