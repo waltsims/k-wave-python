@@ -51,6 +51,8 @@ def test_interpcartdata():
 
         sorted_trbd = np.sort(trbd, axis=1)
         sorted_trbd_py = np.sort(trbd_py, axis=1)
+        print(sorted_trbd[0, :])
+        print(sorted_trbd_py[0, :])
 
         assert np.allclose(sorted_trbd, sorted_trbd_py), f"interpolated values not correct with method: {interp_method}"
         reader.increment()
