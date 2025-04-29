@@ -29,7 +29,7 @@ class kGridMock(Mock):
 def test_interpcartdata():
     reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/interpCartData.mat"))
 
-    for _ in range(len(reader)):
+    for i in range(len(reader)):
         # 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd'
         trbd = reader.expected_value_of("trbd")
         kgrid_props = reader.expected_value_of("kgrid")
@@ -51,13 +51,13 @@ def test_interpcartdata():
 
         sorted_trbd = np.sort(trbd, axis=1)
         sorted_trbd_py = np.sort(trbd_py, axis=1)
-        print(sorted_trbd[0, :])
-        print(sorted_trbd_py[0, :])
+        print(i, sorted_trbd[0, :])
+        print(i, sorted_trbd_py[0, :])
 
-        assert np.allclose(sorted_trbd, sorted_trbd_py), f"interpolated values not correct with method: {interp_method}"
+        assert np.allclose(sorted_trbd, sorted_trbd_py), f"{i}. interpolated values not correct with method: {interp_method}"
         reader.increment()
 
-    logging.log(logging.INFO, "cart2grid(..) works as expected!")
+    logging.log(logging.INFO, "interp_cart_data(..) works as expected!")
 
 
 def test_unknown_interp_method():
