@@ -78,7 +78,7 @@ def test_interp_cart_data_1_point_nearest():
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
     cart_sensor_data0 = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    # 3 time steps
     print(cart_sensor_data0)
-    interp_data0 = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+    interp_data0 = interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
 
     print(interp_data0, np.shape(interp_data0), np.shape(cart_sensor_data0))
 
