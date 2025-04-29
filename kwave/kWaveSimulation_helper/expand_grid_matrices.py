@@ -262,11 +262,11 @@ def print_grid_size(kgrid):
     """
     k_Nx, k_Ny, k_Nz = kgrid.Nx, kgrid.Ny, kgrid.Nz
     if kgrid.dim == 1:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} grid points")
     elif kgrid.dim == 2:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "by", int(k_Ny), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} grid points")
     elif kgrid.dim == 3:
-        logging.log(logging.INFO, "  computational grid size:", int(k_Nx), "by", int(k_Ny), "by", int(k_Nz), "grid points")
+        logging.log(logging.INFO, f"  computational grid size: {k_Nx} by {k_Ny} by {k_Nz} grid points")
 
 
 def expand_cuboid_corner_list(is_cuboid_list, kgrid, pml_size: Vector):

@@ -18,7 +18,7 @@ def save_to_disk_func(
     kgrid: kWaveGrid, medium: kWaveMedium, source, opt: SimulationOptions, auto_chunk: bool, values: dotdict, flags: dotdict
 ):
     # update command line status
-    logging.log(logging.INFO, "  precomputation completed in ", scale_time(TicToc.toc()))
+    logging.log(logging.INFO, f"  precomputation completed in {scale_time(TicToc.toc())}")
     TicToc.tic()
     logging.log(logging.INFO, "  saving input files to disk...")
 
@@ -66,7 +66,7 @@ def save_to_disk_func(
     save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, auto_chunk=auto_chunk)
 
     # update command line status
-    logging.log(logging.INFO, "  completed in ", scale_time(TicToc.toc()))
+    logging.log(logging.INFO, f"  completed in {scale_time(TicToc.toc())}")
 
 
 def grab_integer_variables(integer_variables, kgrid, flags, medium):
