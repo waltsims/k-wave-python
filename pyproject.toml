@@ -31,7 +31,7 @@ dependencies = [
     "numpy>=1.22.2,<2.3.0",
     "matplotlib==3.10.1",
     "beartype==0.20.2",
-    "jaxtyping==0.2.38",
+    "jaxtyping==0.3.1",
     "deprecated>=1.2.14"
 ]
 
@@ -43,7 +43,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.7.0",
+        "coverage==7.8.0",
         "phantominator",
         "testfixtures==8.3.0",
         "requests==2.32.3"]
@@ -53,7 +53,7 @@ docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-tabs==3.4.7",
     "sphinx-toolbox==3.8.0",
     "furo==2024.8.6"]
-dev = ["pre-commit==4.1.0"]
+dev = ["pre-commit==4.2.0"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
