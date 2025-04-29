@@ -51,7 +51,7 @@ def test_interpcartdata():
             interp=interp_method,
         )
 
-        assert np.allclose(trbd, trbd_py)
+        assert np.allclose(trbd, trbd_py), "interpolated values not correct"
         reader.increment()
 
     logging.log(logging.INFO, "cart2grid(..) works as expected!")

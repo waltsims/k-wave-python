@@ -280,7 +280,7 @@ def interp_cart_data(
             dist_min_index = np.argmin(dist)
 
             # assign value
-            binary_sensor_data[point_index, :] = cart_sensor_data[dist_min_index, :]
+            binary_sensor_data[point_index, :] = cart_sensor_data[:, dist_min_index]
 
         elif interp == "linear":
             # There must be more than 2 points
@@ -294,6 +294,8 @@ def interp_cart_data(
             p2 = cart_sensor_mask[indices[1]]
 
             p_target = cart_bsm[:, point_index]
+
+            print(p1, p2, p_target, np.shape(cart_bsm) )
 
             # Check if target point is between p1 and p2 by projecting onto the line
             # Vector from p1 to p2
