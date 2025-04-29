@@ -61,14 +61,14 @@ def test_interp_cart_data_2_points_nearest():
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
     binary_sensor_mask[501, 51, 7] = True
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point shape: (3,2)
-    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)    # 3 time steps, shape: (3,2)
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)    # 3 time steps, shape: (2,3)
     print(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
 
     print(interp_data)
 
     # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
-    assert np.allclose(interp_data, cart_sensor_data.T), "not close enough"
+    assert np.allclose(interp_data, cart_sensor_data), "not close enough"
     
 
 
@@ -83,8 +83,22 @@ def test_interp_cart_data_1_point_nearest():
 
     print(interp_data)
 
-    assert np.allclose(interp_data, cart_sensor_data.T), "not close enough"
+    assert np.allclose(interp_data, cart_sensor_data), "not close enough"
     
+
+def test_interp_cart_data_1_point_nearest_2():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 6] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0, 4.0, 5.0]], dtype=np.float32)  # 5 time steps
+    print(cart_sensor_data)
+    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+    print(interp_data)
+
+    assert np.allclose(interp_data, cart_sensor_data), "not close enough"
+
 
 
 def test_nepers2db():
