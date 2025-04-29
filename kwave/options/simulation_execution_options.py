@@ -1,10 +1,13 @@
 import os
 import warnings
+from logging import getLogger
 from pathlib import Path
 from typing import Optional, Union
 
 from kwave import BINARY_DIR, PLATFORM
 from kwave.ksensor import kSensor
+
+logger = getLogger(__name__)
 
 
 class SimulationExecutionOptions:
@@ -27,6 +30,9 @@ class SimulationExecutionOptions:
         verbose_level: int = 0,
         auto_chunking: Optional[bool] = True,
         show_sim_log: bool = True,
+        checkpoint_interval: Optional[int] = None,  # [seconds]
+        checkpoint_timesteps: Optional[int] = None,  # [timestep integer]
+        checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
     ):
         self.is_gpu_simulation = is_gpu_simulation
         self._binary_path = binary_path
@@ -41,6 +47,9 @@ class SimulationExecutionOptions:
         self.verbose_level = verbose_level
         self.auto_chunking = auto_chunking
         self.show_sim_log = show_sim_log
+        self.checkpoint_interval = checkpoint_interval
+        self.checkpoint_timesteps = checkpoint_timesteps
+        self.checkpoint_file = checkpoint_file
 
     @property
     def num_threads(self) -> Union[int, str]:
@@ -178,6 +187,30 @@ class SimulationExecutionOptions:
         if self.verbose_level > 0:
             options_list.append("--verbose")
             options_list.append(str(self.verbose_level))
+
+        if self.checkpoint_interval is not None and self.checkpoint_timesteps is not None:
+            logger.warning("Both checkpoint_interval and checkpoint_timesteps have been set. Kwave defaults to checkpoint_interval")
+
+        if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
+            if self.checkpoint_timesteps is not None:
+                if not isinstance(self.checkpoint_timesteps, int) or self.checkpoint_timesteps < 0:
+                    raise ValueError(f"checkpoint_timesteps has value {self.checkpoint_timesteps}, must be a positive integer value")
+                options_list.append("--checkpoint_timesteps")
+                options_list.append(str(self.checkpoint_timesteps))
+            else:
+                if not isinstance(self.checkpoint_interval, int) or self.checkpoint_interval < 0:
+                    raise ValueError(f"checkpoint_interval has value {self.checkpoint_interval}, must be a positive integer value")
+                options_list.append("--checkpoint_interval")
+                options_list.append(str(self.checkpoint_interval))
+
+            p = Path(self.checkpoint_file)
+            if not p.parent.exists():
+                raise ValueError(f"Checkpoint directory {p.parent} does not exist." "Please create it before running the simulation.")
+            if p.suffix != ".h5":
+                raise ValueError(f"Checkpoint file {p.name} must have .h5 " "extension. Please rename it before running the simulation.")
+
+            options_list.append("--checkpoint_file")
+            options_list.append(str(self.checkpoint_file))
 
         record_options_map = {
             "p": "p_raw",

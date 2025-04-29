@@ -31,6 +31,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.verbose_level, 0)
         self.assertTrue(options.auto_chunking)
         self.assertTrue(options.show_sim_log)
+        self.assertIsNone(options.checkpoint_interval)
+        self.assertIsNone(options.checkpoint_file)
 
     def test_num_threads_setter_valid(self):
         """Test setting a valid number of threads."""
@@ -213,6 +215,50 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options_list = options.as_list(self.mock_sensor)
         options_string = options.get_options_string(self.mock_sensor)
         self.assertEqual(" ".join(options_list), options_string)
+
+    def test_as_list_with_valid_checkpoint_interval_options(self):
+        """Test the checkpoint interval options."""
+        options = self.default_options
+        options.num_threads = os.cpu_count()
+        options.checkpoint_interval = 10
+        options.checkpoint_file = "checkpoint.h5"
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            "-t",
+            str(os.cpu_count()),
+            "--checkpoint_interval",
+            "10",
+            "--checkpoint_file",
+            "checkpoint.h5",
+            "--p_raw",
+            "--u_max",
+            "-s",
+            "10",
+        ]
+        self.assertListEqual(expected_elements, options_list)
+
+    def test_as_list_with_valid_checkpoint_timesteps_options(self):
+        """Test the checkpoint interval options."""
+        options = self.default_options
+        options.num_threads = os.cpu_count()
+        options.checkpoint_timesteps = 10
+        options.checkpoint_file = "checkpoint.h5"
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            "-t",
+            str(os.cpu_count()),
+            "--checkpoint_timesteps",
+            "10",
+            "--checkpoint_file",
+            "checkpoint.h5",
+            "--p_raw",
+            "--u_max",
+            "-s",
+            "10",
+        ]
+        self.assertListEqual(expected_elements, options_list)
 
 
 if __name__ == "__main__":
