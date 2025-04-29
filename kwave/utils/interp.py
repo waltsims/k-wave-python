@@ -222,7 +222,7 @@ def interp_cart_data(
                              cart_sensor_mask indexed as
                              cart_sensor_data(sensor position, time)
         cart_sensor_mask:     Cartesian sensor mask over which
-                             cart_sensor_data is measured
+                             cart_sensor_data is measured (dim, sensor position)
         binary_sensor_mask:   binary sensor mask at which equivalent
                              time-series are computed via interpolation
 
@@ -257,9 +257,9 @@ def interp_cart_data(
     if kgrid.dim not in [2, 3]:
         raise ValueError("Data must be two- or three-dimensional.")
 
-    if kgrid.dim != cart_sensor_mask.shape[1]:
+    if kgrid.dim != cart_sensor_mask.shape[0]:
         raise ValueError(
-            f"Cartesian sensor mask must have the same dimensionality as the k-Wave grid. Kgrid dim: {kgrid.dim}, cart_sensor_mask dim: {cart_sensor_mask.shape[1]}"
+            f"Cartesian sensor mask must have the same dimensionality as the k-Wave grid. Kgrid dim: {kgrid.dim}, cart_sensor_mask dim: {cart_sensor_mask.shape[0]}"
         )
 
     if kgrid.dim != len(np.squeeze(binary_sensor_mask).shape):
