@@ -31,20 +31,27 @@ for idx=1:length(all_params)
 
         % define a Cartesian spherical sensor
         sensor_radius = 4e-3;       % [m]
-        center_pos = [0, 0, 0];     % [m]
         num_sensor_points = 100;
-        sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+
 
 
         % define the properties of the propagation medium
         medium_sound_speed = params{1};	% [m/s]
         if dim == 2
+
+            center_pos = [0, 0];     % [m]
+            sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+
             kgrid = kWaveGrid(Nx, dx, Ny, dy);
             % create a binary sensor mask of an equivalent continuous sphere
             sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
             p0_binary = ball_magnitude * makeCircle(Nx, Ny, ball_x_pos, ball_y_pos, ball_radius);
             binary_sensor_mask = makeDisc(kgrid.Nx, kgrid.Ny, 0, 0, sensor_radius_grid_points);
         else
+
+            center_pos = [0, 0, 0];     % [m]
+            sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+
             kgrid = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
             % create a binary sensor mask of an equivalent continuous sphere
             sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
