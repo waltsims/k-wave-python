@@ -41,8 +41,6 @@ def test_interpcartdata():
         kgrid = kGridMock()
         kgrid.set_props(kgrid_props)
 
-        print(kgrid.Nx, kgrid.Ny, kgrid.Nz, np.shape(sensor_data), np.shape(sensor_mask), np.shape(binary_sensor_mask), interp_method)
-
         trbd_py = interp_cart_data(
             kgrid,
             cart_sensor_data=sensor_data,
@@ -51,7 +49,7 @@ def test_interpcartdata():
             interp=interp_method,
         )
 
-        assert np.allclose(trbd, trbd_py), "interpolated values not correct"
+        assert np.allclose(trbd, trbd_py), f"interpolated values not correct with {interp_method}"
         reader.increment()
 
     logging.log(logging.INFO, "cart2grid(..) works as expected!")
