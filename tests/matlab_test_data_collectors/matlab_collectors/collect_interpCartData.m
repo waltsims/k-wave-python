@@ -40,7 +40,7 @@ for idx=1:length(all_params)
         if dim == 2
 
             center_pos = [0, 0];     % [m]
-            sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+            sensor_mask = makeCartCircle(sensor_radius, num_sensor_points, center_pos, false);
 
             kgrid = kWaveGrid(Nx, dx, Ny, dy);
             % create a binary sensor mask of an equivalent continuous sphere
@@ -63,7 +63,7 @@ for idx=1:length(all_params)
         kgrid.makeTime(medium_sound_speed);
         % mock the simulation
         phase_shifts = linspace(0, 2 * pi, num_sensor_points);
-        sensor_data = sin(2 * pi * [1:kgrid.Nt]/ kgrid.Nt + repmat(phase_shifts', 1, kgrid.Nt));
+        sensor_data = sin(2 * pi * [1:kgrid.Nt]/ kgrid.Nt + repmat(transpose(phase_shifts), 1, kgrid.Nt));
         % smooth the initial pressure distribution and restore the magnitude
         p0 = smooth(p0_binary, true);
         
