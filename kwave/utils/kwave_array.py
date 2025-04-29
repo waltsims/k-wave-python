@@ -125,7 +125,7 @@ class Element:
         :param rtol: The relative tolerance parameter, defaults to 1e-05
         :param atol: The absolute tolerance parameter, defaults to 1e-08
         :param equal_nan: Whether to compare NaN's as equal, defaults to False
-        :raises ValueError: when other object is not an instance of Element
+        :raises TypeError: when other object is not an instance of Element
         :return: bool
         """
         if not isinstance(other, type(self)):
