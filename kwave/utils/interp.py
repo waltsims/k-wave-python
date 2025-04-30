@@ -268,7 +268,7 @@ def interp_cart_data(
         )
 
     cart_bsm, _ = grid2cart(kgrid, binary_sensor_mask)
-
+    
     if len(cart_bsm.shape) == 1:
         cart_bsm = cart_bsm[:, None]
 
