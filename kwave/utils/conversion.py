@@ -106,7 +106,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
 
     Returns:
         cart_data: 1 x N, 2 x N, or 3 x N (for 1, 2, and 3 dimensions) array of Cartesian sensor points
-        order_index: returns a list of indices of the returned cart_data coordinates.
+        order_index: returns a list of indices of the returned cart_data coordinates in the matlab memory alignment scheme
 
     Raises:
         ValueError: when input_kgrid.dim is not in [1, 2, 3]
@@ -126,6 +126,15 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
         raise ValueError("kGrid with unsupported size passed.")
 
     order_index = np.argwhere(grid_data.squeeze() != 0)
+
+    # for consistent ordering of output: sort into matlab index ordering
+    temp0 = list(zip(*order_index.T)) 
+    temp1 = np.ravel_multi_index(temp0, grid_data.shape, order='F') 
+    permutation_indices = np.argsort(temp1)
+
+    cart_data = cart_data[:, permutation_indices]
+    order_index = temp1[permutation_indices]
+
     return cart_data.squeeze(), order_index
 
 

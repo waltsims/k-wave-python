@@ -42,11 +42,6 @@ def test_grid2cart():
 
         cart_data, order_index = grid2cart(kgrid, grid_data)
 
-        if grid_data.ndim == 2:
-            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1]), grid_data.shape, order='C') + 1
-        else:
-            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1], order_index[:, 2]), grid_data.shape, order='C') + 1
-
         cart_data = cart_data.squeeze() 
         order_index = order_index.squeeze()
 
