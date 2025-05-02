@@ -37,7 +37,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "http://www.k-wave.org/"
-Repository = "https://github.com/djps/k-wave-python"
+Repository = "https://github.com/djps/k-wave-python/tree/expand_interp_cart_grid_testing"
 
 [project.optional-dependencies]
 test = ["pytest",
