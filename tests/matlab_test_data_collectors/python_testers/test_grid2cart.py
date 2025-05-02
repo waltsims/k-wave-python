@@ -41,8 +41,10 @@ def test_grid2cart():
         expected_order_index = record_reader.expected_value_of("order_index")
 
         cart_data, order_index = grid2cart(kgrid, grid_data)
-
-        order_index = np.ravel_multi_index(order_index, grid_data.shape, order='F')
+        if grid_data.ndim == 2:
+            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1]), grid_data.shape, order='F')
+        else:
+            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1], order_index[:, 2]), grid_data.shape, order='F')
 
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
         assert np.allclose(expected_order_index, order_index.squeeze()), f"Failed on example {i}"
