@@ -42,9 +42,9 @@ def test_grid2cart():
 
         cart_data, order_index = grid2cart(kgrid, grid_data)
         if grid_data.ndim == 2:
-            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1]), grid_data.shape, order='F')
+            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1]), grid_data.shape, order='C') + 1
         else:
-            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1], order_index[:, 2]), grid_data.shape, order='F')
+            order_index = np.ravel_multi_index((order_index[:, 0], order_index[:, 1], order_index[:, 2]), grid_data.shape, order='C') + 1
 
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
         assert np.allclose(expected_order_index, order_index.squeeze()), f"Failed on example {i}"
