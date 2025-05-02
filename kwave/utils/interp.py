@@ -289,15 +289,11 @@ def interp_cart_data(
 
             indices = np.argsort(dist)
 
-            print(np.shape(indices), np.shape(cart_bsm), np.shape(cart_sensor_mask), indices[0], indices[1] )
-
             # Get coordinates of the two closest points
             p1 = cart_sensor_mask[:, indices[0]]
             p2 = cart_sensor_mask[:, indices[1]]
 
             p_target = cart_bsm[:, point_index]
-
-            print(p1, p2, p_target)
 
             # Check if target point is between p1 and p2 by projecting onto the line
             # Vector from p1 to p2
