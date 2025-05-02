@@ -30,30 +30,24 @@ def test_grid2cart():
     record_reader = TestRecordReader(collected_values_file)
 
     for i in range(len(record_reader)):
-        # 'kgrid', 'cart_data', 'grid_data', ...
-        # 'order_index', 'reorder_index'
+        # 'kgrid', 'cart_data', 'grid_data', 'order_index'
         kgrid = kGridMock()
         kgrid_props = record_reader.expected_value_of("kgrid")
         kgrid.set_props(kgrid_props)
 
-        cart_data = record_reader.expected_value_of("cart_data")
-        if cart_data.ndim == 1:
-            cart_data = np.expand_dims(cart_data, axis=0)
-        expected_grid_data = record_reader.expected_value_of("grid_data")
-        expected_order_index = record_reader.expected_value_of("order_index")
-        expected_reorder_index = record_reader.expected_value_of("reorder_index")
+        grid_data = record_reader.expected_value_of("grid_data")
 
-        logging.log(logging.INFO, is_axisymmetric)
+        expected_cart_data = record_reader.expected_value_of("cart_data")
+        expected_order_index = record_reader.expected_value_of("order_index")
 
         if kgrid.dim == 3:
-            expected_reorder_index = np.reshape(expected_reorder_index, (-1, 1, 1))
+            expected_order_index = np.reshape(expected_order_index, (-1, 1, 1))
 
-        grid_data, order_index, = grid2cart(kgrid, cart_data)
+        cart_data, order_index, = grid2cart(kgrid, grid_data)
 
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
         assert np.allclose(expected_order_index, order_index.squeeze()), f"Failed on example {i}"
-        assert np.allclose(expected_reorder_index, reorder_index.squeeze()), f"Failed on example {i}"
-        assert np.allclose(expected_grid_data, grid_data.squeeze()), f"Failed on example {i}"
+        assert np.allclose(expected_cart_data, cart_data.squeeze()), f"Failed on example {i}"
 
     logging.log(logging.INFO, "grid2cart(..) works as expected!")
 
