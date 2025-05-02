@@ -21,14 +21,14 @@ for dim = dims
             Nz = kgrid_dims(3);
             dz = list_d(3);
             kgrid_m = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
-            grid_data = rand([kgrid.Nx, kgrid.Ny, kgrid.Nz]) < threshold;
+            grid_data = rand([kgrid_m.Nx, kgrid_m.Ny, kgrid_m.Nz]) < threshold;
 
             kgrid.x = kgrid_m.x;
             kgrid.y = kgrid_m.y;
             kgrid.z = kgrid_m.z; 
         else
             kgrid_m = kWaveGrid(Nx, dx, Ny, dy);
-            grid_data = rand([kgrid.Nx, kgrid.Ny]) < threshold;
+            grid_data = rand([kgrid_m.Nx, kgrid_m.Ny]) < threshold;
 
             kgrid.x = kgrid_m.x;
             kgrid.y = kgrid_m.y;
