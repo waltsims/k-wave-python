@@ -128,7 +128,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     order_index = np.argwhere(grid_data.squeeze() != 0)
 
     # for consistent ordering of output: sort into matlab index ordering
-    temp0 = list(zip(*order_index.T)) 
+    temp0 = np.transpose(order_index).tolist()
     temp1 = np.ravel_multi_index(temp0, grid_data.shape, order='F') 
     permutation_indices = np.argsort(temp1)
 

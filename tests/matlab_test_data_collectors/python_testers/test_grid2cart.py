@@ -43,11 +43,11 @@ def test_grid2cart():
         cart_data, order_index = grid2cart(kgrid, grid_data)
 
         cart_data = cart_data.squeeze() 
-        order_index = order_index.squeeze()
+        order_index = order_index.squeeze() + 1
 
         assert np.allclose(expected_cart_data, cart_data), f"Failed on example {i}"
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
-        assert np.allclose(expected_order_index, order_index.squeeze()), f"Failed on example {i}"
+        assert np.allclose(expected_order_index, order_index), f"Failed on example {i}"
         
         
 
