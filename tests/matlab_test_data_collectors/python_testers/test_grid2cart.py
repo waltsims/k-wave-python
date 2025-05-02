@@ -43,7 +43,9 @@ def test_grid2cart():
         if kgrid.dim == 3:
             expected_order_index = np.reshape(expected_order_index, (-1, 1, 1))
 
-        cart_data, order_index, = grid2cart(kgrid, grid_data)
+        cart_data, order_index = grid2cart(kgrid, grid_data)
+
+        order_index = np.ravel(order_index, order='F')
 
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
         assert np.allclose(expected_order_index, order_index.squeeze()), f"Failed on example {i}"
