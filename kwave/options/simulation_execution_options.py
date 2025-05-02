@@ -188,9 +188,6 @@ class SimulationExecutionOptions:
             options_list.append("--verbose")
             options_list.append(str(self.verbose_level))
 
-        if self.checkpoint_interval is not None and self.checkpoint_timesteps is not None:
-            logger.warning("Both checkpoint_interval and checkpoint_timesteps have been set. Kwave defaults to checkpoint_interval")
-
         if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
             if self.checkpoint_timesteps is not None:
                 if not isinstance(self.checkpoint_timesteps, int) or self.checkpoint_timesteps < 0:
@@ -205,9 +202,9 @@ class SimulationExecutionOptions:
 
             p = Path(self.checkpoint_file)
             if not p.parent.exists():
-                raise ValueError(f"Checkpoint directory {p.parent} does not exist." "Please create it before running the simulation.")
+                raise ValueError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
             if p.suffix != ".h5":
-                raise ValueError(f"Checkpoint file {p.name} must have .h5 " "extension. Please rename it before running the simulation.")
+                raise ValueError(f"Checkpoint file {p.name} must have .h5 extension. Please rename it before running the simulation.")
 
             options_list.append("--checkpoint_file")
             options_list.append(str(self.checkpoint_file))

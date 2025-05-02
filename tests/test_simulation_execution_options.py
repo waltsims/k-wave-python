@@ -219,14 +219,12 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_as_list_with_valid_checkpoint_interval_options(self):
         """Test the checkpoint interval options."""
         options = self.default_options
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.checkpoint_interval = 10
         options.checkpoint_file = "checkpoint.h5"
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            "-t",
-            str(os.cpu_count()),
             "--checkpoint_interval",
             "10",
             "--checkpoint_file",
@@ -236,19 +234,20 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-s",
             "10",
         ]
+        if not PLATFORM == "windows":
+            expected_elements.insert(0, "-t")
+            expected_elements.insert(1, f"1")
         self.assertListEqual(expected_elements, options_list)
 
     def test_as_list_with_valid_checkpoint_timesteps_options(self):
         """Test the checkpoint interval options."""
         options = self.default_options
-        options.num_threads = os.cpu_count()
+        options.num_threads = 1
         options.checkpoint_timesteps = 10
         options.checkpoint_file = "checkpoint.h5"
 
         options_list = options.as_list(self.mock_sensor)
         expected_elements = [
-            "-t",
-            str(os.cpu_count()),
             "--checkpoint_timesteps",
             "10",
             "--checkpoint_file",
@@ -258,6 +257,9 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             "-s",
             "10",
         ]
+        if not PLATFORM == "windows":
+            expected_elements.insert(0, "-t")
+            expected_elements.insert(1, f"1")
         self.assertListEqual(expected_elements, options_list)
 
 
