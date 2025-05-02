@@ -49,12 +49,7 @@ def test_interpcartdata():
             interp=interp_method,
         )
 
-        sorted_trbd = np.sort(trbd, axis=1)
-        sorted_trbd_py = np.sort(trbd_py, axis=1)
-        print(i, sorted_trbd[0, :])
-        print(i, sorted_trbd_py[0, :])
-
-        assert np.allclose(sorted_trbd, sorted_trbd_py), f"{i}. interpolated values not correct with method: {interp_method}"
+        assert np.allclose(trbd, trbd_py), f"{i}. interpolated values not correct with method: {interp_method}"
         reader.increment()
 
     logging.log(logging.INFO, "interp_cart_data(..) works as expected!")
