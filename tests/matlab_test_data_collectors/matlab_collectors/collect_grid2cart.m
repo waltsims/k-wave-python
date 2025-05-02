@@ -8,19 +8,20 @@ for dim = dims
 
     for threshold = thresholds
 
-        kgrid = {};
         kgrid.dim = dim;
 
-        kgrid.Nx = kgrid_dims(1);
-        kgrid.dx = list_d(1);
-        kgrid.Ny = kgrid_dims(2);
-        kgrid.dy = list_d(2);
+        Nx = kgrid_dims(1);
+        dx = list_d(1);
+        Ny = kgrid_dims(2);
+        dy = list_d(2);
 
         if dim == 3
-            kgrid.Nz = kgrid_dims(3);
-            kgrid.dz = list_d(3);
+            Nz = kgrid_dims(3);
+            dz = list_d(3);
+            kgrid = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
             grid_data = rand([kgrid.Nx, kgrid.Ny, kgrid.Nz]) < threshold;
         else
+            kgrid = kWaveGrid(Nx, dx, Ny, dy);
             grid_data = rand([kgrid.Nx, kgrid.Ny]) < threshold;
         end
 
