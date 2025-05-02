@@ -8,7 +8,9 @@ for dim = dims
 
     for threshold = thresholds
 
-        kgrid.dim = dim;
+        kgrid = {};
+        kgrid.dim = kgrid_dims;
+
 
         Nx = kgrid_dims(1);
         dx = list_d(1);
@@ -18,14 +20,21 @@ for dim = dims
         if dim == 3
             Nz = kgrid_dims(3);
             dz = list_d(3);
-            kgrid = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
+            kgrid_m = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
             grid_data = rand([kgrid.Nx, kgrid.Ny, kgrid.Nz]) < threshold;
+
+            kgrid.x = kgrid_m.x;
+            kgrid.y = kgrid_m.y;
+            kgrid.z = kgrid_m.z; 
         else
-            kgrid = kWaveGrid(Nx, dx, Ny, dy);
+            kgrid_m = kWaveGrid(Nx, dx, Ny, dy);
             grid_data = rand([kgrid.Nx, kgrid.Ny]) < threshold;
+
+            kgrid.x = kgrid_m.x;
+            kgrid.y = kgrid_m.y;
         end
 
-        [cart_data, order_index] = grid2cart(kgrid, grid_data);
+        [cart_data, order_index] = grid2cart(kgrid_m, grid_data);
 
         recorder.recordObject('kgrid', kgrid);
         recorder.recordVariable('cart_data', cart_data);
