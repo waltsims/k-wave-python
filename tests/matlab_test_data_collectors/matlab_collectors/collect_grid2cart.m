@@ -9,8 +9,7 @@ for dim = dims
     for threshold = thresholds
 
         kgrid = {};
-        kgrid.dim = kgrid_dims;
-
+        kgrid.dim = dim;
 
         Nx = kgrid_dims(1);
         dx = list_d(1);
