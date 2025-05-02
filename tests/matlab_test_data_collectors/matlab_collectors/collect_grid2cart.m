@@ -19,9 +19,9 @@ for dim = dims
         if dim == 3
             kgrid.Nz = kgrid_dims(3);
             kgrid.dz = list_d(3);
-            grid_data = rand([Nx, Ny, Nz]) < threshold;
+            grid_data = rand([kgrid.Nx, kgrid.Ny, kgrid.Nz]) < threshold;
         else
-            grid_data = rand([Nx, Ny]) < threshold;
+            grid_data = rand([kgrid.Nx, kgrid.Ny]) < threshold;
         end
 
         [cart_data, order_index] = grid2cart(kgrid, grid_data);
