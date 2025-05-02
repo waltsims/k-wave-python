@@ -202,7 +202,7 @@ class SimulationExecutionOptions:
 
             p = Path(self.checkpoint_file)
             if not p.parent.exists():
-                raise ValueError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
+                raise FileNotFoundError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
             if p.suffix != ".h5":
                 raise ValueError(f"Checkpoint file {p.name} must have .h5 extension. Please rename it before running the simulation.")
 

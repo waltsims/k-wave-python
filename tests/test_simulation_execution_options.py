@@ -1,5 +1,7 @@
 import os
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from kwave import PLATFORM
@@ -261,6 +263,37 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             expected_elements.insert(0, "-t")
             expected_elements.insert(1, f"1")
         self.assertListEqual(expected_elements, options_list)
+
+    def test_as_list_with_invalid_checkpoint_options(self):
+        """Test the checkpoint options with invalid values."""
+        options = self.default_options
+        options.num_threads = 1
+        options.checkpoint_file = "checkpoint.h5"
+
+        options.checkpoint_interval = -1  # negative values not allowed
+        with self.assertRaises(ValueError):
+            options.as_list(self.mock_sensor)
+        options.checkpoint_interval = 1.0  # floats not allowed
+        with self.assertRaises(ValueError):
+            options.as_list(self.mock_sensor)
+        options.checkpoint_interval = None
+
+        options.checkpoint_timesteps = -1  # negative values not allowed
+        with self.assertRaises(ValueError):
+            options.as_list(self.mock_sensor)
+        options.checkpoint_timesteps = 1.0  # floats not allowed
+        with self.assertRaises(ValueError):
+            options.as_list(self.mock_sensor)
+        options.checkpoint_timesteps = 1
+
+        options.checkpoint_file = Path("invalid/path/checkpoint.h5")
+        with self.assertRaises(FileNotFoundError):
+            options.as_list(self.mock_sensor)
+
+        with TemporaryDirectory() as temp_dir:
+            options.checkpoint_file = Path(temp_dir) / "checkpoint.invalid_ext"
+            with self.assertRaises(ValueError):
+                options.as_list(self.mock_sensor)
 
 
 if __name__ == "__main__":
