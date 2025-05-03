@@ -14,25 +14,6 @@ def recursive_getattr(obj, attr, *args):
     return functools.reduce(_getattr, [obj] + attr.split("."))
 
 
-def check_element_equality(
-    actual_element: Element,
-    expected_element: Element,
-) -> bool:
-    for field in dataclasses.fields(expected_element):
-        expected = getattr(expected_element, field.name)
-        actual = getattr(actual_element, field.name)
-        if isinstance(expected, np.ndarray):
-            if not np.allclose(actual, expected):
-                return False
-        elif isinstance(expected, float):
-            if not np.isclose(actual, expected):
-                return False
-        else:
-            if actual != expected:
-                return False
-    return True
-
-
 def check_kgrid_equality(kgrid_object: kWaveArray, expected_kgrid_dict: dict):
     are_totally_equal = True
     for key, expected_value in expected_kgrid_dict.items():
@@ -131,17 +112,11 @@ def check_kwave_array_equality(kwave_array_object: kWaveArray, expected_kwave_ar
             if isinstance(expected_value, dict):
                 expected_value = [Element(**expected_value)]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= check_element_equality(
-                        actual_element=actual,
-                        expected_element=expected,
-                    )
+                    are_equal &= actual.is_approximately_equal(expected)
             elif isinstance(expected_value, list):
                 expected_value = [Element(**val) for val in expected_value]
                 for actual, expected in zip(actual_value, expected_value):
-                    are_equal &= check_element_equality(
-                        actual_element=actual,
-                        expected_element=expected,
-                    )
+                    are_equal &= actual.is_approximately_equal(expected)
         else:
             actual_value = np.squeeze(actual_value)
             expected_value = np.array(expected_value)
