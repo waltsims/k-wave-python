@@ -9,10 +9,7 @@ Environment Setup with uv
 -------------------------
 
 1. Install uv
-~~~~~~~~~~~~~
-.. code-block:: bash
-
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+Uv is "An extremely fast Python package and project manager, written in Rust." We would recommend that you use it. Installation instructions can be found `here <https://docs.astral.sh/uv/getting-started/installation/#installation-methods>`_.
 
 2. Clone the Repository
 ~~~~~~~~~~~~~~~~~~~~~~~
