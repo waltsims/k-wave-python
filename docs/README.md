@@ -55,6 +55,12 @@ found [here](https://k-wave-python.readthedocs.io/en/latest/development/developm
 
 The documentation for k-wave-python can be found [here](https://k-wave-python.readthedocs.io/en/latest/).
 
+## Stay Informed
+
+[Subscribe to our mailing list](https://groups.google.com/u/1/g/k-wave-python) to receive updates regarding releases and weekly development meetings.
+
+[Join our Discord](https://discord.gg/Yq5Qj6D9vN) for questions and comments regarding k-wave-python.
+
 ## Citation
 ```bibtex
 @software{k-Wave-Python,
