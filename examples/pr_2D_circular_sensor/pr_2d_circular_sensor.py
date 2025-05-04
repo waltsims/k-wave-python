@@ -1,25 +1,26 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from copy import deepcopy
 
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
+
 from kwave.data import Vector
-from kwave.utils.conversion import cart2grid
-from kwave.utils.io import load_image
-from kwave.utils.filters import smooth
-from kwave.utils.interp import interp_cart_data
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
 from kwave.ksensor import kSensor
-from kwave.utils.mapgen import make_cart_circle, make_circle
-from kwave.utils.signals import add_noise, reorder_binary_sensor_data
-from kwave.utils.colormap import get_color_map
-from kwave.utils.matrix import resize
+from kwave.ksource import kSource
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.reconstruction.time_reversal import TimeReversal
+from kwave.utils.colormap import get_color_map
+from kwave.utils.conversion import cart2grid
+from kwave.utils.filters import smooth
+from kwave.utils.interp import interp_cart_data
+from kwave.utils.io import load_image
+from kwave.utils.mapgen import make_cart_circle, make_circle
+from kwave.utils.matrix import resize
+from kwave.utils.signals import add_noise, reorder_binary_sensor_data
 
 pml_size: int = 20 # size of the PML in grid points
 Nx: int = 256 - 2 * pml_size # number of grid points in the x direction
