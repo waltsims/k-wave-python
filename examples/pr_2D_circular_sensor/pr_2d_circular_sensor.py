@@ -1,13 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import requests
-import io
-import cv2 
-import sys
-import os
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
-from matplotlib import colors
-from matplotlib.animation import FuncAnimation
 from copy import deepcopy
 
 from kwave.data import Vector
@@ -15,7 +8,6 @@ from kwave.utils.conversion import cart2grid
 from kwave.utils.io import load_image
 from kwave.utils.filters import smooth
 from kwave.utils.interp import interp_cart_data
-from kwave.utils.conversion import grid2cart
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
@@ -23,8 +15,8 @@ from kwave.ksensor import kSensor
 from kwave.utils.mapgen import make_cart_circle, make_circle
 from kwave.utils.signals import add_noise, reorder_binary_sensor_data
 from kwave.utils.colormap import get_color_map
-from kwave.utils.matrix import resize, sort_rows
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D, kspaceFirstOrder2DC
+from kwave.utils.matrix import resize
+from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
 from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.reconstruction.time_reversal import TimeReversal
@@ -227,7 +219,7 @@ ax.yaxis.set_inverted(True)
 ax.set_title('Reconstructed Pressure Distribution with Interpolation')
 
 # plot a profile for comparison
-slice_pos = 4.5e-3;  # [m] location of the slice from top of grid [m]
+slice_pos = 4.5e-3  # location of the slice from top of grid [m]
 i = int(round(slice_pos / kgrid.dx))
 j = int(round(slice_pos / kgrid_recon.dx)) 
 fig, ax = plt.subplots()
