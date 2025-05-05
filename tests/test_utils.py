@@ -25,9 +25,9 @@ def test_grid2cart():
 
     cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
     assert cart_bsm.shape == (3, 2), f"grid2cart did not return a 3x2 array. Shape is {cart_bsm.shape}"
-    print(cart_bsm)
+    logger.debug(f"cart_bsm: {cart_bsm}")
     expected_cart_bsm = np.array([[-450, 0, -1], [-401, 49, 4]]).T
-    print(expected_cart_bsm)
+    logger.debug(f"expected_cart_bsm: {expected_cart_bsm}")
     assert np.allclose(cart_bsm, expected_cart_bsm), "cart_bsm and expected_cart_bsm are not close enough"
 
 
