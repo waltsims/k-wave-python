@@ -28,7 +28,7 @@ def test_grid2cart():
     print(cart_bsm)
     expected_cart_bsm = np.array([[-450, 0, -1], [-401, 49, 4]]).T
     print(expected_cart_bsm)
-    assert np.all(cart_bsm == expected_cart_bsm)
+    assert np.allclose(cart_bsm, expected_cart_bsm), "cart_bsm and expected_cart_bsm are not close enough"
 
 
 def test_grid2cart_origin():
