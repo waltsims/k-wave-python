@@ -63,9 +63,9 @@ def test_interp_cart_data_2_points_linear():
 def test_interp_cart_data_2_points_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
-    binary_sensor_mask[501, 51, 7] = True
-    binary_sensor_mask[201, 41, 7] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point shape: (3,2)
+    binary_sensor_mask[501, 51, 5] = True
+    binary_sensor_mask[501, 51, 9] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 5.0]], dtype=np.float32).T  # sensor at the origin and another point shape: (3,2)
     cart_sensor_data0 = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)    # 3 time steps, shape: (2,3)
     print(cart_sensor_data0)
     interp_data0 = interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
