@@ -26,9 +26,9 @@ def test_grid2cart():
 
     cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
     assert cart_bsm.shape == (3, 2), f"grid2cart did not return a 3x2 array. Shape is {cart_bsm.shape}"
-    logger.debug(f"cart_bsm: {cart_bsm}")
+    logging.debug(f"cart_bsm: {cart_bsm}")
     expected_cart_bsm = np.array([[-450, 0, -1], [-401, 49, 4]]).T
-    logger.debug(f"expected_cart_bsm: {expected_cart_bsm}")
+    logging.debug(f"expected_cart_bsm: {expected_cart_bsm}")
     assert np.allclose(cart_bsm, expected_cart_bsm), "cart_bsm and expected_cart_bsm are not close enough"
 
 
@@ -40,9 +40,10 @@ def test_grid2cart_origin():
     binary_sensor_mask = np.zeros((1000, 100, 10))
     binary_sensor_mask[500, 50, 5] = 1  # equivalent index in matlab is [501, 51, 6] for mask origin
     cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
-    print(cart_bsm)
-    print(order_index)
-    assert np.all(cart_bsm == 0), "origin location was incorrect"
+    logging.debug(cart_bsm)
+    logging.debug(order_index)
+    assert np.allclose(cart_bsm, np.zeros_like(cart_bsm)), "origin location was incorrect"
+
 
 @pytest.mark.skip(reason="linear interpolation not working")
 def test_interp_cart_data_2_points_linear():
@@ -51,14 +52,14 @@ def test_interp_cart_data_2_points_linear():
     binary_sensor_mask[501, 51, 7] = True
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point
     cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32) # 3 time steps
-    print(cart_sensor_data)
+    logging.debug(cart_sensor_data)
     interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, "linear")
     # TODO: find expected value from matlab. In this case we revert to nearest because point is not between p1 and p2.
-    print(interp_data)
+    logging.debug(interp_data)
     assert np.allclose(interp_data, cart_sensor_data), "not close enough"
 
 
-@pytest.mark.skip(reason="two points not working")
+
 def test_interp_cart_data_2_points_nearest():
     kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
     binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
