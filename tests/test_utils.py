@@ -95,6 +95,16 @@ def test_interp_cart_data_1_point_nearest():
     assert np.allclose(interp_data1, cart_sensor_data1), "not close enough"
 
 
+def test_interp_cart_one_dim_nearest():
+    kgrid = kWaveGrid([1000,], [1,])
+    binary_sensor_mask = np.zeros((1000,), dtype=bool)
+    binary_sensor_mask[501,] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError, match=("Data must be two- or three-dimensional."):
+        interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
+
+
 def test_nepers2db():
     expected_scalar = 8.186258123051049e05
     expected_matrix = expected_scalar * np.ones((10, 10))
