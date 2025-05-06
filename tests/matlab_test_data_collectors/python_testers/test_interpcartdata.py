@@ -55,6 +55,36 @@ def test_interpcartdata():
     logging.log(logging.INFO, "interp_cart_data(..) works as expected!")
 
 
+def test_griddim_sensor_data():    
+    kgrid = kWaveGrid([100,100], [1,1])
+    binary_sensor_mask = np.zeros((100,100), dtype=bool)
+    binary_sensor_mask[501, 499] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+
+def test_griddim_binary_sensor_mask():    
+    kgrid = kWaveGrid([100,100], [1,1])
+    binary_sensor_mask = np.zeros((100,), dtype=bool)
+    binary_sensor_mask[501, 499] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+
+def test_cart_sensor_data_shape():    
+    kgrid = kWaveGrid([100,100], [1,1])
+    binary_sensor_mask = np.zeros((100,), dtype=bool)
+    binary_sensor_mask[501, 499] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, 'linear')
+
+
 def test_unknown_interp_method():
     with pytest.raises(ValueError):
         reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/interpCartData.mat"))
