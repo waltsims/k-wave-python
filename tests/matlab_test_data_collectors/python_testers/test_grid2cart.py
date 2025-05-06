@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import numpy as np
+import pytest
 
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import grid2cart
