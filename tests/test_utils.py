@@ -1,10 +1,9 @@
+import logging
 import os
 from pathlib import Path
 
 import numpy as np
 import pytest
-import logging
-
 from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import db2neper, grid2cart, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
@@ -12,7 +11,8 @@ from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
-from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import \
+    TestRecordReader
 
 
 def test_grid2cart():
@@ -102,7 +102,7 @@ def test_interp_cart_one_dim_nearest():
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
     cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
     with pytest.raises(ValueError, match=("Data must be two- or three-dimensional.")):
-        interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
 
 
 def test_nepers2db():
