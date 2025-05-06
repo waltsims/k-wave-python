@@ -101,7 +101,7 @@ def test_interp_cart_one_dim_nearest():
     binary_sensor_mask[501,] = True
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
     cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
-    with pytest.raises(ValueError, match=("Data must be two- or three-dimensional."):
+    with pytest.raises(ValueError, match=("Data must be two- or three-dimensional.")):
         interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
 
 
