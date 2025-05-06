@@ -12,8 +12,7 @@ from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
-from tests.matlab_test_data_collectors.python_testers.utils.record_reader import \
-    TestRecordReader
+from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
 
 
 def test_grid2cart():

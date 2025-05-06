@@ -302,15 +302,21 @@ def interp_cart_data(
             w = p_target - p1
 
             # Project w onto v
-            c1 = np.dot(w, v) / np.dot(v, v)
+            magnitude_v = np.dot(v, v)
+            if np.abs(np.magnitude_v) > 10E-12:
+                c1 = np.dot(w, v) / np.dot(v, v)
 
-            # If c1 is between 0 and 1, point is between p1 and p2
-            if 0 <= c1 <= 1:
-                # Linear interpolation
-                binary_sensor_data[point_index, :] = (1 - c1) * cart_sensor_data[indices[0], :] + c1 * cart_sensor_data[indices[1], :]
+                # If c1 is between 0 and 1, point is between p1 and p2
+                if 0 <= c1 <= 1:
+                    # Linear interpolation
+                    binary_sensor_data[point_index, :] = (1 - c1) * cart_sensor_data[indices[0], :] + c1 * cart_sensor_data[indices[1], :]
+                else:
+                    # Point is not between p1 and p2 
+                    # Option 1: Use nearest neighbor
+                    binary_sensor_data[point_index, :] = cart_sensor_data[indices[0], :]
             else:
-                # Point is not between p1 and p2
-                # Option 1: Use nearest neighbor
+                # Points p1 and p2 are equal
+                # Use nearest neighbor
                 binary_sensor_data[point_index, :] = cart_sensor_data[indices[0], :]
 
         else:
