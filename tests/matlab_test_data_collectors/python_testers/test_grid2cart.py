@@ -49,10 +49,23 @@ def test_grid2cart():
         assert len(expected_order_index) == len(order_index), f"Failed on example {i}"
         assert np.allclose(expected_order_index, order_index), f"Failed on example {i}"
         
-        
-
     logging.log(logging.INFO, "grid2cart(..) works as expected!")
+
+
+def test_grid2cart_grid_dimensions():
+    collected_values_file = os.path.join(Path(__file__).parent, "collectedValues/grid2cart.mat")
+    record_reader = TestRecordReader(collected_values_file)
+    grid_data = record_reader.expected_value_of("grid_data")
+    bad_dims = [0, 4]
+    for bad_dim in bad_dims:
+        kgrid_dummy = {'dim': bad_dim}
+        kgrid_dummy_props = kGridMock()
+        kgrid_dummy.set_props(kgrid_dummy_props)
+        with pytest.raises(ValueError, match=("kGrid with unsupported size passed.")):
+            grid2cart(kgrid_dummy, grid_data)
+
 
 
 if __name__ == "__main__":
     test_grid2cart()
+    test_grid2cart_grid_dimensions()
