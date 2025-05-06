@@ -116,14 +116,15 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     grid_data = np.array((grid_selection != 0), dtype=bool)
     cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
 
+    if not (0 < input_kgrid.dim <= 3):
+        raise ValueError("kGrid with unsupported size passed.")
+
     if input_kgrid.dim > 0:
         cart_data[0, :] = input_kgrid.x[grid_data]
     if input_kgrid.dim > 1:
         cart_data[1, :] = input_kgrid.y[grid_data]
     if input_kgrid.dim > 2:
         cart_data[2, :] = input_kgrid.z[grid_data]
-    if 0 <= input_kgrid.dim > 3:
-        raise ValueError("kGrid with unsupported size passed.")
 
     order_index = np.argwhere(grid_data.squeeze() != 0)
 

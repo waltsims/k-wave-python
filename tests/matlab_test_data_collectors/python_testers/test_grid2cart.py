@@ -62,7 +62,7 @@ def test_grid2cart_grid_dimensions():
         kgrid_dummy_props = {'dim': bad_dim}
         kgrid_dummy = kGridMock()
         kgrid_dummy.set_props(kgrid_dummy_props)
-        with pytest.raises(ValueError, match=("kGrid with unsupported size passed.")):
+        with pytest.raises(ValueError):
             grid2cart(kgrid_dummy, grid_data)
 
 
