@@ -69,7 +69,7 @@ def test_griddim_binary_sensor_mask():
     kgrid = kWaveGrid([100, 100], [1, 1])
     binary_sensor_mask = np.zeros((100,), dtype=bool)
     binary_sensor_mask[51] = True
-    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_mask = np.array([[0.0, 0.0]], dtype=np.float32).T  
     cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
     with pytest.raises(ValueError):
         interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
