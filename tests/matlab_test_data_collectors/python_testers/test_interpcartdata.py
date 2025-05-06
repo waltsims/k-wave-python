@@ -81,8 +81,14 @@ def test_cart_sensor_data_shape():
     binary_sensor_mask[51, 49] = True
     cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
     cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
-    with pytest.raises(ValueError):
-        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, 'linear')
+    with pytest.raises(ValueError, match="Not enough points to interpolate."):
+        interp_cart_data(
+            kgrid,
+            cart_sensor_data=cart_sensor_data,
+            cart_sensor_mask=cart_sensor_mask,
+            binary_sensor_mask=binary_sensor_mask,
+            interp="linear",
+        )
 
 
 def test_unknown_interp_method():
