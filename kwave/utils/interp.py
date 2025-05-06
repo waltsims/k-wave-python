@@ -303,7 +303,7 @@ def interp_cart_data(
 
             # Project w onto v
             magnitude_v = np.dot(v, v)
-            if np.abs(np.magnitude_v) > 10E-12:
+            if np.abs(magnitude_v) > 10E-12:
                 c1 = np.dot(w, v) / np.dot(v, v)
 
                 # If c1 is between 0 and 1, point is between p1 and p2
