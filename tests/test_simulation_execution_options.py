@@ -273,6 +273,10 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             with self.assertRaises(ValueError):
                 SimulationExecutionOptions(checkpoint_file=checkpoint_file)
 
+        # Test with invalid checkpoint_file type
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_file=12345, checkpoint_timesteps=10)
+
         # Test with invalid checkpoint_timesteps
         with self.assertRaises(ValueError):
             SimulationExecutionOptions(checkpoint_timesteps=-1, checkpoint_file="checkpoint.h5")
