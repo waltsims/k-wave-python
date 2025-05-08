@@ -293,12 +293,26 @@ class TestSimulationExecutionOptions(unittest.TestCase):
                 checkpoint_file="nonexistent_dir/checkpoint.h5",  # Non-existent directory
             )
 
-        # Test with invalid type
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(
-                checkpoint_timesteps=10,
-                checkpoint_file=12345,  # Invalid type
-            )
+    def test_initialization_with_valid_checkpoint_options(self):
+        """Test initialization with valid checkpoint options."""
+        with TemporaryDirectory() as temp_dir:
+            checkpoint_file = Path(temp_dir) / "checkpoint.h5"
+
+            # Test with valid checkpoint_timesteps
+            options = SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_timesteps, 10)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
+
+            # Test with valid checkpoint_interval
+            options = SimulationExecutionOptions(checkpoint_interval=20, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_interval, 20)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
+
+            # Test with both checkpoint options - should be valid
+            options = SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_interval=20, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_timesteps, 10)
+            self.assertEqual(options.checkpoint_interval, 20)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
 
 
 if __name__ == "__main__":
