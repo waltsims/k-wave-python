@@ -51,6 +51,19 @@ class SimulationExecutionOptions:
         self.checkpoint_timesteps = checkpoint_timesteps
         self.checkpoint_file = checkpoint_file
 
+        if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
+            if self.checkpoint_timesteps is not None:
+                if not isinstance(self.checkpoint_timesteps, int) or self.checkpoint_timesteps < 0:
+                    raise ValueError(f"checkpoint_timesteps has value {self.checkpoint_timesteps}, must be a positive integer value")
+            if self.checkpoint_interval is not None:
+                if not isinstance(self.checkpoint_interval, int) or self.checkpoint_interval < 0:
+                    raise ValueError(f"checkpoint_interval has value {self.checkpoint_interval}, must be a positive integer value")
+
+            if not self.checkpoint_file.parent.exists():
+                raise FileNotFoundError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
+            if self.checkpoint_file.suffix != ".h5":
+                raise ValueError(f"Checkpoint file {p.name} must have .h5 extension. Please rename it before running the simulation.")
+
     @property
     def num_threads(self) -> Union[int, str]:
         return self._num_threads
@@ -173,6 +186,47 @@ class SimulationExecutionOptions:
             raise ValueError("Device number must be non-negative")
         self._device_num = value
 
+    @property
+    def checkpoint_interval(self) -> Optional[int]:
+        return self._checkpoint_interval
+
+    @checkpoint_interval.setter
+    def checkpoint_interval(self, value: Optional[int]):
+        if value is not None:
+            if not isinstance(value, int) or value < 0:
+                raise ValueError("Checkpoint interval must be a positive integer")
+        self._checkpoint_interval = value
+
+    @property
+    def checkpoint_timesteps(self) -> Optional[int]:
+        return self._checkpoint_timesteps
+
+    @checkpoint_timesteps.setter
+    def checkpoint_timesteps(self, value: Optional[int]):
+        if value is not None:
+            if not isinstance(value, int) or value < 0:
+                raise ValueError("Checkpoint timesteps must be a positive integer")
+        self._checkpoint_timesteps = value
+
+    @property
+    def checkpoint_file(self) -> Optional[Path]:
+        if self._checkpoint_file is None:
+            return None
+        return self._checkpoint_file
+
+    @checkpoint_file.setter
+    def checkpoint_file(self, value: Optional[Path | str]):
+        if value is not None:
+            if not isinstance(value, (str, Path)):
+                raise ValueError("Checkpoint file must be a string or Path object.")
+            if isinstance(value, str):
+                value = Path(value)
+            if not value.parent.is_dir():
+                raise FileNotFoundError(f"Checkpoint folder {value.parent} does not exist.")
+            if value.suffix != ".h5":
+                raise ValueError(f"Checkpoint file {value} must have .h5 extension.")
+        self._checkpoint_file = value
+
     def as_list(self, sensor: kSensor) -> list[str]:
         options_list = []
 
@@ -190,21 +244,11 @@ class SimulationExecutionOptions:
 
         if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
             if self.checkpoint_timesteps is not None:
-                if not isinstance(self.checkpoint_timesteps, int) or self.checkpoint_timesteps < 0:
-                    raise ValueError(f"checkpoint_timesteps has value {self.checkpoint_timesteps}, must be a positive integer value")
                 options_list.append("--checkpoint_timesteps")
                 options_list.append(str(self.checkpoint_timesteps))
-            else:
-                if not isinstance(self.checkpoint_interval, int) or self.checkpoint_interval < 0:
-                    raise ValueError(f"checkpoint_interval has value {self.checkpoint_interval}, must be a positive integer value")
+            if self.checkpoint_interval is not None:
                 options_list.append("--checkpoint_interval")
                 options_list.append(str(self.checkpoint_interval))
-
-            p = Path(self.checkpoint_file)
-            if not p.parent.exists():
-                raise FileNotFoundError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
-            if p.suffix != ".h5":
-                raise ValueError(f"Checkpoint file {p.name} must have .h5 extension. Please rename it before running the simulation.")
 
             options_list.append("--checkpoint_file")
             options_list.append(str(self.checkpoint_file))
