@@ -51,18 +51,9 @@ class SimulationExecutionOptions:
         self.checkpoint_timesteps = checkpoint_timesteps
         self.checkpoint_file = checkpoint_file
 
-        if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
-            if self.checkpoint_timesteps is not None:
-                if not isinstance(self.checkpoint_timesteps, int) or self.checkpoint_timesteps < 0:
-                    raise ValueError(f"checkpoint_timesteps has value {self.checkpoint_timesteps}, must be a positive integer value")
-            if self.checkpoint_interval is not None:
-                if not isinstance(self.checkpoint_interval, int) or self.checkpoint_interval < 0:
-                    raise ValueError(f"checkpoint_interval has value {self.checkpoint_interval}, must be a positive integer value")
-
-            if not self.checkpoint_file.parent.exists():
-                raise FileNotFoundError(f"Checkpoint directory {p.parent} does not exist. Please create it before running the simulation.")
-            if self.checkpoint_file.suffix != ".h5":
-                raise ValueError(f"Checkpoint file {p.name} must have .h5 extension. Please rename it before running the simulation.")
+        if self.checkpoint_file is not None:
+            if self.checkpoint_interval is None and self.checkpoint_timesteps is None:
+                raise ValueError("One of checkpoint_interval or checkpoint_timesteps must be set when checkpoint_file is set.")
 
     @property
     def num_threads(self) -> Union[int, str]:

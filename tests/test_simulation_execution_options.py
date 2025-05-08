@@ -266,6 +266,13 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
     def test_initialization_with_invalid_checkpoint_options(self):
         """Test initialization with invalid checkpoint options."""
+
+        # Test with valid checkpoint_file but unset checkpoint_timesteps and checkpoint_interval
+        with TemporaryDirectory() as temp_dir:
+            checkpoint_file = Path(temp_dir) / "checkpoint.h5"
+            with self.assertRaises(ValueError):
+                SimulationExecutionOptions(checkpoint_file=checkpoint_file)
+
         # Test with invalid checkpoint_timesteps
         with self.assertRaises(ValueError):
             SimulationExecutionOptions(checkpoint_timesteps=-1, checkpoint_file="checkpoint.h5")
