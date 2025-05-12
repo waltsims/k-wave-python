@@ -9,10 +9,7 @@ Environment Setup with uv
 -------------------------
 
 1. Install uv
-~~~~~~~~~~~~~
-.. code-block:: bash
-
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+Uv is "An extremely fast Python package and project manager, written in Rust." We would recommend that you use it. Installation instructions can be found `here <https://docs.astral.sh/uv/getting-started/installation/#installation-methods>`_.
 
 2. Clone the Repository
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,7 +168,7 @@ Publishing k-wave-python
 `Hatch <https://hatch.pypa.io/latest/>`_ is used to publish k-wave-python to `PyPI <https://pypi.org/>`_. 
 
 .. note::
-    This is only performed by developers with write access to the k-wave-python package on PiPI.
+    This is only performed by developers with write access to the k-wave-python package on PyPI.
 
 The package can be built using:
 
