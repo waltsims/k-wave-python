@@ -57,18 +57,9 @@ upsampling_rate: int = 10  # density of integration points relative to grid
 # --------------------
 
 # calculate the grid spacing based on the PPW and F0
-dx: float = c0 / (ppw * source_f0)  # [m]
-
-# compute the size of the grid
-Nx: int = round_even(axial_size / dx) + source_x_offset
-Ny: int = round_even(lateral_size / dx)
-Nz: int = Ny
-
-grid_size_points = Vector([Nx, Ny, Nz])
-grid_spacing_meters = Vector([dx, dx, dx])
-
-# create the k-space grid
-kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
+kgrid = kWaveGrid.from_domain(
+    dimensions=[axial_size, lateral_size, lateral_size], frequency=source_f0, sound_speed_min=c0, points_per_wavelength=ppw
+)
 
 # compute points per temporal period
 ppp: int = round(ppw / cfl)
@@ -124,8 +115,8 @@ medium = kWaveMedium(sound_speed=c0, density=rho0)
 sensor = kSensor()
 
 # set sensor mask to record central plane, not including the source point
-sensor.mask = np.zeros((Nx, Ny, Nz), dtype=bool)
-sensor.mask[(source_x_offset + 1) : -1, :, Nz // 2] = True
+sensor.mask = np.zeros(kgrid.N, dtype=bool)
+sensor.mask[(source_x_offset + 1) : -1, :, kgrid.Nz // 2] = True
 
 # record the pressure
 sensor.record = ["p"]
@@ -155,10 +146,10 @@ sensor_data = kspaceFirstOrder3D(
 amp, _, _ = extract_amp_phase(sensor_data["p"].T, 1.0 / kgrid.dt, source_f0, dim=1, fft_padding=1, window="Rectangular")
 
 # reshape data
-amp = np.reshape(amp, (Nx - (source_x_offset + 2), Ny), order="F")
+amp = np.reshape(amp, (kgrid.Nx - (source_x_offset + 2), kgrid.Ny), order="F")
 
 # extract pressure on axis
-amp_on_axis = amp[:, Ny // 2]
+amp_on_axis = amp[:, kgrid.Ny // 2]
 
 # define axis vectors for plotting
 x_vec = kgrid.x_vec[(source_x_offset + 1) : -1, :] - kgrid.x_vec[source_x_offset]
@@ -171,8 +162,9 @@ y_vec = kgrid.y_vec
 # calculate the wavenumber
 knumber = 2.0 * np.pi * source_f0 / c0
 
-# define axis
-x_max = Nx * dx
+# define the position vectors
+x_ref = np.arange(0.0, kgrid.x_size, kgrid.dx)
+x_max = (kgrid.Nx - 1) * kgrid.dx
 delta_x = x_max / 10000.0
 x_ref = np.arange(0.0, x_max + delta_x, delta_x)
 
@@ -210,14 +202,14 @@ fig2, (ax2a, ax2b) = plt.subplots(1, 2)
 ax2a.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(source.p_mask[:, :, Nz // 2], axis=0),
+    np.flip(source.p_mask[:, :, kgrid.Nz // 2], axis=0),
     shading="nearest",
 )
 ax2a.set(xlabel="y [mm]", ylabel="x [mm]", title="Source Mask")
 ax2b.pcolormesh(
     1e3 * np.squeeze(kgrid.y_vec),
     1e3 * np.squeeze(kgrid.x_vec),
-    np.flip(grid_weights[:, :, Nz // 2], axis=0),
+    np.flip(grid_weights[:, :, kgrid.Nz // 2], axis=0),
     shading="nearest",
 )
 ax2b.set(xlabel="y [mm]", ylabel="x [mm]", title="Off-Grid Source Weights")
