@@ -1066,11 +1066,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # add the point to the line
                 line[x - 1, y - 1] = 1
@@ -1097,11 +1097,11 @@ def make_line(
                 # find the point closest to the line
                 true_x = (poss_y - c) / m
                 diff = (poss_x - true_x) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # add the point to the line
                 line[x, y] = 1
@@ -1172,11 +1172,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x < 0) or (y > grid_size.y - 1):
@@ -1216,11 +1216,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x < 1) or (y < 1):
@@ -1260,11 +1260,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x > grid_size.x) or (y < 1):
@@ -1304,11 +1304,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x > grid_size.x) or (y > grid_size.y):
