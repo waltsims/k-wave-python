@@ -549,7 +549,7 @@ def make_ball(
 
     # plot results
     if plot_ball:
-        _, scale, prefix, _ = scale_SI(np.max(segment))
+        _, scale, prefix, _ = scale_SI(np.max(ball))
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         ax.scatter(ball[0] * scale, ball[1] * scale, ball[2] * scale)
