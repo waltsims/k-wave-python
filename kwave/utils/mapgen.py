@@ -2346,8 +2346,8 @@ def make_sphere(
         and optional flags to plot the sphere and/or return a binary mask.
 
     Args:
-        grid_size: The size of the grid (assumed to be cubic).
-        radius: The radius of the sphere.
+        grid_size: The size of the grid (assumed to be three dimensional).
+        radius: The radius of the sphere in grid points
         plot_sphere: Whether to plot the sphere (default: False).
         binary: Whether to return a binary mask (default: False).
 
@@ -2428,7 +2428,14 @@ def make_sphere(
 
     # plot results
     if plot_sphere:
-        raise NotImplementedError
+        # create the figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(sphere[0], sphere[1], sphere[2], marker='s', c='black', opacity=0.9)
+        ax.set_box_aspect([1, 1, 1])
+        plt.grid(True)
+        plt.show()
+        
     return sphere
 
 
@@ -2457,7 +2464,6 @@ def make_spherical_section(
 
     Raises:
         ValueError: If the width is not an odd number.
-        NotImplementedError: Plotting not currently supported.
     """
     use_spherical_sections = True
 
@@ -2570,7 +2576,13 @@ def make_spherical_section(
 
     # plot if required
     if plot_section:
-        raise NotImplementedError
+        # create the figure
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(ss[0], ss[1], ss[2], marker='s', c='black', opacity=0.9)
+        ax.set_box_aspect([1, 1, 1])
+        plt.grid(True)
+        plt.show()
 
     return ss, dist_map
 
@@ -2651,6 +2663,19 @@ def make_cart_rect(
 
     # Shift the rectangle to the appropriate centre
     rect = p0 + np.expand_dims(np.array(rect_pos), axis=1)
+
+    if plot_rect:
+        # create the figure
+        fig = plt.figure()
+        if len(rect_pos) == 3:
+            ax = fig.add_subplot(111, projection="3d")
+            ax.scatter(rect[0], rect[1], rect[2], marker='s', c='black', opacity=0.9)
+        if len(rect_pos) == 2:
+            ax = fig.add_subplot(111)
+            ax.scatter(rect[1, :], rect[0, :], marker='s', c='black', opacity=0.9)
+            ax.invert_yaxis()
+        plt.grid(True)
+        plt.show()
 
     return rect
 
