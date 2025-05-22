@@ -2579,7 +2579,7 @@ def make_spherical_section(
         # create the figure
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(ss[0], ss[1], ss[2], marker='s', c='black', opacity=0.9)
+        ax.scatter(ss[0], ss[1], ss[2], marker='s', c='black', alpha=0.9)
         ax.set_box_aspect([1, 1, 1])
         plt.grid(True)
         plt.show()
@@ -2669,10 +2669,10 @@ def make_cart_rect(
         fig = plt.figure()
         if len(rect_pos) == 3:
             ax = fig.add_subplot(111, projection="3d")
-            ax.scatter(rect[0], rect[1], rect[2], marker='s', c='black', opacity=0.9)
+            ax.scatter(rect[0], rect[1], rect[2], marker='s', c='black', alpha=0.9)
         if len(rect_pos) == 2:
             ax = fig.add_subplot(111)
-            ax.scatter(rect[1, :], rect[0, :], marker='s', c='black', opacity=0.9)
+            ax.scatter(rect[1, :], rect[0, :], marker='s', c='black', alpha=0.9)
             ax.invert_yaxis()
         plt.grid(True)
         plt.show()
