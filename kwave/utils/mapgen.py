@@ -549,8 +549,16 @@ def make_ball(
 
     # plot results
     if plot_ball:
-        raise NotImplementedError
-        # voxelPlot(double(ball))
+        _, scale, prefix, _ = scale_SI(np.max(segment))
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(ball[0] * scale, ball[1] * scale, ball[2] * scale)
+        ax.set_xlabel("[" + prefix + "m]")
+        ax.set_ylabel("[" + prefix + "m]")
+        ax.set_zlabel("[" + prefix + "m]")
+        ax.set_box_aspect([1, 1, 1])
+        plt.grid(True)
+        plt.show()
     return ball
 
 
@@ -715,7 +723,12 @@ def make_disc(grid_size: Vector, center: Vector, radius, plot_disc=False) -> kt.
 
     # create the figure
     if plot_disc:
-        raise NotImplementedError
+        _, ax = plt.subplots(1, 1)
+        ax.imshow(disc)
+        ax.set_aspect('auto', adjustable='box')
+        ax.yaxis.set_inverted(True)
+        plt.show()
+
     return disc
 
 
