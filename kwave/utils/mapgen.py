@@ -4,6 +4,7 @@ import warnings
 from math import floor
 
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import numpy as np
 import scipy
 from beartype import beartype as typechecker
@@ -2430,8 +2431,9 @@ def make_sphere(
     if plot_sphere:
         # create the figure
         fig = plt.figure()
+        cmap = cm.get_cmap('viridis', np.shape(sphere)[0])
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(sphere[0], sphere[1], sphere[2], marker='s', c='black', opacity=0.9)
+        ax.scatter(sphere[0], sphere[1], sphere[2], marker='s', cmap=cmap, alpha=0.9)
         ax.set_box_aspect([1, 1, 1])
         plt.grid(True)
         plt.show()
@@ -2667,12 +2669,13 @@ def make_cart_rect(
     if plot_rect:
         # create the figure
         fig = plt.figure()
+        cmap = cm.get_cmap('viridis', np.shape(rect)[0])
         if len(rect_pos) == 3:
             ax = fig.add_subplot(111, projection="3d")
-            ax.scatter(rect[0], rect[1], rect[2], marker='s', c='black', alpha=0.9)
+            ax.scatter(rect[0], rect[1], rect[2], marker='s', cmap=cmap, alpha=0.9)
         if len(rect_pos) == 2:
             ax = fig.add_subplot(111)
-            ax.scatter(rect[1, :], rect[0, :], marker='s', c='black', alpha=0.9)
+            ax.scatter(rect[1, :], rect[0, :], marker='s', cmap=cmap, alpha=0.9)
             ax.invert_yaxis()
         plt.grid(True)
         plt.show()
@@ -3004,7 +3007,8 @@ def make_cart_arc(
 
         # Create the figure
         plt.figure()
-        plt.plot(arc[1, :] * scale, arc[0, :] * scale, "b.")
+        cmap = cmap = cm.get_cmap('viridis', np.shape(arc)[0])
+        plt.scatter(arc[1, :] * scale, arc[0, :] * scale, marker='s', cmap=cmap, opacity=0.9)
         plt.gca().invert_yaxis()
         plt.xlabel(f"y-position [{prefix}m]")
         plt.ylabel(f"x-position [{prefix}m]")
