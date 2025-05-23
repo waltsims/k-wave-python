@@ -1,17 +1,17 @@
 import logging
-import math
 import warnings
 from math import floor
 
-import kwave.utils.typing as kt
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
 from beartype import beartype as typechecker
 from beartype.typing import List, Literal, Optional, Tuple, Union, cast
 from jaxtyping import Complex, Float, Int, Integer, Real
-from scipy import optimize
+from scipy.optimize import fmin
 from scipy.spatial.transform import Rotation
+from scipy.special import jv 
+
+import kwave.utils.typing as kt
 
 from ..data import Vector
 from .conversion import db2neper, neper2db
@@ -2773,7 +2773,7 @@ def focused_bowl_oneil(
         Z = k * lateral_positions * diameter / (2 * radius)
         # TODO: this should work
         # assert np.all(Z) > 0, 'Z must be greater than 0'
-        lateral_pressure = 2.0 * density * sound_speed * velocity * k * h * scipy.special.jv(1, Z) / Z
+        lateral_pressure = 2.0 * density * sound_speed * velocity * k * h * jv(1, Z) / Z
 
         # replace origin with limit
         lateral_pressure[lateral_positions == 0] = density * sound_speed * velocity * k * h
