@@ -128,12 +128,12 @@ def make_cart_disc(
 
         # create the figure
         fig = plt.figure()
-        cmap = plt.get_cmap('viridis', np.shape(disc)[0])
+        cmap = plt.get_cmap('viridis', np.shape(disc)[1])
         
         if len(disc_pos) == 2:
             ax = fig.add_subplot(111)
             ax.plot(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
-                     c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
+                     c=np.arange(np.shape(disc)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.invert_yaxis()
             ax.xlabel(f"y-position [{prefix}m]")
             ax.ylabel(f"x-position [{prefix}m]")
@@ -143,7 +143,7 @@ def make_cart_disc(
         else:
             ax = fig.add_subplot(111, projection="3d")
             ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, marker='.', 
-                      c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
+                      c=np.arange(np.shape(disc)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.set_xlabel(f"[{prefix}m]")
             ax.set_ylabel(f"[{prefix}m]")
             ax.set_zlabel(f"[{prefix}m]")
@@ -225,7 +225,7 @@ def make_cart_bowl(
         cmap = plt.get_cmap('viridis', np.shape(bowl)[1])
         ax = fig.add_subplot(111, projection="3d")
         ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale, marker='.', 
-                   c=np.arange(np.shape(bowl)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
+                   c=np.arange(np.shape(bowl)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
         ax.set_xlabel("[" + prefix + unit + "]")
         ax.set_ylabel("[" + prefix + unit + "]")
         ax.set_zlabel("[" + prefix + unit + "]")
