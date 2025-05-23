@@ -2,7 +2,6 @@ import logging
 import warnings
 from math import ceil, floor
 
-import kwave.utils.typing as kt
 import matplotlib.pyplot as plt
 import numpy as np
 from beartype import beartype as typechecker
@@ -12,7 +11,7 @@ from scipy.optimize import fmin
 from scipy.spatial.transform import Rotation
 from scipy.special import jv
 
-
+import kwave.utils.typing as kt
 
 from ..data import Vector
 from .conversion import db2neper, neper2db
