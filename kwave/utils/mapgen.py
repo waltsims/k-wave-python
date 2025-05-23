@@ -132,7 +132,7 @@ def make_cart_disc(
         
         if len(disc_pos) == 2:
             ax = fig.add_subplot(111)
-            ax.plot(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
+            ax.scatter(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
                      c=np.arange(np.shape(disc)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.invert_yaxis()
             ax.xlabel(f"y-position [{prefix}m]")
@@ -142,7 +142,7 @@ def make_cart_disc(
             ax.box(True)
         else:
             ax = fig.add_subplot(111, projection="3d")
-            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, marker='.', 
+            ax.scatter(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, marker='.', 
                       c=np.arange(np.shape(disc)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.set_xlabel(f"[{prefix}m]")
             ax.set_ylabel(f"[{prefix}m]")
@@ -3013,8 +3013,8 @@ def make_cart_arc(
 
         # Create the figure
         plt.figure()
-        cmap = plt.get_cmap('viridis', np.shape(arc)[0])
-        plt.scatter(arc[1, :] * scale, arc[0, :] * scale, marker='s', c=np.arange(np.shape(arc)[0]), 
+        cmap = plt.get_cmap('viridis', np.shape(arc)[1])
+        plt.scatter(arc[1, :] * scale, arc[0, :] * scale, marker='s', c=np.arange(np.shape(arc)[1]), 
                     cmap=cmap, alpha=0.9, edgecolor=None)
         plt.gca().invert_yaxis()
         plt.xlabel(f"y-position [{prefix}m]")
