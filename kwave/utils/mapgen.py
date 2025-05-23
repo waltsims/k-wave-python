@@ -194,9 +194,8 @@ def make_cart_bowl(
 
     # check for infinite radius of curvature, and call makeCartDisc instead
     if np.isinf(radius):
-        # bowl = make_cart_disc(bowl_pos, diameter / 2, focus_pos, num_points, plot_bowl)
-        # return bowl
-        raise NotImplementedError("make_cart_disc")
+        bowl = make_cart_disc(bowl_pos, diameter / 2, focus_pos, num_points, plot_bowl)
+        return bowl
 
     # compute arc angle from chord (ref: https://en.wikipedia.org/wiki/Chord_(geometry))
     varphi_max = np.arcsin(diameter / (2 * radius))
@@ -223,11 +222,12 @@ def make_cart_bowl(
     if plot_bowl is True:
         # select suitable axis scaling factor
         _, scale, prefix, unit = scale_SI(np.max(bowl))
-
         # create the figure
         fig = plt.figure()
+        cmap = plt.get_cmap('viridis', np.shape(bowl)[1])
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale)
+        ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale, marker='.', 
+                   c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
         ax.set_xlabel("[" + prefix + unit + "]")
         ax.set_ylabel("[" + prefix + unit + "]")
         ax.set_zlabel("[" + prefix + unit + "]")
