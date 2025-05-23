@@ -1,6 +1,6 @@
 import logging
 import warnings
-from math import floor
+from math import floor, ceil
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +16,7 @@ import kwave.utils.typing as kt
 from ..data import Vector
 from .conversion import db2neper, neper2db
 from .data import scale_SI
-from .math import Rx, Ry, Rz, compute_linear_transform, cosd, sind
+from .math import compute_linear_transform, cosd, sind
 from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
@@ -321,7 +321,7 @@ def fit_power_law_params(a0: float, y: float, c0: float, f_min: float, f_max: fl
 
         return absorption_error
 
-    a0_np_fit, y_fit = optimize.fmin(abs_func, [a0_np, y])
+    a0_np_fit, y_fit = fmin(abs_func, [a0_np, y])
 
     a0_fit = neper2db(a0_np_fit, y_fit)
 
@@ -2622,8 +2622,8 @@ def make_cart_rect(
     """
 
     # Find number of points in along each axis
-    npts_x = math.ceil(np.sqrt(num_points * Lx / Ly))
-    npts_y = math.ceil(num_points / npts_x)
+    npts_x = ceil(np.sqrt(num_points * Lx / Ly))
+    npts_y = ceil(num_points / npts_x)
 
     # Recalculate the true number of points
     num_points = npts_x * npts_y
