@@ -28,7 +28,7 @@ from .tictoc import TicToc
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
 PACKING_NUMBER = 7  # 2*pi
 
-
+@typechecker
 def make_cart_disc(
     disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False, use_spiral: bool = False
 ) -> np.ndarray:
@@ -570,10 +570,13 @@ def make_ball(
 
 @typechecker
 def make_cart_sphere(
-    radius: Union[float, int], num_points: int, center_pos: Vector = Vector([0, 0, 0]), plot_sphere: bool = False
+    radius: Union[float, int], 
+    num_points: int, 
+    center_pos: Optional[Union[Real[kt.ScalarLike, "3"], List, Integer[np.ndarray, "3"], Float[np.ndarray, 3]]] = np.zeros((3,)), 
+    plot_sphere: bool = False
 ) -> Float[np.ndarray, "3 NumPoints"]:
     """
-    Cart_sphere creates a set of points in Cartesian coordinates defining a sphere.
+    Creates a set of points in Cartesian coordinates defining a sphere.
 
     Args:
         radius: the radius of the sphere.
@@ -621,7 +624,7 @@ def make_cart_sphere(
 
     return sphere.squeeze()
 
-
+@typechecker
 def make_cart_circle(
     radius: float, num_points: int, center_pos: Vector = Vector([0, 0]), arc_angle: float = 2 * np.pi, plot_circle: bool = False
 ) -> Float[np.ndarray, "2 NumPoints"]:
@@ -2951,7 +2954,7 @@ def make_cart_arc(
     plot_arc: bool = False,
 ) -> Float[np.ndarray, "2 NumPoints"]:
     """
-    make_cart_arc creates a 2 x num_points array of the Cartesian
+    Creates a 2 x num_points array of the Cartesian
     coordinates of points evenly distributed over an arc. The midpoint of
     the arc is set by arc_pos. The orientation of the arc is set by
     focus_pos, which corresponds to any point on the axis of the arc
