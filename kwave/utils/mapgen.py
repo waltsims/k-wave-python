@@ -144,7 +144,7 @@ def make_cart_disc(
         else:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
-            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, , marker='.', 
+            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, marker='.', 
                       c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.set_xlabel(f"[{prefix}m]")
             ax.set_ylabel(f"[{prefix}m]")
