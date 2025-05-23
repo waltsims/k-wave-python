@@ -30,7 +30,8 @@ PACKING_NUMBER = 7  # 2*pi
 
 @typechecker
 def make_cart_disc(
-    disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, plot_disc: bool = False, use_spiral: bool = False
+    disc_pos: np.ndarray, radius: float, focus_pos: np.ndarray, num_points: int, 
+    plot_disc: Optional[Union[bool, Literal[0, 1]]] = False, use_spiral: Optional[Union[bool, Literal[0, 1]]] = False
 ) -> np.ndarray:
     """
     Create evenly distributed Cartesian points covering a disc.
