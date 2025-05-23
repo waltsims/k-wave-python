@@ -572,7 +572,7 @@ def make_ball(
 def make_cart_sphere(
     radius: Union[float, int], 
     num_points: int, 
-    center_pos: Optional[Union[Real[kt.ScalarLike, "3"], List, Integer[np.ndarray, "3"], Float[np.ndarray, 3]]] = np.zeros((3,)), 
+    center_pos: Optional[Union[Real[kt.ScalarLike, "3"], List, Int[np.ndarray, "3"], Float[np.ndarray, 3]]] = np.zeros((3,)), 
     plot_sphere: bool = False
 ) -> Float[np.ndarray, "3 NumPoints"]:
     """
