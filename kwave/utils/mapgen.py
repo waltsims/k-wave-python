@@ -3,17 +3,15 @@ import math
 import warnings
 from math import floor
 
+import kwave.utils.typing as kt
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from beartype import beartype as typechecker
-from beartype.typing import List, Optional, Tuple, Union, cast, Literal
+from beartype.typing import List, Literal, Optional, Tuple, Union, cast
 from jaxtyping import Complex, Float, Int, Integer, Real
 from scipy import optimize
 from scipy.spatial.transform import Rotation
-
-import kwave.utils.typing as kt
-from kwave.utils.math import compute_linear_transform, compute_rotation_between_vectors
 
 from ..data import Vector
 from .conversion import db2neper, neper2db
@@ -22,6 +20,7 @@ from .math import Rx, Ry, Rz, compute_linear_transform, cosd, sind
 from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
 from .matrix import max_nd
 from .tictoc import TicToc
+
 
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
@@ -130,20 +129,20 @@ def make_cart_disc(
         _, scale, prefix, unit = scale_SI(np.max(disc))
 
         # create the figure
-        plt.figure()
+        fig = plt.figure()
         cmap = plt.get_cmap('viridis', np.shape(disc)[0])
         
         if len(disc_pos) == 2:
-            plt.plot(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
+            ax = fig.add_subplot(111)
+            ax.plot(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
                      c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
-            plt.gca().invert_yaxis()
-            plt.xlabel(f"y-position [{prefix}m]")
-            plt.ylabel(f"x-position [{prefix}m]")
-            plt.axis("equal")
+            ax.invert_yaxis()
+            ax.xlabel(f"y-position [{prefix}m]")
+            ax.ylabel(f"x-position [{prefix}m]")
+            ax.axis("equal")
             ax.grid(True)
             ax.box(True)
         else:
-            fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
             ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, marker='.', 
                       c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
@@ -228,7 +227,7 @@ def make_cart_bowl(
         cmap = plt.get_cmap('viridis', np.shape(bowl)[1])
         ax = fig.add_subplot(111, projection="3d")
         ax.scatter(bowl[0, :] * scale, bowl[1, :] * scale, bowl[2, :] * scale, marker='.', 
-                   c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
+                   c=np.arange(np.shape(bowl)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
         ax.set_xlabel("[" + prefix + unit + "]")
         ax.set_ylabel("[" + prefix + unit + "]")
         ax.set_zlabel("[" + prefix + unit + "]")
@@ -2681,10 +2680,10 @@ def make_cart_rect(
         cmap = plt.get_cmap('viridis', np.shape(rect)[1])
         if len(rect_pos) == 3:
             ax = fig.add_subplot(111, projection="3d")
-            ax.scatter(data[0], data[1], data[2], marker='s', c=np.arange(np.shape(data)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
+            ax.scatter(rect[0], rect[1], rect[2], marker='s', c=np.arange(np.shape(rect)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
         if len(rect_pos) == 2:
             ax = fig.add_subplot(111)
-            ax.scatter(rect[1, :], rect[0, :], marker='s', c=np.arange(np.shape(data)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
+            ax.scatter(rect[1, :], rect[0, :], marker='s', c=np.arange(np.shape(rect)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.invert_yaxis()
         plt.grid(True)
         plt.show()
