@@ -20,7 +20,6 @@ from kwave.utils.matlab import ind2sub, matlab_assign, matlab_find, sub2ind
 from kwave.utils.matrix import max_nd
 from kwave.utils.tictoc import TicToc
 
-
 # GLOBALS
 # define literals (ref: http://www.wolframalpha.com/input/?i=golden+angle)
 GOLDEN_ANGLE = 2.39996322972865332223155550663361385312499901105811504
