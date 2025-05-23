@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from beartype import beartype as typechecker
-from beartype.typing import List, Optional, Tuple, Union, cast
+from beartype.typing import List, Optional, Tuple, Union, cast, Literal
 from jaxtyping import Complex, Float, Int, Integer, Real
 from scipy import optimize
 from scipy.spatial.transform import Rotation
