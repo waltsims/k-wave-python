@@ -12,14 +12,13 @@ from scipy.spatial.transform import Rotation
 from scipy.special import jv
 
 import kwave.utils.typing as kt
-
-from ..data import Vector
-from .conversion import db2neper, neper2db
-from .data import scale_SI
-from .math import compute_linear_transform, cosd, sind
-from .matlab import ind2sub, matlab_assign, matlab_find, sub2ind
-from .matrix import max_nd
-from .tictoc import TicToc
+from kwave.data import Vector
+from kwave.utils.conversion import db2neper, neper2db
+from kwave.utils.data import scale_SI
+from kwave.utils.math import compute_linear_transform, cosd, sind
+from kwave.utils.matlab import ind2sub, matlab_assign, matlab_find, sub2ind
+from kwave.utils.matrix import max_nd
+from kwave.utils.tictoc import TicToc
 
 
 # GLOBALS
