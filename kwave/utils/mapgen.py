@@ -113,7 +113,7 @@ def make_cart_disc(
     # specified disc
     if len(disc_pos) == 3:
         # check the focus position isn't coincident with the disc position
-        if all(disc_pos == focus_pos):
+        if np.all(np.isclose(np.array(disc_pos), np.array(focus_pos))):
             raise ValueError("The focus_pos must be different from the disc_pos.")
 
         # compute rotation matrix and apply
@@ -129,17 +129,23 @@ def make_cart_disc(
         _, scale, prefix, unit = scale_SI(np.max(disc))
 
         # create the figure
+        plt.figure()
+        cmap = plt.get_cmap('viridis', np.shape(disc)[0])
+        
         if len(disc_pos) == 2:
-            plt.figure()
-            plt.plot(disc[1, :] * scale, disc[0, :] * scale, ".")
+            plt.plot(disc[1, :] * scale, disc[0, :] * scale, marker='.', 
+                     c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
             plt.gca().invert_yaxis()
             plt.xlabel(f"y-position [{prefix}m]")
             plt.ylabel(f"x-position [{prefix}m]")
             plt.axis("equal")
+            ax.grid(True)
+            ax.box(True)
         else:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
-            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, ".")
+            ax.plot3D(disc[0, :] * scale, disc[1, :] * scale, disc[2, :] * scale, , marker='.', 
+                      c=np.arange(np.shape(disc)[0]), cmap=cmap, alpha=0.9, edgecolor=None)
             ax.set_xlabel(f"[{prefix}m]")
             ax.set_ylabel(f"[{prefix}m]")
             ax.set_zlabel(f"[{prefix}m]")
