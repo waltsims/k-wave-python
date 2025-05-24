@@ -51,7 +51,7 @@ class SimulationExecutionOptions:
         self.checkpoint_timesteps = checkpoint_timesteps
         self.checkpoint_file = checkpoint_file
 
-        self._validate_checkpoint_options()
+        self.validate()
 
     def _validate_checkpoint_options(self):
         # Checkpointing parameters are set
@@ -65,6 +65,20 @@ class SimulationExecutionOptions:
         # Checkpoint file is set but no checkpointing parameters are set
         if self.checkpoint_file is not None and self.checkpoint_interval is None and self.checkpoint_timesteps is None:
             raise ValueError("`checkpoint_interval` or `checkpoint_timesteps` must be set when `checkpoint_file` is set.")
+
+    def validate(self):
+        """Validate all simulation options before running a simulation.
+
+        This method should be called before running a simulation to ensure all options
+        are in a valid state. It validates:
+        1. Checkpoint configuration (if any checkpoint options are set)
+
+        Raises:
+            ValueError: If any option configuration is invalid
+        """
+        # Validate checkpoint configuration if any checkpoint options are set
+        if any(x is not None for x in [self.checkpoint_interval, self.checkpoint_timesteps, self.checkpoint_file]):
+            self._validate_checkpoint_options()
 
     @property
     def num_threads(self) -> Union[int, str]:
