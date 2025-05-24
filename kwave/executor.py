@@ -119,7 +119,6 @@ class Executor:
         # # Combine the sensor data if using a kWaveTransducer as a sensor
         # if isinstance(sensor, kWaveTransducer):
         #     sensor_data['p'] = sensor.combine_sensor_data(sensor_data['p'])
-        #
         # # Compute the intensity outputs
         # if any(key.startswith(('I_avg', 'I')) for key in sensor.get('record', [])):
         #     flags = {
