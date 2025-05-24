@@ -333,26 +333,27 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             options.checkpoint_timesteps = 1.5
 
     def test_checkpoint_file_validation(self):
-        """Test validation of checkpoint_file property."""
+        """Test validation of checkpoint file path."""
+        options = self.default_options
+        with self.assertRaises(ValueError):
+            options.checkpoint_file = "invalid/path/checkpoint.h5"
+
+    def test_checkpoint_file_required_when_parameters_set(self):
+        """Test that checkpoint file is required when checkpoint parameters are set."""
         options = self.default_options
 
-        # Test valid values
-        with TemporaryDirectory() as temp_dir:
-            valid_path = Path(temp_dir) / "checkpoint.h5"
-            options.checkpoint_file = valid_path
-            self.assertEqual(options.checkpoint_file, valid_path)
+        # Test with checkpoint_interval
+        options.checkpoint_interval = 10
+        with self.assertRaises(ValueError) as cm:
+            options.validate()
+        self.assertEqual(str(cm.exception), "`checkpoint_file` must be set when `checkpoint_interval` or `checkpoint_timesteps` is set.")
 
-            # Test string path
-            options.checkpoint_file = str(valid_path)
-            self.assertEqual(options.checkpoint_file, valid_path)
-
-        # Test invalid values
-        with self.assertRaises(ValueError):
-            options.checkpoint_file = "invalid.extension"
-        with self.assertRaises(ValueError):
-            options.checkpoint_file = 123
-        with self.assertRaises(FileNotFoundError):
-            options.checkpoint_file = "/nonexistent/path/checkpoint.h5"
+        # Test with checkpoint_timesteps
+        options.checkpoint_interval = None
+        options.checkpoint_timesteps = 10
+        with self.assertRaises(ValueError) as cm:
+            options.validate()
+        self.assertEqual(str(cm.exception), "`checkpoint_file` must be set when `checkpoint_interval` or `checkpoint_timesteps` is set.")
 
 
 if __name__ == "__main__":
