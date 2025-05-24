@@ -58,7 +58,7 @@ URL_DICT = {
     },
     "darwin": {
         "cuda": [],
-        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc2/{EXECUTABLE_PREFIX}OMP"],
+        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc3/{EXECUTABLE_PREFIX}OMP"],
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
