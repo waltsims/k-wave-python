@@ -27,7 +27,7 @@ dependencies = [
     "h5py==3.13.0",
     "scipy==1.15.2",
     "opencv-python==4.11.0.86",
-    "deepdiff==8.4.2",
+    "deepdiff==8.5.0",
     "numpy>=1.22.2,<2.3.0",
     "matplotlib==3.10.3",
     "beartype==0.20.2",
