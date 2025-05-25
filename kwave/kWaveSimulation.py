@@ -1,5 +1,6 @@
 import logging
 import warnings
+from copy import deepcopy
 from dataclasses import dataclass
 
 import numpy as np
@@ -38,8 +39,10 @@ class kWaveSimulation(object):
         self.precision = None
         self.kgrid = kgrid
         self.medium = medium
-        self.source = source
-        self.sensor = sensor
+        self.original_source = source
+        self.original_sensor = sensor
+        self.source = deepcopy(source)
+        self.sensor = deepcopy(sensor)
         self.options = simulation_options
 
         # =========================================================================
