@@ -39,7 +39,7 @@ test: $(COLLECTED_VALUES_DIR)
 # Includes fallback behavior if MATLAB is not available
 $(COLLECTED_VALUES_DIR): 
 	@echo "Running MATLAB script to collect values..."; \
-	if [ -f "$(MATLAB)" ]; then \
+	if [ -x "$(MATLAB)" ]; then \
 		$(MATLAB) -batch "run('$(MATLAB_SCRIPT)');"; \
 	else \
 		echo "MATLAB not found. Skipping MATLAB data collection."; \
