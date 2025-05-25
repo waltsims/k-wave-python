@@ -301,12 +301,12 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
 
         # Test valid values
-        options.checkpoint_interval = 0
-        self.assertEqual(options.checkpoint_interval, 0)
         options.checkpoint_interval = 100
         self.assertEqual(options.checkpoint_interval, 100)
 
         # Test invalid values
+        with self.assertRaises(ValueError):
+            options.checkpoint_interval = 0
         with self.assertRaises(ValueError):
             options.checkpoint_interval = -1
         with self.assertRaises(ValueError):
