@@ -209,7 +209,7 @@ class SimulationExecutionOptions:
     @checkpoint_interval.setter
     def checkpoint_interval(self, value: Optional[int]):
         if value is not None:
-            if not isinstance(value, int) or value < 0:
+            if not isinstance(value, int) or value <= 0:
                 raise ValueError("Checkpoint interval must be a positive integer in seconds")
         self._checkpoint_interval = value
 
