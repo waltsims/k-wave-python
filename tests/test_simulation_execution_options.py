@@ -339,7 +339,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         # Test with non-existent directory
         with self.assertRaises(FileNotFoundError) as cm:
             options.checkpoint_file = "invalid/path/checkpoint.h5"
-        self.assertEqual(str(cm.exception), "Checkpoint folder invalid/path does not exist.")
+        expected_folder = str(Path("invalid") / "path")
+        self.assertEqual(str(cm.exception), f"Checkpoint folder {expected_folder} does not exist.")
 
         # Test with temporary directory
         with TemporaryDirectory() as temp_dir:
