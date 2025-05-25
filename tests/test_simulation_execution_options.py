@@ -335,8 +335,29 @@ class TestSimulationExecutionOptions(unittest.TestCase):
     def test_checkpoint_file_validation(self):
         """Test validation of checkpoint file path."""
         options = self.default_options
-        with self.assertRaises(ValueError):
+
+        # Test with non-existent directory
+        with self.assertRaises(FileNotFoundError) as cm:
             options.checkpoint_file = "invalid/path/checkpoint.h5"
+        self.assertEqual(str(cm.exception), "Checkpoint folder invalid/path does not exist.")
+
+        # Test with temporary directory
+        with TemporaryDirectory() as temp_dir:
+            # Test invalid file extension
+            invalid_file = Path(temp_dir) / "checkpoint.txt"
+            with self.assertRaises(ValueError) as cm:
+                options.checkpoint_file = invalid_file
+            self.assertEqual(str(cm.exception), f"Checkpoint file {invalid_file} must have .h5 extension.")
+
+            # Test valid file path
+            valid_file = Path(temp_dir) / "checkpoint.h5"
+            options.checkpoint_file = valid_file
+            self.assertEqual(options.checkpoint_file, valid_file)
+
+        # Test invalid type
+        with self.assertRaises(ValueError) as cm:
+            options.checkpoint_file = 123
+        self.assertEqual(str(cm.exception), "Checkpoint file must be a string or Path object.")
 
     def test_checkpoint_file_required_when_parameters_set(self):
         """Test that checkpoint file is required when checkpoint parameters are set."""
