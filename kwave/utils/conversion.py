@@ -116,6 +116,7 @@ def grid2cart(input_kgrid: kWaveGrid, grid_selection: ndarray) -> Tuple[ndarray,
     grid_data = np.array((grid_selection != 0), dtype=bool)
     cart_data = np.zeros((input_kgrid.dim, np.sum(grid_data)))
 
+    # Use C-ordering consistently throughout Python codebase
     if input_kgrid.dim > 0:
         cart_data[0, :] = input_kgrid.x[grid_data]
     if input_kgrid.dim > 1:
@@ -242,8 +243,8 @@ def cart2grid(
         for data_index in range(data_x.size):
             grid_data[data_x[data_index], data_y[data_index]] = int(data_index)
 
-        # extract reordering index
-        reorder_index = grid_data.flatten(order="F")[grid_data.flatten(order="F") != -1]
+        # extract reordering index using C-ordering consistently
+        reorder_index = grid_data.flatten(order="C")[grid_data.flatten(order="C") != -1]
         reorder_index = reorder_index[:, None] + 1  # [N] => [N, 1]
 
     elif kgrid.dim == 3:
@@ -283,8 +284,8 @@ def cart2grid(
         for data_index in range(data_x.size):
             grid_data[data_x[data_index], data_y[data_index], data_z[data_index]] = point_index[data_index]
 
-        # extract reordering index
-        reorder_index = grid_data.flatten(order="F")[grid_data.flatten(order="F") != -1]
+        # extract reordering index using C-ordering consistently
+        reorder_index = grid_data.flatten(order="C")[grid_data.flatten(order="C") != -1]
         reorder_index = reorder_index[:, None, None]  # [N] => [N, 1, 1]
     else:
         raise ValueError("Input cart_data must be a 1, 2, or 3 dimensional matrix.")

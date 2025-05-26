@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 import h5py
+import numpy as np
 
 import kwave
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
@@ -108,7 +109,14 @@ class Executor:
         with h5py.File(output_filename, "r") as output_file:
             sensor_data = {}
             for key in output_file.keys():
-                sensor_data[key] = output_file[f"/{key}"][:].squeeze()
+                data = output_file[f"/{key}"][:].squeeze()
+                # Data is stored transposed due to io.py write_matrix - undo this and ensure C-order
+                if data.ndim == 3:
+                    data = np.transpose(data, [2, 1, 0])  # Undo 3D transpose from write_matrix
+                elif data.ndim == 2:
+                    data = data.T  # Undo 2D transpose from write_matrix
+                # Ensure all data is in C-order (contiguous) layout
+                sensor_data[key] = np.ascontiguousarray(data, dtype=data.dtype)
 
         #     if self.simulation_options.cuboid_corners:
         #         sensor_data = [output_file[f'/p/{index}'][()] for index in range(1, len(key['mask']) + 1)]
