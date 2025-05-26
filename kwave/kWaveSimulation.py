@@ -1520,7 +1520,7 @@ class kWaveSimulation(object):
             return True
 
         # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
-        if pml_size := self.options.pml_size is None:
+        if (pml_size := self.options.pml_size) is None:
             return False
 
         if len(pml_size) == 1:
