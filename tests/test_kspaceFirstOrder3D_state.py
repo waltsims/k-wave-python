@@ -59,10 +59,10 @@ def make_simulation_parameters(directory: Path):
     checkpoint_timesteps = 300
 
     execution_options = SimulationExecutionOptions(
-        is_gpu_simulation=False, # Assuming CPU for basic test
+        is_gpu_simulation=False,  # Assuming CPU for basic test
         checkpoint_file=checkpoint_filename,
         checkpoint_timesteps=checkpoint_timesteps,
-        verbose_level=0 # Keep test output clean
+        verbose_level=0,  # Keep test output clean
     )
     return kgrid, medium, source, sensor, simulation_options, execution_options
 
@@ -76,12 +76,20 @@ def test_kspaceFirstOrder3D_input_state_preservation():
         original_source_p0 = deepcopy(source.p0)
         original_sensor_mask = deepcopy(sensor.mask)
         
+
         # If source.p or source.u were time-varying, store their initial states too.
         # For this test, p0 is the main source attribute.
 
         # First run
         try:
-            _ = kspaceFirstOrder3D(kgrid, medium, source, sensor, simulation_options, execution_options)
+            _ = kspaceFirstOrder3D(
+                kgrid=kgrid,
+                medium=medium,
+                source=source,
+                sensor=sensor,
+                simulation_options=simulation_options,
+                execution_options=execution_options,
+            )
         except Exception as e:
             pytest.fail(f"First call to kspaceFirstOrder3D failed: {e}")
 
@@ -95,13 +103,20 @@ def test_kspaceFirstOrder3D_input_state_preservation():
         simulation_options_run2 = deepcopy(simulation_options)
         simulation_options_run2.input_filename = tmpdir / "kwave_input_run2.h5"
         simulation_options_run2.output_filename = tmpdir / "kwave_output_run2.h5"
-        
+
         execution_options_run2 = deepcopy(execution_options)
-        if execution_options_run2.checkpoint_file: # Only change if it exists
+        if execution_options_run2.checkpoint_file:  # Only change if it exists
             execution_options_run2.checkpoint_file = tmpdir / "kwave_checkpoint_run2.h5"
 
         try:
-            _ = kspaceFirstOrder3D(kgrid, medium, source, sensor, simulation_options_run2, execution_options_run2)
+            _ = kspaceFirstOrder3D(
+                kgrid=kgrid,
+                medium=medium,
+                source=source,
+                sensor=sensor,
+                simulation_options=simulation_options_run2,
+                execution_options=execution_options_run2,
+            )
         except Exception as e:
             pytest.fail(f"Second call to kspaceFirstOrder3D with original objects failed: {e}")
 
@@ -109,4 +124,3 @@ def test_kspaceFirstOrder3D_input_state_preservation():
         assert np.array_equal(source.p0, original_source_p0), "source.p0 was modified after second run"
         assert np.array_equal(sensor.mask, original_sensor_mask), "sensor.mask was modified after second run"
 
-```
