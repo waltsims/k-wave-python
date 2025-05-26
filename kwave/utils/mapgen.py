@@ -607,12 +607,15 @@ def make_cart_sphere(
     if plot_sphere:
         # select suitable axis scaling factor
         [x_sc, scale, prefix, _] = scale_SI(np.max(sphere))
-
+        
+        cmap = plt.get_cmap('viridis', np.shape(sphere)[1])
+        
         # create the figure
         plt.figure()
-        plt.style.use("seaborn-poster")
+        # plt.style.use("seaborn-poster")
         ax = plt.axes(projection="3d")
-        ax.plot3D(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, ".")
+        ax.scatter(sphere[0, :] * scale, sphere[1, :] * scale, sphere[2, :] * scale, marker='.', 
+                   c=np.arange(np.shape(sphere)[1]), cmap=cmap, alpha=0.9, edgecolor=None)
         ax.set_xlabel(f"[{prefix} m]")
         ax.set_ylabel(f"[{prefix} m]")
         ax.set_zlabel(f"[{prefix} m]")
