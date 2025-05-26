@@ -39,7 +39,7 @@ def make_simulation_parameters(directory: Path):
     # define a binary planar sensor
     sensor = kSensor()
     sensor_mask_array = np.zeros(N)
-    sensor_mask_array[0, :, :] = 1  # Corrected to be a plane for 3D
+    sensor_mask_array[0, :, :] = 1 # Corrected to be a plane for 3D
     sensor.mask = sensor_mask_array
 
     input_filename = directory / "kwave_input.h5"
@@ -47,10 +47,10 @@ def make_simulation_parameters(directory: Path):
     checkpoint_filename = directory / "kwave_checkpoint.h5"
 
     simulation_options = SimulationOptions(
-        save_to_disk=True,  # Must be true for kspaceFirstOrder3D
+        save_to_disk=True, # Must be true for kspaceFirstOrder3D
         pml_size=PML_size,
         pml_inside=False,
-        smooth_p0=False,  # p0 is already smoothed
+        smooth_p0=False, # p0 is already smoothed
         data_cast="single",
         input_filename=input_filename,
         output_filename=output_filename,
@@ -75,6 +75,7 @@ def test_kspaceFirstOrder3D_input_state_preservation():
         # Store original states of critical attributes for comparison
         original_source_p0 = deepcopy(source.p0)
         original_sensor_mask = deepcopy(sensor.mask)
+        
 
         # If source.p or source.u were time-varying, store their initial states too.
         # For this test, p0 is the main source attribute.
@@ -122,3 +123,4 @@ def test_kspaceFirstOrder3D_input_state_preservation():
         # Final check that attributes are still the same as the initial state
         assert np.array_equal(source.p0, original_source_p0), "source.p0 was modified after second run"
         assert np.array_equal(sensor.mask, original_sensor_mask), "sensor.mask was modified after second run"
+
