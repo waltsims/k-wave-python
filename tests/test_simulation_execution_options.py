@@ -1,5 +1,7 @@
 import os
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from kwave import PLATFORM
@@ -31,6 +33,8 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.verbose_level, 0)
         self.assertTrue(options.auto_chunking)
         self.assertTrue(options.show_sim_log)
+        self.assertIsNone(options.checkpoint_interval)
+        self.assertIsNone(options.checkpoint_file)
 
     def test_num_threads_setter_valid(self):
         """Test setting a valid number of threads."""
@@ -213,6 +217,113 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options_list = options.as_list(self.mock_sensor)
         options_string = options.get_options_string(self.mock_sensor)
         self.assertEqual(" ".join(options_list), options_string)
+
+    def test_as_list_with_valid_checkpoint_interval_options(self):
+        """Test the checkpoint interval options."""
+        options = self.default_options
+        options.num_threads = 1
+        options.checkpoint_interval = 10
+        options.checkpoint_file = "checkpoint.h5"
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            "--checkpoint_interval",
+            "10",
+            "--checkpoint_file",
+            "checkpoint.h5",
+            "--p_raw",
+            "--u_max",
+            "-s",
+            "10",
+        ]
+        if not PLATFORM == "windows":
+            expected_elements.insert(0, "-t")
+            expected_elements.insert(1, f"1")
+        self.assertListEqual(expected_elements, options_list)
+
+    def test_as_list_with_valid_checkpoint_timesteps_options(self):
+        """Test the checkpoint interval options."""
+        options = self.default_options
+        options.num_threads = 1
+        options.checkpoint_timesteps = 10
+        options.checkpoint_file = "checkpoint.h5"
+
+        options_list = options.as_list(self.mock_sensor)
+        expected_elements = [
+            "--checkpoint_timesteps",
+            "10",
+            "--checkpoint_file",
+            "checkpoint.h5",
+            "--p_raw",
+            "--u_max",
+            "-s",
+            "10",
+        ]
+        if not PLATFORM == "windows":
+            expected_elements.insert(0, "-t")
+            expected_elements.insert(1, f"1")
+        self.assertListEqual(expected_elements, options_list)
+
+    def test_initialization_with_invalid_checkpoint_options(self):
+        """Test initialization with invalid checkpoint options."""
+
+        # Test with valid checkpoint_file but unset checkpoint_timesteps and checkpoint_interval
+        with TemporaryDirectory() as temp_dir:
+            checkpoint_file = Path(temp_dir) / "checkpoint.h5"
+            with self.assertRaises(ValueError):
+                SimulationExecutionOptions(checkpoint_file=checkpoint_file)
+
+        # Test with invalid checkpoint_file type
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_file=12345, checkpoint_timesteps=10)
+
+        # Test with invalid checkpoint_timesteps
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_timesteps=-1, checkpoint_file="checkpoint.h5")
+
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_timesteps="not_an_integer", checkpoint_file="checkpoint.h5")
+
+        # Test with invalid checkpoint_interval
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_interval=-1, checkpoint_file="checkpoint.h5")
+
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(checkpoint_interval="not_an_integer", checkpoint_file="checkpoint.h5")
+
+        # Test with invalid checkpoint_file
+        with self.assertRaises(ValueError):
+            SimulationExecutionOptions(
+                checkpoint_interval=10,
+                checkpoint_file="checkpoint.txt",  # Wrong extension
+            )
+
+        with self.assertRaises(FileNotFoundError):
+            SimulationExecutionOptions(
+                checkpoint_interval=10,
+                checkpoint_file="nonexistent_dir/checkpoint.h5",  # Non-existent directory
+            )
+
+    def test_initialization_with_valid_checkpoint_options(self):
+        """Test initialization with valid checkpoint options."""
+        with TemporaryDirectory() as temp_dir:
+            checkpoint_file = Path(temp_dir) / "checkpoint.h5"
+
+            # Test with valid checkpoint_timesteps
+            options = SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_timesteps, 10)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
+
+            # Test with valid checkpoint_interval
+            options = SimulationExecutionOptions(checkpoint_interval=20, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_interval, 20)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
+
+            # Test with both checkpoint options - should be valid
+            options = SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_interval=20, checkpoint_file=checkpoint_file)
+            self.assertEqual(options.checkpoint_timesteps, 10)
+            self.assertEqual(options.checkpoint_interval, 20)
+            self.assertEqual(options.checkpoint_file, checkpoint_file)
 
 
 if __name__ == "__main__":
