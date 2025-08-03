@@ -21,28 +21,28 @@ Every k-Wave simulation is built from four core components that work together to
 .. grid:: 2
    :gutter: 3
 
-   .. grid-item-card:: :doc:`Grid <kwave.kgrid>`
+   .. grid-item-card:: :doc:`Grid <get_started/grid_overview>`
       :text-align: center
 
       🕸️
 
       Computational foundation defining spatial and temporal discretization
 
-   .. grid-item-card:: :doc:`Medium <kwave.kmedium>`
+   .. grid-item-card:: :doc:`Medium <get_started/medium_overview>`
       :text-align: center
 
       🌊
 
       Material properties through which acoustic waves propagate
 
-   .. grid-item-card:: :doc:`Source <kwave.ksource>`
+   .. grid-item-card:: :doc:`Source <get_started/source_overview>`
       :text-align: center
 
       📡
 
       How acoustic energy is introduced into the simulation
 
-   .. grid-item-card:: :doc:`Sensor <kwave.ksensor>`
+   .. grid-item-card:: :doc:`Sensor <get_started/sensor_overview>`
       :text-align: center
 
       🎙️

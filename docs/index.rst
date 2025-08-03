@@ -14,6 +14,10 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
    :hidden:
 
    get_started/first_simulation
+   get_started/grid_overview
+   get_started/medium_overview
+   get_started/source_overview
+   get_started/sensor_overview
    examples_guide
 
 .. toctree::
