@@ -188,22 +188,22 @@ Now that you understand the four-component structure, explore these examples to 
 
 **Beginner Examples** (start here):
 
-- :doc:`../examples/ivp_photoacoustic_waveforms/README` - See how 2D and 3D wave propagation differs
-- :doc:`../examples/us_defining_transducer/README` - Learn about ultrasound transducers
+- :ghfile:`Photoacoustic Waveforms <examples/ivp_photoacoustic_waveforms/README.md>` - See how 2D and 3D wave propagation differs
+- :ghfile:`Defining Transducers <examples/us_defining_transducer/README.md>` - Learn about ultrasound transducers
 
 **Medical Imaging Applications**:
 
-- :doc:`../examples/us_bmode_linear_transducer/README` - Full B-mode ultrasound imaging pipeline
-- :doc:`../examples/pr_2D_FFT_line_sensor/README` - Photoacoustic image reconstruction
+- :ghfile:`B-mode Linear Transducer <examples/us_bmode_linear_transducer/README.md>` - Full B-mode ultrasound imaging pipeline
+- :ghfile:`2D FFT Line Sensor <examples/pr_2D_FFT_line_sensor/README.md>` - Photoacoustic image reconstruction
 
 **Advanced Transducer Modeling**:
 
-- :doc:`../examples/at_array_as_source/README` - Complex array transducers without staircasing
-- :doc:`../examples/at_focused_bowl_3D/README` - Focused ultrasound applications
+- :ghfile:`Array as Source <examples/at_array_as_source/README.md>` - Complex array transducers without staircasing
+- :ghfile:`Focused Bowl 3D <examples/at_focused_bowl_3D/README.md>` - Focused ultrasound applications
 
 **Acoustic Field Analysis**:
 
-- :doc:`../examples/us_beam_patterns/README` - Understand beam formation and focusing
-- :doc:`../examples/sd_focussed_detector_2D/README` - Sensor directivity effects
+- :ghfile:`Beam Patterns <examples/us_beam_patterns/README.md>` - Understand beam formation and focusing
+- :ghfile:`Focused Detector 2D <examples/sd_focussed_detector_2D/README.md>` - Sensor directivity effects
 
 Each example builds on the same four-component framework but demonstrates different aspects of acoustic simulation. The key insight is that no matter how complex the application, every k-Wave simulation follows this same logical structure.
