@@ -13,6 +13,45 @@ Every k-Wave simulation requires exactly four components:
 3. **Source**: Introduces acoustic energy
 4. **Sensor**: Records simulation data
 
+The Four Components of Every Simulation
+========================================
+
+Every k-Wave simulation is built from four core components that work together to define the acoustic problem:
+
+.. grid:: 2
+   :gutter: 3
+
+   .. grid-item-card:: :doc:`Grid <kwave.kgrid>`
+      :text-align: center
+
+      🕸️
+
+      Computational foundation defining spatial and temporal discretization
+
+   .. grid-item-card:: :doc:`Medium <kwave.kmedium>`
+      :text-align: center
+
+      🌊
+
+      Material properties through which acoustic waves propagate
+
+   .. grid-item-card:: :doc:`Source <kwave.ksource>`
+      :text-align: center
+
+      📡
+
+      How acoustic energy is introduced into the simulation
+
+   .. grid-item-card:: :doc:`Sensor <kwave.ksensor>`
+      :text-align: center
+
+      🎙️
+
+      Where and what acoustic data is recorded
+
+Understanding these four components is key to mastering k-Wave simulations. Each component page provides conceptual explanations, practical examples, and API reference.
+
+
 Let's build a simple 2D simulation to see how these work together.
 
 Step 1: Create the Grid
