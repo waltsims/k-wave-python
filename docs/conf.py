@@ -23,7 +23,43 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx_mdinclude",
+    "sphinx.ext.extlinks",  # Enables :ghfile: external links
 ]
+
+# Provide a smart GitHub branch fallback for linking to example files.
+# Priority: explicit READTHEDOCS_GIT_BRANCH (when building on RTD) →
+#          CI/CD branch via GITHUB_REF_NAME →
+#          local git branch via `git rev-parse --abbrev-ref HEAD` (optional) →
+#          "main".
+import os
+import subprocess
+
+
+def _detect_current_branch() -> str:
+    """Best-effort detection of the current git branch for docs links."""
+    for env_var in ("READTHEDOCS_GIT_BRANCH", "GITHUB_REF_NAME"):
+        branch = os.getenv(env_var)
+        if branch:
+            return branch
+    # Fallback: try local git (will fail on RTD but env vars cover that)
+    try:
+        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
+        if branch:
+            return branch
+    except Exception:
+        pass
+    return "main"
+
+
+_GITHUB_BRANCH = _detect_current_branch()
+
+# Define an extlink so we can write :ghfile:`examples/foo.py` in .rst/.md
+extlinks = {
+    "ghfile": (
+        f"https://github.com/waltsims/k-wave-python/blob/{_GITHUB_BRANCH}/%s",
+        "",  # leave default prefix empty so captions can be provided inline
+    ),
+}
 
 source_suffix = [".rst", ".md"]
 templates_path = ["_templates"]

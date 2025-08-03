@@ -1,0 +1,31 @@
+name: Markdown Link Validator
+
+on:
+  pull_request:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  linkChecker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check links with lychee
+        # See https://github.com/lycheeverse/lychee-action
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Check all markdown and reStructuredText files
+          args: >-
+            --verbose
+            --no-progress
+            --max-concurrency 20
+            "**/*.md" "**/*.rst"
+          # Fail the build on any broken link
+          fail: true
+        env:
+          # Exclude localhost and badges
+          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io" 
