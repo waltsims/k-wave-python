@@ -1,4 +1,4 @@
-kwave.kspaceFirstOrder3D module
+kspaceFirstOrder3D
 ===============================
 
 .. automodule:: kwave.kspaceFirstOrder3D

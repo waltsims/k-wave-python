@@ -1,4 +1,4 @@
-kwave.kWaveSimulation module
+kWaveSimulation
 ============================
 
 .. automodule:: kwave.kWaveSimulation
