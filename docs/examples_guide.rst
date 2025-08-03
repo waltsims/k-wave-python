@@ -1,4 +1,4 @@
-Examples: Learning Path
+Examples: k-Wave-Python Step-by-Step
 =======================
 
 The k-Wave Python examples are organized to help you progress from basic wave physics to advanced applications. Each example demonstrates the four-component framework (Grid, Medium, Source, Sensor) with increasing complexity.
