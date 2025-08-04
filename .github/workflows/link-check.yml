@@ -23,9 +23,10 @@ jobs:
             --verbose
             --no-progress
             --max-concurrency 20
+            --exclude "docs/get_started/legacy_licenses/"
             "**/*.md" "**/*.rst"
           # Fail the build on any broken link
           fail: true
         env:
           # Exclude localhost and badges
-          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org/" 
+          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io" 
