@@ -1,6 +1,6 @@
 # k-Wave-python
 
-[![Support](https://dcbadge.vercel.app/api/server/Yq5Qj6D9vN?style=flat)](https://discord.gg/Yq5Qj6D9vN)
+![Support](https://img.shields.io/discord/1234942672418897960?style=flat&logo=discord)
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
