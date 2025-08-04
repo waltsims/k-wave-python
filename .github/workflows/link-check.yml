@@ -28,4 +28,4 @@ jobs:
           fail: true
         env:
           # Exclude localhost and badges
-          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org/licenses/why-not-lgpl.html,https://www.gnu.org/licenses/" 
+          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org/" 
