@@ -57,7 +57,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 @typechecker
 def get_win(
-    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
+    N: Union[int, np.ndarray, Tuple[int,], Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
     type_: str,  # TODO change this to enum in the future
@@ -215,7 +215,7 @@ def get_win(
         # trim the window if required
         if not symmetric:
             N -= 1
-        win = win[0:N]
+        win = win[0:int(N)]
         win = np.expand_dims(win, axis=-1)
 
         # calculate the coherent gain

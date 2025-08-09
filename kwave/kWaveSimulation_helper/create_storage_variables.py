@@ -99,7 +99,9 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
                                                  flags.binary_sensor_mask,
                                                  kgrid.k,
                                                  values.sensor_mask_index,
-                                                 values.sensor_x)
+                                                 record.sensor_x)
+    
+    # print("Number of sensor points:", num_sensor_points, record.sensor_x, len(record.sensor_x), values.sensor_x)
 
     num_recorded_time_points, _ = \
         get_num_recorded_time_points(kgrid.dim, kgrid.Nt, opt.stream_to_disk, sensor.record_start_index)
@@ -119,7 +121,11 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
                              num_sensor_points, num_recorded_time_points, values.sensor_data_buffer_size,
                              flags, sensor_data)
 
+    # print("pre:", record)
+
     record = compute_triangulation_points(flags, kgrid, record, sensor.mask)
+
+    # print("post:", record)
 
     return flags, record, sensor_data, num_recorded_time_points
 
@@ -163,10 +169,13 @@ def get_num_of_sensor_points(is_blank_sensor, is_binary_sensor_mask, kgrid_k, se
         int: The number of sensor points.
     """
     if is_blank_sensor:
+        # print("0", kgrid_k.shape)
         num_sensor_points = kgrid_k.size
     elif is_binary_sensor_mask:
+        # print("1.", len(sensor_mask_index))
         num_sensor_points = len(sensor_mask_index)
     else:
+        # print("2.", len(sensor_x), sensor_x)
         num_sensor_points = len(sensor_x)
     return num_sensor_points
 
@@ -276,7 +285,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
     a container called sensor_data. If cuboid corners are used this is a list, else a dictionary-like container
     """
 
-    print("[record_old] (create_sensor_variables)", record_old)
+    # print("[record_old] (create_sensor_variables)", record_old)
 
     if use_cuboid_corners:
 
@@ -337,7 +346,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
 
             # store the time history of the particle velocity on staggered grid
             if record_old.u_non_staggered or record_old.I or record_old.I_avg:
-                print("record_old is correct")
+                # print("record_old is correct")
                 # pre-allocate the velocity fields based on the number of dimensions in the simulation
                 if kgrid.dim == 1:
                     sensor_data[cuboid_index].ux_non_staggered = np.zeros(cuboid_size_xt)
@@ -345,7 +354,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
                     sensor_data[cuboid_index].ux_non_staggered = np.zeros(cuboid_size_xt)
                     sensor_data[cuboid_index].uy_non_staggered = np.zeros(cuboid_size_xt)
                 elif kgrid.dim == 3:
-                    print("THIS MUST BE SET")
+                    # print("THIS MUST BE SET")
                     sensor_data[cuboid_index].ux_non_staggered = np.zeros(cuboid_size_xt)
                     sensor_data[cuboid_index].uy_non_staggered = np.zeros(cuboid_size_xt)
                     sensor_data[cuboid_index].uz_non_staggered = np.zeros(cuboid_size_xt)
@@ -378,6 +387,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
         # time history of the acoustic pressure
         if record_old.p or record_old.I or record_old.I_avg:
             # print("create storage:", num_sensor_points, num_recorded_time_points, np.shape(sensor_data.p) )
+            # print("should be here", num_sensor_points, num_recorded_time_points)
             sensor_data.p = np.zeros([num_sensor_points, num_recorded_time_points])
 
         # maximum pressure
@@ -511,7 +521,7 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
         info = "using cuboid_corners (create storage variables)," + str(len(sensor_data)) + ", " + str(np.shape(sensor_data[0].p))
     else:
         info = "binary_mask (create storage variables), ", np.shape(sensor_data.p)
-    print("end here (create storage variables)", info)
+    # print("end here (create storage variables)", info)
 
     return sensor_data
 

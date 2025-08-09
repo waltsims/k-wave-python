@@ -88,6 +88,7 @@ class kWaveSimulation(object):
 
             # set the recorder
             self.record = Recorder()
+            # print("Not time-reversal Recorder:", self.record, self.record.p)
 
         # transducer source flags
         #: transducer is object of kWaveTransducer class
@@ -143,6 +144,15 @@ class kWaveSimulation(object):
         self.record_u_split_field: bool = False
 
     @property
+    def is_nonlinear(self):
+        """
+        Returns:
+            Set simulation to nonlinear if medium is nonlinear.
+        """
+        return self.medium.is_nonlinear()
+
+
+    @property
     def equation_of_state(self):
         """
         Returns:
@@ -154,14 +164,13 @@ class kWaveSimulation(object):
             else:
                 return "absorbing"
         else:
-            return "loseless"
+            return "lossless"
 
     @property
     def use_sensor(self):
         """
         Returns:
             False if no output of any kind is required
-
         """
         return self.sensor is not None
 
@@ -170,7 +179,6 @@ class kWaveSimulation(object):
         """
         Returns
             True if sensor.mask is not defined but _max_all or _final variables are still recorded
-
         """
 
         fields = ["p", "p_max", "p_min", "p_rms", "u", "u_non_staggered", "u_split_field", "u_max", "u_min", "u_rms", "I", "I_avg"]
@@ -196,7 +204,6 @@ class kWaveSimulation(object):
         """
         Returns:
             True if the computational grid is non-uniform
-
         """
         return self.kgrid.nonuniform
 
@@ -205,7 +212,6 @@ class kWaveSimulation(object):
         """
         Returns:
             True for time reversal simulaions using sensor.time_reversal_boundary_data
-
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None:
@@ -218,7 +224,6 @@ class kWaveSimulation(object):
         """
         Returns:
             True if using time reversal with the elastic code
-
         """
         return False
 
@@ -227,7 +232,6 @@ class kWaveSimulation(object):
         """
         Returns:
             True if directivity calculations in 2D are used by setting sensor.directivity_angle
-
         """
         if self.sensor is not None and not isinstance(self.sensor, NotATransducer):
             if self.kgrid.dim == 2:
@@ -586,6 +590,39 @@ class kWaveSimulation(object):
                                                                             values,
                                                                             flags,
                                                                             self.record)
+        else:
+            record_old = copy.deepcopy(self.record)
+            if not self.blank_sensor:
+                sensor_x = self.sensor.mask[0, :]
+            else:
+                sensor_x = None
+
+            values = dotdict({"sensor_x": sensor_x,
+                              "sensor_mask_index": self.sensor_mask_index,
+                              "record": record_old,
+                              "sensor_data_buffer_size": self.s_source_pos_index})
+
+            if self.record.u_split_field:
+                self.record_u_split_field = self.record.u_split_field
+
+            flags = dotdict({"use_sensor": self.use_sensor,
+                             "blank_sensor": self.blank_sensor,
+                             "binary_sensor_mask": self.binary_sensor_mask,
+                             "record_u_split_field": self.record.u_split_field,
+                             "time_rev": self.time_rev,
+                             "reorder_data": self.reorder_data,
+                             "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
+                             "axisymmetric": opt.simulation_type.is_axisymmetric(),
+                             "transducer_sensor": self.transducer_sensor,
+                             "use_cuboid_corners": self.cuboid_corners})
+
+            # this creates the storage variables by determining the spatial locations of the data which is in record.
+            flags, self.record, self.sensor_data, self.num_recorded_time_points = create_storage_variables(self.kgrid,
+                                                                            self.sensor,
+                                                                            opt,
+                                                                            values,
+                                                                            flags,
+                                                                            self.record)
 
         self.create_pml_indices(kgrid_dim=self.kgrid.dim,
                                 kgrid_N=Vector(self.kgrid.N),
@@ -860,7 +897,11 @@ class kWaveSimulation(object):
                             # align sensor data as a column vector to be the
                             # same as kgrid.x_vec so that calls to interp1
                             # return data in the correct dimension
-                            self.sensor_x = np.reshape((self.sensor.mask, (-1, 1)))
+                            
+                            # print(self.sensor.mask.shape, self.kgrid.x_vec.shape)
+                            self.sensor_x = np.reshape(self.sensor.mask, (-1, 1))
+
+                            # print(self.sensor.mask.shape, self.kgrid.x_vec.shape)
 
                             # add sensor_x to the record structure for use with
                             # the extract_sensor_data method
@@ -988,13 +1029,12 @@ class kWaveSimulation(object):
                 # (2*CFL) is the same as source.p0 = 1
                 if self.options.simulation_type.is_elastic_simulation():
 
-
                     print('DEFINE AS A STRESS SOURCE')
 
                     self.source.s_mask = np.ones(np.shape(self.kgrid.k), dtype=bool)
 
                     if self.options.smooth_p0:
-                        print('smooth p0')
+                        # print('smooth p0')
                         self.source.p0 = smooth(self.source.p0, restore_max=True)
 
                     self.source.sxx = np.empty((np.size(self.source.p0), 2))
@@ -1384,8 +1424,8 @@ class kWaveSimulation(object):
         if not self.source_p0:
             print("----------------------NO SMOOTHING")
             self.options.smooth_p0 = False
-        else:
-            print('----------------------(PERHAPS) SMOOTHED!')
+        #else:
+        #    print('----------------------(PERHAPS) SMOOTHED!')
 
         # start log if required
         if opt.create_log:
@@ -1415,7 +1455,7 @@ class kWaveSimulation(object):
             None
         """
 
-        print("[SMOOTH] AND ENLARGE")
+        # print("[SMOOTH] AND ENLARGE")
 
         # smooth the initial pressure distribution p0 if required, and then restore
         # the maximum magnitude
@@ -1463,8 +1503,10 @@ class kWaveSimulation(object):
                 del p0_exp
             else:
                 if (not self.source_p0_elastic) and self.options.smooth_p0:
-                    print('...............smoothing')
-                    source.p0 = smooth(source.p0, True)
+                    #print('...............smoothing')
+                    p0_shape = source.p0.shape
+                    source.p0 = np.squeeze(smooth(source.p0, True))
+                    #print(p0_shape, source.p0.shape)
                 else:
                     print('already smoothed or not declared')
                     pass
@@ -1590,7 +1632,7 @@ class kWaveSimulation(object):
 
                 else:
 
-                    print("this is something else - not cuboid corners")
+                    # print("this is something else - not cuboid corners")
                     # create mask indices (this works for both normal sensor and transducer inputs)
                     self.sensor_mask_index = np.where(self.sensor.mask.flatten(order="F") != 0)[0] + 1  # +1 due to matlab indexing. Use matlab_find?
                     self.sensor_mask_index = np.expand_dims(self.sensor_mask_index, -1)  # compatibility, n => [n, 1]

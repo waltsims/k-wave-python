@@ -702,9 +702,14 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     # get the grid size
     grid_size = a.shape
 
+    # print("[in smooth:grid_size]", grid_size)
+
     # remove singleton dimensions
     if num_dim2(a) != len(grid_size):
         grid_size = np.squeeze(grid_size)
+
+    if a.ndim == 1:
+        a = a.reshape((1, -1))
 
     # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
     # even grid sizes to ensure the DC component of the window has a value of
@@ -722,8 +727,12 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     if a.shape[0] == 1:  # is row?
         win = win.T
 
+    # print("**************", a.shape, win.shape)
+
     # apply the filter
     a_sm = np.real(np.fft.ifftn(np.fft.fftn(a) * np.fft.ifftshift(win)))
+
+    # print("**************", a_sm.shape, win.shape)
 
     # restore magnitude if required
     if restore_max:

@@ -1,7 +1,7 @@
 import numpy as np
 
 def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
-                        flags, record, p, ux_sgx, uy_sgy, uz_sgz=None):
+                        flags, record, p, ux_sgx, uy_sgy=None, uz_sgz=None):
     """
     extract_sensor_data Sample field variables at the sensor locations.
 
@@ -38,6 +38,8 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
     # =========================================================================
     # GRID STAGGERING
     # =========================================================================
+
+    # print("Recorder:", record, dir(record))
 
     # shift the components of the velocity field onto the non-staggered
     # grid if required for output
@@ -451,7 +453,12 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
         # store the time history of the acoustic pressure
         if flags.record_p or flags.record_I or flags.record_I_avg:
             if dim == 1:
-                sensor_data.p[:, file_index] = np.interp(record.grid_x, p, record.sensor_x)
+                # i = np.argmin(np.abs(record.grid_x - record.sensor_x[0])).astype(int)
+                # j = np.argmin(np.abs(record.grid_x - record.sensor_x[1])).astype(int)
+                # print("THIS:", p.shape, file_index,  i, j, record.sensor_x, record.sensor_x[0], record.sensor_x[1], record.grid_x[i], record.grid_x[j], 
+                #       p[i], p[j], 
+                #       record.grid_x[0], record.grid_x[-1], p.max())
+                sensor_data.p[:, file_index] = np.interp(np.squeeze(record.sensor_x), np.squeeze(record.grid_x), p)
             else:
                 sensor_data.p[:, file_index] = np.sum(p[record.tri] * record.bc, axis=1)
 
@@ -468,7 +475,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
                 else:
                     sensor_data.p_max = np.maximum(sensor_data.p_max, np.sum(p[record.tri] * record.bc, axis=1))
 
-
         # store the minimum acoustic pressure
         if flags.record_p_min:
             if dim == 1:
@@ -482,7 +488,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
                 else:
                     sensor_data.p_min = np.minimum(sensor_data.p_min, np.sum(p[record.tri] * record.bc, axis=1))
 
-
         # store the rms acoustic pressure
         if flags.record_p_rms:
             if dim == 1:
@@ -490,7 +495,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
             else:
                 sensor_data.p_rms[:] = np.sqrt((sensor_data.p_rms[:]**2 * (file_index - 0) +
                                                 (np.sum(p[record.tri] * record.bc, axis=1))**2) / (file_index +1))
-
 
         # store the time history of the particle velocity on the staggered grid
         if flags.record_u:
@@ -520,7 +524,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
             else:
                 raise RuntimeError("Wrong dimensions")
 
-
         # store the maximum particle velocity
         if flags.record_u_max:
             if file_index == 0:
@@ -547,7 +550,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
                     sensor_data.uz_max = np.maximum(sensor_data.uz_max, np.sum(uz_sgz[record.tri] * record.bc, axis=1))
                 else:
                     raise RuntimeError("Wrong dimensions")
-
 
         # store the minimum particle velocity
         if flags.record_u_min:

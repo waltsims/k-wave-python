@@ -83,9 +83,21 @@ class kSource(object):
             None
         """
         if self.p0 is not None:
-            if self.p0.shape != kgrid.k.shape:
-                # throw an error if p0 is not the correct size
-                raise ValueError("source.p0 must be the same size as the computational grid.")
+            #try:
+
+            if kgrid.k.shape[1] == 1:
+                kgrid.k = kgrid.k.flatten()
+
+            if (np.squeeze(self.p0.shape) != np.squeeze(kgrid.k.shape)).any():
+                msg = f"source.p0 must be the same size as the computational grid: {np.squeeze(self.p0.shape)} and {np.squeeze(kgrid.k.shape)}."
+                print(msg)
+                print(type(self.p0), type(kgrid.k), np.squeeze(self.p0.shape), np.squeeze(kgrid.k.shape), kgrid.k.ndim)
+                print(kgrid.k)
+                print(np.squeeze(kgrid.k))
+                    # throw an error if p0 is not the correct size
+                raise ValueError(msg)
+            #except ValueError:
+            #    print(f"source.p0 must be the same size as the computational grid: {self.p0.shape} and {kgrid.k.shape}.")
 
             # if using the elastic code, reformulate source.p0 in terms of the
             # stress source terms using the fact that source.p = [0.5 0.5] /

@@ -5,9 +5,12 @@ from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 
 
-@dataclass
+@dataclass(init=False)
 class Recorder(object):
     def __init__(self):
+
+        # print("Recorder initialized")
+
         # flags which control which parameters are recorded
         self.p = True  #: time-varying acoustic pressure
         self.p_max = False  #: maximum pressure over simulation
@@ -33,6 +36,8 @@ class Recorder(object):
         self.x1_inside, self.x2_inside = None, None
         self.y1_inside, self.y2_inside = None, None
         self.z1_inside, self.z2_inside = None, None
+
+        # print("self.p:", self.p)
 
 
     def set_flags_from_list(self, flags_list: List[str], is_elastic_code: bool) -> None:

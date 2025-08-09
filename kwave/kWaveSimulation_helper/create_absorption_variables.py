@@ -10,12 +10,15 @@ from kwave.utils.conversion import db2neper
 
 def create_absorption_variables(kgrid: kWaveGrid, medium: kWaveMedium, equation_of_state):
     # define the lossy derivative operators and proportionality coefficients
+
+    # print("------> equation of state:", equation_of_state)
+
     if equation_of_state == "absorbing":
         return create_absorbing_medium_variables(kgrid.k, medium)
     elif equation_of_state == "stokes":
         return create_stokes_medium_variables(medium)
     else:
-        raise NotImplementedError
+        return None, None, None, None
 
 
 def create_absorbing_medium_variables(kgrid_k, medium: kWaveMedium):
