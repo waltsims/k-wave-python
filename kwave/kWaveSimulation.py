@@ -1503,10 +1503,7 @@ class kWaveSimulation(object):
                 del p0_exp
             else:
                 if (not self.source_p0_elastic) and self.options.smooth_p0:
-                    #print('...............smoothing')
-                    p0_shape = source.p0.shape
                     source.p0 = np.squeeze(smooth(source.p0, True))
-                    #print(p0_shape, source.p0.shape)
                 else:
                     print('already smoothed or not declared')
                     pass

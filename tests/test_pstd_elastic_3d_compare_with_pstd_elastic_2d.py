@@ -39,7 +39,7 @@ from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
-from kwave.pstdElastic2D_check import pstd_elastic_2d
+from kwave.pstdElastic2D import pstd_elastic_2d
 from kwave.pstdElastic3D import pstd_elastic_3d
 from kwave.ksensor import kSensor
 from kwave.options.simulation_options import SimulationOptions, SimulationType

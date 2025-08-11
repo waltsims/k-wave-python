@@ -283,18 +283,6 @@ def test_pstd_elastic_2d_compare_with_kspaceFirstOrder2D():
         else:
             print('\tfails at L_inf_uy_final =', L_inf_uy_final)
 
-        if test_num == 0:
-            matlab_data = loadmat("C:/Users/dsinden/dev/octave/compare2d_fluid_elastic_case1.mat")
-            # print(matlab_data.keys())
-            matlab_source_fluid_p0 = matlab_data['source_fluid_p0']
-            matlab_source_elastic_p0 = matlab_data['source_elastic_p0']
-            matlab_sensor_fluid_p = matlab_data['sensor_fluid_p']
-            matlab_sensor_elastic_p = matlab_data['sensor_elastic_p']
-
-            mat_contents = loadmat('C:/Users/dsinden/dev/octave/2DoneStep_p_additive.mat')
-            mat_sxx = mat_contents['sxx']
-
-
         test_pass = test_pass and latest_test
 
         ###########

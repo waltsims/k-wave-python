@@ -1,9 +1,7 @@
 import numpy as np
-from scipy.interpolate import interpn
 import scipy.fft
 from tqdm import tqdm
 from typing import Union
-from copy import deepcopy
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -13,13 +11,9 @@ from kwave.kWaveSimulation import kWaveSimulation
 
 from kwave.ktransducer import NotATransducer
 
-from kwave.utils.conversion import db2neper
 from kwave.utils.data import scale_time
-# from kwave.utils.data import scale_SI
-from kwave.utils.filters import gaussian_filter
 from kwave.utils.math import sinc
 from kwave.utils.pml import get_pml
-from kwave.utils.signals import reorder_sensor_data
 from kwave.utils.tictoc import TicToc
 from kwave.utils.dotdictionary import dotdict
 
@@ -501,12 +495,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
     if (m_rho0 > 0 and options.use_sg):
 
-        
         points = np.squeeze(k_sim.kgrid.x_vec)
-
-        # rho0 is heterogeneous and staggered grids are used
-        mg = np.meshgrid(np.squeeze(k_sim.kgrid.x_vec) + k_sim.kgrid.dx / 2.0,  indexing='ij',)
-        interp_points = np.moveaxis(mg, 0, -1)
 
         # rho0 is heterogeneous and staggered grids are used
         rho0_sgx = np.interp(points + k_sim.kgrid.dx / 2.0,  points, np.squeeze(k_sim.rho0))
@@ -913,63 +902,13 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
             p = p0
             rhox = p0 / c0**2
 
-            if verbose:
-                print("\tHONK", np.shape(rhox), np.shape(p), k_sim.source.p0.shape, np.shape(c0**2), np.shape(c0), np.shape(np.atleast_1d(p)), 
-                      np.shape(np.atleast_1d(c0**2)), np.shape(np.atleast_1d(c0)))
-            
-            if verbose:
-                print("!", k_sim.is_nonlinear, k_sim.equation_of_state)
-                print("8.", t_index, c0.max(), k_sim.source.p0.max(), p.max(), p.min(), rhox.max(), rhox.min())
-
             # compute u(t = t1 - dt/2) based on u(dt/2) = -u(-dt/2) which forces u(t = t1) = 0
             if not options.use_finite_difference:
                 
                 # calculate gradient using the k-space method on a regular grid
-
-                if verbose: 
-                    print(np.shape(p))
-
-                temp0 = scipy.fft.fftn(p, axes=(0,))
-
-                if verbose:
-                    print(np.shape(temp0))
-                # temp0 = temp0[:, np.newaxis]
-                if verbose:
-                    print(np.shape(temp0))
-                temp1 = ddx_k * ddx_k_shift_pos * kappa * temp0
-                if verbose:
-                    print(np.shape(temp1))
-                temp2 = np.real(scipy.fft.ifftn(temp1, axes=(0,)))
-                if verbose:
-                    print(np.shape(temp2))
-                temp3 = rho0_sgx_inv * temp2 
-                if verbose:
-                    print(np.shape(temp3))
-                ux_sgx = dt * temp3 / 2.0
-                if verbose:
-                    print(np.shape(ux_sgx))
-
-                temp4 = dt * rho0_sgx_inv * np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_pos * kappa * scipy.fft.fftn(p, axes=(0,)), axes=(0,) )) / 2.0
-
-                if verbose:
-                    print("9 check.", np.shape(ddx_k), np.shape(ddx_k_shift_pos), np.shape(kappa), np.shape(p), 
-                          '------->', np.shape(ux_sgx), np.shape(temp0), np.shape(temp1), np.shape(temp2), np.shape(temp3), '*******', np.shape(rhox))
-                    print("another:", np.max(np.abs(temp4 - ux_sgx)))
-            
-                from scipy.io import loadmat
-                octave1 = loadmat("first_pass.mat")
-                # dt = octave1['dt']
-                octave2 = loadmat("second_pass.mat")
-                # If it’s still a 0-d array, convert to a Python float:
-                # if hasattr(dt, 'item'):
-                #     octave1_dt = dt.item()
+                ux_sgx = dt * rho0_sgx_inv * np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_pos * kappa * scipy.fft.fftn(p, axes=(0,)), axes=(0,) )) / 2.0
 
                 p_k = scipy.fft.fftn(p, axes=(0,))  
-
-                # import matplotlib.pyplot as plt
-                # _, ax1 = plt.subplots()
-                # ax1.plot(p, 'b-')
-                # plt.show()
 
 
             else:
@@ -989,115 +928,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                         dpdx = (np.append(p[2:], [0, 0]) - 27.0 * np.append(p[1:], 0) + 27.0 * p - np.append(0, p[:-1])) / (24.0 * kgrid.dx)
                         ux_sgx = dt * rho0_sgx_inv * dpdx / 2.0
                         
-        # if verbose:
-        #     print("10.", np.max(p), np.min(p), np.max(ux_sgx), np.max(ux_sgx))
-
-        # print("8.", np.shape(p))
         
         else:
             # precompute fft of p here so p can be modified for visualisation
             p_k = scipy.fft.fftn(p, axes=(0,))  
             p_k = p_k[:, np.newaxis] 
     
-        # if t_index == 0: 
-        #     if verbose:
-        #         # print("\n9(a).", ux_sgx.max(), dt.item(), rho0_sgx_inv.max(), ddx_k.max(), ddx_k_shift_pos.max(), kappa.max(), p.max(), p_k.max())
-        #         # print("9(b).", octave1['ux_sgx'].max(), octave1['dt'].item(), octave1['rho0_sgx_inv'].max(), octave1['ddx_k'].max(),
-        #         #         octave1['shift_pos'].max(), octave1['kappa'].max(), octave1['p'].max(), octave1['p_k'].max())
-                
-        #         print("\n\tdiff ux_sgx:", np.max(np.abs(octave1['ux_sgx'] - ux_sgx)) )
-        #         print("\tdiff duxdx:", np.max(np.abs(octave1['duxdx'] - duxdx)) )
-        #         print("\tdiff rhox:", np.max(np.abs(octave1['rhox'] - rhox)) )
-        #         print("\tdiff p:", np.max(np.abs(np.squeeze(octave1['p']) - np.squeeze(p))), 
-        #             np.argmax(np.abs(np.squeeze(octave1['p']) - np.squeeze(p))), 
-        #             p[np.argmax(np.abs(np.squeeze(octave1['p']) - np.squeeze(p)))], 
-        #             octave1['p'][np.argmax(np.abs(np.squeeze(octave1['p']) - np.squeeze(p)))])
-        #         print("\tdiff p_k:", np.max(np.abs(octave1['p_k'] - p_k)) )
-
-        #         print("\tdiff temp0:", np.max(np.abs(octave1['temp0'] - temp0)) )
-        #         print("\tdiff temp1:", np.max(np.abs(octave1['temp1'] - temp1)) )
-        #         print("\tdiff temp2:", np.max(np.abs(octave1['temp2'] - temp2)) )
-        #         print("\tdiff temp3:", np.max(np.abs(octave1['temp3'] - temp3)) )
-        #         print("\tdiff temp4:", np.max(np.abs(octave1['temp4'] - temp4)) )
-
-        #         # print("\tdiff pml_x:", np.max(np.abs(octave1['pml_x'] - pml_x)) )
-        #         # print("\tdiff pml_x_sgx:", np.max(np.abs(octave1['pml_x_sgx'] - pml_x_sgx)) )
-        #         # print("\tdiff rho0_sgx:", np.max(np.abs(np.squeeze(octave1['rho0_sgx']) - rho0_sgx)), np.argmax(np.abs(np.squeeze(octave1['rho0_sgx']) - rho0_sgx)), 
-        #         #     np.shape(np.squeeze(octave1['rho0_sgx'])), np.shape(rho0_sgx), rho0_sgx[407:410], np.squeeze(octave1['rho0_sgx'])[407:410]) 
-        #         # print("\tdiff rho0_sgx_inv:", np.max(np.abs(octave1['rho0_sgx_inv'] - rho0_sgx_inv)) )
-        #         # print("\tdiff ddx_k:", np.max(np.abs(octave1['ddx_k'] - ddx_k)) )
-        #         # print("\tdiff shift_pos:", np.max(np.abs(octave1['shift_pos'] - ddx_k_shift_pos)) )
-        #         # print("\tdiff kappa:", np.max(np.abs(octave1['kappa'] - kappa)) )
-
-        #     import matplotlib.pyplot as plt
-        #     _, ax1 = plt.subplots(2,2)
-        #     ax1[0,0].plot(p, 'b-')
-        #     ax1[0,0].plot(np.squeeze(octave1['p']), 'r-')
-        #     ax1[0,0].set_title('p')
-        #     ax1[1,0].plot(ux_sgx, 'b-')
-        #     ax1[1,0].plot(np.squeeze(octave1['ux_sgx']), 'r-')
-        #     ax1[1,0].set_title('ux_sgx')
-        #     ax1[0,1].plot(rhox, 'b-')
-        #     ax1[0,1].plot(np.squeeze(octave1['rhox']), 'r-')
-        #     ax1[0,1].set_title('rhox')
-        #     ax1[1,1].plot(duxdx, 'b-')
-        #     ax1[1,1].plot(np.squeeze(octave1['duxdx']), 'r-')
-        #     ax1[1,1].set_title('duxdx')
-        #     plt.show()
-
-            
-
-        # if t_index == 1:
-
-        #     if verbose:
-        #     # print("9(a).", ux_sgx.max(), dt.item(), rho0_sgx_inv.max(), ddx_k.max(), ddx_k_shift_pos.max(), kappa.max(), p.max(), p_k.max())
-
-        #     # print("9(b).", octave2['ux_sgx'].max(), octave2['dt'].item(), octave2['rho0_sgx_inv'].max(), octave2['ddx_k'].max(),
-        #     #         octave2['shift_pos'].max(), octave2['kappa'].max(), octave2['p'].max(), octave2['p_k'].max())
-            
-        #         print("\n\tdiff ux_sgx:", np.max(np.abs(octave2['ux_sgx'] - ux_sgx)) )
-        #         print("\tdiff duxdx:", np.max(np.abs(octave2['duxdx'] - duxdx)) )
-        #         print("\tdiff rhox:", np.max(np.abs(octave2['rhox'] - rhox)) )
-        #         print("\tdiff p:", np.max(np.abs(np.squeeze(octave2['p']) - np.squeeze(p))), 
-        #             np.argmax(np.abs(np.squeeze(octave2['p'])  - np.squeeze(p))), 
-        #             p[np.argmax(np.abs(np.squeeze(octave2['p'])  - np.squeeze(p)))], 
-        #             octave2['p'][np.argmax(np.abs(np.squeeze(octave2['p']) - np.squeeze(p)))])
-        #         print("\tdiff p_k:", np.max(np.abs(octave2['p_k'] - p_k)) )
-                
-        #         # print("\tdiff pml_x:", np.max(np.abs(octave2['pml_x'] - pml_x)) )
-        #         # print("\tdiff pml_x_sgx:", np.max(np.abs(octave2['pml_x_sgx'] - pml_x_sgx)) )
-        #         # print("\tdiff rho0_sgx:", np.max(np.abs(np.squeeze(octave2['rho0_sgx']) - rho0_sgx)), np.argmax(np.abs(np.squeeze(octave2['rho0_sgx']) - rho0_sgx)), 
-        #         #     np.shape(np.squeeze(octave2['rho0_sgx'])), np.shape(rho0_sgx), rho0_sgx[407:410], np.squeeze(octave2['rho0_sgx'])[407:410]) 
-        #         # print("\tdiff rho0_sgx_inv:", np.max(np.abs(octave2['rho0_sgx_inv'] - rho0_sgx_inv)) )
-        #         # print("\tdiff ddx_k:", np.max(np.abs(octave2['ddx_k'] - ddx_k)) )
-        #         # print("\tdiff shift_pos:", np.max(np.abs(octave2['shift_pos'] - ddx_k_shift_pos)) )
-        #         # print("\tdiff kappa:", np.max(np.abs(octave2['kappa'] - kappa)) )
-
-        #     import matplotlib.pyplot as plt
-        #     _, ax1 = plt.subplots(2,2)
-        #     ax1[0,0].plot(p, 'b-')
-        #     ax1[0,0].plot(np.squeeze(octave2['p']), 'r-')
-        #     ax1[0,0].set_title('p')
-            
-        #     ax1[1,0].plot(ux_sgx, 'b-')
-        #     ax1[1,0].plot(np.squeeze(octave2['ux_sgx']), 'r-')
-        #     ax1[1,0].set_title('ux_sgx')
-
-        #     ax1[0,1].plot(rhox, 'b-')
-        #     ax1[0,1].plot(np.squeeze(octave2['rhox']), 'r-')
-        #     ax1[0,1].set_title('rhox')
-
-        #     ax1[1,1].plot(duxdx, 'b-')
-        #     ax1[1,1].plot(np.squeeze(octave2['duxdx']), 'r-')
-        #     ax1[1,1].set_title('duxdx')
-        #     plt.show()
-
-        # if t_index == 3:
-        #     import matplotlib.pyplot as plt
-        #     _, ax1 = plt.subplots()
-        #     ax1.plot(p, 'b-')
-        #     plt.show()
-
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
         # sensor.record_start_index (defaults to 1) 
