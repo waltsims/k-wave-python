@@ -517,10 +517,10 @@ def create_sensor_variables(record_old: Recorder, kgrid, num_sensor_points, num_
                 sensor_data.uz_split_p = np.zeros([num_sensor_points, num_recorded_time_points])
                 sensor_data.uz_split_s = np.zeros([num_sensor_points, num_recorded_time_points])
 
-    if use_cuboid_corners:
-        info = "using cuboid_corners (create storage variables)," + str(len(sensor_data)) + ", " + str(np.shape(sensor_data[0].p))
-    else:
-        info = "binary_mask (create storage variables), ", np.shape(sensor_data.p)
+    # if use_cuboid_corners:
+        # info = "using cuboid_corners (create storage variables)," + str(len(sensor_data)) + ", " + str(np.shape(sensor_data[0].p))
+    # else:
+        # info = "binary_mask (create storage variables), ", np.shape(sensor_data.p)
     # print("end here (create storage variables)", info)
 
     return sensor_data

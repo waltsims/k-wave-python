@@ -33,7 +33,7 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 # import pytest
 
-from scipy.io import loadmat
+# from scipy.io import loadmat
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
