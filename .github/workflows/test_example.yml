@@ -6,9 +6,8 @@ jobs:
   test_example:
     strategy:
       matrix:
-        os: [ "windows-latest", "ubuntu-latest" ] #, "macos-latest"]
+        os: [ "windows-latest", "ubuntu-latest", "macos-latest"]
         python-version: [ "3.10", "3.11", "3.12"] #, "3.13" ]
->>>>>>> fba263c57935c54c979dd6317392d4a04210ad97
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
