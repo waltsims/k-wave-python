@@ -593,9 +593,14 @@ class kWaveSimulation(object):
         else:
             record_old = copy.deepcopy(self.record)
             if not self.blank_sensor:
-                sensor_x = self.sensor.mask[0, :]
+                if k_dim == 1:
+                    # this has been declared in check_sensor
+                    sensor_x = self.sensor_x
+                else:
+                    sensor_x = self.sensor.mask[0, :]
             else:
                 sensor_x = None
+
 
             values = dotdict({"sensor_x": sensor_x,
                               "sensor_mask_index": self.sensor_mask_index,
@@ -902,6 +907,8 @@ class kWaveSimulation(object):
                             self.sensor_x = np.reshape(self.sensor.mask, (-1, 1))
 
                             # print(self.sensor.mask.shape, self.kgrid.x_vec.shape)
+
+                            print("############## self.record.sensor_x = self.sensor_x", self.sensor_x)
 
                             # add sensor_x to the record structure for use with
                             # the extract_sensor_data method

@@ -99,9 +99,7 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
                                                  flags.binary_sensor_mask,
                                                  kgrid.k,
                                                  values.sensor_mask_index,
-                                                 record.sensor_x)
-    
-    # print("Number of sensor points:", num_sensor_points, record.sensor_x, len(record.sensor_x), values.sensor_x)
+                                                 values.sensor_x)
 
     num_recorded_time_points, _ = \
         get_num_recorded_time_points(kgrid.dim, kgrid.Nt, opt.stream_to_disk, sensor.record_start_index)
