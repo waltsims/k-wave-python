@@ -108,11 +108,12 @@ class kWaveGrid(object):
     @t_array.setter
     def t_array(self, t_array):
         # check for 'auto' input
-        if t_array == "auto":
-            # set values to auto
-            self.Nt = "auto"
-            self.dt = "auto"
-
+        if isinstance(t_array, str):
+            if t_array.lower() == "auto":
+                # set values to auto
+                self.Nt = "auto"
+                self.dt = "auto"
+            else:
         else:
             # extract property values
             Nt_temp = t_array.size

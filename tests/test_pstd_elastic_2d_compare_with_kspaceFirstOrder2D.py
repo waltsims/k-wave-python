@@ -20,7 +20,7 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_disc
 
-from scipy.io import loadmat
+#from scipy.io import loadmat
 
 
 #@pytest.mark.skip(reason="2D not ready")
