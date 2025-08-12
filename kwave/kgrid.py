@@ -114,6 +114,7 @@ class kWaveGrid(object):
                 self.Nt = "auto"
                 self.dt = "auto"
             else:
+                raise ValueError("Wrong entry for t_array")
         else:
             # extract property values
             Nt_temp = t_array.size
