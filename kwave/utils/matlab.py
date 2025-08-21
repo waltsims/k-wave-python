@@ -75,7 +75,7 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "ne
     return np.expand_dims(arr, -1)  # compatibility, n => [n, 1]
 
 
-def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> np.ndarray:
+def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[Int] = None) -> np.ndarray:
     """
     Applies a mask to an array and returns the masked elements.
 
