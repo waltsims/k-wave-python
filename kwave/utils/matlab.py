@@ -94,7 +94,7 @@ def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff = None) -> np.ndarray:
         return np.expand_dims(arr.ravel(order="F")[mask.ravel(order="F") + diff], axis=-1)  # compatibility, n => [n, 1]
 
 
-def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> Tuple[Union[int, np.ndarray], ...]:
+def unflatten_matlab_mask(arr: np.ndarray, mask: np.ndarray, diff = None) -> Tuple[Union[int, np.ndarray], ...]:
     """
     Converts a mask array to a tuple of subscript indices for an n-dimensional array.
 
