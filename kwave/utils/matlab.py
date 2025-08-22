@@ -2,8 +2,6 @@ from typing import Tuple, Union, Optional, List
 
 import numpy as np
 
-from kwave.utils.typing import INT
-
 def rem(x, y, rtol=1e-05, atol=1e-08):
     """
     Returns the remainder after division of x by y, taking into account the floating point precision.
@@ -76,7 +74,7 @@ def matlab_find(arr: Union[List[int], np.ndarray], val: int = 0, mode: str = "ne
     return np.expand_dims(arr, -1)  # compatibility, n => [n, 1]
 
 
-def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[INT] = None) -> np.ndarray:
+def matlab_mask(arr: np.ndarray, mask: np.ndarray, diff: Optional[int] = None) -> np.ndarray:
     """
     Applies a mask to an array and returns the masked elements.
 
