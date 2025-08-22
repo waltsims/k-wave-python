@@ -2,7 +2,7 @@ from typing import Tuple, Union, Optional, List
 
 import numpy as np
 
-import kwave.utils.typing
+from kwave.utils.typing import INT
 
 def rem(x, y, rtol=1e-05, atol=1e-08):
     """
