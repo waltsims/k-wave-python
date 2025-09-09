@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import List
+from typing import Union, Optional
 
 import numpy as np
 
@@ -10,24 +11,24 @@ import kwave.utils.checks
 @dataclass
 class kWaveMedium(object):
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
-    sound_speed: np.array
+    sound_speed: Union[float, int, np.ndarray]
     # reference sound speed used within the k-space operator (phase correction term) [m/s]
-    sound_speed_ref: np.array = None
+    sound_speed_ref: Optional[Union[float, int, np.ndarray]] = None
     # density distribution within the acoustic medium [kg/m^3]
-    density: np.array = None
+    density: Optional[Union[float, int, np.ndarray]] = None
     # power law absorption coefficient [dB/(MHz^y cm)]
-    alpha_coeff: np.array = None
+    alpha_coeff: Optional[Union[float, int, np.ndarray]] = None
     # power law absorption exponent
-    alpha_power: np.array = None
+    alpha_power: Optional[Union[float, int, np.ndarray]] = None
     # optional input to force either the absorption or dispersion terms in the equation of state to be excluded;
     # valid inputs are 'no_absorption' or 'no_dispersion'
-    alpha_mode: np.array = None
+    alpha_mode: Optional[str] = None
     # frequency domain filter applied to the absorption and dispersion terms in the equation of state
-    alpha_filter: np.array = None
+    alpha_filter: Optional[np.ndarray] = None
     # two element array used to control the sign of absorption and dispersion terms in the equation of state
-    alpha_sign: np.array = None
+    alpha_sign: Optional[np.ndarray] = None
     # parameter of nonlinearity
-    BonA: np.array = None
+    BonA: Optional[Union[float, int, np.ndarray]] = None
     # is the medium absorbing?
     absorbing: bool = False
     # is the medium absorbing stokes?
