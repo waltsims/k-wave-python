@@ -1,5 +1,5 @@
 kspaceFirstOrderAS
-===============================
+==================
 
 .. automodule:: kwave.kspaceFirstOrderAS
    :members:

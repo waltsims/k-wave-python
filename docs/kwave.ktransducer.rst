@@ -1,5 +1,5 @@
 kTransducer
-============
+===========
 
 .. automodule:: kwave.ktransducer
    :members:

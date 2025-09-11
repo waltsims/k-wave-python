@@ -1,3 +1,5 @@
+.. _kwave-kWaveSimulation_helper-package:
+
 kWaveSimulation_helper
 =====================================
 

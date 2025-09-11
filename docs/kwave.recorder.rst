@@ -1,5 +1,5 @@
 recorder
-=====================
+========
 
 .. automodule:: kwave.recorder
    :members:
