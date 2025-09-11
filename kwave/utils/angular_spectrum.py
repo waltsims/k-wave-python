@@ -93,7 +93,7 @@ def angular_spectrum(
     # check list of valid inputs
     if not isinstance(data_cast, str):
         raise ValueError("Optional input 'data_cast' must be a string.")
-    elif data_cast not in ["off", "double", "single", "gpuArray-single", "gpuArray-double"]:
+    elif data_cast not in ["off", "double", "single"]:
         raise ValueError("Invalid input for 'data_cast'.")
 
     # replace double with off
