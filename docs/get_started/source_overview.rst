@@ -10,14 +10,14 @@ Source Types
 
 .. code-block:: python
 
-   source.p0 = initial_pressure_map  # Same size as grid
+   source.p0 = initial_pressure_distribution  # Same size as grid
 
 **Time-Varying Pressure** (``p``, ``p_mask``): Pressure sources that vary in time (e.g., ultrasound transducers):
 
 .. code-block:: python
 
-   source.p_mask = transducer_positions  # Binary mask
-   source.p = pressure_time_series       # [N_source_points × N_time_steps]
+   source.p_mask = transducer_mask       # Binary mask
+   source.p = pressure_time_series       # shape: (N_source_points, N_time_steps)
 
 **Velocity Sources** (``ux``, ``uy``, ``uz``, ``u_mask``): Particle-velocity sources.
 
@@ -42,6 +42,11 @@ Common Patterns
    # Ultrasound transducer
    source = kSource()
    source.p_mask = transducer_mask
-   source.p = tone_burst_signal
+   source.p = tone_burst_signal  # shape: (N_source_points, N_time_steps)
+
+.. code-block:: python
+
+   # Enforce Dirichlet mode explicitly (pressure boundary condition)
+   source.p_mode = "dirichlet"
 
 For transducer modeling and advanced source configurations, see :doc:`../fundamentals/understanding_sources`. 

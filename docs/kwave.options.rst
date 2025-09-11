@@ -1,3 +1,5 @@
+.. _kwave-options-module:
+
 options
 ====================
 

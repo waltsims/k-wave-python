@@ -21,13 +21,13 @@ Homogeneous vs Heterogeneous
 
 .. code-block:: python
 
-   medium = kWaveMedium(sound_speed=1540)  # Water-like medium
+   medium = kWaveMedium(sound_speed=1540)  # Soft-tissue-like medium
 
 **Heterogeneous**: Spatially varying properties:
 
 .. code-block:: python
 
-   medium = kWaveMedium(sound_speed=c_map)  # c_map has same size as grid
+   medium = kWaveMedium(sound_speed=c_map)  # c_map shape: (Nx[, Ny[, Nz]]) in m/s
 
 Common Media
 ------------
@@ -41,8 +41,8 @@ Common Media
    tissue = kWaveMedium(
        sound_speed=1540,
        density=1000,
-       alpha_coeff=0.75,  # dB/(MHz·cm)
-       alpha_power=1.5,
+       alpha_coeff=0.75,  # dB/(MHz^alpha_power·cm)
+       alpha_power=1.5,   # typical for soft tissue
    )
 
 For detailed material-property databases and advanced absorption modeling, see :doc:`../fundamentals/understanding_media`. 

@@ -1,3 +1,5 @@
+.. _kwave-kWaveSimulation-module:
+
 kWaveSimulation
 ============================
 

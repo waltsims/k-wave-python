@@ -12,11 +12,11 @@ Sensor Positioning
 
    sensor = kSensor(mask=sensor_mask)  # 1 where sensors are located, 0 elsewhere
 
-**Cartesian Points**: Specify exact sensor coordinates:
+**Cartesian Points**: Specify exact sensor coordinates (meters; shape [N_sensors × N_dims] in the grid coordinate system):
 
 .. code-block:: python
 
-   sensor_points = np.array([[x1, y1], [x2, y2], ...])  # [N_sensors × N_dims]
+   sensor_points = np.array([[x1, y1], [x2, y2], ...])  # meters; shape [N_sensors × N_dims]
    sensor = kSensor(mask=sensor_points)
 
 Recording Options
@@ -57,8 +57,10 @@ Common Patterns
    sensor = kSensor(mask=sensor_positions, record=['p'])
    
    # Line of sensors (imaging array)
-   sensor_mask = np.zeros(grid.N)
-   sensor_mask[64, :] = 1  # Horizontal line
+   sensor_mask = np.zeros(grid.N, dtype=bool)
+   sensor_mask[64, :] = True  # Horizontal line
+   sensor_mask = np.zeros(grid.N, dtype=bool)
+   sensor_mask[64, :] = True  # Horizontal line
    sensor = kSensor(mask=sensor_mask)
 
 For advanced sensor configurations and reconstruction techniques, see :doc:`../fundamentals/understanding_sensors`. 
