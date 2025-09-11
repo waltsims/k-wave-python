@@ -10,7 +10,7 @@ Key Properties
 
 **Density** (``density``): Material density [kg/m³]. Affects impedance and reflection at interfaces.
 
-**Absorption** (``alpha_coeff``, ``alpha_power``): Acoustic energy loss. Follows power-law model: ``α = α₀ × f^y`` where *f* is frequency.
+**Absorption** (``alpha_coeff``, ``alpha_power``): Acoustic energy loss following :math:`\alpha(f)=\alpha_0\,f^{y}`, with units typically dB/(MHz^:math:`y`·cm).
 
 **Nonlinearity** (``BonA``): B/A parameter controlling nonlinear wave-steepening effects.
 
