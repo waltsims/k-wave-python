@@ -46,7 +46,7 @@ test = ["pytest",
         "coverage==7.10.6",
         "phantominator",
         "testfixtures==8.3.0",
-        "requests==2.32.3"]
+        "requests==2.32.5"]
 example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
