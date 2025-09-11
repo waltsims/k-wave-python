@@ -26,38 +26,27 @@ extensions = [
     "sphinx.ext.extlinks",  # Enables :ghfile: external links
 ]
 
-# Provide a smart GitHub branch fallback for linking to example files.
-# Priority: explicit READTHEDOCS_GIT_BRANCH (when building on RTD) →
-#          CI/CD branch via GITHUB_REF_NAME →
-#          local git branch via `git rev-parse --abbrev-ref HEAD` (optional) →
-#          "main".
+# Provide a simple GitHub branch/sha fallback for linking to example files.
+# Priority: explicit override via _GITHUB_BRANCH →
+#           READTHEDOCS_GIT_IDENTIFIER (commit) →
+#           READTHEDOCS_GIT_BRANCH / GITHUB_REF_NAME →
+#           "master".
 import os
-import subprocess
 
 
 def _detect_current_branch() -> str:
+    """Return a branch/commit identifier for GitHub links with minimal logic.
+
+    Order: _GITHUB_BRANCH override → READTHEDOCS_GIT_IDENTIFIER (commit) →
+    READTHEDOCS_GIT_BRANCH / GITHUB_REF_NAME → "master".
     """
-    Return the best-effort git branch name to use for documentation links.
-    
-    Checks, in order of precedence:
-    1. READTHEDOCS_GIT_BRANCH environment variable
-    2. GITHUB_REF_NAME environment variable
-    3. Local git via `git rev-parse --abbrev-ref HEAD`
-    
-    If none of the above yield a branch name (or the git command fails), returns "main". The function swallows errors from the git probe.
-    """
-    for env_var in ("READTHEDOCS_GIT_BRANCH", "GITHUB_REF_NAME"):
-        branch = os.getenv(env_var)
-        if branch:
-            return branch
-    # Fallback: try local git (will fail on RTD but env vars cover that)
-    try:
-        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
-        if branch:
-            return branch
-    except Exception:
-        pass
-    return "main"
+    return (
+        os.getenv("_GITHUB_BRANCH")
+        or os.getenv("READTHEDOCS_GIT_IDENTIFIER")
+        or os.getenv("READTHEDOCS_GIT_BRANCH")
+        or os.getenv("GITHUB_REF_NAME")
+        or "master"
+    )
 
 
 _GITHUB_BRANCH = _detect_current_branch()
@@ -67,6 +56,10 @@ extlinks = {
     "ghfile": (
         f"https://github.com/waltsims/k-wave-python/blob/{_GITHUB_BRANCH}/%s",
         "",  # leave default prefix empty so captions can be provided inline
+    ),
+    "ghdir": (
+        f"https://github.com/waltsims/k-wave-python/tree/{_GITHUB_BRANCH}/%s",
+        "",
     ),
 }
 
@@ -81,9 +74,10 @@ language = "en"
 html_theme = "furo"
 html_theme_options = {
     "source_repository": "https://github.com/waltsims/k-wave-python",
-    "source_branch": "master",
+    "source_branch": _GITHUB_BRANCH,
     "source_directory": "docs/",
 }
+
 html_static_path = ["_static"]
 
 # -- Options for todo extension ----------------------------------------------
