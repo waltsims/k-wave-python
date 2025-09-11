@@ -1,6 +1,6 @@
-# k-Wave-python
+# k-wave-python
 
-[![Support](https://dcbadge.vercel.app/api/server/Yq5Qj6D9vN?style=flat)](https://discord.gg/Yq5Qj6D9vN)
+[![Support](https://img.shields.io/discord/1234942672418897960?style=flat&logo=discord)](https://discord.gg/your-invite-code)
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
@@ -19,7 +19,7 @@ to leverage pythonic practices.
 
 ![](_static/example_bmode.png)
 
-A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
+A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
 
 This example file steps through the process of:
  1. Generating a simulation medium
