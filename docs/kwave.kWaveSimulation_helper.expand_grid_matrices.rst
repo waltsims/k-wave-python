@@ -1,5 +1,5 @@
-kwave.kWaveSimulation\_helper.expand\_grid\_matrices module
-===========================================================
+expand_grid_matrices
+====================
 
 .. automodule:: kwave.kWaveSimulation_helper.expand_grid_matrices
    :members:
