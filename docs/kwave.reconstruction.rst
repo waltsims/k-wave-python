@@ -1,4 +1,4 @@
-kwave.reconstruction package
+reconstruction
 ============================
 
 Submodules

@@ -1,5 +1,5 @@
-kwave.recorder module
-=====================
+recorder
+========
 
 .. automodule:: kwave.recorder
    :members:

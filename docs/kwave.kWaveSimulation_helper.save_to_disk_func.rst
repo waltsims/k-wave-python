@@ -1,5 +1,5 @@
-kwave.kWaveSimulation\_helper.save\_to\_disk\_func module
-=========================================================
+save_to_disk_func
+=================
 
 .. automodule:: kwave.kWaveSimulation_helper.save_to_disk_func
    :members:

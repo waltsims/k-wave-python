@@ -1,6 +1,6 @@
 # 3D FFT Reconstruction For A Planar Sensor Example
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/pr_3D_FFT_planar_sensor/pr_3D_FFT_planar_sensor.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/pr_3D_FFT_planar_sensor/pr_3D_FFT_planar_sensor.ipynb)
 
 This example demonstrates the use of k-Wave for the reconstruction of a three-dimensional photoacoustic wave-field recorded over a planar array of sensor elements. The sensor data is simulated using [kspaceFirstOrder3D](https://k-wave-python.readthedocs.io/en/latest/kwave.kspaceFirstOrder3D.html) and reconstructed using kspacePlaneRecon. It builds on the Simulations In Three Dimensions and [2D FFT Reconstruction For A Line Sensor](../pr_3D_FFT_planar_sensor/) examples.
 
