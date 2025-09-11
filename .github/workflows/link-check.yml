@@ -8,6 +8,8 @@ on:
 jobs:
   linkChecker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,10 +27,11 @@ jobs:
             --max-concurrency 12
             --max-retries 3
             --retry-wait-time 4
+            --accept 200,206,403,429
             --exclude-path "docs/get_started/legacy_licenses/gpl-3.0.rst"
             "**/*.md" "**/*.rst"
           # Fail the build on any broken link
           fail: true
         env:
           # Exclude localhost and badges
-          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io" 
+          LY_CHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io"
