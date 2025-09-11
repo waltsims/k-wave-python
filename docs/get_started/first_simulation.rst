@@ -69,8 +69,7 @@ The grid defines where and when we compute the acoustic fields:
    
    grid = kWaveGrid([Nx, Ny], [dx, dy])
 
-This creates a computational domain suitable for simulating ~15 MHz ultrasound.
-
+This grid (~100 μm spacing) is suitable up to about 7.5 MHz (≈2 points per wavelength in water). For higher frequencies, reduce dx to maintain ≥2–3 PPW.
 Step 2: Define the Medium
 -------------------------
 
