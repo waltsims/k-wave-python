@@ -36,7 +36,16 @@ import subprocess
 
 
 def _detect_current_branch() -> str:
-    """Best-effort detection of the current git branch for docs links."""
+    """
+    Return the best-effort git branch name to use for documentation links.
+    
+    Checks, in order of precedence:
+    1. READTHEDOCS_GIT_BRANCH environment variable
+    2. GITHUB_REF_NAME environment variable
+    3. Local git via `git rev-parse --abbrev-ref HEAD`
+    
+    If none of the above yield a branch name (or the git command fails), returns "main". The function swallows errors from the git probe.
+    """
     for env_var in ("READTHEDOCS_GIT_BRANCH", "GITHUB_REF_NAME"):
         branch = os.getenv(env_var)
         if branch:
