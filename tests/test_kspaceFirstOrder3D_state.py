@@ -19,6 +19,30 @@ from kwave.utils.mapgen import make_ball
 
 def make_simulation_parameters(directory: Path):
     # create the computational grid
+    """
+    Create a minimal 3D k-Wave simulation configuration used for testing.
+    
+    Parameters:
+        directory (Path): Directory used to construct input/output/checkpoint filenames;
+            no files are created by this function.
+    
+    Returns:
+        tuple: (kgrid, medium, source, sensor, simulation_options, execution_options)
+            - kgrid (kWaveGrid): 3D computational grid with PML applied.
+            - medium (kWaveMedium): Homogeneous medium with sound_speed=1500 m/s.
+            - source (kSource): Contains a smoothed spherical initial pressure field (`p0`).
+            - sensor (kSensor): Binary planar sensor mask (plane at the first x-index).
+            - simulation_options (SimulationOptions): Options configured for disk I/O,
+              PML, data casting, and filenames pointing into `directory`.
+            - execution_options (SimulationExecutionOptions): CPU execution settings
+              with checkpointing configured.
+    
+    Notes:
+        - The initial pressure (`source.p0`) is generated as a smoothed ball and
+          smoothing at runtime is disabled (`smooth_p0=False`).
+        - Filenames for input, output, and checkpoint are set to `{directory}/kwave_input.h5`,
+          `{directory}/kwave_output.h5`, and `{directory}/kwave_checkpoint.h5` respectively.
+    """
     PML_size = 10  # size of the PML in grid points
     N = Vector([32, 64, 64]) - 2 * PML_size  # number of grid points
     d = Vector([0.2e-3, 0.2e-3, 0.2e-3])  # grid point spacing [m]

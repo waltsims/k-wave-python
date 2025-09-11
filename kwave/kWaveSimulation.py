@@ -36,6 +36,25 @@ class kWaveSimulation(object):
     def __init__(
         self, kgrid: kWaveGrid, source: kSource, sensor: NotATransducer, medium: kWaveMedium, simulation_options: SimulationOptions
     ):
+        """
+        Initialize kWaveSimulation and prepare internal state for simulation validation and preparation.
+        
+        Creates and stores copies of the provided grid, source, sensor, medium, and options; initializes flags, defaults, and internal placeholders used throughout the input-checking and preparation pipeline. If sensor.time_reversal_boundary_data is provided, the constructor converts inputs into a Dirichlet-style source and a minimal sensor for deprecated time-reversal mode, warns about deprecation, and configures the Recorder accordingly.
+        
+        Parameters:
+            kgrid (kWaveGrid): Spatial grid definition for the simulation.
+            source (kSource): User-provided source definition (a deep copy is stored internally; the original is preserved on original_source).
+            sensor (NotATransducer): User-provided sensor definition (a deep copy is stored internally; the original is preserved on original_sensor).
+            medium (kWaveMedium): Medium properties (sound speed, density, absorption, etc.).
+            simulation_options (SimulationOptions): Simulation-wide options and flags.
+        
+        Side effects:
+            - Stores deep copies as self.source and self.sensor and preserves originals in self.original_source and self.original_sensor.
+            - Sets many internal flags and default values (mask type, time-reversal flag, PML/simulation defaults, source/sensor indexing placeholders, absorption operator placeholders, recorder and logging setup).
+            - May replace source and sensor with a Dirichlet-style source/sensor when time-reversal boundary data is present.
+        
+        No return value.
+        """
         self.precision = None
         self.kgrid = kgrid
         self.medium = medium
@@ -1500,14 +1519,9 @@ class kWaveSimulation(object):
 
     def _is_binary_sensor_mask(self, kgrid_dim: int) -> bool:
         """
-        Check if the sensor mask is a binary grid matching the kgrid dimensions.
-        Takes into account that the PML may have been added to the sensor mask.
-
-        Args:
-            kgrid_dim: Dimensionality of the kWaveGrid
-
-        Returns:
-            bool: True if the sensor mask is a binary grid matching kgrid dimensions
+        Return True if the sensor mask is a binary grid matching the simulation grid (kgrid), accounting for optional PML padding.
+        
+        Checks whether sensor.mask has the same shape as kgrid.k or—when a PML size is configured in self.options.pml_size—matches the grid shape extended by 2*pml in each dimension. Supports 1D, 2D, and 3D grids and accepts a scalar or per-axis PML size representation.
         """
         # Get the grid shape without PML
         grid_shape = self.kgrid.k.shape
