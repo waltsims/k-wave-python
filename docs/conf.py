@@ -55,11 +55,11 @@ _GITHUB_BRANCH = _detect_current_branch()
 extlinks = {
     "ghfile": (
         f"https://github.com/waltsims/k-wave-python/blob/{_GITHUB_BRANCH}/%s",
-        "",  # leave default prefix empty so captions can be provided inline
+        "%s",  # pass-through caption
     ),
     "ghdir": (
         f"https://github.com/waltsims/k-wave-python/tree/{_GITHUB_BRANCH}/%s",
-        "",
+        "%s",
     ),
 }
 
