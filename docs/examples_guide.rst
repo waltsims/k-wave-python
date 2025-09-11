@@ -17,7 +17,7 @@ Basic Wave Propagation (IVP - Initial Value Problems)
    * - Example
      - Core Concept
      - Topics
-   * - :ghfile:`Photoacoustic Waveforms <examples/ivp_photoacoustic_waveforms/>`
+   * - :ghdir:`examples/ivp_photoacoustic_waveforms/`
      - 2D vs 3D wave propagation physics
      - **IVP** • Wave spreading • Compact support
 
@@ -33,13 +33,13 @@ Simple Transducers & Sources
    * - Example
      - Core Concept
      - Topics
-   * - :ghfile:`Defining Transducers <examples/us_defining_transducer/>`
+   * - :ghdir:`examples/us_defining_transducer/`
      - Basic ultrasound transducer setup
      - **US** • Transducer basics • Time-varying sources
-   * - :ghfile:`Circular Piston 3D <examples/at_circular_piston_3D/>`
+   * - :ghdir:`examples/at_circular_piston_3D/`
      - Simple focused geometry
      - **AT** • 3D focusing • Geometric sources
-   * - :ghfile:`Circular Piston (Axisymmetric) <examples/at_circular_piston_AS/>`
+   * - :ghdir:`examples/at_circular_piston_AS/`
      - Computational efficiency with symmetry
      - **AT** • Axisymmetric • Computational optimization
 
@@ -55,16 +55,16 @@ Medical Imaging Applications
    * - Example
      - Application
      - Topics
-   * - :ghfile:`Beam Patterns <examples/us_beam_patterns/>`
+   * - :ghdir:`examples/us_beam_patterns/`
      - Understanding acoustic beam formation
      - **US** • Beam focusing • Field patterns
-   * - :ghfile:`B-mode Linear Transducer <examples/us_bmode_linear_transducer/>`
+   * - :ghdir:`examples/us_bmode_linear_transducer/`
      - Complete ultrasound imaging pipeline
      - **US** • Medical imaging • Signal processing
-   * - :ghfile:`2D FFT Line Sensor <examples/pr_2D_FFT_line_sensor/>`
+   * - :ghdir:`examples/pr_2D_FFT_line_sensor/`
      - Photoacoustic image reconstruction
      - **PR** • Image reconstruction • FFT methods
-   * - :ghfile:`2D Time Reversal Line Sensor <examples/pr_2D_TR_line_sensor/>`
+   * - :ghdir:`examples/pr_2D_TR_line_sensor/`
      - Alternative reconstruction approach
      - **PR** • Time reversal • Reconstruction
 
@@ -80,19 +80,19 @@ Advanced Transducer Modeling (AT - Array Transducers)
    * - Example
      - Advanced Technique
      - Topics
-   * - :ghfile:`Array as Source <examples/at_array_as_source/>`
+   * - :ghdir:`examples/at_array_as_source/`
      - kWaveArray for complex geometries
      - **AT** • Array modeling • Anti-aliasing
-   * - :ghfile:`Array as Sensor <examples/at_array_as_sensor/>`
+   * - :ghdir:`examples/at_array_as_sensor/`
      - Complex sensor array geometries
      - **AT** • Sensor arrays • Flexible positioning
-   * - :ghfile:`Linear Array Transducer <examples/at_linear_array_transducer/>`
+   * - :ghdir:`examples/at_linear_array_transducer/`
      - Multi-element linear arrays
      - **AT** • Linear arrays • Element spacing
-   * - :ghfile:`Focused Bowl 3D <examples/at_focused_bowl_3D/>`
+   * - :ghdir:`examples/at_focused_bowl_3D/`
      - 3D focused ultrasound therapy
      - **AT** • Therapeutic US • 3D focusing
-   * - :ghfile:`Focused Annular Array <examples/at_focused_annular_array_3D/>`
+   * - :ghdir:`examples/at_focused_annular_array_3D/`
      - Multi-element focused systems
      - **AT** • Annular arrays • Complex focusing
 
@@ -108,13 +108,13 @@ Advanced Imaging & Reconstruction (PR - Pressure/Photoacoustic Reconstruction)
    * - Example
      - Reconstruction Method
      - Topics
-   * - :ghfile:`3D FFT Planar Sensor <examples/pr_3D_FFT_planar_sensor/>`
+   * - :ghdir:`examples/pr_3D_FFT_planar_sensor/`
      - 3D FFT-based reconstruction
      - **PR** • 3D imaging • Planar arrays
-   * - :ghfile:`3D Time Reversal Planar <examples/pr_3D_TR_planar_sensor/>`
+   * - :ghdir:`examples/pr_3D_TR_planar_sensor/`
      - 3D time reversal reconstruction
      - **PR** • 3D time reversal • Volumetric imaging
-   * - :ghfile:`B-mode Phased Array <examples/us_bmode_phased_array/>`
+   * - :ghdir:`examples/us_bmode_phased_array/`
      - Advanced ultrasound beamforming
      - **US** • Phased arrays • Electronic steering
 
@@ -130,13 +130,13 @@ Sensor Physics & Directivity (SD - Sensor Directivity)
    * - Example
      - Physics Concept
      - Topics
-   * - :ghfile:`Sensor Directivity 2D <examples/sd_directivity_modelling_2D/>`
+   * - :ghdir:`examples/sd_directivity_modelling_2D/`
      - How sensor size affects measurements
      - **SD** • Directivity • Finite sensor size
-   * - :ghfile:`Focused Detector 2D <examples/sd_focussed_detector_2D/>`
+   * - :ghdir:`examples/sd_focussed_detector_2D/`
      - Directional sensor sensitivity
      - **SD** • Focused detection • Sensor design
-   * - :ghfile:`Focused Detector 3D <examples/sd_focussed_detector_3D/>`
+   * - :ghdir:`examples/sd_focussed_detector_3D/`
      - 3D focused sensor modeling
      - **SD** • 3D detection • Sensor focusing
 
@@ -152,7 +152,7 @@ Computational Optimization (NA - Numerical Analysis)
    * - Example
      - Optimization Topic
      - Topics
-   * - :ghfile:`Controlling the PML <examples/na_controlling_the_pml/>`
+   * - :ghdir:`examples/na_controlling_the_pml/`
      - Boundary conditions and efficiency
      - **NA** • PML boundaries • Computational domains
 

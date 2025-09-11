@@ -1,6 +1,6 @@
 # Defining A Source Using An Array Transducer Example
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/at_array_as_source/at_array_as_source.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/at_array_as_source/at_array_as_source.ipynb)
 
 This example provides a demonstration of using the kWaveArray class to define an array transducer with three arc-shaped elements without staircasing errors.
 

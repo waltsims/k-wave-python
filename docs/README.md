@@ -19,7 +19,7 @@ to leverage pythonic practices.
 
 ![](_static/example_bmode.png)
 
-A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
+A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
 
 This example file steps through the process of:
  1. Generating a simulation medium
