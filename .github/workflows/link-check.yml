@@ -23,7 +23,7 @@ jobs:
             --verbose
             --no-progress
             --max-concurrency 20
-            --exclude "docs/get_started/legacy_licenses/"
+            --exclude "docs/get_started/legacy_licenses/gpl-3.0.rst"
             "**/*.md" "**/*.rst"
           # Fail the build on any broken link
           fail: true
