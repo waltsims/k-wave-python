@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
@@ -9,6 +9,15 @@ import kwave.utils.checks
 
 @dataclass
 class kWaveMedium(object):
+    """
+    Medium properties for k-Wave simulations.
+    
+    Note: For heterogeneous medium parameters, medium.sound_speed and medium.density
+    must be given in matrix form with the same dimensions as kgrid. For homogeneous
+    medium parameters, these can be given as single numeric values. If the medium is
+    homogeneous and velocity inputs or outputs are not required, it is not necessary
+    to specify medium.density.
+    """
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
     sound_speed: Union[float, int, np.ndarray]
     # reference sound speed used within the k-space operator (phase correction term) [m/s]
@@ -33,18 +42,10 @@ class kWaveMedium(object):
     # is the medium absorbing stokes?
     stokes: bool = False
 
-    #  """
-    #     Note: For heterogeneous medium parameters, medium.sound_speed and
-    #     medium.density must be given in matrix form with the same dimensions as
-    #     kgrid. For homogeneous medium parameters, these can be given as single
-    #     numeric values. If the medium is homogeneous and velocity inputs or
-    #     outputs are not required, it is not necessary to specify medium.density.
-    # """
-
     def __post_init__(self):
         self.sound_speed = np.atleast_1d(self.sound_speed)
 
-    def check_fields(self, kgrid_shape: np.ndarray) -> None:
+    def check_fields(self, kgrid_shape: Sequence[int]) -> None:
         """
         Check whether the given properties are valid
 
@@ -63,14 +64,16 @@ class kWaveMedium(object):
             ], "medium.alpha_mode must be set to 'no_absorption', 'no_dispersion', or 'stokes'."
 
         # check the absorption filter input is valid
-        if self.alpha_filter is not None and not (self.alpha_filter.shape == kgrid_shape).all():
+        if self.alpha_filter is not None and self.alpha_filter.shape != tuple(kgrid_shape):
             raise ValueError("medium.alpha_filter must be the same size as the computational grid.")
 
         # check the absorption sign input is valid
-        if self.alpha_sign is not None and (not kwave.utils.checkutils.is_number(self.alpha_sign) or (self.alpha_sign.size != 2)):
-            raise ValueError(
-                "medium.alpha_sign must be given as a " "2 element numerical array controlling absorption and dispersion, respectively."
-            )
+        if self.alpha_sign is not None:
+            alpha_sign_arr = np.atleast_1d(self.alpha_sign)
+            if alpha_sign_arr.size != 2 or not np.issubdtype(alpha_sign_arr.dtype, np.number):
+                raise ValueError(
+                    "medium.alpha_sign must be a 2 element numeric array controlling absorption and dispersion, respectively."
+                )
 
         # check alpha_coeff is non-negative and real
         if self.alpha_coeff is not None and (not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0)):
@@ -102,7 +105,7 @@ class kWaveMedium(object):
             None
         """
         for f in fields:
-            assert getattr(self, f) is not None, f"The field {f} must be not be None"
+            assert getattr(self, f) is not None, f"The field {f} must not be None"
 
     def is_nonlinear(self) -> bool:
         """
@@ -167,8 +170,10 @@ class kWaveMedium(object):
         self.ensure_defined("alpha_coeff")
 
         # give warning if y is specified
-        if self.alpha_power is not None and (self.alpha_power.size != 1 or self.alpha_power != 2):
-            logging.log(logging.WARN, "the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.")
+        if self.alpha_power is not None:
+            ap = np.asarray(self.alpha_power)
+            if ap.size != 1 or not np.isclose(float(ap), 2.0):
+                logging.warning("the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.")
 
         # overwrite y value
         self.alpha_power = 2
