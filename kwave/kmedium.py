@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List
-from typing import Union, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -74,7 +73,7 @@ class kWaveMedium(object):
             )
 
         # check alpha_coeff is non-negative and real
-        if not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0):
+        if self.alpha_coeff is not None and (not np.all(np.isreal(self.alpha_coeff)) or np.any(self.alpha_coeff < 0)):
             raise ValueError("medium.alpha_coeff must be non-negative and real.")
 
     def is_defined(self, *fields) -> List[bool]:
