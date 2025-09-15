@@ -172,7 +172,7 @@ class kWaveMedium(object):
         # give warning if y is specified
         if self.alpha_power is not None:
             ap = np.asarray(self.alpha_power)
-            if ap.size != 1 or not np.isclose(float(ap), 2.0):
+            if ap.size != 1 or not np.isclose(ap.item(), 2.0):
                 logging.warning("the axisymmetric code and stokes absorption assume alpha_power = 2, user value ignored.")
 
         # overwrite y value
