@@ -7,43 +7,54 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
    :start-line: 5
    :end-line: -3
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
-   :hidden:
-
-   get_started/contrib
-   get_started/license
 
 .. toctree::
    :maxdepth: 2
-   :caption: Development
+   :caption: K-Wave Step-by-Step
    :hidden:
 
-   development/development_environment
-
+   get_started/first_simulation
+   get_started/grid_overview
+   get_started/medium_overview
+   get_started/source_overview
+   get_started/sensor_overview
+   get_started/examples_guide
 .. toctree::
-   :caption: kwave
+   :caption: k-Wave-python API
    :titlesonly:
    :maxdepth: 4
    :hidden:
 
-   kwave.data
-   kwave.enums
-   kwave.executor
-   kwave.kWaveSimulation
    kwave.kgrid
    kwave.kmedium
-   kwave.ksensor
    kwave.ksource
-   kwave.kspaceFirstOrder
+   kwave.ksensor
+   kwave.kWaveSimulation
    kwave.kspaceFirstOrder2D
    kwave.kspaceFirstOrder3D
    kwave.kspaceFirstOrderAS
    kwave.ktransducer
+   kwave.reconstruction
+   kwave.data
+   kwave.enums
+   kwave.executor
    kwave.options
    kwave.recorder
    kwave.utils
    kwave.kWaveSimulation_helper
-   kwave.reconstruction
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Development & Contributing
+   :hidden:
+
+   development/development_environment
+   get_started/contrib
+
+.. toctree::
+   :maxdepth: 1
+   :caption: License
+   :hidden:
+
+   get_started/license
 
