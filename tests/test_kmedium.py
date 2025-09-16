@@ -154,6 +154,17 @@ def test_alpha_sign_none():
     medium = kWaveMedium(sound_speed=1500, alpha_sign=None)
     medium.check_fields(kgrid.N)  # Should not raise exception
 
+def test_alpha_sign_wrong_size_raises():
+    kgrid = kWaveGrid(Vector([64, 64]), Vector([0.1e-3, 0.1e-3]))
+    medium = kWaveMedium(sound_speed=1500, alpha_sign=np.array([1.0]))
+    with pytest.raises(ValueError, match="2 element numeric array"):
+        medium.check_fields(kgrid.N)
+
+def test_alpha_sign_non_numeric_raises():
+    kgrid = kWaveGrid(Vector([64, 64]), Vector([0.1e-3, 0.1e-3]))
+    medium = kWaveMedium(sound_speed=1500, alpha_sign=np.array(["a", "b"], dtype=object))
+    with pytest.raises(ValueError, match="2 element numeric array"):
+        medium.check_fields(kgrid.N)
 
 def test_alpha_coeff_none():
     """Test when alpha_coeff is None"""
