@@ -57,6 +57,12 @@ class kWaveSimulation(object):
 
         # check if performing time reversal, and replace inputs to explicitly use a
         # source with a dirichlet boundary condition
+        # check if the sensor mask is defined as a list of cuboid corners
+        if self.sensor.mask is not None and self.sensor.mask.shape[0] == (2 * self.kgrid.dim):
+            self.userarg_cuboid_corners = True
+        else:
+            self.userarg_cuboid_corners = False
+
         if self.sensor.time_reversal_boundary_data is not None:
             warnings.warn(
                 "Time reversal simulation is deprecated. Use TimeReversal class instead. See examples/pr_2D_TR_line_sensor/pr_2D_TR_line_sensor.py for an example."
@@ -786,21 +792,6 @@ class kWaveSimulation(object):
                             self.kgrid, self.sensor.mask, self.options.simulation_type.is_axisymmetric()
                         )
 
-                        # if in time reversal mode, reorder the p0 input data in
-                        # the order of the binary sensor_mask
-                        if self.time_rev:
-                            raise NotImplementedError
-                            """
-                            # append the reordering data
-                            new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
-                            sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
-        
-                            # reorder p0 based on the order_index
-                            sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
-        
-                            # remove the reordering data
-                            sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
-                            """
             else:
                 # set transducer sensor flag
                 self.transducer_sensor = True
@@ -814,6 +805,21 @@ class kWaveSimulation(object):
                     # get the elevation mask that is used to extract the correct values
                     # from the sensor data buffer for averaging
                     self.transducer_receive_mask = self.sensor.elevation_beamforming_mask
+            # if in time reversal mode, reorder the p0 input data in
+            # the order of the binary sensor_mask
+            if self.time_rev:
+                raise NotImplementedError
+                """
+                # append the reordering data
+                new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
+                sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
+
+                # reorder p0 based on the order_index
+                sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
+
+                # remove the reordering data
+                sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
+                """
 
         # check for directivity inputs with time reversal
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
