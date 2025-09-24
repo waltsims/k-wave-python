@@ -1,16 +1,108 @@
+import logging
 import os
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from kwave.utils.conversion import db2neper, neper2db
+from kwave.kgrid import kWaveGrid
+from kwave.utils.conversion import db2neper, grid2cart, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
-from kwave.utils.interp import get_bli
+from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
 from tests.matlab_test_data_collectors.python_testers.utils.record_reader import TestRecordReader
+
+
+def test_grid2cart():
+    kgrid = kWaveGrid(
+        [1000, 100, 10],
+        [1, 1, 1],
+    )
+    binary_sensor_mask = np.zeros((1000, 100, 10))
+    binary_sensor_mask[50, 50, 4] = 1
+    binary_sensor_mask[99, 99, 9] = 1
+
+    cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
+    assert cart_bsm.shape == (3, 2), f"grid2cart did not return a 3x2 array. Shape is {cart_bsm.shape}"
+    logging.debug(f"cart_bsm: {cart_bsm}")
+    expected_cart_bsm = np.array([[-450, 0, -1], [-401, 49, 4]]).T
+    logging.debug(f"expected_cart_bsm: {expected_cart_bsm}")
+    assert np.allclose(cart_bsm, expected_cart_bsm), "cart_bsm and expected_cart_bsm are not close enough"
+
+
+def test_grid2cart_origin():
+    kgrid = kWaveGrid(
+        [1000, 100, 10],
+        [1, 1, 1],
+    )
+    binary_sensor_mask = np.zeros((1000, 100, 10))
+    binary_sensor_mask[500, 50, 5] = 1  # equivalent index in matlab is [501, 51, 6] for mask origin
+    cart_bsm, order_index = grid2cart(kgrid, binary_sensor_mask)
+    logging.debug(cart_bsm)
+    logging.debug(order_index)
+    assert np.allclose(cart_bsm, np.zeros_like(cart_bsm)), "origin location was incorrect"
+
+
+
+def test_interp_cart_data_2_points_linear():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 7] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 2.0]], dtype=np.float32).T  # sensor at the origin and another point
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32) # 3 time steps
+    logging.debug(cart_sensor_data)
+    interp_data = interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask, "linear")
+    # TODO: find expected value from matlab. In this case we revert to nearest because point is not between p1 and p2.
+    logging.debug(interp_data)
+    # assert np.allclose(interp_data, cart_sensor_data), "not close enough"
+
+
+
+def test_interp_cart_data_2_points_nearest():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 5] = True
+    binary_sensor_mask[501, 51, 9] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 5.0]], dtype=np.float32).T  # sensor at the origin and another point shape: (3,2)
+    cart_sensor_data0 = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float32)    # 3 time steps, shape: (2,3)
+    print(cart_sensor_data0)
+    interp_data0 = interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
+    print(interp_data0)
+    # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
+    assert np.allclose(interp_data0, cart_sensor_data0), "not close enough"
+    cart_sensor_data1 = np.array([[1.0, 2.0, 3.0, 4.0, 5.0], [6.0, 7.0, 8.0, 9.0, 10.0]], dtype=np.float32)    # 5 time steps, shape: (2,5)
+    print(cart_sensor_data1)
+    interp_data1 = interp_cart_data(kgrid, cart_sensor_data1, cart_sensor_mask, binary_sensor_mask)
+    print(interp_data1)
+    # TODO: find expected value from matlab, current behavior is round up to nearest neighbor
+    assert np.allclose(interp_data1, cart_sensor_data1), "not close enough"
+    
+
+def test_interp_cart_data_1_point_nearest():
+    kgrid = kWaveGrid([1000, 100, 10], [1, 1, 1])
+    binary_sensor_mask = np.zeros((1000, 100, 10), dtype=bool)
+    binary_sensor_mask[501, 51, 6] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  # sensor at the origin
+    # 3 time steps
+    cart_sensor_data0 = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    interp_data0 = interp_cart_data(kgrid, cart_sensor_data0, cart_sensor_mask, binary_sensor_mask)
+    assert np.allclose(interp_data0, cart_sensor_data0), "not close enough"
+    # 5 time steps
+    cart_sensor_data1 = np.array([[1.0, 2.0, 3.0, 4.0, 5.0]], dtype=np.float32)  
+    interp_data1 = interp_cart_data(kgrid, cart_sensor_data1, cart_sensor_mask, binary_sensor_mask)
+    assert np.allclose(interp_data1, cart_sensor_data1), "not close enough"
+
+
+def test_interp_cart_one_dim_nearest():
+    kgrid = kWaveGrid([1000,], [1,])
+    binary_sensor_mask = np.zeros((1000,), dtype=bool)
+    binary_sensor_mask[501,] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError, match=("Data must be two- or three-dimensional.")):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
 
 
 def test_nepers2db():
@@ -415,3 +507,9 @@ def test_trim_zeros():
         mat_trimmed, ind = trim_zeros(mat)
 
     # TODO: generalize to N-D case
+
+
+if __name__ == "__main__":
+    test_interp_cart_data_1_point_nearest()
+    test_interp_cart_data_2_points_nearest()
+    test_interp_cart_data_2_points_linear()
