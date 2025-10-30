@@ -4,6 +4,7 @@ from typing import Union
 import numpy as np
 from numpy.fft import ifftshift
 
+from kwave.data import SimulationResult
 from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kgrid import kWaveGrid
@@ -30,7 +31,7 @@ def kspaceFirstOrderASC(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> SimulationResult:
     """
     Axisymmetric time-domain simulation of wave propagation using C++ code.
 
@@ -89,7 +90,7 @@ def kspaceFirstOrderAS(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> SimulationResult:
     """
     Axisymmetric time-domain simulation of wave propagation.
 
