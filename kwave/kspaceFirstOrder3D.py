@@ -2,8 +2,8 @@ import warnings
 from typing import Union
 
 import numpy as np
-from deprecated import deprecated
 
+from kwave.data import SimulationResult
 from kwave.executor import Executor
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -27,7 +27,7 @@ def kspaceFirstOrder3DG(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-) -> Union[np.ndarray, dict]:
+) -> SimulationResult:
     """
     3D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
@@ -81,7 +81,7 @@ def kspaceFirstOrder3DC(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> SimulationResult:
     """
     3D time-domain simulation of wave propagation using C++ code.
 
@@ -138,7 +138,7 @@ def kspaceFirstOrder3D(
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
     time_rev: bool = False,  # deprecated parameter
-):
+) -> SimulationResult:
     """
     3D time-domain simulation of wave propagation using k-space pseudospectral method.
 

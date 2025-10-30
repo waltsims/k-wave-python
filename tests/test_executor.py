@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 import numpy as np
 import pytest
 
+from kwave.data import SimulationResult
 from kwave.executor import Executor
 from kwave.utils.dotdictionary import dotdict
 
@@ -108,7 +109,7 @@ class TestExecutor(unittest.TestCase):
         mock_print.assert_has_calls(expected_calls, any_order=False)
 
         # Check that sensor_data is returned correctly
-        self.assertEqual(sensor_data, dotdict())
+        self.assertIsInstance(sensor_data, SimulationResult)
 
     def test_run_simulation_success(self):
         """Test running the simulation successfully."""
@@ -128,7 +129,7 @@ class TestExecutor(unittest.TestCase):
             expected_command, env=self.execution_options.env_vars, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
         self.mock_proc.communicate.assert_called_once()
-        self.assertEqual(sensor_data, dotdict())
+        self.assertIsInstance(sensor_data, SimulationResult)
 
     def test_run_simulation_failure(self):
         """Test handling a simulation failure."""
