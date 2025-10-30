@@ -1,5 +1,5 @@
 import warnings
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 from beartype import beartype as typechecker
@@ -87,7 +87,7 @@ def kspaceFirstOrder2DC(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-) -> SimulationResult:
+) -> Optional[SimulationResult]:
     """
     2D time-domain simulation of wave propagation using C++ code.
 
@@ -147,7 +147,7 @@ def kspaceFirstOrder2D(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-) -> SimulationResult:
+) -> Optional[SimulationResult]:
     """
     2D time-domain simulation of wave propagation using k-space pseudospectral method.
 
