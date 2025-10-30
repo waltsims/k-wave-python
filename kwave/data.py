@@ -163,6 +163,35 @@ class SimulationResult:
     I_avg: Optional[np.ndarray] = None
     I: Optional[np.ndarray] = None
 
+    def __getitem__(self, key: str):
+        """
+        Enable dictionary-style access for backward compatibility.
+
+        Args:
+            key: Field name to access
+
+        Returns:
+            Value of the field
+
+        Raises:
+            KeyError: If the field does not exist
+        """
+        if hasattr(self, key):
+            return getattr(self, key)
+        raise KeyError(f"'{key}' field not found in SimulationResult")
+
+    def __contains__(self, key: str) -> bool:
+        """
+        Enable dictionary-style membership testing for backward compatibility.
+
+        Args:
+            key: Field name to check
+
+        Returns:
+            True if the field exists, False otherwise
+        """
+        return hasattr(self, key)
+
     @classmethod
     def from_dotdict(cls, data: dict) -> "SimulationResult":
         """
