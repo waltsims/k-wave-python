@@ -5,10 +5,10 @@ copying methods (maps-to_coords and gaussian_modulated_sinusoidal_signal) from t
 
 from copy import deepcopy
 
-from matplotlib import animation
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+from matplotlib import animation
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from numpy.typing import NDArray
 from tqdm import tqdm
 
@@ -25,7 +25,7 @@ from kwave.utils.colormap import get_color_map
 
 
 def map_to_coords(
-    map_data: NDArray[np.float64 | np.int64 | np.bool],
+    map_data: NDArray[np.float64 | np.int64 | np.bool_ | bool],
     *,
     export_as_xyz: bool = False,
 ) -> NDArray[np.int64]:
