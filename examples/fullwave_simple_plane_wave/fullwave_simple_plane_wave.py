@@ -7,9 +7,8 @@ from copy import deepcopy
 
 from matplotlib import animation
 import matplotlib.pyplot as plt
-import numpy as np
-
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import numpy as np
 from numpy.typing import NDArray
 from tqdm import tqdm
 
@@ -18,11 +17,10 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.utils.colormap import get_color_map
 from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+from kwave.utils.colormap import get_color_map
 
 
 
