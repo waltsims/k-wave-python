@@ -6,6 +6,7 @@ import sys
 import h5py
 
 import kwave
+from kwave.data import SimulationResult
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 
@@ -32,7 +33,7 @@ class Executor:
             raise FileNotFoundError(f"Binary not found at {binary_path}")
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
-    def run_simulation(self, input_filename: str, output_filename: str, options: list[str]) -> dotdict:
+    def run_simulation(self, input_filename: str, output_filename: str, options: list[str]) -> SimulationResult:
         command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename] + options
 
         try:
@@ -61,7 +62,7 @@ class Executor:
         if not self.simulation_options.pml_inside:
             self._crop_pml(sensor_data)
 
-        return sensor_data
+        return SimulationResult.from_dotdict(sensor_data)
 
     def _crop_pml(self, sensor_data: dotdict):
         Nx = sensor_data["Nx"].item()

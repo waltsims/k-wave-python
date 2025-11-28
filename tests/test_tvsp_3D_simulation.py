@@ -1,11 +1,12 @@
 """
-    Using An Ultrasound Transducer As A Sensor Example
+Using An Ultrasound Transducer As A Sensor Example
 
-    This example shows how an ultrasound transducer can be used as a detector
-    by substituting a transducer object for the normal sensor input
-    structure. It builds on the Defining An Ultrasound Transducer and
-    Simulating Ultrasound Beam Patterns examples.
+This example shows how an ultrasound transducer can be used as a detector
+by substituting a transducer object for the normal sensor input
+structure. It builds on the Defining An Ultrasound Transducer and
+Simulating Ultrasound Beam Patterns examples.
 """
+
 import os
 from tempfile import gettempdir
 
@@ -71,7 +72,7 @@ def test_tvsp_3D_simulation():
     # input arguments
     simulation_options = SimulationOptions(
         data_cast="single",
-        cart_interp="nearest",
+        cartesian_interp="nearest",
         save_to_disk=True,
         input_filename=input_filename,
         save_to_disk_exit=True,
