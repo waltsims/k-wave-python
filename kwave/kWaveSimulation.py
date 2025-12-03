@@ -824,7 +824,7 @@ class kWaveSimulation(object):
         Check the source properties for correctness and validity
 
         Args:
-            kgrid_dim: kWaveGrid dimension
+            k_dim: kWaveGrid dimension
             k_Nt: Number of time steps in kWaveGrid
 
         Returns:
@@ -959,47 +959,50 @@ class kWaveSimulation(object):
             # get the input signal - this is appended with zeros if required to
             # account for the beamforming delays (this will throw an error if the
             # input signal is not defined)
-            self.transducer_input_signal = self.source.input_signal
+            transducer_input_signal = self.source.input_signal
 
-            # get the delay mask that accounts for the beamforming delays and
-            # elevation focussing; this is used so that a single time series can be
-            # applied to the complete transducer mask with different delays
+            # Ensure input signal has shape (L, 1)
+            if transducer_input_signal.ndim == 1:
+                transducer_input_signal = transducer_input_signal.reshape(-1, 1)
+
+            # get the delay mask that accounts for the beamforming delays and elevation focussing
             delay_mask = self.source.delay_mask()
 
-            # set source flag - this should be the length of signal minus the
-            # maximum delay
-            self.transducer_source = self.transducer_input_signal.size - delay_mask.max()
+            # set source flag - this should be the length of signal minus the maximum delay
+            self.transducer_source = transducer_input_signal.size - delay_mask.max()
 
             # get the active elements mask
             active_elements_mask = self.source.active_elements_mask
 
-            # get the apodization mask if not set to 'Rectangular' and convert to a
-            # linear array
+            # Process transmit apodization
             if self.source.transmit_apodization == "Rectangular":
                 self.transducer_transmit_apodization = 1
+                # No apodization applied; leave input signal as is
             else:
-                self.transducer_transmit_apodization = self.source.transmit_apodization_mask
-                self.transducer_transmit_apodization = self.transducer_transmit_apodization[active_elements_mask != 0]
+                # Use the get_transmit_apodization() method to get the correctly sized apodization
+                self.transducer_transmit_apodization = self.source.get_transmit_apodization()
+                # Apply apodization: multiply the reshaped input signal (L x 1) by the transpose of the apodization vector (1 x N_active)
+                transducer_input_signal = transducer_input_signal * self.transducer_transmit_apodization.T
 
-            # create indexing variable corresponding to the active elements
-            # and convert the data type depending on the number of indices
+            # Ensure the final transducer input signal has a leading singleton dimension for compatibility
+            transducer_input_signal = np.expand_dims(transducer_input_signal, axis=0)
+            # Transpose the last two axes to swap time and active element dimensions
+            transducer_input_signal = np.transpose(transducer_input_signal, (0, 2, 1))
+
+            # Store the apodized input signal for later use
+            self.transducer_input_signal = transducer_input_signal
+
+            # create indexing variable corresponding to the active elements and convert the data type depending on the number of indices
             self.u_source_pos_index = matlab_find(active_elements_mask).astype(self.index_data_type)
 
-            # convert the delay mask to an indexing variable (this doesn't need to
-            # be modified if the grid is expanded) which tells each point in the
-            # source mask which point in the input_signal should be used
-            delay_mask = matlab_mask(delay_mask, active_elements_mask != 0)  # compatibility
-
-            # convert the data type depending on the maximum value of the delay
-            # mask and the length of the source
+            # convert the delay mask to an indexing variable
+            delay_mask = matlab_mask(delay_mask, active_elements_mask != 0)
             smallest_type = get_smallest_possible_type(delay_mask.max(), "uint")
             if smallest_type is not None:
                 delay_mask = delay_mask.astype(smallest_type)
 
-            # move forward by 1 as a delay of 0 corresponds to the first point in the input signal
             self.delay_mask = delay_mask + 1
 
-            # clean up unused variables
             del active_elements_mask
 
     def check_kgrid_time(self) -> None:
