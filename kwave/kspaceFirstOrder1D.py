@@ -8,7 +8,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kWaveSimulation import kWaveSimulation
-
+from kwave.kWaveSimulation_helper import extract_sensor_data
 from kwave.ktransducer import NotATransducer
 
 from kwave.utils.data import scale_time
@@ -18,8 +18,6 @@ from kwave.utils.tictoc import TicToc
 from kwave.utils.dotdictionary import dotdict
 
 from kwave.options.simulation_options import SimulationOptions
-
-from kwave.kWaveSimulation_helper import extract_sensor_data
 
 def kspace_first_order_1D(kgrid: kWaveGrid,
                          source: kSource,
