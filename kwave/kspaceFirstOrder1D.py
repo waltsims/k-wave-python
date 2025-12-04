@@ -25,8 +25,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                          source: kSource,
                          sensor: Union[NotATransducer, kSensor],
                          medium: kWaveMedium,
-                         simulation_options: SimulationOptions,
-                         verbose: bool = False):
+                         simulation_options: SimulationOptions):
 
     """
     KSPACEFIRSTORDER1D 1D time-domain simulation of wave propagation.
@@ -586,8 +585,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
     c0    = c0.astype(myType)
 
-    verbose: bool = False
-
     # =========================================================================
     # CREATE INDEX VARIABLES
     # =========================================================================
@@ -666,37 +663,14 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     # start time loop
     for t_index in tqdm(np.arange(index_start, index_end, index_step, dtype=int)):
         
-        # print("0.", np.shape(p))
-
-        # enforce time reversal bounday condition
-        # if options.time_rev:       
-        #     # load pressure value and enforce as a Dirichlet boundary condition
-        #     p[k_sim.sensor_mask_index] = sensor.time_reversal_boundary_data[:, t_index]
-        #     # update p_k
-        #     p_k = scipy.fft.fft(p)
-        #     # compute rhox using an adiabatic equation of state
-        #     rhox_mod = p / c0**2
-        #     rhox[k_sim.sensor_mask_index] = rhox_mod[k_sim.sensor_mask_index]
-        
-    
-        # print("1.", np.shape(p))
-
         # calculate ux at the next time step using dp/dx at the current time step
         if not options.nonuniform_grid and not options.use_finite_difference:
-
-            if verbose:
-                print("Here 1-----.", np.shape(pml_x), np.shape(pml_x_sgx), np.shape(ux_sgx), 
-                      '......', np.shape(ddx_k), np.shape(ddx_k_shift_pos), np.shape(kappa), 
-                      ',,,,,,', np.shape(p_k), np.shape(rho0_sgx_inv))
-
-
 
             # calculate gradient using the k-space method on a regular grid
             ux_sgx = pml_x_sgx * (pml_x_sgx * ux_sgx - 
                                   dt * rho0_sgx_inv * np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_pos * kappa * p_k, axes=(0,))))
         
         elif options.use_finite_difference:
-            print("\t\tEXIT! options.use_finite_difference")
             match options.use_finite_difference:
                 case 2:
                     
@@ -714,13 +688,11 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                     dpdx = (np.insert(p[:-1], 0, 0) - 27.0 * p + 27 * np.append(p[1:], 0.0) - np.append(p[2:], [0, 0])) / (24.0 * kgrid.dx)
                     ux_sgx = pml_x_sgx * (pml_x_sgx * ux_sgx - dt * rho0_sgx_inv * dpdx )
                     
-        else:
-            print("\t\tEXIT! else", )
-            
+        else:           
             # calculate gradient using the k-space method on a non-uniform grid
             # via the mapped pseudospectral method         
             ux_sgx = pml_x_sgx * (pml_x_sgx * ux_sgx - 
-                                dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * np.real(scipy.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
+                                  dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * np.real(scipy.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
         
  
         # print("2.", np.shape(p))
@@ -744,23 +716,15 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         #             # add the source values to the existing field values        
         #             ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
             
-   
-        # print("3.", np.shape(p))
 
         # calculate du/dx at the next time step
         if not options.nonuniform_grid and not options.use_finite_difference:
 
-            if verbose:
-                print("Here 1.", np.shape(p), np.shape(ux_sgx), np.shape(ddx_k), np.shape(ddx_k_shift_neg), np.shape(kappa))
-
             # calculate gradient using the k-space method on a regular grid
             duxdx = np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_neg * kappa * scipy.fft.fftn(ux_sgx, axes=(0,)), axes=(0,) ) )
 
-            if verbose:
-                print("Here 1(end). duxdx:", np.shape(duxdx))
 
         elif options.use_finite_difference:
-            print("\t\tEXIT! options.use_finite_difference")
             match options.use_finite_difference:
                 case 2:
                     
@@ -780,19 +744,11 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
             duxdx = kgrid.dxudxn * np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_neg * kappa * scipy.fft.fftn(ux_sgx, axes=(0,)), axes=(0,)))
 
 
-        # print("4.", np.shape(p))
 
         # calculate rhox at the next time step
         if not k_sim.is_nonlinear:
             # use linearised mass conservation equation
-
-            if verbose:
-                print("pre:", pml_x.shape, rhox.shape, duxdx.shape, dt, rho0.shape)
-
             rhox = pml_x * (pml_x * rhox - dt * rho0 * duxdx)
-
-            if verbose:
-                print("post:", pml_x.shape, rhox.shape, duxdx.shape, dt, rho0.shape)
 
         else:
             # use nonlinear mass conservation equation (explicit calculation)
@@ -821,16 +777,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         #             # add the source values to the existing field values
         #             rhox[k_sim.p_source_pos_index] = rhox[k_sim.p_source_pos_index] + source.p[k_sim.p_source_sig_index, t_index]
             
-    
-        # print("6.", np.shape(p))
 
         # equation of state
         if not k_sim.is_nonlinear:
             # print("is linear", k_sim.equation_of_state, type(k_sim.equation_of_state))
             match k_sim.equation_of_state:
                 case 'lossless':
-
-                    # print("Here 2. lossless / linear",  np.shape(p))
                     
                     # calculate p using a linear adiabatic equation of state
                     p = np.squeeze(c0**2) * np.squeeze(rhox)
@@ -839,8 +791,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                     
                 case 'absorbing':
 
-                    # print("Here 2. absorbing / linear",  np.shape(p))
-
                     # calculate p using a linear absorbing equation of state
                     p = np.squeeze(c0**2 * (rhox
                         + medium.absorb_tau * np.real(scipy.fft.ifftn(medium.absorb_nabla1 * scipy.fft.fftn(rho0 * duxdx, axes=(0,)), axes=(0,) ))  
@@ -848,8 +798,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
                     
                 case 'stokes':
-                    
-                    # print("Here 2. stokes / linear")
 
                     # calculate p using a linear absorbing equation of state
                     # assuming alpha_power = 2
@@ -859,15 +807,11 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         else:
             match k_sim.equation_of_state:
                 case 'lossless':
-
-                    print("Here 2. lossless / nonlinear")
                     
                     # calculate p using a nonlinear adiabatic equation of state
                     p = c0**2 * (rhox + medium.BonA * rhox**2 / (2.0 * rho0))
                     
                 case 'absorbing':
-
-                    print("Here 2. absorbing / nonlinear")
 
                     # calculate p using a nonlinear absorbing equation of state
                     p = c0**2 * ( rhox
@@ -876,8 +820,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                         + medium.BonA * rhox**2 / (2.0 * rho0) )
                     
                 case 'stokes':
-
-                    print("Here 2. stokes / nonlinear")
                     
                     # calculate p using a nonlinear absorbing equation of state
                     # assuming alpha_power = 2
@@ -963,7 +905,8 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                                        'compute_directivity': False})
             
             # run sub-function to extract the required data from the acoustic variables
-            sensor_data = extract_sensor_data(kgrid.dim, sensor_data, file_index, k_sim.sensor_mask_index, extract_options, record, p, ux_sgx)
+            sensor_data = extract_sensor_data(kgrid.dim, sensor_data, file_index, k_sim.sensor_mask_index, 
+                                              extract_options, record, p, ux_sgx)
 
 
 
