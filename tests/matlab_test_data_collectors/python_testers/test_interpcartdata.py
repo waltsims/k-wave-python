@@ -29,7 +29,7 @@ class kGridMock(Mock):
 def test_interpcartdata():
     reader = TestRecordReader(os.path.join(Path(__file__).parent, "collectedValues/interpCartData.mat"))
 
-    for _ in range(len(reader)):
+    for i in range(len(reader)):
         # 'params', 'kgrid', 'sensor_data', 'sensor_mask', 'binary_sensor_mask', 'trbd'
         trbd = reader.expected_value_of("trbd")
         kgrid_props = reader.expected_value_of("kgrid")
@@ -42,13 +42,53 @@ def test_interpcartdata():
         kgrid.set_props(kgrid_props)
 
         trbd_py = interp_cart_data(
-            kgrid, cart_sensor_data=sensor_data, cart_sensor_mask=sensor_mask, binary_sensor_mask=binary_sensor_mask, interp=interp_method
+            kgrid,
+            cart_sensor_data=sensor_data,
+            cart_sensor_mask=sensor_mask,
+            binary_sensor_mask=binary_sensor_mask.astype(bool),
+            interp=interp_method,
         )
 
-        assert np.allclose(trbd, trbd_py)
+        assert np.allclose(trbd, trbd_py), f"{i}. interpolated values not correct with method: {interp_method}"
         reader.increment()
 
-    logging.log(logging.INFO, "cart2grid(..) works as expected!")
+    logging.log(logging.INFO, "interp_cart_data(..) works as expected!")
+
+
+def test_griddim_sensor_data():    
+    kgrid = kWaveGrid([100, 100], [1, 1])
+    binary_sensor_mask = np.zeros((100, 100), dtype=bool)
+    binary_sensor_mask[51, 49] = True
+    cart_sensor_mask = np.array([[0.0, 0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+
+def test_griddim_binary_sensor_mask():    
+    kgrid = kWaveGrid([100, 100], [1, 1])
+    binary_sensor_mask = np.zeros((100,), dtype=bool)
+    binary_sensor_mask[51] = True
+    cart_sensor_mask = np.array([[0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError):
+        interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_mask)
+
+
+def test_cart_sensor_data_shape():    
+    kgrid = kWaveGrid([100, 100], [1, 1])
+    binary_sensor_mask = np.zeros((100, 100), dtype=bool)
+    binary_sensor_mask[51, 49] = True
+    cart_sensor_mask = np.array([[0.0, 0.0]], dtype=np.float32).T  
+    cart_sensor_data = np.array([[1.0, 2.0, 3.0]], dtype=np.float32)    
+    with pytest.raises(ValueError, match="Not enough points to interpolate."):
+        interp_cart_data(
+            kgrid,
+            cart_sensor_data=cart_sensor_data,
+            cart_sensor_mask=cart_sensor_mask,
+            binary_sensor_mask=binary_sensor_mask,
+            interp="linear",
+        )
 
 
 def test_unknown_interp_method():
@@ -61,7 +101,7 @@ def test_unknown_interp_method():
             kgrid,
             cart_sensor_data=reader.expected_value_of("sensor_data"),
             cart_sensor_mask=reader.expected_value_of("sensor_mask"),
-            binary_sensor_mask=reader.expected_value_of("binary_sensor_mask"),
+            binary_sensor_mask=reader.expected_value_of("binary_sensor_mask").astype(bool),
             interp="unknown",
         )
 

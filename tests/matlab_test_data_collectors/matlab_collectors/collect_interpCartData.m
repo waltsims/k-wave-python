@@ -2,7 +2,7 @@ all_params = {
     {1600, 10, 64, 0.2e-3, 'nearest'},...
     {1540, 20, 128, 0.1e-3, 'nearest'},...
     {1500, 40, 300, 0.5e-4, 'nearest'},...
-    {1500, 40, 300, 0.5e-4, 'linear'}
+    % {1500, 40, 300, 0.5e-4, 'linear'}
     };
 
 
@@ -31,20 +31,27 @@ for idx=1:length(all_params)
 
         % define a Cartesian spherical sensor
         sensor_radius = 4e-3;       % [m]
-        center_pos = [0, 0, 0];     % [m]
         num_sensor_points = 100;
-        sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+
 
 
         % define the properties of the propagation medium
         medium_sound_speed = params{1};	% [m/s]
         if dim == 2
+
+            center_pos = [0, 0];     % [m]
+            sensor_mask = makeCartCircle(sensor_radius, num_sensor_points, center_pos, false);
+
             kgrid = kWaveGrid(Nx, dx, Ny, dy);
             % create a binary sensor mask of an equivalent continuous sphere
             sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
             p0_binary = ball_magnitude * makeCircle(Nx, Ny, ball_x_pos, ball_y_pos, ball_radius);
             binary_sensor_mask = makeDisc(kgrid.Nx, kgrid.Ny, 0, 0, sensor_radius_grid_points);
         else
+
+            center_pos = [0, 0, 0];     % [m]
+            sensor_mask = makeCartSphere(sensor_radius, num_sensor_points, center_pos, false);
+
             kgrid = kWaveGrid(Nx, dx, Ny, dy, Nz, dz);
             % create a binary sensor mask of an equivalent continuous sphere
             sensor_radius_grid_points = round(sensor_radius / kgrid.dx);
@@ -55,10 +62,11 @@ for idx=1:length(all_params)
         % create the time array
         kgrid.makeTime(medium_sound_speed);
         % mock the simulation
-        sensor_data = sin(repmat(1:kgrid.Nt,[num_sensor_points,1]));
+        phase_shifts = linspace(0, 2 * pi, num_sensor_points);
+        sensor_data = sin(2 * pi * [1:kgrid.Nt]/ kgrid.Nt + repmat(transpose(phase_shifts), 1, kgrid.Nt));
         % smooth the initial pressure distribution and restore the magnitude
         p0 = smooth(p0_binary, true);
-
+        
         % interpolate data to remove the gaps and assign to time reversal data
         trbd = interpCartData(kgrid, sensor_data, sensor_mask, binary_sensor_mask);
         recorder.recordVariable('trbd', trbd); 
