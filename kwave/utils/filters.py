@@ -588,6 +588,10 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     win, _ = get_win(grid_size, type_=window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
     win = np.abs(win)
 
+    if win.ndim == 2 and a.ndim == 1:
+        # if mismatch between 1d grid and window, make sure win is same shape as the grid
+        win = np.squeeze(win) 
+
     # rotate window if input mat is (1, N)
     if a.shape[0] == 1:  # is row?
         win = win.T

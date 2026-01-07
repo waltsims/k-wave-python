@@ -76,7 +76,8 @@ class kSource(object):
             None
         """
         if self.p0 is not None:
-            if self.p0.shape != kgrid.k.shape:
+            if self.p0.shape != np.squeeze(kgrid.k).shape:
+                
                 # throw an error if p0 is not the correct size
                 raise ValueError("source.p0 must be the same size as the computational grid.")
 

@@ -2,7 +2,9 @@ import logging
 import warnings
 from dataclasses import dataclass
 
+import copy
 import numpy as np
+
 from deprecated import deprecated
 
 from kwave.data import Vector
@@ -13,6 +15,7 @@ from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
 from kwave.kWaveSimulation_helper import (
     create_absorption_variables,
+    create_storage_variables,
     display_simulation_params,
     expand_grid_matrices,
     scale_source_terms_func,
@@ -72,13 +75,13 @@ class kWaveSimulation(object):
             self.sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
 
             # set time reversal flag
-            self.userarg_time_rev = True
+            self.time_rev = True
 
             self.record = Recorder()
             self.record.p = False
         else:
             # set time reversal flag
-            self.userarg_time_rev = False
+            # self.time_rev = False
 
             #: Whether sensor.mask should be re-ordered.
             #: True if sensor.mask is Cartesian with nearest neighbour interpolation which is calculated using a binary mask
@@ -143,6 +146,14 @@ class kWaveSimulation(object):
         self.index_data_type = None
 
     @property
+    def is_nonlinear(self):
+        """
+        Returns:
+            Set simulation to nonlinear if medium is nonlinear.
+        """
+        return self.medium.is_nonlinear()
+
+    @property
     def equation_of_state(self):
         """
         Returns:
@@ -154,7 +165,7 @@ class kWaveSimulation(object):
             else:
                 return "absorbing"
         else:
-            return "loseless"
+            return "lossless"
 
     @property
     def use_sensor(self):
@@ -200,7 +211,7 @@ class kWaveSimulation(object):
     def time_rev(self) -> bool:
         if self.sensor and not isinstance(self.sensor, NotATransducer):
             return not self.options.simulation_type.is_elastic_simulation() and self.sensor.time_reversal_boundary_data is not None
-        return self.userarg_time_rev
+        return self.time_rev
 
     @property
     @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
@@ -515,6 +526,80 @@ class kWaveSimulation(object):
         self.create_absorption_vars()
         self.assign_pseudonyms(self.medium, self.kgrid)
         self.scale_source_terms(opt.scale_source_terms)
+
+        # move all this inside create_storage_variables?
+        # a copy of record is passed through, and use to update the
+        if is_elastic_code:
+            record_old = copy.deepcopy(self.record)
+            if not self.blank_sensor:
+                sensor_x = self.sensor.mask[0, :]
+            else:
+                sensor_x = None
+
+            values = dotdict({"sensor_x": sensor_x,
+                              "sensor_mask_index": self.sensor_mask_index,
+                              "record": record_old,
+                              "sensor_data_buffer_size": self.s_source_pos_index})
+
+            if self.record.u_split_field:
+                self.record_u_split_field = self.record.u_split_field
+
+            flags = dotdict({"use_sensor": self.use_sensor,
+                             "blank_sensor": self.blank_sensor,
+                             "binary_sensor_mask": self.binary_sensor_mask,
+                             "record_u_split_field": self.record.u_split_field,
+                             "time_rev": self.time_rev,
+                             "reorder_data": self.reorder_data,
+                             "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
+                             "axisymmetric": opt.simulation_type.is_axisymmetric(),
+                             "transducer_sensor": self.transducer_sensor,
+                             "use_cuboid_corners": self.cuboid_corners})
+
+            # this creates the storage variables by determining the spatial locations of the data which is in self.record.
+            flags, self.record, self.sensor_data, self.num_recorded_time_points = create_storage_variables(self.kgrid,
+                                                                            self.sensor,
+                                                                            opt,
+                                                                            values,
+                                                                            flags,
+                                                                            self.record)
+        else:
+            record_old = copy.deepcopy(self.record)
+            if not self.blank_sensor:
+                if k_dim == 1:
+                    # this has been declared in check_sensor
+                    sensor_x = self.sensor_x
+                else:
+                    sensor_x = self.sensor.mask[0, :]
+            else:
+                sensor_x = None
+
+            values = dotdict({"sensor_x": sensor_x,
+                              "sensor_mask_index": self.sensor_mask_index,
+                              "record": record_old,
+                              "sensor_data_buffer_size": self.s_source_pos_index})
+
+            if self.record.u_split_field:
+                self.record_u_split_field = self.record.u_split_field
+
+            flags = dotdict({"use_sensor": self.use_sensor,
+                             "blank_sensor": self.blank_sensor,
+                             "binary_sensor_mask": self.binary_sensor_mask,
+                             "record_u_split_field": self.record.u_split_field,
+                             "time_rev": self.time_rev,
+                             "reorder_data": self.reorder_data,
+                             "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
+                             "axisymmetric": opt.simulation_type.is_axisymmetric(),
+                             "transducer_sensor": self.transducer_sensor,
+                             "use_cuboid_corners": self.cuboid_corners})
+
+            # this creates the storage variables by determining the spatial locations of the data which is in self.record.
+            flags, self.record, self.sensor_data, self.num_recorded_time_points = create_storage_variables(self.kgrid,
+                                                                            self.sensor,
+                                                                            opt,
+                                                                            values,
+                                                                            flags,
+                                                                            self.record)
+
         self.create_pml_indices(
             kgrid_dim=self.kgrid.dim,
             kgrid_N=Vector(self.kgrid.N),
@@ -762,12 +847,11 @@ class kWaveSimulation(object):
                             # align sensor data as a column vector to be the
                             # same as kgrid.x_vec so that calls to interp1
                             # return data in the correct dimension
-                            self.sensor_x = np.reshape((self.sensor.mask, (-1, 1)))
+                            self.sensor_x = np.reshape(self.sensor.mask, (-1, 1))
 
                             # add sensor_x to the record structure for use with
                             # the _extractSensorData subfunction
                             self.record.sensor_x = self.sensor_x
-                            "record.sensor_x = sensor_x;"
 
                         elif kgrid_dim == 2:
                             self.sensor_x = self.sensor.mask[0, :]

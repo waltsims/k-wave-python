@@ -421,11 +421,6 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
         # store the time history of the acoustic pressure
         if flags.record_p or flags.record_I or flags.record_I_avg:
             if dim == 1:
-                # i = np.argmin(np.abs(record.grid_x - record.sensor_x[0])).astype(int)
-                # j = np.argmin(np.abs(record.grid_x - record.sensor_x[1])).astype(int)
-                # print("THIS:", p.shape, file_index,  i, j, record.sensor_x, record.sensor_x[0], record.sensor_x[1], record.grid_x[i], record.grid_x[j], 
-                #       p[i], p[j], 
-                #       record.grid_x[0], record.grid_x[-1], p.max())
                 sensor_data.p[:, file_index] = np.interp(np.squeeze(record.sensor_x), np.squeeze(record.grid_x), p)
             else:
                 sensor_data.p[:, file_index] = np.sum(p[record.tri] * record.bc, axis=1)

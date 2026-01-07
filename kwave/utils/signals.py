@@ -56,7 +56,7 @@ def add_noise(signal: np.ndarray, snr: float, mode="rms"):
 
 @typechecker
 def get_win(
-    N: Union[int, np.ndarray, Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
+    N: Union[int, np.ndarray, Tuple[int], Tuple[int, int], Tuple[int, int, int], List[Int[kt.ScalarLike, ""]]],
     # TODO: replace and refactor for scipy.signal.get_window
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window
     type_: str,  # TODO change this to enum in the future
@@ -149,6 +149,10 @@ def get_win(
 
     # create the window
     if N.size == 1:
+
+        # cast if is Tuple with a single value
+        N = int(N)
+
         # TODO: what should this behaviour be if N is a list of ints? make windows of multiple lengths?
         n = np.arange(0, N)
 
