@@ -142,13 +142,13 @@ def get_win(
 
     # if a square window is required, replace grid sizes with smallest size and
     # store a copy of the original size
-    if square and (N.size != 1):
+    if square and (np.asarray(N).size != 1):
         N_orig = np.copy(N)
         L = min(N)
         N[:] = L
 
     # create the window
-    if N.size == 1:
+    if np.asarray(N).size == 1:
 
         # cast if is Tuple with a single value
         N = int(N)
@@ -307,7 +307,7 @@ def get_win(
         raise ValueError("Invalid input for N, only 1-, 2-, and 3-D windows are supported.")
 
     # enlarge the window if required
-    if square and (N.size != 1):
+    if square and (np.asarray(N).size != 1):
         L = N[0]
         win_sq = win
         win = np.zeros(N_orig)

@@ -39,7 +39,7 @@ dependencies = [
 [project.urls]
 Homepage = "http://www.k-wave.org/"
 Documentation = "https://waltersimson.com/k-wave-python/"
-Repository = "https://github.com/djps/k-wave-python"
+Repository = "https://github.com/waltsims/k-wave-python"
 Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]

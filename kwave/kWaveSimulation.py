@@ -75,7 +75,7 @@ class kWaveSimulation(object):
             self.sensor = kSensor(mask=np.ones((Nx, Ny, max(1, Nz))), record=["p_final"])
 
             # set time reversal flag
-            self.time_rev = True
+            #self.time_rev = None
 
             self.record = Recorder()
             self.record.p = False
@@ -548,7 +548,7 @@ class kWaveSimulation(object):
                              "blank_sensor": self.blank_sensor,
                              "binary_sensor_mask": self.binary_sensor_mask,
                              "record_u_split_field": self.record.u_split_field,
-                             "time_rev": self.time_rev,
+                             "time_rev": None,
                              "reorder_data": self.reorder_data,
                              "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
                              "axisymmetric": opt.simulation_type.is_axisymmetric(),
@@ -585,7 +585,7 @@ class kWaveSimulation(object):
                              "blank_sensor": self.blank_sensor,
                              "binary_sensor_mask": self.binary_sensor_mask,
                              "record_u_split_field": self.record.u_split_field,
-                             "time_rev": self.time_rev,
+                             "time_rev": None,
                              "reorder_data": self.reorder_data,
                              "transducer_receive_elevation_focus": self.transducer_receive_elevation_focus,
                              "axisymmetric": opt.simulation_type.is_axisymmetric(),
@@ -742,9 +742,10 @@ class kWaveSimulation(object):
                 # given, the time history of the acoustic pressure is recorded by
                 # default
                 if self.sensor.record is not None:
+
                     # check for time reversal data
-                    if self.time_rev:
-                        logging.log(logging.WARN, "sensor.record is not used for time reversal reconstructions")
+                    # if self.time_rev:
+                    #     logging.log(logging.WARN, "sensor.record is not used for time reversal reconstructions")
 
                     # check the input is a cell array
                     assert isinstance(self.sensor.record, list), 'sensor.record must be given as a list, e.g. ["p", "u"]'
@@ -872,19 +873,19 @@ class kWaveSimulation(object):
 
                         # if in time reversal mode, reorder the p0 input data in
                         # the order of the binary sensor_mask
-                        if self.time_rev:
-                            raise NotImplementedError
-                            """
-                            # append the reordering data
-                            new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
-                            sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
-        
-                            # reorder p0 based on the order_index
-                            sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
-        
-                            # remove the reordering data
-                            sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
-                            """
+                        # if self.time_rev:
+                        #     raise NotImplementedError
+                        #   """
+                        #   # append the reordering data
+                        #   new_col_pos = length(sensor.time_reversal_boundary_data(1, :)) + 1;
+                        #   sensor.time_reversal_boundary_data(:, new_col_pos) = order_index;
+    
+                        #   # reorder p0 based on the order_index
+                        #   sensor.time_reversal_boundary_data = sort_rows(sensor.time_reversal_boundary_data, new_col_pos);
+    
+                        #   # remove the reordering data
+                        #   sensor.time_reversal_boundary_data = sensor.time_reversal_boundary_data(:, 1:new_col_pos - 1);
+                        #   """
             else:
                 # set transducer sensor flag
                 self.transducer_sensor = True
@@ -1097,8 +1098,8 @@ class kWaveSimulation(object):
         # check kgrid for t_array existence, and create if not defined
         if isinstance(self.kgrid.t_array, str) and self.kgrid.t_array == "auto":
             # check for time reversal mode
-            if self.time_rev:
-                raise ValueError("kgrid.t_array (Nt and dt) must be defined explicitly in time reversal mode.")
+            # if self.time_rev:
+            #     raise ValueError("kgrid.t_array (Nt and dt) must be defined explicitly in time reversal mode.")
 
             # check for time varying sources
             if (not self.source_p0_elastic) and (
@@ -1262,8 +1263,8 @@ class kWaveSimulation(object):
             raise NotImplementedError(f"diary({self.LOG_NAME}.txt');")
 
         # update command line status
-        if self.time_rev:
-            logging.log(logging.INFO, "  time reversal mode")
+        # if self.time_rev:
+        #     logging.log(logging.INFO, "  time reversal mode")
 
         # cleanup unused variables
         for k in list(self.__dict__.keys()):

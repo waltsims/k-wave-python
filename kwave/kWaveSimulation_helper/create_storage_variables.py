@@ -81,8 +81,9 @@ def create_storage_variables(kgrid: kWaveGrid, sensor, opt: SimulationOptions,
 
     flags = set_flags(flags, values.sensor_x, sensor.mask, opt.cartesian_interp)
 
-    # preallocate output variables
-    if flags.time_rev:
+    # preallocate output variables - this keeps the time reversal flag, which is, at present, is always None, so that is allocating data 
+    # for intermediate steps in time reversal simulations debugging may be possible. 
+    if flags.time_rev is not None:
         return flags
 
     num_sensor_points = get_num_of_sensor_points(flags.blank_sensor,
@@ -125,8 +126,9 @@ def set_flags(flags: dotdict, sensor_x, sensor_mask, is_cartesian_interp):
         # input_checking, but switch on Cartesian reorder flag so that the
         # final data is returned in the correct order (not in time
         # reversal mode).
+        # Again, as time reversal is not yet implemented, time_rev is always None here, so this is just setting reorder_data to True
         flags.binary_sensor_mask = True
-        if not flags.time_rev:
+        if flags.time_rev is None:
             flags.reorder_data = True
 
         # check if any duplicate points have been discarded in the
