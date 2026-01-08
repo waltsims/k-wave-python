@@ -1,5 +1,10 @@
 from typing import Union
 
+try: 
+    import cupy as cp
+except ImportError: 
+    cp = None
+
 import numpy as np
 import scipy.fft
 from tqdm import tqdm
@@ -171,6 +176,8 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     timer = TicToc()
     timer.tic()
 
+    xp = cp if cp and backend in ("auto", "gpu") else np
+
     # run script to check inputs and create the required arrays
     k_sim = kWaveSimulation(kgrid=kgrid, source=source, sensor=sensor, medium=medium,
                             simulation_options=simulation_options)
@@ -209,8 +216,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     # invert rho0 so it doesn't have to be done each time step
     rho0_sgx_inv = 1.0 / rho0_sgx
 
-    # rho0_sgx_inv = rho0_sgx_inv[:, np.newaxis]
-
     # clear unused variables
     del rho0_sgx
 
@@ -241,29 +246,22 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
     # define the k-space derivative operator
     ddx_k = scipy.fft.ifftshift(1j * kx_vec)
-    
-    #    ddx_k = ddx_k[:, np.newaxis]
 
     # define the staggered grid shift operators (the option options.use_sg exists for debugging)
     if options.use_sg:
         ddx_k_shift_pos = scipy.fft.ifftshift( np.exp( 1j * kx_vec * dx / 2.0))
         ddx_k_shift_neg = scipy.fft.ifftshift( np.exp(-1j * kx_vec * dx / 2.0))
-        #ddx_k_shift_pos = ddx_k_shift_pos[:, np.newaxis]
-        #ddx_k_shift_neg = ddx_k_shift_neg[:, np.newaxis]
     else:
         ddx_k_shift_pos = 1.0
         ddx_k_shift_neg = 1.0 
     
-
     # create k-space operator (the option options.use_kspace exists for debugging)
     if options.use_kspace:
         kappa        = scipy.fft.ifftshift(sinc(c_ref * kgrid.k * kgrid.dt / 2.0))
-        kappa = np.squeeze(kappa)
-        # kappa        = kappa[:, np.newaxis]
+        kappa        = np.squeeze(kappa)
         if (hasattr(options, 'source_p') and hasattr(k_sim.source, 'p_mode')) and (k_sim.source.p_mode == 'additive') or \
            (hasattr(options, 'source_ux') and hasattr(k_sim.source, 'u_mode')) and (k_sim.source.u_mode == 'additive'):
             source_kappa = scipy.fft.ifftshift(np.cos (c_ref * kgrid.k * kgrid.dt / 2.0))
-            #source_kappa = source_kappa[:, np.newaxis]
     else:
         kappa        = 1.0
         source_kappa = 1.0
@@ -383,24 +381,24 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                                   dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * np.real(scipy.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
         
 
-        # # add in the velocity source term
-        # if (k_sim.source_ux is not False and t_index < np.shape(source.ux)[1]):
-        # #if options.source_ux >= t_index:
-        #     match source.u_mode:
-        #         case 'dirichlet':         
-        #             # enforce the source values as a dirichlet boundary condition
-        #             ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
-        #         case 'additive':
-        #             # extract the source values into a matrix
-        #             source_mat = np.zeros([kgrid.Nx, 1])
-        #             source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
-        #             # apply the k-space correction
-        #             source_mat = np.real(scipy.fft.ifft(source_kappa * scipy.fft.fft(source_mat)))
-        #             # add the source values to the existing field values including the k-space correction
-        #             ux_sgx = ux_sgx + source_mat
-        #         case 'additive-no-correction':
-        #             # add the source values to the existing field values        
-        #             ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
+        # add in the velocity source term
+        if (k_sim.source_ux is not False and t_index < np.shape(source.ux)[1]):
+            if options.source_ux >= t_index:
+                match source.u_mode:
+                    case 'dirichlet':
+                        # enforce the source values as a dirichlet boundary condition
+                        ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                    case 'additive':
+                        # extract the source values into a matrix
+                        source_mat = np.zeros([kgrid.Nx, ])
+                        source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                        # apply the k-space correction
+                        source_mat = np.real(scipy.fft.ifft(source_kappa * scipy.fft.fft(source_mat)))
+                        # add the source values to the existing field values including the k-space correction
+                        ux_sgx = ux_sgx + source_mat
+                    case 'additive-no-correction':
+                        # add the source values to the existing field values        
+                        ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
             
 
         # calculate du/dx at the next time step
@@ -432,25 +430,26 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
             # use nonlinear mass conservation equation (explicit calculation)
             rhox = pml_x * (pml_x * rhox - dt * (2.0 * rhox + rho0) * duxdx)
 
+
         # add in the pre-scaled pressure source term as a mass source
-        # if options.source_p >= t_index:
-        # if (k_sim.source_p is not False and t_index < np.shape(source.p)[1]):
-        #     match source.p_mode:
-        #         case 'dirichlet':
-        #             # enforce source values as a dirichlet boundary condition
-        #             rhox[k_sim.p_source_pos_index] = source.p[k_sim.p_source_sig_index, t_index]
-        #         case 'additive':
-        #             # extract the source values into a matrix
-        #             source_mat = np.zeros((kgrid.Nx, 1), dtype=myType)
-        #             source_mat[k_sim.p_source_pos_index] = source.p[k_sim.p_source_sig_index, t_index]
-        #             # apply the k-space correction
-        #             source_mat = np.real(scipy.fft.ifft(source_kappa * scipy.fft.fft(source_mat)))
-        #             # add the source values to the existing field values
-        #             # including the k-space correction
-        #             rhox = rhox + source_mat
-        #         case 'additive-no-correction':
-        #             # add the source values to the existing field values
-        #             rhox[k_sim.p_source_pos_index] = rhox[k_sim.p_source_pos_index] + source.p[k_sim.p_source_sig_index, t_index]
+        if options.source_p >= t_index:
+            if (k_sim.source_p is not False and t_index < np.shape(source.p)[1]):
+                match source.p_mode:
+                    case 'dirichlet':
+                        # enforce source values as a dirichlet boundary condition
+                        rhox[k_sim.p_source_pos_index] = source.p[k_sim.p_source_sig_index, t_index]
+                    case 'additive':
+                        # extract the source values into a matrix
+                        source_mat = np.zeros((kgrid.Nx,), dtype=myType)
+                        source_mat[k_sim.p_source_pos_index] = source.p[k_sim.p_source_sig_index, t_index]
+                        # apply the k-space correction
+                        source_mat = np.real(scipy.fft.ifft(source_kappa * scipy.fft.fft(source_mat)))
+                        # add the source values to the existing field values
+                        # including the k-space correction
+                        rhox = rhox + source_mat
+                    case 'additive-no-correction':
+                        # add the source values to the existing field values
+                        rhox[k_sim.p_source_pos_index] = rhox[k_sim.p_source_pos_index] + source.p[k_sim.p_source_sig_index, t_index]
             
 
         # equation of state
@@ -496,7 +495,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
             p0 = np.squeeze(k_sim.source.p0)
 
-
             # add the initial pressure to rho as a mass source
             p = p0
             rhox = p0 / np.squeeze(c0)**2
@@ -506,7 +504,6 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                 
                 # calculate gradient using the k-space method on a regular grid
                 ux_sgx = dt * rho0_sgx_inv * np.real(scipy.fft.ifftn(ddx_k * ddx_k_shift_pos * kappa * scipy.fft.fftn(p, axes=(0,)), axes=(0,) )) / 2.0
-
                 p_k = scipy.fft.fftn(p, axes=(0,))  
                 p_k = np.squeeze(p_k)
 
@@ -522,11 +519,9 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                         dpdx = (np.append(p[2:], [0, 0]) - 27.0 * np.append(p[1:], 0) + 27.0 * p - np.append(0, p[:-1])) / (24.0 * kgrid.dx)
                         ux_sgx = dt * rho0_sgx_inv * dpdx / 2.0
                         
-        
         else:
             # precompute fft of p here so p can be modified for visualisation
             p_k = scipy.fft.fftn(p, axes=(0,))  
-            #p_k = p_k[:, np.newaxis] 
     
         # extract required sensor data from the pressure and particle velocity
         # fields if the number of time steps elapsed is greater than
