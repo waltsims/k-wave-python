@@ -8,20 +8,16 @@ medium. It builds on the Homogeneous Propagation Medium and Heterogeneous
 Propagation Medium examples.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from kwave.data import Vector
-
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-
 from kwave.kspaceFirstOrder1D import kspace_first_order_1D
-
 from kwave.options.simulation_options import SimulationOptions
-
 
 # =========================================================================
 # SIMULATION

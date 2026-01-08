@@ -1,10 +1,9 @@
+import copy
 import logging
 import warnings
 from dataclasses import dataclass
 
-import copy
 import numpy as np
-
 from deprecated import deprecated
 
 from kwave.data import Vector

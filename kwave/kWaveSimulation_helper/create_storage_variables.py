@@ -1,16 +1,15 @@
+from copy import deepcopy
+from typing import List, Union
+
 import numpy as np
 from numpy.fft import ifftshift
-from copy import deepcopy
-from typing import Union, List
+from scipy.spatial import Delaunay
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
-from kwave.recorder import Recorder
 from kwave.options.simulation_options import SimulationOptions
+from kwave.recorder import Recorder
 from kwave.utils.dotdictionary import dotdict
-
-
-from scipy.spatial import Delaunay
 
 
 def gridDataFast2D(x, y, xi, yi):

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
                         flags, record, p, ux_sgx, uy_sgy=None, uz_sgz=None):
     """
