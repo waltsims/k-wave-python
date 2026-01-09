@@ -17,7 +17,9 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder1D import kspace_first_order_1D
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
+
 
 # =========================================================================
 # SIMULATION
@@ -72,9 +74,10 @@ kgrid.makeTime(c_max, t_end=t_end)
 
 # define the simulation options
 simulation_options = SimulationOptions(data_cast="off", save_to_disk=False)
+execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
 
 # run the simulation
-sensor_data = kspace_first_order_1D(kgrid, source, sensor, medium, simulation_options=simulation_options)
+sensor_data = kspace_first_order_1D(kgrid, source, sensor, medium, simulation_options=simulation_options, execution_options=execution_options)
 
 # =========================================================================
 # VISUALISATION

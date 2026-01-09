@@ -292,7 +292,7 @@ class kWaveSimulation(object):
     def source_p_labelled(self):  # time-varying pressure with labelled source mask
         """
         Returns:
-            True/False if labelled/binary source mask, respectively.
+            True/False if labelled/binary source mask, respectively (default=False)
 
         """
         flag = False

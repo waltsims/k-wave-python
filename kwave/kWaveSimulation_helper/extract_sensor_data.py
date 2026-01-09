@@ -1,7 +1,10 @@
 import numpy as np
+try: 
+    import cupy as cp
+except ImportError: 
+    cp = None
 
-
-def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
+def extract_sensor_data(dim: int, xp, sensor_data, file_index, sensor_mask_index,
                         flags, record, p, ux_sgx, uy_sgy=None, uz_sgz=None):
     """
     extract_sensor_data Sample field variables at the sensor locations.
@@ -422,7 +425,7 @@ def extract_sensor_data(dim: int, sensor_data, file_index, sensor_mask_index,
         # store the time history of the acoustic pressure
         if flags.record_p or flags.record_I or flags.record_I_avg:
             if dim == 1:
-                sensor_data.p[:, file_index] = np.interp(np.squeeze(record.sensor_x), np.squeeze(record.grid_x), p)
+                sensor_data.p[:, file_index] = xp.interp(xp.squeeze(record.sensor_x), xp.squeeze(record.grid_x), xp.real(p))
             else:
                 sensor_data.p[:, file_index] = np.sum(p[record.tri] * record.bc, axis=1)
 
