@@ -4,8 +4,10 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 
 try: 
     import cupy as cp
+    from cupy import fft as cp_fft
 except ImportError: 
     cp = None
+    cp_fft = None
 
 import importlib
 
@@ -460,6 +462,11 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         record = to_gpu(record)
         sensor_data = dotdict_to_gpu(sensor_data)
 
+    if k_sim.source_ux is not False:
+        source_mat = xp.zeros((Nx,), dtype=my_type)
+    if k_sim.source_p is not False:
+        source_mat = xp.zeros((Nx,), dtype=my_type)
+
     # =========================================================================
     # LOOP THROUGH TIME STEPS
     # =========================================================================
@@ -471,7 +478,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     print('\tstarting time loop...')
 
     # start time loop
-    for t_index in tqdm(xp.arange(index_start, index_end, index_step, dtype=int)):
+    for t_index in tqdm(range(index_start, index_end, index_step)):
         
         # calculate ux at the next time step using dp/dx at the current time step
         if not k_sim.nonuniform_grid and not options.use_finite_difference:
@@ -510,7 +517,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                         ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
                     case 'additive':
                         # extract the source values into a matrix
-                        source_mat = xp.zeros([kgrid.Nx, ])
+                        source_mat.fill(0)
                         source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
                         # apply the k-space correction
                         source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
@@ -559,7 +566,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                     rhox[k_sim.p_source_pos_index] = k_sim.source.p[k_sim.p_source_sig_index, t_index]
                 case 'additive':
                     # extract the source values into a matrix
-                    source_mat = xp.zeros((k_sim.kgrid.Nx,), dtype=my_type)
+                    source_mat = source_mat.fill(0)
                     source_mat[k_sim.p_source_pos_index] = k_sim.source.p[k_sim.p_source_sig_index, t_index]
                     # apply the k-space correction
                     source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
