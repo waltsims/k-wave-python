@@ -20,8 +20,8 @@ from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import extract_sensor_data
-from kwave.options.simulation_options import SimulationOptions
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import scale_time
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.math import sinc

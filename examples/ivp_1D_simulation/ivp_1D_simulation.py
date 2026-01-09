@@ -20,7 +20,6 @@ from kwave.kspaceFirstOrder1D import kspace_first_order_1D
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 
-
 # =========================================================================
 # SIMULATION
 # =========================================================================
