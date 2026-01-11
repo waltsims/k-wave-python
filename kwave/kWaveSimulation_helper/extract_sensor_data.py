@@ -301,7 +301,7 @@ def extract_sensor_data(dim: int, xp, sensor_data, file_index, sensor_mask_index
                 if file_index == 0:
                     sensor_data[cuboid_index].p_min = result
                 else:
-                    sensor_data[cuboid_index].p_min = np.maximum(sensor_data[cuboid_index].p_min, result)
+                    sensor_data[cuboid_index].p_min = np.minimum(sensor_data[cuboid_index].p_min, result)
 
             # store the rms acoustic pressure
             if flags.record_p_rms:
@@ -543,6 +543,7 @@ def extract_sensor_data(dim: int, xp, sensor_data, file_index, sensor_mask_index
                 elif (dim == 3):
                     sensor_data.ux_min = np.minimum(sensor_data.ux_min, np.sum(ux_sgx[record.tri] * record.bc, axis=1))
                     sensor_data.uy_min = np.minimum(sensor_data.uy_min, np.sum(uy_sgy[record.tri] * record.bc, axis=1))
+                    sensor_data.uz_min = np.minimum(sensor_data.uz_min, np.sum(uz_sgz[record.tri] * record.bc, axis=1))
                 else:
                     raise RuntimeError("Wrong dimensions")
 

@@ -247,9 +247,10 @@ def create_normalized_wavenumber_vectors(record: Recorder, kgrid: kWaveGrid, is_
     record.kx_norm = ifftshift(record.kx_norm)
 
     # y-dimension
-    record.ky_norm = kgrid.ky / kgrid.k
-    record.ky_norm[kgrid.k == 0] = 0
-    record.ky_norm = ifftshift(record.ky_norm)
+    if kgrid.dim >= 2:
+        record.ky_norm = kgrid.ky / kgrid.k
+        record.ky_norm[kgrid.k == 0] = 0
+        record.ky_norm = ifftshift(record.ky_norm)
 
     # z-dimension
     if kgrid.dim == 3:

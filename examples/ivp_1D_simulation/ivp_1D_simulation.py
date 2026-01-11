@@ -60,7 +60,7 @@ sensor = kSensor()
 sensor.record = ["p"]
 
 # this hack is needed to ensure that the sensor is in [1,2] dimensions
-mask = np.array([-10e-3, 10e-3]) # [mm]
+mask = np.array([-10e-3, 10e-3]) # [m]
 mask = mask[:, np.newaxis].T
 sensor.mask = mask 
 

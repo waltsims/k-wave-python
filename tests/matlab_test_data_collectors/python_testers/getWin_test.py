@@ -31,7 +31,8 @@ def test_get_win():
 
         N = np.squeeze(N)
 
-        logging.log(logging.INFO, N, type_, param, rotation, symmetric, square)
+        logging.log(logging.INFO, "N=%s, type_=%s, param=%s, rotation=%s, symmetric=%s, square=%s", 
+                    N, type_, param, rotation, symmetric, square)
 
         if (np.isscalar(N) and N > 1) or (isinstance(N, np.ndarray) and N.all() > 1):
             win_py, cg_py = get_win(N, type_, param=param, rotation=rotation, symmetric=symmetric, square=square)

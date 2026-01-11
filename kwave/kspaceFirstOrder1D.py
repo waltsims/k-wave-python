@@ -354,6 +354,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     if options.use_kspace:
         kappa        = scipy.fft.ifftshift(sinc(c_ref * kgrid.k * kgrid.dt / 2.0))
         kappa        = np.squeeze(kappa)
+        source_kappa = 1.0
         if (hasattr(options, 'source_p') and hasattr(k_sim.source, 'p_mode')) and (k_sim.source.p_mode == 'additive') or \
            (hasattr(options, 'source_ux') and hasattr(k_sim.source, 'u_mode')) and (k_sim.source.u_mode == 'additive'):
             source_kappa = scipy.fft.ifftshift(xp.cos (c_ref * kgrid.k * kgrid.dt / 2.0))
@@ -505,12 +506,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
             # calculate gradient using the k-space method on a non-uniform grid
             # via the mapped pseudospectral method         
             ux_sgx = pml_x_sgx * (pml_x_sgx * ux_sgx - 
-                                  dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * xp.real(scipy.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
+                                  dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * xp.real(xp.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
         
 
         # add in the velocity source term
         if (k_sim.source_ux is not False and t_index < xp.shape(source.ux)[1]):
-            if options.source_ux >= t_index:
+            if k_sim.source_ux >= t_index:
                 match source.u_mode:
                     case 'dirichlet':
                         # enforce the source values as a dirichlet boundary condition
@@ -566,7 +567,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                     rhox[k_sim.p_source_pos_index] = k_sim.source.p[k_sim.p_source_sig_index, t_index]
                 case 'additive':
                     # extract the source values into a matrix
-                    source_mat = source_mat.fill(0)
+                    source_mat.fill(0)
                     source_mat[k_sim.p_source_pos_index] = k_sim.source.p[k_sim.p_source_sig_index, t_index]
                     # apply the k-space correction
                     source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
@@ -588,8 +589,8 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                 case 'absorbing':
                     # calculate p using a linear absorbing equation of state
                     p = xp.squeeze(c0**2 * (rhox
-                        + medium.absorb_tau * xp.real(scipy.fft.ifftn(medium.absorb_nabla1 * scipy.fft.fftn(rho0 * duxdx, axes=(0,)), axes=(0,) ))  
-                        - medium.absorb_eta * xp.real(scipy.fft.ifftn(medium.absorb_nabla2 * scipy.fft.fftn(rhox, axes=(0,)), axes=(0,))) ) )
+                        + medium.absorb_tau * xp.real(xp.fft.ifftn(medium.absorb_nabla1 * xp.fft.fftn(rho0 * duxdx, axes=(0,)), axes=(0,) ))  
+                        - medium.absorb_eta * xp.real(xp.fft.ifftn(medium.absorb_nabla2 * xp.fft.fftn(rhox, axes=(0,)), axes=(0,))) ) )
     
                 case 'stokes':
                     # calculate p using a linear absorbing equation of state
@@ -605,8 +606,8 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                 case 'absorbing':
                     # calculate p using a nonlinear absorbing equation of state
                     p = c0**2 * (rhox
-                        + medium.absorb_tau * xp.real(scipy.fft.ifftn(medium.absorb_nabla1 * scipy.fft.fftn(rho0 * duxdx, axes=(0,)), axes=(0,)))
-                        - medium.absorb_eta * xp.real(scipy.fft.ifftn(medium.absorb_nabla2 * scipy.fft.fftn(rhox, axes=(0,)), axes=(0,)))
+                        + medium.absorb_tau * xp.real(xp.fft.ifftn(medium.absorb_nabla1 * xp.fft.fftn(rho0 * duxdx, axes=(0,)), axes=(0,)))
+                        - medium.absorb_eta * xp.real(xp.fft.ifftn(medium.absorb_nabla2 * xp.fft.fftn(rhox, axes=(0,)), axes=(0,)))
                         + medium.BonA * rhox**2 / (2.0 * rho0))
                     
                 case 'stokes':
