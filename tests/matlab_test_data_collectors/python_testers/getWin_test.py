@@ -34,7 +34,7 @@ def test_get_win():
         logging.log(logging.INFO, "N=%s, type_=%s, param=%s, rotation=%s, symmetric=%s, square=%s", 
                     N, type_, param, rotation, symmetric, square)
 
-        if (np.isscalar(N) and N > 1) or (isinstance(N, np.ndarray) and N.all() > 1):
+        if (np.isscalar(N) and N > 1) or (isinstance(N, np.ndarray) and (N > 1).all()):
             win_py, cg_py = get_win(N, type_, param=param, rotation=rotation, symmetric=symmetric, square=square)
 
             cg = reader.expected_value_of("cg")

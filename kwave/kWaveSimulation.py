@@ -256,7 +256,6 @@ class kWaveSimulation(object):
         """
         Returns:
             Whether initial pressure source is present (default=False)
-
         """
         flag = False  # default
         if not isinstance(self.source, NotATransducer) and self.source.p0 is not None:
@@ -264,22 +263,22 @@ class kWaveSimulation(object):
             flag = True
         return flag
 
+
     @property
     def source_p0_elastic(self):  # initial pressure in the elastic code
         """
         Returns:
             Whether initial pressure source is present in the elastic code (default=False)
-
         """
         # Not clear where this flag is set
         return False
+
 
     @property
     def source_p(self):
         """
         Returns:
             Whether time-varying pressure source is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
@@ -288,12 +287,12 @@ class kWaveSimulation(object):
             flag = len(self.source.p[0])
         return flag
 
+
     @property
-    def source_p_labelled(self):  # time-varying pressure with labelled source mask
+    def source_p_labelled(self) -> bool:  # time-varying pressure with labelled source mask
         """
         Returns:
             True/False if labelled/binary source mask, respectively (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.p is not None:
@@ -302,12 +301,12 @@ class kWaveSimulation(object):
             flag = not (p_unique.size <= 2 and p_unique.sum() == 1)
         return flag
 
+
     @property
-    def source_ux(self) -> bool:
+    def source_ux(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in X-direction
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.ux is not None:
@@ -316,12 +315,12 @@ class kWaveSimulation(object):
             flag = len(self.source.ux[0])
         return flag
 
+
     @property
-    def source_uy(self) -> bool:
+    def source_uy(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in Y-direction
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uy is not None:
@@ -330,12 +329,12 @@ class kWaveSimulation(object):
             flag = len(self.source.uy[0])
         return flag
 
+
     @property
-    def source_uz(self) -> bool:
+    def source_uz(self):
         """
         Returns:
             Whether time-varying particle velocity source is used in Z-direction
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.uz is not None:
@@ -344,12 +343,12 @@ class kWaveSimulation(object):
             flag = len(self.source.uz[0])
         return flag
 
+
     @property
     def source_u_labelled(self):
         """
         Returns:
             Whether time-varying velocity source with labelled source mask is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.u_mask is not None:
@@ -363,6 +362,7 @@ class kWaveSimulation(object):
                 flag = True
         return flag
 
+
     @property
     def source_sxx(self):
         """
@@ -374,72 +374,72 @@ class kWaveSimulation(object):
             flag = len(self.source.sxx[0])
         return flag
 
+
     @property
     def source_syy(self):
         """
         Returns:
             Whether time-varying stress source in Y->Y direction is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syy is not None:
             flag = len(self.source.syy[0])
         return flag
 
+
     @property
     def source_szz(self):
         """
         Returns:
             Whether time-varying stress source in Z->Z direction is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.szz is not None:
             flag = len(self.source.szz[0])
         return flag
 
+
     @property
     def source_sxy(self):
         """
         Returns:
             Whether time-varying stress source in X->Y direction is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxy is not None:
             flag = len(self.source.sxy[0])
         return flag
 
+
     @property
     def source_sxz(self):
         """
         Returns:
             Whether time-varying stress source in X->Z direction is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.sxz is not None:
             flag = len(self.source.sxz[0])
         return flag
 
+
     @property
     def source_syz(self):
         """
         Returns:
             Whether time-varying stress source in Y->Z direction is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.syz is not None:
             flag = len(self.source.syz[0])
         return flag
 
+
     @property
     def source_s_labelled(self):
         """
         Returns:
             Whether time-varying stress source with labelled source mask is present (default=False)
-
         """
         flag = False
         if not isinstance(self.source, NotATransducer) and self.source.s_mask is not None:
@@ -453,6 +453,7 @@ class kWaveSimulation(object):
                 flag = True
         return flag
 
+
     @property
     def use_w_source_correction_p(self):
         """
@@ -464,6 +465,7 @@ class kWaveSimulation(object):
             if self.source.p is not None and self.source.p_frequency_ref is not None:
                 flag = True
         return flag
+
 
     @property
     def use_w_source_correction_u(self):
@@ -477,6 +479,7 @@ class kWaveSimulation(object):
                 if self.source.u_frequency_ref is not None:
                     flag = True
         return flag
+
 
     def input_checking(self, calling_func_name) -> None:
         """
@@ -598,7 +601,7 @@ class kWaveSimulation(object):
                                                                             values,
                                                                             flags,
                                                                             self.record)
-
+        # create perfectly matched layer indices indices
         self.create_pml_indices(
             kgrid_dim=self.kgrid.dim,
             kgrid_N=Vector(self.kgrid.N),
@@ -606,6 +609,7 @@ class kWaveSimulation(object):
             pml_inside=opt.pml_inside,
             is_axisymmetric=opt.simulation_type.is_axisymmetric(),
         )
+
 
     @staticmethod
     def check_calling_func_name_and_dim(calling_func_name, kgrid_dim) -> None:
@@ -628,6 +632,7 @@ class kWaveSimulation(object):
         elif calling_func_name in ["kspaceFirstOrder3D", "pstdElastic3D", "kspaceElastic3D"]:
             assert kgrid_dim == 3, f"kgrid has the wrong dimensionality for {calling_func_name}."
 
+
     @staticmethod
     def print_start_status(is_elastic_code: bool) -> None:
         """
@@ -645,6 +650,7 @@ class kWaveSimulation(object):
             logging.log(logging.INFO, "Running k-Wave simulation...")
         logging.log(logging.INFO, f"  start time: {get_date_string()}")
 
+
     def set_index_data_type(self) -> None:
         """
         Pre-calculate the data type needed to store the matrix indices given the
@@ -655,6 +661,7 @@ class kWaveSimulation(object):
         """
         total_grid_points = self.kgrid.total_grid_points
         self.index_data_type = get_smallest_possible_type(total_grid_points, "uint", default="double")
+
 
     @staticmethod
     def check_medium(medium, kgrid_k, simulation_type: SimulationType) -> bool:
@@ -687,6 +694,7 @@ class kWaveSimulation(object):
         if is_absorbing:
             medium.check_fields(kgrid_k.shape)
         return user_medium_density_input
+
 
     def check_sensor(self, kgrid_dim) -> None:
         """
@@ -903,6 +911,7 @@ class kWaveSimulation(object):
         if kgrid_dim == 2 and self.use_sensor and self.compute_directivity and self.time_rev:
             logging.log(logging.WARN, "sensor directivity fields are not used for time reversal.")
 
+
     def check_source(self, k_dim, k_Nt) -> None:
         """
         Check the source properties for correctness and validity
@@ -1086,6 +1095,7 @@ class kWaveSimulation(object):
             # clean up unused variables
             del active_elements_mask
 
+
     def check_kgrid_time(self) -> None:
         """
         Check time-related kWaveGrid inputs
@@ -1128,6 +1138,7 @@ class kWaveSimulation(object):
             if self.kgrid.dt > dt_stability_limit:
                 logging.log(logging.WARN, "  time step may be too large for a stable simulation.")
 
+
     @staticmethod
     def select_precision(opt: SimulationOptions):
         """
@@ -1160,6 +1171,7 @@ class kWaveSimulation(object):
         else:
             raise ValueError("'Unknown ''DataCast'' option'")
         return precision
+
 
     def check_input_combinations(self, opt: SimulationOptions, user_medium_density_input: bool, k_dim, pml_size, kgrid_N) -> None:
         """
@@ -1269,6 +1281,7 @@ class kWaveSimulation(object):
         for k in list(self.__dict__.keys()):
             if k.endswith("_DEF"):
                 delattr(self, k)
+
 
     def smooth_and_enlarge(self, source, k_dim, kgrid_N, opt: SimulationOptions) -> None:
         """
@@ -1392,6 +1405,7 @@ class kWaveSimulation(object):
             logging.log(logging.INFO, "smoothing density distribution...")
             self.medium.density = smooth(self.medium.density)
 
+
     def create_sensor_variables(self) -> None:
         """
         Create the sensor related variables
@@ -1449,6 +1463,7 @@ class kWaveSimulation(object):
                 # set the sensor mask index variable to be empty
                 self.sensor_mask_index = []
 
+
     def create_absorption_vars(self) -> None:
         """
         Create absorption variables for the fluid code based on
@@ -1461,6 +1476,7 @@ class kWaveSimulation(object):
             self.absorb_nabla1, self.absorb_nabla2, self.absorb_tau, self.absorb_eta = create_absorption_variables(
                 self.kgrid, self.medium, self.equation_of_state
             )
+
 
     def assign_pseudonyms(self, medium: kWaveMedium, kgrid: kWaveGrid) -> None:
         """
@@ -1477,6 +1493,7 @@ class kWaveSimulation(object):
         self.dt = float(kgrid.dt)
         self.rho0 = medium.density
         self.c0 = medium.sound_speed
+
 
     def scale_source_terms(self, is_scale_source_terms) -> None:
         """
@@ -1535,6 +1552,7 @@ class kWaveSimulation(object):
             ),
         )
 
+
     def create_pml_indices(self, kgrid_dim, kgrid_N: Vector, pml_size, pml_inside, is_axisymmetric):
         """
         Define index variables to remove the PML from the display if the optional
@@ -1575,9 +1593,11 @@ class kWaveSimulation(object):
         #     self.record = Recorder()
         self.record.set_index_variables(self.kgrid, pml_size, pml_inside, is_axisymmetric)
 
+
     @deprecated(version="0.4.1", reason="Use TimeReversal class instead")
     def check_time_reversal(self) -> bool:
         return self.time_rev
+
 
     def _is_binary_sensor_mask(self, kgrid_dim: int) -> bool:
         """
@@ -1616,6 +1636,7 @@ class kWaveSimulation(object):
             expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y, grid_shape[2] + 2 * pml_size.z)
 
         return mask_shape == expected_shape
+
 
     def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
         """

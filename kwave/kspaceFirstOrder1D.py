@@ -32,14 +32,15 @@ from kwave.utils.tictoc import TicToc
 
 
 def get_array_module(verbose: bool = False):
-    """Get the appropriate array module (numpy or cupy) based on GPU availability - if cupy is available and a GPU is present, cupy is used."""
+    """Get the appropriate array module (numpy or cupy) based on GPU 
+    availability - if cupy is available and a GPU is present, cupy is used."""
     # check if cupy is installed
     cupy_spec = importlib.util.find_spec("cupy")
     if verbose:
         print(cupy_spec)
 
     if cupy_spec is None:
-        # if not, use numpy
+        # if cupy not installed, use numpy
         return np, False
 
     # Try to import cupy and check for a GPU
@@ -52,7 +53,7 @@ def get_array_module(verbose: bool = False):
     except Exception:
         pass
 
-    # Fallback to numpy
+    # Fallback (cupy but no gpu) to numpy
     return np, False
 
 
@@ -78,6 +79,9 @@ def dotdict_to_gpu(obj, verbose: bool = False):
 
 def dotdict_to_cpu(obj, verbose: bool = False):
     """Convert all numpy arrays in the given dotdict to numpy arrays."""
+    # case in which gpu is present, but cupy is not used 
+    if cp is None:
+        return obj
     for name, val in obj.items():
         if isinstance(val, cp.ndarray):
             if verbose:
@@ -355,9 +359,9 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         kappa        = scipy.fft.ifftshift(sinc(c_ref * kgrid.k * kgrid.dt / 2.0))
         kappa        = np.squeeze(kappa)
         source_kappa = 1.0
-        if (hasattr(options, 'source_p') and hasattr(k_sim.source, 'p_mode')) and (k_sim.source.p_mode == 'additive') or \
-           (hasattr(options, 'source_ux') and hasattr(k_sim.source, 'u_mode')) and (k_sim.source.u_mode == 'additive'):
-            source_kappa = scipy.fft.ifftshift(xp.cos (c_ref * kgrid.k * kgrid.dt / 2.0))
+        if (hasattr(k_sim, 'source_p') and hasattr(k_sim.source, 'p_mode')) and (k_sim.source.p_mode == 'additive') or \
+           (hasattr(k_sim, 'source_ux') and hasattr(k_sim.source, 'u_mode')) and (k_sim.source.u_mode == 'additive'):
+            source_kappa = scipy.fft.ifftshift(np.cos (c_ref * kgrid.k * kgrid.dt / 2.0))
     else:
         kappa        = 1.0
         source_kappa = 1.0
