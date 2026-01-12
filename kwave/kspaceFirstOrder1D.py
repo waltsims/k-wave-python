@@ -1,12 +1,10 @@
-from typing import Union
 import warnings
+from typing import Union
 
 try: 
     import cupy as cp
-    from cupy import fft as cp_fft
 except ImportError: 
     cp = None
-    cp_fft = None
 
 import importlib
 
@@ -59,6 +57,8 @@ def get_array_module(verbose: bool = False):
 
 def to_gpu(obj, verbose: bool = False):
     """Convert all numpy arrays in the given object to cupy arrays."""
+    if cp is None:
+        raise RuntimeError("CuPy is not available; cannot convert to GPU arrays.")
     for name, val in vars(obj).items():
         if isinstance(val, np.ndarray):
             if verbose:
@@ -69,6 +69,8 @@ def to_gpu(obj, verbose: bool = False):
 
 def dotdict_to_gpu(obj, verbose: bool = False):
     """Convert all numpy arrays in the given dotdict to cupy arrays."""
+    if cp is None:
+        raise RuntimeError("CuPy is not available; cannot convert to GPU arrays.")
     for name, val in obj.items():
         if isinstance(val, np.ndarray):
             if verbose:
@@ -78,7 +80,7 @@ def dotdict_to_gpu(obj, verbose: bool = False):
 
 
 def dotdict_to_cpu(obj, verbose: bool = False):
-    """Convert all numpy arrays in the given dotdict to numpy arrays."""
+    """Convert all cupy arrays in the given dotdict to numpy arrays."""
     # case in which gpu is present, but cupy is not used 
     if cp is None:
         return obj
@@ -260,6 +262,20 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     # this will create the sensor_data dotdict
     k_sim.input_checking("kspaceFirstOrder1D")
 
+    # TODO: Move to input checking
+    # If the user passed a 1D time‐series, promote it to shape (1, Nt)
+    src = k_sim.source
+    if getattr(k_sim.source, "ux", False) is not False:
+        # only promote if it has fewer than 2 dims
+        if k_sim.source.ux.ndim < 2:
+            warnings.warn("A spatially and temporally varying velocity source was passed, but is the wrong shape.")
+            k_sim.source.ux = np.atleast_2d(k_sim.source.ux)
+
+    if getattr(k_sim.source, "p", False) is not False:
+        if k_sim.source.p.ndim < 2:
+            warnings.warn("A spatially and temporally varying pressure source was passed, but is the wrong shape.")
+            k_sim.source.p = np.atleast_2d(k_sim.source.p)
+
 
     # =========================================================================
     # DEFINE CAST TYPE
@@ -399,6 +415,9 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     if hasattr(k_sim, 'p_source_sig_index') and k_sim.p_source_sig_index is not None:
         k_sim.p_source_sig_index = np.squeeze(k_sim.p_source_sig_index) - int(1)
 
+    # make the sensor record index zero indexed
+    record_start_index = k_sim.sensor.record_start_index - int(1)    
+
     # =========================================================================
     # PREPARE VISUALISATIONS
     # =========================================================================
@@ -454,12 +473,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     if k_sim.equation_of_state == 'lossless':
         pass
     elif k_sim.equation_of_state == 'absorbing':
-        medium.medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_tau), dtype=my_type)
-        medium.medium.absorb_eta = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_eta), dtype=my_type)
-        medium.medium.absorb_nabla1 = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_nabla1), dtype=my_type)
-        medium.medium.absorb_nabla2 = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_nabla2), dtype=my_type)
+        medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.absorb_tau), dtype=my_type)
+        medium.absorb_eta = xp.asarray(xp.squeeze(k_sim.medium.absorb_eta), dtype=my_type)
+        medium.absorb_nabla1 = xp.asarray(xp.squeeze(k_sim.medium.absorb_nabla1), dtype=my_type)
+        medium.absorb_nabla2 = xp.asarray(xp.squeeze(k_sim.medium.absorb_nabla2), dtype=my_type)
     elif k_sim.equation_of_state == 'stokes':
-        medium.medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_tau), dtype=my_type)
+        medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.absorb_tau), dtype=my_type)
     else:
         raise ValueError("Unknown equation_of_state: " + str(k_sim.equation_of_state))
 
@@ -487,6 +506,10 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         source_mat = xp.zeros((Nx,), dtype=my_type)
     if k_sim.source_p is not False:
         source_mat = xp.zeros((Nx,), dtype=my_type)
+
+    if k_sim.nonuniform_grid and not options.use_finite_difference:
+        dxudxn = xp.asarray(k_sim.kgrid.dxudxn, dtype=my_type)
+        dxudxn_sgx = xp.asarray(k_sim.kgrid.dxudxn_sgx, dtype=my_type)
 
     # =========================================================================
     # LOOP THROUGH TIME STEPS
@@ -526,7 +549,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
             # calculate gradient using the k-space method on a non-uniform grid
             # via the mapped pseudospectral method         
             ux_sgx = pml_x_sgx * (pml_x_sgx * ux_sgx - 
-                                  dt * rho0_sgx_inv * k_sim.kgrid.dxudxn_sgx * xp.real(xp.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
+                                  dt * rho0_sgx_inv * dxudxn_sgx * xp.real(xp.fft.ifft(ddx_k * ddx_k_shift_pos * kappa * p_k)) )
         
 
         # add in the velocity source term
@@ -566,7 +589,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         else:      
             # calculate gradients using a non-uniform grid via the mapped
             # pseudospectral method
-            duxdx = k_sim.kgrid.dxudxn * xp.real(xp.fft.ifftn(ddx_k * ddx_k_shift_neg * kappa * xp.fft.fftn(ux_sgx, axes=(0,)), axes=(0,)))
+            duxdx = dxudxn * xp.real(xp.fft.ifftn(ddx_k * ddx_k_shift_neg * kappa * xp.fft.fftn(ux_sgx, axes=(0,)), axes=(0,)))
 
 
         # calculate rhox at the next time step
@@ -671,12 +694,11 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     
 
         # extract required sensor data from the pressure and particle velocity
-        # fields if the number of time steps elapsed is greater than
-        # sensor.record_start_index (defaults to 1) 
-        if k_sim.use_sensor and (t_index >= sensor.record_start_index):
+        # fields if the number of time steps elapsed is greater than record_start_index 
+        if k_sim.use_sensor and (t_index >= record_start_index):
         
             # update index for data storage
-            file_index: int = t_index - sensor.record_start_index
+            file_index: int = t_index - record_start_index
             
             # run sub-function to extract the required data from the acoustic variables
             sensor_data = extract_sensor_data(kdim, xp, sensor_data, file_index, sensor_mask_index, 
