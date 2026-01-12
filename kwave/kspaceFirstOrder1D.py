@@ -48,7 +48,7 @@ def get_array_module(verbose: bool = False):
         ngpus = cp.cuda.runtime.getDeviceCount()
         if ngpus > 0:
             return cp, True
-    except Exception(ImportError, RuntimeError, cp.cuda.runtime.CUDARuntimeError):
+    except (ImportError, RuntimeError, AttributeError):
         pass
 
     # Fallback (cupy but no gpu) to numpy
@@ -335,8 +335,8 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     c0 = np.asarray(medium.sound_speed)
 
     # get the PML operators based on the reference sound speed and PML settings
-    pml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 0)
-    pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True,  0)
+    pml_x     = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, False, 1)
+    pml_x_sgx = get_pml(Nx, dx, dt, c_ref, pml_x_size, pml_x_alpha, True,  1)
 
     pml_x = np.squeeze(pml_x)
     pml_x_sgx = np.squeeze(pml_x_sgx)
@@ -375,7 +375,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     index_end: int = Nt
 
     # These should be zero indexed
-    if hasattr(k_sim, 's_source_sig_index') and k_sim.s_source_pos_index is not None:
+    if hasattr(k_sim, 's_source_pos_index') and k_sim.s_source_pos_index is not None:
         k_sim.s_source_pos_index = np.squeeze(k_sim.s_source_pos_index) - int(1)
 
     if hasattr(k_sim, 'u_source_pos_index') and k_sim.u_source_pos_index is not None:
@@ -513,22 +513,21 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
         # add in the velocity source term
         if (k_sim.source_ux is not False and t_index < source.ux.shape[1]):
-            if k_sim.source_ux >= t_index:
-                match source.u_mode:
-                    case 'dirichlet':
-                        # enforce the source values as a dirichlet boundary condition
-                        ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
-                    case 'additive':
-                        # extract the source values into a matrix
-                        source_mat.fill(0)
-                        source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
-                        # apply the k-space correction
-                        source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
-                        # add the source values to the existing field values including the k-space correction
-                        ux_sgx = ux_sgx + source_mat
-                    case 'additive-no-correction':
-                        # add the source values to the existing field values        
-                        ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
+            match source.u_mode:
+                case 'dirichlet':
+                    # enforce the source values as a dirichlet boundary condition
+                    ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                case 'additive':
+                    # extract the source values into a matrix
+                    source_mat.fill(0)
+                    source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                    # apply the k-space correction
+                    source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
+                    # add the source values to the existing field values including the k-space correction
+                    ux_sgx = ux_sgx + source_mat
+                case 'additive-no-correction':
+                    # add the source values to the existing field values        
+                    ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
             
 
         # calculate du/dx at the next time step
