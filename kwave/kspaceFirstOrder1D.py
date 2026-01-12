@@ -1,7 +1,5 @@
 from typing import Union
 
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-
 try: 
     import cupy as cp
     from cupy import fft as cp_fft
@@ -50,7 +48,7 @@ def get_array_module(verbose: bool = False):
         ngpus = cp.cuda.runtime.getDeviceCount()
         if ngpus > 0:
             return cp, True
-    except Exception:
+    except Exception(ImportError, RuntimeError, cp.cuda.runtime.CUDARuntimeError):
         pass
 
     # Fallback (cupy but no gpu) to numpy
@@ -73,7 +71,7 @@ def dotdict_to_gpu(obj, verbose: bool = False):
         if isinstance(val, np.ndarray):
             if verbose:
                 print(f"Converting {name} to cupy array")
-            setattr(obj, name, cp.asarray(val))
+            obj[name] = cp.asarray(val)
     return obj
 
 
@@ -86,7 +84,7 @@ def dotdict_to_cpu(obj, verbose: bool = False):
         if isinstance(val, cp.ndarray):
             if verbose:
                 print(f"Converting {name} to numpy array")
-            setattr(obj, name, val.get())
+            obj[name] = val.get()
     return obj
 
 
@@ -514,7 +512,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         
 
         # add in the velocity source term
-        if (k_sim.source_ux is not False and t_index < xp.shape(source.ux)[1]):
+        if (k_sim.source_ux is not False and t_index < source.ux.shape[1]):
             if k_sim.source_ux >= t_index:
                 match source.u_mode:
                     case 'dirichlet':
@@ -564,7 +562,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
 
         # add in the pre-scaled pressure source term as a mass source
-        if (k_sim.source_p is not False and t_index < xp.shape(k_sim.source.p)[1]):
+        if (k_sim.source_p is not False and t_index < k_sim.source.p.shape[1]):
             match k_sim.source.p_mode:
                 case 'dirichlet':
                     # enforce source values as a dirichlet boundary condition
