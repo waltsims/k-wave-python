@@ -1,4 +1,5 @@
 from typing import Union
+import warnings
 
 try: 
     import cupy as cp
@@ -11,6 +12,7 @@ import importlib
 
 import numpy as np
 import scipy.fft
+from scipy.interpolate import interp1d
 from tqdm import tqdm
 
 from kwave.kgrid import kWaveGrid
@@ -243,7 +245,10 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
 
     if execution_options.is_gpu_simulation:
         xp, using_gpu = get_array_module()
-        print(f"Using {'cupy (GPU)' if using_gpu else 'numpy (CPU)'}")
+        if not using_gpu:
+            warnings.warn("GPU simulation requested but no GPU available. Falling back to CPU (NumPy).")
+        else:
+            print("Using cupy (GPU)")
     else:
         xp = np
         using_gpu = False
@@ -301,11 +306,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         points = np.squeeze(k_sim.kgrid.x_vec)
 
         # rho0 is heterogeneous and staggered grids are used
-        rho0_sgx = np.interp(points + k_sim.kgrid.dx / 2.0,  points, np.squeeze(k_sim.rho0))
+        f = interp1d(points, rho0, bounds_error=False, fill_value=np.nan)
+        rho0_sgx = f(points + k_sim.kgrid.dx / 2.0)
 
         # set values outside of the interpolation range to original values 
-        rho0_sgx[np.isnan(rho0_sgx)] = np.squeeze(k_sim.rho0)[np.isnan(rho0_sgx)]
-        
+        rho0_sgx[np.isnan(rho0_sgx)] = rho0[np.isnan(rho0_sgx)]
+
     else:
         # rho0 is homogeneous or staggered grids are not used
         rho0_sgx = k_sim.rho0
@@ -354,12 +360,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
     
     # create k-space operator (the option options.use_kspace exists for debugging)
     if options.use_kspace:
-        kappa        = scipy.fft.ifftshift(sinc(c_ref * kgrid.k * kgrid.dt / 2.0))
+        kappa        = scipy.fft.ifftshift(sinc(c_ref * kgrid.k * dt / 2.0))
         kappa        = np.squeeze(kappa)
         source_kappa = 1.0
-        if (hasattr(k_sim, 'source_p') and hasattr(k_sim.source, 'p_mode')) and (k_sim.source.p_mode == 'additive') or \
-           (hasattr(k_sim, 'source_ux') and hasattr(k_sim.source, 'u_mode')) and (k_sim.source.u_mode == 'additive'):
-            source_kappa = scipy.fft.ifftshift(np.cos (c_ref * kgrid.k * kgrid.dt / 2.0))
+        if (hasattr(k_sim, 'source_p') and getattr(k_sim.source, 'p_mode', None) == 'additive') or \
+           (hasattr(k_sim, 'source_ux') and getattr(k_sim.source, 'u_mode', None) == 'additive'):
+            source_kappa = scipy.fft.ifftshift(np.cos (c_ref * kgrid.k * dt / 2.0))
     else:
         kappa        = 1.0
         source_kappa = 1.0
@@ -445,6 +451,18 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         BonA  = xp.asarray(xp.squeeze(k_sim.medium.BonA), dtype=my_type)
     rho0_sgx_inv = xp.asarray(rho0_sgx_inv, dtype=my_type)
 
+    if k_sim.equation_of_state == 'lossless':
+        pass
+    elif k_sim.equation_of_state == 'absorbing':
+        medium.medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_tau), dtype=my_type)
+        medium.medium.absorb_eta = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_eta), dtype=my_type)
+        medium.medium.absorb_nabla1 = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_nabla1), dtype=my_type)
+        medium.medium.absorb_nabla2 = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_nabla2), dtype=my_type)
+    elif k_sim.equation_of_state == 'stokes':
+        medium.medium.absorb_tau = xp.asarray(xp.squeeze(k_sim.medium.medium.absorb_tau), dtype=my_type)
+    else:
+        raise ValueError("Unknown equation_of_state: " + str(k_sim.equation_of_state))
+
     pml_x     = xp.asarray(pml_x, dtype=my_complex_type)
     pml_x_sgx = xp.asarray(pml_x_sgx, dtype=my_type)
 
@@ -512,22 +530,22 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
         
 
         # add in the velocity source term
-        if (k_sim.source_ux is not False and t_index < source.ux.shape[1]):
-            match source.u_mode:
+        if (k_sim.source_ux is not False and t_index < k_sim.source.ux.shape[1]):
+            match k_sim.source.u_mode:
                 case 'dirichlet':
                     # enforce the source values as a dirichlet boundary condition
-                    ux_sgx[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                    ux_sgx[k_sim.u_source_pos_index] = k_sim.source.ux[k_sim.u_source_sig_index, t_index]
                 case 'additive':
                     # extract the source values into a matrix
                     source_mat.fill(0)
-                    source_mat[k_sim.u_source_pos_index] = source.ux[k_sim.u_source_sig_index, t_index]
+                    source_mat[k_sim.u_source_pos_index] = k_sim.source.ux[k_sim.u_source_sig_index, t_index]
                     # apply the k-space correction
                     source_mat = xp.real(xp.fft.ifft(source_kappa * xp.fft.fft(source_mat)))
                     # add the source values to the existing field values including the k-space correction
                     ux_sgx = ux_sgx + source_mat
                 case 'additive-no-correction':
                     # add the source values to the existing field values        
-                    ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + source.ux[k_sim.u_source_sig_index, t_index]
+                    ux_sgx[k_sim.u_source_pos_index] = ux_sgx[k_sim.u_source_pos_index] + k_sim.source.ux[k_sim.u_source_sig_index, t_index]
             
 
         # calculate du/dx at the next time step
@@ -577,7 +595,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                     rhox = rhox + source_mat
                 case 'additive-no-correction':
                     # add the source values to the existing field values
-                    rhox[k_sim.p_source_pos_index] = rhox[k_sim.p_source_pos_index] + source.p[k_sim.p_source_sig_index, t_index]
+                    rhox[k_sim.p_source_pos_index] = rhox[k_sim.p_source_pos_index] + k_sim.source.p[k_sim.p_source_sig_index, t_index]
             
 
         # equation of state
@@ -618,7 +636,7 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                         + medium.absorb_tau * rho0 * duxdx
                         + BonA * rhox**2 / (2.0 * rho0) )
     
-        # enforce initial conditions if source.p0 is defined instead of time varying sources
+        # enforce initial conditions if k_sim.source.p0 is defined instead of time varying sources
         if t_index == 0 and k_sim.source.p0 is not None:
 
             p0 = xp.squeeze(p0)
@@ -639,12 +657,12 @@ def kspace_first_order_1D(kgrid: kWaveGrid,
                 match options.use_finite_difference:
                     case 2:
                         # calculate gradient using second-order accurate finite difference scheme (including half step forward)            
-                        dpdx =  (xp.append(p[1:], 0.0) - p) / kgrid.dx
+                        dpdx =  (xp.append(p[1:], 0.0) - p) / dx
                         ux_sgx = dt * rho0_sgx_inv * dpdx / 2.0
                         
                     case 4:   
                         # calculate gradient using fourth-order accurate finite difference scheme (including half step backward)
-                        dpdx = (xp.append(p[2:], [0, 0]) - 27.0 * xp.append(p[1:], 0) + 27.0 * p - xp.append(0, p[:-1])) / (24.0 * kgrid.dx)
+                        dpdx = (xp.append(p[2:], [0, 0]) - 27.0 * xp.append(p[1:], 0) + 27.0 * p - xp.append(0, p[:-1])) / (24.0 * dx)
                         ux_sgx = dt * rho0_sgx_inv * dpdx / 2.0
                         
         else:
