@@ -1066,11 +1066,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # add the point to the line
                 line[x - 1, y - 1] = 1
@@ -1097,11 +1097,11 @@ def make_line(
                 # find the point closest to the line
                 true_x = (poss_y - c) / m
                 diff = (poss_x - true_x) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # add the point to the line
                 line[x, y] = 1
@@ -1172,11 +1172,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x < 0) or (y > grid_size.y - 1):
@@ -1216,11 +1216,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x < 1) or (y < 1):
@@ -1260,11 +1260,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x > grid_size.x) or (y < 1):
@@ -1304,11 +1304,11 @@ def make_line(
                 # find the point closest to the line
                 true_y = m * poss_x + c
                 diff = (poss_y - true_y) ** 2
-                index = matlab_find(diff == min(diff))[0]
+                index = np.argmin(diff)
 
                 # the next point
-                x = poss_x[index[0] - 1]
-                y = poss_y[index[0] - 1]
+                x = poss_x[index]
+                y = poss_y[index]
 
                 # stop the points incrementing at the edges
                 if (x > grid_size.x) or (y > grid_size.y):
@@ -1696,30 +1696,33 @@ def make_bowl(
     # find the grid point that corresponds to the outside of the bowl in the
     # first dimension in both directions (the index gives the distance along
     # this dimension)
-    value_forw, index_forw = pixel_map.min(axis=0), pixel_map.argmin(axis=0)
-    value_back, index_back = np.flip(pixel_map, axis=0).min(axis=0), np.flip(pixel_map, axis=0).argmin(axis=0)
+    value_forw = pixel_map.min(axis=0)
+    index_forw = pixel_map.argmin(axis=0)
 
-    # extract the linear index in the y-z plane of the values that lie on the
-    # bowl surface
-    yz_ind_forw = matlab_find(value_forw < THRESHOLD)
-    yz_ind_back = matlab_find(value_back < THRESHOLD)
+    # For the backward direction
+    pixel_map_flipped_x = np.flip(pixel_map, axis=0)
+    value_back = pixel_map_flipped_x.min(axis=0)
+    index_back = pixel_map_flipped_x.argmin(axis=0)
+
+    # extract the y-z subscript indices of the values that lie on the bowl surface
+    y_coords_forw, z_coords_forw = np.where(value_forw < THRESHOLD)
+    y_coords_back, z_coords_back = np.where(value_back < THRESHOLD)
 
     # use these subscripts to extract the x-index of the grid points that lie
     # on the bowl surface
-    x_ind_forw = index_forw.flatten(order="F")[yz_ind_forw - 1] + 1
-    x_ind_back = index_back.flatten(order="F")[yz_ind_back - 1] + 1
+    x_ind_forw = index_forw[y_coords_forw, z_coords_forw]
 
-    # convert the linear index to equivalent subscript values
-    y_ind_forw, z_ind_forw = ind2sub([Ny, Nz], yz_ind_forw)
-    y_ind_back, z_ind_back = ind2sub([Ny, Nz], yz_ind_back)
-
-    # combine x-y-z indices into a linear index
-    linear_index_forw = sub2ind([Nx, Ny, Nz], x_ind_forw - 1, y_ind_forw - 1, z_ind_forw - 1) + 1
-    linear_index_back = sub2ind([Nx, Ny, Nz], Nx - x_ind_back, y_ind_back - 1, z_ind_back - 1) + 1
+    # For the backward direction, x-indices are initially from the flipped map
+    x_ind_back_flipped = index_back[y_coords_back, z_coords_back]
+    # Convert flipped indices to original 0-based coordinates
+    x_ind_back = (Nx - 1) - x_ind_back_flipped
 
     # assign these values to the bowl
-    bowl_sm = matlab_assign(bowl_sm, linear_index_forw - 1, 1)
-    bowl_sm = matlab_assign(bowl_sm, linear_index_back - 1, 1)
+    if x_ind_forw.size > 0:  # Check if any points were found
+        bowl_sm[x_ind_forw, y_coords_forw, z_coords_forw] = 1
+
+    if x_ind_back.size > 0:  # Check if any points were found
+        bowl_sm[x_ind_back, y_coords_back, z_coords_back] = 1
 
     # set existing bowl values to a distance of zero in the pixel map (this
     # avoids problems with overlapping pixels)
