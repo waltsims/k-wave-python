@@ -154,7 +154,7 @@ class kWaveSimulation(object):
             else:
                 return "absorbing"
         else:
-            return "loseless"
+            return "lossless"
 
     @property
     def use_sensor(self):
