@@ -14,6 +14,8 @@ def create_absorption_variables(kgrid: kWaveGrid, medium: kWaveMedium, equation_
         return create_absorbing_medium_variables(kgrid.k, medium)
     elif equation_of_state == "stokes":
         return create_stokes_medium_variables(medium)
+    elif equation_of_state == "lossless":
+        return None, None, None, None
     else:
         raise NotImplementedError
 
