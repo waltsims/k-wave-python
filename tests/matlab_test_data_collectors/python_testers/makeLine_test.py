@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.io import loadmat
 
 from kwave.data import Vector
@@ -43,3 +44,17 @@ def test_makeLine():
         assert np.allclose(expected_line, line)
 
     logging.log(logging.INFO, "make_line(..) works as expected!")
+
+
+def test_start_greater_grid_size():
+    with np.testing.assert_raises(ValueError):
+        make_line(Vector([1, 1]), (-10, 10), (10, 10))
+
+
+def test_a_b_same():
+    with np.testing.assert_raises(ValueError):
+        make_line(Vector([1, 1]), (10, 10), (10, 10))
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
