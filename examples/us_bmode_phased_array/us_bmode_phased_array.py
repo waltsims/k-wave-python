@@ -22,6 +22,7 @@ from kwave.utils.signals import get_win, tone_burst
 # simulation settings
 DATA_CAST = "single"
 RUN_SIMULATION = True
+RNG_SEED = 123456
 
 
 pml_size_points = Vector([15, 10, 10])  # [grid points]
@@ -83,18 +84,19 @@ not_transducer.input_signal = input_signal
 
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
+rng = np.random.default_rng(RNG_SEED)
 
 # Define a random distribution of scatterers for the medium
 background_map_mean = 1
 background_map_std = 0.008
-background_map = background_map_mean + background_map_std * np.random.randn(kgrid.Nx, kgrid.Ny, kgrid.Nz)
+background_map = background_map_mean + background_map_std * rng.standard_normal((kgrid.Nx, kgrid.Ny, kgrid.Nz))
 
 sound_speed_map = c0 * background_map
 density_map = rho0 * background_map
 
 
 # Define a random distribution of scatterers for the highly scattering region
-scattering_map = np.random.randn(kgrid.Nx, kgrid.Ny, kgrid.Nz)
+scattering_map = rng.standard_normal((kgrid.Nx, kgrid.Ny, kgrid.Nz))
 scattering_c0 = np.clip(c0 + 25 + 75 * scattering_map, 1400, 1600)
 scattering_rho0 = scattering_c0 / 1.5
 
