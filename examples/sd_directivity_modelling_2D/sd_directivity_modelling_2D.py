@@ -1,6 +1,4 @@
-import os
 from copy import deepcopy
-from tempfile import gettempdir
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,9 +71,8 @@ for source_loop in range(points):
     # run the simulation
 
     input_filename = f"example_input_{source_loop + 1}_input.h5"
-    pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname)
+    output_filename = f"example_output_{source_loop + 1}_output.h5"
+    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, output_filename=output_filename)
     # run the simulation
     sensor_data = kspaceFirstOrder2DC(
         medium=medium,

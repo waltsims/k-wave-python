@@ -15,7 +15,14 @@ from kwave.utils.tictoc import TicToc
 
 
 def save_to_disk_func(
-    kgrid: kWaveGrid, medium: kWaveMedium, source, opt: SimulationOptions, auto_chunk: bool, values: dotdict, flags: dotdict
+    kgrid: kWaveGrid,
+    medium: kWaveMedium,
+    source,
+    opt: SimulationOptions,
+    auto_chunk: bool,
+    values: dotdict,
+    flags: dotdict,
+    input_filename: str | None = None,
 ):
     # update command line status
     logging.log(logging.INFO, f"  precomputation completed in {scale_time(TicToc.toc())}")
@@ -63,7 +70,7 @@ def save_to_disk_func(
     # =========================================================================
 
     remove_z_dimension(float_variables, kgrid.dim)
-    save_file(opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, auto_chunk=auto_chunk)
+    save_file(input_filename or opt.input_filename, integer_variables, float_variables, opt.hdf_compression_level, auto_chunk=auto_chunk)
 
     # update command line status
     logging.log(logging.INFO, f"  completed in {scale_time(TicToc.toc())}")

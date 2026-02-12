@@ -12,7 +12,7 @@ from kwave.ktransducer import NotATransducer
 from kwave.kWaveSimulation import kWaveSimulation
 from kwave.kWaveSimulation_helper import retract_transducer_grid_size, save_to_disk_func
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.options.simulation_options import SimulationOptions, resolve_filenames_for_run
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.interp import interpolate3d
 from kwave.utils.pml import get_pml
@@ -313,6 +313,7 @@ def kspaceFirstOrder3D(
     if options.save_to_disk:
         # store the pml size for resizing transducer object below
         retract_size = [[options.pml_x_size, options.pml_y_size, options.pml_z_size]]
+        input_filename, output_filename = resolve_filenames_for_run(k_sim.options)
 
         # run subscript to save files to disk
         save_to_disk_func(
@@ -361,6 +362,7 @@ def kspaceFirstOrder3D(
                     "cuboid_corners": k_sim.cuboid_corners,
                 }
             ),
+            input_filename=input_filename,
         )
 
         # run subscript to resize the transducer object if the grid has been expanded
@@ -372,5 +374,5 @@ def kspaceFirstOrder3D(
 
         executor = Executor(simulation_options=simulation_options, execution_options=execution_options)
         executor_options = execution_options.as_list(sensor=k_sim.sensor)
-        sensor_data = executor.run_simulation(k_sim.options.input_filename, k_sim.options.output_filename, options=executor_options)
+        sensor_data = executor.run_simulation(input_filename, output_filename, options=executor_options)
         return sensor_data

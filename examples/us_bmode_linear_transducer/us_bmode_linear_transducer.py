@@ -25,7 +25,7 @@ PHANTOM_DATA_PATH = "phantom_data.mat"
 
 # simulation settings
 DATA_CAST = "single"
-RUN_SIMULATION = False
+RUN_SIMULATION = True
 
 pml_size_points = Vector([20, 10, 10])  # [grid points]
 grid_size_points = Vector([256, 128, 128]) - 2 * pml_size_points  # [grid points]
