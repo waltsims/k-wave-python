@@ -1,4 +1,4 @@
-kwave.data module
+data
 =================
 
 .. automodule:: kwave.data

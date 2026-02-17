@@ -145,8 +145,13 @@ class kWaveSimulation(object):
     @property
     def equation_of_state(self):
         """
+        Select the active equation-of-state label based on the medium's absorption and Stokes settings.
+        
         Returns:
-            Set equation of state variable
+            equation (str): One of:
+                - 'stokes' when the medium is absorbing and uses the Stokes model.
+                - 'absorbing' when the medium is absorbing and not using the Stokes model.
+                - 'lossless' when the medium is not absorbing.
         """
         if self.medium.absorbing:
             if self.medium.stokes:
@@ -154,14 +159,15 @@ class kWaveSimulation(object):
             else:
                 return "absorbing"
         else:
-            return "loseless"
+            return "lossless"
 
     @property
     def use_sensor(self):
         """
+        Indicates whether a sensor is defined for the simulation.
+        
         Returns:
-            False if no output of any kind is required
-
+            True if a sensor object is present, False otherwise.
         """
         return self.sensor is not None
 

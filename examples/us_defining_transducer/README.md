@@ -1,6 +1,6 @@
 # Defining An Ultrasound Transducer Example
 
- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/examples/us_defining_transducer/us_defining_transducer.ipynb)
+ [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/us_defining_transducer/us_defining_transducer.ipynb)
 
 This example illustrates how kWaveTransducerSimple can be used to simulate the field produced by an ultrasound transducer.
 
