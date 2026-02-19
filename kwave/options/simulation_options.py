@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, List, Optional
 
@@ -14,6 +16,72 @@ if TYPE_CHECKING:
 from kwave.utils.data import get_date_string
 from kwave.utils.io import get_h5_literals
 from kwave.utils.pml import get_optimal_pml_size
+
+EXAMPLE_OUTPUT_ROOT = Path("/tmp/example_runs")
+USE_DATED_FILENAMES_ENV = "KWAVE_USE_DATED_FILENAMES"
+
+
+def _read_bool_env(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
+
+
+def _detect_example_name() -> Optional[str]:
+    script_path = sys.argv[0] if sys.argv else ""
+    if not script_path:
+        return None
+    parts = Path(script_path).resolve().parts
+    for index, part in enumerate(parts[:-1]):
+        if part == "examples" and index + 1 < len(parts):
+            return parts[index + 1]
+    return None
+
+
+def _default_data_path() -> str:
+    example_name = _detect_example_name()
+    if example_name:
+        return str(EXAMPLE_OUTPUT_ROOT / example_name)
+    return gettempdir()
+
+
+def _default_io_filenames(use_dated_filenames: bool) -> tuple[str, str]:
+    if use_dated_filenames:
+        prefix = get_date_string()
+        return f"{prefix}_kwave_input.h5", f"{prefix}_kwave_output.h5"
+    return "kwave_input.h5", "kwave_output.h5"
+
+
+def _derive_output_filename_from_input(input_filename: str | os.PathLike[str]) -> str:
+    input_path = Path(input_filename)
+    output_suffix = input_path.suffix if input_path.suffix else ".h5"
+    output_stem = input_path.stem
+    if "input" in output_stem:
+        output_stem = output_stem.replace("input", "output")
+    else:
+        output_stem = f"{output_stem}_output"
+    return str(input_path.with_name(f"{output_stem}{output_suffix}"))
+
+
+def _resolve_to_data_path(data_path: str, filename: str | os.PathLike[str]) -> str:
+    filename_path = Path(filename)
+    if filename_path.is_absolute():
+        return str(filename_path)
+    return str(Path(data_path) / filename_path)
+
+
+def _with_numeric_suffix(path: Path, suffix_number: int) -> Path:
+    return path.with_name(f"{path.stem}_{suffix_number}{path.suffix}")
+
+
+def _is_within_example_output_root(path: Path) -> bool:
+    return path.resolve().is_relative_to(EXAMPLE_OUTPUT_ROOT.resolve())
 
 
 class SimulationType(Enum):
@@ -108,9 +176,10 @@ class SimulationOptions(object):
     pml_search_range: List[int] = field(default_factory=lambda: [10, 40])
     radial_symmetry: str = "WSWA-FFT"
     multi_axial_PML_ratio: float = 0.1
-    data_path: Optional[str] = field(default_factory=lambda: gettempdir())
-    input_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_input.h5")
-    output_filename: Optional[str] = field(default_factory=lambda: f"{get_date_string()}_kwave_output.h5")
+    data_path: Optional[str] = None
+    input_filename: Optional[str] = None
+    output_filename: Optional[str] = None
+    allow_file_overwrite: bool = False
     pml_x_alpha: Optional[float] = None
     pml_y_alpha: Optional[float] = None
     pml_z_alpha: Optional[float] = None
@@ -157,6 +226,7 @@ class SimulationOptions(object):
             "pml_inside": self.pml_inside,
             "create_log": self.create_log,
             "scale_source_terms": self.scale_source_terms,
+            "allow_file_overwrite": self.allow_file_overwrite,
         }
 
         for key, val in boolean_inputs.items():
@@ -185,9 +255,27 @@ class SimulationOptions(object):
         self.pml_y_alpha = self.pml_alpha if self.pml_y_alpha is None else self.pml_y_alpha
         self.pml_z_alpha = self.pml_alpha if self.pml_z_alpha is None else self.pml_z_alpha
 
+        if self.data_path is None:
+            self.data_path = _default_data_path()
+        self.data_path = os.fspath(self.data_path)
+        os.makedirs(self.data_path, exist_ok=True)
+
+        use_dated_filenames = _read_bool_env(USE_DATED_FILENAMES_ENV, default=True)
+        default_input_filename, default_output_filename = _default_io_filenames(use_dated_filenames)
+        has_explicit_input_filename = self.input_filename is not None
+        if self.input_filename is None:
+            self.input_filename = default_input_filename
+        if self.output_filename is None:
+            if has_explicit_input_filename:
+                self.output_filename = _derive_output_filename_from_input(self.input_filename)
+            else:
+                self.output_filename = default_output_filename
+
         # add pathname to input and output filenames
-        self.input_filename = os.path.join(self.data_path, self.input_filename)
-        self.output_filename = os.path.join(self.data_path, self.output_filename)
+        self.input_filename = _resolve_to_data_path(self.data_path, os.fspath(self.input_filename))
+        self.output_filename = _resolve_to_data_path(self.data_path, os.fspath(self.output_filename))
+        if isinstance(self.stream_to_disk, str):
+            self.stream_to_disk = _resolve_to_data_path(self.data_path, self.stream_to_disk)
 
         assert self.use_fd is None or (
             np.issubdtype(self.use_fd, np.number) and self.use_fd in [2, 4]
@@ -346,3 +434,44 @@ class SimulationOptions(object):
             # cleanup unused variables
             del pml_size_temp
         return options
+
+
+def resolve_filenames_for_run(options: SimulationOptions) -> tuple[str, str]:
+    if options.data_path is None:
+        options.data_path = _default_data_path()
+
+    data_path = Path(options.data_path)
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    use_dated_filenames = _read_bool_env(USE_DATED_FILENAMES_ENV, default=True)
+    default_input_filename, default_output_filename = _default_io_filenames(use_dated_filenames)
+
+    input_template = options.input_filename or default_input_filename
+    if options.output_filename is not None:
+        output_template = options.output_filename
+    elif options.input_filename is not None:
+        output_template = _derive_output_filename_from_input(options.input_filename)
+    else:
+        output_template = default_output_filename
+
+    input_path = Path(_resolve_to_data_path(str(data_path), input_template))
+    output_path = Path(_resolve_to_data_path(str(data_path), output_template))
+    input_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if options.allow_file_overwrite:
+        return str(input_path), str(output_path)
+
+    if not (_is_within_example_output_root(input_path) and _is_within_example_output_root(output_path)):
+        return str(input_path), str(output_path)
+
+    if not input_path.exists() and not output_path.exists():
+        return str(input_path), str(output_path)
+
+    suffix_number = 1
+    while True:
+        candidate_input = _with_numeric_suffix(input_path, suffix_number)
+        candidate_output = _with_numeric_suffix(output_path, suffix_number)
+        if not candidate_input.exists() and not candidate_output.exists():
+            return str(candidate_input), str(candidate_output)
+        suffix_number += 1

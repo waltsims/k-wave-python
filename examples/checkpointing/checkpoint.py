@@ -1,6 +1,5 @@
-from copy import copy
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from shutil import copy2
 
 import numpy as np
 
@@ -15,6 +14,8 @@ from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
 
+EXAMPLE_OUTPUT_DIR = Path("/tmp/example_runs/checkpointing")
+
 # This script demonstrates how to use the checkpointing feature of k-Wave.
 # It runs the same simulation twice, with the second run starting from a
 # checkpoint file created during the first run.
@@ -28,6 +29,17 @@ from kwave.utils.mapgen import make_ball
 #   checkpoint_interval=checkpoint_interval
 # )
 # Note: checkpoint timesteps and checkpoint interval must be integers.
+
+
+def _next_available_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    suffix = 1
+    while True:
+        candidate = path.with_name(f"{path.stem}_{suffix}{path.suffix}")
+        if not candidate.exists():
+            return candidate
+        suffix += 1
 
 
 def make_simulation_parameters(directory: Path, checkpoint_timesteps: int):
@@ -71,6 +83,7 @@ def make_simulation_parameters(directory: Path, checkpoint_timesteps: int):
         pml_inside=False,
         smooth_p0=False,
         data_cast="single",
+        allow_file_overwrite=True,
         input_filename=input_filename,
         output_filename=output_filename,
     )
@@ -84,23 +97,31 @@ def main():
     # the halfway point.
     checkpoint_timesteps = 106
 
-    with TemporaryDirectory() as tmpdir:
-        tmpdir = Path(tmpdir)
-        # create the simulation parameters for the 1st run
-        kgrid, medium, source, sensor, simulation_options, execution_options = make_simulation_parameters(
-            directory=tmpdir, checkpoint_timesteps=checkpoint_timesteps
-        )
-        kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
-        print("Temporary directory contains 3 files (including checkpoint):")
-        print("\t-", "\n\t- ".join([f.name for f in tmpdir.glob("*.h5")]))
+    EXAMPLE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    for filename in ("kwave_input.h5", "kwave_output.h5", "kwave_checkpoint.h5"):
+        (EXAMPLE_OUTPUT_DIR / filename).unlink(missing_ok=True)
 
-        # create the simulation parameters for the 2nd run
-        kgrid, medium, source, sensor, simulation_options, execution_options = make_simulation_parameters(
-            directory=tmpdir, checkpoint_timesteps=checkpoint_timesteps
-        )
-        kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
-        print("Temporary directory contains 2 files (checkpoint has been deleted):")
-        print("\t-", "\n\t- ".join([f.name for f in tmpdir.glob("*.h5")]))
+    # create the simulation parameters for the 1st run
+    kgrid, medium, source, sensor, simulation_options, execution_options = make_simulation_parameters(
+        directory=EXAMPLE_OUTPUT_DIR,
+        checkpoint_timesteps=checkpoint_timesteps,
+    )
+    kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    copy2(simulation_options.input_filename, _next_available_path(EXAMPLE_OUTPUT_DIR / "run_1_kwave_input.h5"))
+    copy2(simulation_options.output_filename, _next_available_path(EXAMPLE_OUTPUT_DIR / "run_1_kwave_output.h5"))
+    print("Checkpoint output directory after run_1:")
+    print("\t-", "\n\t- ".join([f.name for f in EXAMPLE_OUTPUT_DIR.glob("*.h5")]))
+
+    # create the simulation parameters for the 2nd run
+    kgrid, medium, source, sensor, simulation_options, execution_options = make_simulation_parameters(
+        directory=EXAMPLE_OUTPUT_DIR,
+        checkpoint_timesteps=checkpoint_timesteps,
+    )
+    kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    copy2(simulation_options.input_filename, _next_available_path(EXAMPLE_OUTPUT_DIR / "run_2_kwave_input.h5"))
+    copy2(simulation_options.output_filename, _next_available_path(EXAMPLE_OUTPUT_DIR / "run_2_kwave_output.h5"))
+    print("Checkpoint output directory after run_2:")
+    print("\t-", "\n\t- ".join([f.name for f in EXAMPLE_OUTPUT_DIR.glob("*.h5")]))
 
 
 if __name__ == "__main__":
