@@ -33,6 +33,9 @@ class Executor:
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
     def run_simulation(self, input_filename: str, output_filename: str, options: list[str]) -> dotdict:
+        # Validate execution options before running simulation
+        self.execution_options.validate()
+
         command = [str(self.execution_options.binary_path), "-i", input_filename, "-o", output_filename] + options
 
         try:
@@ -116,7 +119,6 @@ class Executor:
         # # Combine the sensor data if using a kWaveTransducer as a sensor
         # if isinstance(sensor, kWaveTransducer):
         #     sensor_data['p'] = sensor.combine_sensor_data(sensor_data['p'])
-
         # # Compute the intensity outputs
         # if any(key.startswith(('I_avg', 'I')) for key in sensor.get('record', [])):
         #     flags = {
