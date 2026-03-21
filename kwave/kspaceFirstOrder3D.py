@@ -195,8 +195,23 @@ def kspaceFirstOrder3D(
         import warnings
 
         warnings.warn("The time_rev parameter is deprecated. Use the TimeReversal class instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn(
+        "kspaceFirstOrder3D is deprecated. Use kspaceFirstOrder() from "
+        "kwave.kspaceFirstOrder instead. See kwave.compat.options_to_kwargs() "
+        "for migrating options.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # start the timer and store the start time
     TicToc.tic()
+
+    # Check for native Python backend
+    if execution_options.is_native_backend:
+        from kwave.solvers import NativeSolver
+
+        solver = NativeSolver(use_gpu=execution_options.is_gpu_simulation)
+        return solver.run(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.
     if not simulation_options.save_to_disk:
