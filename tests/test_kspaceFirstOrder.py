@@ -89,8 +89,15 @@ class TestNativeBackend:
         result = kspaceFirstOrder(kgrid, medium, source, sensor, pml_size=(10, 15), backend="native")
         assert result["p"].shape[1] == 50
 
-    def test_auto_pml(self, sim_2d):
-        kgrid, medium, source, sensor = sim_2d
+    def test_auto_pml(self):
+        # Use 128x128 grid so auto PML is reasonable
+        kgrid = kWaveGrid(Vector([128, 128]), Vector([0.1e-3, 0.1e-3]))
+        kgrid.setTime(10, 1e-8)
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros((128, 128))
+        source.p0[64, 64] = 1.0
+        sensor = kSensor(mask=np.ones((128, 128), dtype=bool))
         result = kspaceFirstOrder(kgrid, medium, source, sensor, pml_size="auto", backend="native")
         assert "p" in result
 

@@ -87,12 +87,10 @@ def kspaceFirstOrder(
     pml_size = _normalize_pml(pml_size, ndim, "pml_size")
     pml_alpha = _normalize_pml(pml_alpha, ndim, "pml_alpha")
 
-    # Validate time stepping is set
-    if kgrid.Nt == "auto" or kgrid.dt == "auto":
-        raise ValueError(
-            "kgrid.Nt and kgrid.dt must be set before calling kspaceFirstOrder. "
-            "Call kgrid.makeTime(medium.sound_speed) or kgrid.setTime(Nt, dt) first."
-        )
+    # Validate inputs
+    from kwave.solvers.validation import validate_simulation
+
+    validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     if backend == "native":
         return _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu, quiet, debug)
