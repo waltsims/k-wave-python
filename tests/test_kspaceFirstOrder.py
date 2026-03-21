@@ -1,4 +1,6 @@
 """Tests for the unified kspaceFirstOrder entry point."""
+import os
+
 import numpy as np
 import pytest
 
@@ -115,8 +117,13 @@ class TestErrors:
         with pytest.raises(ValueError, match="Unknown backend"):
             kspaceFirstOrder(kgrid, medium, source, sensor, backend="unknown")
 
-    def test_cpp_backend_raises(self, sim_2d):
-        """C++ backend should raise ImportError or NotImplementedError until Phase 2."""
+    def test_cpp_save_only(self, sim_2d):
+        """C++ save_only should write HDF5 and return file paths."""
+        import tempfile
+
         kgrid, medium, source, sensor = sim_2d
-        with pytest.raises((ImportError, ModuleNotFoundError)):
-            kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp")
+        data_path = tempfile.mkdtemp()
+        result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", save_only=True, data_path=data_path)
+        assert "input_file" in result
+        assert "output_file" in result
+        assert os.path.exists(result["input_file"])
