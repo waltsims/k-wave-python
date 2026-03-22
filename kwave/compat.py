@@ -45,8 +45,8 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
 
     if execution_options is not None:
         opts = execution_options
-        if opts.backend == "native":
-            kwargs["backend"] = "native"
+        if opts.backend == "python":
+            kwargs["backend"] = "python"
             kwargs["device"] = "gpu" if opts.is_gpu_simulation else "cpu"
         elif opts.backend == "CUDA":
             kwargs["backend"] = "cpp"

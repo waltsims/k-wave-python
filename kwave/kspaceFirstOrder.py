@@ -33,7 +33,7 @@ def kspaceFirstOrder(
     use_sg: bool = True,
     use_kspace: bool = True,
     smooth_p0: bool = True,
-    backend: str = "native",
+    backend: str = "python",
     device: str = "cpu",
     save_only: bool = False,
     data_path: str = None,
@@ -54,7 +54,7 @@ def kspaceFirstOrder(
 
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
-    if backend == "native":
+    if backend == "python":
         from kwave.solvers.kwave_adapter import run_simulation_native
 
         opts = SimpleNamespace(
@@ -88,4 +88,4 @@ def kspaceFirstOrder(
             return {"input_file": input_file, "output_file": output_file}
         return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
 
-    raise ValueError(f"Unknown backend: {backend!r}. Use 'native' or 'cpp'.")
+    raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")

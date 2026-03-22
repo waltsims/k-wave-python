@@ -38,10 +38,10 @@ class TestSimulationOptions:
 
 
 class TestExecutionOptions:
-    def test_native_backend(self):
-        opts = SimulationExecutionOptions(backend="native")
+    def test_python_backend(self):
+        opts = SimulationExecutionOptions(backend="python")
         kwargs = options_to_kwargs(execution_options=opts)
-        assert kwargs["backend"] == "native"
+        assert kwargs["backend"] == "python"
         assert kwargs["device"] == "cpu"
 
     def test_cuda_backend(self):

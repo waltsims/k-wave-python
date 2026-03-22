@@ -212,11 +212,10 @@ def kspaceFirstOrder2D(
     # start the timer and store the start time
     TicToc.tic()
 
-    # Check for native Python backend
-    if execution_options.is_native_backend:
-        from kwave.solvers import NativeSolver
+    if execution_options.is_python_backend:
+        from kwave.solvers import PythonSolver
 
-        solver = NativeSolver(device="gpu" if execution_options.is_gpu_simulation else "cpu")
+        solver = PythonSolver(device="gpu" if execution_options.is_gpu_simulation else "cpu")
         return solver.run(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.

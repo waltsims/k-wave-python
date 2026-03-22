@@ -2,13 +2,13 @@ from kwave.solvers.base import Backend, Solver
 from kwave.solvers.kwave_adapter import run_simulation_native
 
 
-class NativeSolver(Solver):
+class PythonSolver(Solver):
     def __init__(self, device: str = "cpu"):
         self._device = device
 
     @property
     def backend(self) -> Backend:
-        return Backend.NATIVE
+        return Backend.PYTHON
 
     @property
     def device(self) -> str:

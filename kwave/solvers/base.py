@@ -13,9 +13,8 @@ if TYPE_CHECKING:
 
 
 class Backend(Enum):
-    OMP = "OMP"
-    CUDA = "CUDA"
-    NATIVE = "native"
+    PYTHON = "python"
+    CPP = "cpp"
 
 
 class Solver(ABC):
@@ -38,7 +37,7 @@ class Solver(ABC):
 
     @property
     def requires_binary(self) -> bool:
-        return self.backend in (Backend.OMP, Backend.CUDA)
+        return self.backend == Backend.CPP
 
     @property
     def requires_disk_io(self) -> bool:

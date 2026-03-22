@@ -119,7 +119,7 @@ class CppSimulation:
             if mask_arr.ndim == 2 and mask_arr.shape[0] == ndim:
                 raise ValueError(
                     "Cartesian sensor masks are not supported by the cpp backend. "
-                    "Use a binary (grid-shaped) mask or switch to backend='native'."
+                    "Use a binary (grid-shaped) mask or switch to backend='python'."
                 )
             sensor_mask = mask_arr.astype(bool).reshape(grid_shape)
             sensor_mask_index = np.where(sensor_mask.flatten(order="F") != 0)[0] + 1

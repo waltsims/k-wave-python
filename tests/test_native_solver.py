@@ -41,7 +41,7 @@ def _p0_source(shape):
 class TestNative2D:
     def test_p0_source(self, grid_2d):
         result = kspaceFirstOrder(
-            grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), kSensor(mask=np.ones((64, 64), dtype=bool)), backend="native"
+            grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), kSensor(mask=np.ones((64, 64), dtype=bool)), backend="python"
         )
         assert result["p"].shape == (64 * 64, 10)
         assert np.max(np.abs(result["p"])) > 0
@@ -54,7 +54,7 @@ class TestNative2D:
             kWaveMedium(sound_speed=c, density=1000),
             _p0_source((64, 64)),
             kSensor(mask=np.ones((64, 64), dtype=bool)),
-            backend="native",
+            backend="python",
         )
         assert result["p"].shape[0] == 64 * 64
 
@@ -64,7 +64,7 @@ class TestNative2D:
             kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=1.5),
             _p0_source((64, 64)),
             kSensor(mask=np.ones((64, 64), dtype=bool)),
-            backend="native",
+            backend="python",
         )
         assert result["p"].shape == (64 * 64, 10)
 
@@ -76,14 +76,14 @@ class TestNative2D:
         source.p0 = np.zeros((128, 128))
         source.p0[64, 64] = 1.0
         result = kspaceFirstOrder(
-            kgrid, kWaveMedium(sound_speed=1500), source, kSensor(mask=np.ones((128, 128), dtype=bool)), pml_size="auto", backend="native"
+            kgrid, kWaveMedium(sound_speed=1500), source, kSensor(mask=np.ones((128, 128), dtype=bool)), pml_size="auto", backend="python"
         )
         assert "p" in result
 
     def test_record_aggregates(self, grid_2d):
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "p_max", "p_rms"]
-        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="native")
+        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
         assert result["p_max"].shape == (64 * 64,)
         assert "p_rms" in result
 
@@ -96,7 +96,7 @@ class TestNative1D:
         source.p = np.sin(2 * np.pi * 1e6 * np.arange(20) * 1e-8).reshape(1, -1)
         sensor = kSensor(mask=np.zeros(64))
         sensor.mask[50] = 1
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="python")
         assert result["p"].shape == (1, 20)
 
     def test_velocity_source(self, grid_1d):
@@ -106,7 +106,7 @@ class TestNative1D:
         source.ux = np.sin(2 * np.pi * 1e6 * np.arange(20) * 1e-8).reshape(1, -1)
         sensor = kSensor(mask=np.zeros(64))
         sensor.mask[50] = 1
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="python")
         assert "p" in result
 
 
@@ -117,7 +117,7 @@ class TestNativePhysics:
             kWaveMedium(sound_speed=1500, density=1000, BonA=6),
             _p0_source((64, 64)),
             kSensor(mask=np.ones((64, 64), dtype=bool)),
-            backend="native",
+            backend="python",
         )
         assert result["p"].shape == (64 * 64, 10)
 
@@ -127,7 +127,7 @@ class TestNativePhysics:
             kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=2.0),
             _p0_source((64, 64)),
             kSensor(mask=np.ones((64, 64), dtype=bool)),
-            backend="native",
+            backend="python",
         )
         assert result["p"].shape == (64 * 64, 10)
 
@@ -139,13 +139,13 @@ class TestNativePhysics:
         source.p_mode = "dirichlet"
         sensor = kSensor(mask=np.zeros(64))
         sensor.mask[50] = 1
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="python")
         assert result["p"].shape == (1, 20)
 
     def test_velocity_recording(self, grid_2d):
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "ux", "uy", "ux_max", "uy_rms", "ux_final", "p_final"]
-        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="native")
+        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
         n = 64 * 64
         assert result["ux"].shape == (n, 10)
         assert result["ux_max"].shape == (n,)
@@ -154,7 +154,7 @@ class TestNativePhysics:
     def test_intensity_recording(self, grid_2d):
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "ux", "uy", "Ix", "Iy", "Ix_avg", "Iy_avg"]
-        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="native")
+        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
         assert result["Ix"].shape == (64 * 64, 10)
         assert result["Ix_avg"].shape == (64 * 64,)
 
@@ -165,14 +165,14 @@ class TestNativePhysics:
         sensor = kSensor(mask=np.zeros(64))
         sensor.mask[50] = 1
         sensor.record_start_index = 5  # 1-based; skip first 4 steps → 16 recorded
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="python")
         assert result["p"].shape == (1, 16)
 
     def test_sensor_none_records_everywhere(self, grid_1d):
         source = kSource()
         source.p0 = np.zeros(64)
         source.p0[32] = 1.0
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, None, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, None, backend="python")
         assert result["p"].shape == (64, 20)
 
 
@@ -227,7 +227,7 @@ class TestCartesianSensor:
         # 3 query points as (ndim, N_pts) array
         cart_mask = np.array([[0.0, 1e-3, -1e-3], [0.0, 0.0, 1e-3]])  # (2, 3)
         sensor = kSensor(mask=cart_mask)
-        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="native")
+        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
         assert result["p"].shape == (3, 10)
 
     def test_cartesian_1d(self, grid_1d):
@@ -237,7 +237,7 @@ class TestCartesianSensor:
         source = kSource()
         source.p0 = np.zeros(64)
         source.p0[32] = 1.0
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="python")
         assert result["p"].shape == (3, 20)
 
 
@@ -267,19 +267,19 @@ class TestSolverFactory:
     def test_get_native_solver(self):
         from kwave.solvers import Backend, get_solver
 
-        s = get_solver("native")
-        assert s.backend == Backend.NATIVE
+        s = get_solver("python")
+        assert s.backend == Backend.PYTHON
 
     def test_get_cpp_solver(self):
         from kwave.solvers import Backend, get_solver
 
-        s = get_solver("OMP")
-        assert s.backend == Backend.OMP
+        s = get_solver("cpp")
+        assert s.backend == Backend.CPP
 
     def test_get_solver_enum(self):
         from kwave.solvers import Backend, get_solver
 
-        s = get_solver(Backend.NATIVE, device="gpu")
+        s = get_solver(Backend.PYTHON, device="gpu")
         assert s.device == "gpu"
 
     def test_unknown_backend_raises(self):

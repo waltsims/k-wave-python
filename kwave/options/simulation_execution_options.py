@@ -18,7 +18,7 @@ class SimulationExecutionOptions:
         backend: Execution backend to use. Options:
             - "OMP": C++ OpenMP binary (default for CPU)
             - "CUDA": C++ CUDA binary (default for GPU)
-            - "native": Pure Python/CuPy solver (no external binaries required)
+            - "python": Pure Python/CuPy solver (no external binaries required)
     """
 
     def __init__(
@@ -39,7 +39,7 @@ class SimulationExecutionOptions:
         checkpoint_interval: Optional[int] = None,  # [seconds]
         checkpoint_timesteps: Optional[int] = None,  # [timestep integer]
         checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
-        backend: Optional[str] = None,  # "OMP", "CUDA", or "native"
+        backend: Optional[str] = None,  # "OMP", "CUDA", or "python"
     ):
         self.backend = backend
         self.is_gpu_simulation = is_gpu_simulation
@@ -107,15 +107,14 @@ class SimulationExecutionOptions:
 
     @backend.setter
     def backend(self, value: Optional[str]):
-        valid_backends = [None, "OMP", "CUDA", "native"]
+        valid_backends = [None, "OMP", "CUDA", "python"]
         if value not in valid_backends:
             raise ValueError(f"Backend must be one of {valid_backends}, got '{value}'")
         self._backend = value
 
     @property
-    def is_native_backend(self) -> bool:
-        """Returns True if using the pure Python/CuPy native backend."""
-        return self._backend == "native"
+    def is_python_backend(self) -> bool:
+        return self._backend == "python"
 
     @property
     def is_gpu_simulation(self) -> Optional[bool]:

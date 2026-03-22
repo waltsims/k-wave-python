@@ -46,7 +46,7 @@ sensor_mask[3 * Nx // 4] = 1  # right sensor
 sensor = kSensor(mask=sensor_mask)
 
 # -- Run --
-result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="native")
+result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
 
 print(f"Sensor data shape: {result['p'].shape}")  # (2, Nt)
 
