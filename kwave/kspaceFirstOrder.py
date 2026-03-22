@@ -82,9 +82,6 @@ def kspaceFirstOrder(
                 source.p0 = smooth(p0, restore_max=True)
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
-        if save_only:
-            input_file, output_file = cpp_sim.prepare(data_path=data_path)
-            return {"input_file": input_file, "output_file": output_file}
-        return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+        return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
 
     raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
