@@ -672,7 +672,7 @@ def acoustic_intensity(result):
     p = result["p"]
     n_time = p.shape[-1]
     freq = 2 * np.pi * np.arange(-(n_time // 2), n_time - n_time // 2) / n_time
-    freq[n_time // 2] = 0  # zero Nyquist to avoid aliasing artifacts
+    # DC is already 0; Nyquist (freq[0] = -π) is implicitly suppressed by np.real() below
     shift_op = np.fft.ifftshift(np.exp(1j * freq * 0.5))
 
     out = {}
