@@ -1,16 +1,8 @@
-"""
-Native Python/CuPy solver backend.
-
-Thin wrapper around run_simulation_native() conforming to the Solver ABC.
-"""
-
 from kwave.solvers.base import Backend, Solver
 from kwave.solvers.kwave_adapter import run_simulation_native
 
 
 class NativeSolver(Solver):
-    """Pure Python/CuPy k-space pseudospectral solver."""
-
     def __init__(self, use_gpu: bool = False):
         self._use_gpu = use_gpu
 

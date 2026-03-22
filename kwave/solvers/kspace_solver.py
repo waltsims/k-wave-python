@@ -143,15 +143,16 @@ class Simulation:
             self._extract = lambda f: f.flatten(order="F")
         else:
             mask_arr = np.asarray(mask_raw, dtype=float)
-            if _is_binary(mask_arr):
+            # Check Cartesian first to avoid ambiguity when size == grid_numel
+            if _is_cartesian(mask_arr):
+                self._setup_cartesian_extract(mask_arr)
+            elif _is_binary(mask_arr):
                 bmask = xp.array(mask_arr, dtype=bool).flatten(order="F")
                 if bmask.size == 1:
                     bmask = xp.full(grid_numel, bool(bmask[0]), dtype=bool)
                 self.n_sensor_points = int(xp.sum(bmask))
                 idx = xp.where(bmask)[0]
                 self._extract = lambda f, _i=idx: f.flatten(order="F")[_i]
-            elif _is_cartesian(mask_arr):
-                self._setup_cartesian_extract(mask_arr)
             else:
                 raise ValueError(
                     f"Sensor mask shape {mask_arr.shape} is neither binary " f"(numel={grid_numel}) nor Cartesian ({self.ndim}, N_points)"
