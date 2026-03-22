@@ -18,7 +18,7 @@ except ImportError:
 # =============================================================================
 
 
-# Graceful attribute access for optional MATLAB struct fields
+# TODO: replace _attr with plain getattr calls — adds no semantics over getattr
 def _attr(obj, name, default=None):
     return getattr(obj, name, default)
 
@@ -76,7 +76,7 @@ class Simulation:
         xp = self.xp
         print(f"Running on {'CuPy (GPU)' if xp is not np else 'NumPy (CPU)'} backend")
 
-        # Parse grid dimensions
+        # TODO: self.dims is redundant with self.grid_shape — delete dims, use grid_shape everywhere
         self.dims, self.spacing = [], []
         for axis in ["x", "y", "z"]:
             N = _attr(self.kgrid, f"N{axis}", None)
@@ -244,6 +244,7 @@ class Simulation:
         xp = self.xp
         axis_names = ["x", "y", "z"]
 
+        # TODO: reuse kwave/utils/pml.py:get_pml instead of reimplementing (needs xp= arg for CuPy)
         self.pml_list = []  # For pressure/density
         self.pml_sg_list = []  # For velocity (staggered grid)
         self.pml_sizes = []  # PML thickness per axis (for interior slicing)
@@ -592,6 +593,7 @@ class Simulation:
     def _diff(self, f, op, apply_kappa=True):
         """Spectral differentiation: F^-1[op * kappa * F[f]]."""
         # TODO: rfftn/irfftn for ~2x speedup on real fields (requires half-grid k-space operators)
+        # TODO: precompute op*kappa products at setup to eliminate per-call elementwise multiply
         xp = self.xp
         kappa = self.kappa if apply_kappa else 1
         return xp.real(xp.fft.ifftn(op * kappa * xp.fft.fftn(f)))
