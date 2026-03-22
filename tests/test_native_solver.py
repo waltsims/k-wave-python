@@ -327,3 +327,220 @@ class TestCompatEdges:
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "cpp"
         assert kwargs["use_gpu"] is False
+
+    def test_data_path_forwarded(self):
+        from kwave.compat import options_to_kwargs
+        from kwave.options.simulation_options import SimulationOptions
+
+        opts = SimulationOptions(data_path="/tmp/test")
+        kwargs = options_to_kwargs(simulation_options=opts)
+        assert kwargs["data_path"] == "/tmp/test"
+
+
+# -- 5. Physics branches in native solver --
+
+
+class TestNativePhysics:
+    """Test physics branches: nonlinearity, Stokes, dirichlet, velocity recording."""
+
+    def test_nonlinearity_bona(self, grid_2d):
+        """BonA nonlinearity enabled."""
+        medium = kWaveMedium(sound_speed=1500, density=1000, BonA=6)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 5.0
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+
+        result = kspaceFirstOrder(grid_2d, medium, source, sensor, backend="native")
+        assert result["p"].shape == (64 * 64, 10)
+
+    def test_stokes_absorption(self, grid_2d):
+        """Stokes absorption (alpha_power=2.0)."""
+        medium = kWaveMedium(sound_speed=1500, alpha_coeff=0.75, alpha_power=2.0)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+
+        result = kspaceFirstOrder(grid_2d, medium, source, sensor, backend="native")
+        assert result["p"].shape == (64 * 64, 10)
+
+    def test_dirichlet_pressure_source(self, grid_1d):
+        """Dirichlet source mode for pressure."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p_mask = np.zeros(64)
+        source.p_mask[10] = 1
+        source.p = np.sin(2 * np.pi * 1e6 * np.arange(20) * 1e-8).reshape(1, -1)
+        source.p_mode = "dirichlet"
+
+        sensor_mask = np.zeros(64)
+        sensor_mask[50] = 1
+        sensor = kSensor(mask=sensor_mask)
+
+        result = kspaceFirstOrder(grid_1d, medium, source, sensor, backend="native")
+        assert result["p"].shape == (1, 20)
+
+    def test_velocity_recording(self, grid_2d):
+        """Record velocity components and aggregates."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+        sensor.record = ["p", "ux", "uy", "ux_max", "uy_rms", "ux_final", "p_final"]
+
+        result = kspaceFirstOrder(grid_2d, medium, source, sensor, backend="native")
+        n = 64 * 64
+        assert result["ux"].shape == (n, 10)
+        assert result["uy"].shape == (n, 10)
+        assert result["ux_max"].shape == (n,)
+        assert result["uy_rms"].shape == (n,)
+        assert "ux_final" in result
+        assert "p_final" in result
+
+    def test_intensity_recording(self, grid_2d):
+        """Record acoustic intensity."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+        sensor.record = ["p", "ux", "uy", "Ix", "Iy", "Ix_avg", "Iy_avg"]
+
+        result = kspaceFirstOrder(grid_2d, medium, source, sensor, backend="native")
+        n = 64 * 64
+        assert result["Ix"].shape == (n, 10)
+        assert result["Ix_avg"].shape == (n,)
+
+    def test_record_start_index(self, grid_1d):
+        """Delayed recording start."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros(64)
+        source.p0[32] = 1.0
+
+        sensor_mask = np.zeros(64)
+        sensor_mask[50] = 1
+        sensor = kSensor(mask=sensor_mask)
+        sensor.record_start_index = 5  # 1-based, skip first 4 steps
+
+        result = kspaceFirstOrder(grid_1d, medium, source, sensor, backend="native")
+        # 20 steps total, start at index 5 → 16 recorded steps
+        assert result["p"].shape == (1, 16)
+
+    def test_sensor_none_records_everywhere(self, grid_1d):
+        """sensor=None records at all grid points."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros(64)
+        source.p0[32] = 1.0
+
+        result = kspaceFirstOrder(grid_1d, medium, source, None, backend="native")
+        assert result["p"].shape == (64, 20)
+
+
+# -- 6. C++ save_only with more physics --
+
+
+class TestCppPhysics:
+    """Test C++ HDF5 serialization with various physics options."""
+
+    def test_save_only_bona(self, grid_2d, tmp_path):
+        """HDF5 with nonlinearity."""
+        medium = kWaveMedium(sound_speed=1500, density=1000, BonA=6)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+
+        result = kspaceFirstOrder(
+            grid_2d,
+            medium,
+            source,
+            sensor,
+            backend="cpp",
+            save_only=True,
+            data_path=str(tmp_path),
+        )
+        assert os.path.exists(result["input_file"])
+
+    def test_save_only_stokes(self, grid_2d, tmp_path):
+        """HDF5 with Stokes absorption (alpha_power=2.0)."""
+        medium = kWaveMedium(sound_speed=1500, alpha_coeff=0.5, alpha_power=2.0)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+
+        result = kspaceFirstOrder(
+            grid_2d,
+            medium,
+            source,
+            sensor,
+            backend="cpp",
+            save_only=True,
+            data_path=str(tmp_path),
+        )
+        assert os.path.exists(result["input_file"])
+
+    def test_save_only_velocity_source(self, grid_2d, tmp_path):
+        """HDF5 with velocity source."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.u_mask = np.zeros((64, 64))
+        source.u_mask[10, 10] = 1
+        source.ux = np.sin(2 * np.pi * 1e6 * np.arange(10) * float(grid_2d.dt)).reshape(1, -1)
+
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+        result = kspaceFirstOrder(
+            grid_2d,
+            medium,
+            source,
+            sensor,
+            backend="cpp",
+            save_only=True,
+            data_path=str(tmp_path),
+        )
+        assert os.path.exists(result["input_file"])
+
+    def test_save_only_heterogeneous_density(self, grid_2d, tmp_path):
+        """HDF5 with heterogeneous density (tests staggered density computation)."""
+        rho = 1000 * np.ones((64, 64))
+        rho[:32, :] = 1200
+        medium = kWaveMedium(sound_speed=1500, density=rho)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+
+        result = kspaceFirstOrder(
+            grid_2d,
+            medium,
+            source,
+            sensor,
+            backend="cpp",
+            save_only=True,
+            data_path=str(tmp_path),
+        )
+        assert os.path.exists(result["input_file"])
+
+    def test_save_only_sensor_none(self, grid_2d, tmp_path):
+        """HDF5 with sensor=None (record everywhere)."""
+        medium = kWaveMedium(sound_speed=1500)
+        source = kSource()
+        source.p0 = np.zeros((64, 64))
+        source.p0[32, 32] = 1.0
+
+        result = kspaceFirstOrder(
+            grid_2d,
+            medium,
+            source,
+            None,
+            backend="cpp",
+            save_only=True,
+            data_path=str(tmp_path),
+        )
+        assert os.path.exists(result["input_file"])
