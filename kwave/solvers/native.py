@@ -16,3 +16,9 @@ class PythonSolver(Solver):
 
     def run(self, kgrid, medium, source, sensor, simulation_options, execution_options) -> dict:
         return run_simulation_native(kgrid, medium, source, sensor, simulation_options, device=self._device)
+
+
+def run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options):
+    """Dispatch to PythonSolver from legacy kspaceFirstOrder2D/3D."""
+    device = "gpu" if execution_options.is_gpu_simulation else "cpu"
+    return PythonSolver(device=device).run(kgrid, medium, source, sensor, simulation_options, execution_options)

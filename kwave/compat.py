@@ -1,5 +1,4 @@
 """Backward-compatibility bridge: convert legacy options classes to kspaceFirstOrder() kwargs."""
-import os
 
 
 def options_to_kwargs(simulation_options=None, execution_options=None):
@@ -66,8 +65,7 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
         elif opts.verbose_level >= 2:
             kwargs["debug"] = True
 
-        # Only forward num_threads if user explicitly set it (not the auto-detected cpu_count default)
-        if opts._num_threads is not None and opts._num_threads != os.cpu_count():
+        if opts.num_threads_explicit:
             kwargs["num_threads"] = opts.num_threads
         if opts.device_num is not None:
             kwargs["device_num"] = opts.device_num

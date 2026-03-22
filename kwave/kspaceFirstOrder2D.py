@@ -213,10 +213,9 @@ def kspaceFirstOrder2D(
     TicToc.tic()
 
     if execution_options.is_python_backend:
-        from kwave.solvers import PythonSolver
+        from kwave.solvers.native import run_python_backend
 
-        solver = PythonSolver(device="gpu" if execution_options.is_gpu_simulation else "cpu")
-        return solver.run(kgrid, medium, source, sensor, simulation_options, execution_options)
+        return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.
     if not simulation_options.save_to_disk:

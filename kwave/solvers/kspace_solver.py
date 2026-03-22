@@ -239,6 +239,8 @@ class Simulation:
         self.pml_sg_list = []  # For velocity (staggered grid)
         self.pml_sizes = []  # PML thickness per axis (for interior slicing)
 
+        from kwave.utils.pml import get_pml
+
         for axis in range(self.ndim):
             N = self.grid_shape[axis]
             dx = self.spacing[axis]
@@ -249,43 +251,19 @@ class Simulation:
             self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
 
             if pml_size == 0 or pml_alpha == 0:
-                # No PML for this dimension - use identity (multiply by 1)
                 shape = [1] * self.ndim
                 shape[axis] = N
                 self.pml_list.append(xp.ones(shape, dtype=float))
                 self.pml_sg_list.append(xp.ones(shape, dtype=float))
             else:
-                # Build PML profile: exp(-alpha * (c/dx) * (x/pml_size)^4 * dt/2)
-                x = xp.arange(1, pml_size + 1, dtype=float)
+                # dimension=2 gives shape (1, N) which we reshape for broadcasting
+                pml = get_pml(N, dx, self.dt, self.c_ref, pml_size, pml_alpha, staggered=False, dimension=2, xp=xp)
+                pml_sg = get_pml(N, dx, self.dt, self.c_ref, pml_size, pml_alpha, staggered=True, dimension=2, xp=xp)
 
-                # Regular grid (for pressure/density)
-                pml_left = pml_alpha * (self.c_ref / dx) * ((x - pml_size - 1) / (-pml_size)) ** 4
-                pml_right = pml_alpha * (self.c_ref / dx) * (x / pml_size) ** 4
-
-                # Staggered grid (for velocity)
-                pml_left_sg = pml_alpha * (self.c_ref / dx) * ((x + 0.5 - pml_size - 1) / (-pml_size)) ** 4
-                pml_right_sg = pml_alpha * (self.c_ref / dx) * ((x + 0.5) / pml_size) ** 4
-
-                # Exponentiate
-                pml_left = xp.exp(-pml_left * self.dt / 2)
-                pml_right = xp.exp(-pml_right * self.dt / 2)
-                pml_left_sg = xp.exp(-pml_left_sg * self.dt / 2)
-                pml_right_sg = xp.exp(-pml_right_sg * self.dt / 2)
-
-                # Assemble full PML profile (1 in interior)
-                pml = xp.ones(N, dtype=float)
-                pml[:pml_size] = pml_left
-                pml[-pml_size:] = pml_right
-
-                pml_sg = xp.ones(N, dtype=float)
-                pml_sg[:pml_size] = pml_left_sg
-                pml_sg[-pml_size:] = pml_right_sg
-
-                # Reshape for broadcasting
                 shape = [1] * self.ndim
                 shape[axis] = N
-                self.pml_list.append(pml.reshape(shape))
-                self.pml_sg_list.append(pml_sg.reshape(shape))
+                self.pml_list.append(pml.flatten().reshape(shape))
+                self.pml_sg_list.append(pml_sg.flatten().reshape(shape))
 
     def _setup_kspace_operators(self):
         """Build k-space gradient/divergence operators for each dimension."""

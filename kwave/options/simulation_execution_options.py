@@ -41,6 +41,7 @@ class SimulationExecutionOptions:
         checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
         backend: Optional[str] = None,  # "OMP", "CUDA", or "python"
     ):
+        self._num_threads_explicit = num_threads is not None
         self.backend = backend
         self.is_gpu_simulation = is_gpu_simulation
         self._binary_path = binary_path
@@ -62,6 +63,11 @@ class SimulationExecutionOptions:
         if self.checkpoint_file is not None:
             if self.checkpoint_interval is None and self.checkpoint_timesteps is None:
                 raise ValueError("One of checkpoint_interval or checkpoint_timesteps must be set when checkpoint_file is set.")
+
+    @property
+    def num_threads_explicit(self) -> bool:
+        """True if user explicitly set num_threads (vs auto-detected cpu_count)."""
+        return self._num_threads_explicit
 
     @property
     def num_threads(self) -> Union[int, str]:
