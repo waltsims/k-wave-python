@@ -18,6 +18,7 @@ source.p0 = makeDisc(Nx, Ny, 64, 64, 5);
 
 % Sensor: full grid
 sensor.mask = ones(Nx, Ny);
+sensor.record = {'p', 'p_final'};
 
 % Run simulation with default PML settings
 sensor_data = kspaceFirstOrder2D(kgrid, medium, source, sensor, ...

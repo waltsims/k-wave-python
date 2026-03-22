@@ -1,44 +1,31 @@
 % Collect reference data for 1D IVP integration test.
-% Mirrors examples/ivp_1D_simulation.py and tests/integration/test_ivp_1D.py
+% Homogeneous medium, single-point impulse, two-point sensor.
 output_file = 'collectedValues/example_ivp_1D.mat';
 recorder = utils.TestRecorder(output_file);
 
 % Grid
-Nx = 512;
-dx = 0.05e-3;
+Nx = 256;
+dx = 0.1e-3;
 kgrid = kWaveGrid(Nx, dx);
+kgrid.makeTime(1500);
 
-% Heterogeneous medium
-sound_speed = 1500 * ones(Nx, 1);
-sound_speed(1:floor(Nx/3)) = 2000;
+% Homogeneous medium
+medium.sound_speed = 1500;
+medium.density = 1000;
 
-density = 1000 * ones(Nx, 1);
-density(4*floor(Nx/5)+1:end) = 1500;
-
-medium.sound_speed = sound_speed;
-medium.density = density;
-
-% Time stepping (CFL = 0.3)
-% makeTime signature: makeTime(sound_speed, cfl, t_end)
-kgrid.makeTime(sound_speed, 0.3);
-
-% Source: smooth sinusoidal pulse
-p0 = zeros(Nx, 1);
-x0 = 281;  % MATLAB 1-indexed (Python uses 280, 0-indexed)
-width = 100;
-pulse = 0.5 * (sin((0:width) * pi / width - pi/2) + 1);
-p0(x0:x0+width) = pulse;
-source.p0 = p0;
+% Source: single-point impulse at center
+source.p0 = zeros(Nx, 1);
+source.p0(Nx/2 + 1) = 1.0;  % MATLAB 1-indexed: Nx/2+1 = 129 = Python's Nx//2 = 128
 
 % Sensor: two points
-sensor_mask = zeros(Nx, 1);
-sensor_mask(floor(Nx/4) + 1) = 1;    % MATLAB 1-indexed (Python Nx//4 = 128, 0-indexed)
-sensor_mask(3*floor(Nx/4) + 1) = 1;  % Python 3*Nx//4 = 384, 0-indexed
-sensor.mask = sensor_mask;
+sensor.mask = zeros(Nx, 1);
+sensor.mask(Nx/4 + 1) = 1;    % Python: Nx//4 = 64
+sensor.mask(3*Nx/4 + 1) = 1;  % Python: 3*Nx//4 = 192
+sensor.record = {'p'};
 
-% Run
+% Run (Smooth=false to match Python smooth_p0=False)
 sensor_data = kspaceFirstOrder1D(kgrid, medium, source, sensor, ...
-    'PMLInside', true, 'PMLSize', 20, 'PMLAlpha', 2, 'Smooth', true);
+    'PMLInside', true, 'PMLSize', 20, 'PMLAlpha', 2, 'Smooth', false);
 
 % Record outputs
 recorder.recordVariable('sensor_data_p', sensor_data.p);
