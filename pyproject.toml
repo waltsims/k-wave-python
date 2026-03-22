@@ -118,3 +118,8 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 "kwave/options/__init__.py" = ["F401"]
 # Fix in the future => E731: Do not assign a `lambda` expression, use a `def`
 "kwave/utils/mapgen.py" = ["E731"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]
