@@ -5,6 +5,7 @@ Handles HDF5 serialization and C++ binary execution without
 depending on kWaveSimulation or the legacy options classes.
 """
 import os
+import shutil
 import stat
 import subprocess
 import tempfile
@@ -46,10 +47,15 @@ class CppSimulation:
         self._write_hdf5(input_file)
         return input_file, output_file
 
-    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False):
-        input_file, output_file = self.prepare()
-        self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
-        return self._parse_output(output_file)
+    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None):
+        cleanup = data_path is None
+        input_file, output_file = self.prepare(data_path=data_path)
+        try:
+            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+            return self._parse_output(output_file)
+        finally:
+            if cleanup:
+                shutil.rmtree(os.path.dirname(input_file), ignore_errors=True)
 
     # -- HDF5 serialization --
 

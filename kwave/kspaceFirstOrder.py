@@ -45,6 +45,53 @@ def kspaceFirstOrder(
     num_threads: Optional[int] = None,
     device_num: Optional[int] = None,
 ) -> dict:
+    """Run a k-Wave simulation.
+
+    Unified entry point replacing the legacy kspaceFirstOrder2D / 3D
+    functions.  Works with 1-D, 2-D, and 3-D grids.
+
+    Args:
+        kgrid: Simulation grid (defines dimensionality, spacing, and time
+            steps).
+        medium: Acoustic medium properties (sound speed, density, absorption,
+            nonlinearity).
+        source: Pressure and/or velocity source terms.
+        sensor: Sensor mask defining where the field is recorded.  ``None``
+            records the entire grid.
+
+    Keyword Args:
+        pml_size: Perfectly-matched-layer thickness in grid points.  A scalar
+            applies to all dimensions; a tuple sets each dimension
+            independently.  ``"auto"`` selects an optimal size via FFT-based
+            analysis.  Default ``20``.
+        pml_alpha: PML absorption coefficient (Nepers per grid point).
+            Scalar or per-dimension tuple.  Default ``2.0``.
+        use_sg: Use a staggered grid for velocity fields.  Default ``True``.
+        use_kspace: Apply the k-space correction to the time-stepping scheme.
+            Default ``True``.
+        smooth_p0: Smooth the initial pressure distribution to suppress
+            staircasing artifacts.  Default ``True``.
+        backend: Simulation engine.  ``"python"`` runs a pure-Python /
+            NumPy / CuPy solver; ``"cpp"`` serializes to HDF5 and invokes
+            the compiled C++ binary.  Default ``"python"``.
+        device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
+            selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
+            selects the OMP vs CUDA binary.  Default ``"cpu"``.
+        save_only: Reserved for future use.  Default ``False``.
+        data_path: Directory for HDF5 input/output files (``backend="cpp"``
+            only).  If ``None`` a temporary directory is created and cleaned
+            up automatically after the run.  Set explicitly to inspect or
+            reuse the HDF5 files.  Default ``None``.
+        quiet: Suppress progress output.  Default ``False``.
+        debug: Print detailed diagnostic output.  Default ``False``.
+        num_threads: Thread count for the C++ OMP binary.  ``None`` uses all
+            available cores.  Default ``None``.
+        device_num: GPU device index for CUDA execution.  Default ``None``.
+
+    Returns:
+        dict: Recorded sensor data keyed by field name (e.g.
+        ``"p"``, ``"p_final"``, ``"ux"``, ``"uy"``).
+    """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
 
