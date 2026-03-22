@@ -219,3 +219,73 @@ class TestCppSaveOnly:
     def test_sensor_none(self, grid_2d, tmp_path):
         result = self._run_save_only(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), tmp_path, sensor=None)
         assert os.path.exists(result["input_file"])
+
+
+class TestCartesianSensor:
+    def test_cartesian_2d(self, grid_2d):
+        """Cartesian sensor mask with bilinear interpolation."""
+        # 3 query points as (ndim, N_pts) array
+        cart_mask = np.array([[0.0, 1e-3, -1e-3], [0.0, 0.0, 1e-3]])  # (2, 3)
+        sensor = kSensor(mask=cart_mask)
+        result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="native")
+        assert result["p"].shape == (3, 10)
+
+    def test_cartesian_1d(self, grid_1d):
+        """Cartesian sensor mask with 1D interpolation."""
+        cart_mask = np.array([[0.0, 1e-3, -1e-3]])  # (1, 3)
+        sensor = kSensor(mask=cart_mask)
+        source = kSource()
+        source.p0 = np.zeros(64)
+        source.p0[32] = 1.0
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, sensor, backend="native")
+        assert result["p"].shape == (3, 20)
+
+
+class TestMatlabInterop:
+    def test_simulate_from_dicts(self):
+        from kwave.solvers.kspace_solver import simulate_from_dicts
+
+        kgrid = {"Nx": 64, "dx": 0.1e-3, "Nt": 5, "dt": 1e-8, "pml_size_x": 10, "pml_alpha_x": 2.0}
+        medium = {"sound_speed": 1500}
+        p0 = np.zeros(64)
+        p0[32] = 1.0
+        source = {"p0": p0}
+        sensor = {"mask": np.ones(64, dtype=bool)}
+        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        assert "p" in result
+        assert result["p"].shape[0] == 64
+
+    def test_normalize_medium_aliases(self):
+        from kwave.solvers.kspace_solver import _normalize_medium
+
+        d = _normalize_medium({"c0": 1500, "rho0": 1000})
+        assert "sound_speed" in d and "density" in d
+        assert "c0" not in d and "rho0" not in d
+
+
+class TestSolverFactory:
+    def test_get_native_solver(self):
+        from kwave.solvers import Backend, get_solver
+
+        s = get_solver("native")
+        assert s.backend == Backend.NATIVE
+
+    def test_get_cpp_solver(self):
+        from kwave.solvers import Backend, get_solver
+
+        s = get_solver("OMP")
+        assert s.backend == Backend.OMP
+
+    def test_get_solver_enum(self):
+        from kwave.solvers import Backend, get_solver
+
+        s = get_solver(Backend.NATIVE, use_gpu=True)
+        assert s.use_gpu is True
+
+    def test_unknown_backend_raises(self):
+        import pytest
+
+        from kwave.solvers import get_solver
+
+        with pytest.raises(ValueError):
+            get_solver("bad")
