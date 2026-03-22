@@ -10,6 +10,7 @@ This release strategy brings the unified solver architecture to fruition.
 |---------|-----------|-------|
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
+| **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
 
@@ -142,6 +143,31 @@ warnings.warn(
 
 ---
 
+## Phase 3.5: v0.7.0 - CLI (`kwp`)
+
+**Goal:** Command-line tool for running k-wave simulations from the terminal.
+
+```bash
+# Run a simulation from a config file
+kwp run config.yaml
+
+# Run with GPU
+kwp run config.yaml --device gpu
+
+# Generate HDF5 input for C++ binary
+kwp prepare config.yaml --output sim_input.h5
+```
+
+**Features:**
+- `kwp` CLI built on the v0.6 `kspaceFirstOrder()` API
+- YAML/JSON config files for simulation parameters
+- Supports both `python` and `cpp` backends
+- `kwp run` — run simulation, save results
+- `kwp prepare` — generate HDF5 input for offline C++ execution
+- Installable as `pip install k-wave-python[cli]` (adds `click` dependency)
+
+---
+
 ## Post-1.0: 2.x Vision (Performance & Scale)
 
 **Goal:** Further optimization as the user base grows. Decisions driven by real profiling data and user demand.
@@ -235,8 +261,9 @@ uv run pytest tests/ -v
 
 1. **Now:** Finalize master/main for v0.5.0
 2. **Next:** Python solver + `kspaceFirstOrder.py` + deprecation for v0.6.0
-3. **Then:** Clean delete for v1.0.0
-4. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
+3. **Then:** `kwp` CLI for v0.7.0
+4. **Then:** Clean delete for v1.0.0
+5. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
 
 ---
 
