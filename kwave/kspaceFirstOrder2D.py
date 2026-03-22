@@ -216,7 +216,11 @@ def kspaceFirstOrder2D(
         from kwave.solvers.native import run_python_backend
         from kwave.solvers.validation import validate_simulation
 
-        pml_size = simulation_options.pml_size or [20] * kgrid.dim
+        pml_size = simulation_options.pml_size
+        if pml_size is None:
+            pml_size = (20,) * kgrid.dim
+        elif not hasattr(pml_size, "__len__"):
+            pml_size = (int(pml_size),) * kgrid.dim
         validate_simulation(kgrid, medium, source, sensor, pml_size=tuple(pml_size))
         return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 

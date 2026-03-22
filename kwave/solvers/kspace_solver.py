@@ -57,7 +57,9 @@ class Simulation:
         results = Simulation(kgrid, medium, source, sensor).run()
     """
 
-    def __init__(self, kgrid, medium, source, sensor, backend="auto", use_sg=True, use_kspace=True, smooth_p0=True):
+    def __init__(
+        self, kgrid, medium, source, sensor, backend="auto", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
+    ):
         self.kgrid = kgrid
         self.medium = medium
         self.source = source
@@ -65,6 +67,9 @@ class Simulation:
         self.use_sg = use_sg
         self.use_kspace = use_kspace
         self.smooth_p0 = smooth_p0
+        # Explicit PML overrides (used when kgrid is a kWaveGrid without pml_size_x attrs)
+        self._pml_size_override = pml_size
+        self._pml_alpha_override = pml_alpha
         if backend == "gpu":
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
@@ -250,8 +255,20 @@ class Simulation:
             dx = self.spacing[axis]
             name = axis_names[axis]
 
-            pml_size = int(getattr(self.kgrid, f"pml_size_{name}", 0))
-            pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
+            if self._pml_size_override is not None:
+                pml_size = (
+                    int(self._pml_size_override[axis]) if hasattr(self._pml_size_override, "__len__") else int(self._pml_size_override)
+                )
+            else:
+                pml_size = int(getattr(self.kgrid, f"pml_size_{name}", 0))
+            if self._pml_alpha_override is not None:
+                pml_alpha = (
+                    float(self._pml_alpha_override[axis])
+                    if hasattr(self._pml_alpha_override, "__len__")
+                    else float(self._pml_alpha_override)
+                )
+            else:
+                pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
             self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
 
             if pml_size == 0 or pml_alpha == 0:
