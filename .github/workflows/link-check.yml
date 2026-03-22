@@ -33,4 +33,4 @@ jobs:
           fail: true
         env:
           # Exclude localhost, badges, and problematic domains
-          LYCHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org,https://fsf.org"
+          LYCHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org,https://fsf.org,https://pubs.aip.org"
