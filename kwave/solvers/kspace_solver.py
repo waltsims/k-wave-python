@@ -57,11 +57,14 @@ class Simulation:
         results = Simulation(kgrid, medium, source, sensor).run()
     """
 
-    def __init__(self, kgrid, medium, source, sensor, backend="auto"):
+    def __init__(self, kgrid, medium, source, sensor, backend="auto", use_sg=True, use_kspace=True, smooth_p0=True):
         self.kgrid = kgrid
         self.medium = medium
         self.source = source
         self.sensor = sensor
+        self.use_sg = use_sg
+        self.use_kspace = use_kspace
+        self.smooth_p0 = smooth_p0
         if backend == "gpu":
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
@@ -310,22 +313,26 @@ class Simulation:
             k_mag_sq = k_mag_sq + k**2
         k_mag = xp.sqrt(k_mag_sq)
 
-        # k-space correction: kappa = sin(omega*dt/2) / (omega*dt/2) where omega = c_ref*|k|
-        # MATLAB: sinc(A) = sin(pi*A)/(pi*A), so sinc(c*k*dt/2) gives sin(pi*A)/(pi*A)
-        # NumPy:  sinc(x) = sin(pi*x)/(pi*x), so sinc(A/pi) gives sin(A)/A ← correct
-        # Both evaluate the unnormalized sinc of omega*dt/2 (Tabei et al., JASA 2002, Eq. 10)
-        self.kappa = xp.sinc((self.c_ref * k_mag * self.dt / 2) / np.pi)
-
-        # Source kappa: cos correction for time-varying sources (Cox et al., IEEE IUS 2018)
-        self.source_kappa = xp.cos(self.c_ref * k_mag * self.dt / 2)
+        # k-space correction: kappa = sinc(c_ref*|k|*dt/2)  (Tabei et al., JASA 2002, Eq. 10)
+        if self.use_kspace:
+            self.kappa = xp.sinc((self.c_ref * k_mag * self.dt / 2) / np.pi)
+            self.source_kappa = xp.cos(self.c_ref * k_mag * self.dt / 2)
+        else:
+            self.kappa = 1
+            self.source_kappa = 1
 
         # Per-dimension operators with kappa pre-multiplied to avoid per-step work
+        # Staggered grid shifts: exp(±jk*dx/2) offsets between pressure and velocity grids
         self.op_grad_list = []
         self.op_div_list = []
         for axis, (N, dx) in enumerate(zip(self.dims, self.spacing)):
             k = self.k_list[axis]
-            self.op_grad_list.append(1j * k * xp.exp(1j * k * dx / 2) * self.kappa)
-            self.op_div_list.append(1j * k * xp.exp(-1j * k * dx / 2) * self.kappa)
+            if self.use_sg:
+                self.op_grad_list.append(1j * k * xp.exp(1j * k * dx / 2) * self.kappa)
+                self.op_div_list.append(1j * k * xp.exp(-1j * k * dx / 2) * self.kappa)
+            else:
+                self.op_grad_list.append(1j * k * self.kappa)
+                self.op_div_list.append(1j * k * self.kappa)
 
     def _setup_physics_operators(self):
         """Build absorption, dispersion, and nonlinearity operators."""
@@ -489,7 +496,10 @@ class Simulation:
         # Split density per dimension enables independent PML absorption in each direction
         self.rho_split = [xp.zeros(self.grid_shape, dtype=float) for _ in range(self.ndim)]
 
-        self.rho0_staggered = [self._stagger(self.rho0, axis) for axis in range(self.ndim)]
+        if self.use_sg:
+            self.rho0_staggered = [self._stagger(self.rho0, axis) for axis in range(self.ndim)]
+        else:
+            self.rho0_staggered = [self.rho0] * self.ndim
 
         # Precompute fixed coefficients used every time step
         self.c0_sq = self.c0**2
@@ -511,7 +521,15 @@ class Simulation:
 
         # Initial pressure source (p0)
         p0_raw = getattr(self.source, "p0", 0)
-        self._p0_initial = _expand_to_grid(p0_raw, self.grid_shape, xp, "p0") if _is_enabled(p0_raw) else None
+        if _is_enabled(p0_raw):
+            p0 = _expand_to_grid(p0_raw, self.grid_shape, xp, "p0")
+            if self.smooth_p0 and self.ndim >= 2:
+                from kwave.utils.filters import smooth
+
+                p0 = xp.asarray(smooth(_to_cpu(p0), restore_max=True))
+            self._p0_initial = p0
+        else:
+            self._p0_initial = None
 
     def step(self):
         """Advance simulation by one time step. Returns self for chaining."""

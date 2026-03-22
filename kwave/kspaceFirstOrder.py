@@ -40,8 +40,8 @@ def kspaceFirstOrder(
     pml_size: Union[int, tuple, str] = 20,
     pml_alpha: Union[float, tuple] = 2.0,
     use_sg: bool = True,
-    use_kspace: bool = True,  # TODO: not yet forwarded to native solver
-    smooth_p0: bool = True,  # TODO: not yet forwarded to native solver
+    use_kspace: bool = True,
+    smooth_p0: bool = True,
     backend: str = "native",
     use_gpu: bool = False,
     save_only: bool = False,
@@ -91,7 +91,18 @@ def kspaceFirstOrder(
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     if backend == "native":
-        return _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu)
+        return _run_native(
+            kgrid,
+            medium,
+            source,
+            sensor,
+            pml_size,
+            pml_alpha,
+            use_gpu=use_gpu,
+            use_sg=use_sg,
+            use_kspace=use_kspace,
+            smooth_p0=smooth_p0,
+        )
     elif backend == "cpp":
         return _run_cpp(
             kgrid,
@@ -113,14 +124,17 @@ def kspaceFirstOrder(
         raise ValueError(f"Unknown backend: {backend!r}. Use 'native' or 'cpp'.")
 
 
-def _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu):
-    """Run simulation using the native Python/CuPy solver.
-
-    TODO: use_sg, use_kspace, and smooth_p0 are not yet forwarded to the native solver.
-    """
+def _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, *, use_gpu, use_sg, use_kspace, smooth_p0):
+    """Run simulation using the native Python/CuPy solver."""
     from kwave.solvers.kwave_adapter import run_simulation_native
 
-    opts = SimpleNamespace(pml_size=list(pml_size), pml_alpha=list(pml_alpha))
+    opts = SimpleNamespace(
+        pml_size=list(pml_size),
+        pml_alpha=list(pml_alpha),
+        use_sg=use_sg,
+        use_kspace=use_kspace,
+        smooth_p0=smooth_p0,
+    )
     return run_simulation_native(kgrid, medium, source, sensor, opts, use_gpu=use_gpu)
 
 

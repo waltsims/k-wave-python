@@ -172,6 +172,20 @@ def run_simulation_native(
     # Select backend
     backend = "gpu" if use_gpu else "cpu"
 
+    # Physics options
+    use_sg = getattr(simulation_options, "use_sg", True)
+    use_kspace = getattr(simulation_options, "use_kspace", True)
+    smooth_p0 = getattr(simulation_options, "smooth_p0", True)
+
     # Create and run simulation
-    sim = Simulation(kgrid_ns, medium_ns, source_ns, sensor_ns, backend=backend)
+    sim = Simulation(
+        kgrid_ns,
+        medium_ns,
+        source_ns,
+        sensor_ns,
+        backend=backend,
+        use_sg=use_sg,
+        use_kspace=use_kspace,
+        smooth_p0=smooth_p0,
+    )
     return sim.run()
