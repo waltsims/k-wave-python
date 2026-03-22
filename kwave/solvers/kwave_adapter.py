@@ -73,14 +73,14 @@ def run_simulation_native(
     source: kSource,
     sensor: Union[kSensor, NotATransducer, None],
     simulation_options,
-    use_gpu: bool = False,
+    device: str = "cpu",
 ) -> dict:
     return Simulation(
         _convert_kgrid(kgrid, simulation_options),
         _convert_medium(medium),
         _convert_source(source),
         _convert_sensor(sensor),
-        backend="gpu" if use_gpu else "cpu",
+        backend=device,
         use_sg=getattr(simulation_options, "use_sg", True),
         use_kspace=getattr(simulation_options, "use_kspace", True),
         smooth_p0=getattr(simulation_options, "smooth_p0", True),

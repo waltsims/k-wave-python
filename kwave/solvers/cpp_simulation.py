@@ -46,10 +46,9 @@ class CppSimulation:
         self._write_hdf5(input_file)
         return input_file, output_file
 
-    def run(self, *, use_gpu=False, num_threads=None, device_num=None, quiet=False, debug=False):
-        """Prepare + execute C++ binary + parse results."""
+    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False):
         input_file, output_file = self.prepare()
-        self._execute(input_file, output_file, use_gpu=use_gpu, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+        self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
         return self._parse_output(output_file)
 
     # -- HDF5 serialization --
@@ -244,17 +243,15 @@ class CppSimulation:
             return 2  # Stokes
         return 1  # Power-law
 
-    def _execute(self, input_file, output_file, *, use_gpu, num_threads, device_num, quiet, debug):
+    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug):
         """Run the C++ k-Wave binary."""
         import kwave
 
-        binary_name = "kspaceFirstOrder-CUDA" if use_gpu else "kspaceFirstOrder-OMP"
+        binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
         binary_path = kwave.BINARY_PATH / binary_name
         if not binary_path.exists():
-            if kwave.PLATFORM == "darwin" and use_gpu:
-                raise ValueError(
-                    "GPU simulations are currently not supported on MacOS. " "Try running the simulation on CPU by setting use_gpu=False."
-                )
+            if kwave.PLATFORM == "darwin" and device == "gpu":
+                raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
             raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 

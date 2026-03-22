@@ -216,7 +216,7 @@ def kspaceFirstOrder2D(
     if execution_options.is_native_backend:
         from kwave.solvers import NativeSolver
 
-        solver = NativeSolver(use_gpu=execution_options.is_gpu_simulation)
+        solver = NativeSolver(device="gpu" if execution_options.is_gpu_simulation else "cpu")
         return solver.run(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.

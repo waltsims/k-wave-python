@@ -279,8 +279,8 @@ class TestSolverFactory:
     def test_get_solver_enum(self):
         from kwave.solvers import Backend, get_solver
 
-        s = get_solver(Backend.NATIVE, use_gpu=True)
-        assert s.use_gpu is True
+        s = get_solver(Backend.NATIVE, device="gpu")
+        assert s.device == "gpu"
 
     def test_unknown_backend_raises(self):
         import pytest

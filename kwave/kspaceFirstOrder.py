@@ -64,7 +64,7 @@ def kspaceFirstOrder(
             use_kspace=use_kspace,
             smooth_p0=smooth_p0,
         )
-        return run_simulation_native(kgrid, medium, source, sensor, opts, use_gpu=(device == "gpu"))
+        return run_simulation_native(kgrid, medium, source, sensor, opts, device=device)
 
     if backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
@@ -73,6 +73,6 @@ def kspaceFirstOrder(
         if save_only:
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
-        return cpp_sim.run(use_gpu=(device == "gpu"), num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+        return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
 
     raise ValueError(f"Unknown backend: {backend!r}. Use 'native' or 'cpp'.")
