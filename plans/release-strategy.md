@@ -2,21 +2,19 @@
 
 ## Overview
 
-This release strategy brings the unified solver architecture to fruition while keeping k-wave-python pure and enabling AI agent access via FastMCP.
+This release strategy brings the unified solver architecture to fruition while keeping k-wave-python pure and enabling AI agent access via an MCP CLI tool.
 
 ## Repository Structure
 
 ```
 waltsims/
 ├── k-wave-python      # Core simulation library (NumPy + CuPy)
-├── k-wave-mcp         # Local MCP server (runs anywhere, no cloud deps)
-└── k-wave-cloud       # SaaS infrastructure (billing, workers, DO deployment)
+└── kwp                # CLI tool for AI agent access (MCP protocol)
 ```
 
 **Rationale:**
 - `k-wave-python`: Core simulation library, NumPy (CPU) + CuPy (GPU)
-- `k-wave-mcp`: Self-hostable MCP server, users can run locally or on their own infra
-- `k-wave-cloud`: Commercial SaaS layer with billing, scales independently
+- `kwp`: CLI tool (`kwp`) exposing k-wave to AI agents via MCP protocol
 
 ---
 
@@ -26,11 +24,10 @@ waltsims/
 |------|---------|-----------|-------|
 | k-wave-python | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | k-wave-python | **0.6.0** | Native Solver + Unified API + Deprecation | Native solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
-| k-wave-python | **0.7.0** | k-wave-mcp | MCP server using v0.6 unified API |
+| k-wave-python | **0.7.0** | kwp | MCP CLI using v0.6 unified API |
 | k-wave-python | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | k-wave-python | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
-| k-wave-mcp | **0.1.0** | MCP Server | Ships alongside k-wave-python 0.7.0 |
-| k-wave-cloud | **0.1.0** | SaaS Beta | DO deployment, billing, job queue |
+| kwp | **0.1.0** | MCP CLI | Ships alongside k-wave-python 0.7.0 |
 
 ---
 
@@ -139,45 +136,27 @@ warnings.warn(
 
 ---
 
-## Phase 3: v0.7.0 - k-wave-mcp (Local MCP Server)
+## Phase 3: v0.7.0 - kwp (MCP CLI Tool)
 
-**Goal:** Self-hostable MCP server for AI agents, built on the v0.6 unified API.
+**Goal:** CLI tool that exposes k-wave to AI agents via the MCP protocol, built on the v0.6 unified API.
 
-**Create new repo:** `k-wave-mcp`
+**Create new repo:** `kwp`
 
 **Repo structure:**
 ```
-k-wave-mcp/
+kwp/
 ├── pyproject.toml
-├── Dockerfile              # Containerized server
-├── src/kwave_mcp/
-│   ├── server.py           # FastMCP server
+├── src/kwp/
+│   ├── cli.py              # CLI entry point
 │   ├── tools.py            # MCP tool definitions
 │   └── data_handlers.py    # Array serialization
 └── tests/
 ```
 
 **Features:**
-- Runs locally on user's machine
-- No cloud dependencies for local mode
+- CLI tool: `kwp` command
 - Uses local k-wave-python installation
 - Optional CuPy support for GPU
-- **Optional k-wave-cloud integration**: Can dispatch heavy simulations to cloud
-
-**Compute Routing:**
-```
-┌─────────────┐      ┌─────────────┐      ┌────────────────────┐
-│  AI Agent   │─────▶│  k-wave-mcp │─────▶│  Local k-wave-py   │
-│  (Claude)   │      │   (FastMCP) │      │  (NumPy/CuPy)      │
-└─────────────┘      └──────┬──────┘      └────────────────────┘
-                            │
-                            │ (optional, for heavy workloads)
-                            ▼
-                     ┌─────────────┐      ┌────────────────────┐
-                     │ k-wave-cloud│─────▶│  DO Droplets       │
-                     │   (SaaS)    │      │  (GPU workers)     │
-                     └─────────────┘      └────────────────────┘
-```
 
 **MCP Tools:**
 ```python
@@ -204,7 +183,7 @@ async def get_sensor_data(result_id, field="p", format="summary"): ...
 **Large array handling:**
 - Return summaries by default (shape, min, max, mean)
 - Support `format="base64"` for full array transfer
-- Store results server-side, return IDs
+- Store results in-process, return IDs
 
 ---
 
@@ -266,42 +245,6 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 
 ---
 
-## k-wave-cloud (SaaS Platform)
-
-**Goal:** Commercial simulation-as-a-service platform
-
-**Create new repo:** `k-wave-cloud`
-
-**Repo structure:**
-```
-k-wave-cloud/
-├── pyproject.toml
-├── docker-compose.yml      # Full stack
-├── src/kwave_cloud/
-│   ├── api/                # REST API for job submission
-│   ├── worker/             # Celery workers
-│   ├── billing/            # Usage tracking + Stripe
-│   └── storage/            # S3 result management
-├── deploy/
-│   ├── terraform/          # DO infrastructure
-│   └── kubernetes/         # Optional K8s scale
-└── tests/
-```
-
-**Components:**
-- **MCP Server:** Lightweight FastMCP service handling tool calls
-- **Compute Droplets:** Spin up on-demand for simulations (CPU or GPU)
-- **Job Queue:** Redis/Celery for async simulation dispatch
-- **Results Storage:** S3-compatible storage for large sensor data
-- **Billing:** Track compute time, charge per simulation or per minute
-
-**Droplet Tiers:**
-- Basic CPU: Small 2D sims, quick tests (~$0.01/sim)
-- Standard CPU: Medium 3D sims (~$0.05/sim)
-- GPU Droplet: Large 3D sims with CuPy (~$0.10/sim)
-
----
-
 ## Testing Strategy
 
 **Existing (keep):**
@@ -359,7 +302,7 @@ uv run pytest tests/ -v
 
 1. **Now:** Finalize master/main for v0.5.0
 2. **Next:** Native solver + `kspaceFirstOrder.py` + deprecation for v0.6.0
-3. **Then:** k-wave-mcp using v0.6 API for v0.7.0
+3. **Then:** kwp CLI using v0.6 API for v0.7.0
 4. **Then:** Clean delete for v1.0.0
 5. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
 
