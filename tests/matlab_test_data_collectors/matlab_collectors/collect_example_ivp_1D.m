@@ -19,7 +19,8 @@ medium.sound_speed = sound_speed;
 medium.density = density;
 
 % Time stepping (CFL = 0.3)
-kgrid.makeTime(sound_speed, [], [], 'CFLnumber', 0.3);
+% makeTime signature: makeTime(sound_speed, cfl, t_end)
+kgrid.makeTime(sound_speed, 0.3);
 
 % Source: smooth sinusoidal pulse
 p0 = zeros(Nx, 1);
