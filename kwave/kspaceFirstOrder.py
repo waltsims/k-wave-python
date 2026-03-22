@@ -1,5 +1,8 @@
+import copy
 from types import SimpleNamespace
-from typing import Union
+from typing import Optional, Union
+
+import numpy as np
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -36,11 +39,11 @@ def kspaceFirstOrder(
     backend: str = "python",
     device: str = "cpu",
     save_only: bool = False,
-    data_path: str = None,
+    data_path: Optional[str] = None,
     quiet: bool = False,
     debug: bool = False,
-    num_threads: int = None,
-    device_num: int = None,
+    num_threads: Optional[int] = None,
+    device_num: Optional[int] = None,
 ) -> dict:
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
@@ -71,10 +74,6 @@ def kspaceFirstOrder(
 
         # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
         if smooth_p0 and source.p0 is not None:
-            import copy
-
-            import numpy as np
-
             p0 = np.asarray(source.p0, dtype=float)
             if p0.ndim >= 2:
                 from kwave.utils.filters import smooth

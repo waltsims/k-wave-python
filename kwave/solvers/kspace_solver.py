@@ -299,13 +299,11 @@ class Simulation:
             shape[axis] = N
             self.k_list.append(k.reshape(shape))
 
-        # |k| = sqrt(kx^2 + ky^2 + ...) — must use full N-D magnitude for isotropic dispersion
         k_mag_sq = self.k_list[0] ** 2
         for k in self.k_list[1:]:
             k_mag_sq = k_mag_sq + k**2
         k_mag = xp.sqrt(k_mag_sq)
-
-        # k-space correction: kappa = sinc(c_ref*|k|*dt/2)  (Tabei et al., JASA 2002, Eq. 10)
+        self._k_mag = k_mag  # cached for _fractional_laplacian
         if self.use_kspace:
             self.kappa = xp.sinc((self.c_ref * k_mag * self.dt / 2) / np.pi)
             self.source_kappa = xp.cos(self.c_ref * k_mag * self.dt / 2)
@@ -549,17 +547,15 @@ class Simulation:
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
         # Only compute rho_total before the loop when nonlinearity needs it
         nl_factor = self._nonlinear_factor(sum(self.rho_split)) if self._has_nonlinearity else 1.0
-        div_u_components = []
+        div_u_total = xp.zeros(self.grid_shape, dtype=float)
         for i in range(self.ndim):
             pml = self.pml_list[i]
             div_u_i = self._diff(self.u[i], self.op_div_list[i])
-            div_u_components.append(div_u_i)
+            div_u_total += div_u_i
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
             self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
-        # Equation of state
-        rho_total = sum(self.rho_split)
-        div_u_total = sum(div_u_components)
+        rho_total = self.rho_split[0] + sum(self.rho_split[1:]) if self.ndim > 1 else self.rho_split[0]
         self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
         # At t=0, override equation of state with p0; set u(-dt/2) for leapfrog
@@ -629,13 +625,11 @@ class Simulation:
         return xp.concatenate([avg, arr[tuple(last)]], axis=axis)
 
     def _fractional_laplacian(self, power):
-        """N-D fractional Laplacian |k|^power."""
+        """N-D fractional Laplacian |k|^power, using cached k_mag from setup."""
         xp = self.xp
-        k_mag_sq = sum(xp.fft.fftshift(k) ** 2 for k in self.k_list)
-        k_mag = xp.sqrt(k_mag_sq)
-        # Suppress NumPy warnings at k=0 singularity (CuPy doesn't raise these)
+        k_mag = self._k_mag
         with np.errstate(divide="ignore", invalid="ignore"):
-            return xp.fft.ifftshift(xp.where(k_mag == 0, 0, k_mag**power))
+            return xp.where(k_mag == 0, 0, k_mag**power)
 
 
 # =============================================================================
