@@ -62,9 +62,14 @@ class Simulation:
         self.medium = medium
         self.source = source
         self.sensor = sensor
-        if backend == "gpu" and cp is None:
-            raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
-        self.xp = cp if cp and backend in ("auto", "gpu") else np
+        if backend == "gpu":
+            if cp is None:
+                raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
+            self.xp = cp
+        elif backend == "auto":
+            self.xp = cp if cp else np
+        else:
+            self.xp = np
         self._is_setup = False
         self.t = 0  # Current time step
 
@@ -540,12 +545,14 @@ class Simulation:
         div_u_total = sum(div_u_components)
         self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
-        # At t=0, override equation of state with p0; reset split densities and u(-dt/2) for leapfrog
+        # At t=0, override equation of state with p0; set u(-dt/2) for leapfrog
+        # Velocity uses negative half-step: u(-dt/2) = -dt/(2*rho0) * grad(p0)
+        # (MATLAB: kspaceFirstOrder_initialiseKgridVariables.m)
         if self.t == 0 and self._p0_initial is not None:
             self.p = self._p0_initial.copy()
             for i in range(self.ndim):
                 self.rho_split[i] = self._p0_initial / (self.c0_sq * self.ndim)
-                self.u[i] = (self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
+                self.u[i] = -(self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
 
         # Record sensor data (binary: index extraction, Cartesian: bilinear/trilinear interpolation)
         if self.t >= self.record_start_index:

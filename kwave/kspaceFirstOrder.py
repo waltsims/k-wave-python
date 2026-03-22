@@ -114,7 +114,10 @@ def kspaceFirstOrder(
 
 
 def _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu):
-    """Run simulation using the native Python/CuPy solver."""
+    """Run simulation using the native Python/CuPy solver.
+
+    TODO: use_sg, use_kspace, and smooth_p0 are not yet forwarded to the native solver.
+    """
     from kwave.solvers.kwave_adapter import run_simulation_native
 
     opts = SimpleNamespace(pml_size=list(pml_size), pml_alpha=list(pml_alpha))

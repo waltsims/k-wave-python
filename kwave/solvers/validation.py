@@ -132,5 +132,8 @@ def validate_sensor(sensor, kgrid):
     if hasattr(sensor, "mask") and sensor.mask is not None:
         mask = np.asarray(sensor.mask)
         grid_size = int(np.prod(kgrid.N))
-        if mask.size != grid_size:
+        ndim = kgrid.dim
+        # Cartesian mask: shape (ndim, N_pts) — valid, skip binary-size check
+        is_cartesian = mask.ndim == 2 and mask.shape[0] == ndim
+        if not is_cartesian and mask.size != grid_size:
             raise ValueError(f"sensor.mask has {mask.size} elements but grid has {grid_size} points.")
