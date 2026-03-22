@@ -190,9 +190,8 @@ class CppSimulation:
             write_matrix(filepath, p_data, "p_source_input")
             p_mask_idx = np.where(np.asarray(source.p_mask).flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
-            mode_map = _SOURCE_MODE_MAP
             p_mode = getattr(source, "p_mode", "additive")
-            write_matrix(filepath, np.array(mode_map.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
+            write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
             write_matrix(filepath, np.array(int(p_data.ndim > 1 and p_data.shape[0] > 1), dtype=np.uint64), "p_source_many")
 
         for vel, flag in [("ux", has_ux), ("uy", has_uy), ("uz", has_uz)]:
@@ -203,9 +202,8 @@ class CppSimulation:
         if has_ux or has_uy or has_uz:
             u_mask_idx = np.where(np.asarray(source.u_mask).flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
-            mode_map = _SOURCE_MODE_MAP
             u_mode = getattr(source, "u_mode", "additive")
-            write_matrix(filepath, np.array(mode_map.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
+            write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
             # Check if multiple waveforms
             first_vel = next(getattr(source, v) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None)
             write_matrix(filepath, np.array(int(np.ndim(first_vel) > 1), dtype=np.uint64), "u_source_many")

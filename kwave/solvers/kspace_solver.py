@@ -18,11 +18,6 @@ except ImportError:
 # =============================================================================
 
 
-# TODO: replace _attr with plain getattr calls — adds no semantics over getattr
-def _attr(obj, name, default=None):
-    return getattr(obj, name, default)
-
-
 # Zero arrays/scalars from MATLAB indicate "disabled" features
 def _is_enabled(x):
     return x is not None and not (np.all(x == 0) if hasattr(x, "__len__") else x == 0)
@@ -81,8 +76,8 @@ class Simulation:
         # TODO: self.dims is redundant with self.grid_shape — delete dims, use grid_shape everywhere
         self.dims, self.spacing = [], []
         for axis in ["x", "y", "z"]:
-            N = _attr(self.kgrid, f"N{axis}", None)
-            d = _attr(self.kgrid, f"d{axis}", None)
+            N = getattr(self.kgrid, f"N{axis}", None)
+            d = getattr(self.kgrid, f"d{axis}", None)
             if N is not None and d is not None:
                 self.dims.append(int(N))
                 self.spacing.append(float(d))
@@ -96,15 +91,8 @@ class Simulation:
 
         # Medium properties
         self.c0 = _expand_to_grid(self.medium.sound_speed, self.grid_shape, xp, "sound_speed")
-        self.rho0 = _expand_to_grid(_attr(self.medium, "density", 1000.0), self.grid_shape, xp, "density")
+        self.rho0 = _expand_to_grid(getattr(self.medium, "density", 1000.0), self.grid_shape, xp, "density")
         self.c_ref = float(xp.max(self.c0))
-
-        # CFL stability limit for pseudospectral methods on staggered grids:
-        # c * dt / dx <= 2/pi / sqrt(ndim)  (Tabei, Mast & Waag, JASA 2002, Eq. 11)
-        cfl = self.c_ref * self.dt / min(self.spacing)
-        cfl_max = 2 / (np.pi * np.sqrt(self.ndim))
-        if cfl > cfl_max:
-            print(f"Warning: Unstable CFL={cfl:.2f} (limit {cfl_max:.3f} for {self.ndim}D)")
 
         # Sensor mask
         self._setup_sensor_mask()
@@ -131,7 +119,7 @@ class Simulation:
         """Build self._extract(field) → sensor values."""
         xp = self.xp
 
-        mask_raw = _attr(self.sensor, "mask", None)
+        mask_raw = getattr(self.sensor, "mask", None)
         grid_numel = int(np.prod(self.grid_shape))
 
         def _is_binary(arr):
@@ -162,7 +150,7 @@ class Simulation:
                 )
 
         # Parse sensor.record (default matches MATLAB: pressure time-series + final snapshot)
-        record = _attr(self.sensor, "record", ("p", "p_final"))
+        record = getattr(self.sensor, "record", ("p", "p_final"))
         if isinstance(record, str):
             record = (record,)
         self.record = set(record)
@@ -196,7 +184,7 @@ class Simulation:
             self.record.update(f"I{a}_avg" for a in "xyz"[: self.ndim])
 
         # MATLAB uses 1-based indexing; convert to Python's 0-based for array slicing
-        record_start_raw = _attr(self.sensor, "record_start_index", 1)
+        record_start_raw = getattr(self.sensor, "record_start_index", 1)
         self.record_start_index = int(record_start_raw) - 1
         self.num_recorded_time_points = self.Nt - self.record_start_index
 
@@ -256,8 +244,8 @@ class Simulation:
             dx = self.spacing[axis]
             name = axis_names[axis]
 
-            pml_size = int(_attr(self.kgrid, f"pml_size_{name}", 0))
-            pml_alpha = float(_attr(self.kgrid, f"pml_alpha_{name}", 0))
+            pml_size = int(getattr(self.kgrid, f"pml_size_{name}", 0))
+            pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
             self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
 
             if pml_size == 0 or pml_alpha == 0:
@@ -326,26 +314,26 @@ class Simulation:
         # Source kappa: cos correction for time-varying sources (Cox et al., IEEE IUS 2018)
         self.source_kappa = xp.cos(self.c_ref * k_mag * self.dt / 2)
 
-        # Per-dimension operators handle staggered grid shifts; kappa applied globally
+        # Per-dimension operators with kappa pre-multiplied to avoid per-step work
         self.op_grad_list = []
         self.op_div_list = []
         for axis, (N, dx) in enumerate(zip(self.dims, self.spacing)):
             k = self.k_list[axis]
-            self.op_grad_list.append(1j * k * xp.exp(1j * k * dx / 2))
-            self.op_div_list.append(1j * k * xp.exp(-1j * k * dx / 2))
+            self.op_grad_list.append(1j * k * xp.exp(1j * k * dx / 2) * self.kappa)
+            self.op_div_list.append(1j * k * xp.exp(-1j * k * dx / 2) * self.kappa)
 
     def _setup_physics_operators(self):
         """Build absorption, dispersion, and nonlinearity operators."""
         xp = self.xp
 
         # Absorption/dispersion
-        alpha_coeff_raw = _attr(self.medium, "alpha_coeff", 0)
+        alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
         if not _is_enabled(alpha_coeff_raw):
             self._absorption = lambda div_u: 0
             self._dispersion = lambda rho: 0
         else:
             alpha_coeff = _expand_to_grid(alpha_coeff_raw, self.grid_shape, xp, "alpha_coeff")
-            alpha_power = float(xp.array(_attr(self.medium, "alpha_power", 1.5)).flatten()[0])
+            alpha_power = float(xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
             alpha_np = 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
 
             if abs(alpha_power - 2.0) < 1e-10:  # Stokes
@@ -357,12 +345,13 @@ class Simulation:
                 nabla1 = self._fractional_laplacian(alpha_power - 2)
                 nabla2 = self._fractional_laplacian(alpha_power - 1)
                 # Fractional Laplacian already includes full k-space structure; no kappa needed
-                self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1, apply_kappa=False)
-                self._dispersion = lambda rho: eta * self._diff(rho, nabla2, apply_kappa=False)
+                self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
+                self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
 
         # Nonlinearity
-        BonA_raw = _attr(self.medium, "BonA", 0)
-        if not _is_enabled(BonA_raw):
+        BonA_raw = getattr(self.medium, "BonA", 0)
+        self._has_nonlinearity = _is_enabled(BonA_raw)
+        if not self._has_nonlinearity:
             self._nonlinearity = lambda rho: 0
             self._nonlinear_factor = lambda rho: 1.0
         else:
@@ -432,7 +421,7 @@ class Simulation:
                 src = xp.zeros(grid_size, dtype=field.dtype)
                 src[mask] = get_val(t)
                 src = src.reshape(self.grid_shape, order="F")
-                return field + self._diff(src, self.source_kappa, apply_kappa=False)
+                return field + self._diff(src, self.source_kappa)
 
             ops = {"dirichlet": dirichlet, "additive": additive_kspace}
             if mode not in ops:
@@ -449,9 +438,9 @@ class Simulation:
             return c0_flat[mask] if c0_flat.size > 1 else xp.full(n_src, float(c0_flat))
 
         # --- Pressure source ---
-        p_mask = _attr(self.source, "p_mask", 0)
-        p_signal = _attr(self.source, "p", 0)
-        p_mode = _attr(self.source, "p_mode", "additive")
+        p_mask = getattr(self.source, "p_mask", 0)
+        p_signal = getattr(self.source, "p", 0)
+        p_mode = getattr(self.source, "p_mode", "additive")
         N = self.ndim
         if _is_enabled(p_mask) and _is_enabled(p_signal):
             c0_src = source_scale(p_mask, self.c0)
@@ -468,11 +457,11 @@ class Simulation:
             self._source_p_op = lambda t, field, dim: field
 
         # --- Velocity sources (per-axis grid spacing) ---
-        u_mask = _attr(self.source, "u_mask", 0)
-        u_mode = _attr(self.source, "u_mode", "additive")
+        u_mask = getattr(self.source, "u_mask", 0)
+        u_mode = getattr(self.source, "u_mode", "additive")
         self._source_u_ops = []
         for i, vel in enumerate(["ux", "uy", "uz"][: self.ndim]):
-            u_signal = _attr(self.source, vel, 0)
+            u_signal = getattr(self.source, vel, 0)
             di = self.spacing[i]  # dx for ux, dy for uy, dz for uz
             if _is_enabled(u_mask) and _is_enabled(u_signal):
                 c0_src = source_scale(u_mask, self.c0)
@@ -516,7 +505,7 @@ class Simulation:
             self.unstagger_ops = [xp.exp(-1j * self.k_list[ax] * self.spacing[ax] / 2) for ax in range(self.ndim)]
 
         # Initial pressure source (p0)
-        p0_raw = _attr(self.source, "p0", 0)
+        p0_raw = getattr(self.source, "p0", 0)
         self._p0_initial = _expand_to_grid(p0_raw, self.grid_shape, xp, "p0") if _is_enabled(p0_raw) else None
 
     def step(self):
@@ -536,13 +525,14 @@ class Simulation:
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
-        rho_total = sum(self.rho_split)
+        # Only compute rho_total before the loop when nonlinearity needs it
+        nl_factor = self._nonlinear_factor(sum(self.rho_split)) if self._has_nonlinearity else 1.0
         div_u_components = []
         for i in range(self.ndim):
             pml = self.pml_list[i]
             div_u_i = self._diff(self.u[i], self.op_div_list[i])
             div_u_components.append(div_u_i)
-            self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * self._nonlinear_factor(rho_total))
+            self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
             self.rho_split[i] = self._source_p_op(self.t, self.rho_split[i], i)
 
         # Equation of state
@@ -592,13 +582,14 @@ class Simulation:
         return {k: v for k, v in result.items() if k in self.record}
 
     # Helper methods
-    def _diff(self, f, op, apply_kappa=True):
-        """Spectral differentiation: F^-1[op * kappa * F[f]]."""
-        # TODO: rfftn/irfftn for ~2x speedup on real fields (requires half-grid k-space operators)
-        # TODO: precompute op*kappa products at setup to eliminate per-call elementwise multiply
+    def _diff(self, f, op):
+        """Spectral differentiation: F^-1[op * F[f]].
+
+        For gradient/divergence ops, kappa is pre-multiplied at setup.
+        For fractional Laplacian ops (absorption/dispersion), kappa is not needed.
+        """
         xp = self.xp
-        kappa = self.kappa if apply_kappa else 1
-        return xp.real(xp.fft.ifftn(op * kappa * xp.fft.fftn(f)))
+        return xp.real(xp.fft.ifftn(op * xp.fft.fftn(f)))
 
     def _stagger(self, arr, axis):
         """Compute staggered grid values (average neighbors along axis)."""
@@ -697,10 +688,3 @@ def create_simulation(kgrid, medium, source, sensor, backend="auto"):
 def simulate_from_dicts(kgrid, medium, source, sensor, backend="auto"):
     """MATLAB interop entry point."""
     return create_simulation(kgrid, medium, source, sensor, backend).run()
-
-
-def interop_sanity(arr):
-    """Verify MATLAB/Python data layout."""
-    a = np.array(arr, copy=True)
-    a[0, 1] = 99
-    return a
