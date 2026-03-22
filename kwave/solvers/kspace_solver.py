@@ -410,9 +410,16 @@ class Simulation:
                 src = _src_buf.reshape(self.grid_shape, order="F")
                 return field + self._diff(src, self.source_kappa)
 
-            ops = {"dirichlet": dirichlet, "additive": additive_kspace}
+            def additive_no_correction(t, field):
+                if t >= signal_len:
+                    return field
+                _src_buf[:] = 0
+                _src_buf[mask] = get_val(t)
+                return field + _src_buf.reshape(self.grid_shape, order="F")
+
+            ops = {"dirichlet": dirichlet, "additive": additive_kspace, "additive-no-correction": additive_no_correction}
             if mode not in ops:
-                raise ValueError(f"Unknown source mode: {mode!r}. Use 'additive' or 'dirichlet'.")
+                raise ValueError(f"Unknown source mode: {mode!r}. Use 'additive', 'additive-no-correction', or 'dirichlet'.")
             return ops[mode]
 
         def source_scale(mask_raw, c0):
@@ -682,6 +689,13 @@ def _normalize_medium(m):
     if "rho0" in d and "density" not in d:
         d["density"] = d.pop("rho0")
     return d
+
+
+def interop_sanity(arr):
+    """MATLAB interop test: modify A[0,1]=99 and return, to verify column-major indexing."""
+    arr = np.array(arr, dtype=float, order="F")
+    arr[0, 1] = 99
+    return arr
 
 
 def create_simulation(kgrid, medium, source, sensor, backend="auto"):
