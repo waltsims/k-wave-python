@@ -20,7 +20,6 @@ jobs:
         # See https://github.com/lycheeverse/lychee-action
         uses: lycheeverse/lychee-action@v2
         with:
-          # Check all markdown and reStructuredText files
           args: >-
             --verbose
             --no-progress
@@ -28,9 +27,8 @@ jobs:
             --exclude-path "docs/get_started/legacy_licenses/"
             --exclude-link-local
             --exclude "https://doi.org/"
+            --exclude "https://pubs.aip.org"
+            --exclude "https://www.gnu.org"
+            --exclude "https://fsf.org"
             "**/*.md" "**/*.rst"
-          # Fail the build on any broken link
           fail: true
-        env:
-          # Exclude localhost, badges, and problematic domains
-          LYCHEE_EXCLUDE: "http://localhost,https://localhost,https://127.0.0.1,https://img.shields.io,https://www.gnu.org,https://fsf.org,https://pubs.aip.org"
