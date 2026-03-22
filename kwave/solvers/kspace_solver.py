@@ -79,45 +79,32 @@ class Simulation:
     def setup(self):
         """Initialize operators and fields. Call before step()/run()."""
         xp = self.xp
-        print(f"Running on {'CuPy (GPU)' if xp is not np else 'NumPy (CPU)'} backend")
 
-        # TODO: self.dims is redundant with self.grid_shape — delete dims, use grid_shape everywhere
-        self.dims, self.spacing = [], []
+        self.spacing = []
+        grid_dims = []
         for axis in ["x", "y", "z"]:
             N = getattr(self.kgrid, f"N{axis}", None)
             d = getattr(self.kgrid, f"d{axis}", None)
             if N is not None and d is not None:
-                self.dims.append(int(N))
+                grid_dims.append(int(N))
                 self.spacing.append(float(d))
             else:
                 break
 
-        self.grid_shape = tuple(self.dims)
-        self.ndim = len(self.dims)
+        self.grid_shape = tuple(grid_dims)
+        self.ndim = len(grid_dims)
         self.Nt = int(self.kgrid.Nt)
         self.dt = float(self.kgrid.dt)
 
-        # Medium properties
         self.c0 = _expand_to_grid(self.medium.sound_speed, self.grid_shape, xp, "sound_speed")
         self.rho0 = _expand_to_grid(getattr(self.medium, "density", 1000.0), self.grid_shape, xp, "density")
         self.c_ref = float(xp.max(self.c0))
 
-        # Sensor mask
         self._setup_sensor_mask()
-
-        # PML (Perfectly Matched Layer)
         self._setup_pml()
-
-        # K-space operators (one per dimension)
         self._setup_kspace_operators()
-
-        # Physics operators
         self._setup_physics_operators()
-
-        # Source operators
         self._setup_source_operators()
-
-        # Initialize fields
         self._setup_fields()
 
         self._is_setup = True
@@ -204,7 +191,7 @@ class Simulation:
         self.n_sensor_points = cart.shape[1]
 
         # Reconstruct kWaveGrid coordinate axes (centered at origin)
-        axis_coords = [(np.arange(N) - N // 2) * d for N, d in zip(self.dims, self.spacing)]
+        axis_coords = [(np.arange(N) - N // 2) * d for N, d in zip(self.grid_shape, self.spacing)]
 
         if self.ndim == 1:
             x_vec, cart_x = axis_coords[0], cart.flatten()
@@ -216,11 +203,11 @@ class Simulation:
         else:
             # Convert Cartesian positions to continuous grid indices
             frac_idx = np.array([(cart[d] - axis_coords[d][0]) / self.spacing[d] for d in range(self.ndim)])  # (ndim, n_pts)
-            int_idx = np.clip(np.floor(frac_idx).astype(int), 0, np.array(self.dims)[:, None] - 2)
+            int_idx = np.clip(np.floor(frac_idx).astype(int), 0, np.array(self.grid_shape)[:, None] - 2)
             local = frac_idx - int_idx
 
             # F-order strides and 2^ndim corner enumeration
-            strides = np.cumprod([1] + list(self.dims[:-1]))
+            strides = np.cumprod([1] + list(self.grid_shape[:-1]))
             n_corners = 2**self.ndim
             corner_indices = np.zeros((self.n_sensor_points, n_corners), dtype=int)
             corner_weights = np.ones((self.n_sensor_points, n_corners))
@@ -249,7 +236,7 @@ class Simulation:
         self.pml_sizes = []  # PML thickness per axis (for interior slicing)
 
         for axis in range(self.ndim):
-            N = self.dims[axis]
+            N = self.grid_shape[axis]
             dx = self.spacing[axis]
             name = axis_names[axis]
 
@@ -302,7 +289,7 @@ class Simulation:
         self.k_list = []
 
         # First pass: build k-vectors for each dimension
-        for axis, (N, dx) in enumerate(zip(self.dims, self.spacing)):
+        for axis, (N, dx) in enumerate(zip(self.grid_shape, self.spacing)):
             k = 2 * np.pi * xp.fft.fftfreq(N, d=dx)
             shape = [1] * self.ndim
             shape[axis] = N
@@ -326,7 +313,7 @@ class Simulation:
         # Staggered grid shifts: exp(±jk*dx/2) offsets between pressure and velocity grids
         self.op_grad_list = []
         self.op_div_list = []
-        for axis, (N, dx) in enumerate(zip(self.dims, self.spacing)):
+        for axis, (N, dx) in enumerate(zip(self.grid_shape, self.spacing)):
             k = self.k_list[axis]
             if self.use_sg:
                 self.op_grad_list.append(1j * k * xp.exp(1j * k * dx / 2) * self.kappa)
@@ -428,12 +415,15 @@ class Simulation:
                 flat[mask] = get_val(t)
                 return flat.reshape(self.grid_shape, order="F")
 
+            # Pre-allocate buffer to avoid per-step allocation
+            _src_buf = xp.zeros(grid_size, dtype=float)
+
             def additive_kspace(t, field):
                 if t >= signal_len:
                     return field
-                src = xp.zeros(grid_size, dtype=field.dtype)
-                src[mask] = get_val(t)
-                src = src.reshape(self.grid_shape, order="F")
+                _src_buf[:] = 0
+                _src_buf[mask] = get_val(t)
+                src = _src_buf.reshape(self.grid_shape, order="F")
                 return field + self._diff(src, self.source_kappa)
 
             ops = {"dirichlet": dirichlet, "additive": additive_kspace}
@@ -542,10 +532,12 @@ class Simulation:
         xp = self.xp
 
         # Momentum equation: du_i/dt = -grad_i(p)/rho, with PML
+        # Share forward FFT of p across all gradient axes
+        P = xp.fft.fftn(self.p)
         for i in range(self.ndim):
             pml_sg = self.pml_sg_list[i]
-            # Double PML application implements second-order absorption (split-field PML)
-            self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * self._diff(self.p, self.op_grad_list[i]))
+            grad_p_i = xp.real(xp.fft.ifftn(self.op_grad_list[i] * P))
+            self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * grad_p_i)
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
