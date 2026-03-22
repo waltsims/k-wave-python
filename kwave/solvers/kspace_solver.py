@@ -440,24 +440,26 @@ class Simulation:
             n_src = int(xp.sum(mask))
             return c0_flat[mask] if c0_flat.size > 1 else xp.full(n_src, float(c0_flat))
 
-        # --- Pressure source ---
+        # --- Pressure source (per-axis spacing for non-isotropic grids) ---
         p_mask = getattr(self.source, "p_mask", 0)
         p_signal = getattr(self.source, "p", 0)
         p_mode = getattr(self.source, "p_mode", "additive")
         N = self.ndim
         if _is_enabled(p_mask) and _is_enabled(p_signal):
             c0_src = source_scale(p_mask, self.c0)
-            dx = self.spacing[0]
             if p_mode == "dirichlet":
-                # rho_i = source.p / (N * c0^2)
                 scale = 1.0 / (N * c0_src**2)
+                op = build_op(p_mask, p_signal, p_mode, scale)
+                self._source_p_ops = [op] * self.ndim
             else:
-                # rho_i += source.p * 2*dt / (N * c0 * dx)
-                scale = 2 * self.dt / (N * c0_src * dx)
-            op = build_op(p_mask, p_signal, p_mode, scale)
-            self._source_p_op = lambda t, field, dim, _op=op: _op(t, field)
+                # Per-axis: rho_i += source.p * 2*dt / (N * c0 * d_i)
+                self._source_p_ops = []
+                for i in range(self.ndim):
+                    di = self.spacing[i]
+                    scale_i = 2 * self.dt / (N * c0_src * di)
+                    self._source_p_ops.append(build_op(p_mask, p_signal, p_mode, scale_i))
         else:
-            self._source_p_op = lambda t, field, dim: field
+            self._source_p_ops = [lambda t, field: field] * self.ndim
 
         # --- Velocity sources (per-axis grid spacing) ---
         u_mask = getattr(self.source, "u_mask", 0)
@@ -549,7 +551,7 @@ class Simulation:
             div_u_i = self._diff(self.u[i], self.op_div_list[i])
             div_u_components.append(div_u_i)
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
-            self.rho_split[i] = self._source_p_op(self.t, self.rho_split[i], i)
+            self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
         # Equation of state
         rho_total = sum(self.rho_split)
