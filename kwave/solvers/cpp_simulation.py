@@ -17,6 +17,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.io import write_attributes, write_matrix
+from kwave.utils.matrix import num_dim2
 
 # Source injection mode mapping (shared by pressure and velocity sources)
 _SOURCE_MODE_MAP = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
@@ -202,7 +203,7 @@ class CppSimulation:
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
             p_mode = getattr(source, "p_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
-            write_matrix(filepath, np.array(int(p_data.ndim > 1 and p_data.shape[0] > 1), dtype=np.uint64), "p_source_many")
+            write_matrix(filepath, np.array(int(num_dim2(p_data) > 1), dtype=np.uint64), "p_source_many")
 
         for vel, flag in [("ux", has_ux), ("uy", has_uy), ("uz", has_uz)]:
             if flag:
@@ -214,9 +215,8 @@ class CppSimulation:
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
             u_mode = getattr(source, "u_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
-            # Check if multiple waveforms
             first_vel = next(getattr(source, v) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None)
-            write_matrix(filepath, np.array(int(np.ndim(first_vel) > 1), dtype=np.uint64), "u_source_many")
+            write_matrix(filepath, np.array(int(num_dim2(first_vel) > 1), dtype=np.uint64), "u_source_many")
 
         # File attributes
         write_attributes(filepath)

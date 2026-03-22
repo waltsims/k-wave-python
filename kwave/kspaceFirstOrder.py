@@ -18,11 +18,10 @@ def _normalize_pml(val, ndim, name="pml_size"):
     if isinstance(val, (int, float)):
         return (val,) * ndim
     t = tuple(val)
-    if len(t) == 1:
-        return t * ndim
-    if len(t) == ndim:
-        return t
-    raise ValueError(f"{name} must be a scalar or {ndim}-element sequence, got {len(t)} elements")
+    if len(t) == 0 or len(t) > ndim:
+        raise ValueError(f"{name} must be a scalar or 1-to-{ndim}-element sequence, got {len(t)} elements")
+    # Pad short tuples by repeating last value (e.g. (20, 15) in 3-D → (20, 15, 15))
+    return t + (t[-1],) * (ndim - len(t))
 
 
 def kspaceFirstOrder(
@@ -77,7 +76,9 @@ def kspaceFirstOrder(
         device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
             selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
             selects the OMP vs CUDA binary.  Default ``"cpu"``.
-        save_only: Reserved for future use.  Default ``False``.
+        save_only: When ``True`` (``backend="cpp"`` only), write the HDF5
+            input file and return without running the binary.  Useful for
+            cluster submission.  Default ``False``.
         data_path: Directory for HDF5 input/output files (``backend="cpp"``
             only).  If ``None`` a temporary directory is created and cleaned
             up automatically after the run.  Set explicitly to inspect or
@@ -117,18 +118,27 @@ def kspaceFirstOrder(
         return run_simulation_native(kgrid, medium, source, sensor, opts, device=device)
 
     if backend == "cpp":
+        import warnings
+
         from kwave.solvers.cpp_simulation import CppSimulation
 
-        # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
-        if smooth_p0 and source.p0 is not None:
-            p0 = np.asarray(source.p0, dtype=float)
-            if p0.ndim >= 2:
-                from kwave.utils.filters import smooth
+        if not use_kspace:
+            warnings.warn(
+                "use_kspace=False has no effect with backend='cpp'; " "the C++ binary always applies k-space correction.",
+                stacklevel=2,
+            )
 
-                source = copy.copy(source)
-                source.p0 = smooth(p0, restore_max=True)
+        # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
+        if smooth_p0 and source.p0 is not None and kgrid.dim >= 2:
+            from kwave.utils.filters import smooth
+
+            source = copy.copy(source)
+            source.p0 = smooth(np.asarray(source.p0, dtype=float), restore_max=True)
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
+        if save_only:
+            input_file, output_file = cpp_sim.prepare(data_path=data_path)
+            return {"input_file": input_file, "output_file": output_file}
         return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
 
     raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")

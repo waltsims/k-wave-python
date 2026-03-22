@@ -32,8 +32,16 @@ class TestNormalizePml:
         assert _normalize_pml((10, 20), 2) == (10, 20)
         assert _normalize_pml((15,), 3) == (15, 15, 15)
 
+    def test_short_tuple_padded(self):
+        # 2-element tuple in 3-D pads z with last value
+        assert _normalize_pml((20, 15), 3) == (20, 15, 15)
+
+    def test_empty_raises(self):
+        with pytest.raises(ValueError, match="got 0 elements"):
+            _normalize_pml((), 3)
+
     def test_wrong_length(self):
-        with pytest.raises(ValueError, match="must be a scalar or 2-element"):
+        with pytest.raises(ValueError, match="got 3 elements"):
             _normalize_pml((10, 20, 30), 2)
 
 
