@@ -431,15 +431,10 @@ class Simulation:
                 src = src.reshape(self.grid_shape, order="F")
                 return field + self._diff(src, self.source_kappa, apply_kappa=False)
 
-            def additive_no_correction(t, field):
-                if t >= signal_len:
-                    return field
-                flat = field.flatten(order="F")
-                flat[mask] += get_val(t)
-                return flat.reshape(self.grid_shape, order="F")
-
             ops = {"dirichlet": dirichlet, "additive": additive_kspace}
-            return ops.get(mode, additive_no_correction)
+            if mode not in ops:
+                raise ValueError(f"Unknown source mode: {mode!r}. Use 'additive' or 'dirichlet'.")
+            return ops[mode]
 
         def source_scale(mask_raw, c0):
             """Get per-source-point sound speed values."""
@@ -497,8 +492,11 @@ class Simulation:
         # Split density per dimension enables independent PML absorption in each direction
         self.rho_split = [xp.zeros(self.grid_shape, dtype=float) for _ in range(self.ndim)]
 
-        # Staggered density for each dimension
         self.rho0_staggered = [self._stagger(self.rho0, axis) for axis in range(self.ndim)]
+
+        # Precompute fixed coefficients used every time step
+        self.c0_sq = self.c0**2
+        self.dt_over_rho0 = [self.dt / rho for rho in self.rho0_staggered]
 
         # Sensor data storage (sized based on record_start_index)
         self.sensor_data = {}
@@ -531,7 +529,7 @@ class Simulation:
         for i in range(self.ndim):
             pml_sg = self.pml_sg_list[i]
             # Double PML application implements second-order absorption (split-field PML)
-            self.u[i] = pml_sg * (pml_sg * self.u[i] - (self.dt / self.rho0_staggered[i]) * self._diff(self.p, self.op_grad_list[i]))
+            self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * self._diff(self.p, self.op_grad_list[i]))
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
@@ -541,21 +539,20 @@ class Simulation:
             pml = self.pml_list[i]
             div_u_i = self._diff(self.u[i], self.op_div_list[i])
             div_u_components.append(div_u_i)
-            # Double PML application implements second-order absorption (split-field PML)
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * self._nonlinear_factor(rho_total))
             self.rho_split[i] = self._source_p_op(self.t, self.rho_split[i], i)
 
         # Equation of state
         rho_total = sum(self.rho_split)
         div_u_total = sum(div_u_components)
-        self.p = self.c0**2 * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
+        self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
         # At t=0, override equation of state with p0; reset split densities and u(-dt/2) for leapfrog
         if self.t == 0 and self._p0_initial is not None:
             self.p = self._p0_initial.copy()
             for i in range(self.ndim):
-                self.rho_split[i] = self._p0_initial / (self.c0**2 * self.ndim)
-                self.u[i] = (self.dt / (2 * self.rho0_staggered[i])) * self._diff(self.p, self.op_grad_list[i])
+                self.rho_split[i] = self._p0_initial / (self.c0_sq * self.ndim)
+                self.u[i] = (self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
 
         # Record sensor data (binary: index extraction, Cartesian: bilinear/trilinear interpolation)
         if self.t >= self.record_start_index:
@@ -578,7 +575,7 @@ class Simulation:
         while self.t < self.Nt:
             self.step()
         result = {k: _to_cpu(v) for k, v in self.sensor_data.items()}
-        result.update(_compute_aggregates(result, self.ndim))
+        result.update(_compute_aggregates(result, self.ndim, self.record))
         if "p" in result and any(f"u{a}" in result for a in "xyz"):
             result.update(acoustic_intensity(result))
         # Final-state snapshots: interior grid (excluding PML) at last timestep
@@ -627,16 +624,19 @@ class Simulation:
 # =============================================================================
 
 
-def _compute_aggregates(result, ndim):
-    """Compute max/min/rms from time-series. Returns only computed keys."""
+def _compute_aggregates(result, ndim, record):
+    """Compute max/min/rms from time-series. Only computes requested keys."""
     out = {}
     for prefix in ["p"] + [f"u{a}" for a in "xyz"[:ndim]]:
         ts = result.get(prefix)
         if ts is None:
             continue
-        out[f"{prefix}_max"] = np.max(ts, axis=-1)
-        out[f"{prefix}_min"] = np.min(ts, axis=-1)
-        out[f"{prefix}_rms"] = np.sqrt(np.mean(ts**2, axis=-1))
+        if f"{prefix}_max" in record:
+            out[f"{prefix}_max"] = np.max(ts, axis=-1)
+        if f"{prefix}_min" in record:
+            out[f"{prefix}_min"] = np.min(ts, axis=-1)
+        if f"{prefix}_rms" in record:
+            out[f"{prefix}_rms"] = np.sqrt(np.mean(ts**2, axis=-1))
     return out
 
 
@@ -661,7 +661,7 @@ def acoustic_intensity(result):
             break
         u_shifted = np.real(np.fft.ifft(shift_op * np.fft.fft(u, axis=-1), axis=-1))
         out[f"I{a}"] = p * u_shifted
-        out[f"I{a}_avg"] = np.mean(p * u_shifted, axis=-1)
+        out[f"I{a}_avg"] = np.mean(out[f"I{a}"], axis=-1)
     return out
 
 

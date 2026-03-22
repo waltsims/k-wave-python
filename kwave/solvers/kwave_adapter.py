@@ -130,7 +130,7 @@ def _convert_sensor(sensor: Union[kSensor, NotATransducer, None]) -> SimpleNames
         # Record everywhere
         ns.mask = None
     elif hasattr(sensor, "mask") and sensor.mask is not None:
-        ns.mask = np.asarray(sensor.mask, dtype=bool)
+        ns.mask = np.asarray(sensor.mask)
 
     if hasattr(sensor, "record") and sensor.record is not None:
         ns.record = tuple(sensor.record)
