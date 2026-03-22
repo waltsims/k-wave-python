@@ -540,14 +540,14 @@ class Simulation:
         rho_total = self.rho_split[0] + sum(self.rho_split[1:]) if self.ndim > 1 else self.rho_split[0]
         self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
-        # At t=0, override equation of state with p0; set u(-dt/2) for leapfrog
-        # Velocity uses negative half-step: u(-dt/2) = -dt/(2*rho0) * grad(p0)
-        # (MATLAB: kspaceFirstOrder_initialiseKgridVariables.m)
+        # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
+        # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)
+        # using u(dt/2) = -u(-dt/2) which forces u(t1) = 0.
         if self.t == 0 and self._p0_initial is not None:
             self.p = self._p0_initial.copy()
             for i in range(self.ndim):
                 self.rho_split[i] = self._p0_initial / (self.c0_sq * self.ndim)
-                self.u[i] = -(self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
+                self.u[i] = (self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
 
         # Record sensor data (binary: index extraction, Cartesian: bilinear/trilinear interpolation)
         if self.t >= self.record_start_index:

@@ -38,14 +38,8 @@ def test_ivp_2D_vs_matlab(load_matlab_ref):
     assert int(kgrid.Nt) == int(ref["Nt"]), f"Nt mismatch: Python {kgrid.Nt} vs MATLAB {ref['Nt']}"
     np.testing.assert_allclose(float(kgrid.dt), float(ref["dt"]), rtol=1e-12)
 
-    # TODO: Investigate source of ~30% divergence from MATLAB.
-    # k-wave-cupy achieves <1e-15 parity via simulate_from_dicts() path,
-    # so the issue is likely in kwave_adapter.py or kspaceFirstOrder() setup.
-    # For now, use relaxed tolerances to validate the infrastructure.
     assert_fields_close(
         result,
         ref,
         [("p", "sensor_data_p")],
-        rtol=0.5,
-        atol=0.5,
     )

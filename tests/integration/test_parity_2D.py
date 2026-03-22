@@ -1,10 +1,7 @@
 """Step-by-step parity test: Python solver vs MATLAB k-Wave.
 
 Uses a 64x64 grid, single-point p0 source, no smoothing.
-Pinpoints the divergence source between the two implementations.
-
-Key finding: Python velocity = -MATLAB velocity (exact sign flip).
-The gradient operator sign convention differs.
+Validates machine-precision agreement at each stage of the solver.
 """
 from types import SimpleNamespace
 
@@ -98,14 +95,8 @@ def test_p_at_t0_matches(load_matlab_ref):
 
 
 @pytest.mark.integration
-def test_velocity_sign_flip(load_matlab_ref):
-    """ROOT CAUSE: Python velocity = -MATLAB velocity after t=0.
-
-    The gradient operator in the Python solver uses the opposite sign
-    convention from MATLAB k-Wave, causing all velocity components
-    to be negated. This propagates into pressure via the divergence
-    at t=1, creating the ~30% divergence seen in end-to-end tests.
-    """
+def test_velocity_matches_matlab(load_matlab_ref):
+    """Velocity at t=0 matches MATLAB exactly (sign bug was fixed)."""
     ref = _load_ref(load_matlab_ref)
     sim = _build_sim()
     sim.step()  # t=0
@@ -113,22 +104,19 @@ def test_velocity_sign_flip(load_matlab_ref):
     mat_ux = ref["sensor_data_ux"][:, 0].reshape(Nx, Ny, order="F")
     mat_uy = ref["sensor_data_uy"][:, 0].reshape(Nx, Ny, order="F")
 
-    # Python velocity is exactly -MATLAB velocity
-    np.testing.assert_allclose(sim.u[0], -mat_ux, rtol=1e-14, atol=1e-20, err_msg="ux should be exactly -MATLAB ux")
-    np.testing.assert_allclose(sim.u[1], -mat_uy, rtol=1e-14, atol=1e-20, err_msg="uy should be exactly -MATLAB uy")
+    np.testing.assert_allclose(sim.u[0], mat_ux, rtol=1e-14, atol=1e-20, err_msg="ux should match MATLAB")
+    np.testing.assert_allclose(sim.u[1], mat_uy, rtol=1e-14, atol=1e-20, err_msg="uy should match MATLAB")
 
 
 @pytest.mark.integration
-def test_p_at_t1_diverges(load_matlab_ref):
-    """Pressure at t=1 diverges due to velocity sign flip."""
+def test_pressure_parity_10_steps(load_matlab_ref):
+    """Pressure matches MATLAB for first 10 timesteps at machine precision."""
     ref = _load_ref(load_matlab_ref)
     sim = _build_sim()
-    sim.step()  # t=0
-    sim.step()  # t=1
+    mat_p_all = ref["sensor_data_p"]
 
-    py_p = sim.p.flatten(order="F")
-    mat_p = ref["sensor_data_p"][:, 1]
-
-    max_diff = np.max(np.abs(py_p - mat_p))
-    # This should be large (~0.5) due to the sign-flipped velocity
-    assert max_diff > 0.1, f"Expected large divergence at t=1, got {max_diff:.6e}"
+    for t in range(10):
+        sim.step()
+        py_p = sim.p.flatten(order="F")
+        mat_p = mat_p_all[:, t]
+        np.testing.assert_allclose(py_p, mat_p, rtol=1e-12, atol=1e-14, err_msg=f"Pressure diverged at timestep {t}")

@@ -41,5 +41,4 @@ def test_ivp_1D_vs_matlab(load_matlab_ref):
     assert int(kgrid.Nt) == int(ref["Nt"])
     np.testing.assert_allclose(float(kgrid.dt), float(ref["dt"]), rtol=1e-12)
 
-    # TODO: same divergence as 2D — see test_ivp_2D.py
-    assert_fields_close(result, ref, [("p", "sensor_data_p")], rtol=0.5, atol=0.5)
+    assert_fields_close(result, ref, [("p", "sensor_data_p")])

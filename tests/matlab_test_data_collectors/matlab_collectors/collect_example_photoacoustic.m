@@ -16,6 +16,7 @@ Nt = round(t_end / dt);
 kgrid2.setTime(Nt, dt);
 
 medium2.sound_speed = 1500;
+medium2.density = 1000;
 
 source2.p0 = makeDisc(Nx, Nx, Nx/2, Nx/2, source_radius);
 
@@ -33,6 +34,7 @@ kgrid3 = kWaveGrid(Nx, dx, Nx, dx, Nx, dx);
 kgrid3.setTime(Nt, dt);
 
 medium3.sound_speed = 1500;
+medium3.density = 1000;
 
 source3.p0 = makeBall(Nx, Nx, Nx, Nx/2, Nx/2, Nx/2, source_radius);
 

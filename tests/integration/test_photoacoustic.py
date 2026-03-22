@@ -32,20 +32,20 @@ def test_photoacoustic_2D_vs_matlab(load_matlab_ref):
     Nt = int(np.round(t_end / dt))
     kgrid.setTime(Nt, dt)
 
-    medium = kWaveMedium(sound_speed=1500)
+    medium = kWaveMedium(sound_speed=1500, density=1000)
 
     source = kSource()
     source.p0 = make_disc(Vector([Nx, Nx]), Vector([Nx // 2, Nx // 2]), source_radius)
 
     sensor = kSensor()
     sensor.mask = np.zeros((Nx, Nx), dtype=bool)
-    sensor.mask[Nx // 2 + source_sensor_distance, Nx // 2] = True
+    # MATLAB 1-indexed: mask(Nx/2 + dist, Nx/2) → Python 0-indexed: mask[Nx/2 + dist - 1, Nx/2 - 1]
+    sensor.mask[Nx // 2 + source_sensor_distance - 1, Nx // 2 - 1] = True
     sensor.record = ["p"]
 
     result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
 
-    # TODO: same divergence as test_ivp_2D.py
-    assert_fields_close(result, ref, [("p", "sensor_data_2D_p")], rtol=0.5, atol=0.5)
+    assert_fields_close(result, ref, [("p", "sensor_data_2D_p")])
 
 
 @pytest.mark.integration
@@ -56,17 +56,16 @@ def test_photoacoustic_3D_vs_matlab(load_matlab_ref):
     Nt = int(np.round(t_end / dt))
     kgrid.setTime(Nt, dt)
 
-    medium = kWaveMedium(sound_speed=1500)
+    medium = kWaveMedium(sound_speed=1500, density=1000)
 
     source = kSource()
     source.p0 = make_ball(Vector([Nx, Nx, Nx]), Vector([Nx // 2, Nx // 2, Nx // 2]), source_radius)
 
     sensor = kSensor()
     sensor.mask = np.zeros((Nx, Nx, Nx), dtype=bool)
-    sensor.mask[Nx // 2 + source_sensor_distance, Nx // 2, Nx // 2] = True
+    sensor.mask[Nx // 2 + source_sensor_distance - 1, Nx // 2 - 1, Nx // 2 - 1] = True
     sensor.record = ["p"]
 
     result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
 
-    # TODO: same divergence as test_ivp_2D.py
-    assert_fields_close(result, ref, [("p", "sensor_data_3D_p")], rtol=0.5, atol=0.5)
+    assert_fields_close(result, ref, [("p", "sensor_data_3D_p")])
