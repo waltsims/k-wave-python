@@ -255,6 +255,34 @@ class TestMatlabInterop:
         assert "p" in result
         assert result["p"].shape[0] == 64
 
+    def test_simulate_from_dicts_2d_no_smooth(self):
+        """simulate_from_dicts defaults smooth_p0=False so MATLAB shim doesn't double-smooth."""
+        from kwave.solvers.kspace_solver import simulate_from_dicts
+
+        Nx = 32
+        kgrid = {
+            "Nx": Nx,
+            "Ny": Nx,
+            "dx": 0.1e-3,
+            "dy": 0.1e-3,
+            "Nt": 5,
+            "dt": 1e-8,
+            "pml_size_x": 10,
+            "pml_size_y": 10,
+            "pml_alpha_x": 2.0,
+            "pml_alpha_y": 2.0,
+        }
+        medium = {"sound_speed": 1500, "density": 1000}
+        # Sharp single-point source — smoothing would spread this across neighbors
+        p0 = np.zeros((Nx, Nx))
+        p0[Nx // 2, Nx // 2] = 1.0
+        source = {"p0": p0}
+        sensor = {"mask": np.ones((Nx, Nx), dtype=bool)}
+        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        # At t=0 the recorded pressure should be the unsmoothed p0
+        p_t0 = result["p"][:, 0].reshape(Nx, Nx)
+        assert p_t0[Nx // 2, Nx // 2] == 1.0, "smooth_p0 should default to False"
+
     def test_normalize_medium_aliases(self):
         from kwave.solvers.kspace_solver import _normalize_medium
 
