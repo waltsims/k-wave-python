@@ -67,6 +67,8 @@ class Simulation:
         self.medium = medium
         self.source = source
         self.sensor = sensor
+        if backend == "gpu" and cp is None:
+            raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
         self.xp = cp if cp and backend in ("auto", "gpu") else np
         self._is_setup = False
         self.t = 0  # Current time step

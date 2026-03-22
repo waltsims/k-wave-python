@@ -77,14 +77,22 @@ def validate_pml(pml_size, kgrid):
 
 
 def validate_cfl(kgrid, medium):
-    """Warn if CFL condition suggests instability."""
+    """Warn if CFL condition suggests instability.
+
+    Uses the pseudospectral stability limit: c*dt/dx <= 2/(pi*sqrt(ndim))
+    (Tabei, Mast & Waag, JASA 2002, Eq. 11).
+    """
     c_max = float(np.max(np.asarray(medium.sound_speed)))
     dt = float(kgrid.dt)
     dx_min = float(np.min(kgrid.spacing))
+    ndim = kgrid.dim
     cfl = c_max * dt / dx_min
-    if cfl > 1.0:
+    cfl_limit = 2 / (np.pi * np.sqrt(ndim))
+    if cfl > cfl_limit:
         warnings.warn(
-            f"CFL number = {cfl:.3f} > 1.0. Simulation may be unstable. " f"Reduce dt or increase grid spacing.",
+            f"CFL number = {cfl:.3f} exceeds pseudospectral stability limit "
+            f"{cfl_limit:.3f} for {ndim}D. Simulation may be unstable. "
+            f"Reduce dt or increase grid spacing.",
             stacklevel=3,
         )
 

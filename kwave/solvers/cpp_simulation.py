@@ -113,9 +113,13 @@ class CppSimulation:
         else:
             grid_shape = (Nx,)
 
-        sensor_mask = np.asarray(sensor.mask, dtype=bool).reshape(grid_shape)
-        sensor_mask_index = np.where(sensor_mask.flatten(order="F") != 0)[0] + 1
-        sensor_mask_index = sensor_mask_index.astype(np.uint64)
+        if sensor is None or sensor.mask is None:
+            # Record everywhere
+            sensor_mask_index = np.arange(1, int(np.prod(grid_shape)) + 1, dtype=np.uint64)
+        else:
+            sensor_mask = np.asarray(sensor.mask, dtype=bool).reshape(grid_shape)
+            sensor_mask_index = np.where(sensor_mask.flatten(order="F") != 0)[0] + 1
+            sensor_mask_index = sensor_mask_index.astype(np.uint64)
 
         # -- Write integer variables --
         ints = {

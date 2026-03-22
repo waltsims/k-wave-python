@@ -89,7 +89,7 @@ def _extract_exec_options(kwargs, opts):
     # Backend
     if opts.backend == "native":
         kwargs["backend"] = "native"
-        kwargs["use_gpu"] = False
+        kwargs["use_gpu"] = opts.is_gpu_simulation or False
     elif opts.backend == "CUDA":
         kwargs["backend"] = "cpp"
         kwargs["use_gpu"] = True
@@ -109,8 +109,11 @@ def _extract_exec_options(kwargs, opts):
     elif opts.verbose_level >= 2:
         kwargs["debug"] = True
 
-    # Threading
-    if opts.num_threads is not None:
+    # Threading — only forward if user explicitly set it (not the auto-detected cpu_count default)
+    import os
+
+    cpu_count = os.cpu_count()
+    if opts._num_threads is not None and opts._num_threads != cpu_count:
         kwargs["num_threads"] = opts.num_threads
 
     # GPU device
