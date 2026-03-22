@@ -698,11 +698,22 @@ def interop_sanity(arr):
     return arr
 
 
-def create_simulation(kgrid, medium, source, sensor, backend="auto"):
-    """MATLAB interop: create Simulation from dicts (for step-by-step debugging)."""
-    return Simulation(_to_namespace(kgrid), _to_namespace(_normalize_medium(medium)), _to_namespace(source), _to_namespace(sensor), backend)
+def create_simulation(kgrid, medium, source, sensor, backend="auto", smooth_p0=False):
+    """MATLAB interop: create Simulation from dicts (for step-by-step debugging).
+
+    smooth_p0 defaults to False because the MATLAB shim handles smoothing
+    before calling Python, so the solver should not re-smooth.
+    """
+    return Simulation(
+        _to_namespace(kgrid),
+        _to_namespace(_normalize_medium(medium)),
+        _to_namespace(source),
+        _to_namespace(sensor),
+        backend,
+        smooth_p0=smooth_p0,
+    )
 
 
-def simulate_from_dicts(kgrid, medium, source, sensor, backend="auto"):
+def simulate_from_dicts(kgrid, medium, source, sensor, backend="auto", smooth_p0=False):
     """MATLAB interop entry point."""
-    return create_simulation(kgrid, medium, source, sensor, backend).run()
+    return create_simulation(kgrid, medium, source, sensor, backend, smooth_p0=smooth_p0).run()
