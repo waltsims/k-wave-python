@@ -133,7 +133,8 @@ def kspaceFirstOrder(
             from kwave.utils.filters import smooth
 
             source = copy.copy(source)
-            source.p0 = smooth(np.asarray(source.p0, dtype=float), restore_max=True)
+            grid_shape = tuple(int(n) for n in kgrid.N)
+            source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(grid_shape, order="F"), restore_max=True)
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:

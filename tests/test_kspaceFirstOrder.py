@@ -57,6 +57,12 @@ class TestErrors:
         with pytest.raises(ValueError, match="Unknown backend"):
             kspaceFirstOrder(kgrid, medium, source, sensor, backend="unknown")
 
+    def test_python_backend_runs(self, sim_2d):
+        kgrid, medium, source, sensor = sim_2d
+        result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
+        assert "p" in result
+        assert result["p"].shape == (int(sensor.mask.sum()), int(kgrid.Nt))
+
     def test_cpp_save_only(self, sim_2d):
         kgrid, medium, source, sensor = sim_2d
         result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", save_only=True, data_path=tempfile.mkdtemp())
