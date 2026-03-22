@@ -19,7 +19,8 @@ def _convert_kgrid(kgrid: kWaveGrid, opts) -> SimpleNamespace:
     if kgrid.dim >= 3:
         ns.Nz, ns.dz = int(kgrid.N[2]), float(kgrid.spacing[2])
 
-    pml_size, pml_alpha = opts.pml_size, opts.pml_alpha
+    pml_size = opts.pml_size if opts.pml_size is not None else [20] * kgrid.dim
+    pml_alpha = opts.pml_alpha if opts.pml_alpha is not None else [2.0] * kgrid.dim
     for attr, src, cast in [("pml_size", pml_size, int), ("pml_alpha", pml_alpha, float)]:
         dims = ["x", "y", "z"][: kgrid.dim]
         if hasattr(src, "__len__"):

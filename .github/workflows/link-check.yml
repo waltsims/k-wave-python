@@ -29,6 +29,7 @@ jobs:
             --retry-wait-time 4
             --accept 200,206,403,429
             --exclude-path "docs/get_started/legacy_licenses/gpl-3.0.rst"
+            --exclude "https://doi.org/"
             "**/*.md" "**/*.rst"
           # Fail the build on any broken link
           fail: true

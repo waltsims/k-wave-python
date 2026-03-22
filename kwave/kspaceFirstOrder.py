@@ -69,6 +69,19 @@ def kspaceFirstOrder(
     if backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
 
+        # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
+        if smooth_p0 and source.p0 is not None:
+            import copy
+
+            import numpy as np
+
+            p0 = np.asarray(source.p0, dtype=float)
+            if p0.ndim >= 2:
+                from kwave.utils.filters import smooth
+
+                source = copy.copy(source)
+                source.p0 = smooth(p0, restore_max=True)
+
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
