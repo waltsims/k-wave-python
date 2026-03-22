@@ -58,13 +58,14 @@ def _convert_source(source: kSource) -> SimpleNamespace:
 
 def _convert_sensor(sensor: Union[kSensor, NotATransducer, None]) -> SimpleNamespace:
     ns = SimpleNamespace(mask=None)
-    if sensor is not None:
-        if hasattr(sensor, "mask") and sensor.mask is not None:
-            ns.mask = np.asarray(sensor.mask)
-        if hasattr(sensor, "record") and sensor.record is not None:
-            ns.record = tuple(sensor.record)
-        if hasattr(sensor, "record_start_index") and sensor.record_start_index is not None:
-            ns.record_start_index = int(sensor.record_start_index)
+    if sensor is None:
+        return ns
+    if hasattr(sensor, "mask") and sensor.mask is not None:
+        ns.mask = np.asarray(sensor.mask)
+    if hasattr(sensor, "record") and sensor.record is not None:
+        ns.record = tuple(sensor.record)
+    if hasattr(sensor, "record_start_index") and sensor.record_start_index is not None:
+        ns.record_start_index = int(sensor.record_start_index)
     return ns
 
 
