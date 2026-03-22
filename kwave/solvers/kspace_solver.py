@@ -565,10 +565,9 @@ class Simulation:
             self.setup()
         while self.t < self.Nt:
             self.step()
-        result = {k: _to_cpu(v) for k, v in self.sensor_data.items()}
-        result.update(_compute_aggregates(result, self.ndim, self.record))
         if "p" in result and any(f"u{a}" in result for a in "xyz"):
-            result.update(acoustic_intensity(result))
+            if any(k.startswith("I") for k in self._requested_record):
+                result.update(acoustic_intensity(result))
         # Final-state snapshots: interior grid (excluding PML) at last timestep
         interior = tuple(slice(s, N - s if s else None) for s, N in zip(self.pml_sizes, self.grid_shape))
         if "p_final" in self.record:
