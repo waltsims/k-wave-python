@@ -13,6 +13,12 @@ logger = getLogger(__name__)
 class SimulationExecutionOptions:
     """
     A class to manage and configure the execution options for k-Wave simulations.
+
+    Attributes:
+        backend: Execution backend to use. Options:
+            - "OMP": C++ OpenMP binary (default for CPU)
+            - "CUDA": C++ CUDA binary (default for GPU)
+            - "native": Pure Python/CuPy solver (no external binaries required)
     """
 
     def __init__(
@@ -33,7 +39,9 @@ class SimulationExecutionOptions:
         checkpoint_interval: Optional[int] = None,  # [seconds]
         checkpoint_timesteps: Optional[int] = None,  # [timestep integer]
         checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
+        backend: Optional[str] = None,  # "OMP", "CUDA", or "native"
     ):
+        self.backend = backend
         self.is_gpu_simulation = is_gpu_simulation
         self._binary_path = binary_path
         self._binary_name = binary_name
@@ -92,6 +100,22 @@ class SimulationExecutionOptions:
         if not (isinstance(value, int) and 0 <= value <= 2):
             raise ValueError("Verbose level must be between 0 and 2")
         self._verbose_level = value
+
+    @property
+    def backend(self) -> Optional[str]:
+        return self._backend
+
+    @backend.setter
+    def backend(self, value: Optional[str]):
+        valid_backends = [None, "OMP", "CUDA", "native"]
+        if value not in valid_backends:
+            raise ValueError(f"Backend must be one of {valid_backends}, got '{value}'")
+        self._backend = value
+
+    @property
+    def is_native_backend(self) -> bool:
+        """Returns True if using the pure Python/CuPy native backend."""
+        return self._backend == "native"
 
     @property
     def is_gpu_simulation(self) -> Optional[bool]:
