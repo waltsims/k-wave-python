@@ -2,32 +2,16 @@
 
 ## Overview
 
-This release strategy brings the unified solver architecture to fruition while keeping k-wave-python pure and enabling AI agent access via an MCP CLI tool.
-
-## Repository Structure
-
-```
-waltsims/
-├── k-wave-python      # Core simulation library (NumPy + CuPy)
-└── kwp                # CLI tool for AI agent access (MCP protocol)
-```
-
-**Rationale:**
-- `k-wave-python`: Core simulation library, NumPy (CPU) + CuPy (GPU)
-- `kwp`: CLI tool (`kwp`) exposing k-wave to AI agents via MCP protocol
-
----
+This release strategy brings the unified solver architecture to fruition.
 
 ## Version Roadmap
 
-| Repo | Version | Milestone | Focus |
-|------|---------|-----------|-------|
-| k-wave-python | **0.5.0** | Finalize master/main | Stabilize current codebase |
-| k-wave-python | **0.6.0** | Native Solver + Unified API + Deprecation | Native solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
-| k-wave-python | **0.7.0** | kwp | MCP CLI using v0.6 unified API |
-| k-wave-python | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
-| k-wave-python | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
-| kwp | **0.1.0** | MCP CLI | Ships alongside k-wave-python 0.7.0 |
+| Version | Milestone | Focus |
+|---------|-----------|-------|
+| **0.5.0** | Finalize master/main | Stabilize current codebase |
+| **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
+| **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
+| **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
 
 ---
 
@@ -91,7 +75,7 @@ def kspaceFirstOrder(
     use_kspace: bool = True,
     smooth_p0: bool = True,
     # Backend (replaces SimulationExecutionOptions)
-    backend: str = "cpp",  # "cpp" or "native"
+    backend: str = "cpp",  # "cpp" or "python"
     use_gpu: bool = False,
     # Execution
     save_only: bool = False,
@@ -136,58 +120,7 @@ warnings.warn(
 
 ---
 
-## Phase 3: v0.7.0 - kwp (MCP CLI Tool)
-
-**Goal:** CLI tool that exposes k-wave to AI agents via the MCP protocol, built on the v0.6 unified API.
-
-**Create new repo:** `kwp`
-
-**Repo structure:**
-```
-kwp/
-├── pyproject.toml
-├── src/kwp/
-│   ├── cli.py              # CLI entry point
-│   ├── tools.py            # MCP tool definitions
-│   └── data_handlers.py    # Array serialization
-└── tests/
-```
-
-**Features:**
-- CLI tool: `kwp` command
-- Uses local k-wave-python installation
-- Optional CuPy support for GPU
-
-**MCP Tools:**
-```python
-@mcp.tool()
-async def create_grid(dimensions, spacing, time_end=None, cfl=0.3): ...
-
-@mcp.tool()
-async def configure_medium(sound_speed, density=None, alpha_coeff=None): ...
-
-@mcp.tool()
-async def configure_source(source_type, mask, signal=None, p0=None): ...
-
-@mcp.tool()
-async def configure_sensor(mask, record=["p"]): ...
-
-@mcp.tool()
-async def run_simulation(grid_id, medium_id, source_id, sensor_id,
-                         backend="native", use_gpu=False): ...
-
-@mcp.tool()
-async def get_sensor_data(result_id, field="p", format="summary"): ...
-```
-
-**Large array handling:**
-- Return summaries by default (shape, min, max, mean)
-- Support `format="base64"` for full array transfer
-- Store results in-process, return IDs
-
----
-
-## Phase 4: v1.0.0 - Clean Release
+## Phase 3: v1.0.0 - Clean Release
 
 **Goal:** Simple, readable, fast. Remove all deprecated code.
 
@@ -301,10 +234,9 @@ uv run pytest tests/ -v
 ## Implementation Order
 
 1. **Now:** Finalize master/main for v0.5.0
-2. **Next:** Native solver + `kspaceFirstOrder.py` + deprecation for v0.6.0
-3. **Then:** kwp CLI using v0.6 API for v0.7.0
-4. **Then:** Clean delete for v1.0.0
-5. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
+2. **Next:** Python solver + `kspaceFirstOrder.py` + deprecation for v0.6.0
+3. **Then:** Clean delete for v1.0.0
+4. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
 
 ---
 
