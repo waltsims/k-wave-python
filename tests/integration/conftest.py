@@ -1,5 +1,4 @@
 """Shared fixtures for MATLAB-reference integration tests."""
-import os
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +8,7 @@ import pytest
 _COLLECTED_VALUES_DIR = Path(__file__).resolve().parents[1] / "matlab_test_data_collectors" / "python_testers" / "collectedValues"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def matlab_refs_dir():
     """Path to collectedValues/. Skips if not present (local dev without MATLAB)."""
     if not _COLLECTED_VALUES_DIR.is_dir():
@@ -17,7 +16,7 @@ def matlab_refs_dir():
     return _COLLECTED_VALUES_DIR
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def load_matlab_ref(matlab_refs_dir):
     """Return a loader function: load_matlab_ref('example_ivp_2D') -> dict."""
     from scipy.io import loadmat

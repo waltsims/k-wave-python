@@ -1,4 +1,5 @@
 import copy
+import warnings
 from types import SimpleNamespace
 from typing import Optional, Union
 
@@ -109,8 +110,8 @@ def kspaceFirstOrder(
         from kwave.solvers.kwave_adapter import run_simulation_native
 
         opts = SimpleNamespace(
-            pml_size=list(pml_size),
-            pml_alpha=list(pml_alpha),
+            pml_size=pml_size,
+            pml_alpha=pml_alpha,
             use_sg=use_sg,
             use_kspace=use_kspace,
             smooth_p0=smooth_p0,
@@ -118,8 +119,6 @@ def kspaceFirstOrder(
         return run_simulation_native(kgrid, medium, source, sensor, opts, device=device)
 
     if backend == "cpp":
-        import warnings
-
         from kwave.solvers.cpp_simulation import CppSimulation
 
         if not use_kspace:

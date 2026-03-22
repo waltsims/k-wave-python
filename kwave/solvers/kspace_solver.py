@@ -187,6 +187,8 @@ class Simulation:
         record_start_raw = int(getattr(self.sensor, "record_start_index", 1))
         if record_start_raw < 1:
             raise ValueError(f"sensor.record_start_index must be >= 1 (1-based, MATLAB convention), got {record_start_raw}")
+        if record_start_raw > self.Nt:
+            raise ValueError(f"sensor.record_start_index ({record_start_raw}) exceeds Nt ({self.Nt})")
         self.record_start_index = record_start_raw - 1
         self.num_recorded_time_points = self.Nt - self.record_start_index
 
@@ -567,7 +569,10 @@ class Simulation:
             self.setup()
         while self.t < self.Nt:
             self.step()
-        result = {k: _to_cpu(v) for k, v in self.sensor_data.items()}
+        # Copy to CPU one-by-one, freeing GPU memory as we go
+        result = {}
+        for k in list(self.sensor_data):
+            result[k] = _to_cpu(self.sensor_data.pop(k))
         result.update(_compute_aggregates(result, self.ndim, self.record))
         if "p" in result and any(f"u{a}" in result for a in "xyz"):
             if any(k.startswith("I") for k in self._requested_record):

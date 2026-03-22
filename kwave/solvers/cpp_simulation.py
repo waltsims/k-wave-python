@@ -49,14 +49,20 @@ class CppSimulation:
         return input_file, output_file
 
     def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None):
+        import warnings
+
         cleanup = data_path is None
         input_file, output_file = self.prepare(data_path=data_path)
+        data_dir = os.path.dirname(input_file)
         try:
             self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
             return self._parse_output(output_file)
         finally:
             if cleanup:
-                shutil.rmtree(os.path.dirname(input_file), ignore_errors=True)
+                try:
+                    shutil.rmtree(data_dir)
+                except OSError as exc:
+                    warnings.warn(f"Could not clean up temp directory {data_dir!r}: {exc}", RuntimeWarning, stacklevel=2)
 
     # -- HDF5 serialization --
 
@@ -140,7 +146,7 @@ class CppSimulation:
             "Nt": Nt,
             "pml_x_size": pml_x_size,
             "pml_y_size": pml_y_size,
-            "pml_z_size": pml_z_size if ndim >= 3 else 0,
+            "pml_z_size": pml_z_size,
             "p_source_flag": int(has_p),
             "p0_source_flag": int(has_p0),
             "ux_source_flag": int(has_ux),
@@ -275,8 +281,13 @@ class CppSimulation:
             options.extend(["--verbose", "2"])
 
         command = [str(binary_path)] + options
-        # capture_output: suppress in quiet mode, show in default/debug
-        subprocess.run(command, capture_output=quiet, text=True, check=True)
+        try:
+            subprocess.run(command, capture_output=quiet, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            if quiet and e.stderr:
+                # Surface binary error output even in quiet mode
+                raise subprocess.CalledProcessError(e.returncode, e.cmd, e.stdout, e.stderr) from None
+            raise
 
     @staticmethod
     def _parse_output(output_file):
