@@ -114,10 +114,15 @@ class CppSimulation:
             grid_shape = (Nx,)
 
         if sensor is None or sensor.mask is None:
-            # Record everywhere
             sensor_mask_index = np.arange(1, int(np.prod(grid_shape)) + 1, dtype=np.uint64)
         else:
-            sensor_mask = np.asarray(sensor.mask, dtype=bool).reshape(grid_shape)
+            mask_arr = np.asarray(sensor.mask)
+            if mask_arr.ndim == 2 and mask_arr.shape[0] == ndim:
+                raise ValueError(
+                    "Cartesian sensor masks are not supported by the cpp backend. "
+                    "Use a binary (grid-shaped) mask or switch to backend='native'."
+                )
+            sensor_mask = mask_arr.astype(bool).reshape(grid_shape)
             sensor_mask_index = np.where(sensor_mask.flatten(order="F") != 0)[0] + 1
             sensor_mask_index = sensor_mask_index.astype(np.uint64)
 
