@@ -16,7 +16,8 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
                 sizes.append(opts.pml_y_size)
             if opts.pml_z_size is not None:
                 sizes.append(opts.pml_z_size)
-            kwargs["pml_size"] = sizes[0] if len(sizes) == 1 else tuple(sizes)
+            # Collapse to scalar when all set values match (safe for any ndim)
+            kwargs["pml_size"] = sizes[0] if len(set(sizes)) == 1 else tuple(sizes)
         elif opts.pml_size is not None:
             s = opts.pml_size
             if hasattr(s, "__len__"):

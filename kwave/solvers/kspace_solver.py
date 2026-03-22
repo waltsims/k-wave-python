@@ -163,21 +163,25 @@ class Simulation:
                 self.record.discard(f"u{suffix}")
                 self.record.update(f"u{a}{suffix}" for a in "xyz"[: self.ndim])
 
-        # Expand aggregate keys → ensure base time-series is recorded
+        # Expand intensity shorthands
+        if "I" in self.record or "I_avg" in self.record:
+            if "I" in self.record:
+                self.record.discard("I")
+                self.record.update(f"I{a}" for a in "xyz"[: self.ndim])
+            if "I_avg" in self.record:
+                self.record.discard("I_avg")
+                self.record.update(f"I{a}_avg" for a in "xyz"[: self.ndim])
+
+        # Snapshot of what the user actually requested (after shorthand expansion)
+        self._requested_record = set(self.record)
+
+        # Add internal dependencies: aggregates need base time-series, intensity needs p + u
         for key in list(self.record):
             for suffix in ("_max", "_min", "_rms"):
                 if key.endswith(suffix):
-                    self.record.add(key[: -len(suffix)])  # p_rms → p, ux_max → ux
-
-        # Intensity requires both p and u time-series
-        if "I" in self.record or "I_avg" in self.record:
+                    self.record.add(key[: -len(suffix)])
+        if any(k.startswith("I") for k in self._requested_record):
             self.record.update(["p"] + [f"u{a}" for a in "xyz"[: self.ndim]])
-        if "I" in self.record:
-            self.record.discard("I")
-            self.record.update(f"I{a}" for a in "xyz"[: self.ndim])
-        if "I_avg" in self.record:
-            self.record.discard("I_avg")
-            self.record.update(f"I{a}_avg" for a in "xyz"[: self.ndim])
 
         # MATLAB uses 1-based indexing; convert to Python's 0-based for array slicing
         record_start_raw = getattr(self.sensor, "record_start_index", 1)
@@ -599,7 +603,7 @@ class Simulation:
             for i, a in enumerate("xyz"[: self.ndim]):
                 if f"u{a}_final" in self.record:
                     result[f"u{a}_final"] = _to_cpu(self.u[i][interior].copy())
-        return {k: v for k, v in result.items() if k in self.record}
+        return {k: v for k, v in result.items() if k in self._requested_record}
 
     # Helper methods
     def _diff(self, f, op):
