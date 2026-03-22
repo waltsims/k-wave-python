@@ -138,6 +138,8 @@ def kspaceFirstOrder(
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
+            if data_path is None:
+                raise ValueError("data_path must be provided when save_only=True " "(the HDF5 files must persist for cluster submission).")
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
         return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)

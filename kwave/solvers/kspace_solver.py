@@ -69,10 +69,10 @@ class Simulation:
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
             self.xp = cp
-        elif backend == "auto":
-            self.xp = cp if cp else np
+        elif backend in ("auto", "cpu"):
+            self.xp = cp if (backend == "auto" and cp) else np
         else:
-            self.xp = np
+            raise ValueError(f"Unknown backend {backend!r}. Use 'gpu', 'cpu', or 'auto'.")
         self._is_setup = False
         self.t = 0  # Current time step
 
@@ -183,9 +183,11 @@ class Simulation:
         if any(k.startswith("I") for k in self._requested_record):
             self.record.update(["p"] + [f"u{a}" for a in "xyz"[: self.ndim]])
 
-        # MATLAB uses 1-based indexing; convert to Python's 0-based for array slicing
-        record_start_raw = getattr(self.sensor, "record_start_index", 1)
-        self.record_start_index = int(record_start_raw) - 1
+        # sensor.record_start_index uses MATLAB 1-based convention (1 = first step)
+        record_start_raw = int(getattr(self.sensor, "record_start_index", 1))
+        if record_start_raw < 1:
+            raise ValueError(f"sensor.record_start_index must be >= 1 (1-based, MATLAB convention), got {record_start_raw}")
+        self.record_start_index = record_start_raw - 1
         self.num_recorded_time_points = self.Nt - self.record_start_index
 
     def _setup_cartesian_extract(self, cart_pos):
