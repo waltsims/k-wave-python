@@ -43,7 +43,7 @@ def kspaceFirstOrder(
     use_kspace: bool = True,
     smooth_p0: bool = True,
     backend: str = "native",
-    use_gpu: bool = False,
+    device: str = "cpu",
     save_only: bool = False,
     data_path: str = None,
     quiet: bool = False,
@@ -65,7 +65,7 @@ def kspaceFirstOrder(
         use_kspace: Use k-space correction (default True)
         smooth_p0: Smooth initial pressure distribution (default True)
         backend: "native" (Python/CuPy) or "cpp" (C++ binary)
-        use_gpu: Use GPU acceleration
+        device: "cpu" or "gpu"
         save_only: Only write HDF5 input file (cpp backend)
         data_path: Directory for HDF5 files (cpp backend)
         quiet: Suppress output
@@ -77,6 +77,8 @@ def kspaceFirstOrder(
         dict with 'p' (sensor data), 'p_final' (final pressure field),
         and optionally 'input_file' (if save_only=True)
     """
+    if device not in ("cpu", "gpu"):
+        raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
     ndim = kgrid.dim
 
     # Resolve pml_size="auto"
@@ -89,6 +91,8 @@ def kspaceFirstOrder(
     from kwave.solvers.validation import validate_simulation
 
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
+
+    use_gpu = device == "gpu"
 
     if backend == "native":
         return _run_native(

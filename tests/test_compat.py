@@ -42,19 +42,19 @@ class TestExecutionOptions:
         opts = SimulationExecutionOptions(backend="native")
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "native"
-        assert kwargs["use_gpu"] is False
+        assert kwargs["device"] == "cpu"
 
     def test_cuda_backend(self):
         opts = SimulationExecutionOptions(is_gpu_simulation=True)
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "cpp"
-        assert kwargs["use_gpu"] is True
+        assert kwargs["device"] == "gpu"
 
     def test_omp_backend(self):
         opts = SimulationExecutionOptions(is_gpu_simulation=False)
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "cpp"
-        assert kwargs["use_gpu"] is False
+        assert kwargs["device"] == "cpu"
 
     def test_quiet_mode(self):
         opts = SimulationExecutionOptions(verbose_level=0, show_sim_log=False)
@@ -80,7 +80,7 @@ class TestCombined:
         assert kwargs["pml_size"] == "auto"
         assert kwargs["smooth_p0"] is False
         assert kwargs["backend"] == "cpp"
-        assert kwargs["use_gpu"] is True
+        assert kwargs["device"] == "gpu"
         assert kwargs["debug"] is True
 
     def test_none_options(self):

@@ -86,22 +86,22 @@ def _extract_sim_options(kwargs, opts):
 
 def _extract_exec_options(kwargs, opts):
     """Extract execution options into kwargs dict."""
-    # Backend
+    # Backend and device
     if opts.backend == "native":
         kwargs["backend"] = "native"
-        kwargs["use_gpu"] = opts.is_gpu_simulation or False
+        kwargs["device"] = "gpu" if opts.is_gpu_simulation else "cpu"
     elif opts.backend == "CUDA":
         kwargs["backend"] = "cpp"
-        kwargs["use_gpu"] = True
+        kwargs["device"] = "gpu"
     elif opts.backend == "OMP":
         kwargs["backend"] = "cpp"
-        kwargs["use_gpu"] = False
+        kwargs["device"] = "cpu"
     elif opts.is_gpu_simulation:
         kwargs["backend"] = "cpp"
-        kwargs["use_gpu"] = True
+        kwargs["device"] = "gpu"
     else:
         kwargs["backend"] = "cpp"
-        kwargs["use_gpu"] = False
+        kwargs["device"] = "cpu"
 
     # Verbosity
     if opts.verbose_level == 0 and not opts.show_sim_log:

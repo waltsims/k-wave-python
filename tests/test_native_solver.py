@@ -317,7 +317,7 @@ class TestCompatEdges:
         opts = SimulationExecutionOptions(backend="CUDA")
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "cpp"
-        assert kwargs["use_gpu"] is True
+        assert kwargs["device"] == "gpu"
 
     def test_backend_omp_mapping(self):
         from kwave.compat import options_to_kwargs
@@ -326,7 +326,7 @@ class TestCompatEdges:
         opts = SimulationExecutionOptions(backend="OMP")
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["backend"] == "cpp"
-        assert kwargs["use_gpu"] is False
+        assert kwargs["device"] == "cpu"
 
     def test_data_path_forwarded(self):
         from kwave.compat import options_to_kwargs
