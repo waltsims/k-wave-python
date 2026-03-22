@@ -1,3 +1,4 @@
+import warnings
 from typing import Union
 
 import numpy as np
@@ -200,8 +201,6 @@ def kspaceFirstOrder2D(
     kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
     kspaceFirstOrder3D : 3D version of this simulation function
     """
-    import warnings
-
     warnings.warn(
         "kspaceFirstOrder2D is deprecated. Use kspaceFirstOrder() from "
         "kwave.kspaceFirstOrder instead. See kwave.compat.options_to_kwargs() "

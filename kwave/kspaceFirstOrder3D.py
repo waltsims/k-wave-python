@@ -1,3 +1,4 @@
+import warnings
 from typing import Union
 
 import numpy as np
@@ -192,8 +193,6 @@ def kspaceFirstOrder3D(
     kspaceFirstOrder2D : 2D version of this simulation function
     """
     if time_rev:
-        import warnings
-
         warnings.warn("The time_rev parameter is deprecated. Use the TimeReversal class instead.", DeprecationWarning, stacklevel=2)
     warnings.warn(
         "kspaceFirstOrder3D is deprecated. Use kspaceFirstOrder() from "
