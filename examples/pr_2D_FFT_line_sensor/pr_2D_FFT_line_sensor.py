@@ -75,7 +75,7 @@ def main():
 
     # run the simulation
     sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
-    sensor_data = sensor_data["p"].T
+    sensor_data = sensor_data["p"]  # No transpose needed - fixed in executor
 
     # reconstruct the initial pressure
     p_xy = kspaceLineRecon(sensor_data.T, dy=d[1], dt=kgrid.dt.item(), c=medium.sound_speed.item(), pos_cond=True, interp="linear")
