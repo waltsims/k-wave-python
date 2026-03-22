@@ -5,6 +5,8 @@ Handles HDF5 serialization and C++ binary execution without
 depending on kWaveSimulation or the legacy options classes.
 """
 import os
+import stat
+import subprocess
 import tempfile
 
 import numpy as np
@@ -14,7 +16,9 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.io import write_attributes, write_matrix
-from kwave.utils.pml import get_pml
+
+# Source injection mode mapping (shared by pressure and velocity sources)
+_SOURCE_MODE_MAP = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
 
 
 class CppSimulation:
@@ -39,9 +43,6 @@ class CppSimulation:
         input_file = os.path.join(data_path, "kwave_input.h5")
         output_file = os.path.join(data_path, "kwave_output.h5")
 
-        if os.path.exists(input_file):
-            os.remove(input_file)
-
         self._write_hdf5(input_file)
         return input_file, output_file
 
@@ -54,7 +55,12 @@ class CppSimulation:
     # -- HDF5 serialization --
 
     def _write_hdf5(self, filepath):
-        """Write all variables to HDF5 input file."""
+        """Write all variables to HDF5 input file.
+
+        TODO: write_matrix() opens/closes the HDF5 file on each call (~30
+        calls per serialization). Batching writes into a single open/close
+        would improve performance, but requires changing the shared utility.
+        """
         kgrid = self.kgrid
         medium = self.medium
         source = self.source
@@ -180,7 +186,7 @@ class CppSimulation:
             write_matrix(filepath, p_data, "p_source_input")
             p_mask_idx = np.where(np.asarray(source.p_mask).flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
-            mode_map = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
+            mode_map = _SOURCE_MODE_MAP
             p_mode = getattr(source, "p_mode", "additive")
             write_matrix(filepath, np.array(mode_map.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
             write_matrix(filepath, np.array(int(p_data.ndim > 1 and p_data.shape[0] > 1), dtype=np.uint64), "p_source_many")
@@ -193,7 +199,7 @@ class CppSimulation:
         if has_ux or has_uy or has_uz:
             u_mask_idx = np.where(np.asarray(source.u_mask).flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
-            mode_map = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
+            mode_map = _SOURCE_MODE_MAP
             u_mode = getattr(source, "u_mode", "additive")
             write_matrix(filepath, np.array(mode_map.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
             # Check if multiple waveforms
@@ -204,7 +210,14 @@ class CppSimulation:
         write_attributes(filepath)
 
     def _compute_staggered_density(self, rho0):
-        """Compute staggered grid density by averaging neighbors."""
+        """Compute staggered grid density by averaging neighbors.
+
+        TODO: This uses np.roll (spatial averaging) which matches the legacy
+        save_to_disk_func behavior. The C++ binary computes its own spectral
+        interpolation internally, so this is only used as the initial estimate.
+        For full physical accuracy with heterogeneous density, consider using
+        spectral interpolation (FFT-based shift) instead.
+        """
         ndim = self.ndim
         rho0_sg = []
         for axis in range(ndim):
@@ -227,11 +240,16 @@ class CppSimulation:
     def _execute(self, input_file, output_file, *, use_gpu, num_threads, device_num, quiet, debug):
         """Run the C++ k-Wave binary."""
         import kwave
-        from kwave.executor import Executor
-        from kwave.options.simulation_execution_options import SimulationExecutionOptions
 
         binary_name = "kspaceFirstOrder-CUDA" if use_gpu else "kspaceFirstOrder-OMP"
-        exec_opts = SimulationExecutionOptions(is_gpu_simulation=use_gpu)
+        binary_path = kwave.BINARY_PATH / binary_name
+        if not binary_path.exists():
+            if kwave.PLATFORM == "darwin" and use_gpu:
+                raise ValueError(
+                    "GPU simulations are currently not supported on MacOS. " "Try running the simulation on CPU by setting use_gpu=False."
+                )
+            raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
+        binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
         # Build command-line options
         options = ["-i", input_file, "-o", output_file]
@@ -246,25 +264,13 @@ class CppSimulation:
         elif debug:
             options.extend(["--verbose", "2"])
 
-        import stat
-        import subprocess
-
-        binary_path = kwave.BINARY_PATH / binary_name
-        if not binary_path.exists():
-            raise FileNotFoundError(f"C++ binary not found at {binary_path}. " f"Install with: pip install k-wave-data")
-        binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
-
         command = [str(binary_path)] + options
-        result = subprocess.run(command, capture_output=not debug and not (not quiet), text=True, check=True)
+        # capture_output: suppress in quiet mode, show in default/debug
+        subprocess.run(command, capture_output=quiet, text=True, check=True)
 
-    def _parse_output(self, output_file):
+    @staticmethod
+    def _parse_output(output_file):
         """Parse HDF5 output file into result dict."""
-        import h5py
+        from kwave.executor import Executor
 
-        from kwave.utils.dotdictionary import dotdict
-
-        output = dotdict()
-        with h5py.File(output_file, "r") as f:
-            for key in f.keys():
-                output[key] = f[f"/{key}"][:].squeeze()
-        return output
+        return Executor.parse_executable_output(output_file)

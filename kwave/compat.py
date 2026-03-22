@@ -90,10 +90,16 @@ def _extract_exec_options(kwargs, opts):
     if opts.backend == "native":
         kwargs["backend"] = "native"
         kwargs["use_gpu"] = False
-    elif opts.backend == "CUDA" or opts.is_gpu_simulation:
+    elif opts.backend == "CUDA":
         kwargs["backend"] = "cpp"
         kwargs["use_gpu"] = True
-    elif opts.backend == "OMP" or not opts.is_gpu_simulation:
+    elif opts.backend == "OMP":
+        kwargs["backend"] = "cpp"
+        kwargs["use_gpu"] = False
+    elif opts.is_gpu_simulation:
+        kwargs["backend"] = "cpp"
+        kwargs["use_gpu"] = True
+    else:
         kwargs["backend"] = "cpp"
         kwargs["use_gpu"] = False
 

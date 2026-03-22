@@ -7,8 +7,6 @@ appropriate backend (native Python/CuPy or C++ OMP/CUDA).
 from types import SimpleNamespace
 from typing import Union
 
-import numpy as np
-
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
@@ -22,7 +20,7 @@ def _normalize_pml(pml_value, ndim, name="pml_size"):
     if isinstance(pml_value, str):
         raise ValueError(f"{name} should already be resolved before calling _normalize_pml")
     if isinstance(pml_value, (int, float)):
-        return tuple([pml_value] * ndim)
+        return (pml_value,) * ndim
     if hasattr(pml_value, "__len__"):
         val = tuple(pml_value)
         if len(val) == 1:
@@ -30,7 +28,7 @@ def _normalize_pml(pml_value, ndim, name="pml_size"):
         if len(val) == ndim:
             return val
         raise ValueError(f"{name} must be a scalar or {ndim}-element sequence, got {len(val)} elements")
-    return tuple([pml_value] * ndim)
+    return (pml_value,) * ndim
 
 
 def kspaceFirstOrder(
@@ -42,8 +40,8 @@ def kspaceFirstOrder(
     pml_size: Union[int, tuple, str] = 20,
     pml_alpha: Union[float, tuple] = 2.0,
     use_sg: bool = True,
-    use_kspace: bool = True,
-    smooth_p0: bool = True,
+    use_kspace: bool = True,  # TODO: not yet forwarded to native solver
+    smooth_p0: bool = True,  # TODO: not yet forwarded to native solver
     backend: str = "native",
     use_gpu: bool = False,
     save_only: bool = False,
@@ -93,7 +91,7 @@ def kspaceFirstOrder(
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     if backend == "native":
-        return _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu, quiet, debug)
+        return _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu)
     elif backend == "cpp":
         return _run_cpp(
             kgrid,
@@ -102,6 +100,7 @@ def kspaceFirstOrder(
             sensor,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
+            use_sg=use_sg,
             use_gpu=use_gpu,
             save_only=save_only,
             data_path=data_path,
@@ -114,39 +113,17 @@ def kspaceFirstOrder(
         raise ValueError(f"Unknown backend: {backend!r}. Use 'native' or 'cpp'.")
 
 
-def _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu, quiet, debug):
+def _run_native(kgrid, medium, source, sensor, pml_size, pml_alpha, use_gpu):
     """Run simulation using the native Python/CuPy solver."""
-    from kwave.solvers.kwave_adapter import (
-        _convert_kgrid,
-        _convert_medium,
-        _convert_sensor,
-        _convert_source,
-        run_simulation_native,
-    )
+    from kwave.solvers.kwave_adapter import run_simulation_native
 
-    # Create a minimal options-like object for the adapter
     opts = SimpleNamespace(pml_size=list(pml_size), pml_alpha=list(pml_alpha))
-
-    kgrid_ns = _convert_kgrid(kgrid, opts)
-    medium_ns = _convert_medium(medium)
-    source_ns = _convert_source(source)
-    sensor_ns = _convert_sensor(sensor)
-
-    from kwave.solvers.kspace_solver import Simulation
-
-    backend_str = "gpu" if use_gpu else "cpu"
-    sim = Simulation(kgrid_ns, medium_ns, source_ns, sensor_ns, backend=backend_str)
-    results = sim.run()
-
-    from kwave.utils.dotdictionary import dotdict
-
-    output = dotdict()
-    output["p"] = results["sensor_data"]
-    output["p_final"] = results["pressure"]
-    return output
+    return run_simulation_native(kgrid, medium, source, sensor, opts, use_gpu=use_gpu)
 
 
-def _run_cpp(kgrid, medium, source, sensor, *, pml_size, pml_alpha, use_gpu, save_only, data_path, quiet, debug, num_threads, device_num):
+def _run_cpp(
+    kgrid, medium, source, sensor, *, pml_size, pml_alpha, use_sg, use_gpu, save_only, data_path, quiet, debug, num_threads, device_num
+):
     """Run simulation using the C++ binary backend."""
     from kwave.solvers.cpp_simulation import CppSimulation
 
@@ -157,6 +134,7 @@ def _run_cpp(kgrid, medium, source, sensor, *, pml_size, pml_alpha, use_gpu, sav
         sensor,
         pml_size=pml_size,
         pml_alpha=pml_alpha,
+        use_sg=use_sg,
     )
 
     if save_only:
