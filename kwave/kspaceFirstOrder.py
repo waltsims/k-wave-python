@@ -126,6 +126,16 @@ def kspaceFirstOrder(
                 "use_kspace=False has no effect with backend='cpp'; " "the C++ binary always applies k-space correction.",
                 stacklevel=2,
             )
+        if sensor is not None and getattr(sensor, "record", None) is not None:
+            warnings.warn(
+                "sensor.record is not yet supported for backend='cpp'; " "the C++ binary will record its default fields.",
+                stacklevel=2,
+            )
+        if sensor is not None and getattr(sensor, "record_start_index", 1) != 1:
+            warnings.warn(
+                "sensor.record_start_index is not yet supported for backend='cpp'; " "the C++ binary records from the first time step.",
+                stacklevel=2,
+            )
 
         # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
         if smooth_p0 and source.p0 is not None and kgrid.dim >= 2:

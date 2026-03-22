@@ -183,7 +183,8 @@ class CppSimulation:
             floats["pml_z_alpha"] = pml_z_alpha
         floats["pml_x_alpha"] = pml_x_alpha
         floats["rho0_sgx"] = rho0_sgx
-        floats["rho0_sgy"] = rho0_sgy if ndim >= 2 else rho0
+        if ndim >= 2:
+            floats["rho0_sgy"] = rho0_sgy
         if ndim >= 3:
             floats["rho0_sgz"] = rho0_sgz
 
