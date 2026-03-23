@@ -67,14 +67,33 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-def _strip_pml(result, pml_size, ndim):
-    """Remove PML padding from full-grid fields in the result dict."""
-    slices = tuple(slice(int(p), -int(p)) for p in pml_size[:ndim])
+def _strip_pml(result, pml_size, ndim, expanded_grid_shape=None):
+    """Remove PML padding from full-grid fields in the result dict.
+
+    Strips spatial fields (_final, _max, _min, _rms) using interior slices.
+    If expanded_grid_shape is given, also strips time-series that were
+    recorded over the full expanded grid (sensor=None with pml_inside=False).
+    """
+    slices = tuple(slice(int(p), -int(p) if int(p) else None) for p in pml_size[:ndim])
     full_grid_suffixes = ("_final", "_max", "_min", "_rms")
     stripped = {}
     for key, val in result.items():
         if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in full_grid_suffixes):
             stripped[key] = val[slices]
+        elif expanded_grid_shape is not None and isinstance(val, np.ndarray) and val.ndim == 2:
+            expanded_numel = int(np.prod(expanded_grid_shape))
+            if val.shape[0] == expanded_numel:
+                # Build interior boolean mask on expanded grid, apply to sensor axis
+                interior = np.ones(expanded_grid_shape, dtype=bool)
+                for ax in range(ndim):
+                    sl = [slice(None)] * ndim
+                    sl[ax] = slice(None, int(pml_size[ax]))
+                    interior[tuple(sl)] = False
+                    sl[ax] = slice(-int(pml_size[ax]), None)
+                    interior[tuple(sl)] = False
+                stripped[key] = val[interior.flatten(order="F")]
+            else:
+                stripped[key] = val
         else:
             stripped[key] = val
     return stripped
@@ -190,6 +209,7 @@ def kspaceFirstOrder(
             "Set pml_inside=False (default) to expand the grid automatically instead.",
             stacklevel=2,
         )
+    sensor_was_none = sensor is None or (hasattr(sensor, "mask") and sensor.mask is None)
     if not pml_inside:
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
 
@@ -259,6 +279,7 @@ def kspaceFirstOrder(
 
     # Strip PML from full-grid output fields when PML was outside the user domain
     if not pml_inside and isinstance(result, dict):
-        result = _strip_pml(result, pml_size, kgrid.dim)
+        expanded_shape = tuple(int(n) for n in kgrid.N) if sensor_was_none else None
+        result = _strip_pml(result, pml_size, kgrid.dim, expanded_grid_shape=expanded_shape)
 
     return result
