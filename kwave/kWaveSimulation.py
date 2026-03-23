@@ -1502,38 +1502,16 @@ class kWaveSimulation(object):
         return self.time_rev
 
     def _is_binary_sensor_mask(self, kgrid_dim: int) -> bool:
-        """
-        Check if the sensor mask is a binary grid matching the kgrid dimensions.
-        Takes into account that the PML may have been added to the sensor mask.
-
-        Args:
-            kgrid_dim: Dimensionality of the kWaveGrid
-
-        Returns:
-            bool: True if the sensor mask is a binary grid matching kgrid dimensions
-        """
-        # Get the grid shape without PML
-        grid_shape = self.kgrid.k.shape
-
-        # Get the sensor mask shape
+        """Check if sensor mask is a binary grid matching kgrid dimensions (with or without PML)."""
         mask_shape = self.sensor.mask.shape
-
-        # If shapes match exactly, it's a binary mask
+        grid_shape = self.kgrid.k.shape
         if mask_shape == grid_shape:
             return True
-
-        # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
-        if (pml_size := self.options.pml_size) is None:
+        pml = self.options.pml_size
+        if pml is None:
             return False
-
-        # pml_size may be a scalar, Vector, or tuple — normalize to a per-dim tuple
-        if not hasattr(pml_size, "__len__"):
-            pml_size = (int(pml_size),) * kgrid_dim
-        elif len(pml_size) == 1:
-            pml_size = (int(pml_size[0]),) * kgrid_dim
-
-        expected_shape = tuple(grid_shape[i] + 2 * int(pml_size[i]) for i in range(kgrid_dim))
-        return mask_shape == expected_shape
+        pml = np.broadcast_to(np.atleast_1d(pml), kgrid_dim)
+        return mask_shape == tuple(g + 2 * int(p) for g, p in zip(grid_shape, pml))
 
     def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
         """
