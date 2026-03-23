@@ -96,6 +96,8 @@ def kspaceFirstOrder(
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
+    if backend not in ("python", "cpp"):
+        raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
 
     if isinstance(pml_size, str) and pml_size.lower() == "auto":
         pml_size = tuple(int(x) for x in get_optimal_pml_size(kgrid))

@@ -67,9 +67,22 @@ class Simulation:
         self.use_sg = use_sg
         self.use_kspace = use_kspace
         self.smooth_p0 = smooth_p0
-        # Explicit PML overrides (used when kgrid is a kWaveGrid without pml_size_x attrs)
         self._pml_size_override = pml_size
         self._pml_alpha_override = pml_alpha
+        # kWaveGrid doesn't have pml_size_x attrs; warn if PML will silently be disabled
+        if pml_size is None:
+            from kwave.kgrid import kWaveGrid as _KWG
+
+            if isinstance(kgrid, _KWG):
+                import warnings
+
+                warnings.warn(
+                    "Simulation received a kWaveGrid without explicit pml_size; "
+                    "PML will be disabled. Pass pml_size=(20,)*kgrid.dim or use "
+                    "kspaceFirstOrder() which handles PML automatically.",
+                    UserWarning,
+                    stacklevel=2,
+                )
         if backend == "gpu":
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
@@ -680,13 +693,12 @@ def acoustic_intensity(result):
     # DC is already 0; Nyquist (freq[0] = -π) is implicitly suppressed by np.real() below
     shift_op = np.fft.ifftshift(np.exp(1j * freq * 0.5))
 
+    out = {}
     for a in "xyz":
         u = result.get(f"u{a}")
         if u is None:
             continue
         u_shifted = np.real(np.fft.ifft(shift_op * np.fft.fft(u, axis=-1), axis=-1))
-        out[f"I{a}"] = p * u_shifted
-        out[f"I{a}_avg"] = np.mean(out[f"I{a}"], axis=-1)
         out[f"I{a}"] = p * u_shifted
         out[f"I{a}_avg"] = np.mean(out[f"I{a}"], axis=-1)
     return out
