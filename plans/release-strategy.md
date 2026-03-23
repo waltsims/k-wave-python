@@ -141,6 +141,36 @@ warnings.warn(
 
 **Impact:** ~5700 lines → ~1200 lines (-79%)
 
+### Memory Layout and Indexing Migration (v1.0.0)
+
+k-Wave is a MATLAB project. Two MATLAB conventions pervade the Python codebase:
+
+1. **Fortran (column-major) memory layout** — `order="F"` appears ~22 times in the solver alone. Arrays are flattened/reshaped with `order="F"` to match MATLAB's column-major storage. NumPy defaults to C (row-major).
+
+2. **1-based indexing** — The C++ binary expects 1-based sensor/source indices in HDF5. `matlab_find()` returns 1-based indices. `sensor.record_start_index` uses 1-based convention.
+
+**Current state:** Both conventions are handled at the boundaries:
+- `kspace_solver.py`: Uses `order="F"` in `_expand_to_grid`, `_build_source_op`, sensor mask extraction, and field recording. The physics (FFT, PML, stepping) is order-agnostic.
+- `cpp_simulation.py`: Converts to 1-based Fortran-order indices for HDF5 serialization.
+- `kWaveArray.combine_sensor_data`: Uses `matlab_find` (1-based) and Fortran-order flattening.
+
+**Migration strategy for v1.0.0:**
+
+| Layer | Current | Target | Migration |
+|-------|---------|--------|-----------|
+| **Python solver** (`kspace_solver.py`) | F-order throughout | C-order internally, F-order at boundaries only | Audit all `order="F"` — keep only where MATLAB compat requires it (interop, HDF5). Internal field storage uses default C-order. |
+| **C++ HDF5 serialization** (`cpp_simulation.py`) | F-order + 1-based | Keep as-is (binary expects this) | This is a fixed boundary — always convert at the serialization layer. |
+| **MATLAB interop** (`simulate_from_dicts`, `kWavePy.py`) | F-order dicts from MATLAB | Convert at entry point | `simulate_from_dicts` converts F→C on input, C→F on output. Single conversion boundary. |
+| **kWaveArray** | `matlab_find` (1-based), F-order | 0-based, C-order | Rewrite `combine_sensor_data` and `get_distributed_source_signal` to use `np.where` (0-based) and C-order. |
+| **sensor.record_start_index** | 1-based (MATLAB convention) | 0-based | Accept both, deprecate 1-based in v0.7, require 0-based in v1.0. |
+
+**Principle:** Python-native (C-order, 0-based) everywhere internally. MATLAB compatibility at two explicit boundaries: (1) `simulate_from_dicts` for k-wave-cupy interop, (2) `cpp_simulation._write_hdf5` for the C++ binary.
+
+**Testing:** Add a `test_memory_layout.py` that verifies:
+- `Simulation` produces identical results with C-order and F-order input arrays
+- `simulate_from_dicts` correctly converts F→C→F round-trip
+- `cpp_simulation` writes correct 1-based F-order HDF5 regardless of internal layout
+
 ---
 
 ## Phase 3.5: v0.7.0 - CLI (`kwp`)
