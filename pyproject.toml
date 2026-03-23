@@ -24,13 +24,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py==3.13.0",
+    "h5py==3.15.1",
     "scipy==1.15.3",
     "opencv-python==4.11.0.86",
     "deepdiff==8.6.1",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.3",
-    "beartype==0.20.2",
+    "matplotlib==3.10.7",
+    "beartype==0.22.4",
     "jaxtyping==0.3.2",
     "deprecated>=1.2.14"
 ]
@@ -43,6 +43,7 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
+        "pytest-xdist",
         "coverage==7.10.6",
         "phantominator",
         "testfixtures==8.3.0",
@@ -79,6 +80,7 @@ exclude = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: MATLAB-reference integration tests (require collected values)"]
 filterwarnings = [
     "error::DeprecationWarning",
     "error::PendingDeprecationWarning",
@@ -118,3 +120,8 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 "kwave/options/__init__.py" = ["F401"]
 # Fix in the future => E731: Do not assign a `lambda` expression, use a `def`
 "kwave/utils/mapgen.py" = ["E731"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]

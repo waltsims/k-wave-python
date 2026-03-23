@@ -6,10 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+from kwave import __version__
+
 project = "k-Wave-python"
 copyright = "2024, Walter Simson, Farid Yagubbayli"
 author = "Walter Simson, Farid Yagubbayli"
-version = "0.3.3"
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
