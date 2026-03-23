@@ -23,6 +23,10 @@ def _is_enabled(x):
     return x is not None and not (np.all(x == 0) if hasattr(x, "__len__") else x == 0)
 
 
+def _noop_source(t, field):
+    return field
+
+
 def _to_cpu(x):
     return x.get() if hasattr(x, "get") else x
 
@@ -113,7 +117,7 @@ class Simulation:
     """
 
     def __init__(
-        self, kgrid, medium, source, sensor, *, backend="cpu", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
+        self, kgrid, medium, source, sensor, *, device="cpu", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
     ):
         self.kgrid = kgrid
         self.medium = medium
@@ -138,14 +142,14 @@ class Simulation:
                     UserWarning,
                     stacklevel=2,
                 )
-        if backend == "gpu":
+        if device == "gpu":
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
             self.xp = cp
-        elif backend == "cpu":
+        elif device == "cpu":
             self.xp = np
         else:
-            raise ValueError(f"Unknown backend {backend!r}. Use 'gpu' or 'cpu'.")
+            raise ValueError(f"Unknown device {device!r}. Use 'gpu' or 'cpu'.")
         self._is_setup = False
         self.t = 0  # Current time step
 
@@ -263,7 +267,8 @@ class Simulation:
             self.record.update(["p"] + [f"u{a}" for a in "xyz"[: self.ndim]])
 
         # sensor.record_start_index uses MATLAB 1-based convention (1 = first step)
-        record_start_raw = int(getattr(self.sensor, "record_start_index", None) or 1)
+        raw = getattr(self.sensor, "record_start_index", None)
+        record_start_raw = int(raw) if raw is not None else 1
         if record_start_raw < 1:
             raise ValueError(f"sensor.record_start_index must be >= 1 (1-based, MATLAB convention), got {record_start_raw}")
         if record_start_raw > self.Nt:
@@ -332,6 +337,7 @@ class Simulation:
             if self._pml_size_override is not None:
                 pml_size = int(self._pml_size_override[axis])
             else:
+                # MATLAB interop: SimpleNamespace kgrids carry pml_size_x/y/z; kWaveGrid does not
                 pml_size = int(getattr(self.kgrid, f"pml_size_{name}", 0))
             if self._pml_alpha_override is not None:
                 pml_alpha = float(self._pml_alpha_override[axis])
@@ -501,7 +507,7 @@ class Simulation:
                     scale_i = 2 * self.dt / (n_rho_splits * c0_src * di)
                     self._source_p_ops.append(build_op(p_mask, p_signal, p_mode, scale_i))
         else:
-            self._source_p_ops = [lambda t, field: field] * self.ndim
+            self._source_p_ops = [_noop_source] * self.ndim
 
         # --- Velocity sources (per-axis grid spacing) ---
         u_mask = getattr(self.source, "u_mask", 0)
@@ -520,7 +526,7 @@ class Simulation:
                 op = build_op(u_mask, u_signal, u_mode, scale)
                 self._source_u_ops.append(op)
             else:
-                self._source_u_ops.append(lambda t, field: field)
+                self._source_u_ops.append(_noop_source)
 
     def _setup_fields(self):
         """Initialize pressure, velocity, and density fields."""
@@ -594,7 +600,7 @@ class Simulation:
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
             self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
-        rho_total = self.rho_split[0] + sum(self.rho_split[1:]) if self.ndim > 1 else self.rho_split[0]
+        rho_total = sum(self.rho_split)
         self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
@@ -767,7 +773,7 @@ def create_simulation(kgrid, medium, source, sensor, device="auto", smooth_p0=Fa
         _to_namespace(_normalize_medium(medium)),
         _to_namespace(source),
         _to_namespace(sensor),
-        backend=_resolve_device(device),
+        device=_resolve_device(device),
         smooth_p0=smooth_p0,
     )
 

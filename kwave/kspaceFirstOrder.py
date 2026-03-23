@@ -14,7 +14,8 @@ from kwave.utils.pml import get_optimal_pml_size
 
 def _normalize_pml(val, ndim, name="pml_size"):
     if isinstance(val, str):
-        raise ValueError(f"{name} must be an integer, tuple of integers, or 'auto', got {val!r}")
+        valid = "an integer, tuple of integers, or 'auto'" if name == "pml_size" else "a float or tuple of floats"
+        raise ValueError(f"{name} must be {valid}, got {val!r}")
     if isinstance(val, (int, float)):
         return (val,) * ndim
     t = tuple(val)
@@ -115,7 +116,7 @@ def kspaceFirstOrder(
             medium,
             source,
             sensor,
-            backend=device,
+            device=device,
             use_sg=use_sg,
             use_kspace=use_kspace,
             smooth_p0=smooth_p0,

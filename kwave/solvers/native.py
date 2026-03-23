@@ -21,7 +21,7 @@ def run_python_backend(kgrid, medium, source, sensor, simulation_options, execut
         medium,
         source,
         sensor,
-        backend=device,
+        device=device,
         use_sg=getattr(simulation_options, "use_sg", True),
         use_kspace=getattr(simulation_options, "use_kspace", True),
         smooth_p0=getattr(simulation_options, "smooth_p0", True),
