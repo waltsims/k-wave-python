@@ -54,7 +54,8 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
 
-    expanded_medium = _expand_obj(medium, ("sound_speed", "density", "alpha_coeff", "BonA"), pml_size)
+    expanded_medium = _expand_obj(medium, ("sound_speed", "sound_speed_ref", "density", "alpha_coeff", "BonA"), pml_size)
+    expanded_medium = _expand_obj(expanded_medium, ("alpha_filter",), pml_size, edge_val=0)  # zero-pad, not edge-extend
     # s_mask intentionally excluded — stress sources are not yet implemented (raises NotImplementedError)
     expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
 
