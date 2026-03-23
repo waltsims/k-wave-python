@@ -63,6 +63,31 @@ class TestErrors:
         assert "p" in result
         assert result["p"].shape == (int(sensor.mask.sum()), int(kgrid.Nt))
 
+    def test_env_override_backend(self, sim_2d, monkeypatch):
+        """KWAVE_BACKEND env var overrides the backend parameter."""
+        monkeypatch.setenv("KWAVE_BACKEND", "python")
+        kgrid, medium, source, sensor = sim_2d
+        # Pass backend="cpp" but env says "python" — should run python backend (no C++ binary needed)
+        result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp")
+        assert "p" in result
+
+    def test_env_override_device(self, sim_2d, monkeypatch):
+        """KWAVE_DEVICE env var overrides the device parameter."""
+        monkeypatch.setenv("KWAVE_DEVICE", "cpu")
+        kgrid, medium, source, sensor = sim_2d
+        result = kspaceFirstOrder(kgrid, medium, source, sensor, device="cpu")
+        assert "p" in result
+
+    def test_cartesian_sensor_mask_cpp_conversion(self, sim_2d):
+        """Cartesian sensor mask is auto-converted to binary for cpp backend."""
+        kgrid, medium, source, _ = sim_2d
+        # Create a Cartesian sensor mask (2, N_points) — positions in meters
+        cart_points = np.array([[0.0, 0.5e-3, -0.5e-3], [0.0, 0.0, 0.0]])  # 3 points, 2D
+        sensor = kSensor(cart_points)
+        # save_only=True so we don't need the C++ binary
+        result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", save_only=True, data_path=tempfile.mkdtemp())
+        assert "input_file" in result
+
     def test_cpp_save_only(self, sim_2d):
         kgrid, medium, source, sensor = sim_2d
         result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", save_only=True, data_path=tempfile.mkdtemp())
