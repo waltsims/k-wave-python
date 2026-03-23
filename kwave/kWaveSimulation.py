@@ -1526,17 +1526,13 @@ class kWaveSimulation(object):
         if (pml_size := self.options.pml_size) is None:
             return False
 
-        if len(pml_size) == 1:
-            # make pml_size a vector type
-            pml_size = Vector(np.tile(pml_size, kgrid_dim))
+        # pml_size may be a scalar, Vector, or tuple — normalize to a per-dim tuple
+        if not hasattr(pml_size, "__len__"):
+            pml_size = (int(pml_size),) * kgrid_dim
+        elif len(pml_size) == 1:
+            pml_size = (int(pml_size[0]),) * kgrid_dim
 
-        if kgrid_dim == 1:
-            expected_shape = (grid_shape[0] + 2 * pml_size.x,)
-        elif kgrid_dim == 2:
-            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y)
-        else:  # 3D
-            expected_shape = (grid_shape[0] + 2 * pml_size.x, grid_shape[1] + 2 * pml_size.y, grid_shape[2] + 2 * pml_size.z)
-
+        expected_shape = tuple(grid_shape[i] + 2 * int(pml_size[i]) for i in range(kgrid_dim))
         return mask_shape == expected_shape
 
     def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
