@@ -1,6 +1,6 @@
 name: test_example
 
-on: [ push ]
+on: workflow_dispatch  # disabled: gdown fails due to Google Drive bot detection
 
 jobs:
   test_example:
