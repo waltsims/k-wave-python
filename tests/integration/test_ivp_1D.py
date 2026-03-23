@@ -36,7 +36,7 @@ def test_ivp_1D_vs_matlab(load_matlab_ref):
     sensor_mask[3 * Nx // 4] = 1
     sensor = kSensor(mask=sensor_mask)
 
-    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python", smooth_p0=False)
+    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python", smooth_p0=False, pml_inside=True)
 
     assert int(kgrid.Nt) == int(ref["Nt"])
     np.testing.assert_allclose(float(kgrid.dt), float(ref["dt"]), rtol=1e-12)
