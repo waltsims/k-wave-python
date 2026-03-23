@@ -13,6 +13,9 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
+from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D  # TimeReversal requires legacy API
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
@@ -80,11 +83,7 @@ def main():
 
     # create time reversal handler and run reconstruction
     tr = TimeReversal(kgrid, medium, sensor)
-    # NOTE: TimeReversal still uses the legacy API internally — this may need updating separately
-    from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-    from kwave.options.simulation_execution_options import SimulationExecutionOptions
-    from kwave.options.simulation_options import SimulationOptions
-
+    # NOTE: TimeReversal requires the legacy API until it is updated
     simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=PML_size,

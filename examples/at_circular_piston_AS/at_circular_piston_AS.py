@@ -23,7 +23,9 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder import kspaceFirstOrder
+from kwave.kspaceFirstOrder2D import kspaceFirstOrderASC
+from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import extract_amp_phase
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.math import round_even
@@ -133,17 +135,17 @@ sensor.record = ["p"]
 # record only the final few periods when the field is in steady state
 sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
 
-# NOTE: pml_inside=False not supported in new API
-# NOTE: simulation_type=SimulationType.AXISYMMETRIC is handled automatically by the new API
-
-sensor_data = kspaceFirstOrder(
-    kgrid,
-    medium,
-    source,
-    sensor,
-    pml_size="auto",
-    backend="cpp",
-    device="cpu",
+# NOTE: Axisymmetric simulations require the legacy kspaceFirstOrderASC API
+# until the new kspaceFirstOrder() supports the axisymmetric flag.
+simulation_options = SimulationOptions(save_to_disk=True, pml_inside=False, data_cast="single")
+execution_options = SimulationExecutionOptions(is_gpu_simulation=False)
+sensor_data = kspaceFirstOrderASC(
+    kgrid=kgrid,
+    medium=medium,
+    source=source,
+    sensor=sensor,
+    simulation_options=simulation_options,
+    execution_options=execution_options,
 )
 
 # extract amplitude from the sensor data
