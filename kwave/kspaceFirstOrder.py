@@ -52,7 +52,6 @@ def _expand_obj(obj, attrs, pml_size, edge_val=None):
 
 def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     """Expand grid/medium/source/sensor so PML sits outside the user domain."""
-    ndim = kgrid.dim
     new_N = tuple(int(n) + 2 * int(p) for n, p in zip(kgrid.N, pml_size))
     expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
