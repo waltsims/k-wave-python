@@ -568,7 +568,8 @@ class Simulation:
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
         # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)
-        # using u(dt/2) = -u(-dt/2) which forces u(t1) = 0.
+        # The positive sign is correct: we are setting u at t=+dt/2 (not t=-dt/2).
+        # The constraint u(dt/2) = -u(-dt/2) forces u(t1) = 0; the value assigned here is u(dt/2).
         if self.t == 0 and self._p0_initial is not None:
             self.p = self._p0_initial.copy()
             for i in range(self.ndim):
