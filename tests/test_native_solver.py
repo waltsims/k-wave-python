@@ -304,4 +304,57 @@ class TestSolverFactory:
         from kwave.solvers import Simulation
 
         with pytest.raises(ValueError):
+            get_solver("bad")
+
+
+class TestCoverageEdgeCases:
+    """Tests for error branches and edge cases to improve coverage."""
+
+    def test_expand_to_grid_none_raises(self):
+        from kwave.solvers.kspace_solver import _expand_to_grid
+
+        with pytest.raises(ValueError, match="Missing"):
+            _expand_to_grid(None, (64,), np, "test_param")
+
+    def test_expand_to_grid_wrong_size_raises(self):
+        from kwave.solvers.kspace_solver import _expand_to_grid
+
+        with pytest.raises(ValueError, match="incompatible"):
+            _expand_to_grid(np.ones(10), (64,), np, "test_param")
+
+    def test_simulation_bad_backend_raises(self):
+        from kwave.solvers.kspace_solver import Simulation
+
+        with pytest.raises(ValueError, match="Unknown backend"):
             Simulation(None, None, None, None, backend="bad")
+
+    def test_bad_sensor_mask_shape_raises(self):
+        from types import SimpleNamespace
+
+        from kwave.solvers.kspace_solver import Simulation
+
+        kgrid = SimpleNamespace(Nx=64, dx=0.1e-3, Nt=5, dt=1e-8)
+        medium = SimpleNamespace(sound_speed=1500)
+        source = SimpleNamespace(p0=np.zeros(64), p=None, p_mask=None, ux=None, uy=None, uz=None, u_mask=None, p_mode=None, u_mode=None)
+        source.p0[32] = 1.0
+        # Sensor mask with wrong shape — neither binary nor Cartesian
+        sensor = SimpleNamespace(mask=np.ones((3, 5)), record=None, record_start_index=None)
+        sim = Simulation(kgrid, medium, source, sensor, backend="cpu", pml_size=(10,))
+        with pytest.raises(ValueError, match="neither binary"):
+            sim.setup()
+
+    def test_kspaceFirstOrder_bad_backend_raises(self):
+        from kwave.kspaceFirstOrder import kspaceFirstOrder
+
+        kgrid = kWaveGrid(Vector([64]), Vector([0.1e-3]))
+        kgrid.makeTime(1500)
+        with pytest.raises(ValueError, match="Unknown backend"):
+            kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), backend="torch")
+
+    def test_kspaceFirstOrder_bad_device_raises(self):
+        from kwave.kspaceFirstOrder import kspaceFirstOrder
+
+        kgrid = kWaveGrid(Vector([64]), Vector([0.1e-3]))
+        kgrid.makeTime(1500)
+        with pytest.raises(ValueError, match="device"):
+            kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
