@@ -9,6 +9,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.ktransducer import NotATransducer
+from kwave.utils.matrix import expand_matrix
 from kwave.utils.pml import get_optimal_pml_size
 
 
@@ -25,6 +26,58 @@ def _normalize_pml(val, ndim, name="pml_size"):
     return t + (t[-1],) * (ndim - len(t))
 
 
+def _is_binary_mask(mask, ndim):
+    """True if mask is a grid-shaped binary array (not Cartesian coordinates)."""
+    arr = np.asarray(mask)
+    if arr.ndim == 2 and arr.shape[0] == ndim:
+        return False  # Cartesian: (ndim, n_points)
+    return True
+
+
+def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
+    """Expand grid/medium/source/sensor so PML sits outside the user domain."""
+    ndim = kgrid.dim
+    new_N = tuple(int(n) + 2 * int(p) for n, p in zip(kgrid.N, pml_size))
+    expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
+    expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
+
+    # Medium: edge-extend non-scalar arrays
+    expanded_medium = copy.copy(medium)
+    for attr in ("sound_speed", "density", "alpha_coeff", "BonA"):
+        val = getattr(expanded_medium, attr, None)
+        if val is not None and np.atleast_1d(val).size > 1:
+            setattr(expanded_medium, attr, expand_matrix(np.atleast_1d(val), list(pml_size)))
+
+    # Source: zero-pad spatial arrays
+    expanded_source = copy.copy(source)
+    for attr in ("p0", "p_mask", "u_mask"):
+        val = getattr(expanded_source, attr, None)
+        if val is not None and np.atleast_1d(val).size > 1:
+            setattr(expanded_source, attr, expand_matrix(np.atleast_1d(val), list(pml_size), 0))
+
+    # Sensor: zero-pad binary masks, leave Cartesian unchanged
+    expanded_sensor = sensor
+    if sensor is not None and getattr(sensor, "mask", None) is not None:
+        if _is_binary_mask(sensor.mask, ndim):
+            expanded_sensor = copy.copy(sensor)
+            expanded_sensor.mask = expand_matrix(np.atleast_1d(sensor.mask), list(pml_size), 0)
+
+    return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
+
+
+def _strip_pml(result, pml_size, ndim):
+    """Remove PML padding from full-grid fields in the result dict."""
+    slices = tuple(slice(int(p), -int(p)) for p in pml_size[:ndim])
+    full_grid_suffixes = ("_final", "_max", "_min", "_rms")
+    stripped = {}
+    for key, val in result.items():
+        if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in full_grid_suffixes):
+            stripped[key] = val[slices]
+        else:
+            stripped[key] = val
+    return stripped
+
+
 def kspaceFirstOrder(
     kgrid: kWaveGrid,
     medium: kWaveMedium,
@@ -33,6 +86,7 @@ def kspaceFirstOrder(
     *,
     pml_size: Union[int, tuple, str] = 20,
     pml_alpha: Union[float, tuple] = 2.0,
+    pml_inside: bool = False,
     use_sg: bool = True,
     use_kspace: bool = True,
     smooth_p0: bool = True,
@@ -66,6 +120,13 @@ def kspaceFirstOrder(
             analysis.  Default ``20``.
         pml_alpha: PML absorption coefficient (Nepers per grid point).
             Scalar or per-dimension tuple.  Default ``2.0``.
+        pml_inside: When ``False`` (default), the grid is automatically
+            expanded by ``2 * pml_size`` so the PML sits outside the user
+            domain; full-grid output fields (``_final``, ``_max``, etc.)
+            are cropped back to the original size.  When ``True``, the PML
+            occupies the outermost grid points of the user-supplied grid,
+            which saves memory but means PML absorption will modify field
+            values near the domain boundary.
         use_sg: Use a staggered grid for velocity fields.  Default ``True``.
         use_kspace: Apply the k-space correction to the time-stepping scheme.
             Default ``True``.
@@ -108,10 +169,33 @@ def kspaceFirstOrder(
 
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
+    # --- Shared pre-processing (both backends) ---
+
+    # Expand grid when PML sits outside the user domain
+    if pml_inside:
+        warnings.warn(
+            f"pml_inside=True: the outermost {pml_size} grid points per side will be used for PML absorption. "
+            "Sources, sensors, and medium properties near the boundary will be affected. "
+            "Set pml_inside=False (default) to expand the grid automatically instead.",
+            stacklevel=2,
+        )
+    if not pml_inside:
+        kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
+
+    # Smooth initial pressure (after expansion so Blackman window covers PML transition)
+    if smooth_p0 and source.p0 is not None and kgrid.dim >= 2:
+        from kwave.utils.filters import smooth
+
+        source = copy.copy(source)
+        grid_shape = tuple(int(n) for n in kgrid.N)
+        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(grid_shape, order="F"), restore_max=True)
+
+    # --- Backend dispatch ---
+
     if backend == "python":
         from kwave.solvers.kspace_solver import Simulation
 
-        return Simulation(
+        result = Simulation(
             kgrid,
             medium,
             source,
@@ -119,12 +203,12 @@ def kspaceFirstOrder(
             device=device,
             use_sg=use_sg,
             use_kspace=use_kspace,
-            smooth_p0=smooth_p0,
+            smooth_p0=False,  # already handled above
             pml_size=pml_size,
             pml_alpha=pml_alpha,
         ).run()
 
-    if backend == "cpp":
+    elif backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
 
         if not use_kspace:
@@ -143,14 +227,14 @@ def kspaceFirstOrder(
                 stacklevel=2,
             )
 
-        # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
-        if smooth_p0 and source.p0 is not None and kgrid.dim >= 2:
-            from kwave.utils.filters import smooth
+        # Convert Cartesian sensor mask to binary grid (cpp binary requires binary masks)
+        if sensor is not None and sensor.mask is not None:
+            mask_arr = np.asarray(sensor.mask)
+            if mask_arr.ndim == 2 and mask_arr.shape[0] == kgrid.dim:
+                from kwave.utils.conversion import cart2grid
 
-            source = copy.copy(source)
-            grid_shape = tuple(int(n) for n in kgrid.N)
-            # Fortran (column-major) layout matches MATLAB convention; smooth() is order-agnostic (uses FFT on shape)
-            source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(grid_shape, order="F"), restore_max=True)
+                sensor = copy.copy(sensor)
+                sensor.mask, _, _ = cart2grid(kgrid, mask_arr)
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
@@ -158,4 +242,12 @@ def kspaceFirstOrder(
                 raise ValueError("data_path must be provided when save_only=True " "(the HDF5 files must persist for cluster submission).")
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
-        return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
+        result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
+
+    # --- Shared post-processing ---
+
+    # Strip PML from full-grid output fields when PML was outside the user domain
+    if not pml_inside and isinstance(result, dict):
+        result = _strip_pml(result, pml_size, kgrid.dim)
+
+    return result
