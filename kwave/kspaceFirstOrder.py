@@ -3,6 +3,7 @@ import warnings
 from typing import Optional, Union
 
 import numpy as np
+from beartype import beartype as typechecker
 
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -25,6 +26,7 @@ def _normalize_pml(val, ndim, name="pml_size"):
     return t + (t[-1],) * (ndim - len(t))
 
 
+@typechecker
 def kspaceFirstOrder(
     kgrid: kWaveGrid,
     medium: kWaveMedium,
@@ -142,6 +144,15 @@ def kspaceFirstOrder(
                 "sensor.record_start_index is not yet supported for backend='cpp'; " "the C++ binary records from the first time step.",
                 stacklevel=2,
             )
+
+        # Convert Cartesian sensor mask to binary grid (cpp binary requires binary masks)
+        if sensor is not None and sensor.mask is not None:
+            mask_arr = np.asarray(sensor.mask)
+            if mask_arr.ndim == 2 and mask_arr.shape[0] == kgrid.dim:
+                from kwave.utils.conversion import cart2grid
+
+                sensor = copy.copy(sensor)
+                sensor.mask, _, _ = cart2grid(kgrid, mask_arr)
 
         # Apply p0 smoothing before HDF5 serialization (matches MATLAB legacy path)
         if smooth_p0 and source.p0 is not None and kgrid.dim >= 2:
