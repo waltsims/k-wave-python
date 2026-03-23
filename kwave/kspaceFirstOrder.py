@@ -1,6 +1,5 @@
 import copy
 import warnings
-from types import SimpleNamespace
 from typing import Optional, Union
 
 import numpy as np
@@ -15,7 +14,7 @@ from kwave.utils.pml import get_optimal_pml_size
 
 def _normalize_pml(val, ndim, name="pml_size"):
     if isinstance(val, str):
-        raise ValueError(f"{name} should already be resolved before calling _normalize_pml")
+        raise ValueError(f"{name} must be an integer, tuple of integers, or 'auto', got {val!r}")
     if isinstance(val, (int, float)):
         return (val,) * ndim
     t = tuple(val)
@@ -109,16 +108,20 @@ def kspaceFirstOrder(
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     if backend == "python":
-        from kwave.solvers.kwave_adapter import run_simulation_native
+        from kwave.solvers.kspace_solver import Simulation
 
-        opts = SimpleNamespace(
-            pml_size=pml_size,
-            pml_alpha=pml_alpha,
+        return Simulation(
+            kgrid,
+            medium,
+            source,
+            sensor,
+            backend=device,
             use_sg=use_sg,
             use_kspace=use_kspace,
             smooth_p0=smooth_p0,
-        )
-        return run_simulation_native(kgrid, medium, source, sensor, opts, device=device)
+            pml_size=pml_size,
+            pml_alpha=pml_alpha,
+        ).run()
 
     if backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation

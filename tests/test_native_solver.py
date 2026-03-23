@@ -292,30 +292,16 @@ class TestMatlabInterop:
 
 
 class TestSolverFactory:
-    def test_get_native_solver(self):
-        from kwave.solvers import Backend, get_solver
+    def test_backend_enum(self):
+        from kwave.solvers import Backend
 
-        s = get_solver("python")
-        assert s.backend == Backend.PYTHON
+        assert Backend.PYTHON.value == "python"
+        assert Backend.CPP.value == "cpp"
 
-    def test_get_cpp_solver_raises(self):
+    def test_simulation_bad_backend_raises(self):
         import pytest
 
-        from kwave.solvers import get_solver
-
-        with pytest.raises(ValueError, match="kspaceFirstOrder"):
-            get_solver("cpp")
-
-    def test_get_solver_enum(self):
-        from kwave.solvers import Backend, get_solver
-
-        s = get_solver(Backend.PYTHON, device="gpu")
-        assert s.device == "gpu"
-
-    def test_unknown_backend_raises(self):
-        import pytest
-
-        from kwave.solvers import get_solver
+        from kwave.solvers import Simulation
 
         with pytest.raises(ValueError):
-            get_solver("bad")
+            Simulation(None, None, None, None, backend="bad")

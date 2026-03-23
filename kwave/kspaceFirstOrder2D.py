@@ -220,9 +220,7 @@ def kspaceFirstOrder2D(
 
     if execution_options.is_python_backend:
         from kwave.solvers.native import run_python_backend
-        from kwave.solvers.validation import validate_simulation
 
-        validate_simulation(kgrid, medium, source, sensor, pml_size=tuple(simulation_options.pml_size))
         return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.

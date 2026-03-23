@@ -104,11 +104,11 @@ class CppSimulation:
         rho0 = np.atleast_1d(np.asarray(medium.density if medium.density is not None else 1000.0, dtype=np.float32))
         c_ref = float(np.max(c0))
 
-        # Staggered grid density
+        # Staggered grid density (one per active axis)
         if rho0.size == 1 or not self.use_sg:
-            rho0_sgx = rho0_sgy = rho0_sgz = rho0
+            rho0_sg = [rho0] * ndim
         else:
-            rho0_sgx, rho0_sgy, rho0_sgz = self._compute_staggered_density(rho0)
+            rho0_sg = self._compute_staggered_density(rho0)
 
         # Source flags
         has_p0 = source.p0 is not None and np.any(source.p0 != 0)
@@ -182,11 +182,8 @@ class CppSimulation:
             floats["dz"] = dz
             floats["pml_z_alpha"] = pml_z_alpha
         floats["pml_x_alpha"] = pml_x_alpha
-        floats["rho0_sgx"] = rho0_sgx
-        if ndim >= 2:
-            floats["rho0_sgy"] = rho0_sgy
-        if ndim >= 3:
-            floats["rho0_sgz"] = rho0_sgz
+        for i, name in enumerate(["rho0_sgx", "rho0_sgy", "rho0_sgz"][:ndim]):
+            floats[name] = rho0_sg[i]
 
         # Medium properties
         if medium.BonA is not None and np.any(np.asarray(medium.BonA) != 0):
@@ -243,21 +240,15 @@ class CppSimulation:
     def _compute_staggered_density(self, rho0):
         """Compute staggered grid density by averaging neighbors.
 
+        Returns a list of ndim staggered density arrays (one per active axis).
+
         TODO: This uses np.roll (spatial averaging) which matches the legacy
         save_to_disk_func behavior. The C++ binary computes its own spectral
         interpolation internally, so this is only used as the initial estimate.
         For full physical accuracy with heterogeneous density, consider using
         spectral interpolation (FFT-based shift) instead.
         """
-        ndim = self.ndim
-        rho0_sg = []
-        for axis in range(ndim):
-            shifted = np.roll(rho0, -1, axis=axis)
-            rho0_sg.append(0.5 * (rho0 + shifted))
-        # Fill remaining dims
-        while len(rho0_sg) < 3:
-            rho0_sg.append(rho0)
-        return rho0_sg[0], rho0_sg[1], rho0_sg[2]
+        return [0.5 * (rho0 + np.roll(rho0, -1, axis=axis)) for axis in range(self.ndim)]
 
     def _get_absorbing_flag(self):
         """Determine absorption type: 0=lossless, 1=power-law, 2=stokes."""

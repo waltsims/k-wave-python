@@ -39,6 +39,61 @@ def _expand_to_grid(val, grid_shape, xp, name="parameter"):
     raise ValueError(f"{name} size {arr.size} incompatible with grid size {grid_size}")
 
 
+def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_size, source_kappa, diff_fn):
+    """Build a source injection operator for one field variable.
+
+    Returns a callable (t, field) → field that injects scaled source values.
+    """
+    mask = xp.array(mask_raw, dtype=bool).flatten(order="F")
+    if mask.size == 1:
+        mask = xp.full(grid_shape, bool(mask[0]), dtype=bool).flatten(order="F")
+    n_src = int(xp.sum(mask))
+
+    signal_arr = xp.array(signal_raw, dtype=float, order="F")
+    if signal_arr.ndim == 1:
+        signal = signal_arr.reshape(1, -1)
+    else:
+        signal = signal_arr.reshape(-1, signal_arr.shape[-1], order="F") if signal_arr.ndim > 2 else signal_arr
+
+    scaled = signal * xp.atleast_1d(xp.asarray(scale))[:, None]
+    signal_len = scaled.shape[1]
+
+    def get_val(t):
+        if scaled.shape[0] == 1:
+            return xp.full(n_src, float(scaled[0, t]))
+        return scaled[:, t]
+
+    def dirichlet(t, field):
+        if t >= signal_len:
+            return field
+        flat = field.flatten(order="F")
+        flat[mask] = get_val(t)
+        return flat.reshape(grid_shape, order="F")
+
+    # Pre-allocate buffer to avoid per-step allocation
+    _src_buf = xp.zeros(grid_size, dtype=float)
+
+    def additive_kspace(t, field):
+        if t >= signal_len:
+            return field
+        _src_buf[:] = 0
+        _src_buf[mask] = get_val(t)
+        src = _src_buf.reshape(grid_shape, order="F")
+        return field + diff_fn(src, source_kappa)
+
+    def additive_no_correction(t, field):
+        if t >= signal_len:
+            return field
+        _src_buf[:] = 0
+        _src_buf[mask] = get_val(t)
+        return field + _src_buf.reshape(grid_shape, order="F")
+
+    ops = {"dirichlet": dirichlet, "additive": additive_kspace, "additive-no-correction": additive_no_correction}
+    if mode not in ops:
+        raise ValueError(f"Unknown source mode: {mode!r}. Use 'additive', 'additive-no-correction', or 'dirichlet'.")
+    return ops[mode]
+
+
 # =============================================================================
 # Simulation Class
 # =============================================================================
@@ -58,7 +113,7 @@ class Simulation:
     """
 
     def __init__(
-        self, kgrid, medium, source, sensor, backend="auto", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
+        self, kgrid, medium, source, sensor, *, backend="cpu", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
     ):
         self.kgrid = kgrid
         self.medium = medium
@@ -87,10 +142,10 @@ class Simulation:
             if cp is None:
                 raise ImportError("CuPy is required for GPU backend but is not installed. Install with: pip install cupy-cuda12x")
             self.xp = cp
-        elif backend in ("auto", "cpu"):
-            self.xp = cp if (backend == "auto" and cp) else np
+        elif backend == "cpu":
+            self.xp = np
         else:
-            raise ValueError(f"Unknown backend {backend!r}. Use 'gpu', 'cpu', or 'auto'.")
+            raise ValueError(f"Unknown backend {backend!r}. Use 'gpu' or 'cpu'.")
         self._is_setup = False
         self.t = 0  # Current time step
 
@@ -98,24 +153,28 @@ class Simulation:
         """Initialize operators and fields. Call before step()/run()."""
         xp = self.xp
 
-        self.spacing = []
-        grid_dims = []
-        for axis in ["x", "y", "z"]:
-            N = getattr(self.kgrid, f"N{axis}", None)
-            d = getattr(self.kgrid, f"d{axis}", None)
-            if N is not None and d is not None:
-                grid_dims.append(int(N))
-                self.spacing.append(float(d))
-            else:
-                break
-
-        self.grid_shape = tuple(grid_dims)
-        self.ndim = len(grid_dims)
+        # Support both kWaveGrid (.N, .spacing, .dim) and SimpleNamespace (Nx/dx — MATLAB interop)
+        if hasattr(self.kgrid, "N") and hasattr(self.kgrid, "spacing"):
+            self.grid_shape = tuple(int(n) for n in self.kgrid.N)
+            self.spacing = [float(d) for d in self.kgrid.spacing]
+        else:
+            grid_dims, self.spacing = [], []
+            for axis in ["x", "y", "z"]:
+                N = getattr(self.kgrid, f"N{axis}", None)
+                d = getattr(self.kgrid, f"d{axis}", None)
+                if N is not None and d is not None:
+                    grid_dims.append(int(N))
+                    self.spacing.append(float(d))
+                else:
+                    break
+            self.grid_shape = tuple(grid_dims)
+        self.ndim = len(self.grid_shape)
         self.Nt = int(self.kgrid.Nt)
         self.dt = float(self.kgrid.dt)
 
         self.c0 = _expand_to_grid(self.medium.sound_speed, self.grid_shape, xp, "sound_speed")
-        self.rho0 = _expand_to_grid(getattr(self.medium, "density", 1000.0), self.grid_shape, xp, "density")
+        density = getattr(self.medium, "density", None)
+        self.rho0 = _expand_to_grid(density if density is not None else 1000.0, self.grid_shape, xp, "density")
         self.c_ref = float(xp.max(self.c0))
 
         self._setup_sensor_mask()
@@ -166,7 +225,7 @@ class Simulation:
                 )
 
         # Parse sensor.record (default matches MATLAB: pressure time-series + final snapshot)
-        record = getattr(self.sensor, "record", ("p", "p_final"))
+        record = getattr(self.sensor, "record", None) or ("p", "p_final")
         if isinstance(record, str):
             record = (record,)
         self.record = set(record)
@@ -204,7 +263,7 @@ class Simulation:
             self.record.update(["p"] + [f"u{a}" for a in "xyz"[: self.ndim]])
 
         # sensor.record_start_index uses MATLAB 1-based convention (1 = first step)
-        record_start_raw = int(getattr(self.sensor, "record_start_index", 1))
+        record_start_raw = int(getattr(self.sensor, "record_start_index", None) or 1)
         if record_start_raw < 1:
             raise ValueError(f"sensor.record_start_index must be >= 1 (1-based, MATLAB convention), got {record_start_raw}")
         if record_start_raw > self.Nt:
@@ -271,17 +330,11 @@ class Simulation:
             name = axis_names[axis]
 
             if self._pml_size_override is not None:
-                pml_size = (
-                    int(self._pml_size_override[axis]) if hasattr(self._pml_size_override, "__len__") else int(self._pml_size_override)
-                )
+                pml_size = int(self._pml_size_override[axis])
             else:
                 pml_size = int(getattr(self.kgrid, f"pml_size_{name}", 0))
             if self._pml_alpha_override is not None:
-                pml_alpha = (
-                    float(self._pml_alpha_override[axis])
-                    if hasattr(self._pml_alpha_override, "__len__")
-                    else float(self._pml_alpha_override)
-                )
+                pml_alpha = float(self._pml_alpha_override[axis])
             else:
                 pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
             self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
@@ -383,13 +436,13 @@ class Simulation:
         Pressure sources are injected as mass sources into the split density
         fields (rho_x, rho_y, ...).  Since p = c0^2 * (rho_x + rho_y + ...),
         the user-supplied pressure must be converted to density and divided
-        equally across N = ndim components:
+        equally across n_rho_splits = ndim components:
 
-            dirichlet:  source.p / (N * c0^2)
-            additive:   source.p * 2*dt / (N * c0 * dx)
+            dirichlet:  source.p / (n * c0^2)
+            additive:   source.p * 2*dt / (n * c0 * dx)
 
         The 1/c0^2 converts pressure to density (equation of state).
-        The 1/N splits evenly so the sum reconstructs the correct total.
+        The 1/n splits evenly so the sum reconstructs the correct total.
         The 2*dt/(c0*dx) factor accounts for the leapfrog time discretization
         (see Cox et al., IEEE IUS 2018).
 
@@ -400,93 +453,59 @@ class Simulation:
         xp = self.xp
         grid_size = int(np.prod(self.grid_shape))
 
-        def build_op(mask_raw, signal_raw, mode, scale):
-            """Build a source injection operator for one field variable."""
-            if not (_is_enabled(mask_raw) and _is_enabled(signal_raw)):
-                return None
-
+        def _expand_mask(mask_raw):
             mask = xp.array(mask_raw, dtype=bool).flatten(order="F")
             if mask.size == 1:
                 mask = xp.full(self.grid_shape, bool(mask[0]), dtype=bool).flatten(order="F")
-            n_src = int(xp.sum(mask))
-
-            signal_arr = xp.array(signal_raw, dtype=float, order="F")
-            if signal_arr.ndim == 1:
-                signal = signal_arr.reshape(1, -1)
-            else:
-                signal = signal_arr.reshape(-1, signal_arr.shape[-1], order="F") if signal_arr.ndim > 2 else signal_arr
-
-            scaled = signal * xp.atleast_1d(xp.asarray(scale))[:, None]
-            signal_len = scaled.shape[1]
-
-            def get_val(t):
-                if scaled.shape[0] == 1:
-                    return xp.full(n_src, float(scaled[0, t]))
-                return scaled[:, t]
-
-            def dirichlet(t, field):
-                if t >= signal_len:
-                    return field
-                flat = field.flatten(order="F")
-                flat[mask] = get_val(t)
-                return flat.reshape(self.grid_shape, order="F")
-
-            # Pre-allocate buffer to avoid per-step allocation
-            _src_buf = xp.zeros(grid_size, dtype=float)
-
-            def additive_kspace(t, field):
-                if t >= signal_len:
-                    return field
-                _src_buf[:] = 0
-                _src_buf[mask] = get_val(t)
-                src = _src_buf.reshape(self.grid_shape, order="F")
-                return field + self._diff(src, self.source_kappa)
-
-            def additive_no_correction(t, field):
-                if t >= signal_len:
-                    return field
-                _src_buf[:] = 0
-                _src_buf[mask] = get_val(t)
-                return field + _src_buf.reshape(self.grid_shape, order="F")
-
-            ops = {"dirichlet": dirichlet, "additive": additive_kspace, "additive-no-correction": additive_no_correction}
-            if mode not in ops:
-                raise ValueError(f"Unknown source mode: {mode!r}. Use 'additive', 'additive-no-correction', or 'dirichlet'.")
-            return ops[mode]
+            return mask
 
         def source_scale(mask_raw, c0):
             """Get per-source-point sound speed values."""
-            mask = xp.array(mask_raw, dtype=bool).flatten(order="F")
-            if mask.size == 1:
-                mask = xp.full(self.grid_shape, bool(mask[0]), dtype=bool).flatten(order="F")
+            mask = _expand_mask(mask_raw)
             c0_flat = c0.flatten(order="F")
             n_src = int(xp.sum(mask))
             return c0_flat[mask] if c0_flat.size > 1 else xp.full(n_src, float(c0_flat))
 
+        def build_op(mask_raw, signal_raw, mode, scale):
+            """Build a source injection operator for one field variable."""
+            if not (_is_enabled(mask_raw) and _is_enabled(signal_raw)):
+                return None
+            return _build_source_op(
+                mask_raw,
+                signal_raw,
+                mode,
+                scale,
+                xp=xp,
+                grid_shape=self.grid_shape,
+                grid_size=grid_size,
+                source_kappa=self.source_kappa,
+                diff_fn=self._diff,
+            )
+
         # --- Pressure source (per-axis spacing for non-isotropic grids) ---
         p_mask = getattr(self.source, "p_mask", 0)
         p_signal = getattr(self.source, "p", 0)
-        p_mode = getattr(self.source, "p_mode", "additive")
-        N = self.ndim
+        p_mode = getattr(self.source, "p_mode", None) or "additive"
+        n_rho_splits = self.ndim  # pressure splits evenly across density components
         if _is_enabled(p_mask) and _is_enabled(p_signal):
             c0_src = source_scale(p_mask, self.c0)
             if p_mode == "dirichlet":
-                scale = 1.0 / (N * c0_src**2)
+                scale = 1.0 / (n_rho_splits * c0_src**2)
                 op = build_op(p_mask, p_signal, p_mode, scale)
                 self._source_p_ops = [op] * self.ndim
             else:
-                # Per-axis: rho_i += source.p * 2*dt / (N * c0 * d_i)
+                # Per-axis: rho_i += source.p * 2*dt / (n_rho_splits * c0 * d_i)
                 self._source_p_ops = []
                 for i in range(self.ndim):
                     di = self.spacing[i]
-                    scale_i = 2 * self.dt / (N * c0_src * di)
+                    scale_i = 2 * self.dt / (n_rho_splits * c0_src * di)
                     self._source_p_ops.append(build_op(p_mask, p_signal, p_mode, scale_i))
         else:
             self._source_p_ops = [lambda t, field: field] * self.ndim
 
         # --- Velocity sources (per-axis grid spacing) ---
         u_mask = getattr(self.source, "u_mask", 0)
-        u_mode = getattr(self.source, "u_mode", "additive")
+        u_mode = getattr(self.source, "u_mode", None) or "additive"
         self._source_u_ops = []
         for i, vel in enumerate(["ux", "uy", "uz"][: self.ndim]):
             u_signal = getattr(self.source, vel, 0)
@@ -730,6 +749,13 @@ def interop_sanity(arr):
     return arr
 
 
+def _resolve_backend(backend):
+    """Resolve 'auto' backend: use CuPy if available, else NumPy."""
+    if backend == "auto":
+        return "gpu" if cp else "cpu"
+    return backend
+
+
 def create_simulation(kgrid, medium, source, sensor, backend="auto", smooth_p0=False):
     """MATLAB interop: create Simulation from dicts (for step-by-step debugging).
 
@@ -741,7 +767,7 @@ def create_simulation(kgrid, medium, source, sensor, backend="auto", smooth_p0=F
         _to_namespace(_normalize_medium(medium)),
         _to_namespace(source),
         _to_namespace(sensor),
-        backend,
+        backend=_resolve_backend(backend),
         smooth_p0=smooth_p0,
     )
 
