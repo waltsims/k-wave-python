@@ -43,7 +43,7 @@ def test_photoacoustic_2D_vs_matlab(load_matlab_ref):
     sensor.mask[Nx // 2 + source_sensor_distance - 1, Nx // 2 - 1] = True
     sensor.record = ["p"]
 
-    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
+    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python", pml_inside=True)
 
     assert_fields_close(result, ref, [("p", "sensor_data_2D_p")])
 
@@ -66,6 +66,6 @@ def test_photoacoustic_3D_vs_matlab(load_matlab_ref):
     sensor.mask[Nx // 2 + source_sensor_distance - 1, Nx // 2 - 1, Nx // 2 - 1] = True
     sensor.record = ["p"]
 
-    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
+    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python", pml_inside=True)
 
     assert_fields_close(result, ref, [("p", "sensor_data_3D_p")])

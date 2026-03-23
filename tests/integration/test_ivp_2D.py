@@ -32,7 +32,7 @@ def test_ivp_2D_vs_matlab(load_matlab_ref):
 
     sensor = kSensor(mask=np.ones((128, 128), dtype=bool))
 
-    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
+    result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python", pml_inside=True)
 
     # Verify time stepping matches
     assert int(kgrid.Nt) == int(ref["Nt"]), f"Nt mismatch: Python {kgrid.Nt} vs MATLAB {ref['Nt']}"
