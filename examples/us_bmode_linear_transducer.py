@@ -4,12 +4,12 @@
 
 # %%
 import logging
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io
 
-from examples.us_bmode_linear_transducer.example_utils import download_if_does_not_exist
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -21,6 +21,22 @@ from kwave.utils.conversion import db2neper
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import gaussian_filter
 from kwave.utils.signals import get_win, tone_burst
+
+
+def _download_from_gdrive(file_id, output_path):
+    try:
+        import gdown
+    except ModuleNotFoundError:
+        raise AssertionError("This example requires `gdown` to be installed. Please install using `pip install gdown`")
+
+    url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
+    gdown.download(url, output_path, quiet=False)
+
+
+def download_if_does_not_exist(file_id, output_path):
+    if not os.path.exists(output_path):
+        _download_from_gdrive(file_id, output_path)
+
 
 # %%
 SENSOR_DATA_GDRIVE_ID = "1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv"
