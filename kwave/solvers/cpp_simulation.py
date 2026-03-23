@@ -206,7 +206,13 @@ class CppSimulation:
         if has_p:
             p_data = np.asarray(source.p, dtype=np.float32)
             write_matrix(filepath, p_data, "p_source_input")
-            p_mask_idx = np.where(np.asarray(source.p_mask).flatten(order="F") != 0)[0] + 1
+            p_mask_arr = np.asarray(source.p_mask)
+            if p_mask_arr.ndim == 2 and p_mask_arr.shape[0] == ndim:
+                raise ValueError(
+                    "Cartesian source masks (p_mask) are not supported by the cpp backend. "
+                    "Use a binary (grid-shaped) mask or switch to backend='python'."
+                )
+            p_mask_idx = np.where(p_mask_arr.flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
             p_mode = getattr(source, "p_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
@@ -218,7 +224,13 @@ class CppSimulation:
                 write_matrix(filepath, vel_data, f"{vel}_source_input")
 
         if has_ux or has_uy or has_uz:
-            u_mask_idx = np.where(np.asarray(source.u_mask).flatten(order="F") != 0)[0] + 1
+            u_mask_arr = np.asarray(source.u_mask)
+            if u_mask_arr.ndim == 2 and u_mask_arr.shape[0] == ndim:
+                raise ValueError(
+                    "Cartesian source masks (u_mask) are not supported by the cpp backend. "
+                    "Use a binary (grid-shaped) mask or switch to backend='python'."
+                )
+            u_mask_idx = np.where(u_mask_arr.flatten(order="F") != 0)[0] + 1
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
             u_mode = getattr(source, "u_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")

@@ -532,8 +532,7 @@ class Simulation:
                     self.sensor_data[v] = xp.zeros((self.n_sensor_points, self.num_recorded_time_points), dtype=float)
 
         # Spectral shift: move velocity from staggered (mid-cell) to collocated (pressure) grid
-        if any(f"u{a}" in self.sensor_data for a in "xyz"[: self.ndim]):
-            self.unstagger_ops = [xp.exp(-1j * self.k_list[ax] * self.spacing[ax] / 2) for ax in range(self.ndim)]
+        self.unstagger_ops = [xp.exp(-1j * self.k_list[ax] * self.spacing[ax] / 2) for ax in range(self.ndim)]
 
         # Initial pressure source (p0)
         p0_raw = getattr(self.source, "p0", 0)
