@@ -72,21 +72,21 @@ def validate_cfl(kgrid, medium):
 
 def validate_source(source, kgrid):
     grid_size = int(np.prod(kgrid.N))
-    if source.p0 is not None:
+    if getattr(source, "p0", None) is not None:
         p0 = np.asarray(source.p0)
         if p0.size != grid_size and p0.size != 0:
             raise ValueError(f"source.p0 has {p0.size} elements but grid has {grid_size} points.")
-    if source.p is not None and source.p_mask is None:
+    if getattr(source, "p", None) is not None and getattr(source, "p_mask", None) is None:
         raise ValueError("source.p requires source.p_mask to be set.")
-    if source.p_mask is not None:
+    if getattr(source, "p_mask", None) is not None:
         mask = np.asarray(source.p_mask)
         is_cartesian = mask.ndim == 2 and mask.shape[0] == kgrid.dim
         if not is_cartesian and mask.size != grid_size:
             raise ValueError(f"source.p_mask has {mask.size} elements but grid has {grid_size} points.")
     for vel in ["ux", "uy", "uz"]:
-        if getattr(source, vel, None) is not None and source.u_mask is None:
+        if getattr(source, vel, None) is not None and getattr(source, "u_mask", None) is None:
             raise ValueError(f"source.{vel} requires source.u_mask to be set.")
-    if source.u_mask is not None:
+    if getattr(source, "u_mask", None) is not None:
         mask = np.asarray(source.u_mask)
         is_cartesian = mask.ndim == 2 and mask.shape[0] == kgrid.dim
         if not is_cartesian and mask.size != grid_size:

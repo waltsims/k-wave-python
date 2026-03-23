@@ -28,7 +28,7 @@ def main():
 
     # create the computational grid
     PML_size = 20  # size of the PML in grid points
-    N = Vector([128, 256]) - 2 * PML_size  # number of grid points
+    N = Vector([128, 256])  # number of grid points (PML is inside the grid)
     d = Vector([0.1e-3, 0.1e-3])  # grid point spacing [m]
     kgrid = kWaveGrid(N, d)
 
@@ -100,7 +100,7 @@ def main():
     # plot the initial pressure and sensor distribution
     fig, ax = plt.subplots(1, 1)
     im = ax.imshow(
-        p0 + sensor.mask[PML_size:-PML_size, PML_size:-PML_size] * disc_magnitude,
+        p0 + sensor.mask * disc_magnitude,
         extent=[kgrid.y_vec.min() * 1e3, kgrid.y_vec.max() * 1e3, kgrid.x_vec.max() * 1e3, kgrid.x_vec.min() * 1e3],
         vmin=-disc_magnitude,
         vmax=disc_magnitude,

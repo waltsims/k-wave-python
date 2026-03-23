@@ -65,14 +65,13 @@ def main():
     output = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
     # Reorder the sensor data returned by k-Wave to match the order of the elements in the array
     _, _, reorder_index = cart2grid(kgrid, element_pos)
-    sensor_data_point = reorder_binary_sensor_data(output["p"].T, reorder_index=reorder_index)
+    sensor_data_point = reorder_binary_sensor_data(output["p"], reorder_index=reorder_index)
 
     # assign binary mask from karray to the source mask
     sensor.mask = karray.get_array_binary_mask(kgrid)
 
     output = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
-    sensor_data = output["p"].T
-    combined_sensor_data = karray.combine_sensor_data(kgrid, sensor_data)
+    combined_sensor_data = karray.combine_sensor_data(kgrid, output["p"])
 
     # %% Visualization
     # create pml mask (default size of 20 grid points)

@@ -144,7 +144,7 @@ sensor_data = kspaceFirstOrder(
 )
 
 # extract amplitude from the sensor data
-amp, _, _ = extract_amp_phase(sensor_data["p"].T, 1.0 / kgrid.dt, source_f0, dim=1, fft_padding=1, window="Rectangular")
+amp, _, _ = extract_amp_phase(sensor_data["p"], 1.0 / kgrid.dt, source_f0, dim=1, fft_padding=1, window="Rectangular")
 
 # reshape data
 amp = np.reshape(amp, (Nx - (source_x_offset + 1), Ny), order="F")

@@ -67,7 +67,7 @@ def main():
         backend="cpp",
         device="gpu",
     )
-    sensor_data = sensor_data["p"].T
+    sensor_data = sensor_data["p"]
 
     # reshape sensor data to y, z, t
     sensor_data_rs = sensor_data.reshape(N[1], N[2], kgrid.Nt)
