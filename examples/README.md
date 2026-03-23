@@ -12,11 +12,12 @@ python examples/ivp_1D_simulation.py
 **Interactively (VS Code / JupyterLab / PyCharm):**
 Open any `.py` file — the `# %%` markers define cells you can run one at a time.
 
-**As a Jupyter notebook:**
-```bash
-jupytext --to notebook examples/ivp_1D_simulation.py
-jupyter notebook examples/ivp_1D_simulation.ipynb
-```
+**On Google Colab:**
+Notebooks are auto-generated in the [`notebooks/`](../notebooks/) directory. Open any example with:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/notebooks/ivp_1D_simulation.ipynb)
+
+Replace the filename in the URL for other examples.
 
 ## Example categories
 
@@ -48,4 +49,4 @@ jupyter notebook examples/ivp_1D_simulation.ipynb
    ```
 3. Add `# %%` before each logical section (grid, source, simulation, visualization)
 4. Use `kspaceFirstOrder()` — not the legacy `kspaceFirstOrder2D/3D`
-5. Notebooks (`.ipynb`) are auto-generated from `.py` files at release time — don't create them by hand
+5. Notebooks are auto-generated from `.py` files on merge to master — don't create `.ipynb` by hand
