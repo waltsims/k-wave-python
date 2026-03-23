@@ -103,5 +103,6 @@ def validate_sensor(sensor, kgrid):
     mask = np.asarray(sensor.mask)
     grid_size = int(np.prod(kgrid.N))
     # Cartesian mask: shape (ndim, N_pts) — skip binary-size check
-    if not (mask.ndim == 2 and mask.shape[0] == kgrid.dim) and mask.size != grid_size:
+    # Scalar mask (size == 1) is a broadcast shorthand — also skip
+    if not (mask.ndim == 2 and mask.shape[0] == kgrid.dim) and mask.size != 1 and mask.size != grid_size:
         raise ValueError(f"sensor.mask has {mask.size} elements but grid has {grid_size} points.")
