@@ -680,12 +680,13 @@ def acoustic_intensity(result):
     # DC is already 0; Nyquist (freq[0] = -π) is implicitly suppressed by np.real() below
     shift_op = np.fft.ifftshift(np.exp(1j * freq * 0.5))
 
-    out = {}
     for a in "xyz":
         u = result.get(f"u{a}")
         if u is None:
-            break
+            continue
         u_shifted = np.real(np.fft.ifft(shift_op * np.fft.fft(u, axis=-1), axis=-1))
+        out[f"I{a}"] = p * u_shifted
+        out[f"I{a}_avg"] = np.mean(out[f"I{a}"], axis=-1)
         out[f"I{a}"] = p * u_shifted
         out[f"I{a}_avg"] = np.mean(out[f"I{a}"], axis=-1)
     return out
