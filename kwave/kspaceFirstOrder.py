@@ -31,7 +31,7 @@ def _normalize_pml(val, ndim, name="pml_size"):
 def kspaceFirstOrder(
     kgrid: kWaveGrid,
     medium: kWaveMedium,
-    source: kSource,
+    source: Union[kSource, NotATransducer],
     sensor: Union[kSensor, NotATransducer, None] = None,
     *,
     pml_size: Union[int, tuple, str] = 20,
