@@ -1,4 +1,5 @@
 import copy
+import os
 import warnings
 from typing import Optional, Union
 
@@ -95,7 +96,15 @@ def kspaceFirstOrder(
     Returns:
         dict: Recorded sensor data keyed by field name (e.g.
         ``"p"``, ``"p_final"``, ``"ux"``, ``"uy"``).
+
+    Environment variables:
+        ``KWAVE_BACKEND``: Override ``backend`` (e.g. ``"python"``).
+        ``KWAVE_DEVICE``: Override ``device`` (e.g. ``"cpu"``).
     """
+    # Environment overrides — lets CI run GPU/cpp examples on CPU/python
+    backend = os.environ.get("KWAVE_BACKEND", backend)
+    device = os.environ.get("KWAVE_DEVICE", device)
+
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
     if backend not in ("python", "cpp"):
