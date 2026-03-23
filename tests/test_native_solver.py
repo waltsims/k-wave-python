@@ -298,11 +298,13 @@ class TestSolverFactory:
         s = get_solver("python")
         assert s.backend == Backend.PYTHON
 
-    def test_get_cpp_solver(self):
-        from kwave.solvers import Backend, get_solver
+    def test_get_cpp_solver_raises(self):
+        import pytest
 
-        s = get_solver("cpp")
-        assert s.backend == Backend.CPP
+        from kwave.solvers import get_solver
+
+        with pytest.raises(ValueError, match="kspaceFirstOrder"):
+            get_solver("cpp")
 
     def test_get_solver_enum(self):
         from kwave.solvers import Backend, get_solver
