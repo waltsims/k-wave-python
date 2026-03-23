@@ -27,12 +27,6 @@ def _normalize_pml(val, ndim, name="pml_size"):
     return t + (t[-1],) * (ndim - len(t))
 
 
-def _is_binary_mask(mask, ndim):
-    """True if mask is a grid-shaped binary array (not Cartesian coordinates)."""
-    arr = np.asarray(mask)
-    if arr.ndim == 2 and arr.shape[0] == ndim:
-        return False  # Cartesian: (ndim, n_points)
-    return True
 def _is_cartesian_mask(mask, ndim):
     """True if mask is a Cartesian coordinate array (ndim, n_points)."""
     arr = np.asarray(mask)
@@ -89,6 +83,7 @@ def _strip_pml(result, pml_size, ndim):
     }
 
 
+@typechecker
 def kspaceFirstOrder(
     kgrid: kWaveGrid,
     medium: kWaveMedium,
@@ -198,7 +193,6 @@ def kspaceFirstOrder(
             "Set pml_inside=False (default) to expand the grid automatically instead.",
             stacklevel=2,
         )
-    sensor_was_none = sensor is None or (hasattr(sensor, "mask") and sensor.mask is None)
     if not pml_inside:
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
 
