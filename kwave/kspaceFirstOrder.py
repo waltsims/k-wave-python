@@ -32,14 +32,18 @@ def _is_cartesian_mask(mask, ndim):
 
 
 def _expand_obj(obj, attrs, pml_size, edge_val=None):
-    """Shallow-copy obj and expand non-scalar array attributes via expand_matrix."""
+    """Shallow-copy obj and expand grid-shaped array attributes via expand_matrix.
+
+    Scalars (size == 1) are intentionally skipped — they broadcast to any grid
+    shape and don't need expansion (e.g. homogeneous sound_speed=1500).
+    """
     exp_coeff = list(pml_size)
     out = copy.copy(obj)
     for attr in attrs:
         val = getattr(out, attr, None)
         if val is not None:
             arr = np.asarray(val)
-            if arr.size > 1:
+            if arr.size > 1:  # scalar/homogeneous values broadcast — skip
                 setattr(out, attr, expand_matrix(arr, exp_coeff, edge_val))
     return out
 
@@ -51,6 +55,7 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
 
     expanded_medium = _expand_obj(medium, ("sound_speed", "density", "alpha_coeff", "BonA"), pml_size)
+    # s_mask intentionally excluded — stress sources are not yet implemented (raises NotImplementedError)
     expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
 
     expanded_sensor = sensor
