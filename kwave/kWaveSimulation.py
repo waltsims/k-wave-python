@@ -146,7 +146,7 @@ class kWaveSimulation(object):
     def equation_of_state(self):
         """
         Select the active equation-of-state label based on the medium's absorption and Stokes settings.
-        
+
         Returns:
             equation (str): One of:
                 - 'stokes' when the medium is absorbing and uses the Stokes model.
@@ -165,7 +165,7 @@ class kWaveSimulation(object):
     def use_sensor(self):
         """
         Indicates whether a sensor is defined for the simulation.
-        
+
         Returns:
             True if a sensor object is present, False otherwise.
         """
@@ -1523,7 +1523,7 @@ class kWaveSimulation(object):
             return True
 
         # If the sensor mask is larger by PML size in each dimension, it's still a binary mask
-        if pml_size := self.options.pml_size is None:
+        if (pml_size := self.options.pml_size) is None:
             return False
 
         if len(pml_size) == 1:
