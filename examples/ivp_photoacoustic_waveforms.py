@@ -116,8 +116,10 @@ sensor_data_3D = kspaceFirstOrder(
 # plot the simulations
 t_sc, t_scale, t_prefix, _ = scale_SI(t_end)
 _, ax1 = plt.subplots()
-ax1.plot(np.squeeze(kgrid2.t_array * t_scale), sensor_data_2D["p"] / np.max(np.abs(sensor_data_2D["p"])), "r-", label="2D")
-ax1.plot(np.squeeze(kgrid3.t_array * t_scale), sensor_data_3D["p"] / np.max(np.abs(sensor_data_3D["p"])), "k-", label="3D")
+p_2D = sensor_data_2D["p"].squeeze()
+p_3D = sensor_data_3D["p"].squeeze()
+ax1.plot(np.squeeze(kgrid2.t_array * t_scale), p_2D / np.max(np.abs(p_2D)), "r-", label="2D")
+ax1.plot(np.squeeze(kgrid3.t_array * t_scale), p_3D / np.max(np.abs(p_3D)), "k-", label="3D")
 ax1.set(xlabel=f"Time [{t_prefix}s]", ylabel="Recorded Pressure [au]")
 ax1.grid(True)
 ax1.legend(loc="upper right")

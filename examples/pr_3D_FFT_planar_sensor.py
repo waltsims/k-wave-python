@@ -29,12 +29,15 @@ def main():
 
     # create the computational grid
     PML_size = 10  # size of the PML in grid points
-    N = Vector([32, 64, 64]) * scale - 2 * PML_size  # number of grid points
+    N = Vector([32, 64, 64]) * scale  # number of grid points (PML is inside the grid)
     d = Vector([0.2e-3, 0.2e-3, 0.2e-3]) / scale  # grid point spacing [m]
     kgrid = kWaveGrid(N, d)
 
     # define the properties of the propagation medium
     medium = kWaveMedium(sound_speed=1500)  # [m/s]
+
+    # create the time array
+    kgrid.makeTime(medium.sound_speed)
 
     # create initial pressure distribution using makeBall
     ball_magnitude = 10  # [Pa]

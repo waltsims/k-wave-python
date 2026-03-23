@@ -48,19 +48,23 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor, pml_size="auto")
 print(f"  Sensor data: {result['p'].shape}")
 
 # %% Example 4: C++ save_only (writes HDF5 for cluster submission)
+import os
 import tempfile
 
-print("\nSaving HDF5 for C++ binary...")
-result = kspaceFirstOrder(
-    kgrid,
-    medium,
-    source,
-    sensor,
-    backend="cpp",
-    save_only=True,
-    data_path=tempfile.mkdtemp(),
-)
-print(f"  Input file: {result['input_file']}")
+if os.environ.get("KWAVE_BACKEND", "").lower() == "python":
+    print("\nSkipping C++ save_only example (KWAVE_BACKEND=python)...")
+else:
+    print("\nSaving HDF5 for C++ binary...")
+    result = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        sensor,
+        backend="cpp",
+        save_only=True,
+        data_path=tempfile.mkdtemp(),
+    )
+    print(f"  Input file: {result['input_file']}")
 
 # %% Example 5: Migrating from legacy options
 print("\nMigrating from legacy options...")

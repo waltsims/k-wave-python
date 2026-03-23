@@ -80,7 +80,7 @@ for source_loop in range(points):
         backend="cpp",
         device="cpu",
     )
-    single_element_data[:, source_loop] = sensor_data["p"].sum(axis=1)
+    single_element_data[:, source_loop] = sensor_data["p"].sum(axis=0)
 
 # %%
 plt.figure()

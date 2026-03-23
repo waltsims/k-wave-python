@@ -66,7 +66,7 @@ sensor_data1 = kspaceFirstOrder(
 )
 
 # average the data recorded at each grid point to simulate the measured signal from a single element focused detector
-sensor_data1 = np.sum(sensor_data1["p"], axis=1)
+sensor_data1 = np.sum(sensor_data1["p"], axis=0)
 
 # %%
 # place the second point source off axis
@@ -87,7 +87,7 @@ sensor_data2 = kspaceFirstOrder(
 )
 
 # average the data recorded at each grid point to simulate the measured signal from a single element focused detector
-sensor_data2 = np.sum(sensor_data2["p"], axis=1)
+sensor_data2 = np.sum(sensor_data2["p"], axis=0)
 
 # %%
 # Combine arrays as in MATLAB: sensor.mask + source1 + source2

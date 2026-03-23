@@ -71,8 +71,8 @@ sensor_data2 = kspaceFirstOrder(
 # %%
 ## Visualize recorded data
 
-sensor_output1 = np.sum(sensor_data1["p"], axis=1) / np.sum(sensor.mask)
-sensor_output2 = np.sum(sensor_data2["p"], axis=1) / np.sum(sensor.mask)
+sensor_output1 = np.sum(sensor_data1["p"], axis=0) / np.sum(sensor.mask)
+sensor_output2 = np.sum(sensor_data2["p"], axis=0) / np.sum(sensor.mask)
 
 t_sc, t_scale, t_prefix, _ = scale_SI(t_end)
 t_array = kgrid.t_array.squeeze() * t_scale
