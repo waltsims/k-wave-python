@@ -251,7 +251,7 @@ class TestMatlabInterop:
         p0[32] = 1.0
         source = {"p0": p0}
         sensor = {"mask": np.ones(64, dtype=bool)}
-        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        result = simulate_from_dicts(kgrid, medium, source, sensor, device="cpu")
         assert "p" in result
         assert result["p"].shape[0] == 64
 
@@ -278,7 +278,7 @@ class TestMatlabInterop:
         p0[Nx // 2, Nx // 2] = 1.0
         source = {"p0": p0}
         sensor = {"mask": np.ones((Nx, Nx), dtype=bool)}
-        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        result = simulate_from_dicts(kgrid, medium, source, sensor, device="cpu")
         # At t=0 the recorded pressure should be the unsmoothed p0
         p_t0 = result["p"][:, 0].reshape(Nx, Nx)
         assert p_t0[Nx // 2, Nx // 2] == 1.0, "smooth_p0 should default to False"
@@ -292,33 +292,13 @@ class TestMatlabInterop:
 
 
 class TestSolverFactory:
-    def test_get_native_solver(self):
-        from kwave.solvers import Backend, get_solver
-
-        s = get_solver("python")
-        assert s.backend == Backend.PYTHON
-
-    def test_get_cpp_solver_raises(self):
+    def test_simulation_bad_device_raises(self):
         import pytest
 
-        from kwave.solvers import get_solver
+        from kwave.solvers import Simulation
 
-        with pytest.raises(ValueError, match="kspaceFirstOrder"):
-            get_solver("cpp")
-
-    def test_get_solver_enum(self):
-        from kwave.solvers import Backend, get_solver
-
-        s = get_solver(Backend.PYTHON, device="gpu")
-        assert s.device == "gpu"
-
-    def test_unknown_backend_raises(self):
-        import pytest
-
-        from kwave.solvers import get_solver
-
-        with pytest.raises(ValueError):
-            get_solver("bad")
+        with pytest.raises(ValueError, match="Unknown device"):
+            Simulation(None, None, None, None, device="bad")
 
 
 class TestCoverageEdgeCases:
@@ -336,11 +316,11 @@ class TestCoverageEdgeCases:
         with pytest.raises(ValueError, match="incompatible"):
             _expand_to_grid(np.ones(10), (64,), np, "test_param")
 
-    def test_simulation_bad_backend_raises(self):
+    def test_simulation_bad_device_raises(self):
         from kwave.solvers.kspace_solver import Simulation
 
-        with pytest.raises(ValueError, match="Unknown backend"):
-            Simulation(None, None, None, None, backend="bad")
+        with pytest.raises(ValueError, match="Unknown device"):
+            Simulation(None, None, None, None, device="bad")
 
     def test_bad_sensor_mask_shape_raises(self):
         from types import SimpleNamespace
@@ -353,7 +333,7 @@ class TestCoverageEdgeCases:
         source.p0[32] = 1.0
         # Sensor mask with wrong shape — neither binary nor Cartesian
         sensor = SimpleNamespace(mask=np.ones((3, 5)), record=None, record_start_index=None)
-        sim = Simulation(kgrid, medium, source, sensor, backend="cpu", pml_size=(10,))
+        sim = Simulation(kgrid, medium, source, sensor, device="cpu", pml_size=(10,))
         with pytest.raises(ValueError, match="neither binary"):
             sim.setup()
 

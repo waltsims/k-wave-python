@@ -205,17 +205,9 @@ def kspaceFirstOrder3D(
     # start the timer and store the start time
     TicToc.tic()
 
-    # Ensure pml_size is resolved for both python and cpp paths
-    if simulation_options.pml_size is None:
-        simulation_options.pml_size = (20,) * kgrid.dim
-    elif not hasattr(simulation_options.pml_size, "__len__"):
-        simulation_options.pml_size = (int(simulation_options.pml_size),) * kgrid.dim
-
     if execution_options.is_python_backend:
         from kwave.solvers.native import run_python_backend
-        from kwave.solvers.validation import validate_simulation
 
-        validate_simulation(kgrid, medium, source, sensor, pml_size=tuple(simulation_options.pml_size))
         return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.

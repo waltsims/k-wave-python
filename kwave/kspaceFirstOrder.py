@@ -1,6 +1,5 @@
 import copy
 import warnings
-from types import SimpleNamespace
 from typing import Optional, Union
 
 import numpy as np
@@ -15,7 +14,8 @@ from kwave.utils.pml import get_optimal_pml_size
 
 def _normalize_pml(val, ndim, name="pml_size"):
     if isinstance(val, str):
-        raise ValueError(f"{name} should already be resolved before calling _normalize_pml")
+        valid = "an integer, tuple of integers, or 'auto'" if name == "pml_size" else "a float or tuple of floats"
+        raise ValueError(f"{name} must be {valid}, got {val!r}")
     if isinstance(val, (int, float)):
         return (val,) * ndim
     t = tuple(val)
@@ -109,16 +109,20 @@ def kspaceFirstOrder(
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     if backend == "python":
-        from kwave.solvers.kwave_adapter import run_simulation_native
+        from kwave.solvers.kspace_solver import Simulation
 
-        opts = SimpleNamespace(
-            pml_size=pml_size,
-            pml_alpha=pml_alpha,
+        return Simulation(
+            kgrid,
+            medium,
+            source,
+            sensor,
+            device=device,
             use_sg=use_sg,
             use_kspace=use_kspace,
             smooth_p0=smooth_p0,
-        )
-        return run_simulation_native(kgrid, medium, source, sensor, opts, device=device)
+            pml_size=pml_size,
+            pml_alpha=pml_alpha,
+        ).run()
 
     if backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
@@ -154,5 +158,3 @@ def kspaceFirstOrder(
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
         return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
-
-    raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
