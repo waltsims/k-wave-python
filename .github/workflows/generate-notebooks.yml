@@ -3,11 +3,13 @@ name: Generate Notebooks
 on:
   push:
     branches: [master]
-    paths: ['examples/**/*.py']
+    paths: ['examples/*.py']
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -21,13 +23,9 @@ jobs:
       - name: Generate notebooks
         run: |
           mkdir -p notebooks
-          for py in examples/**/*.py examples/*.py; do
+          for py in examples/*.py; do
             [ -f "$py" ] || continue
-            # Skip utilities and non-example files
             basename=$(basename "$py")
-            case "$basename" in
-              example_utils.py|__init__.py) continue ;;
-            esac
             jupytext --to notebook "$py" --output "notebooks/${basename%.py}.ipynb"
           done
 
@@ -40,5 +38,5 @@ jobs:
             echo "No notebook changes"
           else
             git commit -m "Auto-generate notebooks from examples [skip ci]"
-            git push
+            git push origin HEAD:master
           fi

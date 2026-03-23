@@ -23,7 +23,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrderASC
+from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
 from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.filters import extract_amp_phase
