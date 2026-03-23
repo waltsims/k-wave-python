@@ -70,7 +70,7 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
     def dirichlet(t, field):
         if t >= signal_len:
             return field
-        flat = field.flatten(order="F")
+        flat = field.flatten(order="F")  # copy — mutation is intentional
         flat[mask] = get_val(t)
         return flat.reshape(grid_shape, order="F")
 

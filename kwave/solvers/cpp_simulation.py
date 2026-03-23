@@ -87,8 +87,8 @@ class CppSimulation:
             Nz = int(kgrid.N[2])
 
         dx = float(kgrid.spacing[0])
-        dy = float(kgrid.spacing[1]) if ndim >= 2 else dx
-        dz = float(kgrid.spacing[2]) if ndim >= 3 else dx
+        dy = float(kgrid.spacing[1]) if ndim >= 2 else 0.0
+        dz = float(kgrid.spacing[2]) if ndim >= 3 else 0.0
         dt = float(kgrid.dt)
         Nt = int(kgrid.Nt)
 

@@ -1510,7 +1510,7 @@ class kWaveSimulation(object):
         pml = self.options.pml_size
         if pml is None:
             return False
-        pml = np.broadcast_to(np.atleast_1d(pml), kgrid_dim)
+        pml = np.broadcast_to(np.atleast_1d(pml), (kgrid_dim,))
         return mask_shape == tuple(g + 2 * int(p) for g, p in zip(grid_shape, pml))
 
     def _is_cuboid_corners_mask(self, kgrid_dim: int) -> bool:
