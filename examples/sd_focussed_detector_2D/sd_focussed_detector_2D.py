@@ -1,9 +1,7 @@
 # # Focussed Detector In 2D Example
 # This example shows how k-Wave-python can be used to model the output of a focused semicircular detector, where the directionality arises from spatially averaging across the detector surface. Unlike the original example in k-Wave, this example does not visualize the simulation, as this functionality is not intrinsically supported by the accelerated binaries.
 
-import os
 from copy import deepcopy
-from tempfile import gettempdir
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,10 +10,8 @@ from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.ktransducer import kSensor
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.data import scale_SI
 from kwave.utils.mapgen import make_circle, make_disc
 
@@ -41,49 +37,42 @@ t_end = 11e-6  # [s]
 _ = kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
 
-# ## Define simulation parameters
-input_filename = "example_sd_focused_2d_input.h5"
-pathname = gettempdir()
-input_file_full_path = os.path.join(pathname, input_filename)
-simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname)
-
-
-# ## Run simulation with first source
+## Run simulation with first source
 # place a disc-shaped source near the focus of the detector
 source = kSource()
 source.p0 = 2 * make_disc(grid_size, grid_size / 2, 4)
 
 # run the simulation
-sensor_data1 = kspaceFirstOrder2DC(
-    medium=medium,
-    kgrid=kgrid,
-    source=deepcopy(source),
-    sensor=sensor,
-    simulation_options=simulation_options,
-    execution_options=SimulationExecutionOptions(),
+sensor_data1 = kspaceFirstOrder(
+    kgrid,
+    medium,
+    deepcopy(source),
+    sensor,
+    backend="cpp",
+    device="cpu",
 )
 
 
 sensor_data1["p"].shape
 
 
-# ## Run simulation with second source
+## Run simulation with second source
 
 
 # place a disc-shaped source horizontally shifted from the focus of the detector
 source.p0 = 2 * make_disc(grid_size, grid_size / 2 + [0, 20], 4)
 
-sensor_data2 = kspaceFirstOrder2DC(
-    medium=medium,
-    kgrid=kgrid,
-    source=deepcopy(source),
-    sensor=sensor,
-    simulation_options=simulation_options,
-    execution_options=SimulationExecutionOptions(),
+sensor_data2 = kspaceFirstOrder(
+    kgrid,
+    medium,
+    deepcopy(source),
+    sensor,
+    backend="cpp",
+    device="cpu",
 )
 
 
-# ## Visualize recorded data
+## Visualize recorded data
 
 
 sensor_output1 = np.sum(sensor_data1["p"], axis=1) / np.sum(sensor.mask)

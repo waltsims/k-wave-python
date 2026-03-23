@@ -10,10 +10,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.kspaceLineRecon import kspaceLineRecon
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
 from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
@@ -71,8 +69,29 @@ def main():
     inner_mask[0, :] = 1  # Line sensor along the first row
     sensor.mask = inner_mask
     sensor.record = ["p", "p_final"]
-    # set the input arguments: force the PML to be outside the computational
-    # grid; switch off p0 smoothing within kspaceFirstOrder2D
+    # NOTE: pml_inside=False, data_cast="single" not supported in new API
+    # run the simulation
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        deepcopy(sensor),
+        pml_size=PML_size,
+        smooth_p0=False,
+        backend="cpp",
+        device="gpu",
+    )
+    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
+
+    # reset only the initial pressure, keep the sensor with recorded data
+    source = kSource()
+    # create time reversal handler and run reconstruction
+    tr = TimeReversal(kgrid, medium, sensor)
+    # NOTE: TimeReversal still uses the legacy API internally — this may need updating separately
+    from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
+
     simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=PML_size,
@@ -81,15 +100,6 @@ def main():
         data_cast="single",
     )
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-    # run the simulation
-    sensor_data = kspaceFirstOrder2D(kgrid, source, deepcopy(sensor), medium, simulation_options, execution_options)
-    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
-
-    # reset only the initial pressure, keep the sensor with recorded data
-    source = kSource()
-    # create time reversal handler and run reconstruction
-    tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder2D, simulation_options, execution_options)
 
     # repeat the FFT reconstruction for comparison

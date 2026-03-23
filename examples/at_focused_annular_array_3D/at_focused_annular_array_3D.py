@@ -8,9 +8,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import extract_amp_phase
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import focused_annulus_oneil
@@ -136,17 +134,15 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 # SIMULATION
 # --------------------
 
-simulation_options = SimulationOptions(pml_auto=True, data_recast=True, save_to_disk=True, save_to_disk_exit=False, pml_inside=False)
-
-execution_options = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False, verbose_level=2)
-
-sensor_data = kspaceFirstOrder3D(
-    medium=deepcopy(medium),
-    kgrid=deepcopy(kgrid),
-    source=deepcopy(source),
-    sensor=deepcopy(sensor),
-    simulation_options=simulation_options,
-    execution_options=execution_options,
+# NOTE: pml_inside=False not supported in new API
+sensor_data = kspaceFirstOrder(
+    deepcopy(kgrid),
+    deepcopy(medium),
+    deepcopy(source),
+    deepcopy(sensor),
+    pml_size="auto",
+    backend="cpp",
+    device="gpu",
 )
 
 # extract amplitude from the sensor data

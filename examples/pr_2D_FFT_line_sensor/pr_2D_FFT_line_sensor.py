@@ -8,10 +8,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.kspaceLineRecon import kspaceLineRecon
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
@@ -64,17 +62,18 @@ def main():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
-    # set the input arguments: force the PML to be outside the computational grid
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        pml_inside=False,
+    # NOTE: pml_inside=False not supported in new API
+    # run the simulation
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        sensor,
         pml_size=PML_size,
         smooth_p0=False,
+        backend="cpp",
+        device="gpu",
     )
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-    # run the simulation
-    sensor_data = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
     sensor_data = sensor_data["p"]  # No transpose needed - fixed in executor
 
     # reconstruct the initial pressure

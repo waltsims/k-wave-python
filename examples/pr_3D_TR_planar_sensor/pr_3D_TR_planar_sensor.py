@@ -9,9 +9,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.reconstruction import TimeReversal
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
@@ -67,7 +65,30 @@ def main():
     sensor.mask[0, :, :] = 1  # Planar sensor along the first x-plane
     sensor.record = ["p", "p_final"]
 
-    # set the input arguments
+    # NOTE: pml_inside=False, data_cast="single" not supported in new API
+    # run the simulation
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        deepcopy(sensor),
+        pml_size=PML_size,
+        smooth_p0=False,
+        backend="cpp",
+        device="gpu",
+    )
+    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
+
+    # reset only the initial pressure source
+    source = kSource()
+
+    # create time reversal handler and run reconstruction
+    tr = TimeReversal(kgrid, medium, sensor)
+    # NOTE: TimeReversal still uses the legacy API internally — this may need updating separately
+    from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
+
     simulation_options = SimulationOptions(
         pml_inside=False,
         pml_size=PML_size,
@@ -76,16 +97,6 @@ def main():
         data_cast="single",
     )
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-    # run the simulation
-    sensor_data = kspaceFirstOrder3D(kgrid, source, deepcopy(sensor), medium, simulation_options, execution_options)
-    sensor.recorded_pressure = sensor_data["p"].T  # Store the recorded pressure data
-
-    # reset only the initial pressure source
-    source = kSource()
-
-    # create time reversal handler and run reconstruction
-    tr = TimeReversal(kgrid, medium, sensor)
     p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
 
     # --------------------

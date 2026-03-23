@@ -1,6 +1,4 @@
-import os
 from copy import deepcopy
-from tempfile import gettempdir
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,9 +8,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2DC
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.colormap import get_color_map
 from kwave.utils.conversion import cart2grid
 from kwave.utils.data import scale_SI
@@ -71,19 +67,13 @@ for source_loop in range(points):
     source.p_mask[unflatten_matlab_mask(source.p_mask, source_positions[source_loop] - 1)] = 1
 
     # run the simulation
-
-    input_filename = f"example_input_{source_loop + 1}_input.h5"
-    pathname = gettempdir()
-    input_file_full_path = os.path.join(pathname, input_filename)
-    simulation_options = SimulationOptions(save_to_disk=True, input_filename=input_filename, data_path=pathname)
-    # run the simulation
-    sensor_data = kspaceFirstOrder2DC(
-        medium=medium,
-        kgrid=kgrid,
-        source=deepcopy(source),
-        sensor=deepcopy(sensor),
-        simulation_options=simulation_options,
-        execution_options=SimulationExecutionOptions(),
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        deepcopy(source),
+        deepcopy(sensor),
+        backend="cpp",
+        device="cpu",
     )
     single_element_data[:, source_loop] = sensor_data["p"].sum(axis=1)
 

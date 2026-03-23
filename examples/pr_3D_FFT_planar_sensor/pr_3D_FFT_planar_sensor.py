@@ -7,10 +7,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.kspacePlaneRecon import kspacePlaneRecon
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
 from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
@@ -55,13 +53,18 @@ def main():
     sensor_mask[0] = 1
     sensor.mask = sensor_mask
 
-    # set the input arguments
-    simulation_options = SimulationOptions(save_to_disk=True, pml_size=PML_size, pml_inside=False, smooth_p0=False, data_cast="single")
-
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
+    # NOTE: pml_inside=False, data_cast="single" not supported in new API
     # run the simulation
-    sensor_data = kspaceFirstOrder3D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        sensor,
+        pml_size=PML_size,
+        smooth_p0=False,
+        backend="cpp",
+        device="gpu",
+    )
     sensor_data = sensor_data["p"].T
 
     # reshape sensor data to y, z, t

@@ -6,9 +6,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3DC
-from kwave.kWaveSimulation import SimulationOptions
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.colormap import get_color_map
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.plot import voxel_plot
@@ -74,17 +72,15 @@ def main():
     sensor = kSensor(sensor_mask, record=["p_max"])
 
     # SIMULATION
-    simulation_options = SimulationOptions(
-        pml_auto=True,
-        pml_inside=False,
-        save_to_disk=True,
-        data_cast="single",
-    )
-
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-    sensor_data = kspaceFirstOrder3DC(
-        kgrid=kgrid, medium=medium, source=source, sensor=sensor, simulation_options=simulation_options, execution_options=execution_options
+    # NOTE: pml_inside=False, data_cast="single" not supported in new API
+    sensor_data = kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        sensor,
+        pml_size="auto",
+        backend="cpp",
+        device="gpu",
     )
 
     p_max = np.reshape(sensor_data["p_max"], (Nx, Nz), order="F")

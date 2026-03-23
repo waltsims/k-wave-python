@@ -1,21 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
-from kwave.kWaveSimulation import SimulationOptions
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
 from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import spect
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
-
-# simulation settings
-DATA_CAST = "single"
 
 # define the grid
 PML_X_SIZE = 20
@@ -81,22 +75,15 @@ sensor = kSensor(sensor_mask)
 sensor.record = ["p"]
 
 # SIMULATION
-simulation_options = SimulationOptions(
-    pml_inside=False,
-    pml_size=Vector([PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE]),
-    data_cast=DATA_CAST,
-    save_to_disk=True,
-)
-
-execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-
-sensor_data = kspaceFirstOrder3D(
-    medium=medium,
-    kgrid=kgrid,
-    source=not_transducer,
-    sensor=sensor,
-    simulation_options=simulation_options,
-    execution_options=execution_options,
+# NOTE: pml_inside=False not supported in new API
+sensor_data = kspaceFirstOrder(
+    kgrid,
+    medium,
+    not_transducer,
+    sensor,
+    backend="cpp",
+    device="gpu",
+    pml_size=(PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE),
 )
 
 padded_input_signal = np.concatenate((input_signal, np.zeros((1, 2 * np.shape(input_signal)[1]))), axis=1)

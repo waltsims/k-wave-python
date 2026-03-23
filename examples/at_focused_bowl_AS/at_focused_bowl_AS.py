@@ -8,9 +8,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrderAS import kspaceFirstOrderASC
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions, SimulationType
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import extract_amp_phase
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.mapgen import focused_bowl_oneil
@@ -131,30 +129,20 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 # SIMULATION
 # --------------------
 
-DATA_CAST = "single"
-
-simulation_options = SimulationOptions(
-    simulation_type=SimulationType.AXISYMMETRIC,
-    data_cast=DATA_CAST,
-    data_recast=False,
-    save_to_disk=True,
-    save_to_disk_exit=False,
-    pml_inside=False,
-)
-
-execution_options = SimulationExecutionOptions(is_gpu_simulation=False, delete_data=False, verbose_level=2)
+# NOTE: pml_inside=False, data_cast="single" not supported in new API
+# NOTE: simulation_type=SimulationType.AXISYMMETRIC is handled automatically by the new API
 
 # =========================================================================
 # RUN THE SIMULATION
 # =========================================================================
 
-sensor_data = kspaceFirstOrderASC(
-    medium=deepcopy(medium),
-    kgrid=deepcopy(kgrid),
-    source=deepcopy(source),
-    sensor=deepcopy(sensor),
-    simulation_options=simulation_options,
-    execution_options=execution_options,
+sensor_data = kspaceFirstOrder(
+    deepcopy(kgrid),
+    deepcopy(medium),
+    deepcopy(source),
+    deepcopy(sensor),
+    backend="cpp",
+    device="cpu",
 )
 
 # extract amplitude from the sensor data

@@ -8,10 +8,8 @@ from examples.us_bmode_linear_transducer.example_utils import download_if_does_n
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.ktransducer import NotATransducer, kWaveTransducerSimple
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
 from kwave.reconstruction.beamform import envelope_detection
 from kwave.reconstruction.tools import log_compression
 from kwave.utils.conversion import db2neper
@@ -24,7 +22,6 @@ PHANTOM_DATA_GDRIVE_ID = "1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4"
 PHANTOM_DATA_PATH = "phantom_data.mat"
 
 # simulation settings
-DATA_CAST = "single"
 RUN_SIMULATION = False
 
 pml_size_points = Vector([20, 10, 10])  # [grid points]
@@ -99,27 +96,17 @@ for scan_line_index in range(0, number_scan_lines):
     medium.sound_speed = sound_speed_map[:, medium_position : medium_position + grid_size_points.y, :]
     medium.density = density_map[:, medium_position : medium_position + grid_size_points.y, :]
 
-    # set the input settings
-    input_filename = f"example_input_{scan_line_index}.h5"
-    # set the input settings
-    simulation_options = SimulationOptions(
-        pml_inside=False,
-        pml_size=pml_size_points,
-        data_cast=DATA_CAST,
-        data_recast=True,
-        save_to_disk=True,
-        input_filename=input_filename,
-        save_to_disk_exit=False,
-    )
     # run the simulation
     if RUN_SIMULATION:
-        sensor_data = kspaceFirstOrder3D(
-            medium=medium,
-            kgrid=kgrid,
-            source=not_transducer,
-            sensor=not_transducer,
-            simulation_options=simulation_options,
-            execution_options=SimulationExecutionOptions(is_gpu_simulation=True),
+        # NOTE: pml_inside=False not supported in new API
+        sensor_data = kspaceFirstOrder(
+            kgrid,
+            medium,
+            not_transducer,
+            not_transducer,
+            backend="cpp",
+            device="gpu",
+            pml_size=(pml_size_points.x, pml_size_points.y, pml_size_points.z),
         )
 
         scan_lines[scan_line_index, :] = not_transducer.scan_line(not_transducer.combine_sensor_data(sensor_data["p"].T))

@@ -7,9 +7,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.colormap import get_color_map
 from kwave.utils.conversion import cart2grid
 from kwave.utils.kwave_array import kWaveArray
@@ -54,13 +52,8 @@ def main():
     logical_p0 = source.p0.astype(bool)
     sensor = kSensor()
     sensor.mask = element_pos
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        data_cast="single",
-    )
-
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
-    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    # NOTE: data_cast="single" not supported in new API
+    output = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
     # Reorder the sensor data returned by k-Wave to match the order of the elements in the array
     _, _, reorder_index = cart2grid(kgrid, element_pos)
     sensor_data_point = reorder_binary_sensor_data(output["p"].T, reorder_index=reorder_index)
@@ -68,7 +61,7 @@ def main():
     # assign binary mask from karray to the source mask
     sensor.mask = karray.get_array_binary_mask(kgrid)
 
-    output = kspaceFirstOrder2D(kgrid, source, sensor, medium, simulation_options, execution_options)
+    output = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
     sensor_data = output["p"].T
     combined_sensor_data = karray.combine_sensor_data(kgrid, sensor_data)
 
@@ -76,8 +69,8 @@ def main():
     # VISUALIZATION
     # =========================================================================
 
-    # create pml mask (reuse default size of 20 grid points from simulation_options)
-    pml_size = simulation_options.pml_x_size  # 20 [grid_points]
+    # create pml mask (default size of 20 grid points)
+    pml_size = 20  # [grid_points]
     pml_mask = np.zeros((N.x, N.y), dtype=bool)
     pml_mask[:pml_size, :] = 1
     pml_mask[:, :pml_size] = 1

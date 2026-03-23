@@ -8,9 +8,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspace_first_order_2d_gpu
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.colormap import get_color_map
 from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.signals import tone_burst
@@ -87,11 +85,7 @@ def main():
     # source signal for each grid point that forms part of the source)
     source_p = karray.get_distributed_source_signal(kgrid, source_signal)
 
-    simulation_options = SimulationOptions(
-        save_to_disk=True,
-        data_cast="single",
-    )
-    execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
+    # NOTE: data_cast="single" not supported in new API
     # run k-Wave simulation (no sensor is used for this example)
     # TODO: I would say proper behaviour would be to return the entire pressure field if sensor is None
     sensor = kSensor()
@@ -101,7 +95,7 @@ def main():
     source.p_mask = source_p_mask
     source.p = source_p
 
-    p = kspace_first_order_2d_gpu(kgrid, source, sensor, medium, simulation_options, execution_options)
+    p = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
 
     p_field = np.reshape(p["p"], (kgrid.Nt, Nx, Ny))
     p_field = np.transpose(p_field, (0, 2, 1))

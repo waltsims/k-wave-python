@@ -6,10 +6,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-from kwave.options.simulation_execution_options import SimulationExecutionOptions
-from kwave.options.simulation_options import SimulationOptions
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.data import scale_SI
 from kwave.utils.mapgen import make_ball, make_disc
 
@@ -34,42 +31,6 @@ source_sensor_distance: int = 10  # [grid points]
 # time array
 dt: float = 2e-9  # [s]
 t_end: float = 300e-9  # [s]
-
-# # create the medium
-# medium1 = kWaveMedium(sound_speed=sound_speed)
-
-# # create the computational grid
-# kgrid1 = kWaveGrid([Nx], [dx])
-
-# # create the time array
-# kgrid1.setTime(np.round(t_end / dt), dt)
-
-# # create initial pressure distribution
-# source1 = kSource()
-# source1.p0[Nx//2 - source_radius:Nx//2 + source_radius] = 1.0
-
-# # define a single sensor point
-# sensor1 = kSensor()
-# sensor1.mask = np.zeros((Nx,), dtype=bool)
-# sensor1.mask[Nx // 2 + source_sensor_distance] = True
-
-# simulation_options1 = SimulationOptions(
-#     data_cast='single',
-#     save_to_disk=True)
-
-# execution_options1 = SimulationExecutionOptions(
-#     is_gpu_simulation=True,
-#     delete_data=False,
-#     verbose_level=2)
-
-# # run the simulation
-# sensor_data_1D = kspaceFirstOrder1D(
-#     medium=medium1,
-#     kgrid=kgrid1,
-#     source=source1,
-#     sensor=sensor1,
-#     simulation_options=simulation_options1,
-#     execution_options=execution_options1)
 
 #######
 
@@ -98,18 +59,15 @@ sensor2.record = ["p"]
 source2 = kSource()
 source2.p0 = make_disc(Vector([Nx, Nx]), Vector([Nx // 2, Nx // 2]), source_radius, plot_disc=False)
 
-simulation_options2 = SimulationOptions(data_cast="single", save_to_disk=True)
-
-execution_options2 = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False, verbose_level=2)
-
+# NOTE: data_cast="single" not supported in new API
 # run the simulation
-sensor_data_2D = kspaceFirstOrder2D(
-    medium=medium2,
-    kgrid=kgrid2,
-    source=source2,
-    sensor=sensor2,
-    simulation_options=simulation_options2,
-    execution_options=execution_options2,
+sensor_data_2D = kspaceFirstOrder(
+    kgrid2,
+    medium2,
+    source2,
+    sensor2,
+    backend="cpp",
+    device="gpu",
 )
 
 ############
@@ -139,18 +97,15 @@ sensor3.record = ["p"]
 source3 = kSource()
 source3.p0 = make_ball(Vector([Nx, Nx, Nx]), Vector([Nx // 2, Nx // 2, Nx // 2]), source_radius)
 
-simulation_options3 = SimulationOptions(data_cast="single", save_to_disk=True)
-
-execution_options3 = SimulationExecutionOptions(is_gpu_simulation=True, delete_data=False, verbose_level=2)
-
+# NOTE: data_cast="single" not supported in new API
 # run the simulation
-sensor_data_3D = kspaceFirstOrder3D(
-    medium=medium3,
-    kgrid=kgrid3,
-    source=source3,
-    sensor=sensor3,
-    simulation_options=simulation_options3,
-    execution_options=execution_options3,
+sensor_data_3D = kspaceFirstOrder(
+    kgrid3,
+    medium3,
+    source3,
+    sensor3,
+    backend="cpp",
+    device="gpu",
 )
 
 # plot the simulations
