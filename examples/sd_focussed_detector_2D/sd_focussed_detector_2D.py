@@ -1,8 +1,6 @@
 # # Focussed Detector In 2D Example
 # This example shows how k-Wave-python can be used to model the output of a focused semicircular detector, where the directionality arises from spatially averaging across the detector surface. Unlike the original example in k-Wave, this example does not visualize the simulation, as this functionality is not intrinsically supported by the accelerated binaries.
 
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -46,7 +44,7 @@ source.p0 = 2 * make_disc(grid_size, grid_size / 2, 4)
 sensor_data1 = kspaceFirstOrder(
     kgrid,
     medium,
-    deepcopy(source),
+    source,
     sensor,
     backend="cpp",
     device="cpu",
@@ -65,7 +63,7 @@ source.p0 = 2 * make_disc(grid_size, grid_size / 2 + [0, 20], 4)
 sensor_data2 = kspaceFirstOrder(
     kgrid,
     medium,
-    deepcopy(source),
+    source,
     sensor,
     backend="cpp",
     device="cpu",

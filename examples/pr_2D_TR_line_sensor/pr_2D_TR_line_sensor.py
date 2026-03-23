@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -75,7 +73,7 @@ def main():
         kgrid,
         medium,
         source,
-        deepcopy(sensor),
+        sensor,
         pml_size=PML_size,
         smooth_p0=False,
         backend="cpp",

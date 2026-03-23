@@ -10,8 +10,6 @@ exact in the radial direction.
 and Applications. New York: Acoustical Society of America, 1989.
 """
 
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -150,7 +148,7 @@ sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
 sensor_data = kspaceFirstOrder(
     kgrid,
     medium,
-    deepcopy(source),
+    source,
     sensor,
     pml_size="auto",
     backend="cpp",

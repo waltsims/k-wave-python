@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -136,10 +134,10 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 
 # NOTE: pml_inside=False not supported in new API
 sensor_data = kspaceFirstOrder(
-    deepcopy(kgrid),
-    deepcopy(medium),
-    deepcopy(source),
-    deepcopy(sensor),
+    kgrid,
+    medium,
+    source,
+    sensor,
     pml_size="auto",
     backend="cpp",
     device="gpu",

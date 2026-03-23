@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import numpy as np
 import scipy.io
 from matplotlib import pyplot as plt
@@ -128,7 +126,7 @@ if RUN_SIMULATION:
         # NOTE: pml_inside=False not supported in new API
         sensor_data = kspaceFirstOrder(
             kgrid,
-            deepcopy(medium),
+            medium,
             not_transducer,
             not_transducer,
             backend="cpp",

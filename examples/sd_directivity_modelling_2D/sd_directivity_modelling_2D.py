@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -70,8 +68,8 @@ for source_loop in range(points):
     sensor_data = kspaceFirstOrder(
         kgrid,
         medium,
-        deepcopy(source),
-        deepcopy(sensor),
+        source,
+        sensor,
         backend="cpp",
         device="cpu",
     )

@@ -1,8 +1,6 @@
 # Focussed Detector In 3D Example
 # This example shows how k-Wave can be used to model the output of a focussed bowl detector where the directionality arises from spatially averaging across the detector surface.
 
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -56,8 +54,8 @@ source.p_mask = source1
 sensor_data1 = kspaceFirstOrder(
     kgrid,
     medium,
-    deepcopy(source),
-    deepcopy(sensor),
+    source,
+    sensor,
     backend="cpp",
     device="cpu",
     pml_size=10,
