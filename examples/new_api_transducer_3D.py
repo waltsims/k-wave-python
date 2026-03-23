@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 3D Transducer Simulation (New API)
+# Demonstrates 3D wave propagation with the unified kspaceFirstOrder() function.
+
+# %%
 """
 3D simulation using the new unified API.
 
@@ -14,6 +19,7 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
+# %% Setup and run
 # 3D grid for demonstration
 grid_size = Vector([64, 64, 64])
 grid_spacing = Vector([0.1e-3, 0.1e-3, 0.1e-3])

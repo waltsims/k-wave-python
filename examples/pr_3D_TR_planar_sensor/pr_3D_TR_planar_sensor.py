@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 3D Time Reversal Reconstruction For A Planar Sensor Example
+# Reconstruct a 3D photoacoustic wave-field using time reversal with a planar sensor array.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -13,16 +18,8 @@ from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
 
-# 3D Time Reversal Reconstruction For A Planar Sensor Example
 
-# This example demonstrates the use of k-Wave for the reconstruction
-# of a three-dimensional photoacoustic wave-field recorded over a planar
-# array of sensor elements.  The sensor data is simulated and then
-# time-reversed using kspaceFirstOrder3D. It builds on the 3D FFT
-# Reconstruction For A Planar Sensor and 2D Time Reversal Reconstruction
-# For A Line Sensor examples.
-
-
+# %%
 def main():
     # --------------------
     # SIMULATION
@@ -63,6 +60,7 @@ def main():
     sensor.mask[0, :, :] = 1  # Planar sensor along the first x-plane
     sensor.record = ["p", "p_final"]
 
+    # %%
     # NOTE: pml_inside=False, data_cast="single" not supported in new API
     # run the simulation
     sensor_data = kspaceFirstOrder(
@@ -97,6 +95,7 @@ def main():
     execution_options = SimulationExecutionOptions(is_gpu_simulation=True)
     p0_recon = tr(kspaceFirstOrder3D, simulation_options, execution_options)
 
+    # %%
     # --------------------
     # VISUALIZATION
     # --------------------
@@ -219,5 +218,6 @@ def main():
     plt.show()
 
 
+# %%
 if __name__ == "__main__":
     main()

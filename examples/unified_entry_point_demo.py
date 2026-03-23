@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Unified Entry Point Demo
+# Demonstrates the new single-function kspaceFirstOrder() API across backends and PML options.
+
+# %%
 """
 Unified Entry Point Demo — kspaceFirstOrder()
 
@@ -13,9 +18,7 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
-# ============================================================
-# Setup (same for all backends)
-# ============================================================
+# %% Common setup
 grid_size = Vector([128, 128])
 kgrid = kWaveGrid(grid_size, Vector([0.1e-3, 0.1e-3]))
 kgrid.makeTime(1500)
@@ -29,30 +32,22 @@ source.p0 = p0
 
 sensor = kSensor(mask=np.ones((128, 128), dtype=bool))
 
-# ============================================================
-# Example 1: Native CPU (default)
-# ============================================================
+# %% Example 1: Native CPU (default)
 print("Running native CPU simulation...")
 result = kspaceFirstOrder(kgrid, medium, source, sensor)
 print(f"  Sensor data: {result['p'].shape}")
 
-# ============================================================
-# Example 2: Custom PML
-# ============================================================
+# %% Example 2: Custom PML
 print("\nRunning with custom PML (10, 15)...")
 result = kspaceFirstOrder(kgrid, medium, source, sensor, pml_size=(10, 15))
 print(f"  Sensor data: {result['p'].shape}")
 
-# ============================================================
-# Example 3: Auto PML
-# ============================================================
+# %% Example 3: Auto PML
 print("\nRunning with auto PML...")
 result = kspaceFirstOrder(kgrid, medium, source, sensor, pml_size="auto")
 print(f"  Sensor data: {result['p'].shape}")
 
-# ============================================================
-# Example 4: C++ save_only (writes HDF5 for cluster submission)
-# ============================================================
+# %% Example 4: C++ save_only (writes HDF5 for cluster submission)
 import tempfile
 
 print("\nSaving HDF5 for C++ binary...")
@@ -67,9 +62,7 @@ result = kspaceFirstOrder(
 )
 print(f"  Input file: {result['input_file']}")
 
-# ============================================================
-# Example 5: Migrating from legacy options
-# ============================================================
+# %% Example 5: Migrating from legacy options
 print("\nMigrating from legacy options...")
 from kwave.compat import options_to_kwargs
 from kwave.options.simulation_options import SimulationOptions

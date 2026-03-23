@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Circular Piston Transducer in 3D
+# Simulating a circular piston transducer and comparing on-axis pressure with analytical solution.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,6 +17,7 @@ from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.math import round_even
 from kwave.utils.signals import create_cw_signals
 
+# %% Parameters
 # material values
 c0: float = 1500.0  # sound speed [m/s]
 rho0: float = 1000.0  # density [kg/m^3]
@@ -36,14 +42,7 @@ upsampling_rate: int = 10  # density of integration points relative to grid
 
 verbose: bool = False
 
-# =========================================================================
-# RUN SIMULATION
-# =========================================================================
-
-# --------------------
-# GRID
-# --------------------
-
+# %% Grid setup
 # calculate the grid spacing based on the PPW and F0
 dx: float = c0 / (ppw * source_f0)  # [m]
 
@@ -74,6 +73,7 @@ if verbose:
     print("PPW = " + str(c0 / (dx * source_f0)))
     print("CFL = " + str(c0 * dt / dx))
 
+# %% Source, medium, sensor, and simulation
 # --------------------
 # SOURCE
 # --------------------
@@ -146,10 +146,7 @@ amp_on_axis = amp[:, Ny // 2]
 x_vec = kgrid.x_vec[1:, :] - kgrid.x_vec[0]
 y_vec = kgrid.y_vec
 
-# =========================================================================
-# ANALYTICAL SOLUTION
-# =========================================================================
-
+# %% Analytical solution
 # calculate the wavenumber
 k: float = 2.0 * np.pi * source_f0 / c0
 
@@ -171,10 +168,8 @@ p_ref_kw = source_amp * np.abs(2.0 * np.sin((k * r - k * x_vec) / 2.0))
 # calculate error
 L2_error = 100 * np.linalg.norm(p_ref_kw - amp_on_axis, ord=2)
 Linf_error = 100 * np.linalg.norm(p_ref_kw - amp_on_axis, ord=np.inf)
-# =========================================================================
-# VISUALISATION
-# =========================================================================
 
+# %% Visualization
 # plot the pressure along the focal axis of the piston
 fig1, ax1 = plt.subplots(1, 1)
 ax1.plot(1e3 * x_ref, 1e-6 * p_ref, "k-", label="Exact")

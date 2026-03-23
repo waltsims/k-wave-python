@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Ultrasound B-Mode Linear Transducer Example
+# Simulate and process B-mode ultrasound images using a linear transducer array.
+
+# %%
 import logging
 
 import matplotlib.pyplot as plt
@@ -17,6 +22,7 @@ from kwave.utils.dotdictionary import dotdict
 from kwave.utils.filters import gaussian_filter
 from kwave.utils.signals import get_win, tone_burst
 
+# %%
 SENSOR_DATA_GDRIVE_ID = "1lGFTifpOrzBYT4Bl_ccLu_Kx0IDxM0Lv"
 PHANTOM_DATA_GDRIVE_ID = "1ZfSdJPe8nufZHz0U9IuwHR4chaOGAWO4"
 PHANTOM_DATA_PATH = "phantom_data.mat"
@@ -50,6 +56,7 @@ medium = kWaveMedium(
     BonA=6,
 )
 
+# %%
 transducer = dotdict()
 transducer.number_elements = 32  # total number of transducer elements
 transducer.element_width = 2  # width of each element [grid points/voxels]
@@ -77,7 +84,7 @@ not_transducer.input_signal = input_signal
 
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-
+# %%
 logging.log(logging.INFO, "Fetching phantom data...")
 download_if_does_not_exist(PHANTOM_DATA_GDRIVE_ID, PHANTOM_DATA_PATH)
 
@@ -129,7 +136,7 @@ else:
 
 scan_lines = simulation_data
 
-
+# %%
 # ## PROCESS THE RESULTS
 # ### Remove Input Signal
 #
@@ -205,9 +212,8 @@ scan_lines_harm = log_compression(scan_lines_harm, compression_ratio, True)
 scan_lines_fund_log_ex = scan_lines_fund[len(scan_lines_fund) // 2, :]
 # scan_lines_harm_log_ex = scan_lines_harm[len(scan_lines_harm) // 2, :]
 
-
+# %%
 # ### Visualization
-#
 
 
 # Set the desired size of the image
@@ -245,10 +251,7 @@ ax = plt.gca()
 ax.set_ylim(40, 5)
 plt.tight_layout()
 
-
-# In[ ]:
-
-
+# %%
 # Creating a dictionary with the step labels as keys
 processing_steps = {
     "1. Beamformed Signal": scan_lines_no_input,

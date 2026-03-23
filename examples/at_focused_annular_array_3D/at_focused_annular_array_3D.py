@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Focused Annular Array in 3D
+# Simulating a focused annular array transducer and comparing with analytical O'Neil solution.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,6 +18,7 @@ from kwave.utils.mapgen import focused_annulus_oneil
 from kwave.utils.math import round_even
 from kwave.utils.signals import create_cw_signals
 
+# %% Parameters
 verbose: bool = False
 
 # medium parameters
@@ -43,14 +49,7 @@ bli_tolerance: float = 0.01  # tolerance for truncation of the off-grid source p
 upsampling_rate: int = 10  # density of integration points relative to grid
 verbose_level: int = 0  # verbosity of k-wave executable
 
-# =========================================================================
-# RUN SIMULATION
-# =========================================================================
-
-# --------------------
-# GRID
-# --------------------
-
+# %% Grid setup
 # calculate the grid spacing based on the points per wavelength and the frequency
 dx: float = c0 / (ppw * source_f0)  # [m]
 
@@ -79,6 +78,7 @@ if verbose:
     print("PPW = " + str(c0 / (dx * source_f0)))
     print("CFL = " + str(c0 * dt / dx))
 
+# %% Source, medium, sensor, and simulation
 # --------------------
 # SOURCE
 # --------------------
@@ -156,18 +156,12 @@ amp_on_axis = amp[:, Ny // 2]
 x_vec = kgrid.x_vec[source_x_offset + 1 :, :] - kgrid.x_vec[source_x_offset]
 y_vec = kgrid.y_vec
 
-# =========================================================================
-# ANALYTICAL SOLUTION
-# =========================================================================
-
+# %% Analytical solution
 p_axial = focused_annulus_oneil(
     source_roc, np.asarray(diameters).T, source_amp / (c0 * rho0), source_phase, source_f0, c0, rho0, np.squeeze(x_vec)
 )
 
-# =========================================================================
-# VISUALISATION
-# =========================================================================
-
+# %% Visualization
 # plot the pressure along the focal axis of the piston
 fig1, ax1 = plt.subplots(1, 1)
 ax1.plot(1e3 * x_vec, 1e-6 * p_axial, "k-", label="Exact")

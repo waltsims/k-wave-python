@@ -1,3 +1,7 @@
+# %% [markdown]
+# # Checkpointing Example
+# Demonstrates how to use k-Wave's checkpointing feature to resume a simulation from a saved state.
+
 from copy import copy
 from pathlib import Path
 from tempfile import TemporaryDirectory

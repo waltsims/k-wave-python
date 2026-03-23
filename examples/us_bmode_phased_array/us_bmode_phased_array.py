@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Ultrasound B-Mode Phased Array Example
+# Simulate and process B-mode ultrasound images using a phased array transducer with steering.
+
+# %%
 import numpy as np
 import scipy.io
 from matplotlib import pyplot as plt
@@ -15,6 +20,7 @@ from kwave.utils.filters import gaussian_filter
 from kwave.utils.mapgen import make_ball
 from kwave.utils.signals import get_win, tone_burst
 
+# %%
 # simulation settings
 RUN_SIMULATION = True
 
@@ -39,10 +45,7 @@ kgrid = kWaveGrid(grid_size_points, grid_spacing_meters)
 t_end = (grid_size_points.x * grid_spacing_meters.x) * 2.2 / c0  # [s]
 kgrid.makeTime(c0, t_end=t_end)
 
-
-# In[ ]:
-
-
+# %%
 source_strength = 1e6  # [Pa]
 tone_burst_freq = 1e6  # [Hz]
 tone_burst_cycles = 4
@@ -78,7 +81,7 @@ not_transducer.input_signal = input_signal
 
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-
+# %%
 # Define a random distribution of scatterers for the medium
 background_map_mean = 1
 background_map_std = 0.008
@@ -108,7 +111,7 @@ density_map[scattering_region1] = scattering_rho0[scattering_region1]
 medium.sound_speed = sound_speed_map
 medium.density = density_map
 
-
+# %%
 # Range of steering angles to test
 steering_angles = np.arange(-32, 33, 2)
 
@@ -140,7 +143,7 @@ if RUN_SIMULATION:
 else:
     scan_lines = scipy.io.loadmat("example_us_phased_array_scan_lines")["scan_lines"]
 
-
+# %%
 # PROCESS THE RESULTS
 # Remove Input Signal
 # Trim the delay offset from the scan line data
@@ -188,14 +191,11 @@ scan_lines_harm = envelope_detection(scan_lines_harm)
 
 # Log Compression
 
-# In[ ]:
-
-
 compression_ratio = 3
 scan_lines_fund = log_compression(scan_lines_fund, compression_ratio, True)
 scan_lines_harm = log_compression(scan_lines_harm, compression_ratio, True)
 
-
+# %%
 # Visualization
 image_size = [kgrid.Nx * kgrid.dx, kgrid.Ny * kgrid.dy]
 image_res = [256, 256]

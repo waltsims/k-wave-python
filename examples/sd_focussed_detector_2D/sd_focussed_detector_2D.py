@@ -1,6 +1,8 @@
+# %% [markdown]
 # # Focussed Detector In 2D Example
-# This example shows how k-Wave-python can be used to model the output of a focused semicircular detector, where the directionality arises from spatially averaging across the detector surface. Unlike the original example in k-Wave, this example does not visualize the simulation, as this functionality is not intrinsically supported by the accelerated binaries.
+# Model the output of a focused semicircular detector with spatial averaging across its surface.
 
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,9 +15,7 @@ from kwave.ktransducer import kSensor
 from kwave.utils.data import scale_SI
 from kwave.utils.mapgen import make_circle, make_disc
 
-# In[3]:
-
-
+# %%
 # create the computational grid
 grid_size = Vector([180, 180])  # [grid points]
 grid_spacing = Vector([0.1e-3, 0.1e-3])  # [m]
@@ -34,7 +34,7 @@ sensor = kSensor(sensor_mask)
 t_end = 11e-6  # [s]
 _ = kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
-
+# %%
 ## Run simulation with first source
 # place a disc-shaped source near the focus of the detector
 source = kSource()
@@ -53,9 +53,8 @@ sensor_data1 = kspaceFirstOrder(
 
 sensor_data1["p"].shape
 
-
+# %%
 ## Run simulation with second source
-
 
 # place a disc-shaped source horizontally shifted from the focus of the detector
 source.p0 = 2 * make_disc(grid_size, grid_size / 2 + [0, 20], 4)
@@ -69,9 +68,8 @@ sensor_data2 = kspaceFirstOrder(
     device="cpu",
 )
 
-
+# %%
 ## Visualize recorded data
-
 
 sensor_output1 = np.sum(sensor_data1["p"], axis=1) / np.sum(sensor.mask)
 sensor_output2 = np.sum(sensor_data2["p"], axis=1) / np.sum(sensor.mask)

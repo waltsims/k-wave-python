@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Photoacoustic Waveforms
+# Comparing photoacoustic waveforms from 2D disc and 3D ball sources.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -10,6 +15,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.data import scale_SI
 from kwave.utils.mapgen import make_ball, make_disc
 
+# %% Parameters
 # number of grid points in the x (row) direction
 Nx: int = 64
 
@@ -32,8 +38,7 @@ source_sensor_distance: int = 10  # [grid points]
 dt: float = 2e-9  # [s]
 t_end: float = 300e-9  # [s]
 
-#######
-
+# %% 2D simulation
 # medium
 medium2 = kWaveMedium(sound_speed=1500)
 # create the k-space grid
@@ -70,8 +75,7 @@ sensor_data_2D = kspaceFirstOrder(
     device="gpu",
 )
 
-############
-
+# %% 3D simulation
 # medium
 medium3 = kWaveMedium(sound_speed=1500)
 
@@ -108,6 +112,7 @@ sensor_data_3D = kspaceFirstOrder(
     device="gpu",
 )
 
+# %% Visualization
 # plot the simulations
 t_sc, t_scale, t_prefix, _ = scale_SI(t_end)
 _, ax1 = plt.subplots()

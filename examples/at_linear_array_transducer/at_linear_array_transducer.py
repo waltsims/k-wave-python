@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Linear Array Transducer
+# Simulating a focused linear array transducer in 3D with time-delayed elements.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,6 +19,7 @@ from kwave.utils.signals import tone_burst
 
 
 def main():
+    # %% Parameters and grid
     c0 = 1500
     rho0 = 1000
     source_f0 = 1e6
@@ -41,7 +47,7 @@ def main():
     kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dx, dx])
     kgrid.makeTime(c0, cfl, t_end)
 
-    # SOURCE
+    # %% Source
     if element_num % 2 != 0:
         ids = np.arange(1, element_num + 1) - np.ceil(element_num / 2)
     else:
@@ -63,6 +69,7 @@ def main():
     voxel_plot(np.single(source.p_mask))
     source.p = karray.get_distributed_source_signal(kgrid, source_sig)
 
+    # %% Medium, sensor, and simulation
     # MEDIUM
     medium = kWaveMedium(sound_speed=c0, density=rho0)
 
@@ -85,7 +92,7 @@ def main():
 
     p_max = np.reshape(sensor_data["p_max"], (Nx, Nz), order="F")
 
-    # VISUALISATION
+    # %% Visualization
     plt.figure()
     plt.imshow(
         1e-6 * p_max,

@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Sensor Directivity Modelling in 2D
+# Model the directional response of a finite-sized sensor element in 2D.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,6 +19,7 @@ from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_cart_circle
 from kwave.utils.matlab import ind2sub, matlab_find, unflatten_matlab_mask
 
+# %%
 grid_size_points = Vector([128, 128])  # [grid points]
 grid_size_meters = Vector([50e-3, 50e-3])  # [m]
 grid_spacing_meters = grid_size_meters / grid_size_points  # [m]
@@ -54,6 +60,7 @@ source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 # filter the source to remove high frequencies not supported by the grid
 source.p = filter_time_series(kgrid, medium, source.p)
 
+# %%
 # pre-allocate array for storing the output time series
 single_element_data = np.zeros((Nt, points))  # noqa: F841
 
@@ -75,6 +82,7 @@ for source_loop in range(points):
     )
     single_element_data[:, source_loop] = sensor_data["p"].sum(axis=1)
 
+# %%
 plt.figure()
 plt.imshow(
     circle + sensor.mask,

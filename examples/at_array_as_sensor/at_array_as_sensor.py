@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Array As Sensor
+# Using a kWaveArray of arc elements as a sensor for photoacoustic imaging.
+
+# %%
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +21,7 @@ from kwave.utils.signals import reorder_binary_sensor_data
 
 
 def main():
+    # %% Define array and grid
     # create empty array
     karray = kWaveArray()
 
@@ -44,6 +50,7 @@ def main():
     # time array
     kgrid.makeTime(medium.sound_speed)
 
+    # %% Source and sensor
     source = kSource()
     x_offset = 20  # [pixels]
     # make a small disc in the top left of the domain
@@ -52,6 +59,8 @@ def main():
     logical_p0 = source.p0.astype(bool)
     sensor = kSensor()
     sensor.mask = element_pos
+
+    # %% Run simulations
     # NOTE: data_cast="single" not supported in new API
     output = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp", device="gpu")
     # Reorder the sensor data returned by k-Wave to match the order of the elements in the array
@@ -65,10 +74,7 @@ def main():
     sensor_data = output["p"].T
     combined_sensor_data = karray.combine_sensor_data(kgrid, sensor_data)
 
-    # =========================================================================
-    # VISUALIZATION
-    # =========================================================================
-
+    # %% Visualization
     # create pml mask (default size of 20 grid points)
     pml_size = 20  # [grid_points]
     pml_mask = np.zeros((N.x, N.y), dtype=bool)

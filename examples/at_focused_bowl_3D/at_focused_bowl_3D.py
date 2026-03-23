@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Focused Bowl Transducer in 3D
+# Modelling a focused bowl transducer and comparing on-axis pressure with O'Neil analytical solution.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,11 +18,7 @@ from kwave.utils.mapgen import focused_bowl_oneil
 from kwave.utils.math import round_even
 from kwave.utils.signals import create_cw_signals
 
-# Modelling A Focused Bowl Transducer In 3D Example
-
-# This example models a focused bowl transducer in 3D. The on-axis pressure
-# is compared with the exact solution calculated using focused_bowl_oneil.
-
+# %% Parameters
 verbose: bool = False
 
 # medium parameters
@@ -44,14 +45,7 @@ source_x_offset: int = 20  # grid points to offset the source
 bli_tolerance: float = 0.01  # tolerance for truncation of the off-grid source points
 upsampling_rate: int = 10  # density of integration points relative to grid
 
-# =========================================================================
-# RUN SIMULATION
-# =========================================================================
-
-# --------------------
-# GRID
-# --------------------
-
+# %% Grid setup
 # calculate the grid spacing based on the PPW and F0
 dx: float = c0 / (ppw * source_f0)  # [m]
 
@@ -81,6 +75,7 @@ if verbose:
     print("PPW = " + str(c0 / (dx * source_f0)))
     print("CFL = " + str(c0 * dt / dx))
 
+# %% Source, medium, sensor, and simulation
 # --------------------
 # SOURCE
 # --------------------
@@ -158,10 +153,7 @@ amp_on_axis = amp[:, Ny // 2]
 x_vec = kgrid.x_vec[(source_x_offset + 1) : -1, :] - kgrid.x_vec[source_x_offset]
 y_vec = kgrid.y_vec
 
-# =========================================================================
-# ANALYTICAL SOLUTION
-# =========================================================================
-
+# %% Analytical solution
 # calculate the wavenumber
 knumber = 2.0 * np.pi * source_f0 / c0
 
@@ -181,10 +173,7 @@ p_ref_axial_kw, _, _ = focused_bowl_oneil(source_roc, source_diameter, Z, source
 L2_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=2)
 Linf_error = 100 * np.linalg.norm(p_ref_axial_kw - amp_on_axis, ord=np.inf)
 
-# =========================================================================
-# VISUALISATION
-# =========================================================================
-
+# %% Visualization
 # plot the pressure along the focal axis of the piston
 fig1, ax1 = plt.subplots(1, 1)
 ax1.plot(1e3 * x_ref, 1e-6 * p_ref_axial, "k-", label="Exact")

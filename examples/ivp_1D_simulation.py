@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 1D Initial Value Problem
+# Heterogeneous medium with reflections at impedance boundaries.
+
+# %%
 """
 1D Initial Value Problem — heterogeneous medium with reflections.
 
@@ -15,7 +20,7 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
-# -- Grid --
+# %% Grid and medium
 Nx = 512
 dx = 0.05e-3  # [m]
 kgrid = kWaveGrid(Vector([Nx]), Vector([dx]))
@@ -32,7 +37,7 @@ medium = kWaveMedium(sound_speed=sound_speed, density=density)
 # -- Time stepping --
 kgrid.makeTime(sound_speed, cfl=0.3)
 
-# -- Source: smooth sinusoidal pulse --
+# %% Source and sensor
 source = kSource()
 source.p0 = np.zeros(Nx)
 x0, width = 280, 100
@@ -45,12 +50,12 @@ sensor_mask[Nx // 4] = 1  # left sensor
 sensor_mask[3 * Nx // 4] = 1  # right sensor
 sensor = kSensor(mask=sensor_mask)
 
-# -- Run --
+# %% Run simulation
 result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
 
 print(f"Sensor data shape: {result['p'].shape}")  # (2, Nt)
 
-# -- Plot --
+# %% Visualization
 t_us = np.arange(kgrid.Nt) * float(kgrid.dt) * 1e6
 x_mm = np.arange(Nx) * dx * 1e3
 

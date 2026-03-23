@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Defining An Ultrasound Transducer Example
+# Define a transducer array, run a simulation, and analyze the recorded signals and spectra.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -11,6 +16,7 @@ from kwave.utils.filters import spect
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import tone_burst
 
+# %%
 # define the grid
 PML_X_SIZE = 20
 PML_Y_SIZE = 10
@@ -39,6 +45,7 @@ tone_burst_cycles = 5
 input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 input_signal = (source_strength / (medium.sound_speed * medium.density)) * input_signal
 
+# %%
 # define the transducer
 transducer = dotdict()
 transducer.number_elements = 72
@@ -66,6 +73,7 @@ not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
 voxel_plot(np.single(not_transducer.all_elements_mask))
 
+# %%
 # define sensor mask
 sensor_mask = np.zeros((Nx, Ny, Nz))
 sensor_mask[Nx // 4, Ny // 2, Nz // 2] = 1
@@ -86,6 +94,7 @@ sensor_data = kspaceFirstOrder(
     pml_size=(PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE),
 )
 
+# %%
 padded_input_signal = np.concatenate((input_signal, np.zeros((1, 2 * np.shape(input_signal)[1]))), axis=1)
 f_input, as_input, _ = spect(padded_input_signal, 1 / kgrid.dt)
 _, as_1, _ = spect(sensor_data["p"][:, 0], 1 / kgrid.dt)

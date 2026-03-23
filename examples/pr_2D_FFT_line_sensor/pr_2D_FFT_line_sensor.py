@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 2D FFT Reconstruction For A Line Sensor Example
+# Reconstruct a 2D photoacoustic wave-field from a linear array using kspaceLineRecon.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -14,15 +19,8 @@ from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 
-# 2D FFT Reconstruction For A Line Sensor Example
 
-# This example demonstrates the use of k-Wave for the reconstruction of a
-# two-dimensional photoacoustic wave-field recorded  over a linear array of
-# sensor elements  The sensor data is simulated using kspaceFirstOrder2D
-# and reconstructed using kspaceLineRecon. It builds on the Homogeneous
-# Propagation Medium and Heterogeneous Propagation Medium examples.
-
-
+# %%
 def main():
     # --------------------
     # SIMULATION
@@ -62,6 +60,7 @@ def main():
     # create the time array
     kgrid.makeTime(medium.sound_speed)
 
+    # %%
     # NOTE: pml_inside=False not supported in new API
     # run the simulation
     sensor_data = kspaceFirstOrder(
@@ -91,6 +90,7 @@ def main():
     query_points = np.stack((kgrid.x - kgrid.x.min(), kgrid.y), axis=-1)
     p_xy_rs = interp_func(query_points)
 
+    # %%
     # --------------------
     # VISUALIZATION
     # --------------------
@@ -149,5 +149,6 @@ def main():
     plt.show()
 
 
+# %%
 if __name__ == "__main__":
     main()

@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 2D Time Reversal Reconstruction For A Line Sensor Example
+# Reconstruct a 2D photoacoustic wave-field using time reversal with a linear array of sensor elements.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -15,15 +20,8 @@ from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 
-# 2D Time Reversal Reconstruction For A Line Sensor Example
 
-# This example demonstrates the use of k-Wave for the time-reversal
-# reconstruction of a two-dimensional photoacoustic wave-field recorded
-# over a linear array of sensor elements. The sensor data is simulated and
-# then time-reversed using kspaceFirstOrder2D. It builds on the 2D FFT
-# Reconstruction For A Line Sensor Example.
-
-
+# %%
 def main():
     # --------------------
     # SIMULATION
@@ -67,6 +65,8 @@ def main():
     inner_mask[0, :] = 1  # Line sensor along the first row
     sensor.mask = inner_mask
     sensor.record = ["p", "p_final"]
+
+    # %%
     # NOTE: pml_inside=False, data_cast="single" not supported in new API
     # run the simulation
     sensor_data = kspaceFirstOrder(
@@ -115,6 +115,7 @@ def main():
     query_points = np.stack((kgrid.x - kgrid.x.min(), kgrid.y), axis=-1)
     p_xy_rs = interp_func(query_points)
 
+    # %%
     # --------------------
     # VISUALIZATION
     # --------------------
@@ -186,5 +187,6 @@ def main():
     plt.show()
 
 
+# %%
 if __name__ == "__main__":
     main()

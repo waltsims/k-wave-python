@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Array As Source
+# Using a kWaveArray of arc elements as a pressure source with multiple frequencies.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
@@ -15,10 +20,7 @@ from kwave.utils.signals import tone_burst
 
 
 def main():
-    # =========================================================================
-    # DEFINE KWAVEARRAY
-    # =========================================================================
-
+    # %% Define kWaveArray
     # create empty array
     karray = kWaveArray()
 
@@ -43,10 +45,7 @@ def main():
     # elements together)
     karray.set_array_position([10e-3, 0], 10)
 
-    # =========================================================================
-    # DEFINE GRID PROPERTIES
-    # =========================================================================
-
+    # %% Grid and medium
     # grid properties
     Nx = 256
     dx = 0.5e-3
@@ -60,10 +59,7 @@ def main():
     # time array
     kgrid.makeTime(medium.sound_speed)
 
-    # =========================================================================
-    # SIMULATION
-    # =========================================================================
-
+    # %% Source and simulation
     # assign binary mask from karray to the source mask
     source_p_mask = karray.get_array_binary_mask(kgrid)
 
@@ -99,10 +95,8 @@ def main():
 
     p_field = np.reshape(p["p"], (kgrid.Nt, Nx, Ny))
     p_field = np.transpose(p_field, (0, 2, 1))
-    # =========================================================================
-    # VISUALIZATION
-    # =========================================================================
 
+    # %% Visualization
     # Normalize frames based on the maximum value over all frames
     max_value = np.max(p_field)
     normalized_frames = p_field / max_value

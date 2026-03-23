@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Focused Bowl Transducer (Axisymmetric)
+# Modelling a focused bowl transducer assuming axisymmetry, compared with O'Neil analytical solution.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,6 +18,7 @@ from kwave.utils.mapgen import focused_bowl_oneil
 from kwave.utils.math import round_even
 from kwave.utils.signals import create_cw_signals
 
+# %% Parameters
 verbose: bool = False
 
 # medium parameters
@@ -39,14 +45,7 @@ source_x_offset: int = 20  # grid points to offset the source
 bli_tolerance: float = 0.01  # tolerance for truncation of the off-grid source points
 upsampling_rate: int = 10  # density of integration points relative to grid
 
-# =========================================================================
-# RUN SIMULATION
-# =========================================================================
-
-# --------------------
-# GRID
-# --------------------
-
+# %% Grid setup
 # calculate the grid spacing based on the PPW and F0
 dx: float = c0 / (ppw * source_f0)  # [m]
 
@@ -75,6 +74,7 @@ if verbose:
     print("PPW = " + str(c0 / (dx * source_f0)))
     print("CFL = " + str(c0 * dt / dx))
 
+# %% Source, medium, sensor, and simulation
 # --------------------
 # SOURCE
 # --------------------
@@ -130,10 +130,6 @@ sensor.record_start_index = kgrid.Nt - (record_periods * ppp) + 1
 # NOTE: pml_inside=False, data_cast="single" not supported in new API
 # NOTE: simulation_type=SimulationType.AXISYMMETRIC is handled automatically by the new API
 
-# =========================================================================
-# RUN THE SIMULATION
-# =========================================================================
-
 sensor_data = kspaceFirstOrder(
     kgrid,
     medium,
@@ -156,10 +152,7 @@ amp_on_axis = amp[:, 0]
 x_vec = np.squeeze(kgrid.x_vec[(source_x_offset + 1) :, :] - kgrid.x_vec[source_x_offset])
 y_vec = kgrid.y_vec
 
-# =========================================================================
-# ANALYTICAL SOLUTION
-# =========================================================================
-
+# %% Analytical solution
 # calculate the wavenumber
 knumber = 2.0 * np.pi * source_f0 / c0
 
@@ -176,11 +169,7 @@ p_ref_axial_kw, _, _ = focused_bowl_oneil(
     source_roc, source_diameter, source_amp[0] / (c0 * rho0), source_f0, c0, rho0, axial_positions=x_vec
 )
 
-
-# =========================================================================
-# VISUALISATION
-# =========================================================================
-
+# %% Visualization
 # plot the pressure along the focal axis of the piston
 fig1, ax1 = plt.subplots(1, 1)
 ax1.plot(1e3 * x_ref, 1e-6 * p_ref_axial, "k-", label="Exact")

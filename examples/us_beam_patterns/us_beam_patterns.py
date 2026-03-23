@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
+# %% [markdown]
+# # Ultrasound Beam Patterns Example
+# Compute and visualize beam patterns from a linear transducer array in 3D.
 
-# In[ ]:
-
-
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -17,9 +16,7 @@ from kwave.utils.filters import spect
 from kwave.utils.math import find_closest
 from kwave.utils.signals import tone_burst
 
-# In[ ]:
-
-
+# %%
 # simulation settings
 # set to 'xy' or 'xz' to generate the beam pattern in different planes
 MASK_PLANE = "xy"
@@ -40,10 +37,7 @@ dz = dx
 
 kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dy, dz])
 
-
-# In[ ]:
-
-
+# %%
 # define the medium
 medium = kWaveMedium(sound_speed=1540, density=1000, alpha_coeff=0.75, alpha_power=1.5, BonA=6)
 
@@ -52,10 +46,6 @@ t_end = 45e-6  # alternatively, use np.sqrt(kgrid.x_size ** 2 + kgrid.y_size ** 
 
 kgrid.makeTime(medium.sound_speed, t_end=t_end)
 
-
-# In[ ]:
-
-
 # define the input signal
 source_strength = 1e6
 tone_burst_freq = 0.5e6
@@ -63,10 +53,7 @@ tone_burst_cycles = 5
 input_signal = tone_burst(1 / kgrid.dt, tone_burst_freq, tone_burst_cycles)
 input_signal = (source_strength / (medium.sound_speed * medium.density)) * input_signal
 
-
-# In[ ]:
-
-
+# %%
 # define the transducer
 transducer = dotdict()
 transducer.number_elements = 32
@@ -82,10 +69,6 @@ transducer_width = transducer.number_elements * transducer.element_width + (tran
 transducer.position = np.round([1, Ny / 2 - transducer_width / 2, Nz / 2 - transducer.element_length / 2])
 transducer = kWaveTransducerSimple(kgrid, **transducer)
 
-
-# In[ ]:
-
-
 not_transducer = dotdict()
 not_transducer.sound_speed = medium.sound_speed  # sound speed [m/s]
 not_transducer.focus_distance = 20e-3  # focus distance [m]
@@ -98,10 +81,7 @@ not_transducer.input_signal = input_signal
 
 not_transducer = NotATransducer(transducer, kgrid, **not_transducer)
 
-
-# In[ ]:
-
-
+# %%
 sensor_mask = np.zeros((Nx, Ny, Nz))
 
 if MASK_PLANE == "xy":
@@ -116,10 +96,6 @@ elif MASK_PLANE == "xz":
     Nj = Nz
     j_vec = kgrid.z_vec
     j_label = "z"
-
-
-# In[ ]:
-
 
 sensor = kSensor(sensor_mask)
 if USE_STATISTICS:
@@ -137,10 +113,7 @@ sensor_data = kspaceFirstOrder(
     pml_size=(PML_X_SIZE, PML_Y_SIZE, PML_Z_SIZE),
 )
 
-
-# In[ ]:
-
-
+# %%
 if USE_STATISTICS:
     fig, axes = plt.subplots(1, 2)
     fig.set_figwidth(8)
@@ -170,10 +143,7 @@ if USE_STATISTICS:
     plt.tight_layout()
     plt.show()
 
-
-# In[ ]:
-
-
+# %%
 if not USE_STATISTICS:
     sensor_data_array = np.reshape(sensor_data["p"], [kgrid.Nt, kgrid.Ny, kgrid.Nx]).transpose(2, 1, 0)
     # compute the amplitude spectrum
@@ -192,10 +162,7 @@ if not USE_STATISTICS:
     # extract the integral of the total amplitude spectrum
     beam_pattern_total = np.squeeze(np.sum(amp_spect, axis=2))
 
-
-# In[ ]:
-
-
+# %%
 if not USE_STATISTICS:
     fig, axes = plt.subplots(1, 3)
     fig.set_figwidth(8)
@@ -226,10 +193,7 @@ if not USE_STATISTICS:
     plt.tight_layout()
     plt.show()
 
-
-# In[ ]:
-
-
+# %%
 if not USE_STATISTICS:
     # Compute the directivity at each of the harmonics
     directivity_f1 = beam_pattern_f1[round(not_transducer.focus_distance / dx), :]

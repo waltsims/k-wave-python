@@ -1,3 +1,7 @@
+# %% [markdown]
+# # B-Mode Linear Transducer Utilities
+# Helper functions for downloading example data from Google Drive.
+
 import os
 
 

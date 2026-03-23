@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 3D FFT Reconstruction For A Planar Sensor Example
+# Reconstruct a 3D photoacoustic wave-field from a planar sensor array using kspacePlaneRecon.
+
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
@@ -13,15 +18,8 @@ from kwave.utils.colormap import get_color_map
 from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
 
-# 3D FFT Reconstruction For A Planar Sensor Example
 
-# This example demonstrates the use of k-Wave for the reconstruction of a
-# three-dimensional photoacoustic wave-field recorded over a planar array
-# of sensor elements. The sensor data is simulated using kspaceFirstOrder3D
-# and reconstructed using kspacePlaneRecon. It builds on the Simulations In
-# Three Dimensions and 2D FFT Reconstruction For A Line Sensor examples.
-
-
+# %%
 def main():
     # --------------------
     # SIMULATION
@@ -53,6 +51,7 @@ def main():
     sensor_mask[0] = 1
     sensor.mask = sensor_mask
 
+    # %%
     # NOTE: pml_inside=False, data_cast="single" not supported in new API
     # run the simulation
     sensor_data = kspaceFirstOrder(
@@ -98,6 +97,7 @@ def main():
     )
     p_xyz_rs = interp_func(query_points)
 
+    # %%
     # --------------------
     # VISUALIZATION
     # --------------------
@@ -204,5 +204,6 @@ def main():
     plt.show()
 
 
+# %%
 if __name__ == "__main__":
     main()

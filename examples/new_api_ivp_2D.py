@@ -1,3 +1,8 @@
+# %% [markdown]
+# # 2D Initial Value Problem (New API)
+# A disc-shaped initial pressure propagates outward in a homogeneous medium.
+
+# %%
 """
 2D Initial Value Problem using the new unified API.
 
@@ -14,6 +19,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_disc
 
+# %% Setup and run
 # Grid
 grid_size = Vector([128, 128])
 grid_spacing = Vector([0.1e-3, 0.1e-3])

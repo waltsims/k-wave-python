@@ -1,6 +1,8 @@
-# Focussed Detector In 3D Example
-# This example shows how k-Wave can be used to model the output of a focussed bowl detector where the directionality arises from spatially averaging across the detector surface.
+# %% [markdown]
+# # Focussed Detector In 3D Example
+# Model the output of a focussed bowl detector with spatial averaging across its surface.
 
+# %%
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,6 +16,7 @@ from kwave.utils.data import scale_SI
 from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_bowl
 
+# %%
 # create the computational grid
 grid_size = Vector([64, 64, 64])  # [grid points]
 grid_spacing_single = 100e-3 / grid_size.x
@@ -44,6 +47,7 @@ source_mag = 1  # [Pa]
 source.p = source_mag * np.sin(2 * np.pi * source_freq * kgrid.t_array)
 source.p = filter_time_series(kgrid, medium, source.p)
 
+# %%
 # place the first point source near the focus of the detector
 source1 = np.zeros(grid_size)
 source1[int(sphere_offset + radius), grid_size.y // 2 - 1, grid_size.z // 2 - 1] = 1
@@ -64,6 +68,7 @@ sensor_data1 = kspaceFirstOrder(
 # average the data recorded at each grid point to simulate the measured signal from a single element focused detector
 sensor_data1 = np.sum(sensor_data1["p"], axis=1)
 
+# %%
 # place the second point source off axis
 source2 = np.zeros(grid_size)
 source2[int(1 + sphere_offset + radius), grid_size.y // 2 + 5, grid_size.z // 2 + 5] = 1
@@ -84,6 +89,7 @@ sensor_data2 = kspaceFirstOrder(
 # average the data recorded at each grid point to simulate the measured signal from a single element focused detector
 sensor_data2 = np.sum(sensor_data2["p"], axis=1)
 
+# %%
 # Combine arrays as in MATLAB: sensor.mask + source1 + source2
 combined_array = sensor_mask + source1 + source2
 

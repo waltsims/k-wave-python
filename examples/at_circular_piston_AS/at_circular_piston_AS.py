@@ -1,3 +1,8 @@
+# %% [markdown]
+# # Circular Piston Transducer (Axisymmetric)
+# Modelling a circular piston transducer assuming axisymmetry, compared with analytical solution.
+
+# %%
 """
 Modelling A Circular Plane Piston Transducer Assuming Axisymmetry Example
 
@@ -24,6 +29,7 @@ from kwave.utils.kwave_array import kWaveArray
 from kwave.utils.math import round_even
 from kwave.utils.signals import create_cw_signals
 
+# %% Parameters
 # medium parameters
 c0 = 1500.0  # sound speed [m/s]
 rho0 = 1000.0  # density [kg/m^3]
@@ -52,14 +58,7 @@ cfl = 0.05  # CFL number
 bli_tolerance = 0.05  # tolerance for truncation of the off-grid source points
 upsampling_rate = 10  # density of integration points relative to grid
 
-# =========================================================================
-# RUN SIMULATION
-# =========================================================================
-
-# --------------------
-# GRID
-# --------------------
-
+# %% Grid setup
 # grid resolution
 dx = c0 / (ppw * source_f0)  # [m]
 
@@ -83,7 +82,7 @@ dt = 1.0 / (ppp * source_f0)
 Nt = round(t_end / dt)
 kgrid.setTime(Nt, dt)
 
-
+# %% Source, medium, sensor, and simulation
 # --------------------
 # SOURCE
 # --------------------
@@ -134,16 +133,8 @@ sensor.record = ["p"]
 # record only the final few periods when the field is in steady state
 sensor.record_start_index = kgrid.Nt - record_periods * ppp + 1
 
-# =========================================================================
-# DEFINE THE SIMULATION PARAMETERS
-# =========================================================================
-
 # NOTE: pml_inside=False not supported in new API
 # NOTE: simulation_type=SimulationType.AXISYMMETRIC is handled automatically by the new API
-
-# =========================================================================
-# RUN THE SIMULATION
-# =========================================================================
 
 sensor_data = kspaceFirstOrder(
     kgrid,
@@ -169,10 +160,7 @@ yvec = np.squeeze(kgrid.y_vec) - kgrid.y_vec[0].item()
 y_vec = 1e3 * np.hstack((-np.flip(yvec)[:-1], yvec))
 x_vec = 1e3 * np.squeeze(kgrid.x_vec[:, :] - kgrid.x_vec[0])
 
-# =========================================================================
-# ANALYTICAL SOLUTION
-# =========================================================================
-
+# %% Analytical solution
 # calculate the wavenumber
 k: float = 2.0 * np.pi * source_f0 / c0
 
@@ -195,10 +183,7 @@ p_ref = source_mag[0] * np.abs(2.0 * np.sin((k * r_ref - k * x_ref) / 2.0))
 # L2_error = 100 * np.linalg.norm(p_ref_kw - amp_on_axis, ord=2)
 # Linf_error = 100 * np.linalg.norm(p_ref_kw -  amp_on_axis, ord=np.inf)
 
-# =========================================================================
-# VISUALISATION
-# =========================================================================
-
+# %% Visualization
 data = np.hstack((np.fliplr(amp[:, :-1]), amp)) / 1e6
 sp = np.hstack((np.fliplr(source.p_mask[:, :])[:, :-1], source.p_mask))
 
