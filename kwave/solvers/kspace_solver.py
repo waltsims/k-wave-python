@@ -124,6 +124,8 @@ class Simulation:
 
         def _is_binary(arr):
             """numel matches grid → boolean mask (matches MATLAB isCartesian logic)."""
+            if arr.ndim == 2 and arr.shape[0] == self.ndim:
+                return False  # defer to _is_cartesian
             return arr.size == 1 or arr.size == grid_numel
 
         def _is_cartesian(arr):
@@ -603,11 +605,11 @@ class Simulation:
                 result.update(acoustic_intensity(result))
         # Final-state snapshots: interior grid (excluding PML) at last timestep
         interior = tuple(slice(s, N - s if s else None) for s, N in zip(self.pml_sizes, self.grid_shape))
-        if "p_final" in self.record:
+        if "p_final" in self._requested_record:
             result["p_final"] = _to_cpu(self.p[interior].copy())
-        if any(f"u{a}_final" in self.record for a in "xyz"):
+        if any(f"u{a}_final" in self._requested_record for a in "xyz"):
             for i, a in enumerate("xyz"[: self.ndim]):
-                if f"u{a}_final" in self.record:
+                if f"u{a}_final" in self._requested_record:
                     result[f"u{a}_final"] = _to_cpu(self.u[i][interior].copy())
         return {k: v for k, v in result.items() if k in self._requested_record}
 

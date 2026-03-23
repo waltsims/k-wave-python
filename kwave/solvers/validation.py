@@ -2,6 +2,8 @@ import warnings
 
 import numpy as np
 
+from kwave.utils.matrix import num_dim2
+
 
 def validate_simulation(kgrid, medium, source, sensor, *, pml_size):
     validate_time_stepping(kgrid)
@@ -78,15 +80,21 @@ def validate_source(source, kgrid):
         raise ValueError("source.p requires source.p_mask to be set.")
     if source.p_mask is not None:
         mask = np.asarray(source.p_mask)
-        if mask.size != grid_size:
+        is_cartesian = mask.ndim == 2 and mask.shape[0] == kgrid.dim
+        if not is_cartesian and mask.size != grid_size:
             raise ValueError(f"source.p_mask has {mask.size} elements but grid has {grid_size} points.")
     for vel in ["ux", "uy", "uz"]:
         if getattr(source, vel, None) is not None and source.u_mask is None:
             raise ValueError(f"source.{vel} requires source.u_mask to be set.")
     if source.u_mask is not None:
         mask = np.asarray(source.u_mask)
-        if mask.size != grid_size:
+        is_cartesian = mask.ndim == 2 and mask.shape[0] == kgrid.dim
+        if not is_cartesian and mask.size != grid_size:
             raise ValueError(f"source.u_mask has {mask.size} elements but grid has {grid_size} points.")
+    # Validate all velocity source components agree on single vs many time series
+    vel_dims = [num_dim2(np.asarray(getattr(source, v))) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None]
+    if vel_dims and len(set(d > 1 for d in vel_dims)) > 1:
+        raise ValueError("All velocity source components must either be single (1D) or many (2D) time series.")
 
 
 def validate_sensor(sensor, kgrid):
