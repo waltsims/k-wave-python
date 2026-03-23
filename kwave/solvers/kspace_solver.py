@@ -566,6 +566,7 @@ class Simulation:
             if self.smooth_p0 and self.ndim >= 2:
                 from kwave.utils.filters import smooth
 
+                # p0 is F-order from _expand_to_grid; smooth() is order-agnostic (uses FFT on shape)
                 p0 = xp.asarray(smooth(_to_cpu(p0), restore_max=True))
             self._p0_initial = p0
         else:

@@ -231,6 +231,7 @@ class CppSimulation:
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
             u_mode = getattr(source, "u_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
+            # validate_source() ensures all velocity components agree on single vs many
             first_vel = next(getattr(source, v) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None)
             write_matrix(filepath, np.array(int(num_dim2(first_vel) > 1), dtype=np.uint64), "u_source_many")
 

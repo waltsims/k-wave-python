@@ -149,6 +149,7 @@ def kspaceFirstOrder(
 
             source = copy.copy(source)
             grid_shape = tuple(int(n) for n in kgrid.N)
+            # Fortran (column-major) layout matches MATLAB convention; smooth() is order-agnostic (uses FFT on shape)
             source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(grid_shape, order="F"), restore_max=True)
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
