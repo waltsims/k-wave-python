@@ -157,5 +157,3 @@ def kspaceFirstOrder(
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
         return cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
-
-    raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")

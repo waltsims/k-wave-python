@@ -251,7 +251,7 @@ class TestMatlabInterop:
         p0[32] = 1.0
         source = {"p0": p0}
         sensor = {"mask": np.ones(64, dtype=bool)}
-        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        result = simulate_from_dicts(kgrid, medium, source, sensor, device="cpu")
         assert "p" in result
         assert result["p"].shape[0] == 64
 
@@ -278,7 +278,7 @@ class TestMatlabInterop:
         p0[Nx // 2, Nx // 2] = 1.0
         source = {"p0": p0}
         sensor = {"mask": np.ones((Nx, Nx), dtype=bool)}
-        result = simulate_from_dicts(kgrid, medium, source, sensor, backend="cpu")
+        result = simulate_from_dicts(kgrid, medium, source, sensor, device="cpu")
         # At t=0 the recorded pressure should be the unsmoothed p0
         p_t0 = result["p"][:, 0].reshape(Nx, Nx)
         assert p_t0[Nx // 2, Nx // 2] == 1.0, "smooth_p0 should default to False"

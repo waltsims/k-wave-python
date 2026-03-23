@@ -290,7 +290,7 @@ class CppSimulation:
         except subprocess.CalledProcessError as e:
             if quiet and e.stderr:
                 # Surface binary error output even in quiet mode
-                raise subprocess.CalledProcessError(e.returncode, e.cmd, e.stdout, e.stderr) from None
+                raise subprocess.CalledProcessError(e.returncode, e.cmd, e.stdout, e.stderr) from e
             raise
 
     @staticmethod
