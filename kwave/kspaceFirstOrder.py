@@ -226,7 +226,10 @@ def kspaceFirstOrder(
             if data_path is None:
                 raise ValueError("data_path must be provided when save_only=True (the HDF5 files must persist for cluster submission).")
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
-            return {"input_file": input_file, "output_file": output_file}
+            result = {"input_file": input_file, "output_file": output_file}
+            if not pml_inside:
+                result["pml_size"] = pml_size
+            return result
         result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
 
     # --- Shared post-processing ---
