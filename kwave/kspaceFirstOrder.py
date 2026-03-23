@@ -22,60 +22,56 @@ def _normalize_pml(val, ndim, name="pml_size"):
     t = tuple(val)
     if len(t) == 0 or len(t) > ndim:
         raise ValueError(f"{name} must be a scalar or 1-to-{ndim}-element sequence, got {len(t)} elements")
-    # Pad short tuples by repeating last value (e.g. (20, 15) in 3-D → (20, 15, 15))
     return t + (t[-1],) * (ndim - len(t))
 
 
-def _is_binary_mask(mask, ndim):
-    """True if mask is a grid-shaped binary array (not Cartesian coordinates)."""
+def _is_cartesian_mask(mask, ndim):
+    """True if mask is a Cartesian coordinate array (ndim, n_points)."""
     arr = np.asarray(mask)
-    if arr.ndim == 2 and arr.shape[0] == ndim:
-        return False  # Cartesian: (ndim, n_points)
-    return True
+    return arr.ndim == 2 and arr.shape[0] == ndim
+
+
+def _expand_obj(obj, attrs, pml_size, edge_val=None):
+    """Shallow-copy obj and expand non-scalar array attributes via expand_matrix."""
+    exp_coeff = list(pml_size)
+    out = copy.copy(obj)
+    for attr in attrs:
+        val = getattr(out, attr, None)
+        if val is not None:
+            arr = np.asarray(val)
+            if arr.size > 1:
+                setattr(out, attr, expand_matrix(arr, exp_coeff, edge_val))
+    return out
 
 
 def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     """Expand grid/medium/source/sensor so PML sits outside the user domain."""
-    ndim = kgrid.dim
     new_N = tuple(int(n) + 2 * int(p) for n, p in zip(kgrid.N, pml_size))
     expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
 
-    # Medium: edge-extend non-scalar arrays
-    expanded_medium = copy.copy(medium)
-    for attr in ("sound_speed", "density", "alpha_coeff", "BonA"):
-        val = getattr(expanded_medium, attr, None)
-        if val is not None and np.atleast_1d(val).size > 1:
-            setattr(expanded_medium, attr, expand_matrix(np.atleast_1d(val), list(pml_size)))
+    expanded_medium = _expand_obj(medium, ("sound_speed", "density", "alpha_coeff", "BonA"), pml_size)
+    expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
 
-    # Source: zero-pad spatial arrays
-    expanded_source = copy.copy(source)
-    for attr in ("p0", "p_mask", "u_mask"):
-        val = getattr(expanded_source, attr, None)
-        if val is not None and np.atleast_1d(val).size > 1:
-            setattr(expanded_source, attr, expand_matrix(np.atleast_1d(val), list(pml_size), 0))
-
-    # Sensor: zero-pad binary masks, leave Cartesian unchanged
     expanded_sensor = sensor
     if sensor is not None and getattr(sensor, "mask", None) is not None:
-        if _is_binary_mask(sensor.mask, ndim):
+        if not _is_cartesian_mask(sensor.mask, kgrid.dim):
             expanded_sensor = copy.copy(sensor)
-            expanded_sensor.mask = expand_matrix(np.atleast_1d(sensor.mask), list(pml_size), 0)
+            expanded_sensor.mask = expand_matrix(np.asarray(sensor.mask), list(pml_size), 0)
 
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
+_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms")
+
+
 def _strip_pml(result, pml_size, ndim):
     """Remove PML padding from full-grid fields in the result dict."""
-    slices = tuple(slice(int(p), -int(p)) for p in pml_size[:ndim])
-    full_grid_suffixes = ("_final", "_max", "_min", "_rms")
-    stripped = {}
-    for key, val in result.items():
-        if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in full_grid_suffixes):
-            stripped[key] = val[slices]
-        else:
-            stripped[key] = val
-    return stripped
+    slices = tuple(slice(int(p), -int(p) if int(p) else None) for p in pml_size[:ndim])
+    return {
+        key: val[slices] if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in _FULL_GRID_SUFFIXES) else val
+        for key, val in result.items()
+    }
 
 
 def kspaceFirstOrder(
@@ -171,14 +167,6 @@ def kspaceFirstOrder(
 
     # --- Shared pre-processing (both backends) ---
 
-    # Expand grid when PML sits outside the user domain
-    if pml_inside:
-        warnings.warn(
-            f"pml_inside=True: the outermost {pml_size} grid points per side will be used for PML absorption. "
-            "Sources, sensors, and medium properties near the boundary will be affected. "
-            "Set pml_inside=False (default) to expand the grid automatically instead.",
-            stacklevel=2,
-        )
     if not pml_inside:
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
 
@@ -187,8 +175,7 @@ def kspaceFirstOrder(
         from kwave.utils.filters import smooth
 
         source = copy.copy(source)
-        grid_shape = tuple(int(n) for n in kgrid.N)
-        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(grid_shape, order="F"), restore_max=True)
+        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(tuple(int(n) for n in kgrid.N), order="F"), restore_max=True)
 
     # --- Backend dispatch ---
 
@@ -203,7 +190,7 @@ def kspaceFirstOrder(
             device=device,
             use_sg=use_sg,
             use_kspace=use_kspace,
-            smooth_p0=False,  # already handled above
+            smooth_p0=False,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
         ).run()
@@ -213,41 +200,38 @@ def kspaceFirstOrder(
 
         if not use_kspace:
             warnings.warn(
-                "use_kspace=False has no effect with backend='cpp'; " "the C++ binary always applies k-space correction.",
+                "use_kspace=False has no effect with backend='cpp'; the C++ binary always applies k-space correction.",
                 stacklevel=2,
             )
         if sensor is not None and getattr(sensor, "record", None) is not None:
             warnings.warn(
-                "sensor.record is not yet supported for backend='cpp'; " "the C++ binary will record its default fields.",
+                "sensor.record is not yet supported for backend='cpp'; the C++ binary will record its default fields.",
                 stacklevel=2,
             )
         if sensor is not None and getattr(sensor, "record_start_index", 1) != 1:
             warnings.warn(
-                "sensor.record_start_index is not yet supported for backend='cpp'; " "the C++ binary records from the first time step.",
+                "sensor.record_start_index is not yet supported for backend='cpp'; the C++ binary records from the first time step.",
                 stacklevel=2,
             )
 
         # Convert Cartesian sensor mask to binary grid (cpp binary requires binary masks)
-        if sensor is not None and sensor.mask is not None:
-            mask_arr = np.asarray(sensor.mask)
-            if mask_arr.ndim == 2 and mask_arr.shape[0] == kgrid.dim:
-                from kwave.utils.conversion import cart2grid
+        if sensor is not None and sensor.mask is not None and _is_cartesian_mask(sensor.mask, kgrid.dim):
+            from kwave.utils.conversion import cart2grid
 
-                sensor = copy.copy(sensor)
-                sensor.mask, _, _ = cart2grid(kgrid, mask_arr)
+            sensor = copy.copy(sensor)
+            sensor.mask, _, _ = cart2grid(kgrid, np.asarray(sensor.mask))
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
             if data_path is None:
-                raise ValueError("data_path must be provided when save_only=True " "(the HDF5 files must persist for cluster submission).")
+                raise ValueError("data_path must be provided when save_only=True (the HDF5 files must persist for cluster submission).")
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
             return {"input_file": input_file, "output_file": output_file}
         result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
 
     # --- Shared post-processing ---
 
-    # Strip PML from full-grid output fields when PML was outside the user domain
-    if not pml_inside and isinstance(result, dict):
+    if not pml_inside:
         result = _strip_pml(result, pml_size, kgrid.dim)
 
     return result
