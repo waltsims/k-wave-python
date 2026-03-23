@@ -304,7 +304,7 @@ class TestSolverFactory:
         from kwave.solvers import Simulation
 
         with pytest.raises(ValueError):
-            get_solver("bad")
+            Simulation(None, None, None, None, backend="bad")
 
 
 class TestCoverageEdgeCases:
