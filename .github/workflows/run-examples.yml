@@ -14,12 +14,9 @@ jobs:
       - uses: actions/checkout@v4
       - id: find-examples
         run: |
-          # Exclude: checkpointing (legacy), time-reversal (TimeReversal needs C++ binary),
-          # axisymmetric (legacy kspaceFirstOrderASC, not yet in new API)
-          EXAMPLES=$(find examples -maxdepth 1 -name "*.py" \
-            -not -name "checkpoint.py" \
-            -not -name "*TR_*" \
-            -not -name "*_AS.py" \
+          # Find all example scripts (exclude utilities only)
+          EXAMPLES=$(find examples -maxdepth 2 -name "*.py" \
+            -not -name "example_utils.py" \
             | sort | jq -R -s -c 'split("\n")[:-1]')
           echo "examples=$EXAMPLES" >> "$GITHUB_OUTPUT"
 
@@ -55,7 +52,6 @@ jobs:
 
       - name: Run example
         env:
-          KWAVE_BACKEND: python
           KWAVE_DEVICE: cpu
           MPLBACKEND: Agg
         run: |
