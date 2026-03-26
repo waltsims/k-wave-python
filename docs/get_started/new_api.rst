@@ -6,10 +6,6 @@ simulations.  It replaces the legacy ``kspaceFirstOrder2D``,
 ``kspaceFirstOrder3D``, and their GPU variants with a single function that
 auto-detects dimensionality from the grid.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
 Quick Start
 -----------
 
