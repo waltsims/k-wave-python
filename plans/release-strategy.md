@@ -10,6 +10,9 @@ This release strategy brings the unified solver architecture to fruition.
 |---------|-----------|-------|
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
+| **0.6.1** | C-order Migration (Helpers) | Migrate utils/helpers from F-order to C-order, keep legacy API working |
+| **0.6.2** | Example Migration | Port remaining examples to new `kspaceFirstOrder()` API |
+| **0.6.3** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
 | **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
@@ -121,6 +124,65 @@ warnings.warn(
 
 ---
 
+## Phase 2.1: v0.6.1 - C-order Migration (Helpers)
+
+**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No user-facing API changes. Fix hacky shaping/indexing throughout.
+
+**Scope:** 55 occurrences of `order="F"` across 10 files. Migrate where possible, keep F-order only at explicit boundaries.
+
+**Migrate (internal helpers — safe to convert):**
+
+| File | `order="F"` count | Notes |
+|------|-------------------|-------|
+| `kwave/utils/matlab.py` | 11 | reshape, flatten, unflatten utilities |
+| `kwave/kgrid.py` | 8 | Grid coordinate generation |
+| `kwave/utils/mapgen.py` | 6 | Map generation |
+| `kwave/utils/conversion.py` | 2 | Unit conversion |
+| `kwave/utils/matrix.py` | 1 | Matrix utilities |
+| `kwave/solvers/kspace_solver.py` | 19 | Audit each: keep F-order only at `simulate_from_dicts` boundary. Convert internal field storage, `_expand_to_grid`, `_build_source_op`, sensor mask extraction. |
+| `kwave/kspaceFirstOrder.py` | 1 | Likely removable |
+
+**Keep as-is (fixed boundaries):**
+
+| File | Reason |
+|------|--------|
+| `kwave/solvers/cpp_simulation.py` | C++ binary expects F-order HDF5 |
+| `kwave/kWaveSimulation.py` | Legacy, deleted in v1.0.0 |
+| `kwave/kWaveSimulation_helper/*` | Legacy, deleted in v1.0.0 |
+
+**Testing:**
+- All existing tests must pass (no behavioral change)
+- Add `tests/test_memory_layout.py`: verify C/F-order input produces identical results, `simulate_from_dicts` round-trips correctly, `cpp_simulation` writes correct F-order HDF5
+
+---
+
+## Phase 2.2: v0.6.2 - Example Migration
+
+**Goal:** Port remaining examples from legacy `kspaceFirstOrder2D/3D` to `kspaceFirstOrder()`.
+
+| Example | Blocker |
+|---------|---------|
+| `pr_2D_TR_line_sensor`, `pr_3D_TR_planar_sensor` | `TimeReversal` class uses legacy API internally |
+| `us_defining_transducer`, `us_beam_patterns`, `us_bmode_linear_transducer`, `us_bmode_phased_array` | `NotATransducer`-as-source pipeline untested with new API |
+| `checkpointing/checkpoint.py` | `checkpoint_file`/`checkpoint_timesteps` not exposed in new API |
+
+---
+
+## Phase 2.3: v0.6.3 - Axisymmetric Support
+
+**Goal:** Add axisymmetric simulation to `kspaceFirstOrder()` and port AS examples.
+
+**Current state:** `kspaceFirstOrderAS.py` / `kspaceFirstOrderASC.py` are standalone entry points. New API hardcodes `axisymmetric_flag=0`.
+
+**Tasks:**
+1. Add `axisymmetric: bool = False` kwarg to `kspaceFirstOrder()`
+2. Implement radial symmetry terms in `Simulation` class (operates on (r, z) grid)
+3. Port `at_circular_piston_AS`, `at_focused_bowl_AS`
+4. Validate against MATLAB references
+5. Deprecate `kspaceFirstOrderAS` / `kspaceFirstOrderASC`
+
+---
+
 ## Phase 3: v1.0.0 - Clean Release
 
 **Goal:** Simple, readable, fast. Remove all deprecated code.
@@ -140,6 +202,17 @@ warnings.warn(
 - `kwave/solvers/serializer.py` (~200 lines)
 
 **Impact:** ~5700 lines → ~1200 lines (-79%)
+
+### Memory Layout and Indexing (v1.0.0)
+
+By v1.0.0, the F→C migration from v0.6.1 should be complete. What remains:
+
+- **C++ HDF5 serialization** (`cpp_simulation.py`) — F-order + 1-based. Stays forever (binary expects this).
+- **MATLAB interop** (`simulate_from_dicts`) — converts F→C on input, C→F on output. Single conversion boundary.
+- **kWaveArray** — rewrite `combine_sensor_data` and `get_distributed_source_signal` to use `np.where` (0-based) and C-order.
+- **sensor.record_start_index** — require 0-based (deprecated 1-based in v0.6.1).
+
+**Principle:** Python-native (C-order, 0-based) everywhere internally. MATLAB compatibility at two explicit boundaries: (1) `simulate_from_dicts` for k-wave-cupy interop, (2) `cpp_simulation._write_hdf5` for the C++ binary.
 
 ---
 
@@ -260,10 +333,13 @@ uv run pytest tests/ -v
 ## Implementation Order
 
 1. **Now:** Finalize master/main for v0.5.0
-2. **Next:** Python solver + `kspaceFirstOrder.py` + deprecation for v0.6.0
-3. **Then:** `kwp` CLI for v0.7.0
-4. **Then:** Clean delete for v1.0.0
-5. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
+2. **Next:** Python solver + `kspaceFirstOrder()` API + deprecation for v0.6.0
+3. **Then:** C-order migration of helpers/utils for v0.6.1
+4. **Then:** Port remaining examples to new API for v0.6.2
+5. **Then:** Axisymmetric support in new API for v0.6.3
+6. **Then:** `kwp` CLI for v0.7.0
+7. **Then:** Clean delete for v1.0.0
+8. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
 
 ---
 
