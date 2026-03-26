@@ -138,20 +138,27 @@ Sensors specify where we record the acoustic data:
 Step 5: Run the Simulation
 --------------------------
 
-Now we combine all four components and run the simulation:
+Now we combine all four components and run:
 
 .. code-block:: python
 
-   from kwave import kspaceFirstOrder2D
-   
-   # Run the simulation
-   sensor_data = kspaceFirstOrder2D(
-       grid=grid,
-       medium=medium, 
-       source=source,
-       sensor=sensor,
-       simulation_options={'PMLInside': False, 'PlotSim': False}
+   from kwave.kspaceFirstOrder import kspaceFirstOrder
+
+   # Run with the NumPy/CuPy backend in Python
+   sensor_data = kspaceFirstOrder(
+       grid, medium, source, sensor,
+       pml_inside=False,
+       quiet=True,
    )
+
+.. note::
+
+   ``kspaceFirstOrder()`` is the unified entry point introduced in v0.6.0.
+   It auto-detects dimensionality from the grid and replaces the legacy
+   ``kspaceFirstOrder2D`` / ``3D`` functions. See :doc:`/get_started/new_api`
+   for details.
+
+   The legacy functions still work but emit deprecation warnings.
 
 Step 6: Visualize Results
 -------------------------

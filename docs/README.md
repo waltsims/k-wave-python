@@ -8,6 +8,25 @@
 This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
+## What's New in v0.6.0
+
+**Unified API:** A single `kspaceFirstOrder()` function replaces `kspaceFirstOrder2D` / `3D` and their options classes.
+Dimensionality is auto-detected from the grid. All simulation parameters are keyword arguments.
+
+**Python solver:** A pure NumPy/CuPy solver runs 1D, 2D, and 3D simulations without the C++ binary.
+Use `device="gpu"` for GPU acceleration via CuPy.
+
+```python
+from kwave.kspaceFirstOrder import kspaceFirstOrder
+
+result = kspaceFirstOrder(kgrid, medium, source, sensor)           # NumPy CPU
+result = kspaceFirstOrder(kgrid, medium, source, sensor, device="gpu")  # CuPy GPU
+result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="cpp") # C++ binary
+```
+
+The legacy `kspaceFirstOrder2D` / `3D` functions still work but emit deprecation warnings.
+See the [Unified API guide](https://k-wave-python.readthedocs.io/en/latest/get_started/new_api.html) for migration details.
+
 ## Mission
 
 With this project, we hope to increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
