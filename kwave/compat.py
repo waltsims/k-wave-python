@@ -34,6 +34,7 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
         elif opts.pml_alpha is not None:
             kwargs["pml_alpha"] = opts.pml_alpha
 
+        kwargs["pml_inside"] = opts.pml_inside
         kwargs["use_sg"] = opts.use_sg
         kwargs["use_kspace"] = opts.use_kspace
         kwargs["smooth_p0"] = opts.smooth_p0
