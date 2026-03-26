@@ -198,7 +198,7 @@ def kspaceFirstOrder3D(
         "kspaceFirstOrder3D is deprecated. Use kspaceFirstOrder() from "
         "kwave.kspaceFirstOrder instead. See kwave.compat.options_to_kwargs() "
         "for migrating options.",
-        DeprecationWarning,
+        FutureWarning,
         stacklevel=2,
     )
 

@@ -134,4 +134,4 @@ arguments:
    result = kspaceFirstOrder(kgrid, medium, source, sensor, **kwargs)
 
 The legacy ``kspaceFirstOrder2D`` and ``kspaceFirstOrder3D`` functions
-continue to work but emit ``DeprecationWarning``.
+continue to work but emit ``FutureWarning``.
