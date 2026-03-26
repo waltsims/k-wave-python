@@ -6,10 +6,6 @@ simulations.  It replaces the legacy ``kspaceFirstOrder2D``,
 ``kspaceFirstOrder3D``, and their GPU variants with a single function that
 auto-detects dimensionality from the grid.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
 Quick Start
 -----------
 
@@ -138,4 +134,4 @@ arguments:
    result = kspaceFirstOrder(kgrid, medium, source, sensor, **kwargs)
 
 The legacy ``kspaceFirstOrder2D`` and ``kspaceFirstOrder3D`` functions
-continue to work but emit ``DeprecationWarning``.
+continue to work but emit ``FutureWarning``.

@@ -158,7 +158,7 @@ Now we combine all four components and run:
    ``kspaceFirstOrder2D`` / ``3D`` functions. See :doc:`/get_started/new_api`
    for details.
 
-   The legacy functions still work but emit deprecation warnings.
+   The legacy functions still work but emit warnings.
 
 Step 6: Visualize Results
 -------------------------
