@@ -139,17 +139,3 @@ arguments:
 
 The legacy ``kspaceFirstOrder2D`` and ``kspaceFirstOrder3D`` functions
 continue to work but emit ``DeprecationWarning``.
-
-Environment Variables
----------------------
-
-Two environment variables override the ``backend`` and ``device`` parameters
-for all ``kspaceFirstOrder()`` calls.  Useful for CI and cluster environments:
-
-- ``KWAVE_BACKEND`` — set to ``"python"`` or ``"cpp"``
-- ``KWAVE_DEVICE`` — set to ``"cpu"`` or ``"gpu"``
-
-.. code-block:: bash
-
-   # Run all simulations with the Python backend on CPU
-   KWAVE_BACKEND=python KWAVE_DEVICE=cpu python my_script.py
