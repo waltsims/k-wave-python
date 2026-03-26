@@ -172,7 +172,7 @@ class TestNativePhysics:
         source = kSource()
         source.p0 = np.zeros(64)
         source.p0[32] = 1.0
-        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, None, backend="python")
+        result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, None, backend="python", pml_inside=True)
         assert result["p"].shape == (64, 20)
 
 

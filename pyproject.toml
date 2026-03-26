@@ -26,10 +26,10 @@ classifiers = [
 dependencies = [
     "h5py==3.15.1",
     "scipy==1.15.3",
-    "opencv-python==4.11.0.86",
+    "opencv-python==4.13.0.92",
     "deepdiff==8.6.1",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.3",
+    "matplotlib==3.10.7",
     "beartype==0.22.4",
     "jaxtyping==0.3.2",
     "deprecated>=1.2.14"
@@ -54,7 +54,7 @@ docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-tabs==3.4.7",
     "sphinx-toolbox==3.8.0",
     "furo==2024.8.6"]
-dev = ["pre-commit==4.2.0"]
+dev = ["pre-commit==4.5.1"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
