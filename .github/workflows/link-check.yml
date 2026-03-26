@@ -30,5 +30,6 @@ jobs:
             --exclude "https://pubs.aip.org"
             --exclude "https://www.gnu.org"
             --exclude "https://fsf.org"
+            --exclude "http://www.k-wave.org"
             "**/*.md" "**/*.rst"
           fail: true
