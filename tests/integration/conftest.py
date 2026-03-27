@@ -33,40 +33,35 @@ def load_matlab_ref(matlab_refs_dir):
     return _load
 
 
-def _to_matlab_shape(py_val, mat_val):
-    """Reshape C-order Python output to match MATLAB F-order reference shape.
+def _c_to_f_reorder(py_val, grid_shape):
+    """Reorder sensor rows from C-flat to F-flat ordering for MATLAB comparison.
 
-    The new API returns full-grid time-series as (Nt, *grid_shape) in C-order.
-    MATLAB references store them as (n_sensor, Nt) in F-flat order.
-    Similarly, aggregates are (*grid_shape) vs MATLAB (n_sensor,).
+    Python (C-order) and MATLAB (F-order) flatten grid points in different
+    orders.  Both produce (n_sensor, Nt) but the row ordering differs.
+    This builds a permutation to reorder Python rows to match MATLAB.
     """
-    if py_val.shape == mat_val.shape:
+    if grid_shape is None or len(grid_shape) < 2:
         return py_val
-
-    # Time-series ≥3D: (Nt, *grid_shape) → (n_sensor, Nt) with F-order flatten
-    if py_val.ndim >= 3 and mat_val.ndim == 2:
-        Nt = py_val.shape[0]
-        # Move time axis last, then F-order flatten the grid dims
-        return np.moveaxis(py_val, 0, -1).reshape(-1, Nt, order="F")
-
-    # Time-series 1D: (Nt, N) → (N, Nt) — both 2D but transposed
-    if py_val.ndim == 2 and mat_val.ndim == 2 and py_val.shape == mat_val.shape[::-1]:
-        return py_val.T
-
-    # Aggregates: (*grid_shape) → (n_sensor,) with F-order flatten
-    if py_val.ndim >= 2 and mat_val.ndim == 1:
-        return py_val.ravel(order="F")
-
+    c_indices = np.arange(int(np.prod(grid_shape)))
+    f_indices = np.ravel_multi_index(np.unravel_index(c_indices, grid_shape), grid_shape, order="F")
+    # f_indices[i] = where C-flat point i lands in F-flat order
+    # We need the inverse: for each F-flat position, which C-flat row?
+    inv = np.argsort(f_indices)
+    if py_val.ndim == 2 and py_val.shape[0] == len(c_indices):
+        return py_val[inv]
+    if py_val.ndim == 1 and py_val.shape[0] == len(c_indices):
+        return py_val[inv]
     return py_val
 
 
-def assert_fields_close(result, ref, fields, *, rtol=1e-10, atol=1e-12):
+def assert_fields_close(result, ref, fields, *, rtol=1e-10, atol=1e-12, grid_shape=None):
     """Compare Python result dict against MATLAB reference arrays.
 
     Args:
         result: dict from kspaceFirstOrder()
         ref: dict from scipy.io.loadmat()
         fields: list of (python_key, matlab_key) tuples
+        grid_shape: tuple of grid dims for C→F row reordering (full-grid masks only)
         rtol, atol: tolerances passed to np.testing.assert_allclose
     """
     for py_key, mat_key in fields:
@@ -74,7 +69,8 @@ def assert_fields_close(result, ref, fields, *, rtol=1e-10, atol=1e-12):
         assert mat_key in ref, f"MATLAB reference missing key '{mat_key}'"
         py_val = np.atleast_1d(np.squeeze(np.asarray(result[py_key])))
         mat_val = np.atleast_1d(np.squeeze(np.asarray(ref[mat_key])))
-        py_val = _to_matlab_shape(py_val, mat_val)
+        if grid_shape is not None:
+            py_val = _c_to_f_reorder(py_val, grid_shape)
         assert py_val.shape == mat_val.shape, f"Shape mismatch for {py_key}: Python {py_val.shape} vs MATLAB {mat_val.shape}"
         np.testing.assert_allclose(
             py_val, mat_val, rtol=rtol, atol=atol, err_msg=f"Field '{py_key}' differs from MATLAB reference '{mat_key}'"

@@ -157,10 +157,9 @@ def kspaceFirstOrder(
         dict: Recorded sensor data keyed by field name (e.g.
         ``"p"``, ``"p_final"``, ``"ux"``, ``"uy"``).
 
-        Sensor time-series are C-ordered.  When the sensor mask covers the
-        entire grid, time-series fields are returned as
-        ``(Nt, *grid_shape)`` (time-first).  For partial masks the shape is
-        ``(n_sensor, Nt)`` with sensor points in C-flattened order.
+        All time-series are ``(n_sensor, Nt)`` with sensor points in
+        C-flattened order.  Use :func:`reshape_to_grid` to recover spatial
+        structure for full-grid masks.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
@@ -177,8 +176,6 @@ def kspaceFirstOrder(
     validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
 
     # --- Shared pre-processing (both backends) ---
-
-    user_grid_shape = tuple(int(n) for n in kgrid.N)
 
     if not pml_inside:
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
@@ -250,35 +247,28 @@ def kspaceFirstOrder(
     if not pml_inside:
         result = _strip_pml(result, pml_size, kgrid.dim)
 
-    result = _reshape_sensor_to_grid(result, sensor, user_grid_shape)
-
     return result
 
 
-def _reshape_sensor_to_grid(result, sensor, user_grid_shape):
-    """Reshape sensor time-series to (Nt, *grid_shape) when the sensor covers the full user grid.
+def reshape_to_grid(data, grid_shape):
+    """Reshape flat sensor data to grid shape.
 
-    After PML expansion the sensor mask is padded with zeros, so we check
-    against the user's original grid shape (before expansion).
+    Convenience helper for full-grid sensor masks where ``n_sensor``
+    equals the total number of grid points.
+
+    Args:
+        data: sensor array — ``(n_sensor, Nt)`` time-series or
+            ``(n_sensor,)`` aggregate.
+        grid_shape: tuple of grid dimensions, e.g. ``(Nx, Ny)``.
+
+    Returns:
+        For time-series: ``(*grid_shape, Nt)``
+        For aggregates:  ``(*grid_shape)``
     """
-    user_numel = int(np.prod(user_grid_shape))
-
-    mask = getattr(sensor, "mask", None) if sensor is not None else None
-    if mask is None:
-        n_sensor = user_numel
-    elif _is_cartesian_mask(mask, len(user_grid_shape)):
-        return result
-    else:
-        n_sensor = int(np.asarray(mask, dtype=bool).sum())
-
-    if n_sensor != user_numel:
-        return result
-
-    for key, val in result.items():
-        if not isinstance(val, np.ndarray):
-            continue
-        if val.ndim == 2 and val.shape[0] == n_sensor:
-            result[key] = val.T.reshape(-1, *user_grid_shape)
-        elif val.ndim == 1 and val.shape[0] == n_sensor:
-            result[key] = val.reshape(user_grid_shape)
-    return result
+    data = np.asarray(data)
+    if data.ndim == 2:
+        n_sensor, Nt = data.shape
+        return data.reshape(*grid_shape, Nt)
+    elif data.ndim == 1:
+        return data.reshape(grid_shape)
+    return data

@@ -9,7 +9,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.kspaceFirstOrder import _is_cartesian_mask, _reshape_sensor_to_grid
+from kwave.kspaceFirstOrder import reshape_to_grid
 
 # ---------------------------------------------------------------------------
 # _fix_output_order (CppSimulation)
@@ -111,55 +111,34 @@ class TestFixOutputOrder:
 
 
 # ---------------------------------------------------------------------------
-# _reshape_sensor_to_grid
+# reshape_to_grid helper
 # ---------------------------------------------------------------------------
 
 
-class TestReshapeSensorToGrid:
-    def test_cartesian_mask_unchanged(self):
-        """Cartesian sensor masks should not be reshaped."""
-        sensor = SimpleNamespace(mask=np.array([[0.0, 1e-3], [0.0, 0.0]]))  # (2, 2) Cartesian
-        result = {"p": np.arange(20).reshape(2, 10)}
-        out = _reshape_sensor_to_grid(result, sensor, (64, 64))
-        assert out["p"].shape == (2, 10)  # unchanged
+class TestReshapeToGrid:
+    def test_time_series_2d(self):
+        """(n_sensor, Nt) → (*grid_shape, Nt)."""
+        data = np.arange(120).reshape(24, 5)
+        out = reshape_to_grid(data, (4, 6))
+        assert out.shape == (4, 6, 5)
 
-    def test_partial_mask_unchanged(self):
-        """Partial binary masks should not be reshaped."""
-        mask = np.zeros((8, 8), dtype=bool)
-        mask[0, 0] = True
-        mask[4, 4] = True
-        sensor = SimpleNamespace(mask=mask)
-        result = {"p": np.arange(20).reshape(2, 10)}
-        out = _reshape_sensor_to_grid(result, sensor, (8, 8))
-        assert out["p"].shape == (2, 10)  # unchanged
+    def test_aggregate_1d(self):
+        """(n_sensor,) → (*grid_shape)."""
+        data = np.arange(24)
+        out = reshape_to_grid(data, (4, 6))
+        assert out.shape == (4, 6)
 
-    def test_full_grid_reshaped(self):
-        """Full-grid binary mask is reshaped to (Nt, *grid_shape)."""
-        sensor = SimpleNamespace(mask=np.ones((4, 6), dtype=bool))
-        Nt = 5
-        result = {"p": np.arange(120).reshape(24, Nt)}
-        out = _reshape_sensor_to_grid(result, sensor, (4, 6))
-        assert out["p"].shape == (Nt, 4, 6)
+    def test_3d_grid(self):
+        """Works with 3D grids."""
+        data = np.arange(60).reshape(60, 1)
+        out = reshape_to_grid(data, (3, 4, 5))
+        assert out.shape == (3, 4, 5, 1)
 
-    def test_aggregate_reshaped(self):
-        """1D aggregates reshaped to grid_shape for full-grid masks."""
-        sensor = SimpleNamespace(mask=np.ones((4, 6), dtype=bool))
-        result = {"p_max": np.arange(24)}
-        out = _reshape_sensor_to_grid(result, sensor, (4, 6))
-        assert out["p_max"].shape == (4, 6)
-
-    def test_sensor_none(self):
-        """sensor=None means full grid."""
-        result = {"p": np.arange(80).reshape(16, 5)}
-        out = _reshape_sensor_to_grid(result, None, (4, 4))
-        assert out["p"].shape == (5, 4, 4)
-
-    def test_non_array_values_unchanged(self):
-        """Non-ndarray values in result are passed through."""
-        sensor = SimpleNamespace(mask=np.ones((4, 4), dtype=bool))
-        result = {"p": np.arange(80).reshape(16, 5), "metadata": "hello"}
-        out = _reshape_sensor_to_grid(result, sensor, (4, 4))
-        assert out["metadata"] == "hello"
+    def test_passthrough_higher_dim(self):
+        """Higher-dim arrays pass through unchanged."""
+        data = np.arange(120).reshape(2, 3, 4, 5)
+        out = reshape_to_grid(data, (4, 6))
+        assert out.shape == (2, 3, 4, 5)
 
 
 # ---------------------------------------------------------------------------
