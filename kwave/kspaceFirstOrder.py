@@ -100,6 +100,7 @@ def kspaceFirstOrder(
     debug: bool = False,
     num_threads: Optional[int] = None,
     device_num: Optional[int] = None,
+    progress_callback=None,
 ) -> dict:
     """Run a k-Wave simulation.
 
@@ -203,7 +204,7 @@ def kspaceFirstOrder(
             smooth_p0=False,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
-        ).run()
+        ).run(progress_callback=progress_callback)
 
     elif backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation

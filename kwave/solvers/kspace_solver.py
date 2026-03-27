@@ -628,12 +628,14 @@ class Simulation:
         self.t += 1
         return self
 
-    def run(self):
+    def run(self, progress_callback=None):
         """Run simulation to completion. Returns results dict."""
         if not self._is_setup:
             self.setup()
         while self.t < self.Nt:
             self.step()
+            if progress_callback is not None:
+                progress_callback(self.t, self.Nt)
         # Copy to CPU one-by-one, freeing GPU memory as we go
         result = {}
         for k in list(self.sensor_data):
