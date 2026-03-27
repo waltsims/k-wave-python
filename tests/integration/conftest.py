@@ -43,11 +43,15 @@ def _to_matlab_shape(py_val, mat_val):
     if py_val.shape == mat_val.shape:
         return py_val
 
-    # Time-series: (Nt, *grid_shape) → (n_sensor, Nt) with F-order flatten
+    # Time-series ≥3D: (Nt, *grid_shape) → (n_sensor, Nt) with F-order flatten
     if py_val.ndim >= 3 and mat_val.ndim == 2:
         Nt = py_val.shape[0]
         # Move time axis last, then F-order flatten the grid dims
         return np.moveaxis(py_val, 0, -1).reshape(-1, Nt, order="F")
+
+    # Time-series 1D: (Nt, N) → (N, Nt) — both 2D but transposed
+    if py_val.ndim == 2 and mat_val.ndim == 2 and py_val.shape == mat_val.shape[::-1]:
+        return py_val.T
 
     # Aggregates: (*grid_shape) → (n_sensor,) with F-order flatten
     if py_val.ndim >= 2 and mat_val.ndim == 1:
