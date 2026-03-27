@@ -56,7 +56,7 @@ class TestNative2D:
             kSensor(mask=np.ones((64, 64), dtype=bool)),
             backend="python",
         )
-        assert result["p"].shape[0] == 64 * 64
+        assert result["p"].shape == (64 * 64, 10)
 
     def test_absorption(self, grid_2d):
         result = kspaceFirstOrder(
@@ -146,9 +146,8 @@ class TestNativePhysics:
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "ux", "uy", "ux_max", "uy_rms", "ux_final", "p_final"]
         result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
-        n = 64 * 64
-        assert result["ux"].shape == (n, 10)
-        assert result["ux_max"].shape == (n,)
+        assert result["ux"].shape == (64 * 64, 10)
+        assert result["ux_max"].shape == (64 * 64,)
         assert "ux_final" in result and "p_final" in result
 
     def test_intensity_recording(self, grid_2d):

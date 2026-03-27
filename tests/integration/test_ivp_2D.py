@@ -42,4 +42,5 @@ def test_ivp_2D_vs_matlab(load_matlab_ref):
         result,
         ref,
         [("p", "sensor_data_p")],
+        grid_shape=(128, 128),
     )

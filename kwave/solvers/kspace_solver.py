@@ -34,12 +34,12 @@ def _to_cpu(x):
 def _expand_to_grid(val, grid_shape, xp, name="parameter"):
     if val is None:
         raise ValueError(f"Missing required parameter: {name}")
-    arr = xp.array(val, dtype=float).flatten(order="F")
+    arr = xp.array(val, dtype=float).ravel()
     grid_size = int(np.prod(grid_shape))
     if arr.size == 1:
         return xp.full(grid_shape, float(arr[0]), dtype=float)
     if arr.size == grid_size:
-        return arr.reshape(grid_shape, order="F")
+        return arr.reshape(grid_shape)
     raise ValueError(f"{name} size {arr.size} incompatible with grid size {grid_size}")
 
 
@@ -48,16 +48,16 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
 
     Returns a callable (t, field) → field that injects scaled source values.
     """
-    mask = xp.array(mask_raw, dtype=bool).flatten(order="F")
+    mask = xp.array(mask_raw, dtype=bool).ravel()
     if mask.size == 1:
-        mask = xp.full(grid_shape, bool(mask[0]), dtype=bool).flatten(order="F")
+        mask = xp.full(grid_shape, bool(mask[0]), dtype=bool).ravel()
     n_src = int(xp.sum(mask))
 
-    signal_arr = xp.array(signal_raw, dtype=float, order="F")
+    signal_arr = xp.array(signal_raw, dtype=float)
     if signal_arr.ndim == 1:
         signal = signal_arr.reshape(1, -1)
     else:
-        signal = signal_arr.reshape(-1, signal_arr.shape[-1], order="F") if signal_arr.ndim > 2 else signal_arr
+        signal = signal_arr.reshape(-1, signal_arr.shape[-1]) if signal_arr.ndim > 2 else signal_arr
 
     scaled = signal * xp.atleast_1d(xp.asarray(scale))[:, None]
     signal_len = scaled.shape[1]
@@ -70,9 +70,9 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
     def dirichlet(t, field):
         if t >= signal_len:
             return field
-        flat = field.flatten(order="F")  # copy — mutation is intentional
+        flat = field.flatten()  # copy — mutation is intentional
         flat[mask] = get_val(t)
-        return flat.reshape(grid_shape, order="F")
+        return flat.reshape(grid_shape)
 
     # Pre-allocate buffer to avoid per-step allocation
     _src_buf = xp.zeros(grid_size, dtype=float)
@@ -82,7 +82,7 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
             return field
         _src_buf[:] = 0
         _src_buf[mask] = get_val(t)
-        src = _src_buf.reshape(grid_shape, order="F")
+        src = _src_buf.reshape(grid_shape)
         return field + diff_fn(src, source_kappa)
 
     def additive_no_correction(t, field):
@@ -90,7 +90,7 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
             return field
         _src_buf[:] = 0
         _src_buf[mask] = get_val(t)
-        return field + _src_buf.reshape(grid_shape, order="F")
+        return field + _src_buf.reshape(grid_shape)
 
     ops = {"dirichlet": dirichlet, "additive": additive_kspace, "additive-no-correction": additive_no_correction}
     if mode not in ops:
@@ -223,19 +223,19 @@ class Simulation:
 
         if mask_raw is None:
             self.n_sensor_points = grid_numel
-            self._extract = lambda f: f.flatten(order="F")
+            self._extract = lambda f: f.ravel()
         else:
             mask_arr = np.asarray(mask_raw, dtype=float)
             # Check Cartesian first to avoid ambiguity when size == grid_numel
             if _is_cartesian(mask_arr):
                 self._setup_cartesian_extract(mask_arr)
             elif _is_binary(mask_arr):
-                bmask = xp.array(mask_arr, dtype=bool).flatten(order="F")
+                bmask = xp.array(mask_arr, dtype=bool).ravel()
                 if bmask.size == 1:
                     bmask = xp.full(grid_numel, bool(bmask[0]), dtype=bool)
                 self.n_sensor_points = int(xp.sum(bmask))
                 idx = xp.where(bmask)[0]
-                self._extract = lambda f, _i=idx: f.flatten(order="F")[_i]
+                self._extract = lambda f, _i=idx: f.ravel()[_i]
             else:
                 raise ValueError(
                     f"Sensor mask shape {mask_arr.shape} is neither binary " f"(numel={grid_numel}) nor Cartesian ({self.ndim}, N_points)"
@@ -302,7 +302,7 @@ class Simulation:
             x_vec, cart_x = axis_coords[0], cart.flatten()
 
             def _extract_1d_interp(f):
-                return xp.asarray(np.interp(cart_x, x_vec, _to_cpu(f).flatten(order="F")))
+                return xp.asarray(np.interp(cart_x, x_vec, _to_cpu(f).ravel()))
 
             self._extract = _extract_1d_interp
         else:
@@ -311,8 +311,8 @@ class Simulation:
             int_idx = np.clip(np.floor(frac_idx).astype(int), 0, np.array(self.grid_shape)[:, None] - 2)
             local = frac_idx - int_idx
 
-            # F-order strides and 2^ndim corner enumeration
-            strides = np.cumprod([1] + list(self.grid_shape[:-1]))
+            # C-order strides and 2^ndim corner enumeration
+            strides = np.cumprod([1] + list(self.grid_shape[:0:-1]))[::-1]
             n_corners = 2**self.ndim
             corner_indices = np.zeros((self.n_sensor_points, n_corners), dtype=int)
             corner_weights = np.ones((self.n_sensor_points, n_corners))
@@ -326,7 +326,7 @@ class Simulation:
             corner_weights = xp.array(corner_weights)
 
             def _extract_bilinear(f):
-                return (f.flatten(order="F")[corner_indices] * corner_weights).sum(axis=1)
+                return (f.ravel()[corner_indices] * corner_weights).sum(axis=1)
 
             self._extract = _extract_bilinear
 
@@ -473,15 +473,15 @@ class Simulation:
         grid_size = int(np.prod(self.grid_shape))
 
         def _expand_mask(mask_raw):
-            mask = xp.array(mask_raw, dtype=bool).flatten(order="F")
+            mask = xp.array(mask_raw, dtype=bool).ravel()
             if mask.size == 1:
-                mask = xp.full(self.grid_shape, bool(mask[0]), dtype=bool).flatten(order="F")
+                mask = xp.full(self.grid_shape, bool(mask[0]), dtype=bool).ravel()
             return mask
 
         def source_scale(mask_raw, c0):
             """Get per-source-point sound speed values."""
             mask = _expand_mask(mask_raw)
-            c0_flat = c0.flatten(order="F")
+            c0_flat = c0.ravel()
             n_src = int(xp.sum(mask))
             return c0_flat[mask] if c0_flat.size > 1 else xp.full(n_src, float(c0_flat))
 
@@ -579,7 +579,7 @@ class Simulation:
             if self.smooth_p0 and self.ndim >= 2:
                 from kwave.utils.filters import smooth
 
-                # p0 is F-order from _expand_to_grid; smooth() is order-agnostic (uses FFT on shape)
+                # smooth() is order-agnostic (uses FFT on shape)
                 p0 = xp.asarray(smooth(_to_cpu(p0), restore_max=True))
             self._p0_initial = p0
         else:
@@ -801,6 +801,53 @@ def create_simulation(kgrid, medium, source, sensor, device="auto", smooth_p0=Fa
     )
 
 
+def _f_to_c_source_reorder(source, grid_shape):
+    """Reorder multi-row source signals from MATLAB F-flat to C-flat mask order.
+
+    MATLAB sends source signal rows ordered by F-flattened mask indices.
+    The solver uses C-flat ordering internally.  For single-row (uniform)
+    sources, no reordering is needed.
+    """
+    ndim = len(grid_shape)
+    if ndim < 2:
+        return source
+    source = dict(source)  # shallow copy — don't mutate caller's dict
+
+    for mask_key, signal_keys in [("p_mask", ["p"]), ("u_mask", ["ux", "uy", "uz"])]:
+        mask_raw = source.get(mask_key)
+        if mask_raw is None:
+            continue
+        mask = np.asarray(mask_raw, dtype=bool)
+        if mask.size <= 1:
+            continue
+        mask_grid = mask.reshape(grid_shape)
+        n_src = int(mask_grid.sum())
+        if n_src < 2:
+            continue
+
+        # Build F→C permutation for mask points
+        f_nz = np.where(mask_grid.ravel(order="F"))[0]
+        c_nz = np.where(mask_grid.ravel())[0]
+        f_equiv = np.ravel_multi_index(np.unravel_index(c_nz, grid_shape), grid_shape, order="F")
+        perm = np.searchsorted(f_nz, f_equiv)
+
+        for sig_key in signal_keys:
+            sig = source.get(sig_key)
+            if sig is None:
+                continue
+            sig = np.asarray(sig)
+            if sig.ndim >= 2 and sig.shape[0] == n_src:
+                source[sig_key] = sig[perm]
+
+    return source
+
+
 def simulate_from_dicts(kgrid, medium, source, sensor, device="auto", smooth_p0=False):
-    """MATLAB interop entry point."""
+    """MATLAB interop entry point.
+
+    Reorders multi-row source signals from MATLAB's F-flat mask ordering
+    to the solver's C-flat ordering before running the simulation.
+    """
+    grid_shape = tuple(kgrid[k] for k in ["Nx", "Ny", "Nz"] if k in kgrid)
+    source = _f_to_c_source_reorder(source, grid_shape)
     return create_simulation(kgrid, medium, source, sensor, device, smooth_p0=smooth_p0).run()
