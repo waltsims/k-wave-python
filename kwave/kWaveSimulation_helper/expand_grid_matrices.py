@@ -1,3 +1,8 @@
+# Deprecated: this module is part of the legacy kWaveSimulation stack.
+# Use kspaceFirstOrder(pml_inside=False) instead, which handles grid
+# expansion via _expand_for_pml_outside in kspaceFirstOrder.py.
+# Will be deleted in v1.0 (see plans/release-strategy.md).
+
 import logging
 
 import numpy as np

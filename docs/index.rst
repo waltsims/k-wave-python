@@ -14,6 +14,7 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
    :hidden:
 
    get_started/first_simulation
+   get_started/new_api
    get_started/grid_overview
    get_started/medium_overview
    get_started/source_overview
@@ -29,6 +30,7 @@ k-Wave is an open source acoustics toolbox for MATLAB and C++ developed by Bradl
    kwave.kmedium
    kwave.ksource
    kwave.ksensor
+   kwave.kspaceFirstOrder
    kwave.kWaveSimulation
    kwave.kspaceFirstOrder2D
    kwave.kspaceFirstOrder3D

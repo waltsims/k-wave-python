@@ -8,6 +8,8 @@
 This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
 interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
 
+**New in v0.6.0:** Unified `kspaceFirstOrder()` API with a pure NumPy/CuPy solver. See the [API guide](https://k-wave-python.readthedocs.io/en/latest/get_started/new_api.html).
+
 ## Mission
 
 With this project, we hope to increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
