@@ -32,7 +32,8 @@ dependencies = [
     "matplotlib==3.10.7",
     "beartype==0.22.9",
     "jaxtyping==0.3.2",
-    "deprecated>=1.2.14"
+    "deprecated>=1.2.14",
+    "tqdm>=4.60"
 ]
 
 [project.urls]
