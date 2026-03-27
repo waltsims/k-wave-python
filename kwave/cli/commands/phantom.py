@@ -13,6 +13,75 @@ def phantom():
     pass
 
 
+@phantom.command("load")
+@click.option("--grid-size", required=True, help="Grid dimensions, e.g. 512 or 128,128")
+@click.option("--spacing", required=True, type=float, help="Grid spacing in meters")
+@click.option("--sound-speed", required=True, help="Scalar value (m/s) or path to .npy file")
+@click.option("--density", default=None, help="Scalar value (kg/m^3) or path to .npy file")
+@click.option("--cfl", type=float, default=None, help="CFL number for time step calculation")
+@pass_session
+@json_command("phantom.load")
+def load(sess, grid_size, spacing, sound_speed, density, cfl):
+    """Load medium properties from scalar values or .npy files."""
+    sess.load()
+
+    grid_n = tuple(int(x) for x in grid_size.split(","))
+    ndim = len(grid_n)
+    grid_spacing = (spacing,) * ndim
+
+    medium_state = {}
+
+    # Sound speed: scalar or .npy path
+    if sound_speed.endswith(".npy"):
+        arr = np.load(sound_speed)
+        path = sess.save_array("sound_speed", arr)
+        medium_state["sound_speed_path"] = path
+        medium_state["sound_speed_scalar"] = None
+        # Store path so makeTime gets the full array (not just max)
+        sound_speed_for_time_path = path
+        sound_speed_for_time_scalar = None
+    else:
+        medium_state["sound_speed_scalar"] = float(sound_speed)
+        medium_state["sound_speed_path"] = None
+        sound_speed_for_time_path = None
+        sound_speed_for_time_scalar = float(sound_speed)
+
+    # Density: scalar, .npy path, or None
+    if density is not None:
+        if density.endswith(".npy"):
+            arr = np.load(density)
+            path = sess.save_array("density", arr)
+            medium_state["density_path"] = path
+            medium_state["density_scalar"] = None
+        else:
+            medium_state["density_scalar"] = float(density)
+            medium_state["density_path"] = None
+
+    grid_state = {
+        "N": list(grid_n),
+        "spacing": list(grid_spacing),
+        "sound_speed_for_time_path": sound_speed_for_time_path,
+        "sound_speed_for_time_scalar": sound_speed_for_time_scalar,
+    }
+    if cfl is not None:
+        grid_state["cfl"] = cfl
+
+    sess.update("grid", grid_state)
+    sess.update("medium", medium_state)
+
+    return CLIResponse(
+        result={
+            "grid_size": list(grid_n),
+            "spacing": list(grid_spacing),
+            "medium": medium_state,
+        },
+        derived={
+            "ndim": ndim,
+            "grid_points": int(np.prod(grid_n)),
+        },
+    )
+
+
 @phantom.command()
 @click.option("--type", "phantom_type", required=True, type=click.Choice(["disc", "spherical", "layered"]))
 @click.option("--grid-size", required=True, help="Grid dimensions, e.g. 128,128")
@@ -73,7 +142,8 @@ def generate(sess, phantom_type, grid_size, spacing, sound_speed, density, disc_
         {
             "N": list(grid_n),
             "spacing": list(grid_spacing),
-            "sound_speed_for_time": sound_speed,
+            "sound_speed_for_time_scalar": sound_speed,
+            "sound_speed_for_time_path": None,
         },
     )
     sess.update(

@@ -25,9 +25,11 @@ from kwave.cli.commands.plan import plan  # noqa: E402
 from kwave.cli.commands.run import run  # noqa: E402
 from kwave.cli.commands.sensor import sensor  # noqa: E402
 from kwave.cli.commands.session_cmd import session  # noqa: E402
+from kwave.cli.commands.source import source  # noqa: E402
 
 cli.add_command(session)
 cli.add_command(phantom)
 cli.add_command(sensor)
+cli.add_command(source)
 cli.add_command(plan)
 cli.add_command(run)

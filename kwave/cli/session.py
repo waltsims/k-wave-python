@@ -123,12 +123,24 @@ class Session:
 
         g = self.state["grid"]
         if g is None:
-            raise SessionError("Grid not defined. Run 'kwave phantom generate' first.")
+            raise SessionError("Grid not defined. Run 'kwave phantom generate' or 'kwave phantom load' first.")
         grid_size = tuple(g["N"])
         grid_spacing = tuple(g["spacing"])
         kgrid = kWaveGrid(grid_size, grid_spacing)
-        if g.get("sound_speed_for_time") is not None:
-            kgrid.makeTime(g["sound_speed_for_time"])
+
+        # Resolve sound speed for time stepping (array or scalar)
+        sound_speed = None
+        if g.get("sound_speed_for_time_path") is not None:
+            sound_speed = np.load(g["sound_speed_for_time_path"])
+        elif g.get("sound_speed_for_time_scalar") is not None:
+            sound_speed = g["sound_speed_for_time_scalar"]
+
+        if sound_speed is not None:
+            cfl = g.get("cfl")
+            if cfl is not None:
+                kgrid.makeTime(sound_speed, cfl=cfl)
+            else:
+                kgrid.makeTime(sound_speed)
         return kgrid
 
     def make_medium(self):
@@ -137,10 +149,19 @@ class Session:
 
         m = self.state["medium"]
         if m is None:
-            raise SessionError("Medium not defined. Run 'kwave phantom generate' first.")
+            raise SessionError("Medium not defined. Run 'kwave phantom generate' or 'kwave phantom load' first.")
         kwargs = {}
+        # Handle fields that can be scalars or .npy paths
         for field in ("sound_speed", "density", "alpha_coeff", "alpha_power", "BonA"):
-            if field in m and m[field] is not None:
+            # Check for path-based storage (from phantom load)
+            path_key = f"{field}_path"
+            scalar_key = f"{field}_scalar"
+            if path_key in m and m[path_key] is not None:
+                kwargs[field] = np.load(m[path_key])
+            elif scalar_key in m and m[scalar_key] is not None:
+                kwargs[field] = m[scalar_key]
+            # Fallback: direct scalar value (from phantom generate)
+            elif field in m and m[field] is not None:
                 kwargs[field] = m[field]
         return kWaveMedium(**kwargs)
 
