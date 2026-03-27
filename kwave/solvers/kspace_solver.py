@@ -789,6 +789,7 @@ def _f_to_c_source_reorder(source, grid_shape):
     ndim = len(grid_shape)
     if ndim < 2:
         return source
+    source = dict(source)  # shallow copy — don't mutate caller's dict
 
     for mask_key, signal_keys in [("p_mask", ["p"]), ("u_mask", ["ux", "uy", "uz"])]:
         mask_raw = source.get(mask_key)
