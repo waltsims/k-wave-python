@@ -1,14 +1,13 @@
 """Run command: execute simulation with structured JSON progress."""
 
 import json
-import sys
 import time
 
 import click
 import numpy as np
 
 from kwave.cli.main import pass_session
-from kwave.cli.schema import CLIResponse, SessionError, json_command
+from kwave.cli.schema import CLIResponse, json_command
 
 
 def _emit_event(event: dict):
@@ -24,12 +23,7 @@ def _emit_event(event: dict):
 def run(sess, backend, device):
     """Execute the simulation."""
     sess.load()
-
-    # Check completeness
-    comp = sess._completeness()
-    missing = [k for k, v in comp.items() if not v]
-    if missing:
-        raise SessionError(f"Cannot run: missing {', '.join(missing)}. Complete setup first.")
+    sess.assert_ready("run")
 
     kgrid = sess.make_grid()
     medium = sess.make_medium()

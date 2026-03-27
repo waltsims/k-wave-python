@@ -7,6 +7,19 @@ from kwave.cli.main import pass_session
 from kwave.cli.schema import CLIError, CLIResponse, ValidationError, json_command
 
 
+def _parse_int_tuple(s: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in s.split(","))
+
+
+def _resolve_scalar_or_path(value: str, name: str, sess) -> dict:
+    """Parse a CLI value as scalar float or .npy path. Returns {name_scalar, name_path} dict."""
+    if value.endswith(".npy"):
+        arr = np.load(value)
+        path = sess.save_array(name, arr)
+        return {f"{name}_scalar": None, f"{name}_path": path}
+    return {f"{name}_scalar": float(value), f"{name}_path": None}
+
+
 @click.group("phantom")
 def phantom():
     """Define the simulation phantom (medium + initial pressure)."""
@@ -25,60 +38,23 @@ def load(sess, grid_size, spacing, sound_speed, density, cfl):
     """Load medium properties from scalar values or .npy files."""
     sess.load()
 
-    grid_n = tuple(int(x) for x in grid_size.split(","))
+    grid_n = _parse_int_tuple(grid_size)
     ndim = len(grid_n)
     grid_spacing = (spacing,) * ndim
 
-    medium_state = {}
-
-    # Sound speed: scalar or .npy path
-    if sound_speed.endswith(".npy"):
-        arr = np.load(sound_speed)
-        path = sess.save_array("sound_speed", arr)
-        medium_state["sound_speed_path"] = path
-        medium_state["sound_speed_scalar"] = None
-        # Store path so makeTime gets the full array (not just max)
-        sound_speed_for_time_path = path
-        sound_speed_for_time_scalar = None
-    else:
-        medium_state["sound_speed_scalar"] = float(sound_speed)
-        medium_state["sound_speed_path"] = None
-        sound_speed_for_time_path = None
-        sound_speed_for_time_scalar = float(sound_speed)
-
-    # Density: scalar, .npy path, or None
+    medium_state = _resolve_scalar_or_path(sound_speed, "sound_speed", sess)
     if density is not None:
-        if density.endswith(".npy"):
-            arr = np.load(density)
-            path = sess.save_array("density", arr)
-            medium_state["density_path"] = path
-            medium_state["density_scalar"] = None
-        else:
-            medium_state["density_scalar"] = float(density)
-            medium_state["density_path"] = None
+        medium_state.update(_resolve_scalar_or_path(density, "density", sess))
 
-    grid_state = {
-        "N": list(grid_n),
-        "spacing": list(grid_spacing),
-        "sound_speed_for_time_path": sound_speed_for_time_path,
-        "sound_speed_for_time_scalar": sound_speed_for_time_scalar,
-    }
+    grid_state = {"N": list(grid_n), "spacing": list(grid_spacing)}
     if cfl is not None:
         grid_state["cfl"] = cfl
 
-    sess.update("grid", grid_state)
-    sess.update("medium", medium_state)
+    sess.update_many({"grid": grid_state, "medium": medium_state})
 
     return CLIResponse(
-        result={
-            "grid_size": list(grid_n),
-            "spacing": list(grid_spacing),
-            "medium": medium_state,
-        },
-        derived={
-            "ndim": ndim,
-            "grid_points": int(np.prod(grid_n)),
-        },
+        result={"grid_size": list(grid_n), "spacing": list(grid_spacing), "medium": medium_state},
+        derived={"ndim": ndim, "grid_points": int(np.prod(grid_n))},
     )
 
 
@@ -96,7 +72,7 @@ def generate(sess, phantom_type, grid_size, spacing, sound_speed, density, disc_
     """Generate an analytical phantom."""
     sess.load()
 
-    grid_n = tuple(int(x) for x in grid_size.split(","))
+    grid_n = _parse_int_tuple(grid_size)
     ndim = len(grid_n)
     grid_spacing = (spacing,) * ndim
 
@@ -117,12 +93,11 @@ def generate(sess, phantom_type, grid_size, spacing, sound_speed, density, disc_
         if disc_center is None:
             center = Vector([n // 2 for n in grid_n])
         else:
-            center = Vector([int(x) for x in disc_center.split(",")])
+            center = Vector(_parse_int_tuple(disc_center))
 
         p0 = make_disc(Vector(list(grid_n)), center, disc_radius).astype(float)
 
     elif phantom_type == "spherical":
-        # Simple spherical inclusion centered in grid
         center = np.array([n // 2 for n in grid_n])
         coords = np.mgrid[tuple(slice(0, n) for n in grid_n)]
         dist = np.sqrt(sum((c - cn) ** 2 for c, cn in zip(coords, center)))
@@ -133,32 +108,14 @@ def generate(sess, phantom_type, grid_size, spacing, sound_speed, density, disc_
         layer_pos = grid_n[0] // 4
         p0[layer_pos, ...] = 1.0
 
-    # Save arrays
     p0_path = sess.save_array("p0", p0)
 
-    # Update session
-    sess.update(
-        "grid",
+    sess.update_many(
         {
-            "N": list(grid_n),
-            "spacing": list(grid_spacing),
-            "sound_speed_for_time_scalar": sound_speed,
-            "sound_speed_for_time_path": None,
-        },
-    )
-    sess.update(
-        "medium",
-        {
-            "sound_speed": sound_speed,
-            "density": density,
-        },
-    )
-    sess.update(
-        "source",
-        {
-            "type": "initial-pressure",
-            "p0_path": p0_path,
-        },
+            "grid": {"N": list(grid_n), "spacing": list(grid_spacing)},
+            "medium": {"sound_speed_scalar": sound_speed, "sound_speed_path": None, "density_scalar": density, "density_path": None},
+            "source": {"type": "initial-pressure", "p0_path": p0_path},
+        }
     )
 
     return CLIResponse(
@@ -171,8 +128,5 @@ def generate(sess, phantom_type, grid_size, spacing, sound_speed, density, disc_
             "sound_speed": sound_speed,
             "density": density,
         },
-        derived={
-            "ndim": ndim,
-            "grid_points": int(np.prod(grid_n)),
-        },
+        derived={"ndim": ndim, "grid_points": int(np.prod(grid_n))},
     )

@@ -1,7 +1,6 @@
 """Agent-first CLI for k-Wave simulations. All commands return structured JSON."""
 
 from pathlib import Path
-from typing import Optional
 
 import click
 

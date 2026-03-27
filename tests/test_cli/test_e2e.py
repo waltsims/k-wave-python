@@ -14,47 +14,12 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_disc
-
-
-def _invoke(runner, args, session_dir):
-    result = runner.invoke(cli, ["--session-dir", str(session_dir)] + args, catch_exceptions=False)
-    assert result.exit_code == 0, f"Command failed: {args}\n{result.output}"
-    # The run command emits progress events (single-line JSON) before the final
-    # multi-line JSON response. Find the last complete JSON object.
-    output = result.output.strip()
-    # Try parsing the full output first (non-run commands produce a single JSON object)
-    try:
-        return json.loads(output)
-    except json.JSONDecodeError:
-        pass
-    # For run command: find the last '{' that starts a top-level JSON object
-    depth = 0
-    last_start = None
-    for i, ch in enumerate(output):
-        if ch == "{" and depth == 0:
-            last_start = i
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-    if last_start is not None:
-        return json.loads(output[last_start:])
-    raise ValueError(f"Could not parse JSON from output: {output[:200]}")
-
-
-@pytest.fixture
-def session_dir(tmp_path):
-    return tmp_path / "kwave_test_session"
-
-
-@pytest.fixture
-def runner():
-    return CliRunner()
+from tests.test_cli.conftest import invoke
 
 
 class TestSessionLifecycle:
     def test_init(self, runner, session_dir):
-        resp = _invoke(runner, ["session", "init"], session_dir)
+        resp = invoke(runner, ["session", "init"], session_dir)
         assert resp["status"] == "ok"
         assert "session_id" in resp["result"]
 
@@ -63,15 +28,15 @@ class TestSessionLifecycle:
         assert result.exit_code != 0
 
     def test_reset(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
-        resp = _invoke(runner, ["session", "reset"], session_dir)
+        invoke(runner, ["session", "init"], session_dir)
+        resp = invoke(runner, ["session", "reset"], session_dir)
         assert resp["result"]["reset"] is True
 
 
 class TestPhantomGenerate:
     def test_disc_phantom(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
-        resp = _invoke(
+        invoke(runner, ["session", "init"], session_dir)
+        resp = invoke(
             runner,
             [
                 "phantom",
@@ -96,21 +61,10 @@ class TestPhantomGenerate:
         assert resp["result"]["p0_max"] == 1.0
 
     def test_disc_requires_2d(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
+        invoke(runner, ["session", "init"], session_dir)
         result = runner.invoke(
             cli,
-            [
-                "--session-dir",
-                str(session_dir),
-                "phantom",
-                "generate",
-                "--type",
-                "disc",
-                "--grid-size",
-                "64,64,64",
-                "--spacing",
-                "0.1e-3",
-            ],
+            ["--session-dir", str(session_dir), "phantom", "generate", "--type", "disc", "--grid-size", "64,64,64", "--spacing", "0.1e-3"],
         )
         assert result.exit_code != 0
         resp = json.loads(result.output)
@@ -119,21 +73,21 @@ class TestPhantomGenerate:
 
 class TestSensorDefine:
     def test_full_grid(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
-        resp = _invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
+        invoke(runner, ["session", "init"], session_dir)
+        resp = invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
         assert resp["result"]["mask_type"] == "full-grid"
         assert resp["result"]["record"] == ["p", "p_final"]
 
 
 class TestPlan:
     def test_plan_incomplete_session(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
+        invoke(runner, ["session", "init"], session_dir)
         result = runner.invoke(cli, ["--session-dir", str(session_dir), "plan"])
         assert result.exit_code != 0
 
     def test_plan_complete_session(self, runner, session_dir):
-        _invoke(runner, ["session", "init"], session_dir)
-        _invoke(
+        invoke(runner, ["session", "init"], session_dir)
+        invoke(
             runner,
             [
                 "phantom",
@@ -151,8 +105,8 @@ class TestPlan:
             ],
             session_dir,
         )
-        _invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
-        resp = _invoke(runner, ["plan"], session_dir)
+        invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
+        resp = invoke(runner, ["plan"], session_dir)
         assert resp["status"] == "ok"
         assert resp["result"]["grid"]["Nt"] > 0
         assert resp["derived"]["cfl"] > 0
@@ -161,10 +115,12 @@ class TestPlan:
 class TestEndToEnd:
     """Replicate new_api_ivp_2D.py via CLI and compare results."""
 
+    N = 48  # small grid for fast CI (must be > 2*pml_size=40)
+
     def test_cli_matches_python_api(self, runner, session_dir):
-        # Run via CLI
-        _invoke(runner, ["session", "init"], session_dir)
-        _invoke(
+        N = self.N
+        invoke(runner, ["session", "init"], session_dir)
+        invoke(
             runner,
             [
                 "phantom",
@@ -172,7 +128,7 @@ class TestEndToEnd:
                 "--type",
                 "disc",
                 "--grid-size",
-                "128,128",
+                f"{N},{N}",
                 "--spacing",
                 "0.1e-3",
                 "--sound-speed",
@@ -180,30 +136,27 @@ class TestEndToEnd:
                 "--density",
                 "1000",
                 "--disc-center",
-                "64,64",
+                f"{N // 2},{N // 2}",
                 "--disc-radius",
-                "5",
+                "3",
             ],
             session_dir,
         )
-        _invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
-        resp = _invoke(runner, ["run"], session_dir)
+        invoke(runner, ["sensor", "define", "--mask", "full-grid", "--record", "p,p_final"], session_dir)
+        resp = invoke(runner, ["run"], session_dir)
         assert resp["status"] == "ok"
 
-        # Load CLI results
         cli_p = np.load(resp["result"]["outputs"]["p"]["path"])
         cli_p_final = np.load(resp["result"]["outputs"]["p_final"]["path"])
 
-        # Run directly via Python API (the example)
-        kgrid = kWaveGrid([128, 128], [0.1e-3, 0.1e-3])
+        kgrid = kWaveGrid([N, N], [0.1e-3, 0.1e-3])
         kgrid.makeTime(1500)
         medium = kWaveMedium(sound_speed=1500, density=1000)
         source = kSource()
-        source.p0 = make_disc(Vector([128, 128]), Vector([64, 64]), 5).astype(float)
-        sensor = kSensor(mask=np.ones((128, 128), dtype=bool))
+        source.p0 = make_disc(Vector([N, N]), Vector([N // 2, N // 2]), 3).astype(float)
+        sensor = kSensor(mask=np.ones((N, N), dtype=bool))
         result = kspaceFirstOrder(kgrid, medium, source, sensor, quiet=True)
 
-        # Compare
         assert cli_p.shape == result["p"].shape
         assert cli_p_final.shape == result["p_final"].shape
         np.testing.assert_allclose(cli_p, result["p"], rtol=0, atol=0)

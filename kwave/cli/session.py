@@ -83,7 +83,6 @@ class Session:
         """Clear session state, keep the session ID."""
         self.load()
         self._state = _default_state()
-        # Clean up data files
         if self.data_dir.exists():
             for f in self.data_dir.iterdir():
                 f.unlink()
@@ -96,12 +95,34 @@ class Session:
             "session_id": self.id,
             "created_at": self._created_at,
             "state": self.state,
-            "completeness": self._completeness(),
+            "completeness": self.completeness(),
         }
+
+    def completeness(self) -> dict:
+        """Which steps have been completed."""
+        s = self.state
+        return {
+            "grid": s["grid"] is not None,
+            "medium": s["medium"] is not None,
+            "source": s["source"] is not None,
+            "sensor": s["sensor"] is not None,
+        }
+
+    def assert_ready(self, verb: str = "proceed") -> None:
+        """Raise SessionError if any required step is incomplete."""
+        missing = [k for k, v in self.completeness().items() if not v]
+        if missing:
+            raise SessionError(f"Cannot {verb}: missing {', '.join(missing)}. Complete setup first.")
 
     def update(self, key: str, value) -> None:
         """Update a state field and persist."""
         self.state[key] = value
+        self._save()
+
+    def update_many(self, updates: dict) -> None:
+        """Update multiple state fields and persist once."""
+        for key, value in updates.items():
+            self.state[key] = value
         self._save()
 
     def save_array(self, name: str, arr: np.ndarray) -> str:
@@ -117,6 +138,16 @@ class Session:
 
     # --- Materializers: session state -> kWave objects ---
 
+    def _resolve_field(self, state: dict, field: str):
+        """Load a medium field from session state (path or scalar)."""
+        path = state.get(f"{field}_path")
+        if path is not None:
+            return np.load(path)
+        scalar = state.get(f"{field}_scalar")
+        if scalar is not None:
+            return scalar
+        return None
+
     def make_grid(self):
         """Construct a kWaveGrid from session state."""
         from kwave.kgrid import kWaveGrid
@@ -128,19 +159,16 @@ class Session:
         grid_spacing = tuple(g["spacing"])
         kgrid = kWaveGrid(grid_size, grid_spacing)
 
-        # Resolve sound speed for time stepping (array or scalar)
-        sound_speed = None
-        if g.get("sound_speed_for_time_path") is not None:
-            sound_speed = np.load(g["sound_speed_for_time_path"])
-        elif g.get("sound_speed_for_time_scalar") is not None:
-            sound_speed = g["sound_speed_for_time_scalar"]
-
-        if sound_speed is not None:
-            cfl = g.get("cfl")
-            if cfl is not None:
-                kgrid.makeTime(sound_speed, cfl=cfl)
-            else:
-                kgrid.makeTime(sound_speed)
+        # Resolve sound speed for time stepping from medium state
+        m = self.state.get("medium")
+        if m is not None:
+            sound_speed = self._resolve_field(m, "sound_speed")
+            if sound_speed is not None:
+                cfl = g.get("cfl")
+                if cfl is not None:
+                    kgrid.makeTime(sound_speed, cfl=cfl)
+                else:
+                    kgrid.makeTime(sound_speed)
         return kgrid
 
     def make_medium(self):
@@ -151,18 +179,10 @@ class Session:
         if m is None:
             raise SessionError("Medium not defined. Run 'kwave phantom generate' or 'kwave phantom load' first.")
         kwargs = {}
-        # Handle fields that can be scalars or .npy paths
         for field in ("sound_speed", "density", "alpha_coeff", "alpha_power", "BonA"):
-            # Check for path-based storage (from phantom load)
-            path_key = f"{field}_path"
-            scalar_key = f"{field}_scalar"
-            if path_key in m and m[path_key] is not None:
-                kwargs[field] = np.load(m[path_key])
-            elif scalar_key in m and m[scalar_key] is not None:
-                kwargs[field] = m[scalar_key]
-            # Fallback: direct scalar value (from phantom generate)
-            elif field in m and m[field] is not None:
-                kwargs[field] = m[field]
+            val = self._resolve_field(m, field)
+            if val is not None:
+                kwargs[field] = val
         return kWaveMedium(**kwargs)
 
     def make_source(self):
@@ -196,16 +216,6 @@ class Session:
         return sensor
 
     # --- Private ---
-
-    def _completeness(self) -> dict:
-        """Which steps have been completed."""
-        s = self.state
-        return {
-            "grid": s["grid"] is not None,
-            "medium": s["medium"] is not None,
-            "source": s["source"] is not None,
-            "sensor": s["sensor"] is not None,
-        }
 
     def _save(self):
         raw = {
