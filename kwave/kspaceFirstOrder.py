@@ -68,7 +68,7 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms")
+_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
 
 
 def _strip_pml(result, pml_size, ndim):
@@ -156,6 +156,10 @@ def kspaceFirstOrder(
     Returns:
         dict: Recorded sensor data keyed by field name (e.g.
         ``"p"``, ``"p_final"``, ``"ux"``, ``"uy"``).
+
+        All time-series are ``(n_sensor, Nt)`` with sensor points in
+        C-flattened order.  Use :func:`reshape_to_grid` to recover spatial
+        structure for full-grid masks.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
@@ -181,7 +185,7 @@ def kspaceFirstOrder(
         from kwave.utils.filters import smooth
 
         source = copy.copy(source)
-        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(tuple(int(n) for n in kgrid.N), order="F"), restore_max=True)
+        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(tuple(int(n) for n in kgrid.N)), restore_max=True)
 
     # --- Backend dispatch ---
 
@@ -225,7 +229,7 @@ def kspaceFirstOrder(
             from kwave.utils.conversion import cart2grid
 
             sensor = copy.copy(sensor)
-            sensor.mask, _, _ = cart2grid(kgrid, np.asarray(sensor.mask))
+            sensor.mask, _, _ = cart2grid(kgrid, np.asarray(sensor.mask), order="C")
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
@@ -244,3 +248,27 @@ def kspaceFirstOrder(
         result = _strip_pml(result, pml_size, kgrid.dim)
 
     return result
+
+
+def reshape_to_grid(data, grid_shape):
+    """Reshape flat sensor data to grid shape.
+
+    Convenience helper for full-grid sensor masks where ``n_sensor``
+    equals the total number of grid points.
+
+    Args:
+        data: sensor array — ``(n_sensor, Nt)`` time-series or
+            ``(n_sensor,)`` aggregate.
+        grid_shape: tuple of grid dimensions, e.g. ``(Nx, Ny)``.
+
+    Returns:
+        For time-series: ``(*grid_shape, Nt)``
+        For aggregates:  ``(*grid_shape)``
+    """
+    data = np.asarray(data)
+    if data.ndim == 2:
+        n_sensor, Nt = data.shape
+        return data.reshape(*grid_shape, Nt)
+    elif data.ndim == 1:
+        return data.reshape(grid_shape)
+    return data

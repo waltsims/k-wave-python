@@ -218,6 +218,32 @@ Port examples one at a time using MATLAB as ground truth — not old Python resu
 
 ---
 
+## Phase 2.x: v0.6.x Point Releases
+
+### v0.6.1 — C-order Migration
+
+**Status: implemented on `c-order-migration` branch**
+
+Atomic migration of all solver internals from Fortran-order to C-order. The `kspaceFirstOrder()` API is experimental pre-1.0, so output shape changes are acceptable without a deprecation cycle.
+
+**Changes:**
+- `kspace_solver.py`: all `flatten(order="F")`/`reshape(..., order="F")` → `ravel()`/`reshape()`. C-order strides for bilinear interpolation.
+- `cpp_simulation.py`: `_fix_output_order()` transposes full-grid fields and permutes sensor time-series rows from F-indexed to C-indexed.
+- `kspaceFirstOrder.py`: `_reshape_sensor_to_grid()` for full-grid sensors → `(Nt, *grid_shape)` output. Aggregates → `(*grid_shape)`.
+- `cart2grid`, `combine_sensor_data`, `get_distributed_source_signal`: `order=` param with `FutureWarning` defaulting to `"F"`.
+
+**Unchanged (by design):** `matlab.py` (F-order boundary), `mapgen.py` (geometry), `kgrid.py` (MATLAB inputs), `cpp_simulation._write_hdf5()` (C++ binary format), legacy `kspaceFirstOrder2D/3D`.
+
+### v0.6.2 — Example Porting
+
+Port remaining examples from legacy `kspaceFirstOrder2D/3D` to unified `kspaceFirstOrder()`. Strategy: MATLAB reference → k-wave-cupy validation → standalone Python port → CI fixture.
+
+### v0.6.3 — Axisymmetric Support
+
+Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.
+
+---
+
 ## Phase 3: v1.0.0 - Clean Release
 
 **Goal:** Simple, readable, fast. Remove all deprecated code.

@@ -16,6 +16,8 @@ from kwave.utils.mapgen import make_cart_arc, make_cart_bowl, make_cart_disc, ma
 from kwave.utils.math import make_affine, sinc
 from kwave.utils.matlab import matlab_assign, matlab_find, matlab_mask
 
+_DEFAULT_ORDER = object()  # sentinel for detecting implicit default order="F"
+
 
 @dataclass(eq=False)
 class Element:
@@ -692,14 +694,31 @@ class kWaveArray(object):
 
         return grid_weights
 
-    def get_distributed_source_signal(self, kgrid, source_signal):
-        start_time = time.time()
+    def get_distributed_source_signal(self, kgrid, source_signal, *, order=_DEFAULT_ORDER):
+        """Distribute per-element source signals onto grid source points.
 
+        Args:
+            order: ``"C"`` for C-order (new API) or ``"F"`` for Fortran-order
+                (legacy).  Default ``"F"`` — will change to ``"C"`` in a
+                future release.
+        """
+        if order is _DEFAULT_ORDER:
+            import warnings
+
+            warnings.warn(
+                "get_distributed_source_signal default order='F' will change to order='C' in a future release. "
+                "Pass order='C' explicitly.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            order = "F"
+
+        start_time = time.time()
         self.check_for_elements()
 
         mask = self.get_array_binary_mask(kgrid)
-        mask_ind = matlab_find(mask).squeeze(axis=-1)
-        num_source_points = np.sum(mask)
+        mask_ind = np.where(mask.ravel(order=order) != 0)[0]
+        num_source_points = int(np.sum(mask))
 
         Nt = np.shape(source_signal)[1]
 
@@ -727,46 +746,50 @@ class kWaveArray(object):
         distributed_source_signal = np.zeros((num_source_points, Nt), dtype=data_type)
 
         for ind in range(self.number_elements):
-            source_weights = self.get_element_grid_weights(kgrid, ind)
-
-            element_mask_ind = matlab_find(np.array(source_weights), val=0, mode="neq").squeeze(axis=-1)
-
+            weights_flat = np.asarray(self.get_element_grid_weights(kgrid, ind)).ravel(order=order)
+            element_mask_ind = np.where(weights_flat != 0)[0]
             local_ind = np.isin(mask_ind, element_mask_ind)
-
-            distributed_source_signal[local_ind] += matlab_mask(source_weights, element_mask_ind - 1) * source_signal[ind, :][None, :]
+            distributed_source_signal[local_ind] += weights_flat[element_mask_ind, None] * source_signal[ind, :][None, :]
 
         end_time = time.time()
         logging.log(logging.INFO, f"total computation time : {end_time - start_time:.2f} s")
 
         return distributed_source_signal
 
-    def combine_sensor_data(self, kgrid, sensor_data):
+    def combine_sensor_data(self, kgrid, sensor_data, *, order=_DEFAULT_ORDER):
+        """Combine sensor data from grid points back to array elements.
+
+        Args:
+            order: ``"C"`` for C-order (new API) or ``"F"`` for Fortran-order
+                (legacy).  Default ``"F"`` — will change to ``"C"`` in a
+                future release.
+        """
+        if order is _DEFAULT_ORDER:
+            import warnings
+
+            warnings.warn(
+                "combine_sensor_data default order='F' will change to order='C' in a future release. " "Pass order='C' explicitly.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            order = "F"
+
         self.check_for_elements()
 
         mask = self.get_array_binary_mask(kgrid)
-        mask_ind = matlab_find(mask).squeeze(axis=-1)
+        mask_ind = np.where(mask.ravel(order=order) != 0)[0]
 
         Nt = np.shape(sensor_data)[1]
-        # TODO (Walter): this assertion does not work when "auto" is set
-        # assert kgrid.Nt == Nt, 'sensor_data must have the same number of time steps as kgrid'
-
         combined_sensor_data = np.zeros((self.number_elements, Nt))
 
         for element_num in range(self.number_elements):
-            source_weights = self.get_element_grid_weights(kgrid, element_num)
-
-            element_mask_ind = matlab_find(np.array(source_weights), val=0, mode="neq").squeeze(axis=-1)
-
+            weights_flat = np.asarray(self.get_element_grid_weights(kgrid, element_num)).ravel(order=order)
+            element_mask_ind = np.where(weights_flat != 0)[0]
             local_ind = np.isin(mask_ind, element_mask_ind)
 
-            combined_sensor_data[element_num, :] = np.sum(
-                sensor_data[local_ind] * matlab_mask(source_weights, element_mask_ind - 1),
-                axis=0,
-            )
-
+            combined_sensor_data[element_num, :] = np.sum(sensor_data[local_ind] * weights_flat[element_mask_ind, None], axis=0)
             m_grid = self.elements[element_num].measure / (kgrid.dx) ** (self.elements[element_num].dim)
-
-            combined_sensor_data[element_num, :] = combined_sensor_data[element_num, :] / m_grid
+            combined_sensor_data[element_num, :] /= m_grid
 
         return combined_sensor_data
 
