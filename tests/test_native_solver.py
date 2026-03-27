@@ -240,6 +240,32 @@ class TestCartesianSensor:
         assert result["p"].shape == (3, 20)
 
 
+class TestProgressBar:
+    def test_progress_bar_runs(self, grid_2d):
+        """quiet=False (default) shows tqdm progress bar without error."""
+        result = kspaceFirstOrder(
+            grid_2d,
+            kWaveMedium(sound_speed=1500),
+            _p0_source((64, 64)),
+            kSensor(mask=np.ones((64, 64), dtype=bool)),
+            backend="python",
+            quiet=False,
+        )
+        assert "p" in result
+
+    def test_quiet_suppresses_bar(self, grid_2d):
+        """quiet=True suppresses progress bar."""
+        result = kspaceFirstOrder(
+            grid_2d,
+            kWaveMedium(sound_speed=1500),
+            _p0_source((64, 64)),
+            kSensor(mask=np.ones((64, 64), dtype=bool)),
+            backend="python",
+            quiet=True,
+        )
+        assert "p" in result
+
+
 class TestMatlabInterop:
     def test_simulate_from_dicts(self):
         from kwave.solvers.kspace_solver import simulate_from_dicts
