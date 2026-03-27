@@ -158,13 +158,34 @@ warnings.warn(
 
 ## Phase 2.2: v0.6.2 - Example Migration
 
-**Goal:** Port remaining examples from legacy `kspaceFirstOrder2D/3D` to `kspaceFirstOrder()`.
+**Goal:** Port remaining examples from legacy `kspaceFirstOrder2D/3D` to `kspaceFirstOrder()`, validated against MATLAB reference outputs.
 
-| Example | Blocker |
-|---------|---------|
-| `pr_2D_TR_line_sensor`, `pr_3D_TR_planar_sensor` | `TimeReversal` class uses legacy API internally |
-| `us_defining_transducer`, `us_beam_patterns`, `us_bmode_linear_transducer`, `us_bmode_phased_array` | `NotATransducer`-as-source pipeline untested with new API |
-| `checkpointing/checkpoint.py` | `checkpoint_file`/`checkpoint_timesteps` not exposed in new API |
+### Strategy
+
+Port examples one at a time using MATLAB as ground truth — not old Python results. Use the k-wave-cupy interop layer as the bridge between MATLAB and Python.
+
+**Per-example workflow:**
+
+1. **MATLAB reference** — Run the example in MATLAB k-Wave, save outputs to `.mat`
+2. **k-wave-cupy validation** — Call the Python solver from MATLAB via k-wave-cupy (`simulate_from_dicts`). Compare against MATLAB output. This catches F/C ordering and interop issues at the boundary.
+3. **Standalone Python port** — Port the example to `kspaceFirstOrder()`, compare against the same MATLAB `.mat` reference
+4. **CI fixture** — Add the MATLAB `.mat` as a reference test in `tests/integration/`
+
+**Why k-wave-cupy first:** The interop layer handles F→C conversion at the boundary. Validating there first means ordering bugs are caught before they propagate to the standalone Python example. Once the k-wave-cupy version matches MATLAB, the Python port is a straightforward translation.
+
+**Order of work:**
+1. Migrate example in k-wave-cupy repo (MATLAB calls Python solver)
+2. Validate against MATLAB reference output
+3. Port the standalone Python example in k-wave-python
+4. Add integration test with `.mat` fixture
+
+### Examples to port
+
+| Example | Blocker | Resolution |
+|---------|---------|------------|
+| `pr_2D_TR_line_sensor`, `pr_3D_TR_planar_sensor` | `TimeReversal` class uses legacy API internally | Refactor `TimeReversal` to call `kspaceFirstOrder()` |
+| `us_defining_transducer`, `us_beam_patterns`, `us_bmode_linear_transducer`, `us_bmode_phased_array` | `NotATransducer`-as-source pipeline untested with new API | Validate transducer pipeline end-to-end via k-wave-cupy first |
+| `checkpointing/checkpoint.py` | `checkpoint_file`/`checkpoint_timesteps` not exposed in new API | Add checkpoint kwargs to `kspaceFirstOrder()` |
 
 ---
 
