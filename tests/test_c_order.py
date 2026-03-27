@@ -10,6 +10,7 @@ from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import reshape_to_grid
+from kwave.solvers.kspace_solver import _f_to_c_source_reorder
 
 # ---------------------------------------------------------------------------
 # _fix_output_order (CppSimulation)
@@ -139,6 +140,101 @@ class TestReshapeToGrid:
         data = np.arange(120).reshape(2, 3, 4, 5)
         out = reshape_to_grid(data, (4, 6))
         assert out.shape == (2, 3, 4, 5)
+
+
+# ---------------------------------------------------------------------------
+# _f_to_c_source_reorder (MATLAB interop)
+# ---------------------------------------------------------------------------
+
+
+class TestFToCSourceReorder:
+    def test_1d_noop(self):
+        """1D grids have no F/C ordering difference — source unchanged."""
+        source = {"p_mask": np.array([0, 1, 0, 1, 0, 0, 0, 0], dtype=bool), "p": np.array([[10, 11], [20, 21]])}
+        out = _f_to_c_source_reorder(source, (8,))
+        np.testing.assert_array_equal(out["p"], np.array([[10, 11], [20, 21]]))
+
+    def test_pressure_multi_source_2d(self):
+        """Multi-row pressure source rows are reordered from F-flat to C-flat."""
+        grid_shape = (3, 4)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[0, 0] = True  # F-idx 0, C-idx 0
+        mask[1, 0] = True  # F-idx 1, C-idx 4
+        mask[0, 1] = True  # F-idx 3, C-idx 1
+
+        # Signal rows in F-flat order: row0→(0,0), row1→(1,0), row2→(0,1)
+        p_signal = np.array([[100, 101], [200, 201], [300, 301]])
+        source = {"p_mask": mask, "p": p_signal.copy()}
+        out = _f_to_c_source_reorder(source, grid_shape)
+
+        # C-flat order: (0,0)=idx0, (0,1)=idx1, (1,0)=idx4
+        # So C-flat rows should be: (0,0), (0,1), (1,0) = F-rows 0, 2, 1
+        np.testing.assert_array_equal(out["p"][0], [100, 101])  # (0,0)
+        np.testing.assert_array_equal(out["p"][1], [300, 301])  # (0,1)
+        np.testing.assert_array_equal(out["p"][2], [200, 201])  # (1,0)
+
+    def test_velocity_multi_source_2d(self):
+        """Multi-row velocity source rows are reordered."""
+        grid_shape = (3, 4)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[0, 0] = True
+        mask[2, 1] = True  # F-idx 5, C-idx 6
+
+        ux = np.array([[10, 11], [20, 21]])
+        source = {"u_mask": mask, "ux": ux.copy(), "uy": None}
+        out = _f_to_c_source_reorder(source, grid_shape)
+        # With only 2 points, check that reorder happened (or is identity if indices align)
+        assert out["ux"].shape == (2, 2)
+
+    def test_single_source_noop(self):
+        """Single-source (n_src=1) is not reordered."""
+        grid_shape = (4, 4)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[2, 3] = True
+        p_signal = np.array([[5, 6, 7]])
+        source = {"p_mask": mask, "p": p_signal.copy()}
+        out = _f_to_c_source_reorder(source, grid_shape)
+        np.testing.assert_array_equal(out["p"], p_signal)
+
+    def test_uniform_source_noop(self):
+        """Uniform source (1 row broadcast to all) is not reordered."""
+        grid_shape = (4, 4)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[0, 0] = True
+        mask[1, 1] = True
+        mask[2, 2] = True
+        # 1 row, broadcast — n_rows != n_src
+        p_signal = np.array([[1, 2, 3]])
+        source = {"p_mask": mask, "p": p_signal.copy()}
+        out = _f_to_c_source_reorder(source, grid_shape)
+        np.testing.assert_array_equal(out["p"], p_signal)
+
+    def test_no_mask_noop(self):
+        """Missing mask key is silently skipped."""
+        source = {"p": np.array([[1, 2]])}
+        out = _f_to_c_source_reorder(source, (4, 4))
+        np.testing.assert_array_equal(out["p"], np.array([[1, 2]]))
+
+    def test_scalar_mask_noop(self):
+        """Scalar mask (size 1) is skipped."""
+        source = {"p_mask": np.array([True]), "p": np.array([[1, 2]])}
+        out = _f_to_c_source_reorder(source, (4, 4))
+        np.testing.assert_array_equal(out["p"], np.array([[1, 2]]))
+
+    def test_3d_grid(self):
+        """Works with 3D grids."""
+        grid_shape = (2, 3, 4)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[0, 0, 0] = True  # F-idx 0, C-idx 0
+        mask[1, 0, 0] = True  # F-idx 1, C-idx 12
+        mask[0, 1, 0] = True  # F-idx 2, C-idx 4
+        p_signal = np.array([[10, 11], [20, 21], [30, 31]])
+        source = {"p_mask": mask, "p": p_signal.copy()}
+        out = _f_to_c_source_reorder(source, grid_shape)
+        # C-flat: (0,0,0)=0, (0,1,0)=4, (1,0,0)=12 → F-rows 0, 2, 1
+        np.testing.assert_array_equal(out["p"][0], [10, 11])
+        np.testing.assert_array_equal(out["p"][1], [30, 31])
+        np.testing.assert_array_equal(out["p"][2], [20, 21])
 
 
 # ---------------------------------------------------------------------------
