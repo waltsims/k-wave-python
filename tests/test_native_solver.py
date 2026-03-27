@@ -43,7 +43,7 @@ class TestNative2D:
         result = kspaceFirstOrder(
             grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), kSensor(mask=np.ones((64, 64), dtype=bool)), backend="python"
         )
-        assert result["p"].shape == (64 * 64, 10)
+        assert result["p"].shape == (10, 64, 64)
         assert np.max(np.abs(result["p"])) > 0
 
     def test_heterogeneous_medium(self, grid_2d):
@@ -56,7 +56,7 @@ class TestNative2D:
             kSensor(mask=np.ones((64, 64), dtype=bool)),
             backend="python",
         )
-        assert result["p"].shape[0] == 64 * 64
+        assert result["p"].shape == (10, 64, 64)
 
     def test_absorption(self, grid_2d):
         result = kspaceFirstOrder(
@@ -66,7 +66,7 @@ class TestNative2D:
             kSensor(mask=np.ones((64, 64), dtype=bool)),
             backend="python",
         )
-        assert result["p"].shape == (64 * 64, 10)
+        assert result["p"].shape == (10, 64, 64)
 
     def test_pml_auto(self):
         kgrid = kWaveGrid(Vector([128, 128]), Vector([0.1e-3, 0.1e-3]))
@@ -84,7 +84,7 @@ class TestNative2D:
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "p_max", "p_rms"]
         result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
-        assert result["p_max"].shape == (64 * 64,)
+        assert result["p_max"].shape == (64, 64)
         assert "p_rms" in result
 
 
@@ -119,7 +119,7 @@ class TestNativePhysics:
             kSensor(mask=np.ones((64, 64), dtype=bool)),
             backend="python",
         )
-        assert result["p"].shape == (64 * 64, 10)
+        assert result["p"].shape == (10, 64, 64)
 
     def test_stokes_absorption(self, grid_2d):
         result = kspaceFirstOrder(
@@ -129,7 +129,7 @@ class TestNativePhysics:
             kSensor(mask=np.ones((64, 64), dtype=bool)),
             backend="python",
         )
-        assert result["p"].shape == (64 * 64, 10)
+        assert result["p"].shape == (10, 64, 64)
 
     def test_dirichlet_pressure_source(self, grid_1d):
         source = kSource()
@@ -146,17 +146,16 @@ class TestNativePhysics:
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "ux", "uy", "ux_max", "uy_rms", "ux_final", "p_final"]
         result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
-        n = 64 * 64
-        assert result["ux"].shape == (n, 10)
-        assert result["ux_max"].shape == (n,)
+        assert result["ux"].shape == (10, 64, 64)
+        assert result["ux_max"].shape == (64, 64)
         assert "ux_final" in result and "p_final" in result
 
     def test_intensity_recording(self, grid_2d):
         sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
         sensor.record = ["p", "ux", "uy", "Ix", "Iy", "Ix_avg", "Iy_avg"]
         result = kspaceFirstOrder(grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor, backend="python")
-        assert result["Ix"].shape == (64 * 64, 10)
-        assert result["Ix_avg"].shape == (64 * 64,)
+        assert result["Ix"].shape == (10, 64, 64)
+        assert result["Ix_avg"].shape == (64, 64)
 
     def test_record_start_index(self, grid_1d):
         source = kSource()
@@ -173,7 +172,7 @@ class TestNativePhysics:
         source.p0 = np.zeros(64)
         source.p0[32] = 1.0
         result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), source, None, backend="python", pml_inside=True)
-        assert result["p"].shape == (64, 20)
+        assert result["p"].shape == (20, 64)
 
 
 class TestCppSaveOnly:

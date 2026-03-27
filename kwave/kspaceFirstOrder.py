@@ -156,6 +156,11 @@ def kspaceFirstOrder(
     Returns:
         dict: Recorded sensor data keyed by field name (e.g.
         ``"p"``, ``"p_final"``, ``"ux"``, ``"uy"``).
+
+        Sensor time-series are C-ordered.  When the sensor mask covers the
+        entire grid, time-series fields are returned as
+        ``(Nt, *grid_shape)`` (time-first).  For partial masks the shape is
+        ``(n_sensor, Nt)`` with sensor points in C-flattened order.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
@@ -173,6 +178,8 @@ def kspaceFirstOrder(
 
     # --- Shared pre-processing (both backends) ---
 
+    user_grid_shape = tuple(int(n) for n in kgrid.N)
+
     if not pml_inside:
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
 
@@ -181,7 +188,7 @@ def kspaceFirstOrder(
         from kwave.utils.filters import smooth
 
         source = copy.copy(source)
-        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(tuple(int(n) for n in kgrid.N), order="F"), restore_max=True)
+        source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(tuple(int(n) for n in kgrid.N)), restore_max=True)
 
     # --- Backend dispatch ---
 
@@ -225,7 +232,7 @@ def kspaceFirstOrder(
             from kwave.utils.conversion import cart2grid
 
             sensor = copy.copy(sensor)
-            sensor.mask, _, _ = cart2grid(kgrid, np.asarray(sensor.mask))
+            sensor.mask, _, _ = cart2grid(kgrid, np.asarray(sensor.mask), order="C")
 
         cpp_sim = CppSimulation(kgrid, medium, source, sensor, pml_size=pml_size, pml_alpha=pml_alpha, use_sg=use_sg)
         if save_only:
@@ -243,4 +250,35 @@ def kspaceFirstOrder(
     if not pml_inside:
         result = _strip_pml(result, pml_size, kgrid.dim)
 
+    result = _reshape_sensor_to_grid(result, sensor, user_grid_shape)
+
+    return result
+
+
+def _reshape_sensor_to_grid(result, sensor, user_grid_shape):
+    """Reshape sensor time-series to (Nt, *grid_shape) when the sensor covers the full user grid.
+
+    After PML expansion the sensor mask is padded with zeros, so we check
+    against the user's original grid shape (before expansion).
+    """
+    user_numel = int(np.prod(user_grid_shape))
+
+    mask = getattr(sensor, "mask", None) if sensor is not None else None
+    if mask is None:
+        n_sensor = user_numel
+    elif _is_cartesian_mask(mask, len(user_grid_shape)):
+        return result
+    else:
+        n_sensor = int(np.asarray(mask, dtype=bool).sum())
+
+    if n_sensor != user_numel:
+        return result
+
+    for key, val in result.items():
+        if not isinstance(val, np.ndarray):
+            continue
+        if val.ndim == 2 and val.shape[0] == n_sensor:
+            result[key] = val.T.reshape(-1, *user_grid_shape)
+        elif val.ndim == 1 and val.shape[0] == n_sensor:
+            result[key] = val.reshape(user_grid_shape)
     return result

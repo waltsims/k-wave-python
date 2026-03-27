@@ -61,7 +61,8 @@ class TestErrors:
         kgrid, medium, source, sensor = sim_2d
         result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
         assert "p" in result
-        assert result["p"].shape == (int(sensor.mask.sum()), int(kgrid.Nt))
+        # Full-grid sensor → (Nt, *grid_shape) in C-order
+        assert result["p"].shape == (int(kgrid.Nt), 64, 64)
 
     def test_cpp_save_only(self, sim_2d):
         kgrid, medium, source, sensor = sim_2d

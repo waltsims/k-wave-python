@@ -56,13 +56,64 @@ class CppSimulation:
         data_dir = os.path.dirname(input_file)
         try:
             self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
-            return self._parse_output(output_file)
+            result = self._parse_output(output_file)
+            result = self._fix_output_order(result)
+            return result
         finally:
             if cleanup:
                 try:
                     shutil.rmtree(data_dir)
                 except OSError as exc:
                     warnings.warn(f"Could not clean up temp directory {data_dir!r}: {exc}", RuntimeWarning, stacklevel=2)
+
+    _FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+
+    def _fix_output_order(self, result):
+        """Convert C++ output from F-order to C-order.
+
+        The C++ binary writes arrays in Fortran order.  HDF5/h5py reads them
+        with reversed dimensions.  We fix full-grid fields via transpose and
+        reorder sensor time-series rows from F-indexed to C-indexed.
+        """
+        ndim = self.ndim
+        grid_shape = tuple(int(n) for n in self.kgrid.N)
+
+        # 1. Transpose full-grid fields from reversed F-order to C-order
+        for key, val in result.items():
+            if not isinstance(val, np.ndarray):
+                continue
+            is_grid = any(key.endswith(s) for s in self._FULL_GRID_SUFFIXES)
+            if is_grid and val.ndim == ndim:
+                result[key] = val.transpose(tuple(range(ndim - 1, -1, -1)))
+
+        # 2. Reorder sensor time-series from F-indexed to C-indexed rows
+        if self.sensor is None or self.sensor.mask is None:
+            mask = np.ones(grid_shape, dtype=bool)
+        else:
+            mask = np.asarray(self.sensor.mask, dtype=bool).reshape(grid_shape)
+
+        n_sensor = int(mask.sum())
+        if n_sensor > 0 and ndim >= 2:
+            f_nz = np.where(mask.ravel(order="F"))[0]
+            c_nz = np.where(mask.ravel())[0]
+            f_equiv = np.ravel_multi_index(np.unravel_index(c_nz, grid_shape), grid_shape, order="F")
+            perm = np.searchsorted(f_nz, f_equiv)
+
+            for key, val in result.items():
+                if not isinstance(val, np.ndarray):
+                    continue
+                is_grid = any(key.endswith(s) for s in self._FULL_GRID_SUFFIXES)
+                if is_grid:
+                    continue
+                if val.ndim == 2 and n_sensor in val.shape:
+                    if val.shape[0] == n_sensor:
+                        result[key] = val[perm]
+                    elif val.shape[1] == n_sensor:
+                        result[key] = val[:, perm]
+                elif val.ndim == 1 and val.shape[0] == n_sensor:
+                    result[key] = val[perm]
+
+        return result
 
     # -- HDF5 serialization --
 

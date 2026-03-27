@@ -33,6 +33,34 @@ def load_matlab_ref(matlab_refs_dir):
     return _load
 
 
+def _to_matlab_shape(py_val, mat_val):
+    """Reshape C-order Python output to match MATLAB F-order reference shape.
+
+    The new API returns full-grid time-series as (Nt, *grid_shape) in C-order.
+    MATLAB references store them as (n_sensor, Nt) in F-flat order.
+    Similarly, aggregates are (*grid_shape) vs MATLAB (n_sensor,).
+    """
+    if py_val.shape == mat_val.shape:
+        return py_val
+
+    # Time-series: (Nt, *grid_shape) → (n_sensor, Nt) with F-order flatten
+    if py_val.ndim >= 3 and mat_val.ndim == 2:
+        Nt = py_val.shape[0]
+        grid_shape = py_val.shape[1:]
+        # Flatten each time step in F-order to match MATLAB's F-flat sensor ordering
+        n_sensor = int(np.prod(grid_shape))
+        reshaped = np.zeros((n_sensor, Nt), dtype=py_val.dtype)
+        for t in range(Nt):
+            reshaped[:, t] = py_val[t].ravel(order="F")
+        return reshaped
+
+    # Aggregates: (*grid_shape) → (n_sensor,) with F-order flatten
+    if py_val.ndim >= 2 and mat_val.ndim == 1:
+        return py_val.ravel(order="F")
+
+    return py_val
+
+
 def assert_fields_close(result, ref, fields, *, rtol=1e-10, atol=1e-12):
     """Compare Python result dict against MATLAB reference arrays.
 
@@ -47,6 +75,7 @@ def assert_fields_close(result, ref, fields, *, rtol=1e-10, atol=1e-12):
         assert mat_key in ref, f"MATLAB reference missing key '{mat_key}'"
         py_val = np.atleast_1d(np.squeeze(np.asarray(result[py_key])))
         mat_val = np.atleast_1d(np.squeeze(np.asarray(ref[mat_key])))
+        py_val = _to_matlab_shape(py_val, mat_val)
         assert py_val.shape == mat_val.shape, f"Shape mismatch for {py_key}: Python {py_val.shape} vs MATLAB {mat_val.shape}"
         np.testing.assert_allclose(
             py_val, mat_val, rtol=rtol, atol=atol, err_msg=f"Field '{py_key}' differs from MATLAB reference '{mat_key}'"
