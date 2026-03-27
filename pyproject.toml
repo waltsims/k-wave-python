@@ -55,6 +55,10 @@ docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-toolbox==3.8.0",
     "furo==2024.8.6"]
 dev = ["pre-commit==4.5.1"]
+cli = ["click>=8.0"]
+
+[project.scripts]
+kwave = "kwave.cli.main:cli"
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
@@ -65,7 +69,7 @@ path = "kwave/__init__.py"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper"]
+packages = ["kwave", "kwave.utils", "kwave.reconstruction", "kwave.kWaveSimulation_helper", "kwave.cli", "kwave.cli.commands"]
 
 
 [tool.hatch.build.targets.sdist]
