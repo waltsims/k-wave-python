@@ -126,7 +126,7 @@ warnings.warn(
 
 ## Phase 2.1: v0.6.1 - C-order Migration (Helpers)
 
-**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No user-facing API changes. Fix hacky shaping/indexing throughout.
+**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No structural API changes — deprecation warnings only. Fix hacky shaping/indexing throughout.
 
 **Scope:** 55 occurrences of `order="F"` across 10 files. Migrate where possible, keep F-order only at explicit boundaries.
 
@@ -144,11 +144,11 @@ warnings.warn(
 
 **Keep as-is (fixed boundaries):**
 
-| File | Reason |
-|------|--------|
-| `kwave/solvers/cpp_simulation.py` | C++ binary expects F-order HDF5 |
-| `kwave/kWaveSimulation.py` | Legacy, deleted in v1.0.0 |
-| `kwave/kWaveSimulation_helper/*` | Legacy, deleted in v1.0.0 |
+| File | `order="F"` count | Reason |
+|------|-------------------|--------|
+| `kwave/solvers/cpp_simulation.py` | 3 | C++ binary expects F-order HDF5 |
+| `kwave/kWaveSimulation.py` | 1 | Legacy, deleted in v1.0.0 |
+| `kwave/kWaveSimulation_helper/*` | 3 | Legacy, deleted in v1.0.0 |
 
 **Testing:**
 - All existing tests must pass (no behavioral change)
