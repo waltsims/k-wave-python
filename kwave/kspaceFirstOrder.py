@@ -68,7 +68,7 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms")
+_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
 
 
 def _strip_pml(result, pml_size, ndim):

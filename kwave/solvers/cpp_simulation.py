@@ -105,11 +105,8 @@ class CppSimulation:
                 is_grid = any(key.endswith(s) for s in self._FULL_GRID_SUFFIXES)
                 if is_grid:
                     continue
-                if val.ndim == 2 and n_sensor in val.shape:
-                    if val.shape[0] == n_sensor:
-                        result[key] = val[perm]
-                    elif val.shape[1] == n_sensor:
-                        result[key] = val[:, perm]
+                if val.ndim == 2 and val.shape[0] == n_sensor:
+                    result[key] = val[perm]
                 elif val.ndim == 1 and val.shape[0] == n_sensor:
                     result[key] = val[perm]
 

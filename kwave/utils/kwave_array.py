@@ -743,11 +743,10 @@ class kWaveArray(object):
         distributed_source_signal = np.zeros((num_source_points, Nt), dtype=data_type)
 
         for ind in range(self.number_elements):
-            source_weights = self.get_element_grid_weights(kgrid, ind)
-            element_mask_ind = np.where(np.asarray(source_weights).ravel(order=order) != 0)[0]
+            weights_flat = np.asarray(self.get_element_grid_weights(kgrid, ind)).ravel(order=order)
+            element_mask_ind = np.where(weights_flat != 0)[0]
             local_ind = np.isin(mask_ind, element_mask_ind)
-            weight_vals = np.asarray(source_weights).ravel(order=order)[element_mask_ind]
-            distributed_source_signal[local_ind] += weight_vals[:, None] * source_signal[ind, :][None, :]
+            distributed_source_signal[local_ind] += weights_flat[element_mask_ind, None] * source_signal[ind, :][None, :]
 
         end_time = time.time()
         logging.log(logging.INFO, f"total computation time : {end_time - start_time:.2f} s")
@@ -780,12 +779,11 @@ class kWaveArray(object):
         combined_sensor_data = np.zeros((self.number_elements, Nt))
 
         for element_num in range(self.number_elements):
-            source_weights = self.get_element_grid_weights(kgrid, element_num)
-            element_mask_ind = np.where(np.asarray(source_weights).ravel(order=order) != 0)[0]
+            weights_flat = np.asarray(self.get_element_grid_weights(kgrid, element_num)).ravel(order=order)
+            element_mask_ind = np.where(weights_flat != 0)[0]
             local_ind = np.isin(mask_ind, element_mask_ind)
-            weight_vals = np.asarray(source_weights).ravel(order=order)[element_mask_ind]
 
-            combined_sensor_data[element_num, :] = np.sum(sensor_data[local_ind] * weight_vals[:, None], axis=0)
+            combined_sensor_data[element_num, :] = np.sum(sensor_data[local_ind] * weights_flat[element_mask_ind, None], axis=0)
             m_grid = self.elements[element_num].measure / (kgrid.dx) ** (self.elements[element_num].dim)
             combined_sensor_data[element_num, :] /= m_grid
 

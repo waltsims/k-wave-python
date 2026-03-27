@@ -46,13 +46,8 @@ def _to_matlab_shape(py_val, mat_val):
     # Time-series: (Nt, *grid_shape) → (n_sensor, Nt) with F-order flatten
     if py_val.ndim >= 3 and mat_val.ndim == 2:
         Nt = py_val.shape[0]
-        grid_shape = py_val.shape[1:]
-        # Flatten each time step in F-order to match MATLAB's F-flat sensor ordering
-        n_sensor = int(np.prod(grid_shape))
-        reshaped = np.zeros((n_sensor, Nt), dtype=py_val.dtype)
-        for t in range(Nt):
-            reshaped[:, t] = py_val[t].ravel(order="F")
-        return reshaped
+        # Move time axis last, then F-order flatten the grid dims
+        return np.moveaxis(py_val, 0, -1).reshape(-1, Nt, order="F")
 
     # Aggregates: (*grid_shape) → (n_sensor,) with F-order flatten
     if py_val.ndim >= 2 and mat_val.ndim == 1:
