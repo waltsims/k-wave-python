@@ -779,12 +779,52 @@ def create_simulation(kgrid, medium, source, sensor, device="auto", smooth_p0=Fa
     )
 
 
+def _f_to_c_source_reorder(source, grid_shape):
+    """Reorder multi-row source signals from MATLAB F-flat to C-flat mask order.
+
+    MATLAB sends source signal rows ordered by F-flattened mask indices.
+    The solver uses C-flat ordering internally.  For single-row (uniform)
+    sources, no reordering is needed.
+    """
+    ndim = len(grid_shape)
+    if ndim < 2:
+        return source
+
+    for mask_key, signal_keys in [("p_mask", ["p"]), ("u_mask", ["ux", "uy", "uz"])]:
+        mask_raw = source.get(mask_key)
+        if mask_raw is None:
+            continue
+        mask = np.asarray(mask_raw, dtype=bool)
+        if mask.size <= 1:
+            continue
+        mask_grid = mask.reshape(grid_shape)
+        n_src = int(mask_grid.sum())
+        if n_src < 2:
+            continue
+
+        # Build F→C permutation for mask points
+        f_nz = np.where(mask_grid.ravel(order="F"))[0]
+        c_nz = np.where(mask_grid.ravel())[0]
+        f_equiv = np.ravel_multi_index(np.unravel_index(c_nz, grid_shape), grid_shape, order="F")
+        perm = np.searchsorted(f_nz, f_equiv)
+
+        for sig_key in signal_keys:
+            sig = source.get(sig_key)
+            if sig is None:
+                continue
+            sig = np.asarray(sig)
+            if sig.ndim >= 2 and sig.shape[0] == n_src:
+                source[sig_key] = sig[perm]
+
+    return source
+
+
 def simulate_from_dicts(kgrid, medium, source, sensor, device="auto", smooth_p0=False):
     """MATLAB interop entry point.
 
-    NOTE: The solver uses C-order internally.  MATLAB sends grid-shaped arrays
-    (which are order-agnostic via logical indexing) but source signals with
-    rows ordered by F-flattened mask positions.  Multi-row source signals from
-    MATLAB may need reordering at the kWavePy shim layer.
+    Reorders multi-row source signals from MATLAB's F-flat mask ordering
+    to the solver's C-flat ordering before running the simulation.
     """
+    grid_shape = tuple(kgrid[k] for k in ["Nx", "Ny", "Nz"] if k in kgrid)
+    source = _f_to_c_source_reorder(source, grid_shape)
     return create_simulation(kgrid, medium, source, sensor, device, smooth_p0=smooth_p0).run()

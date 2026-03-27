@@ -155,6 +155,18 @@ class TestFutureWarnings:
         with pytest.warns(FutureWarning, match="cart2grid"):
             cart2grid(kgrid, cart)
 
+    def test_cart2grid_no_warn_on_explicit_f(self):
+        """Explicit order='F' should NOT warn — only implicit default warns."""
+        from kwave.utils.conversion import cart2grid
+
+        kgrid = kWaveGrid(Vector([32, 32]), Vector([1e-4, 1e-4]))
+        cart = np.array([[0.0], [0.0]])
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", FutureWarning)
+            cart2grid(kgrid, cart, order="F")
+
     def test_cart2grid_no_warn_on_c_order(self):
         from kwave.utils.conversion import cart2grid
 

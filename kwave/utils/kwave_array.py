@@ -16,6 +16,8 @@ from kwave.utils.mapgen import make_cart_arc, make_cart_bowl, make_cart_disc, ma
 from kwave.utils.math import make_affine, sinc
 from kwave.utils.matlab import matlab_assign, matlab_find, matlab_mask
 
+_DEFAULT_ORDER = object()  # sentinel for detecting implicit default order="F"
+
 
 @dataclass(eq=False)
 class Element:
@@ -692,7 +694,7 @@ class kWaveArray(object):
 
         return grid_weights
 
-    def get_distributed_source_signal(self, kgrid, source_signal, *, order="F"):
+    def get_distributed_source_signal(self, kgrid, source_signal, *, order=_DEFAULT_ORDER):
         """Distribute per-element source signals onto grid source points.
 
         Args:
@@ -700,7 +702,7 @@ class kWaveArray(object):
                 (legacy).  Default ``"F"`` — will change to ``"C"`` in a
                 future release.
         """
-        if order == "F":
+        if order is _DEFAULT_ORDER:
             import warnings
 
             warnings.warn(
@@ -709,6 +711,7 @@ class kWaveArray(object):
                 FutureWarning,
                 stacklevel=2,
             )
+            order = "F"
 
         start_time = time.time()
         self.check_for_elements()
@@ -753,7 +756,7 @@ class kWaveArray(object):
 
         return distributed_source_signal
 
-    def combine_sensor_data(self, kgrid, sensor_data, *, order="F"):
+    def combine_sensor_data(self, kgrid, sensor_data, *, order=_DEFAULT_ORDER):
         """Combine sensor data from grid points back to array elements.
 
         Args:
@@ -761,7 +764,7 @@ class kWaveArray(object):
                 (legacy).  Default ``"F"`` — will change to ``"C"`` in a
                 future release.
         """
-        if order == "F":
+        if order is _DEFAULT_ORDER:
             import warnings
 
             warnings.warn(
@@ -769,6 +772,7 @@ class kWaveArray(object):
                 FutureWarning,
                 stacklevel=2,
             )
+            order = "F"
 
         self.check_for_elements()
 

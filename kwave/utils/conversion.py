@@ -13,6 +13,8 @@ from kwave.kgrid import kWaveGrid
 from kwave.utils.matlab import matlab_mask
 from kwave.utils.matrix import sort_rows
 
+_default = object()  # sentinel for detecting implicit default order="F"
+
 
 @typechecker
 def db2neper(alpha: Real[kt.ArrayLike, "..."], y: Real[kt.ScalarLike, ""] = 1) -> Real[kt.ArrayLike, "..."]:
@@ -165,7 +167,7 @@ def cart2grid(
     cart_data: Union[Float[ndarray, "1 NumPoints"], Float[ndarray, "2 NumPoints"], Float[ndarray, "3 NumPoints"]],
     axisymmetric: bool = False,
     *,
-    order: str = "F",
+    order: str = _default,
 ) -> Tuple:
     """Interpolate Cartesian points onto a binary grid using nearest neighbour.
 
@@ -180,7 +182,7 @@ def cart2grid(
     Returns:
         (grid_data, order_index, reorder_index)
     """
-    if order == "F":
+    if order is _default:
         import warnings
 
         warnings.warn(
@@ -188,6 +190,7 @@ def cart2grid(
             FutureWarning,
             stacklevel=2,
         )
+        order = "F"
 
     # check for axisymmetric input
     if axisymmetric and kgrid.dim != 2:
