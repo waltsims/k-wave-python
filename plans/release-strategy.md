@@ -9,7 +9,7 @@ This release strategy brings the unified solver architecture to fruition.
 | Version | Milestone | Focus |
 |---------|-----------|-------|
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
-| **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, deprecation warnings |
+| **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, Future warnings |
 | **0.6.1** | C-order Migration (Helpers) | Migrate utils/helpers from F-order to C-order, keep legacy API working |
 | **0.6.2** | Example Migration | Port remaining examples to new `kspaceFirstOrder()` API |
 | **0.6.3** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
@@ -30,7 +30,7 @@ This release strategy brings the unified solver architecture to fruition.
 
 ---
 
-## Phase 2: v0.6.0 - Native Solver + Unified API + Deprecation
+## Phase 2: v0.6.0 - Native Solver + Unified API + Future
 
 **Goal:** Ship a pure Python/CuPy native solver, create a single entry point with kwargs, and deprecate the old API. Three things in one release.
 
@@ -100,14 +100,14 @@ def kspaceFirstOrder2D(kgrid, source, sensor, medium,
 
 **Create:** `kwave/solvers/serializer.py` - Simple HDF5 writer (~200 lines)
 
-### 2c: Deprecation Warnings
+### 2c: Future Warnings
 
-**Add deprecation warnings on old API:**
+**Add Future warnings on old API:**
 ```python
 warnings.warn(
     "SimulationOptions is deprecated. Use kspaceFirstOrder() kwargs instead. "
     "See https://waltersimson.com/k-wave-python/migration",
-    DeprecationWarning
+    FutureWarning
 )
 ```
 
@@ -120,13 +120,13 @@ warnings.warn(
 - `tests/test_native_solver.py` - parity with C++ backend
 - `tests/test_cupy_backend.py` - GPU acceleration (when CUDA available)
 - `tests/test_unified_api.py` - new kwargs API
-- `tests/test_deprecation_warnings.py` - verify warnings emitted
+- `tests/test_Future_warnings.py` - verify warnings emitted
 
 ---
 
 ## Phase 2.1: v0.6.1 - C-order Migration (Helpers)
 
-**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No structural API changes — deprecation warnings only. Fix hacky shaping/indexing throughout.
+**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No structural API changes — Future warnings only. Fix hacky shaping/indexing throughout.
 
 **Scope:** 55 occurrences of `order="F"` across 10 files. Migrate where possible, keep F-order only at explicit boundaries.
 
@@ -338,7 +338,7 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 
 **Cross-cutting:**
 - `tests/test_backend_parity.py` — Python vs C++ backends produce same results for shared test cases
-- `tests/test_deprecation_warnings.py` — verify FutureWarning emitted on legacy API calls
+- `tests/test_Future_warnings.py` — verify FutureWarning emitted on legacy API calls
 
 ---
 
@@ -369,8 +369,8 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor, backend='native')
 print('Success:', result['p'].shape)
 "
 
-# v0.6.0 - Deprecation warnings
-uv run python -W error::DeprecationWarning -c "
+# v0.6.0 - Future warnings
+uv run python -W error::FutureWarning -c "
 from kwave.options.simulation_options import SimulationOptions
 "  # Should warn
 
@@ -383,7 +383,7 @@ uv run pytest tests/ -v
 ## Implementation Order
 
 1. **Now:** Finalize master/main for v0.5.0
-2. **Next:** Python solver + `kspaceFirstOrder()` API + deprecation for v0.6.0
+2. **Next:** Python solver + `kspaceFirstOrder()` API + Future for v0.6.0
 3. **Then:** C-order migration of helpers/utils for v0.6.1
 4. **Then:** Port remaining examples to new API for v0.6.2
 5. **Then:** Axisymmetric support in new API for v0.6.3
