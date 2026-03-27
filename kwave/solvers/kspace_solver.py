@@ -117,7 +117,19 @@ class Simulation:
     """
 
     def __init__(
-        self, kgrid, medium, source, sensor, *, device="cpu", use_sg=True, use_kspace=True, smooth_p0=True, pml_size=None, pml_alpha=None
+        self,
+        kgrid,
+        medium,
+        source,
+        sensor,
+        *,
+        device="cpu",
+        use_sg=True,
+        use_kspace=True,
+        smooth_p0=True,
+        pml_size=None,
+        pml_alpha=None,
+        quiet=False,
     ):
         self.kgrid = kgrid
         self.medium = medium
@@ -126,6 +138,7 @@ class Simulation:
         self.use_sg = use_sg
         self.use_kspace = use_kspace
         self.smooth_p0 = smooth_p0
+        self.quiet = quiet
         self._pml_size_override = pml_size
         self._pml_alpha_override = pml_alpha
         # kWaveGrid doesn't have pml_size_x attrs; warn if PML will silently be disabled
@@ -632,8 +645,17 @@ class Simulation:
         """Run simulation to completion. Returns results dict."""
         if not self._is_setup:
             self.setup()
-        while self.t < self.Nt:
-            self.step()
+        remaining = self.Nt - self.t
+        if not self.quiet and remaining > 0:
+            from tqdm import tqdm
+
+            with tqdm(total=remaining, desc="k-Wave", unit="step") as pbar:
+                while self.t < self.Nt:
+                    self.step()
+                    pbar.update(1)
+        else:
+            while self.t < self.Nt:
+                self.step()
         # Copy to CPU one-by-one, freeing GPU memory as we go
         result = {}
         for k in list(self.sensor_data):
