@@ -7,6 +7,7 @@ Design: Simulation class with setup/step separation for debuggability.
 from types import SimpleNamespace
 
 import numpy as np
+from tqdm import tqdm
 
 try:
     import cupy as cp
@@ -647,8 +648,6 @@ class Simulation:
             self.setup()
         remaining = self.Nt - self.t
         if not self.quiet and remaining > 0:
-            from tqdm import tqdm
-
             with tqdm(total=remaining, desc="k-Wave", unit="step") as pbar:
                 while self.t < self.Nt:
                     self.step()

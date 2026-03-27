@@ -770,6 +770,7 @@ dependencies = [
     { name = "numpy" },
     { name = "opencv-python" },
     { name = "scipy" },
+    { name = "tqdm" },
 ]
 
 [package.optional-dependencies]
@@ -824,6 +825,7 @@ requires-dist = [
     { name = "sphinx-tabs", marker = "extra == 'docs'", specifier = "==3.4.7" },
     { name = "sphinx-toolbox", marker = "extra == 'docs'", specifier = "==3.8.0" },
     { name = "testfixtures", marker = "extra == 'test'", specifier = "==8.3.0" },
+    { name = "tqdm", specifier = ">=4.60" },
 ]
 
 [package.metadata.requires-dev]
