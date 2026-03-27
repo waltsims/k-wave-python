@@ -3,9 +3,11 @@
 import json
 
 import pytest
-from click.testing import CliRunner
 
-from kwave.cli.main import cli
+click = pytest.importorskip("click", reason="CLI tests require click: pip install k-wave-python[cli]")
+from click.testing import CliRunner  # noqa: E402
+
+from kwave.cli.main import cli  # noqa: E402
 
 
 def invoke(runner, args, session_dir):
