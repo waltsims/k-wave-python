@@ -193,14 +193,28 @@ Port examples one at a time using MATLAB as ground truth — not old Python resu
 
 **Goal:** Add axisymmetric simulation to `kspaceFirstOrder()` and port AS examples.
 
-**Current state:** `kspaceFirstOrderAS.py` / `kspaceFirstOrderASC.py` are standalone entry points. New API hardcodes `axisymmetric_flag=0`.
+**What axisymmetric means:** Dimensionality reduction for problems with cylindrical symmetry. A 3D symmetric problem is simulated on a 2D (r, z) half-domain; a 2D symmetric problem on a 1D half-domain. Results are mirrored around the symmetry axis to reconstruct the full field.
+
+**Current state:** `kspaceFirstOrderAS.py` / `kspaceFirstOrderASC.py` are standalone entry points using the legacy `kWaveSimulation` pipeline. The new API hardcodes `axisymmetric_flag=0`.
+
+**Design:** Not a separate solver — a wrapper around `kspaceFirstOrder()` that:
+1. Takes `axisymmetric=True` kwarg
+2. Reduces the grid to a half-domain (y ≥ 0 = radial direction)
+3. Adds radial symmetry terms: special PML at axis (no absorption at y=0), expanded grid for FFT symmetries (WSWA: 4× radial, WSWS: 2×-2), radial coordinate vectors for geometric source terms
+4. Runs the lower-dimensional simulation via `Simulation`
+5. Mirrors results around the axis for output
+
+**Legacy mapping:** `kspaceFirstOrderAS` → `kspaceFirstOrder(..., axisymmetric=True, backend="python")`, `kspaceFirstOrderASC` → `kspaceFirstOrder(..., axisymmetric=True, backend="cpp")`
+
+**Constraints:** Staggered grid mandatory (`use_sg=True` enforced). Viscous absorption only (`alpha_power=2` fixed).
 
 **Tasks:**
 1. Add `axisymmetric: bool = False` kwarg to `kspaceFirstOrder()`
-2. Implement radial symmetry terms in `Simulation` class (operates on (r, z) grid)
-3. Port `at_circular_piston_AS`, `at_focused_bowl_AS`
-4. Validate against MATLAB references
-5. Deprecate `kspaceFirstOrderAS` / `kspaceFirstOrderASC`
+2. Implement radial symmetry pre/post-processing in `kspaceFirstOrder()` (grid reduction, PML axis handling, result mirroring)
+3. Add radial terms to `Simulation` class (geometric source terms for (r, z) grid)
+4. Port `at_circular_piston_AS`, `at_focused_bowl_AS` using the v0.6.2 MATLAB-first workflow
+5. Validate against MATLAB references
+6. Deprecate `kspaceFirstOrderAS` / `kspaceFirstOrderASC`
 
 ---
 
@@ -301,15 +315,30 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 ## Testing Strategy
 
 **Existing (keep):**
-- MATLAB reference tests via CI
-- Multi-platform pytest (Windows, Ubuntu, macOS)
-- Python 3.10-3.13 coverage
+- MATLAB reference tests via CI (66 MATLAB collectors → `.mat` fixtures, `scipy.io.loadmat`)
+- Multi-platform pytest (Windows, Ubuntu, macOS) × Python 3.10-3.13 (12-job matrix)
+- Integration tests in `tests/integration/` with `assert_fields_close()` (rtol=1e-10, atol=1e-12)
+- Weekly example runner (`run-examples.yml`, `KWAVE_FORCE_CPU=1`)
 
-**Add:**
-- `tests/test_native_solver.py` - native vs C++ parity
-- `tests/test_unified_api.py` - new kwargs API
-- `tests/test_deprecation_warnings.py` - verify warnings emitted
-- `tests/test_backend_parity.py` - all backends produce same results
+**v0.6.0 (done):**
+- `tests/test_native_solver.py` — 33 tests for Python backend
+- `tests/test_unified_api.py` — new kwargs API
+- `tests/test_compat.py` — `options_to_kwargs()` migration
+
+**v0.6.1 (C-order migration):**
+- `tests/test_memory_layout.py` — C/F-order input produces identical results, `simulate_from_dicts` F→C→F round-trip, `cpp_simulation` writes correct F-order HDF5
+
+**v0.6.2 (example migration):**
+- Per-example MATLAB reference integration tests — validate via k-wave-cupy interop first, then add `.mat` fixtures to `tests/integration/`
+- Each ported example gets a corresponding `test_<example_name>.py` with MATLAB reference comparison
+
+**v0.6.3 (axisymmetric):**
+- Extend existing `test_ivp_axisymmetric_simulation.py` to use new `kspaceFirstOrder(..., axisymmetric=True)` API
+- New MATLAB reference tests for `at_circular_piston_AS`, `at_focused_bowl_AS`
+
+**Cross-cutting:**
+- `tests/test_backend_parity.py` — Python vs C++ backends produce same results for shared test cases
+- `tests/test_deprecation_warnings.py` — verify FutureWarning emitted on legacy API calls
 
 ---
 
