@@ -65,7 +65,7 @@ The documentation for k-wave-python can be found [here](https://k-wave-python.re
 ## Citation
 ```bibtex
 @software{k-Wave-Python,
-author = {Yagubbbayli, Farid and Sinden, David and Simson, Walter},
+author = {Yagubbayli, Farid and Sinden, David and Simson, Walter},
 license = {GPL-3.0},
 title = {{k-Wave-Python}},
 url = {https://github.com/waltsims/k-wave-python}
