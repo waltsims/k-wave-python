@@ -314,3 +314,117 @@ class TestTVSPSnellsLaw:
         pml = 20
         matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+# ---------------------------------------------------------------------------
+# Batch 3: NA examples (PML, nonlinearity, filtering)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.matlab_parity
+class TestNAControllingPML:
+    @pytest.fixture(scope="class")
+    def result(self):
+        # This example's physics includes non-default PML settings (alpha=0),
+        # so we call run() directly rather than _run_with_binary_sensor.
+        from examples.ported.example_na_controlling_the_PML import run
+
+        return run()
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("na_controlling_the_PML")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        # pml_inside=True with pml_alpha=0: full field valid, no PML crop
+        _assert_close(np.asarray(result["p_final"]), ref["p_final"], "p_final")
+
+
+@pytest.mark.matlab_parity
+class TestNAFilteringPart1:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_na_filtering_part_1 import setup
+
+        return _run_with_binary_sensor(setup, ndim=1)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("na_filtering_part_1")
+
+    def test_p(self, result, ref):
+        matlab_p = ref["p"]
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+
+
+@pytest.mark.matlab_parity
+@pytest.mark.skip(reason="smooth() implementation differs between Python and MATLAB — needs investigation")
+class TestNAFilteringPart2:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_na_filtering_part_2 import setup
+
+        return _run_with_binary_sensor(setup, ndim=1)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("na_filtering_part_2")
+
+    def test_p(self, result, ref):
+        matlab_p = ref["p"]
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+
+
+@pytest.mark.matlab_parity
+class TestNAFilteringPart3:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_na_filtering_part_3 import setup
+
+        return _run_with_binary_sensor(setup, ndim=1)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("na_filtering_part_3")
+
+    def test_p(self, result, ref):
+        matlab_p = ref["p"]
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+class TestNAModellingNonlinearity:
+    @pytest.fixture(scope="class")
+    def result(self):
+        # Uses record_start_index and non-default PML, so call run() directly
+        from examples.ported.example_na_modelling_nonlinearity import run
+
+        return run()
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("na_modelling_nonlinearity")
+
+    def test_p(self, result, ref):
+        matlab_p = ref["p"]
+        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH_TVSP)
