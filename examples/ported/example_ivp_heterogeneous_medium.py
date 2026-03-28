@@ -63,8 +63,8 @@ def setup():
     source = kSource()
     source.p0 = (disc_1 + disc_2).astype(float)
 
-    # set time array (use max sound speed for CFL stability)
-    kgrid.makeTime(np.max(c))
+    # set time array (pass full c array — makeTime uses max internally for dt)
+    kgrid.makeTime(c)
 
     return kgrid, medium, source
 

@@ -334,7 +334,7 @@ class Simulation:
         bary_weights = xp.array(bary)
 
         def _extract_delaunay(f):
-            return np.einsum("ij,ij->i", f.ravel()[vert_flat], bary_weights)
+            return xp.einsum("ij,ij->i", f.ravel()[vert_flat], bary_weights)
 
         self._extract = _extract_delaunay
 

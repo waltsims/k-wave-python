@@ -53,7 +53,8 @@ def _reorder_fullgrid_p(matlab_p, Nx, Ny):
 # Shared test logic
 # ---------------------------------------------------------------------------
 
-THRESH = 5e-13  # relative threshold (allows for floating-point rounding)
+THRESH = 5e-13  # relative threshold for IVP (initial value) examples
+THRESH_TVSP = 5e-11  # looser for time-varying source examples (more FFT round-trips)
 
 
 def _assert_close(python, matlab, label="", thresh=None):
@@ -216,3 +217,100 @@ class TestIVP1DSimulation:
         pml = 20
         matlab_pf = ref["p_final"][pml:-pml]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH)
+
+
+# ---------------------------------------------------------------------------
+# Batch 2: TVSP examples
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.matlab_parity
+class TestTVSPMonopole:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_homogeneous_medium_monopole import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_homogeneous_medium_monopole")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+class TestTVSPDipole:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_homogeneous_medium_dipole import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_homogeneous_medium_dipole")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+class TestTVSPSteeringLinearArray:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_steering_linear_array import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_steering_linear_array")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+class TestTVSPSnellsLaw:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_snells_law import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_snells_law")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        pml = 20
+        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)

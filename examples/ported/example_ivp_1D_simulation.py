@@ -47,12 +47,12 @@ def setup():
     x_pos = 280  # starting grid point for the pulse [grid points]
     width = 100  # pulse width [grid points]
     height = 1.0  # pulse amplitude [au]
-    in_arr = np.arange(0, 2 * np.pi + np.pi / (width / 2), np.pi / (width / 2))
+    in_arr = np.linspace(0, 2 * np.pi, width + 1)  # exactly 101 points
     p0 = np.concatenate(
         [
             np.zeros(x_pos),
             (height / 2) * np.sin(in_arr - np.pi / 2) + (height / 2),
-            np.zeros(Nx - x_pos - width - 1),
+            np.zeros(Nx - x_pos - (width + 1)),
         ]
     )
     source = kSource()
