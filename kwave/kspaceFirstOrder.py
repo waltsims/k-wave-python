@@ -203,6 +203,7 @@ def kspaceFirstOrder(
             smooth_p0=False,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
+            quiet=quiet,
         ).run()
 
     elif backend == "cpp":
