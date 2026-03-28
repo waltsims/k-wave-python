@@ -1,9 +1,7 @@
 # Focussed Detector In 3D Example
 # This example shows how k-Wave can be used to model the output of a focussed bowl detector where the directionality arises from spatially averaging across the detector surface.
 
-import os
 from copy import deepcopy
-from tempfile import gettempdir
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,10 +31,8 @@ medium = kWaveMedium(sound_speed=1500)
 _ = kgrid.makeTime(medium.sound_speed)
 
 input_filename = "example_sd_focused_3d_input.h5"
-pathname = gettempdir()
-input_file_full_path = os.path.join(pathname, input_filename)
 simulation_options = SimulationOptions(
-    save_to_disk=True, input_filename=input_filename, data_path=pathname, pml_size=10, data_cast="single"
+    save_to_disk=True, input_filename=input_filename, pml_size=10, data_cast="single"
 )
 
 # create a concave sensor
