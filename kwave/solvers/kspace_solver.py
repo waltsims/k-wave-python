@@ -291,45 +291,52 @@ class Simulation:
         self.num_recorded_time_points = self.Nt - self.record_start_index
 
     def _setup_cartesian_extract(self, cart_pos):
-        """Build self._extract using bilinear/trilinear interpolation on the regular grid."""
+        """Build self._extract using Delaunay barycentric interpolation.
+
+        Uses ``scipy.spatial.Delaunay`` to triangulate the regular grid,
+        then precomputes simplex membership and barycentric weights for
+        each sensor point.  The extraction closure is O(n_sensor) per step.
+        """
+        from scipy.spatial import Delaunay
+
         xp = self.xp
-        cart = cart_pos if cart_pos.ndim == 2 else cart_pos.reshape(self.ndim, -1)
+        cart = cart_pos  # (ndim, n_pts) — guaranteed by caller
         self.n_sensor_points = cart.shape[1]
 
-        # Reconstruct kWaveGrid coordinate axes (centered at origin)
         axis_coords = [(np.arange(N) - N // 2) * d for N, d in zip(self.grid_shape, self.spacing)]
 
         if self.ndim == 1:
             x_vec, cart_x = axis_coords[0], cart.flatten()
 
-            def _extract_1d_interp(f):
+            def _extract_1d(f):
                 return xp.asarray(np.interp(cart_x, x_vec, _to_cpu(f).ravel()))
 
-            self._extract = _extract_1d_interp
-        else:
-            # Convert Cartesian positions to continuous grid indices
-            frac_idx = np.array([(cart[d] - axis_coords[d][0]) / self.spacing[d] for d in range(self.ndim)])  # (ndim, n_pts)
-            int_idx = np.clip(np.floor(frac_idx).astype(int), 0, np.array(self.grid_shape)[:, None] - 2)
-            local = frac_idx - int_idx
+            self._extract = _extract_1d
+            return
 
-            # C-order strides and 2^ndim corner enumeration
-            strides = np.cumprod([1] + list(self.grid_shape[:0:-1]))[::-1]
-            n_corners = 2**self.ndim
-            corner_indices = np.zeros((self.n_sensor_points, n_corners), dtype=int)
-            corner_weights = np.ones((self.n_sensor_points, n_corners))
-            for c in range(n_corners):
-                for d in range(self.ndim):
-                    bit = (c >> d) & 1
-                    corner_indices[:, c] += (int_idx[d] + bit) * strides[d]
-                    corner_weights[:, c] *= local[d] if bit else (1 - local[d])
+        # 2D / 3D: Delaunay triangulation of the regular grid
+        grids = np.meshgrid(*axis_coords, indexing="ij")
+        grid_points = np.column_stack([g.ravel() for g in grids])
+        tri = Delaunay(grid_points)
 
-            corner_indices = xp.array(corner_indices)
-            corner_weights = xp.array(corner_weights)
+        query = cart.T  # (n_pts, ndim)
+        simplex_idx = tri.find_simplex(query)
+        if np.any(simplex_idx < 0):
+            raise ValueError("Cartesian sensor points lie outside the grid.")
 
-            def _extract_bilinear(f):
-                return (f.ravel()[corner_indices] * corner_weights).sum(axis=1)
+        vert_indices = tri.simplices[simplex_idx]
+        transforms = tri.transform[simplex_idx]
+        delta = query - transforms[:, self.ndim]
+        bary = np.einsum("ijk,ik->ij", transforms[:, : self.ndim], delta)
+        bary = np.column_stack([bary, 1.0 - bary.sum(axis=1)])
 
-            self._extract = _extract_bilinear
+        vert_flat = xp.array(vert_indices)
+        bary_weights = xp.array(bary)
+
+        def _extract_delaunay(f):
+            return np.einsum("ij,ij->i", f.ravel()[vert_flat], bary_weights)
+
+        self._extract = _extract_delaunay
 
     def _setup_pml(self):
         """Build Perfectly Matched Layer absorption operators for each dimension."""
@@ -628,16 +635,16 @@ class Simulation:
                 self.rho_split[i] = self._p0_initial / (self.c0_sq * self.ndim)
                 self.u[i] = (self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
 
-        # Record sensor data (binary: index extraction, Cartesian: bilinear/trilinear interpolation)
+        # Record sensor data (binary: index extraction, Cartesian: Delaunay barycentric)
         if self.t >= self.record_start_index:
             file_index = self.t - self.record_start_index
             if "p" in self.sensor_data:
                 self.sensor_data["p"][:, file_index] = self._extract(self.p)
             for i, a in enumerate("xyz"[: self.ndim]):
-                if f"u{a}" in self.sensor_data:  # colocated
+                if f"u{a}" in self.sensor_data:  # non-staggered (collocated with pressure)
                     shifted = xp.real(xp.fft.ifftn(self.unstagger_ops[i] * xp.fft.fftn(self.u[i])))
                     self.sensor_data[f"u{a}"][:, file_index] = self._extract(shifted)
-                if f"u{a}_staggered" in self.sensor_data:  # raw staggered
+                if f"u{a}_staggered" in self.sensor_data:  # raw staggered grid
                     self.sensor_data[f"u{a}_staggered"][:, file_index] = self._extract(self.u[i])
         self.t += 1
         return self
