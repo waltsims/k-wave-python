@@ -55,6 +55,7 @@ def _reorder_fullgrid_p(matlab_p, Nx, Ny):
 
 THRESH = 5e-13  # relative threshold for IVP (initial value) examples
 THRESH_TVSP = 5e-11  # looser for time-varying source examples (more FFT round-trips)
+PML_SIZE = 20  # default PML thickness used by all examples
 
 
 def _assert_close(python, matlab, label="", thresh=None):
@@ -113,8 +114,7 @@ class TestIVPHomogeneousMedium:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
 
@@ -136,8 +136,7 @@ class TestIVPHeterogeneousMedium:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
 
@@ -159,8 +158,7 @@ class TestIVPBinarySensorMask:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
 
@@ -182,8 +180,7 @@ class TestIVPRecordingParticleVelocity:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
     def test_ux(self, result, ref):
@@ -214,8 +211,7 @@ class TestIVP1DSimulation:
         _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH)
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH)
 
 
@@ -242,8 +238,7 @@ class TestTVSPMonopole:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
@@ -265,8 +260,7 @@ class TestTVSPDipole:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
@@ -288,8 +282,7 @@ class TestTVSPSteeringLinearArray:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
@@ -311,8 +304,7 @@ class TestTVSPSnellsLaw:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"][pml:-pml, pml:-pml]
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
@@ -362,8 +354,7 @@ class TestNAFilteringPart1:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
 
@@ -385,8 +376,7 @@ class TestNAFilteringPart2:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
 
 
@@ -407,8 +397,7 @@ class TestNAFilteringPart3:
         _assert_close(np.asarray(result["p"]), matlab_p, "p")
 
     def test_p_final(self, result, ref):
-        pml = 20
-        matlab_pf = ref["p_final"].ravel()[pml:-pml]
+        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
