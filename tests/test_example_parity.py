@@ -125,7 +125,7 @@ _EXAMPLES = [
     ("ivp_loading_external_image", 2, THRESH, THRESH),
     ("ivp_photoacoustic_waveforms", 2, THRESH, THRESH),
     # ivp_saving_movie_files: heterogeneous sound_speed + density with makeDisc.
-    # ~1.5% p error due to makeDisc/smooth differences; p_final is tighter.
+    # ~1.5% error due to makeDisc/smooth differences in heterogeneous medium.
     ("ivp_saving_movie_files", 2, 2e-2, 2e-2),
     # TVSP --- p is machine precision, p_final is looser (more FFT round-trips)
     ("tvsp_homogeneous_medium_monopole", 2, THRESH, THRESH_TVSP),
@@ -319,7 +319,6 @@ class TestNASourceSmoothing:
         from examples.na_source_smoothing import _apply_window, setup
 
         ref = _load_ref("na_source_smoothing")
-        Nx = 256
 
         results = {}
         for label, window_type in [
@@ -328,6 +327,7 @@ class TestNASourceSmoothing:
             ("blackman", "Blackman"),
         ]:
             kgrid, medium, source = setup()
+            Nx = int(kgrid.N[0]) if hasattr(kgrid.N, "__len__") else int(kgrid.N)
             if window_type is not None:
                 source.p0 = _apply_window(source.p0, Nx, window_type)
             sensor = kSensor(mask=np.ones(Nx, dtype=bool))
@@ -378,8 +378,8 @@ class TestPR2DFFTLineSensor:
         from examples.pr_2D_FFT_line_sensor import setup
 
         kgrid, medium, source = setup()
-        Nx, Ny = 88, 216
-        sensor = kSensor(mask=np.ones((Nx, Ny), dtype=bool))
+        grid_shape = tuple(int(n) for n in kgrid.N)
+        sensor = kSensor(mask=np.ones(grid_shape, dtype=bool))
         sensor.record = ["p", "p_final"]
         result = kspaceFirstOrder(
             kgrid,
