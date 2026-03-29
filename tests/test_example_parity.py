@@ -70,7 +70,8 @@ def _grid_shape_from_ref(ref, ndim):
 
 THRESH = 5e-13  # relative threshold for IVP (initial value) examples
 THRESH_TVSP = 5e-11  # looser for time-varying source examples (more FFT round-trips)
-PML_SIZE = 20  # default PML thickness used by all examples
+# MATLAB default PML sizes: 20 for 1D/2D, 10 for 3D (see kspaceFirstOrder_setDefaults.m)
+PML_SIZE = {1: 20, 2: 20, 3: 10}
 
 
 def _assert_close(python, matlab, label="", thresh=None):
@@ -95,6 +96,7 @@ def _run_with_binary_sensor(setup_fn, ndim, record=None):
         mask = np.ones(tuple(int(n) for n in kgrid.N), dtype=bool)
     sensor = kSensor(mask=mask)
     sensor.record = record or ["p", "p_final"]
+    pml_size = PML_SIZE[ndim]
     return kspaceFirstOrder(
         kgrid,
         medium,
@@ -103,12 +105,14 @@ def _run_with_binary_sensor(setup_fn, ndim, record=None):
         backend="python",
         quiet=True,
         pml_inside=True,
+        pml_size=pml_size,
     )
 
 
 def _pml_crop(ndim):
     """PML crop slices for p_final."""
-    return tuple(slice(PML_SIZE, -PML_SIZE) for _ in range(ndim))
+    pml = PML_SIZE[ndim]
+    return tuple(slice(pml, -pml) for _ in range(ndim))
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +141,9 @@ _EXAMPLES = [
     ("na_filtering_part_1", 1, THRESH, THRESH),
     ("na_filtering_part_2", 1, THRESH, THRESH_TVSP),
     ("na_filtering_part_3", 1, THRESH, THRESH_TVSP),
+    # 3D — p_final only (full p recording would be ~880 MB)
+    ("ivp_3D_simulation", 3, None, THRESH_TVSP),
+    ("tvsp_3D_simulation", 3, None, THRESH_TVSP),
 ]
 
 
@@ -153,8 +160,10 @@ class TestStandardExamples:
     def scenario(self, request):
         name, ndim, p_thresh, pf_thresh = request.param
         mod = importlib.import_module(f"examples.{name}")
+        # 3D examples only record p_final (full p would be ~880 MB)
+        record = ["p_final"] if p_thresh is None else ["p", "p_final"]
         try:
-            result = _run_with_binary_sensor(mod.setup, ndim)
+            result = _run_with_binary_sensor(mod.setup, ndim, record)
         except FileNotFoundError:
             pytest.skip(f"Asset not found for {name}")
         ref = _load_ref(name)
@@ -162,6 +171,8 @@ class TestStandardExamples:
 
     def test_p(self, scenario):
         result, ref, ndim, p_thresh, _pf_thresh = scenario
+        if p_thresh is None:
+            pytest.skip("p not recorded (3D example)")
         matlab_p = ref["p"]
         if ndim >= 2:
             matlab_p = _reorder_fullgrid(matlab_p, _grid_shape_from_ref(ref, ndim))
@@ -244,36 +255,6 @@ class TestNAModellingNonlinearity:
     def test_p(self, scenario):
         result, ref = scenario
         _assert_close(np.asarray(result["p"]), ref["p"], "p", thresh=THRESH_TVSP)
-
-
-# ---------------------------------------------------------------------------
-# 3D examples --- skipped pending investigation
-# ---------------------------------------------------------------------------
-
-_SKIPPED_3D = [
-    # TODO: investigate 3D p_final mismatch --- Python max 7e-5 at (20,20,24) vs
-    # MATLAB max 2e-4 at (60,53,19). Not an axis permutation (all 6 tried).
-    # Likely a difference in p0 smoothing or heterogeneous medium setup for 3D.
-    ("ivp_3D_simulation", 3, THRESH, ["p_final"]),
-    ("tvsp_3D_simulation", 3, THRESH_TVSP, ["p_final"]),
-]
-
-
-@pytest.mark.matlab_parity
-@pytest.mark.skip(reason="3D p_final axis ordering mismatch --- needs investigation")
-class TestSkipped3D:
-    @pytest.fixture(scope="class", params=_SKIPPED_3D, ids=[e[0] for e in _SKIPPED_3D])
-    def scenario(self, request):
-        name, ndim, thresh, record = request.param
-        mod = importlib.import_module(f"examples.{name}")
-        result = _run_with_binary_sensor(mod.setup, ndim, record)
-        ref = _load_ref(name)
-        return result, ref, ndim, thresh
-
-    def test_p_final(self, scenario):
-        result, ref, ndim, thresh = scenario
-        matlab_pf = ref["p_final"][_pml_crop(ndim)]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh)
 
 
 # ---------------------------------------------------------------------------

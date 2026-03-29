@@ -31,7 +31,14 @@ This example file steps through the process of:
 
 ## Installation
 
-To install the most recent build of k-Wave-python from PyPI, run:
+To install using [uv](https://docs.astral.sh/uv/) (recommended):
+
+```bash
+uv add k-wave-python
+uv run python my_simulation.py
+```
+
+Or with pip:
 
 ```bash
 pip install k-wave-python
