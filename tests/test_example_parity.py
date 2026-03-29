@@ -491,7 +491,10 @@ class TestIVPLoadingExternalImage:
     def result(self):
         from examples.ported.example_ivp_loading_external_image import setup
 
-        return _run_with_binary_sensor(setup, ndim=2)
+        try:
+            return _run_with_binary_sensor(setup, ndim=2)
+        except FileNotFoundError:
+            pytest.skip("EXAMPLE_source_one.png not found (requires k-wave-cupy sibling repo)")
 
     @pytest.fixture(scope="class")
     def ref(self):
