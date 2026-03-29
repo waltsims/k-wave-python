@@ -314,13 +314,14 @@ class Simulation:
             self._extract = _extract_1d
             return
 
-        # Precompute query points (n_pts, ndim) — fixed for the simulation
-        query = cart.T  # (n_pts, ndim)
+        # Pre-build interpolator with a dummy field; update .values each step
+        query = cart.T  # (n_pts, ndim) — fixed for the simulation
+        dummy = np.zeros(tuple(len(ax) for ax in axis_coords))
+        rgi = RegularGridInterpolator(axis_coords, dummy, method="linear", bounds_error=True)
 
         def _extract_rgi(f):
-            f_cpu = _to_cpu(f)
-            interp = RegularGridInterpolator(axis_coords, f_cpu, method="linear", bounds_error=True)
-            return xp.asarray(interp(query))
+            rgi.values = _to_cpu(f)
+            return xp.asarray(rgi(query))
 
         self._extract = _extract_rgi
 
@@ -621,7 +622,7 @@ class Simulation:
                 self.rho_split[i] = self._p0_initial / (self.c0_sq * self.ndim)
                 self.u[i] = (self.dt_over_rho0[i] / 2) * self._diff(self.p, self.op_grad_list[i])
 
-        # Record sensor data (binary: index extraction, Cartesian: Delaunay barycentric)
+        # Record sensor data (binary: index extraction, Cartesian: RegularGridInterpolator linear)
         if self.t >= self.record_start_index:
             file_index = self.t - self.record_start_index
             if "p" in self.sensor_data:

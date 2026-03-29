@@ -576,7 +576,7 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
 
     if num_dim2(a) != len(grid_size):
         a = np.squeeze(a)
-        grid_size = a.shape if a.ndim > 1 else a.shape[0]
+        grid_size = a.shape  # tuple, possibly (N,) for 1D
 
     # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
     # even grid sizes to ensure the DC component of the window has a value of
@@ -585,6 +585,10 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     window_symmetry = (gs_arr % 2).astype(bool)
     if window_symmetry.size == 1:
         window_symmetry = bool(window_symmetry)
+
+    # get_win expects int for 1D, tuple for 2D/3D
+    if len(grid_size) == 1:
+        grid_size = grid_size[0]
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
