@@ -78,13 +78,13 @@ nbsphinx_prolog = r"""
 .. raw:: html
 
     <p>
-      <a href="https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/notebooks/{{ nb_basename }}.ipynb">
+      <a href="https://colab.research.google.com/github/waltsims/k-wave-python/blob/GITHUB_BRANCH_PLACEHOLDER/notebooks/{{ nb_basename }}.ipynb">
         <img alt="Open In Colab"
              src="https://colab.research.google.com/assets/colab-badge.svg"
              style="vertical-align:text-bottom">
       </a>
     </p>
-"""
+""".replace("GITHUB_BRANCH_PLACEHOLDER", _GITHUB_BRANCH)
 
 source_suffix = [".rst", ".md"]
 templates_path = ["_templates"]

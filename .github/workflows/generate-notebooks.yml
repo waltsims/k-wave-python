@@ -5,6 +5,10 @@ on:
     branches: [master]
     paths: ['examples/*.py']
 
+concurrency:
+  group: generate-notebooks
+  cancel-in-progress: true
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -20,14 +24,12 @@ jobs:
       - name: Install jupytext
         run: pip install 'jupytext>=1.16,<2'
 
-      - name: Generate notebooks
-        run: python docs/generate_example_notebooks.py
-
       - name: Commit notebooks
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin master
+          python docs/generate_example_notebooks.py
           git add notebooks/
           if git diff --cached --quiet; then
             echo "No notebook changes"

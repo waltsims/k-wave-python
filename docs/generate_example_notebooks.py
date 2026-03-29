@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert examples/*.py (jupytext percent format) to docs/_examples/*.ipynb.
+"""Convert examples/*.py (jupytext percent format) to notebooks/*.ipynb.
 
 Run this before the Sphinx build so that nbsphinx can render them.
 
@@ -16,10 +16,19 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "examples"
 OUTPUT_DIR = REPO_ROOT / "notebooks"
 
+_INSTALL_CELL = {
+    "cell_type": "code",
+    "execution_count": None,
+    "metadata": {},
+    "outputs": [],
+    "source": "!pip install k-wave-python",
+}
+
 
 def _promote_docstring_to_markdown(nb_path: Path) -> None:
     """If the first cell is a code cell whose only content is a docstring,
-    convert it to a markdown cell with the first line as an H1 title."""
+    convert it to a markdown cell with the first line as an H1 title.
+    Then insert a pip install cell for Colab users."""
     with open(nb_path) as f:
         nb = json.load(f)
 
@@ -34,11 +43,14 @@ def _promote_docstring_to_markdown(nb_path: Path) -> None:
     source = "".join(first["source"]) if isinstance(first["source"], list) else first["source"]
     stripped = source.strip()
 
-    # Check for triple-quoted docstring as the sole content
+    # Detect triple-quoted docstring: starts and ends with """ (or '''),
+    # with no other triple-quotes in between.
     for quote in ('"""', "'''"):
-        if stripped.startswith(quote) and stripped.endswith(quote) and stripped.count(quote) == 2:
-            body = stripped[3:-3].strip()
-            break
+        if stripped.startswith(quote) and stripped.endswith(quote) and len(stripped) > 6:
+            inner = stripped[3:-3]
+            if quote not in inner:
+                body = inner.strip()
+                break
     else:
         return
 
@@ -53,12 +65,14 @@ def _promote_docstring_to_markdown(nb_path: Path) -> None:
 
     first["cell_type"] = "markdown"
     first["source"] = md_source
-    # Remove code-cell-only keys
     first.pop("execution_count", None)
     first.pop("outputs", None)
 
+    # Insert pip install cell after title, before imports
+    cells.insert(1, _INSTALL_CELL.copy())
+
     with open(nb_path, "w") as f:
-        json.dump(nb, f, indent=1)
+        json.dump(nb, f, indent=2)
         f.write("\n")
 
 
