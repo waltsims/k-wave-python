@@ -21,13 +21,7 @@ jobs:
         run: pip install 'jupytext>=1.16,<2'
 
       - name: Generate notebooks
-        run: |
-          mkdir -p notebooks
-          for py in examples/*.py; do
-            [ -f "$py" ] || continue
-            basename=$(basename "$py")
-            jupytext --to notebook "$py" --output "notebooks/${basename%.py}.ipynb"
-          done
+        run: python docs/generate_example_notebooks.py
 
       - name: Commit notebooks
         run: |

@@ -14,7 +14,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "examples"
-OUTPUT_DIR = REPO_ROOT / "docs" / "_examples"
+OUTPUT_DIR = REPO_ROOT / "notebooks"
 
 
 def _promote_docstring_to_markdown(nb_path: Path) -> None:
