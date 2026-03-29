@@ -132,7 +132,7 @@ if __name__ == "__main__":
     input_as = np.abs(np.fft.rfft(source_p)) / N
     output_as = np.abs(np.fft.rfft(p[sensor_row, :])) / N
 
-    f_max = kgrid.k_max * np.min(medium.sound_speed) / (2 * np.pi)
+    f_max = float(kgrid.k_max * np.min(medium.sound_speed) / (2 * np.pi))
     f_MHz = f * 1e-6
 
     ax2.plot(f_MHz, input_as, "k-", label="Input spectrum")

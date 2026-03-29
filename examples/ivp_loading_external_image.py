@@ -33,7 +33,7 @@ from kwave.utils.mapgen import make_cart_circle
 from kwave.utils.matrix import resize
 
 _IMAGE_FILENAME = "EXAMPLE_source_one.png"
-_REPO_ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
+_REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 
 
 def _find_image():

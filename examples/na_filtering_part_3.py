@@ -142,7 +142,7 @@ if __name__ == "__main__":
     orig_as = np.abs(np.fft.rfft(source_func_orig)) / Nt
     filt_as = np.abs(np.fft.rfft(source_p)) / Nt
 
-    f_max = kgrid.k_max * np.min(medium.sound_speed) / (2 * np.pi)
+    f_max = float(kgrid.k_max * np.min(medium.sound_speed) / (2 * np.pi))
     f_MHz = f * 1e-6
 
     ax2.plot(f_MHz, orig_as, "k-", label="Original spectrum")

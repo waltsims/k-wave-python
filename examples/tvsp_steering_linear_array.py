@@ -112,13 +112,13 @@ def run(backend="python", device="cpu", quiet=True):
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
+    kgrid, _, source = setup()
     result = run(quiet=False)
-    p_final = np.asarray(result["p_final"]).reshape(128, 128)
+    pf = np.asarray(result["p_final"])
+    side = int(np.sqrt(pf.size))
+    p_final = pf.reshape(side, side)
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-
-    # plot p_final
-    kgrid, _, source = setup()
     ax = axes[0]
     im = ax.imshow(
         p_final.T,
