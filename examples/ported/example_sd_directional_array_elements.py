@@ -104,7 +104,7 @@ def run(backend="python", device="cpu", quiet=True):
     x_vec = np.asarray(kgrid_tmp.x_vec).ravel()
     y_vec = np.asarray(kgrid_tmp.y_vec).ravel()
     rows, cols = np.unravel_index(arc_indices, (Nx, Ny))
-    arc_angles = np.arctan2(y_vec[cols], x_vec[rows])
+    arc_angles = np.arctan(y_vec[cols] / x_vec[rows])  # MATLAB uses atan(y/x)
 
     # sort the angles into ascending order
     sorted_order = np.argsort(arc_angles)

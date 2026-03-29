@@ -176,7 +176,7 @@ if __name__ == "__main__":
     ix, iy, iz = np.unravel_index(source_positions, (Nx, Ny, Nz))
     x_src = x_vec[ix]
     y_src = y_vec[iy]
-    angles = np.arctan2(y_src, x_src)
+    angles = np.arctan(y_src / x_src)  # MATLAB uses atan(y/x), not atan2
 
     fig2, ax2 = plt.subplots(figsize=(6, 4))
     ax2.plot(angles, np.max(single_element_data, axis=0), "o")

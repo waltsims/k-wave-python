@@ -45,7 +45,7 @@ def setup():
     kgrid.setTime(Nt, dt)
 
     # create delta function source at centre
-    source_pos = Nx // 2  # 0-based: 128
+    source_pos = Nx // 2 - 1  # MATLAB Nx/2=128 (1-based) = 127 (0-based)
     source = kSource()
     source.p0 = np.zeros(Nx)
     source.p0[source_pos] = 1.0

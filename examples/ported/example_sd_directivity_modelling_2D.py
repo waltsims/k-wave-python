@@ -170,7 +170,7 @@ if __name__ == "__main__":
     rows, cols = np.unravel_index(source_positions, (Nx, Ny))
     x_src = x_vec[rows]
     y_src = y_vec[cols]
-    angles = np.arctan2(y_src, x_src)
+    angles = np.arctan(y_src / x_src)  # MATLAB uses atan(y/x), not atan2
 
     fig2, ax2 = plt.subplots(figsize=(6, 4))
     # MATLAB: max(single_element_data(200:350, :))  ->  0-based rows 199:350
