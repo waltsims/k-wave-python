@@ -1,3 +1,0 @@
-# Jupytext config: .py files with # %% markers are the source of truth.
-# Generate notebooks with: jupytext --to notebook examples/*.py
-formats = "py:percent"
