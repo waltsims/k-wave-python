@@ -54,9 +54,9 @@ class Executor:
         except subprocess.CalledProcessError as e:
             print(e.stdout)
             print(e.stderr, file=sys.stderr)
-            if sys.platform == "darwin":
+            if sys.platform == "darwin" and e.stderr and any(s in e.stderr for s in ("Library not loaded", "image not found", "dyld")):
                 print(
-                    "\nOn macOS, the C++ backend requires additional libraries.\n"
+                    "\nMissing macOS libraries for the C++ backend.\n"
                     "Install them with:\n\n"
                     "    brew install fftw hdf5 zlib libomp\n\n"
                     "Alternatively, use backend='python' which requires no extra dependencies.",
