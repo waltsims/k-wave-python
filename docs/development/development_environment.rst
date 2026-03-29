@@ -172,23 +172,3 @@ And pushed to the production index with:
 
     uv publish --token $PYPI_TOKEN
 
-
-
-
-ckage on PyPI.
-
-The package can be built using:
-
-.. code-block:: bash
-
-    uv build
-
-And pushed to the production index with:
-
-.. code-block:: bash
-
-    uv publish --token $PYPI_TOKEN
-
-
-
-
