@@ -291,13 +291,13 @@ class Simulation:
         self.num_recorded_time_points = self.Nt - self.record_start_index
 
     def _setup_cartesian_extract(self, cart_pos):
-        """Build self._extract using Delaunay barycentric interpolation.
+        """Build self._extract using regular-grid interpolation.
 
-        Uses ``scipy.spatial.Delaunay`` to triangulate the regular grid,
-        then precomputes simplex membership and barycentric weights for
-        each sensor point.  The extraction closure is O(n_sensor) per step.
+        Uses ``scipy.interpolate.RegularGridInterpolator`` for piecewise-linear
+        interpolation on the structured grid.  Setup is O(1) in grid size and
+        each extraction is O(n_sensor).
         """
-        from scipy.spatial import Delaunay
+        from scipy.interpolate import RegularGridInterpolator
 
         xp = self.xp
         cart = cart_pos  # (ndim, n_pts) — guaranteed by caller
@@ -314,29 +314,15 @@ class Simulation:
             self._extract = _extract_1d
             return
 
-        # 2D / 3D: Delaunay triangulation of the regular grid
-        grids = np.meshgrid(*axis_coords, indexing="ij")
-        grid_points = np.column_stack([g.ravel() for g in grids])
-        tri = Delaunay(grid_points)
-
+        # Precompute query points (n_pts, ndim) — fixed for the simulation
         query = cart.T  # (n_pts, ndim)
-        simplex_idx = tri.find_simplex(query)
-        if np.any(simplex_idx < 0):
-            raise ValueError("Cartesian sensor points lie outside the grid.")
 
-        vert_indices = tri.simplices[simplex_idx]
-        transforms = tri.transform[simplex_idx]
-        delta = query - transforms[:, self.ndim]
-        bary = np.einsum("ijk,ik->ij", transforms[:, : self.ndim], delta)
-        bary = np.column_stack([bary, 1.0 - bary.sum(axis=1)])
+        def _extract_rgi(f):
+            f_cpu = _to_cpu(f)
+            interp = RegularGridInterpolator(axis_coords, f_cpu, method="linear", bounds_error=True)
+            return xp.asarray(interp(query))
 
-        vert_flat = xp.array(vert_indices)
-        bary_weights = xp.array(bary)
-
-        def _extract_delaunay(f):
-            return xp.einsum("ij,ij->i", f.ravel()[vert_flat], bary_weights)
-
-        self._extract = _extract_delaunay
+        self._extract = _extract_rgi
 
     def _setup_pml(self):
         """Build Perfectly Matched Layer absorption operators for each dimension."""
