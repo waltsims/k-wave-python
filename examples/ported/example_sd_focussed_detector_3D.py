@@ -105,7 +105,7 @@ def run(backend="python", device="cpu", quiet=True):
     p_mask1[42, 31, 31] = 1
     source1.p_mask = p_mask1
 
-    sensor1 = kSensor(mask=sensor_mask.astype(float))
+    sensor1 = kSensor(mask=sensor_mask.astype(bool))
 
     result1 = kspaceFirstOrder(
         kgrid,
@@ -131,7 +131,7 @@ def run(backend="python", device="cpu", quiet=True):
     p_mask2[42, 37, 37] = 1
     source2.p_mask = p_mask2
 
-    sensor2 = kSensor(mask=sensor_mask.astype(float))
+    sensor2 = kSensor(mask=sensor_mask.astype(bool))
 
     result2 = kspaceFirstOrder(
         kgrid,

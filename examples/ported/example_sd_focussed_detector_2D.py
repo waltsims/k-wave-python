@@ -89,7 +89,7 @@ def run(backend="python", device="cpu", quiet=True):
 
     # --- Simulation 1: source on focus ---
     kgrid, medium, source = setup()
-    sensor = kSensor(mask=sensor_mask.astype(float))
+    sensor = kSensor(mask=sensor_mask.astype(bool))
 
     result1 = kspaceFirstOrder(
         kgrid,
@@ -109,7 +109,7 @@ def run(backend="python", device="cpu", quiet=True):
     source2 = kSource()
     source2.p0 = 2.0 * make_disc(Vector([Nx, Ny]), Vector([Nx // 2, Ny // 2 + 20]), 4).astype(float)
 
-    sensor2 = kSensor(mask=sensor_mask.astype(float))
+    sensor2 = kSensor(mask=sensor_mask.astype(bool))
     result2 = kspaceFirstOrder(
         kgrid,
         medium,
