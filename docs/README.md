@@ -3,39 +3,31 @@
 [![Support](https://img.shields.io/discord/1234942672418897960?style=flat&logo=discord)](https://discord.gg/your-invite-code)
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
 
-This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
-interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
-
-**New in v0.6.0:** Unified `kspaceFirstOrder()` API with a pure NumPy/CuPy solver. See the [API guide](https://k-wave-python.readthedocs.io/en/latest/get_started/new_api.html). The `kspaceFirstOrder()` API is experimental and may change before v1.0.0.
+A Python implementation of [k-Wave](http://www.k-wave.org/) — an acoustics toolbox for time-domain simulation of acoustic wave fields. Includes a pure NumPy/CuPy solver (`backend="python"`) and an interface to the pre-compiled k-Wave C++ binaries (`backend="cpp"`) with NVIDIA GPU support (sm 5.0–9.0a).
 
 ## Mission
 
-With this project, we hope to increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
-for medical imaging, algorithmic prototyping, and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
-be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
-to leverage pythonic practices.
+Increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations for medical imaging, algorithmic prototyping, and testing.
 
 ## Getting started
 
 ![](_static/example_bmode.png)
 
-A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/legacy/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
+A [collection of examples](../examples/) covers common simulation scenarios. Run any example locally:
 
-This example file steps through the process of:
- 1. Generating a simulation medium
- 2. Configuring a transducer
- 3. Running the simulation
- 4. Reconstructing the simulation
+```bash
+uv run python examples/ivp_homogeneous_medium.py
+```
+
+No GPU required — all examples run on CPU with NumPy.
 
 ## Installation
 
-To install using [uv](https://docs.astral.sh/uv/) (recommended):
+Using [uv](https://docs.astral.sh/uv/) (recommended):
 
 ```bash
 uv add k-wave-python
-uv run python my_simulation.py
 ```
 
 Or with pip:
@@ -46,8 +38,7 @@ pip install k-wave-python
 
 ## Development
 
-If you're enjoying k-Wave-python and want to contribute, development instructions can be
-found [here](https://k-wave-python.readthedocs.io/en/latest/development/development_environment.html).
+Development instructions can be found [here](https://k-wave-python.readthedocs.io/en/latest/development/development_environment.html).
 
 ## Related Projects
 
