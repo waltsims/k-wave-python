@@ -16,6 +16,7 @@ resolve the moving source position.
 It builds on the Monopole Point Source In A Homogeneous Propagation Medium
 Example.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -27,6 +28,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import filter_time_series
 
 
+# %%
 def setup():
     """Set up simulation physics (grid, medium, source).
 
@@ -123,6 +125,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a single-point sensor and full-grid for p_final.
 
@@ -160,6 +163,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

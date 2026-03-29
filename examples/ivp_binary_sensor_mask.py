@@ -13,6 +13,7 @@ uses a binary arc created with make_circle. You should observe the same two
 expanding wavefronts, now sampled at grid-aligned sensor positions along a
 three-quarter arc.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -24,6 +25,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_circle, make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -69,6 +71,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with the original binary arc sensor.
 
@@ -107,6 +110,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

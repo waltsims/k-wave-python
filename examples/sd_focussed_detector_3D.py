@@ -13,6 +13,7 @@ stronger for the on-axis case.
 author: Ben Cox and Bradley Treeby
 date: 29th October 2010
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -25,6 +26,7 @@ from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_bowl
 
 
+# %%
 def setup():
     """Set up simulation physics (grid, medium, source).
 
@@ -66,6 +68,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run on-axis and off-axis simulations with a concave bowl sensor.
 
@@ -153,6 +156,7 @@ def run(backend="python", device="cpu", quiet=True):
     }
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

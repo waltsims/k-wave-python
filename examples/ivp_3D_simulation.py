@@ -12,6 +12,7 @@ propagation medium. The left half of the domain has a higher sound speed
 It builds on the Homogeneous Propagation Medium and Heterogeneous
 Propagation Medium examples.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_ball
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -79,6 +81,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with the original Cartesian sensor.
 
@@ -110,6 +113,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

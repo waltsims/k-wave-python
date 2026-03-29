@@ -26,6 +26,7 @@ simulation is ported.
 Builds on: example_tvsp_homogeneous_medium_monopole (time-varying pressure
 source), but uses a 1D grid with nonlinear medium properties.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -36,6 +37,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
 
+# %%
 def setup():
     """Set up the nonlinear 1D simulation physics (grid, medium, source).
 
@@ -132,6 +134,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a full-grid binary sensor recording p.
 
@@ -177,6 +180,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

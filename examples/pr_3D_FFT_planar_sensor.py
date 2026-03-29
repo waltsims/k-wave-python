@@ -11,6 +11,7 @@ and is not included.
 Note: uses scale=1 (small grid). The DataCast 'single' option from MATLAB
 is not needed for the Python backend.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_ball
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -65,6 +67,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run the forward simulation with a binary planar sensor.
 
@@ -97,6 +100,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

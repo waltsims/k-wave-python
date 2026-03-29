@@ -8,6 +8,7 @@ with a Cartesian circular sensor. DataCast options are skipped (not needed
 for the Python backend). Uses the binary sensor mask approach (MATLAB case 2)
 for optimal performance.
 """
+# %%
 from pathlib import Path
 
 import numpy as np
@@ -36,6 +37,7 @@ def _find_image():
     raise FileNotFoundError("Cannot find EXAMPLE_source_two.bmp. " "Expected in <k-wave-python>/tests/EXAMPLE_source_two.bmp")
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -70,6 +72,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a Cartesian circular sensor.
 
@@ -97,6 +100,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

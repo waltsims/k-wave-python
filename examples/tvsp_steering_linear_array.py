@@ -12,6 +12,7 @@ The original MATLAB example passes an empty sensor (full-domain movie).
 Here we record p and p_final on a full binary grid so the result can be
 compared quantitatively with the MATLAB reference.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.signals import tone_burst
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -84,6 +86,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run the simulation with a full-grid binary sensor.
 
@@ -109,6 +112,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

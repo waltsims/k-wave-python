@@ -19,6 +19,7 @@ The 3D loop (11 simulations on a 64^3 grid) can take a few minutes.
 author: Ben Cox and Bradley Treeby
 date: 29th October 2010
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -32,6 +33,7 @@ from kwave.utils.filters import filter_time_series
 from kwave.utils.mapgen import make_cart_circle
 
 
+# %%
 def setup():
     """Set up simulation physics (grid, medium, source template).
 
@@ -66,6 +68,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run 11 simulations (one per source angle) and return directivity data.
 
@@ -147,6 +150,7 @@ def run(backend="python", device="cpu", quiet=True):
     }
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

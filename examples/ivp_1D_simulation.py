@@ -14,6 +14,7 @@ You should observe the initial pulse splitting into left- and right-
 travelling waves, with partial reflections and transmission at the
 impedance boundaries.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -24,6 +25,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -65,6 +67,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with the original Cartesian two-point sensor.
 
@@ -91,6 +94,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

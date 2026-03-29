@@ -8,6 +8,7 @@ discs) detected by a binary line sensor along the first row. Only the forward
 simulation is ported; the FFT-based reconstruction (kspaceLineRecon) is
 post-processing and is not included.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -20,6 +21,7 @@ from kwave.utils.filters import smooth
 from kwave.utils.mapgen import make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -57,6 +59,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run the forward simulation with a binary line sensor.
 
@@ -88,6 +91,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

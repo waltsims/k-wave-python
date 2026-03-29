@@ -14,6 +14,7 @@ Medium, and Simulations in Three Dimensions examples.
 setup() prepares all three dimensionalities (1D slab, 2D disc, 3D ball).
 run() executes the 2D case, which is the most representative.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -25,6 +26,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_ball, make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics for 1D, 2D, and 3D cases.
 
@@ -88,6 +90,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def setup_1d():
     """Set up the 1D case (slab source, single sensor point).
 
@@ -125,6 +128,7 @@ def setup_1d():
     return kgrid, medium, source, sensor
 
 
+# %%
 def setup_3d():
     """Set up the 3D case (ball source, single sensor point).
 
@@ -163,6 +167,7 @@ def setup_3d():
     return kgrid, medium, source, sensor
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run the 2D case with a full-grid binary sensor.
 
@@ -189,6 +194,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

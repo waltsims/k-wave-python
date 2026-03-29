@@ -18,6 +18,7 @@ Medium: c = 1500 m/s, alpha_coeff = 0.75 dB/(MHz^y cm), alpha_power = 1.5.
 
 It builds on the Homogeneous Propagation Medium Example.
 """
+# %%
 import os
 
 import numpy as np
@@ -49,6 +50,7 @@ def _find_image():
     raise FileNotFoundError(f"Cannot find {_IMAGE_FILENAME}. Looked in: {candidates}")
 
 
+# %%
 def setup():
     """Set up simulation physics (grid, medium, source).
 
@@ -89,6 +91,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a full-grid binary sensor recording p and p_final.
 
@@ -117,6 +120,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

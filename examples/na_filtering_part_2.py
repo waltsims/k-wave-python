@@ -12,6 +12,7 @@ the spatial spectrum of the source below the grid Nyquist limit.
 
 The default CFL case is ported: dt = 7 ns fixed, Nt = 1024 steps.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import smooth
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -91,6 +93,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a full-grid binary sensor.
 
@@ -118,6 +121,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

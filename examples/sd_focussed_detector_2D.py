@@ -12,6 +12,7 @@ averaged detector signal is much stronger for the on-focus case.
 author: Ben Cox and Bradley Treeby
 date: 20th January 2010
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_circle, make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -60,6 +62,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run both on-focus and off-focus simulations with a binary arc sensor.
 
@@ -135,6 +138,7 @@ def run(backend="python", device="cpu", quiet=True):
     }
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

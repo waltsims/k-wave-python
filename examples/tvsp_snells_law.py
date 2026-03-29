@@ -10,6 +10,7 @@ It builds on the Steering A Linear Array example.
 You should observe the transmitted beam refracting according to Snell's
 law at the interface, and the reflected beam at the complementary angle.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -21,6 +22,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.signals import tone_burst
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -86,6 +88,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a full-grid sensor recording p_final.
 
@@ -112,6 +115,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

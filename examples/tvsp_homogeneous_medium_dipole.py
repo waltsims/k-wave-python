@@ -10,6 +10,7 @@ x-direction at a single grid point; this creates a characteristic dipole
 radiation pattern. A single-point sensor records the resulting pressure
 and the final pressure field.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -21,6 +22,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import filter_time_series
 
 
+# %%
 def setup():
     """Set up simulation physics. Returns (kgrid, medium, source)."""
 
@@ -60,6 +62,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with original sensor from MATLAB example."""
     kgrid, medium, source = setup()
@@ -83,6 +86,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

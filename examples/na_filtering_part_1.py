@@ -14,6 +14,7 @@ The default CFL case is ported here: dt = 7 ns fixed, Nt = 1024 steps.
 The PML is placed *outside* the computational domain (PMLInside = false)
 with alpha = 0 (no absorption) so it acts purely as a grid extension.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -24,6 +25,7 @@ from kwave.ksource import kSource
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -68,6 +70,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with a full-grid binary sensor.
 
@@ -99,6 +102,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

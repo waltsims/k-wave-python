@@ -22,6 +22,7 @@ instructive case: you can clearly see the wrap-around artifacts.
 Builds on: example_ivp_homogeneous_medium (same grid, medium, and initial
 pressure distribution but without absorption).
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -33,6 +34,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -124,6 +126,7 @@ def _run_case(case, backend="python", device="cpu", quiet=True):
     return kspaceFirstOrder(kgrid, medium, source, sensor, **kwargs)
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with PML alpha = 0 (default case, PML with no absorption).
 
@@ -136,6 +139,7 @@ def run(backend="python", device="cpu", quiet=True):
     return _run_case(1, backend=backend, device=device, quiet=quiet)
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

@@ -12,6 +12,7 @@ Three cases are run: no window, Hanning, and Blackman. Each applies a
 frequency-domain window to a delta-function initial pressure before
 propagating.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.signals import get_win
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source) with no window.
 
@@ -60,6 +62,7 @@ def _apply_window(p0, Nx, window_type):
     return np.real(np.fft.ifft(np.fft.fftshift(np.fft.fftshift(np.fft.fft(p0)) * win))) / cg
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run three simulations (no window, Hanning, Blackman).
 
@@ -100,6 +103,7 @@ def run(backend="python", device="cpu", quiet=True):
     return results
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

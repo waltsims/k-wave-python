@@ -12,6 +12,7 @@ the arriving pressure waveform.
 This is the first time-varying source example and builds on the initial
 value problem demonstrations.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.filters import filter_time_series
 
 
+# %%
 def setup():
     """Set up simulation physics (grid, medium, source).
 
@@ -70,6 +72,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with the original single-point sensor from the MATLAB example.
 
@@ -100,6 +103,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

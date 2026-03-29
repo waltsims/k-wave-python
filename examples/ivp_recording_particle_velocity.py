@@ -12,6 +12,7 @@ sensors along the x-axis show large ux and near-zero uy, while sensors along
 the y-axis show the opposite — illustrating the vector nature of acoustic
 particle velocity.
 """
+# %%
 import numpy as np
 
 from kwave.data import Vector
@@ -23,6 +24,7 @@ from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.utils.mapgen import make_disc
 
 
+# %%
 def setup():
     """Set up the simulation physics (grid, medium, source).
 
@@ -60,6 +62,7 @@ def setup():
     return kgrid, medium, source
 
 
+# %%
 def run(backend="python", device="cpu", quiet=True):
     """Run with four binary sensor points at cardinal directions.
 
@@ -95,6 +98,7 @@ def run(backend="python", device="cpu", quiet=True):
     )
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
