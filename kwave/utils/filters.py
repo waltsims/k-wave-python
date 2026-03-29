@@ -574,12 +574,17 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
 
     # remove singleton dimensions
     if num_dim2(a) != len(grid_size):
-        grid_size = np.squeeze(grid_size)
+        grid_size = tuple(s for s in grid_size if s != 1)
+        if len(grid_size) == 1:
+            grid_size = grid_size[0]  # scalar for get_win 1D path
 
     # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
     # even grid sizes to ensure the DC component of the window has a value of
     # unity
-    window_symmetry = (np.array(grid_size) % 2).astype(bool)
+    gs_arr = np.atleast_1d(np.array(grid_size))
+    window_symmetry = (gs_arr % 2).astype(bool)
+    if window_symmetry.size == 1:
+        window_symmetry = bool(window_symmetry)
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
