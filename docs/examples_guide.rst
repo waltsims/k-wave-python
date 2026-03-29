@@ -1,179 +1,70 @@
-Examples: k-Wave-Python Step-by-Step
-=======================
+Examples
+========
 
-The k-Wave Python examples are organized to help you progress from basic wave physics to advanced applications. Each example demonstrates the four-component framework (Grid, Medium, Source, Sensor) with increasing complexity.
+k-Wave-python examples are organized by topic. Each example uses the ``setup()/run()`` pattern and can be run directly:
 
-Start with the :doc:`get_started/first_simulation` tutorial, then follow this suggested learning path:
+.. code-block:: bash
 
-Basic Wave Propagation (IVP - Initial Value Problems)
------------------------------------------------------
+   uv run python examples/ivp_homogeneous_medium.py
 
-**Start Here**: Learn fundamental wave physics using initial pressure distributions (the simplest source type).
+No GPU required — all examples run on CPU with NumPy.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
+Start with the :doc:`get_started/first_simulation` tutorial, then explore by topic:
 
-   * - Example
-     - Core Concept
-     - Topics
-   * - :ghdir:`examples/legacy/ivp_photoacoustic_waveforms/`
-     - 2D vs 3D wave propagation physics
-     - **IVP** • Wave spreading • Compact support
-
-Simple Transducers & Sources
------------------------------
-
-**Next Step**: Introduction to time-varying sources and practical transducer modeling.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
-
-   * - Example
-     - Core Concept
-     - Topics
-   * - :ghdir:`examples/legacy/us_defining_transducer/`
-     - Basic ultrasound transducer setup
-     - **US** • Transducer basics • Time-varying sources
-   * - :ghdir:`examples/legacy/at_circular_piston_3D/`
-     - Simple focused geometry
-     - **AT** • 3D focusing • Geometric sources
-   * - :ghdir:`examples/legacy/at_circular_piston_AS/`
-     - Computational efficiency with symmetry
-     - **AT** • Axisymmetric • Computational optimization
-
-Medical Imaging Applications
+Initial Value Problems (IVP)
 ----------------------------
 
-**Practical Applications**: See how basic concepts combine into real-world medical imaging systems.
+Learn fundamental wave physics using initial pressure distributions.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
+- :ghfile:`Homogeneous medium <examples/ivp_homogeneous_medium.py>` — simplest 2D simulation
+- :ghfile:`Heterogeneous medium <examples/ivp_heterogeneous_medium.py>` — spatially varying sound speed and density
+- :ghfile:`1D simulation <examples/ivp_1D_simulation.py>` — reflections at impedance boundaries
+- :ghfile:`3D simulation <examples/ivp_3D_simulation.py>` — extending to three dimensions
+- :ghfile:`Binary sensor mask <examples/ivp_binary_sensor_mask.py>` — defining sensor regions
+- :ghfile:`Recording particle velocity <examples/ivp_recording_particle_velocity.py>` — velocity field output
+- :ghfile:`Photoacoustic waveforms <examples/ivp_photoacoustic_waveforms.py>` — 2D vs 3D wave spreading
+- :ghfile:`Loading external image <examples/ivp_loading_external_image.py>` — image-based initial pressure
 
-   * - Example
-     - Application
-     - Topics
-   * - :ghdir:`examples/legacy/us_beam_patterns/`
-     - Understanding acoustic beam formation
-     - **US** • Beam focusing • Field patterns
-   * - :ghdir:`examples/legacy/us_bmode_linear_transducer/`
-     - Complete ultrasound imaging pipeline
-     - **US** • Medical imaging • Signal processing
-   * - :ghdir:`examples/legacy/pr_2D_FFT_line_sensor/`
-     - Photoacoustic image reconstruction
-     - **PR** • Image reconstruction • FFT methods
-   * - :ghdir:`examples/legacy/pr_2D_TR_line_sensor/`
-     - Alternative reconstruction approach
-     - **PR** • Time reversal • Reconstruction
+Time-Varying Pressure Sources (TVSP)
+-------------------------------------
 
-Advanced Transducer Modeling (AT - Array Transducers)
------------------------------------------------------
+Transducer-driven simulations with time-varying sources.
 
-**Complex Geometries**: Learn sophisticated techniques for modeling complex transducer arrays using Cartesian space methods.
+- :ghfile:`Monopole source <examples/tvsp_homogeneous_medium_monopole.py>` — single point source
+- :ghfile:`Dipole source <examples/tvsp_homogeneous_medium_dipole.py>` — dipole radiation pattern
+- :ghfile:`Steering linear array <examples/tvsp_steering_linear_array.py>` — beam steering with delays
+- :ghfile:`Snell's law <examples/tvsp_snells_law.py>` — refraction at material boundaries
+- :ghfile:`Doppler effect <examples/tvsp_doppler_effect.py>` — moving source frequency shift
+- :ghfile:`3D simulation <examples/tvsp_3D_simulation.py>` — time-varying source in 3D
 
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
+Sensor Directivity (SD)
+------------------------
 
-   * - Example
-     - Advanced Technique
-     - Topics
-   * - :ghdir:`examples/legacy/at_array_as_source/`
-     - kWaveArray for complex geometries
-     - **AT** • Array modeling • Anti-aliasing
-   * - :ghdir:`examples/legacy/at_array_as_sensor/`
-     - Complex sensor array geometries
-     - **AT** • Sensor arrays • Flexible positioning
-   * - :ghdir:`examples/legacy/at_linear_array_transducer/`
-     - Multi-element linear arrays
-     - **AT** • Linear arrays • Element spacing
-   * - :ghdir:`examples/legacy/at_focused_bowl_3D/`
-     - 3D focused ultrasound therapy
-     - **AT** • Therapeutic US • 3D focusing
-   * - :ghdir:`examples/legacy/at_focused_annular_array_3D/`
-     - Multi-element focused systems
-     - **AT** • Annular arrays • Complex focusing
+How sensor geometry affects measurements.
 
-Advanced Imaging & Reconstruction (PR - Pressure/Photoacoustic Reconstruction)
--------------------------------------------------------------------------------
+- :ghfile:`Directivity modelling 2D <examples/sd_directivity_modelling_2D.py>` — finite sensor size effects
+- :ghfile:`Directivity modelling 3D <examples/sd_directivity_modelling_3D.py>` — 3D directivity
+- :ghfile:`Focused detector 2D <examples/sd_focussed_detector_2D.py>` — directional sensitivity
+- :ghfile:`Focused detector 3D <examples/sd_focussed_detector_3D.py>` — 3D focused sensors
+- :ghfile:`Directional array elements <examples/sd_directional_array_elements.py>` — multi-element arrays
 
-**3D Reconstruction**: Advanced reconstruction techniques for photoacoustic and pressure field imaging.
+Photoacoustic Reconstruction (PR)
+----------------------------------
 
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
+Image reconstruction from sensor data.
 
-   * - Example
-     - Reconstruction Method
-     - Topics
-   * - :ghdir:`examples/legacy/pr_3D_FFT_planar_sensor/`
-     - 3D FFT-based reconstruction
-     - **PR** • 3D imaging • Planar arrays
-   * - :ghdir:`examples/legacy/pr_3D_TR_planar_sensor/`
-     - 3D time reversal reconstruction
-     - **PR** • 3D time reversal • Volumetric imaging
-   * - :ghdir:`examples/legacy/us_bmode_phased_array/`
-     - Advanced ultrasound beamforming
-     - **US** • Phased arrays • Electronic steering
+- :ghfile:`2D FFT line sensor <examples/pr_2D_FFT_line_sensor.py>` — FFT-based reconstruction
+- :ghfile:`3D FFT planar sensor <examples/pr_3D_FFT_planar_sensor.py>` — 3D FFT reconstruction
 
-Sensor Physics & Directivity (SD - Sensor Directivity)
-------------------------------------------------------
+Numerical Analysis (NA)
+------------------------
 
-**Sensor Modeling**: Understanding how sensor size, shape, and directivity affect measurements.
+Computational methods and optimization.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
-
-   * - Example
-     - Physics Concept
-     - Topics
-   * - :ghdir:`examples/legacy/sd_directivity_modelling_2D/`
-     - How sensor size affects measurements
-     - **SD** • Directivity • Finite sensor size
-   * - :ghdir:`examples/legacy/sd_focussed_detector_2D/`
-     - Directional sensor sensitivity
-     - **SD** • Focused detection • Sensor design
-   * - :ghdir:`examples/legacy/sd_focussed_detector_3D/`
-     - 3D focused sensor modeling
-     - **SD** • 3D detection • Sensor focusing
-
-Computational Optimization (NA - Numerical Analysis)
-----------------------------------------------------
-
-**Advanced Numerics**: Optimize simulations and understand computational aspects.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 40 40 20
-
-   * - Example
-     - Optimization Topic
-     - Topics
-   * - :ghdir:`examples/legacy/na_controlling_the_pml/`
-     - Boundary conditions and efficiency
-     - **NA** • PML boundaries • Computational domains
-
-Understanding the Prefixes
---------------------------
-
-- **IVP** = Initial Value Problems (wave propagation from initial pressure)
-- **US** = Ultrasound (medical and therapeutic ultrasound applications)  
-- **AT** = Array Transducers (complex geometries using Cartesian space methods)
-- **PR** = Pressure/Photoacoustic Reconstruction (image reconstruction techniques)
-- **SD** = Sensor Directivity (sensor physics and measurement effects)
-- **NA** = Numerical Analysis (computational optimization and methods)
-
-Learning Strategy
------------------
-
-1. **Start with IVP**: Understand basic wave physics
-2. **Move to simple US/AT**: Learn transducer basics
-3. **Apply to imaging**: See concepts in real applications (US, PR)
-4. **Master advanced AT**: Handle complex geometries
-5. **Understand sensors**: Learn about measurement physics (SD)
-6. **Optimize**: Improve computational efficiency (NA)
-
-Each example builds on the four-component framework, but with increasing sophistication in how the components are configured and used.
+- :ghfile:`Controlling the PML <examples/na_controlling_the_PML.py>` — boundary absorption settings
+- :ghfile:`Source smoothing <examples/na_source_smoothing.py>` — spatial filtering of sources
+- :ghfile:`Filtering part 1 <examples/na_filtering_part_1.py>` — grid-imposed frequency limits
+- :ghfile:`Filtering part 2 <examples/na_filtering_part_2.py>` — filtering source signals
+- :ghfile:`Filtering part 3 <examples/na_filtering_part_3.py>` — combined filtering
+- :ghfile:`Modelling nonlinearity <examples/na_modelling_nonlinearity.py>` — nonlinear wave propagation
+- :ghfile:`Optimising performance <examples/na_optimising_performance.py>` — speed and memory tips
