@@ -91,7 +91,7 @@ def run(backend="python", device="cpu", quiet=True):
         backend=backend,
         device=device,
         quiet=quiet,
-        pml_inside=True,
+        pml_inside=True,  # TODO: use pml_inside=False once validation accepts 2*pml >= N
         pml_size=10,
         smooth_p0=False,  # already smoothed manually
     )

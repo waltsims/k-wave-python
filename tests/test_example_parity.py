@@ -423,6 +423,10 @@ class TestNAModellingNonlinearity:
 # ---------------------------------------------------------------------------
 
 
+# TODO: investigate 3D p_final mismatch — Python max 7e-5 at (20,20,24) vs
+# MATLAB max 2e-4 at (60,53,19). Not an axis permutation (all 6 tried).
+# Likely a difference in p0 smoothing or heterogeneous medium setup for 3D.
+# The 3D solver passes symmetry tests on homogeneous media, so the physics is correct.
 @pytest.mark.matlab_parity
 @pytest.mark.skip(reason="3D p_final axis ordering mismatch — needs investigation")
 class TestIVP3DSimulation:
@@ -523,3 +527,20 @@ class TestIVPPhotoacousticWaveforms:
     def test_p_final(self, result, ref):
         matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
         _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+
+
+# ---------------------------------------------------------------------------
+# TODO: Parity tests still needed for these ported examples:
+#
+# - example_ivp_saving_movie_files (standard 2D IVP — straightforward)
+# - example_na_optimising_performance (uses Cartesian sensor — needs custom ref)
+# - example_na_source_smoothing (uses kspaceFirstOrder not kspaceSecondOrder)
+# - example_pr_2D_FFT_line_sensor (forward sim with pml_inside=False)
+# - example_pr_3D_FFT_planar_sensor (forward sim, pml_inside deviation)
+# - example_sd_directional_array_elements (multi-element averaging — custom harness)
+# - example_sd_directivity_modelling_2D (11 sims — custom harness)
+# - example_sd_directivity_modelling_3D (11 sims on 64^3 — slow, custom harness)
+#
+# The SD directivity examples need a different test pattern: call run()
+# directly (not _run_with_binary_sensor) and compare element-level output.
+# ---------------------------------------------------------------------------

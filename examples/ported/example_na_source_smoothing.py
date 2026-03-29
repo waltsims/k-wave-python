@@ -6,7 +6,7 @@ Ported from: k-Wave/examples/example_na_source_smoothing.m
 Illustrates how spatial smoothing can reduce discrete sampling artifacts.
 The original MATLAB example uses kspaceSecondOrder; this port uses
 kspaceFirstOrder (the only solver available in the Python backend) with
-equivalent 1D parameters.
+equivalent 1D parameters. TODO: port to kspaceSecondOrder when available.
 
 Three cases are run: no window, Hanning, and Blackman. Each applies a
 frequency-domain window to a delta-function initial pressure before

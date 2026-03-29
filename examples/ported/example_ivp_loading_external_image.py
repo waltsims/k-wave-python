@@ -64,6 +64,7 @@ def setup():
     # load the initial pressure distribution from an image and scale
     p0_magnitude = 3  # [Pa]
     image_path = _find_image()
+    # TODO: verify load_image handles image inversion the same as MATLAB's loadImage
     p0 = p0_magnitude * load_image(image_path, is_gray=True)
 
     # create the computational grid

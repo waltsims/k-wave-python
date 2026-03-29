@@ -96,6 +96,8 @@ def setup():
     sensor_index = 0  # current left grid-point pair index (0-based)
     t_index = 0  # current time step (0-based)
 
+    # TODO: vectorize this loop — the entire source_p matrix can be computed
+    # with NumPy fancy indexing instead of iterating over 4500 time steps.
     while t_index < Nt and sensor_index < num_source_positions - 2:
         # check if the source has moved to the next pair of grid points
         # MATLAB: kgrid.t_array(t_index) > (sensor_index * dy / source_vel)
