@@ -165,7 +165,7 @@ Process for Creating Reference Files
 Publishing k-wave-python
 -----------------
 
-`Hatch <https://hatch.pypa.io/latest/>`_ is used to publish k-wave-python to `PyPI <https://pypi.org/>`_. 
+`uv <https://docs.astral.sh/uv/>`_ is used to build and publish k-wave-python to `PyPI <https://pypi.org/>`_.
 
 .. note::
     This is only performed by developers with write access to the k-wave-python package on PyPI.
@@ -174,13 +174,13 @@ The package can be built using:
 
 .. code-block:: bash
 
-    hatch build
+    uv build
 
 And pushed to the production index with:
 
 .. code-block:: bash
 
-    hatch publish -u __token__
+    uv publish --token $PYPI_TOKEN
 
 
 
