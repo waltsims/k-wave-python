@@ -44,13 +44,13 @@ Running Examples
 
 .. code-block:: bash
 
-    uv run python examples/ivp_homogeneous_medium.py
+    uv run examples/ivp_homogeneous_medium.py
 
 Force CPU (skip GPU even if available):
 
 .. code-block:: bash
 
-    KWAVE_FORCE_CPU=1 uv run python examples/ivp_homogeneous_medium.py
+    KWAVE_FORCE_CPU=1 uv run examples/ivp_homogeneous_medium.py
 
 Publishing
 ----------

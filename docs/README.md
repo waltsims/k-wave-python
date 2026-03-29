@@ -17,7 +17,7 @@ Increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org
 A [collection of examples](../examples/) covers common simulation scenarios. Run any example locally:
 
 ```bash
-uv run python examples/ivp_homogeneous_medium.py
+uv run examples/ivp_homogeneous_medium.py
 ```
 
 No GPU required — all examples run on CPU with NumPy.
