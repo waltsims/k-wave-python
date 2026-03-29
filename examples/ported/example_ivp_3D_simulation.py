@@ -87,7 +87,7 @@ def run(backend="python", device="cpu", quiet=True):
     the format required for parity testing against MATLAB references.
 
     Returns:
-        dict: Simulation results with keys 'p', 'p_final'.
+        dict: Simulation results with key 'p_final' (p omitted to save memory).
     """
     kgrid, medium, source = setup()
 
