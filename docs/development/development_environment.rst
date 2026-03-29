@@ -85,13 +85,13 @@ Run a single example:
 
 .. code-block:: bash
 
-    uv run python examples/ivp_homogeneous_medium.py
+    uv run examples/ivp_homogeneous_medium.py
 
 Force CPU Execution
 ^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
-    KWAVE_FORCE_CPU=1 uv run python examples/ivp_homogeneous_medium.py
+    KWAVE_FORCE_CPU=1 uv run examples/ivp_homogeneous_medium.py
 
 Test Architecture
 -----------------
