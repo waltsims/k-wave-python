@@ -238,17 +238,29 @@ Atomic migration of all solver internals from Fortran-order to C-order. The `ksp
 
 Port remaining examples from legacy `kspaceFirstOrder2D/3D` to unified `kspaceFirstOrder()`. Strategy: MATLAB reference → k-wave-cupy validation → standalone Python port → CI fixture.
 
-**Current status (port-examples branch):** 29 of 75 examples ported (all Tier 1). 70 parity tests pass, 2 skipped (3D axis mismatch). See `docs/porting-plan.md` for full breakdown.
+**Current status:** 29 of 75 examples ported (all Tier 1), merged to master. 70 parity tests pass, 2 skipped (3D axis mismatch). See `docs/porting-plan.md` for full breakdown.
+
+**Example directory restructure:**
+1. **Flatten `examples/ported/` into `examples/`** — the `ported/` name is an implementation detail. One flat directory, alphabetically browsable.
+2. **Delete old subdirectory examples** (`at_array_as_sensor/`, `us_bmode_linear_transducer/`, etc.) — they use the deprecated C++ API and confuse newcomers. Archive in a tagged release before deletion.
+3. **Delete loose root scripts** (`ivp_1D_simulation.py`, `new_api_ivp_2D.py`, `unified_entry_point_demo.py`) — they overlap with ported examples.
+4. **Keep `setup()/run()/__main__` pattern** — tested, composable, teachable. `setup()` returns physics, `run()` adds sensor and executes, `__main__` visualizes.
+5. **Add example registry to `tests/conftest.py`** — single dict mapping example names to import paths. Tests import from registry, not hardcoded paths.
+6. **Create `examples/README.md`** — categorized table with one-line descriptions, getting-started section, running instructions.
+7. **Parametrize parity tests** — collapse 15 identical test classes into a single parametrized function (~10 lines vs ~120).
 
 **CI simplification steps:**
-1. **Bundle small test assets in the repo** — images like `EXAMPLE_source_one.png` (332B) and `EXAMPLE_source_two.bmp` (32KB) already live in `tests/`. Examples now look there first.
-2. **Pre-generate MATLAB references offline** — `.mat` files (totalling ~2.5GB) are too large for git. Generate them locally with MATLAB, upload as GitHub release assets or cache artifacts.
+1. **Bundle small test assets in the repo** — images like `EXAMPLE_source_one.png` (332B) and `EXAMPLE_source_two.bmp` (32KB) already live in `tests/`. Examples look there first.
+2. **Pre-generate MATLAB references offline** — `.mat` files (~2.5GB total) are too large for git. Generate locally with MATLAB, upload as GitHub release assets from k-wave-cupy CI (`publish-refs.yml`).
 3. **CI test tiers:**
-   - **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
+   - **Tier 1 (every PR):** `test_native_solver.py` + validation tests — no MATLAB needed, ~2s
    - **Tier 2 (nightly/manual):** `test_example_parity.py` — downloads pre-generated `.mat` refs from release assets, ~30s
    - **Tier 3 (release):** Full MATLAB regeneration + parity — requires MATLAB runner
-4. **Register pytest markers** — `matlab_parity` marker registered in `pytest.ini` for selective runs: `pytest -m "not matlab_parity"` skips parity tests cleanly.
+4. **Register pytest markers** — `matlab_parity` and `cpp` markers in `pytest.ini` for selective runs.
 5. **Graceful skip on missing assets** — parity tests skip (not error) when `.mat` refs or image files are absent.
+6. **Triage old integration tests** (`test_ivp_*.py` etc.) — delete those covered by parity tests, rewrite unique ones to new API, mark C++-specific tests with `@pytest.mark.cpp`.
+7. **Add jupytext CI step** — auto-generate `.ipynb` notebooks from `.py` example files. One source of truth, no hand-maintained notebooks.
+8. **Add `run-examples.yml` workflow** — weekly smoke test running all examples with `backend="python"`, `device="cpu"`.
 
 ### v0.6.3 — Axisymmetric Support
 
