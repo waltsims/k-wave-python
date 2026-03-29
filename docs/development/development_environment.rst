@@ -66,42 +66,32 @@ Running Tests
 
 Full Test Suite
 ^^^^^^^^^^^^^^^
-Generate reference files with MATLAB and run the complete Python test suite:
-
-.. code-block:: bash
-    cd k-wave-python/
-    make test
-
-Manual Test Execution
-^^^^^^^^^^^^^^^^^^^^^
-After reference generation:
+Run the complete Python test suite:
 
 .. code-block:: bash
 
-    pytest
+    uv run pytest
 
 Test Coverage
 ^^^^^^^^^^^^^
 .. code-block:: bash
 
-    coverage run
+    uv run coverage run
 
 Running Examples
 ~~~~~~~~~~~~~~~~
 
-Default (GPU-enabled)
-^^^^^^^^^^^^^^^^^^^^^
+Run a single example:
+
 .. code-block:: bash
 
-    make run-examples
-    # or
-    MPLBACKEND=Agg python run_examples.py
+    uv run python examples/ivp_homogeneous_medium.py
 
 Force CPU Execution
 ^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
-    MPLBACKEND=Agg KWAVE_FORCE_CPU=1 python run_examples.py
+    KWAVE_FORCE_CPU=1 uv run python examples/ivp_homogeneous_medium.py
 
 Test Architecture
 -----------------
