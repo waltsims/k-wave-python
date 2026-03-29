@@ -21,6 +21,7 @@ build/
 src/
 transfer_temp/
 docs/_build/
+docs/_examples/
 kwave/bin/
 
 # Package manager files
