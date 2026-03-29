@@ -1,9 +1,8 @@
 Example Gallery
 ===============
 
-Interactive notebook versions of the k-Wave-python examples.
-Each page includes an **Open in Colab** badge so you can run the code in the
-cloud without any local setup.
+Pre-executed notebook versions of the k-Wave-python examples with plot outputs.
+To run locally: ``uv run python examples/<name>.py``
 
 Initial Value Problems (IVP)
 ----------------------------

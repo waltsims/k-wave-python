@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Convert examples/*.py (jupytext percent format) to notebooks/*.ipynb.
 
-Run this before the Sphinx build so that nbsphinx can render them.
-
 Usage:
-    python docs/generate_example_notebooks.py
+    python docs/generate_example_notebooks.py            # convert only
+    python docs/generate_example_notebooks.py --execute   # convert + run (captures plot outputs)
 """
 
 import json
@@ -16,19 +15,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "examples"
 OUTPUT_DIR = REPO_ROOT / "notebooks"
 
-_INSTALL_CELL = {
-    "cell_type": "code",
-    "execution_count": None,
-    "metadata": {},
-    "outputs": [],
-    "source": "!pip install k-wave-python",
-}
-
 
 def _promote_docstring_to_markdown(nb_path: Path) -> None:
     """If the first cell is a code cell whose only content is a docstring,
-    convert it to a markdown cell with the first line as an H1 title.
-    Then insert a pip install cell for Colab users."""
+    convert it to a markdown cell with the first line as an H1 title."""
     with open(nb_path) as f:
         nb = json.load(f)
 
@@ -43,8 +33,6 @@ def _promote_docstring_to_markdown(nb_path: Path) -> None:
     source = "".join(first["source"]) if isinstance(first["source"], list) else first["source"]
     stripped = source.strip()
 
-    # Detect triple-quoted docstring: starts and ends with """ (or '''),
-    # with no other triple-quotes in between.
     for quote in ('"""', "'''"):
         if stripped.startswith(quote) and stripped.endswith(quote) and len(stripped) > 6:
             inner = stripped[3:-3]
@@ -54,7 +42,6 @@ def _promote_docstring_to_markdown(nb_path: Path) -> None:
     else:
         return
 
-    # Split into title (first line) and description (rest)
     lines = body.split("\n", 1)
     title = lines[0].strip()
     description = lines[1].strip() if len(lines) > 1 else ""
@@ -68,15 +55,14 @@ def _promote_docstring_to_markdown(nb_path: Path) -> None:
     first.pop("execution_count", None)
     first.pop("outputs", None)
 
-    # Insert pip install cell after title, before imports
-    cells.insert(1, _INSTALL_CELL.copy())
-
     with open(nb_path, "w") as f:
         json.dump(nb, f, indent=2)
         f.write("\n")
 
 
 def main() -> None:
+    execute = "--execute" in sys.argv
+
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     py_files = sorted(EXAMPLES_DIR.glob("*.py"))
@@ -93,6 +79,31 @@ def main() -> None:
         _promote_docstring_to_markdown(out_file)
 
     print(f"Converted {len(py_files)} examples to {OUTPUT_DIR.relative_to(REPO_ROOT)}/")
+
+    if execute:
+        print("\nExecuting notebooks (this may take a few minutes)...")
+        for nb_file in sorted(OUTPUT_DIR.glob("*.ipynb")):
+            print(f"  Running {nb_file.name}...", end=" ", flush=True)
+            try:
+                subprocess.check_call(
+                    [
+                        sys.executable,
+                        "-m",
+                        "jupyter",
+                        "nbconvert",
+                        "--to",
+                        "notebook",
+                        "--inplace",
+                        "--execute",
+                        "--ExecutePreprocessor.timeout=300",
+                        str(nb_file),
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                print("OK")
+            except subprocess.CalledProcessError:
+                print("FAILED (kept without outputs)")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,9 @@
-# Generated Notebooks
+# Example Notebooks
 
-These `.ipynb` files are auto-generated from `examples/*.py` via [jupytext](https://jupytext.readthedocs.io/). Do not edit them directly — edit the `.py` source files instead.
+Pre-executed notebooks with plot outputs, generated from `examples/*.py` via [jupytext](https://jupytext.readthedocs.io/). Do not edit directly — edit the `.py` source files instead.
 
-Regenerate locally:
+Regenerate:
 
 ```bash
-python docs/generate_example_notebooks.py
+python docs/generate_example_notebooks.py --execute
 ```
-
-On merge to master, the `generate-notebooks.yml` workflow updates these automatically.
