@@ -115,25 +115,25 @@ def _pml_crop(ndim):
 # Example registry
 # ---------------------------------------------------------------------------
 
-# (name, ndim, thresh) — standard examples tested for p + p_final
+# (name, ndim, p_thresh, p_final_thresh)
 _EXAMPLES = [
-    # IVP
-    ("ivp_homogeneous_medium", 2, THRESH),
-    ("ivp_heterogeneous_medium", 2, THRESH),
-    ("ivp_binary_sensor_mask", 2, THRESH),
-    ("ivp_1D_simulation", 1, THRESH),
-    ("ivp_loading_external_image", 2, THRESH),
-    ("ivp_photoacoustic_waveforms", 2, THRESH),
-    # TVSP
-    ("tvsp_homogeneous_medium_monopole", 2, THRESH_TVSP),
-    ("tvsp_homogeneous_medium_dipole", 2, THRESH_TVSP),
-    ("tvsp_steering_linear_array", 2, THRESH_TVSP),
-    ("tvsp_snells_law", 2, THRESH_TVSP),
-    ("tvsp_doppler_effect", 2, THRESH_TVSP),
-    # NA (filtering)
-    ("na_filtering_part_1", 1, THRESH),
-    ("na_filtering_part_2", 1, THRESH_TVSP),
-    ("na_filtering_part_3", 1, THRESH_TVSP),
+    # IVP — machine precision for both p and p_final
+    ("ivp_homogeneous_medium", 2, THRESH, THRESH),
+    ("ivp_heterogeneous_medium", 2, THRESH, THRESH),
+    ("ivp_binary_sensor_mask", 2, THRESH, THRESH),
+    ("ivp_1D_simulation", 1, THRESH, THRESH),
+    ("ivp_loading_external_image", 2, THRESH, THRESH),
+    ("ivp_photoacoustic_waveforms", 2, THRESH, THRESH),
+    # TVSP — p is machine precision, p_final is looser (more FFT round-trips)
+    ("tvsp_homogeneous_medium_monopole", 2, THRESH, THRESH_TVSP),
+    ("tvsp_homogeneous_medium_dipole", 2, THRESH, THRESH_TVSP),
+    ("tvsp_steering_linear_array", 2, THRESH, THRESH_TVSP),
+    ("tvsp_snells_law", 2, THRESH, THRESH_TVSP),
+    ("tvsp_doppler_effect", 2, THRESH_TVSP, THRESH_TVSP),
+    # NA (filtering) — p is machine precision, p_final looser for parts 2/3
+    ("na_filtering_part_1", 1, THRESH, THRESH),
+    ("na_filtering_part_2", 1, THRESH, THRESH_TVSP),
+    ("na_filtering_part_3", 1, THRESH, THRESH_TVSP),
 ]
 
 
@@ -148,29 +148,29 @@ class TestStandardExamples:
 
     @pytest.fixture(scope="class", params=_EXAMPLES, ids=[e[0] for e in _EXAMPLES])
     def scenario(self, request):
-        name, ndim, thresh = request.param
+        name, ndim, p_thresh, pf_thresh = request.param
         mod = importlib.import_module(f"examples.{name}")
         try:
             result = _run_with_binary_sensor(mod.setup, ndim)
         except FileNotFoundError:
             pytest.skip(f"Asset not found for {name}")
         ref = _load_ref(name)
-        return result, ref, ndim, thresh
+        return result, ref, ndim, p_thresh, pf_thresh
 
     def test_p(self, scenario):
-        result, ref, ndim, thresh = scenario
+        result, ref, ndim, p_thresh, _pf_thresh = scenario
         matlab_p = ref["p"]
         if ndim >= 2:
             matlab_p = _reorder_fullgrid(matlab_p, _grid_shape_from_ref(ref, ndim))
-        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p", p_thresh)
 
     def test_p_final(self, scenario):
-        result, ref, ndim, thresh = scenario
+        result, ref, ndim, _p_thresh, pf_thresh = scenario
         matlab_pf = ref["p_final"]
         if ndim == 1:
             matlab_pf = matlab_pf.ravel()
         matlab_pf = matlab_pf[_pml_crop(ndim)]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh)
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", pf_thresh)
 
 
 # ---------------------------------------------------------------------------
