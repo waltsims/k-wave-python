@@ -1,0 +1,37 @@
+name: Generate Notebooks
+
+on:
+  push:
+    branches: [master]
+    paths: ['examples/*.py']
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install jupytext
+        run: pip install 'jupytext>=1.16,<2'
+
+      - name: Generate notebooks
+        run: python docs/generate_example_notebooks.py
+
+      - name: Commit notebooks
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin master
+          git add notebooks/
+          if git diff --cached --quiet; then
+            echo "No notebook changes"
+          else
+            git commit -m "Auto-generate notebooks from examples [skip ci]"
+            git push origin HEAD:master
+          fi
