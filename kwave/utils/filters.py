@@ -575,7 +575,6 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     grid_size = a.shape
 
     if num_dim2(a) != len(grid_size):
-        is_row = a.shape[0] == 1  # remember before squeezing
         a = np.squeeze(a)
         grid_size = a.shape if a.ndim > 1 else a.shape[0]
 
