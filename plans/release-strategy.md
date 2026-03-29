@@ -252,7 +252,7 @@ Flatten example directory, add jupytext notebook generation, build docs gallery.
 - Deleted dead `test_example.yml`
 
 **Remaining for v0.6.2:**
-1. **Docs example gallery** — Add nbsphinx or sphinx-gallery to docs build; render generated notebooks as HTML pages with "Open in Colab" badges. Wire into `test_pages.yml`.
+1. **Docs example gallery** — Pre-executed notebooks rendered via nbsphinx with plot outputs. No Colab — users run locally with `uv run`.
 2. **8 more parity tests** — ivp_saving_movie_files, na_optimising_performance, na_source_smoothing, pr_2D_FFT_line_sensor, pr_3D_FFT_planar_sensor, sd_directional_array_elements, sd_directivity_modelling_2D/3D
 3. **Investigate 3D p_final mismatch** — 2 skipped tests (likely p0 smoothing or medium mapping difference)
 4. **CuPy GPU validation** — Run all 29 examples on DigitalOcean GPU droplet, verify NumPy↔CuPy parity
