@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '0 0 * * 1'  # Every Monday at 00:00 UTC
   workflow_dispatch:      # Manual trigger
+  pull_request:
+    paths:
+      - 'examples/*.py'
+      - '.github/workflows/run-examples.yml'
 
 jobs:
   discover-examples:
@@ -14,8 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - id: find-examples
         run: |
-          # Find all Python files in examples subdirectories
-          EXAMPLES=$(find examples -name "*.py" -not -path "*/\.*" | jq -R -s -c 'split("\n")[:-1]')
+          # Find ported examples (exclude legacy/ and hidden files)
+          EXAMPLES=$(find examples -maxdepth 1 -name "*.py" -not -path "*/\.*" | jq -R -s -c 'split("\n")[:-1]')
           echo "examples=$EXAMPLES" >> "$GITHUB_OUTPUT"
 
   run-examples:

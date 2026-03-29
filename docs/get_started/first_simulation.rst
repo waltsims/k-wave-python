@@ -194,22 +194,22 @@ Now that you understand the four-component structure, explore these examples to 
 
 **Beginner Examples** (start here):
 
-- :ghfile:`Photoacoustic Waveforms <examples/ivp_photoacoustic_waveforms/README.md>` - See how 2D and 3D wave propagation differs
-- :ghfile:`Defining Transducers <examples/us_defining_transducer/README.md>` - Learn about ultrasound transducers
+- :ghfile:`Photoacoustic Waveforms <examples/legacy/ivp_photoacoustic_waveforms/README.md>` - See how 2D and 3D wave propagation differs
+- :ghfile:`Defining Transducers <examples/legacy/us_defining_transducer/README.md>` - Learn about ultrasound transducers
 
 **Medical Imaging Applications**:
 
-- :ghfile:`B-mode Linear Transducer <examples/us_bmode_linear_transducer/README.md>` - Full B-mode ultrasound imaging pipeline
-- :ghfile:`2D FFT Line Sensor <examples/pr_2D_FFT_line_sensor/README.md>` - Photoacoustic image reconstruction
+- :ghfile:`B-mode Linear Transducer <examples/legacy/us_bmode_linear_transducer/README.md>` - Full B-mode ultrasound imaging pipeline
+- :ghfile:`2D FFT Line Sensor <examples/legacy/pr_2D_FFT_line_sensor/README.md>` - Photoacoustic image reconstruction
 
 **Advanced Transducer Modeling**:
 
-- :ghfile:`Array as Source <examples/at_array_as_source/README.md>` - Complex array transducers without staircasing
-- :ghfile:`Focused Bowl 3D <examples/at_focused_bowl_3D/README.md>` - Focused ultrasound applications
+- :ghfile:`Array as Source <examples/legacy/at_array_as_source/README.md>` - Complex array transducers without staircasing
+- :ghfile:`Focused Bowl 3D <examples/legacy/at_focused_bowl_3D/README.md>` - Focused ultrasound applications
 
 **Acoustic Field Analysis**:
 
-- :ghfile:`Beam Patterns <examples/us_beam_patterns/README.md>` - Understand beam formation and focusing
-- :ghfile:`Focused Detector 2D <examples/sd_focussed_detector_2D/README.md>` - Sensor directivity effects
+- :ghfile:`Beam Patterns <examples/legacy/us_beam_patterns/README.md>` - Understand beam formation and focusing
+- :ghfile:`Focused Detector 2D <examples/legacy/sd_focussed_detector_2D/README.md>` - Sensor directivity effects
 
 Each example builds on the same four-component framework but demonstrates different aspects of acoustic simulation. The key insight is that no matter how complex the application, every k-Wave simulation follows this same logical structure.

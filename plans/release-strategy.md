@@ -11,8 +11,9 @@ This release strategy brings the unified solver architecture to fruition.
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, Future warnings |
 | **0.6.1** | C-order Migration (Helpers) | Migrate utils/helpers from F-order to C-order, keep legacy API working |
-| **0.6.2** | Example Migration | Port remaining examples to new `kspaceFirstOrder()` API |
-| **0.6.3** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
+| **0.6.2** | Example Restructure & Docs Gallery | Flatten examples, jupytext notebooks, docs gallery, CuPy validation |
+| **0.6.3** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
+| **0.6.4** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
 | **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
@@ -234,23 +235,59 @@ Atomic migration of all solver internals from Fortran-order to C-order. The `ksp
 
 **Unchanged (by design):** `matlab.py` (F-order boundary), `mapgen.py` (geometry), `kgrid.py` (MATLAB inputs), `cpp_simulation._write_hdf5()` (C++ binary format), legacy `kspaceFirstOrder2D/3D`.
 
-### v0.6.2 — Example Porting
+### v0.6.2 — Example Restructure & Docs Gallery
 
-Port remaining examples from legacy `kspaceFirstOrder2D/3D` to unified `kspaceFirstOrder()`. Strategy: MATLAB reference → k-wave-cupy validation → standalone Python port → CI fixture.
+**Status: in progress (restructure-examples branch, PR #686)**
 
-**Current status (port-examples branch):** 29 of 75 examples ported (all Tier 1). 70 parity tests pass, 2 skipped (3D axis mismatch). See `docs/porting-plan.md` for full breakdown.
+Flatten example directory, add jupytext notebook generation, build docs gallery.
 
-**CI simplification steps:**
-1. **Bundle small test assets in the repo** — images like `EXAMPLE_source_one.png` (332B) and `EXAMPLE_source_two.bmp` (32KB) already live in `tests/`. Examples now look there first.
-2. **Pre-generate MATLAB references offline** — `.mat` files (totalling ~2.5GB) are too large for git. Generate them locally with MATLAB, upload as GitHub release assets or cache artifacts.
-3. **CI test tiers:**
-   - **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
-   - **Tier 2 (nightly/manual):** `test_example_parity.py` — downloads pre-generated `.mat` refs from release assets, ~30s
-   - **Tier 3 (release):** Full MATLAB regeneration + parity — requires MATLAB runner
-4. **Register pytest markers** — `matlab_parity` marker registered in `pytest.ini` for selective runs: `pytest -m "not matlab_parity"` skips parity tests cleanly.
-5. **Graceful skip on missing assets** — parity tests skip (not error) when `.mat` refs or image files are absent.
+**Done:**
+- 29 Tier 1 examples ported to `setup()/run()/__main__` pattern with `kspaceFirstOrder()`
+- Flattened `examples/ported/` → `examples/`, dropped `example_` prefix
+- Old subdirectory examples moved to `examples/legacy/`
+- Test file parametrized: 15 classes → table-driven (550 → 290 lines), 35 pass / 2 skip
+- Separate `p_thresh` / `p_final_thresh` per example (machine precision for time-series)
+- `jupytext.toml` + `generate-notebooks.yml` — auto-generates `.ipynb` on merge to master
+- `run-examples.yml` triggers on PRs touching `examples/`, excludes `legacy/`
+- Deleted dead `test_example.yml`
 
-### v0.6.3 — Axisymmetric Support
+**Remaining for v0.6.2:**
+1. **Docs example gallery** — Add nbsphinx or sphinx-gallery to docs build; render generated notebooks as HTML pages with "Open in Colab" badges. Wire into `test_pages.yml`.
+2. **8 more parity tests** — ivp_saving_movie_files, na_optimising_performance, na_source_smoothing, pr_2D_FFT_line_sensor, pr_3D_FFT_planar_sensor, sd_directional_array_elements, sd_directivity_modelling_2D/3D
+3. **Investigate 3D p_final mismatch** — 2 skipped tests (likely p0 smoothing or medium mapping difference)
+4. **CuPy GPU validation** — Run all 29 examples on DigitalOcean GPU droplet, verify NumPy↔CuPy parity
+5. **Real-world validation** — Run representative simulations from published papers or user workflows to catch edge cases not covered by toy examples
+
+**CI test tiers (implemented):**
+- **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
+- **Tier 2 (every PR):** `test_example_parity.py` — skips gracefully when `.mat` refs absent
+- **Tier 3 (weekly + PR):** `run-examples.yml` — runs all examples end-to-end
+- **`matlab_parity` marker** registered in `pytest.ini` for selective runs
+
+### v0.6.3 — New Features + Updated Examples
+
+**Goal:** Add solver features needed by Tier 2 examples, port those examples, update docs gallery.
+
+**Features to add:**
+- **Time-reversal reconstruction** — needed by 9 PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
+- **Rectangular/corner sensor masks** — needed by 5 examples
+- **`sound_speed_ref`** — needed by `tvsp_slit_diffraction`
+- **Frequency-response sensor** — needed by `ivp_sensor_frequency_response`
+- **Directional sensor** — needed by `sd_sensor_directivity_2D`
+
+**Per-feature workflow:**
+1. Implement feature in solver (`kspace_solver.py`)
+2. Port the MATLAB examples that need it
+3. Generate MATLAB references, add parity tests
+4. Update docs gallery with new examples
+
+**Simplification targets:**
+- Delete `examples/legacy/` once all examples are ported or confirmed obsolete
+- Consolidate `tests/integration/` and `tests/test_example_parity.py` test infrastructure
+- Remove unused MATLAB collector infrastructure if parity tests replace it
+- Audit `kWaveSimulation_helper/` — delete helpers superseded by `kspaceFirstOrder()`
+
+### v0.6.4 — Axisymmetric Support
 
 Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.
 

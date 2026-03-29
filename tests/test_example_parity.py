@@ -11,6 +11,7 @@ are not tested here.
 MATLAB references are per-example v7 .mat files in the sibling k-wave-cupy repo.
 Regenerate with: ``arch -arm64 matlab -batch "run('tests/gen_ref_batch1.m')"``
 """
+import importlib
 import os
 
 import numpy as np
@@ -43,10 +44,24 @@ def _load_ref(name):
 # ---------------------------------------------------------------------------
 
 
-def _reorder_fullgrid_p(matlab_p, Nx, Ny):
+def _reorder_fullgrid(matlab_arr, grid_shape):
     """Reorder MATLAB full-grid sensor data from F-order to C-order."""
-    Nt = matlab_p.shape[1]
-    return matlab_p.reshape(Nx, Ny, Nt, order="F").reshape(Nx * Ny, Nt)
+    Nt = matlab_arr.shape[1]
+    n_pts = int(np.prod(grid_shape))
+    return matlab_arr.reshape(*grid_shape, Nt, order="F").reshape(n_pts, Nt)
+
+
+def _grid_shape_from_ref(ref, ndim):
+    """Extract grid shape from reference data, inferring from p_final if needed."""
+    if ndim == 1:
+        return (int(ref["Nx"]),) if "Nx" in ref else ref["p_final"].shape[:1]
+    if ndim == 2:
+        if "Nx" in ref and "Ny" in ref:
+            return (int(ref["Nx"]), int(ref["Ny"]))
+        return ref["p_final"].shape[:2]
+    if "Nx" in ref and "Ny" in ref and "Nz" in ref:
+        return (int(ref["Nx"]), int(ref["Ny"]), int(ref["Nz"]))
+    return ref["p_final"].shape[:3]
 
 
 # ---------------------------------------------------------------------------
@@ -91,458 +106,184 @@ def _run_with_binary_sensor(setup_fn, ndim, record=None):
     )
 
 
+def _pml_crop(ndim):
+    """PML crop slices for p_final."""
+    return tuple(slice(PML_SIZE, -PML_SIZE) for _ in range(ndim))
+
+
 # ---------------------------------------------------------------------------
-# Tests
+# Example registry
+# ---------------------------------------------------------------------------
+
+# (name, ndim, p_thresh, p_final_thresh)
+_EXAMPLES = [
+    # IVP — machine precision for both p and p_final
+    ("ivp_homogeneous_medium", 2, THRESH, THRESH),
+    ("ivp_heterogeneous_medium", 2, THRESH, THRESH),
+    ("ivp_binary_sensor_mask", 2, THRESH, THRESH),
+    ("ivp_1D_simulation", 1, THRESH, THRESH),
+    ("ivp_loading_external_image", 2, THRESH, THRESH),
+    ("ivp_photoacoustic_waveforms", 2, THRESH, THRESH),
+    # TVSP — p is machine precision, p_final is looser (more FFT round-trips)
+    ("tvsp_homogeneous_medium_monopole", 2, THRESH, THRESH_TVSP),
+    ("tvsp_homogeneous_medium_dipole", 2, THRESH, THRESH_TVSP),
+    ("tvsp_steering_linear_array", 2, THRESH, THRESH_TVSP),
+    ("tvsp_snells_law", 2, THRESH, THRESH_TVSP),
+    ("tvsp_doppler_effect", 2, THRESH_TVSP, THRESH_TVSP),
+    # NA (filtering) — p is machine precision, p_final looser for parts 2/3
+    ("na_filtering_part_1", 1, THRESH, THRESH),
+    ("na_filtering_part_2", 1, THRESH, THRESH_TVSP),
+    ("na_filtering_part_3", 1, THRESH, THRESH_TVSP),
+]
+
+
+# ---------------------------------------------------------------------------
+# Standard parity tests: p + p_final
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.matlab_parity
-class TestIVPHomogeneousMedium:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_homogeneous_medium import setup
+class TestStandardExamples:
+    """Table-driven parity tests for examples using setup() + binary sensor."""
 
-        return _run_with_binary_sensor(setup, ndim=2)
+    @pytest.fixture(scope="class", params=_EXAMPLES, ids=[e[0] for e in _EXAMPLES])
+    def scenario(self, request):
+        name, ndim, p_thresh, pf_thresh = request.param
+        mod = importlib.import_module(f"examples.{name}")
+        try:
+            result = _run_with_binary_sensor(mod.setup, ndim)
+        except FileNotFoundError:
+            pytest.skip(f"Asset not found for {name}")
+        ref = _load_ref(name)
+        return result, ref, ndim, p_thresh, pf_thresh
 
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_homogeneous_medium")
+    def test_p(self, scenario):
+        result, ref, ndim, p_thresh, _pf_thresh = scenario
+        matlab_p = ref["p"]
+        if ndim >= 2:
+            matlab_p = _reorder_fullgrid(matlab_p, _grid_shape_from_ref(ref, ndim))
+        _assert_close(np.asarray(result["p"]), matlab_p, "p", p_thresh)
 
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
-
-
-@pytest.mark.matlab_parity
-class TestIVPHeterogeneousMedium:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_heterogeneous_medium import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_heterogeneous_medium")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+    def test_p_final(self, scenario):
+        result, ref, ndim, _p_thresh, pf_thresh = scenario
+        matlab_pf = ref["p_final"]
+        if ndim == 1:
+            matlab_pf = matlab_pf.ravel()
+        matlab_pf = matlab_pf[_pml_crop(ndim)]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", pf_thresh)
 
 
-@pytest.mark.matlab_parity
-class TestIVPBinarySensorMask:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_binary_sensor_mask import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_binary_sensor_mask")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+# ---------------------------------------------------------------------------
+# Velocity parity test (records ux, uy in addition to p, p_final)
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.matlab_parity
 class TestIVPRecordingParticleVelocity:
     @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_recording_particle_velocity import setup
+    def scenario(self):
+        from examples.ivp_recording_particle_velocity import setup
 
-        return _run_with_binary_sensor(setup, ndim=2, record=["p", "p_final", "ux", "uy"])
+        result = _run_with_binary_sensor(setup, ndim=2, record=["p", "p_final", "ux", "uy"])
+        ref = _load_ref("ivp_recording_particle_velocity")
+        shape = _grid_shape_from_ref(ref, 2)
+        return result, ref, shape
 
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_recording_particle_velocity")
+    def test_p(self, scenario):
+        result, ref, shape = scenario
+        _assert_close(np.asarray(result["p"]), _reorder_fullgrid(ref["p"], shape), "p")
 
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+    def test_p_final(self, scenario):
+        result, ref, shape = scenario
+        _assert_close(np.asarray(result["p_final"]), ref["p_final"][_pml_crop(2)], "p_final")
 
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+    def test_ux(self, scenario):
+        result, ref, shape = scenario
+        _assert_close(np.asarray(result["ux"]), _reorder_fullgrid(ref["ux"], shape), "ux")
 
-    def test_ux(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_ux = _reorder_fullgrid_p(ref["ux"], Nx, Ny)
-        _assert_close(np.asarray(result["ux"]), matlab_ux, "ux")
-
-    def test_uy(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_uy = _reorder_fullgrid_p(ref["uy"], Nx, Ny)
-        _assert_close(np.asarray(result["uy"]), matlab_uy, "uy")
-
-
-@pytest.mark.matlab_parity
-class TestIVP1DSimulation:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_1D_simulation import setup
-
-        return _run_with_binary_sensor(setup, ndim=1)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_1D_simulation")
-
-    def test_p(self, result, ref):
-        matlab_p = ref["p"]  # 1D: no F-to-C reorder needed
-        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH)
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH)
+    def test_uy(self, scenario):
+        result, ref, shape = scenario
+        _assert_close(np.asarray(result["uy"]), _reorder_fullgrid(ref["uy"], shape), "uy")
 
 
 # ---------------------------------------------------------------------------
-# Batch 2: TVSP examples
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.matlab_parity
-class TestTVSPMonopole:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_homogeneous_medium_monopole import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_homogeneous_medium_monopole")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-@pytest.mark.matlab_parity
-class TestTVSPDipole:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_homogeneous_medium_dipole import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_homogeneous_medium_dipole")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-@pytest.mark.matlab_parity
-class TestTVSPSteeringLinearArray:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_steering_linear_array import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_steering_linear_array")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-@pytest.mark.matlab_parity
-class TestTVSPSnellsLaw:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_snells_law import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_snells_law")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-# ---------------------------------------------------------------------------
-# Batch 3: NA examples (PML, nonlinearity, filtering)
+# Custom-run examples (call run() directly, non-standard PML/record)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.matlab_parity
 class TestNAControllingPML:
     @pytest.fixture(scope="class")
-    def result(self):
-        # This example's physics includes non-default PML settings (alpha=0),
-        # so we call run() directly rather than _run_with_binary_sensor.
-        from examples.ported.example_na_controlling_the_PML import run
+    def scenario(self):
+        from examples.na_controlling_the_PML import run
 
-        return run()
+        ref = _load_ref("na_controlling_the_PML")
+        return run(), ref, _grid_shape_from_ref(ref, 2)
 
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("na_controlling_the_PML")
+    def test_p(self, scenario):
+        result, ref, shape = scenario
+        _assert_close(np.asarray(result["p"]), _reorder_fullgrid(ref["p"], shape), "p")
 
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        # pml_inside=True with pml_alpha=0: full field valid, no PML crop
+    def test_p_final(self, scenario):
+        result, ref, shape = scenario
+        # pml_alpha=0 means no absorption at boundary — full field valid, no PML crop
         _assert_close(np.asarray(result["p_final"]), ref["p_final"], "p_final")
-
-
-@pytest.mark.matlab_parity
-class TestNAFilteringPart1:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_na_filtering_part_1 import setup
-
-        return _run_with_binary_sensor(setup, ndim=1)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("na_filtering_part_1")
-
-    def test_p(self, result, ref):
-        matlab_p = ref["p"]
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
-
-
-@pytest.mark.matlab_parity
-class TestNAFilteringPart2:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_na_filtering_part_2 import setup
-
-        return _run_with_binary_sensor(setup, ndim=1)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("na_filtering_part_2")
-
-    def test_p(self, result, ref):
-        matlab_p = ref["p"]
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-@pytest.mark.matlab_parity
-class TestNAFilteringPart3:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_na_filtering_part_3 import setup
-
-        return _run_with_binary_sensor(setup, ndim=1)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("na_filtering_part_3")
-
-    def test_p(self, result, ref):
-        matlab_p = ref["p"]
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"].ravel()[PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
 
 
 @pytest.mark.matlab_parity
 class TestNAModellingNonlinearity:
     @pytest.fixture(scope="class")
-    def result(self):
-        # Uses record_start_index and non-default PML, so call run() directly
-        from examples.ported.example_na_modelling_nonlinearity import run
+    def scenario(self):
+        from examples.na_modelling_nonlinearity import run
 
-        return run()
+        return run(), _load_ref("na_modelling_nonlinearity")
 
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("na_modelling_nonlinearity")
-
-    def test_p(self, result, ref):
-        matlab_p = ref["p"]
-        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH_TVSP)
+    def test_p(self, scenario):
+        result, ref = scenario
+        _assert_close(np.asarray(result["p"]), ref["p"], "p", thresh=THRESH_TVSP)
 
 
 # ---------------------------------------------------------------------------
-# Batch 4: 3D, photoacoustic, SD examples
+# 3D examples — skipped pending investigation
 # ---------------------------------------------------------------------------
 
-
-# TODO: investigate 3D p_final mismatch — Python max 7e-5 at (20,20,24) vs
-# MATLAB max 2e-4 at (60,53,19). Not an axis permutation (all 6 tried).
-# Likely a difference in p0 smoothing or heterogeneous medium setup for 3D.
-# The 3D solver passes symmetry tests on homogeneous media, so the physics is correct.
-@pytest.mark.matlab_parity
-@pytest.mark.skip(reason="3D p_final axis ordering mismatch — needs investigation")
-class TestIVP3DSimulation:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_3D_simulation import setup
-
-        return _run_with_binary_sensor(setup, ndim=3)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_3D_simulation")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
-
-
-@pytest.mark.matlab_parity
-class TestTVSPDopplerEffect:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_doppler_effect import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_doppler_effect")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH_TVSP)
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+_SKIPPED_3D = [
+    # TODO: investigate 3D p_final mismatch — Python max 7e-5 at (20,20,24) vs
+    # MATLAB max 2e-4 at (60,53,19). Not an axis permutation (all 6 tried).
+    # Likely a difference in p0 smoothing or heterogeneous medium setup for 3D.
+    ("ivp_3D_simulation", 3, THRESH, ["p_final"]),
+    ("tvsp_3D_simulation", 3, THRESH_TVSP, ["p_final"]),
+]
 
 
 @pytest.mark.matlab_parity
 @pytest.mark.skip(reason="3D p_final axis ordering mismatch — needs investigation")
-class TestTVSP3DSimulation:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_tvsp_3D_simulation import setup
+class TestSkipped3D:
+    @pytest.fixture(scope="class", params=_SKIPPED_3D, ids=[e[0] for e in _SKIPPED_3D])
+    def scenario(self, request):
+        name, ndim, thresh, record = request.param
+        mod = importlib.import_module(f"examples.{name}")
+        result = _run_with_binary_sensor(mod.setup, ndim, record)
+        ref = _load_ref(name)
+        return result, ref, ndim, thresh
 
-        return _run_with_binary_sensor(setup, ndim=3, record=["p_final"])
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("tvsp_3D_simulation")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
-
-
-@pytest.mark.matlab_parity
-class TestIVPLoadingExternalImage:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_loading_external_image import setup
-
-        try:
-            return _run_with_binary_sensor(setup, ndim=2)
-        except FileNotFoundError:
-            pytest.skip("EXAMPLE_source_one.png not found (requires k-wave-cupy sibling repo)")
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_loading_external_image")
-
-    def test_p(self, result, ref):
-        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
-
-
-@pytest.mark.matlab_parity
-class TestIVPPhotoacousticWaveforms:
-    @pytest.fixture(scope="class")
-    def result(self):
-        from examples.ported.example_ivp_photoacoustic_waveforms import setup
-
-        return _run_with_binary_sensor(setup, ndim=2)
-
-    @pytest.fixture(scope="class")
-    def ref(self):
-        return _load_ref("ivp_photoacoustic_waveforms")
-
-    def test_p(self, result, ref):
-        Nx, Ny = 64, 64
-        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
-        _assert_close(np.asarray(result["p"]), matlab_p, "p")
-
-    def test_p_final(self, result, ref):
-        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+    def test_p_final(self, scenario):
+        result, ref, ndim, thresh = scenario
+        matlab_pf = ref["p_final"][_pml_crop(ndim)]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh)
 
 
 # ---------------------------------------------------------------------------
 # TODO: Parity tests still needed for these ported examples:
 #
-# - example_ivp_saving_movie_files (standard 2D IVP — straightforward)
-# - example_na_optimising_performance (uses Cartesian sensor — needs custom ref)
-# - example_na_source_smoothing (uses kspaceFirstOrder not kspaceSecondOrder)
-# - example_pr_2D_FFT_line_sensor (forward sim with pml_inside=False)
-# - example_pr_3D_FFT_planar_sensor (forward sim, pml_inside deviation)
-# - example_sd_directional_array_elements (multi-element averaging — custom harness)
-# - example_sd_directivity_modelling_2D (11 sims — custom harness)
-# - example_sd_directivity_modelling_3D (11 sims on 64^3 — slow, custom harness)
+# - ivp_saving_movie_files (standard 2D IVP — straightforward)
+# - na_optimising_performance (uses Cartesian sensor — needs custom ref)
+# - na_source_smoothing (uses kspaceFirstOrder not kspaceSecondOrder)
+# - pr_2D_FFT_line_sensor (forward sim with pml_inside=False)
+# - pr_3D_FFT_planar_sensor (forward sim, pml_inside deviation)
+# - sd_directional_array_elements (multi-element averaging — custom harness)
+# - sd_directivity_modelling_2D (11 sims — custom harness)
+# - sd_directivity_modelling_3D (11 sims on 64^3 — slow, custom harness)
 #
 # The SD directivity examples need a different test pattern: call run()
 # directly (not _run_with_binary_sensor) and compare element-level output.
