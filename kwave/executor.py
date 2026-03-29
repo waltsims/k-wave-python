@@ -52,9 +52,16 @@ class Executor:
                     raise subprocess.CalledProcessError(proc.returncode, command, stdout, stderr)
 
         except subprocess.CalledProcessError as e:
-            # This ensures stdout is printed regardless of show_sim_logs value if an error occurs
             print(e.stdout)
             print(e.stderr, file=sys.stderr)
+            if sys.platform == "darwin":
+                print(
+                    "\nOn macOS, the C++ backend requires additional libraries.\n"
+                    "Install them with:\n\n"
+                    "    brew install fftw hdf5 zlib libomp\n\n"
+                    "Alternatively, use backend='python' which requires no extra dependencies.",
+                    file=sys.stderr,
+                )
             raise
 
         sensor_data = self.parse_executable_output(output_filename)
