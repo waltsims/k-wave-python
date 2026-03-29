@@ -238,6 +238,18 @@ Atomic migration of all solver internals from Fortran-order to C-order. The `ksp
 
 Port remaining examples from legacy `kspaceFirstOrder2D/3D` to unified `kspaceFirstOrder()`. Strategy: MATLAB reference → k-wave-cupy validation → standalone Python port → CI fixture.
 
+**Current status (port-examples branch):** 29 of 75 examples ported (all Tier 1). 70 parity tests pass, 2 skipped (3D axis mismatch). See `docs/porting-plan.md` for full breakdown.
+
+**CI simplification steps:**
+1. **Bundle small test assets in the repo** — images like `EXAMPLE_source_one.png` (332B) and `EXAMPLE_source_two.bmp` (32KB) already live in `tests/`. Examples now look there first.
+2. **Pre-generate MATLAB references offline** — `.mat` files (totalling ~2.5GB) are too large for git. Generate them locally with MATLAB, upload as GitHub release assets or cache artifacts.
+3. **CI test tiers:**
+   - **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
+   - **Tier 2 (nightly/manual):** `test_example_parity.py` — downloads pre-generated `.mat` refs from release assets, ~30s
+   - **Tier 3 (release):** Full MATLAB regeneration + parity — requires MATLAB runner
+4. **Register pytest markers** — `matlab_parity` marker registered in `pytest.ini` for selective runs: `pytest -m "not matlab_parity"` skips parity tests cleanly.
+5. **Graceful skip on missing assets** — parity tests skip (not error) when `.mat` refs or image files are absent.
+
 ### v0.6.3 — Axisymmetric Support
 
 Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.

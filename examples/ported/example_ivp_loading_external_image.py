@@ -32,17 +32,15 @@ from kwave.utils.io import load_image
 from kwave.utils.mapgen import make_cart_circle
 from kwave.utils.matrix import resize
 
-# Path to the source image shipped with k-Wave
-_KWAVE_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "k-wave-cupy", "k-Wave", "examples")
-# Fall back: try a sibling repo layout  ~/git/k-wave-cupy/k-Wave/examples/
 _IMAGE_FILENAME = "EXAMPLE_source_one.png"
+_REPO_ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
 
 
 def _find_image():
     """Locate the EXAMPLE_source_one.png image file."""
-    # Try relative path first (works from ~/git/k-wave-python)
     candidates = [
-        os.path.join(_KWAVE_EXAMPLES_DIR, _IMAGE_FILENAME),
+        os.path.join(_REPO_ROOT, "tests", _IMAGE_FILENAME),  # bundled in k-wave-python
+        os.path.join(_REPO_ROOT, "..", "k-wave-cupy", "k-Wave", "examples", _IMAGE_FILENAME),
         os.path.join(os.path.expanduser("~"), "git", "k-wave-cupy", "k-Wave", "examples", _IMAGE_FILENAME),
     ]
     for path in candidates:
