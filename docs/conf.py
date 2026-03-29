@@ -73,12 +73,12 @@ nbsphinx_execute = "never"
 # Add an "Open in Colab" badge at the top of every notebook page.
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
-{% set nb_name = docname.split('/')[-1] %}
+{% set nb_basename = docname.split('/')[-1].replace('.ipynb', '') %}
 
 .. raw:: html
 
     <p>
-      <a href="https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/notebooks/{{ nb_name }}">
+      <a href="https://colab.research.google.com/github/waltsims/k-wave-python/blob/master/notebooks/{{ nb_basename }}.ipynb">
         <img alt="Open In Colab"
              src="https://colab.research.google.com/assets/colab-badge.svg"
              style="vertical-align:text-bottom">

@@ -14,11 +14,9 @@ jobs:
         cache: 'pip'
     - name: Install pandoc
       run: sudo apt-get update && sudo apt-get install -y pandoc
-    - name: Install dependencies
-      run: pip install '.[docs]'
-    - name: Generate example notebooks
-      run: python docs/generate_example_notebooks.py
+    - name: Install dependencies and generate notebooks
+      run: |
+        pip install '.[docs]'
+        python docs/generate_example_notebooks.py
     - name: Build and Commit
       uses: waltsims/pages@pyproject.toml-support
-      with:
-        pyproject_toml_deps: ".[docs]"
