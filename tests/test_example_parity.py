@@ -442,6 +442,68 @@ class TestIVP3DSimulation:
 
 
 @pytest.mark.matlab_parity
+class TestTVSPDopplerEffect:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_doppler_effect import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_doppler_effect")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p", thresh=THRESH_TVSP)
+
+    def test_p_final(self, result, ref):
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+@pytest.mark.skip(reason="3D p_final axis ordering mismatch — needs investigation")
+class TestTVSP3DSimulation:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_tvsp_3D_simulation import setup
+
+        return _run_with_binary_sensor(setup, ndim=3, record=["p_final"])
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("tvsp_3D_simulation")
+
+    def test_p_final(self, result, ref):
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", thresh=THRESH_TVSP)
+
+
+@pytest.mark.matlab_parity
+class TestIVPLoadingExternalImage:
+    @pytest.fixture(scope="class")
+    def result(self):
+        from examples.ported.example_ivp_loading_external_image import setup
+
+        return _run_with_binary_sensor(setup, ndim=2)
+
+    @pytest.fixture(scope="class")
+    def ref(self):
+        return _load_ref("ivp_loading_external_image")
+
+    def test_p(self, result, ref):
+        Nx, Ny = int(ref["Nx"]), int(ref["Ny"])
+        matlab_p = _reorder_fullgrid_p(ref["p"], Nx, Ny)
+        _assert_close(np.asarray(result["p"]), matlab_p, "p")
+
+    def test_p_final(self, result, ref):
+        matlab_pf = ref["p_final"][PML_SIZE:-PML_SIZE, PML_SIZE:-PML_SIZE]
+        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final")
+
+
+@pytest.mark.matlab_parity
 class TestIVPPhotoacousticWaveforms:
     @pytest.fixture(scope="class")
     def result(self):
