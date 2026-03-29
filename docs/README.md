@@ -43,14 +43,6 @@ Or with pip:
 ```bash
 pip install k-wave-python
 ```
-> **Note for MacOS:**
-> 
-> k-wave-python offers initial support for MacOS, but you will need to install the following dependencies using the [brew package manager](https://docs.brew.sh/Installation) along with the Python package:
-> ```bash
-> brew install fftw hdf5 zlib libomp
-> ```
-After installing the Python package, the required binaries will be downloaded and installed the first time you run a
-simulation.
 
 ## Development
 
@@ -80,4 +72,4 @@ url = {https://github.com/waltsims/k-wave-python}
 ```
 ## Contact
 
-e-mail [wsimson@stanford.edu](mailto:wsimson@stanford.edu).
+e-mail [walter.a.simson@gmail.com](mailto:walter.a.simson@gmail.com).

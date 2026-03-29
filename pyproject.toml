@@ -11,10 +11,10 @@ license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
-    { name = "Walter Simson", email = "walter.simson@tum.de"}
+    { name = "Walter Simson", email = "walter.a.simson@gmail.com"}
 ]
 maintainers = [
-    { name = "Walter Simson", email = "walter.simson@tum.de" },
+    { name = "Walter Simson", email = "walter.a.simson@gmail.com" },
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
     { name = "David Sinden", email = "david.sinden@mevis.fraunhofer.de" }
 ]
