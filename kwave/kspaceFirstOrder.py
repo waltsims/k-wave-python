@@ -68,14 +68,16 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-_FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+_FULL_GRID_SUFFIXES = ("_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+# Python solver pre-strips _final fields; C++ binary does not
+_FULL_GRID_SUFFIXES_CPP = ("_final",) + _FULL_GRID_SUFFIXES
 
 
-def _strip_pml(result, pml_size, ndim):
+def _strip_pml(result, pml_size, ndim, suffixes=_FULL_GRID_SUFFIXES):
     """Remove PML padding from full-grid fields in the result dict."""
     slices = tuple(slice(int(p), -int(p) if int(p) else None) for p in pml_size[:ndim])
     return {
-        key: val[slices] if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in _FULL_GRID_SUFFIXES) else val
+        key: val[slices] if isinstance(val, np.ndarray) and val.ndim == ndim and any(key.endswith(s) for s in suffixes) else val
         for key, val in result.items()
     }
 
@@ -243,10 +245,12 @@ def kspaceFirstOrder(
             return result
         result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
 
-    # --- Shared post-processing ---
+    # --- Post-processing: strip PML from full-grid fields ---
 
     if not pml_inside:
-        result = _strip_pml(result, pml_size, kgrid.dim)
+        # Python solver pre-strips _final fields; C++ binary does not
+        suffixes = _FULL_GRID_SUFFIXES_CPP if backend == "cpp" else _FULL_GRID_SUFFIXES
+        result = _strip_pml(result, pml_size, kgrid.dim, suffixes=suffixes)
 
     return result
 
