@@ -10,10 +10,9 @@ This release strategy brings the unified solver architecture to fruition.
 |---------|-----------|-------|
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, Future warnings |
-| **0.6.1** | C-order Migration (Helpers) | Migrate utils/helpers from F-order to C-order, keep legacy API working |
-| **0.6.2** | Example Restructure & Docs Gallery | Flatten examples, jupytext notebooks, docs gallery, CuPy validation |
-| **0.6.3** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
-| **0.6.4** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
+| **0.6.1** | C-order + Examples + Docs | C-order migration, 29 examples ported, 47 parity tests, docs cleanup |
+| **0.6.2** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
+| **0.6.3** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
 | **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
@@ -125,169 +124,57 @@ warnings.warn(
 
 ---
 
-## Phase 2.1: v0.6.1 - C-order Migration (Helpers)
+## v0.6.x Point Releases
 
-**Goal:** Migrate helper/utility code from Fortran-order to C-order internally, while keeping the legacy API functional. No structural API changes — Future warnings only. Fix hacky shaping/indexing throughout.
+### v0.6.1 — C-order + Examples + Docs (released 2026-03-29)
 
-**Scope:** 55 occurrences of `order="F"` across 10 files. Migrate where possible, keep F-order only at explicit boundaries.
+Combined release: C-order migration, example restructure, parity tests, docs cleanup.
 
-**Migrate (internal helpers — safe to convert):**
+**C-order migration:**
+- `kspace_solver.py`: F-order → C-order internally
+- `cpp_simulation.py`: `_fix_output_order()` for C++ backend compatibility
+- `kspaceFirstOrder.py`: `_reshape_sensor_to_grid()` for full-grid sensors
+- F-order kept at boundaries: `matlab.py`, `cpp_simulation._write_hdf5()`, legacy API
 
-| File | `order="F"` count | Notes |
-|------|-------------------|-------|
-| `kwave/utils/matlab.py` | 11 | reshape, flatten, unflatten utilities |
-| `kwave/kgrid.py` | 8 | Grid coordinate generation |
-| `kwave/utils/mapgen.py` | 6 | Map generation |
-| `kwave/utils/conversion.py` | 2 | Unit conversion |
-| `kwave/utils/matrix.py` | 1 | Matrix utilities |
-| `kwave/solvers/kspace_solver.py` | 19 | Audit each: keep F-order only at `simulate_from_dicts` boundary. Convert internal field storage, `_expand_to_grid`, `_build_source_op`, sensor mask extraction. |
-| `kwave/kspaceFirstOrder.py` | 1 | Likely removable |
-
-**Keep as-is (fixed boundaries):**
-
-| File | `order="F"` count | Reason |
-|------|-------------------|--------|
-| `kwave/solvers/cpp_simulation.py` | 3 | C++ binary expects F-order HDF5 |
-| `kwave/kWaveSimulation.py` | 1 | Legacy, deleted in v1.0.0 |
-| `kwave/kWaveSimulation_helper/*` | 3 | Legacy, deleted in v1.0.0 |
+**Example restructure:**
+- 29 Tier 1 examples ported to `setup()/run()/__main__` pattern
+- Flattened `examples/ported/` → `examples/`, dropped `example_` prefix
+- Old subdirectory examples in `examples/legacy/`
+- `run-examples.yml` triggers on PRs touching `examples/`, excludes `legacy/`
 
 **Testing:**
-- All existing tests must pass (no behavioral change)
-- Add `tests/test_memory_layout.py`: verify C/F-order input produces identical results, `simulate_from_dicts` round-trips correctly, `cpp_simulation` writes correct F-order HDF5
+- 47 parity tests passing (machine precision), 6 skipped (missing refs)
+- 3D PML fix: MATLAB defaults to pml_size=10 for 3D
+- Table-driven parametrized test framework
 
----
+**Docs & infra cleanup:**
+- README: Python-first framing, both backends described
+- Dev docs: simplified setup with `uv sync`, removed outdated sections
+- macOS C++ hint in executor.py (scoped to linker errors)
+- Deleted: Makefile, Dockerfile, run_examples.py, notebook pipeline, dead CI workflows
 
-## Phase 2.2: v0.6.2 - Example Migration
+### v0.6.2 — Tier 2 Features + Examples
 
-**Goal:** Port remaining examples from legacy `kspaceFirstOrder2D/3D` to `kspaceFirstOrder()`, validated against MATLAB reference outputs.
-
-### Strategy
-
-Port examples one at a time using MATLAB as ground truth — not old Python results. Use the k-wave-cupy interop layer as the bridge between MATLAB and Python.
-
-**Per-example workflow:**
-
-1. **MATLAB reference** — Run the example in MATLAB k-Wave, save outputs to `.mat`
-2. **k-wave-cupy validation** — Call the Python solver from MATLAB via k-wave-cupy (`simulate_from_dicts`). Compare against MATLAB output. This catches F/C ordering and interop issues at the boundary.
-3. **Standalone Python port** — Port the example to `kspaceFirstOrder()`, compare against the same MATLAB `.mat` reference
-4. **CI fixture** — Add the MATLAB `.mat` as a reference test in `tests/integration/`
-
-**Why k-wave-cupy first:** The interop layer handles F→C conversion at the boundary. Validating there first means ordering bugs are caught before they propagate to the standalone Python example. Once the k-wave-cupy version matches MATLAB, the Python port is a straightforward translation.
-
-**Order of work:**
-1. Migrate example in k-wave-cupy repo (MATLAB calls Python solver)
-2. Validate against MATLAB reference output
-3. Port the standalone Python example in k-wave-python
-4. Add integration test with `.mat` fixture
-
-### Examples to port
-
-| Example | Blocker | Resolution |
-|---------|---------|------------|
-| `pr_2D_TR_line_sensor`, `pr_3D_TR_planar_sensor` | `TimeReversal` class uses legacy API internally | Refactor `TimeReversal` to call `kspaceFirstOrder()` |
-| `us_defining_transducer`, `us_beam_patterns`, `us_bmode_linear_transducer`, `us_bmode_phased_array` | `NotATransducer`-as-source pipeline untested with new API | Validate transducer pipeline end-to-end via k-wave-cupy first |
-| `checkpointing/checkpoint.py` | `checkpoint_file`/`checkpoint_timesteps` not exposed in new API | Add checkpoint kwargs to `kspaceFirstOrder()` |
-
----
-
-## Phase 2.3: v0.6.3 - Axisymmetric Support
-
-**Goal:** Add axisymmetric simulation to `kspaceFirstOrder()` and port AS examples.
-
-**What axisymmetric means:** Dimensionality reduction for problems with cylindrical symmetry. A 3D symmetric problem is simulated on a 2D (r, z) half-domain; a 2D symmetric problem on a 1D half-domain. Results are mirrored around the symmetry axis to reconstruct the full field.
-
-**Current state:** `kspaceFirstOrderAS.py` / `kspaceFirstOrderASC.py` are standalone entry points using the legacy `kWaveSimulation` pipeline. The new API hardcodes `axisymmetric_flag=0`.
-
-**Design:** Not a separate solver — a wrapper around `kspaceFirstOrder()` that:
-1. Takes `axisymmetric=True` kwarg
-2. Reduces the grid to a half-domain (y ≥ 0 = radial direction)
-3. Adds radial symmetry terms: special PML at axis (no absorption at y=0), expanded grid for FFT symmetries (WSWA: 4× radial, WSWS: 2×-2), radial coordinate vectors for geometric source terms
-4. Runs the lower-dimensional simulation via `Simulation`
-5. Mirrors results around the axis for output
-
-**Legacy mapping:** `kspaceFirstOrderAS` → `kspaceFirstOrder(..., axisymmetric=True, backend="python")`, `kspaceFirstOrderASC` → `kspaceFirstOrder(..., axisymmetric=True, backend="cpp")`
-
-**Constraints:** Staggered grid mandatory (`use_sg=True` enforced). Viscous absorption only (`alpha_power=2` fixed).
-
-**Tasks:**
-1. Add `axisymmetric: bool = False` kwarg to `kspaceFirstOrder()`
-2. Implement radial symmetry pre/post-processing in `kspaceFirstOrder()` (grid reduction, PML axis handling, result mirroring)
-3. Add radial terms to `Simulation` class (geometric source terms for (r, z) grid)
-4. Port `at_circular_piston_AS`, `at_focused_bowl_AS` using the v0.6.2 MATLAB-first workflow
-5. Validate against MATLAB references
-6. Deprecate `kspaceFirstOrderAS` / `kspaceFirstOrderASC`
-
----
-
-## Phase 2.x: v0.6.x Point Releases
-
-### v0.6.1 — C-order Migration
-
-**Status: implemented on `c-order-migration` branch**
-
-Atomic migration of all solver internals from Fortran-order to C-order. The `kspaceFirstOrder()` API is experimental pre-1.0, so output shape changes are acceptable without a deprecation cycle.
-
-**Changes:**
-- `kspace_solver.py`: all `flatten(order="F")`/`reshape(..., order="F")` → `ravel()`/`reshape()`. C-order strides for bilinear interpolation.
-- `cpp_simulation.py`: `_fix_output_order()` transposes full-grid fields and permutes sensor time-series rows from F-indexed to C-indexed.
-- `kspaceFirstOrder.py`: `_reshape_sensor_to_grid()` for full-grid sensors → `(Nt, *grid_shape)` output. Aggregates → `(*grid_shape)`.
-- `cart2grid`, `combine_sensor_data`, `get_distributed_source_signal`: `order=` param with `FutureWarning` defaulting to `"F"`.
-
-**Unchanged (by design):** `matlab.py` (F-order boundary), `mapgen.py` (geometry), `kgrid.py` (MATLAB inputs), `cpp_simulation._write_hdf5()` (C++ binary format), legacy `kspaceFirstOrder2D/3D`.
-
-### v0.6.2 — Example Restructure & Docs Gallery
-
-**Status: in progress (restructure-examples branch, PR #686)**
-
-Flatten example directory, add jupytext notebook generation, build docs gallery.
-
-**Done:**
-- 29 Tier 1 examples ported to `setup()/run()/__main__` pattern with `kspaceFirstOrder()`
-- Flattened `examples/ported/` → `examples/`, dropped `example_` prefix
-- Old subdirectory examples moved to `examples/legacy/`
-- Test file parametrized: 15 classes → table-driven (550 → 290 lines), 35 pass / 2 skip
-- Separate `p_thresh` / `p_final_thresh` per example (machine precision for time-series)
-- `jupytext.toml` + `generate-notebooks.yml` — auto-generates `.ipynb` on merge to master
-- `run-examples.yml` triggers on PRs touching `examples/`, excludes `legacy/`
-- Deleted dead `test_example.yml`
-
-**Remaining for v0.6.2:**
-1. **Docs example gallery** — Add nbsphinx or sphinx-gallery to docs build; render generated notebooks as HTML pages with "Open in Colab" badges. Wire into `test_pages.yml`.
-2. **8 more parity tests** — ivp_saving_movie_files, na_optimising_performance, na_source_smoothing, pr_2D_FFT_line_sensor, pr_3D_FFT_planar_sensor, sd_directional_array_elements, sd_directivity_modelling_2D/3D
-3. **Investigate 3D p_final mismatch** — 2 skipped tests (likely p0 smoothing or medium mapping difference)
-4. **CuPy GPU validation** — Run all 29 examples on DigitalOcean GPU droplet, verify NumPy↔CuPy parity
-5. **Real-world validation** — Run representative simulations from published papers or user workflows to catch edge cases not covered by toy examples
-
-**CI test tiers (implemented):**
-- **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
-- **Tier 2 (every PR):** `test_example_parity.py` — skips gracefully when `.mat` refs absent
-- **Tier 3 (weekly + PR):** `run-examples.yml` — runs all examples end-to-end
-- **`matlab_parity` marker** registered in `pytest.ini` for selective runs
-
-### v0.6.3 — New Features + Updated Examples
-
-**Goal:** Add solver features needed by Tier 2 examples, port those examples, update docs gallery.
+**Goal:** Add solver features needed by Tier 2 examples, port those examples.
 
 **Features to add:**
-- **Time-reversal reconstruction** — needed by 9 PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
+- **Time-reversal reconstruction** — needed by PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
 - **Rectangular/corner sensor masks** — needed by 5 examples
 - **`sound_speed_ref`** — needed by `tvsp_slit_diffraction`
 - **Frequency-response sensor** — needed by `ivp_sensor_frequency_response`
 - **Directional sensor** — needed by `sd_sensor_directivity_2D`
 
-**Per-feature workflow:**
-1. Implement feature in solver (`kspace_solver.py`)
-2. Port the MATLAB examples that need it
-3. Generate MATLAB references, add parity tests
-4. Update docs gallery with new examples
+**Also:**
+- CuPy GPU validation on DigitalOcean (29 examples ready)
+- Real-world validation (published paper simulations)
+- Consolidate test infrastructure (`tests/integration/` + `test_example_parity.py`)
 
 **Simplification targets:**
 - Delete `examples/legacy/` once all examples are ported or confirmed obsolete
-- Consolidate `tests/integration/` and `tests/test_example_parity.py` test infrastructure
 - Remove unused MATLAB collector infrastructure if parity tests replace it
 - Audit `kWaveSimulation_helper/` — delete helpers superseded by `kspaceFirstOrder()`
 
-### v0.6.4 — Axisymmetric Support
+### v0.6.3 — Axisymmetric Support
 
 Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.
 
@@ -389,96 +276,30 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 
 ## Testing Strategy
 
-**Existing (keep):**
-- MATLAB reference tests via CI (66 MATLAB collectors → `.mat` fixtures, `scipy.io.loadmat`)
+**Current (v0.6.1):**
 - Multi-platform pytest (Windows, Ubuntu, macOS) × Python 3.10-3.13 (12-job matrix)
-- Integration tests in `tests/integration/` with `assert_fields_close()` (rtol=1e-10, atol=1e-12)
-- Weekly example runner (`run-examples.yml`, `KWAVE_FORCE_CPU=1`)
+- MATLAB reference tests via CI (66 collectors → `.mat` fixtures)
+- `test_example_parity.py` — 47 table-driven parity tests against MATLAB refs
+- `test_native_solver.py` — 33 tests for Python backend
+- Weekly example runner (`run-examples.yml`)
+- `matlab_parity` marker for selective runs
 
-**v0.6.0 (done):**
-- `tests/test_native_solver.py` — 33 tests for Python backend
-- `tests/test_unified_api.py` — new kwargs API
-- `tests/test_compat.py` — `options_to_kwargs()` migration
-
-**v0.6.1 (C-order migration):**
-- `tests/test_memory_layout.py` — C/F-order input produces identical results, `simulate_from_dicts` F→C→F round-trip, `cpp_simulation` writes correct F-order HDF5
-
-**v0.6.2 (example migration):**
-- Per-example MATLAB reference integration tests — validate via k-wave-cupy interop first, then add `.mat` fixtures to `tests/integration/`
-- Each ported example gets a corresponding `test_<example_name>.py` with MATLAB reference comparison
+**v0.6.2 (Tier 2 features):**
+- Parity tests for time-reversal, rect sensors, etc.
+- CuPy GPU validation
 
 **v0.6.3 (axisymmetric):**
-- Extend existing `test_ivp_axisymmetric_simulation.py` to use new `kspaceFirstOrder(..., axisymmetric=True)` API
-- New MATLAB reference tests for `at_circular_piston_AS`, `at_focused_bowl_AS`
-
-**Cross-cutting:**
-- `tests/test_backend_parity.py` — Python vs C++ backends produce same results for shared test cases
-- `tests/test_Future_warnings.py` — verify FutureWarning emitted on legacy API calls
-
----
-
-## Verification
-
-```bash
-# v0.5.0 - CI passes
-uv run pytest tests/ -v
-
-# v0.6.0 - Unified API works
-uv run python -c "
-from kwave.kspaceFirstOrder import kspaceFirstOrder
-from kwave.kgrid import kWaveGrid
-from kwave.kmedium import kWaveMedium
-from kwave.ksource import kSource
-from kwave.ksensor import kSensor
-import numpy as np
-
-kgrid = kWaveGrid([64, 64], [0.1e-3, 0.1e-3])
-kgrid.makeTime(1500, 0.3, 20e-6)
-medium = kWaveMedium(sound_speed=1500)
-source = kSource()
-source.p0 = np.zeros((64, 64)); source.p0[32, 32] = 1
-sensor = kSensor()
-sensor.mask = np.ones((64, 64), dtype=bool)
-
-result = kspaceFirstOrder(kgrid, medium, source, sensor, backend='native')
-print('Success:', result['p'].shape)
-"
-
-# v0.6.0 - Future warnings
-uv run python -W error::FutureWarning -c "
-from kwave.options.simulation_options import SimulationOptions
-"  # Should warn
-
-# v1.0.0 - Full test suite
-uv run pytest tests/ -v
-```
+- MATLAB reference tests for `at_circular_piston_AS`, `at_focused_bowl_AS`
 
 ---
 
 ## Implementation Order
 
-1. **Now:** Finalize master/main for v0.5.0
-2. **Next:** Python solver + `kspaceFirstOrder()` API + Future for v0.6.0
-3. **Then:** C-order migration of helpers/utils for v0.6.1
-4. **Then:** Port remaining examples to new API for v0.6.2
-5. **Then:** Axisymmetric support in new API for v0.6.3
-6. **Then:** `kwp` CLI for v0.7.0
-7. **Then:** Clean delete for v1.0.0
-8. **Post-1.0:** Devito, nanobind/MPI based on profiling and user demand
-
----
-
-## Critical Files
-
-| File | Action | Version |
-|------|--------|---------|
-| `kwave/solvers/kspace_solver.py` | Finalize native solver | 0.6.0 |
-| `kwave/solvers/native.py` | Finalize | 0.6.0 |
-| `kwave/solvers/kwave_adapter.py` | Finalize | 0.6.0 |
-| `kwave/kspaceFirstOrder.py` | Create unified entry point | 0.6.0 |
-| `kwave/solvers/serializer.py` | Create HDF5 writer | 0.6.0 |
-| `kwave/kspaceFirstOrder2D.py` | Simplify to wrapper | 0.6.0 |
-| `kwave/kspaceFirstOrder3D.py` | Simplify to wrapper | 0.6.0 |
-| `kwave/options/simulation_options.py` | Delete | 1.0.0 |
-| `kwave/options/simulation_execution_options.py` | Delete | 1.0.0 |
-| `kwave/kWaveSimulation.py` | Delete | 1.0.0 |
+1. ~~v0.5.0~~ ✅ Stabilize master
+2. ~~v0.6.0~~ ✅ Python solver + unified API + deprecations
+3. ~~v0.6.1~~ ✅ C-order + examples + docs cleanup
+4. **Next:** v0.6.2 — Tier 2 features + examples
+5. **Then:** v0.6.3 — Axisymmetric support
+6. **Then:** v0.7.0 — CLI (`kwp`)
+7. **Then:** v1.0.0 — Clean release (delete deprecated code)
+8. **Post-1.0:** Performance & scale based on profiling
