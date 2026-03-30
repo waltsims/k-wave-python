@@ -198,11 +198,11 @@ class CppSimulation:
             # NOTE: Despite the name "*_source_flag", the C++ binary expects
             # the number of time points in the source signal (not a boolean).
             # 0 = no source, >0 = number of time steps in the source signal.
-            "p_source_flag": len(source.p[0]) if has_p else 0,
+            "p_source_flag": np.asarray(source.p).shape[-1] if has_p else 0,
             "p0_source_flag": int(has_p0),
-            "ux_source_flag": len(source.ux[0]) if has_ux else 0,
-            "uy_source_flag": len(source.uy[0]) if has_uy else 0,
-            "uz_source_flag": len(source.uz[0]) if has_uz else 0,
+            "ux_source_flag": np.asarray(source.ux).shape[-1] if has_ux else 0,
+            "uy_source_flag": np.asarray(source.uy).shape[-1] if has_uy else 0,
+            "uz_source_flag": np.asarray(source.uz).shape[-1] if has_uz else 0,
             "sxx_source_flag": 0,
             "syy_source_flag": 0,
             "szz_source_flag": 0,
