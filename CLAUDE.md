@@ -83,7 +83,7 @@ When `pml_inside=False` (default), `kspaceFirstOrder()` expands the grid by `2*p
 
 - Tests in `tests/`, configured via `[tool.pytest.ini_options]` in `pyproject.toml`
 - Integration tests (`@pytest.mark.integration`) compare against MATLAB reference data
-- Test fixtures in `tests/integration/conftest.py`: `load_matlab_ref`, `assert_fields_close`
+- Test fixtures in `tests/integration/conftest.py`: `load_matlab_ref` (fixture), `assert_fields_close` (helper function for field comparison)
 - MATLAB reference data pointed to by `KWAVE_MATLAB_REF_DIR` env var
 
 ## Naming Conventions
