@@ -195,6 +195,9 @@ class CppSimulation:
             "pml_x_size": pml_x_size,
             "pml_y_size": pml_y_size,
             "pml_z_size": pml_z_size,
+            # NOTE: Despite the name "*_source_flag", the C++ binary expects
+            # the number of time points in the source signal (not a boolean).
+            # 0 = no source, >0 = number of time steps in the source signal.
             "p_source_flag": len(source.p[0]) if has_p else 0,
             "p0_source_flag": int(has_p0),
             "ux_source_flag": len(source.ux[0]) if has_ux else 0,
