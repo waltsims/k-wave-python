@@ -10,10 +10,9 @@ This release strategy brings the unified solver architecture to fruition.
 |---------|-----------|-------|
 | **0.5.0** | Finalize master/main | Stabilize current codebase |
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, Future warnings |
-| **0.6.1** | C-order Migration (Helpers) | Migrate utils/helpers from F-order to C-order, keep legacy API working |
-| **0.6.2** | Example Restructure & Docs Gallery | Flatten examples, jupytext notebooks, docs gallery, CuPy validation |
-| **0.6.3** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
-| **0.6.4** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
+| **0.6.1** | C-order + Examples + Docs | C-order migration, 29 examples ported, 47 parity tests, docs cleanup |
+| **0.6.2** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
+| **0.6.3** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
 | **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
@@ -221,73 +220,55 @@ Port examples one at a time using MATLAB as ground truth — not old Python resu
 
 ## Phase 2.x: v0.6.x Point Releases
 
-### v0.6.1 — C-order Migration
+### v0.6.1 — C-order + Examples + Docs (released 2026-03-29)
 
-**Status: implemented on `c-order-migration` branch**
+Combined release: C-order migration, example restructure, parity tests, docs cleanup.
 
-Atomic migration of all solver internals from Fortran-order to C-order. The `kspaceFirstOrder()` API is experimental pre-1.0, so output shape changes are acceptable without a deprecation cycle.
+**C-order migration:**
+- `kspace_solver.py`: F-order → C-order internally
+- `cpp_simulation.py`: `_fix_output_order()` for C++ backend compatibility
+- `kspaceFirstOrder.py`: `_reshape_sensor_to_grid()` for full-grid sensors
+- F-order kept at boundaries: `matlab.py`, `cpp_simulation._write_hdf5()`, legacy API
 
-**Changes:**
-- `kspace_solver.py`: all `flatten(order="F")`/`reshape(..., order="F")` → `ravel()`/`reshape()`. C-order strides for bilinear interpolation.
-- `cpp_simulation.py`: `_fix_output_order()` transposes full-grid fields and permutes sensor time-series rows from F-indexed to C-indexed.
-- `kspaceFirstOrder.py`: `_reshape_sensor_to_grid()` for full-grid sensors → `(Nt, *grid_shape)` output. Aggregates → `(*grid_shape)`.
-- `cart2grid`, `combine_sensor_data`, `get_distributed_source_signal`: `order=` param with `FutureWarning` defaulting to `"F"`.
-
-**Unchanged (by design):** `matlab.py` (F-order boundary), `mapgen.py` (geometry), `kgrid.py` (MATLAB inputs), `cpp_simulation._write_hdf5()` (C++ binary format), legacy `kspaceFirstOrder2D/3D`.
-
-### v0.6.2 — Example Restructure & Docs Gallery
-
-**Status: in progress (restructure-examples branch, PR #686)**
-
-Flatten example directory, add jupytext notebook generation, build docs gallery.
-
-**Done:**
-- 29 Tier 1 examples ported to `setup()/run()/__main__` pattern with `kspaceFirstOrder()`
+**Example restructure:**
+- 29 Tier 1 examples ported to `setup()/run()/__main__` pattern
 - Flattened `examples/ported/` → `examples/`, dropped `example_` prefix
-- Old subdirectory examples moved to `examples/legacy/`
-- Test file parametrized: 15 classes → table-driven (550 → 290 lines), 35 pass / 2 skip
-- Separate `p_thresh` / `p_final_thresh` per example (machine precision for time-series)
-- `jupytext.toml` + `generate-notebooks.yml` — auto-generates `.ipynb` on merge to master
+- Old subdirectory examples in `examples/legacy/`
 - `run-examples.yml` triggers on PRs touching `examples/`, excludes `legacy/`
-- Deleted dead `test_example.yml`
 
-**Remaining for v0.6.2:**
-1. **Docs example gallery** — Add nbsphinx or sphinx-gallery to docs build; render generated notebooks as HTML pages with "Open in Colab" badges. Wire into `test_pages.yml`.
-2. **8 more parity tests** — ivp_saving_movie_files, na_optimising_performance, na_source_smoothing, pr_2D_FFT_line_sensor, pr_3D_FFT_planar_sensor, sd_directional_array_elements, sd_directivity_modelling_2D/3D
-3. **Investigate 3D p_final mismatch** — 2 skipped tests (likely p0 smoothing or medium mapping difference)
-4. **CuPy GPU validation** — Run all 29 examples on DigitalOcean GPU droplet, verify NumPy↔CuPy parity
-5. **Real-world validation** — Run representative simulations from published papers or user workflows to catch edge cases not covered by toy examples
+**Testing:**
+- 47 parity tests passing (machine precision), 6 skipped (missing refs)
+- 3D PML fix: MATLAB defaults to pml_size=10 for 3D
+- Table-driven parametrized test framework
 
-**CI test tiers (implemented):**
-- **Tier 1 (every PR):** `test_native_solver.py` + old C++ API tests — no MATLAB needed, ~2s
-- **Tier 2 (every PR):** `test_example_parity.py` — skips gracefully when `.mat` refs absent
-- **Tier 3 (weekly + PR):** `run-examples.yml` — runs all examples end-to-end
-- **`matlab_parity` marker** registered in `pytest.ini` for selective runs
+**Docs & infra cleanup:**
+- README: Python-first framing, both backends described
+- Dev docs: simplified setup with `uv sync`, removed outdated sections
+- macOS C++ hint in executor.py (scoped to linker errors)
+- Deleted: Makefile, Dockerfile, run_examples.py, notebook pipeline, dead CI workflows
 
-### v0.6.3 — New Features + Updated Examples
+### v0.6.2 — Tier 2 Features + Examples
 
-**Goal:** Add solver features needed by Tier 2 examples, port those examples, update docs gallery.
+**Goal:** Add solver features needed by Tier 2 examples, port those examples.
 
 **Features to add:**
-- **Time-reversal reconstruction** — needed by 9 PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
+- **Time-reversal reconstruction** — needed by PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
 - **Rectangular/corner sensor masks** — needed by 5 examples
 - **`sound_speed_ref`** — needed by `tvsp_slit_diffraction`
 - **Frequency-response sensor** — needed by `ivp_sensor_frequency_response`
 - **Directional sensor** — needed by `sd_sensor_directivity_2D`
 
-**Per-feature workflow:**
-1. Implement feature in solver (`kspace_solver.py`)
-2. Port the MATLAB examples that need it
-3. Generate MATLAB references, add parity tests
-4. Update docs gallery with new examples
+**Also:**
+- CuPy GPU validation on DigitalOcean (29 examples ready)
+- Real-world validation (published paper simulations)
+- Consolidate test infrastructure (`tests/integration/` + `test_example_parity.py`)
 
 **Simplification targets:**
 - Delete `examples/legacy/` once all examples are ported or confirmed obsolete
-- Consolidate `tests/integration/` and `tests/test_example_parity.py` test infrastructure
 - Remove unused MATLAB collector infrastructure if parity tests replace it
 - Audit `kWaveSimulation_helper/` — delete helpers superseded by `kspaceFirstOrder()`
 
-### v0.6.4 — Axisymmetric Support
+### v0.6.3 — Axisymmetric Support
 
 Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.
 
