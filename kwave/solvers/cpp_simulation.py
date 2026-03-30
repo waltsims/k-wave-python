@@ -195,11 +195,14 @@ class CppSimulation:
             "pml_x_size": pml_x_size,
             "pml_y_size": pml_y_size,
             "pml_z_size": pml_z_size,
-            "p_source_flag": int(has_p),
+            # NOTE: Despite the name "*_source_flag", the C++ binary expects
+            # the number of time points in the source signal (not a boolean).
+            # 0 = no source, >0 = number of time steps in the source signal.
+            "p_source_flag": np.asarray(source.p).shape[-1] if has_p else 0,
             "p0_source_flag": int(has_p0),
-            "ux_source_flag": int(has_ux),
-            "uy_source_flag": int(has_uy),
-            "uz_source_flag": int(has_uz),
+            "ux_source_flag": np.asarray(source.ux).shape[-1] if has_ux else 0,
+            "uy_source_flag": np.asarray(source.uy).shape[-1] if has_uy else 0,
+            "uz_source_flag": np.asarray(source.uz).shape[-1] if has_uz else 0,
             "sxx_source_flag": 0,
             "syy_source_flag": 0,
             "szz_source_flag": 0,
