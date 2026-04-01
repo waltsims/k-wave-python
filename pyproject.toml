@@ -27,11 +27,11 @@ dependencies = [
     "h5py==3.15.1",
     "scipy==1.15.3",
     "opencv-python==4.13.0.92",
-    "deepdiff==8.6.2",
+    "deepdiff==9.0.0",
     "numpy>=1.22.2,<2.3.0",
     "matplotlib==3.10.7",
     "beartype==0.22.9",
-    "jaxtyping==0.3.2",
+    "jaxtyping==0.3.7",
     "deprecated>=1.2.14",
     "tqdm>=4.60"
 ]
@@ -48,7 +48,7 @@ test = ["pytest",
         "coverage==7.10.6",
         "phantominator",
         "testfixtures==8.3.0",
-        "requests==2.33.0"]
+        "requests==2.33.1"]
 example = ["gdown==5.2.0"]
 docs = [ "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
