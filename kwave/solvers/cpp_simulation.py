@@ -39,7 +39,7 @@ class CppSimulation:
 
         from kwave.solvers.validation import warn_cpp_alpha_mode_unsupported
 
-        warn_cpp_alpha_mode_unsupported(medium.alpha_mode, stacklevel=3)
+        warn_cpp_alpha_mode_unsupported(getattr(medium, "alpha_mode", None), stacklevel=3)
 
     def prepare(self, data_path=None):
         """Write HDF5 input file. Returns (input_file, output_file)."""
