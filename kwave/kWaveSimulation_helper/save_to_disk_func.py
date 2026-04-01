@@ -1,6 +1,5 @@
 import logging
 import os
-import warnings
 
 import numpy as np
 from scipy.io import savemat
@@ -230,15 +229,9 @@ def grab_medium_props(integer_variables, float_variables, medium, is_elastic_cod
         integer_variables.absorbing_flag = 0
 
     if medium.absorbing:
-        alpha_mode = getattr(medium, "alpha_mode", None)
-        if alpha_mode in ("no_absorption", "no_dispersion"):
-            warnings.warn(
-                f"medium.alpha_mode='{alpha_mode}' is not supported by the C++ backend "
-                f"and will be silently ignored. The C++ binary always computes both "
-                f"absorption and dispersion when absorbing_flag > 0. Use backend='python' "
-                f"to honor alpha_mode.",
-                stacklevel=4,
-            )
+        from kwave.solvers.validation import warn_cpp_alpha_mode_unsupported
+
+        warn_cpp_alpha_mode_unsupported(medium.alpha_mode, stacklevel=4)
         if is_elastic_code:  # pragma: no cover
             # add to the variable list
             float_variables["chi"] = None

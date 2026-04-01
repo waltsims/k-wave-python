@@ -411,7 +411,7 @@ class Simulation:
 
         # Absorption/dispersion
         alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
-        alpha_mode = getattr(self.medium, "alpha_mode", None)
+        alpha_mode = self.medium.alpha_mode
         if not _is_enabled(alpha_coeff_raw):
             self._absorption = lambda div_u: 0
             self._dispersion = lambda rho: 0
@@ -424,7 +424,7 @@ class Simulation:
             no_dispersion = alpha_mode == "no_dispersion"
 
             if abs(alpha_power - 2.0) < 1e-10:  # Stokes
-                self._absorption = lambda div_u: 0 if no_absorption else -2 * alpha_np * self.c0 * self.rho0 * div_u
+                self._absorption = (lambda div_u: 0) if no_absorption else (lambda div_u: -2 * alpha_np * self.c0 * self.rho0 * div_u)
                 self._dispersion = lambda rho: 0
             else:  # Power-law with fractional Laplacian
                 tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
