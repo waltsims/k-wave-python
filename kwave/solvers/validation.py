@@ -52,8 +52,9 @@ def validate_medium(medium, kgrid):
                 raise ValueError(
                     f"medium.alpha_power={power} is too close to 1.0. The dispersion term "
                     f"contains tan(pi*alpha_power/2), which diverges at alpha_power=1. "
-                    f"Set medium.alpha_mode='no_dispersion' to disable the dispersion term, "
-                    f"or use an alpha_power value further from 1.0."
+                    f"For backend='python': set medium.alpha_mode='no_dispersion' to disable "
+                    f"the dispersion term. For backend='cpp' or to use both absorption and "
+                    f"dispersion, choose an alpha_power value further from 1.0."
                 )
 
 
