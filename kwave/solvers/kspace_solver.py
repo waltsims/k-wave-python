@@ -427,12 +427,9 @@ class Simulation:
                 self._absorption = lambda div_u: 0 if no_absorption else -2 * alpha_np * self.c0 * self.rho0 * div_u
                 self._dispersion = lambda rho: 0
             else:  # Power-law with fractional Laplacian
-                if no_absorption:
-                    self._absorption = lambda div_u: 0
-                else:
-                    tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-                    nabla1 = self._fractional_laplacian(alpha_power - 2)
-                    self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
+                tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
+                nabla1 = self._fractional_laplacian(alpha_power - 2)
+                self._absorption = (lambda div_u: 0) if no_absorption else (lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1))
 
                 if no_dispersion:
                     self._dispersion = lambda rho: 0
