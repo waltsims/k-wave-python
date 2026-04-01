@@ -47,6 +47,14 @@ def validate_medium(medium, kgrid):
             power = float(np.asarray(medium.alpha_power).flat[0])
             if power < 0 or power > 3:
                 warnings.warn(f"medium.alpha_power={power} is outside typical range [0, 3].", stacklevel=3)
+            alpha_mode = getattr(medium, "alpha_mode", None)
+            if abs(power - 1.0) < 0.05 and alpha_mode != "no_dispersion":
+                raise ValueError(
+                    f"medium.alpha_power={power} is too close to 1.0. The dispersion term "
+                    f"contains tan(pi*alpha_power/2), which diverges at alpha_power=1. "
+                    f"Set medium.alpha_mode='no_dispersion' to disable the dispersion term, "
+                    f"or use an alpha_power value further from 1.0."
+                )
 
 
 def validate_pml(pml_size, kgrid):

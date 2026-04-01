@@ -411,6 +411,7 @@ class Simulation:
 
         # Absorption/dispersion
         alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
+        alpha_mode = getattr(self.medium, "alpha_mode", None)
         if not _is_enabled(alpha_coeff_raw):
             self._absorption = lambda div_u: 0
             self._dispersion = lambda rho: 0
@@ -419,17 +420,23 @@ class Simulation:
             alpha_power = float(xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
             alpha_np = 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
 
+            no_absorption = alpha_mode == "no_absorption"
+            no_dispersion = alpha_mode == "no_dispersion"
+
             if abs(alpha_power - 2.0) < 1e-10:  # Stokes
-                self._absorption = lambda div_u: -2 * alpha_np * self.c0 * self.rho0 * div_u
+                self._absorption = lambda div_u: 0 if no_absorption else -2 * alpha_np * self.c0 * self.rho0 * div_u
                 self._dispersion = lambda rho: 0
             else:  # Power-law with fractional Laplacian
                 tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-                eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
                 nabla1 = self._fractional_laplacian(alpha_power - 2)
-                nabla2 = self._fractional_laplacian(alpha_power - 1)
-                # Fractional Laplacian already includes full k-space structure; no kappa needed
-                self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
-                self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
+                self._absorption = (lambda div_u: 0) if no_absorption else (lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1))
+
+                if no_dispersion:
+                    self._dispersion = lambda rho: 0
+                else:
+                    eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
+                    nabla2 = self._fractional_laplacian(alpha_power - 1)
+                    self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
 
         # Nonlinearity
         BonA_raw = getattr(self.medium, "BonA", 0)
