@@ -47,6 +47,15 @@ def validate_medium(medium, kgrid):
             power = float(np.asarray(medium.alpha_power).flat[0])
             if power < 0 or power > 3:
                 warnings.warn(f"medium.alpha_power={power} is outside typical range [0, 3].", stacklevel=3)
+            alpha_mode = medium.alpha_mode
+            if abs(power - 1.0) < 0.05 and alpha_mode != "no_dispersion":
+                raise ValueError(
+                    f"medium.alpha_power={power} is too close to 1.0. The dispersion term "
+                    f"contains tan(pi*alpha_power/2), which diverges at alpha_power=1. "
+                    f"For backend='python': set medium.alpha_mode='no_dispersion' to disable "
+                    f"the dispersion term. For backend='cpp' or to use both absorption and "
+                    f"dispersion, choose an alpha_power value further from 1.0."
+                )
 
 
 def validate_pml(pml_size, kgrid):
@@ -95,6 +104,18 @@ def validate_source(source, kgrid):
     vel_dims = [num_dim2(np.asarray(getattr(source, v))) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None]
     if vel_dims and len(set(d > 1 for d in vel_dims)) > 1:
         raise ValueError("All velocity source components must either be single (1D) or many (2D) time series.")
+
+
+def warn_cpp_alpha_mode_unsupported(alpha_mode, stacklevel=3):
+    """Warn that the C++ backend cannot honor medium.alpha_mode."""
+    if alpha_mode in ("no_absorption", "no_dispersion"):
+        warnings.warn(
+            f"medium.alpha_mode='{alpha_mode}' is not supported by the C++ backend "
+            f"and will be silently ignored. The C++ binary always computes both "
+            f"absorption and dispersion when absorbing_flag > 0. Use backend='python' "
+            f"to honor alpha_mode.",
+            stacklevel=stacklevel,
+        )
 
 
 def validate_sensor(sensor, kgrid):

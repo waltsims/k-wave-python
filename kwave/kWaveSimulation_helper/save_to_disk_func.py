@@ -229,6 +229,9 @@ def grab_medium_props(integer_variables, float_variables, medium, is_elastic_cod
         integer_variables.absorbing_flag = 0
 
     if medium.absorbing:
+        from kwave.solvers.validation import warn_cpp_alpha_mode_unsupported
+
+        warn_cpp_alpha_mode_unsupported(medium.alpha_mode, stacklevel=4)
         if is_elastic_code:  # pragma: no cover
             # add to the variable list
             float_variables["chi"] = None
