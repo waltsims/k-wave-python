@@ -383,7 +383,7 @@ def gaussian(
 
 def _compute_direction(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:
     """Compute normalized direction vector and magnitude between two points."""
-    direction = end_pos - start_pos
+    direction = np.asarray(end_pos) - np.asarray(start_pos)
     magnitude = np.linalg.norm(direction)
     direction = direction / magnitude
     return direction, magnitude
@@ -457,11 +457,12 @@ def compute_linear_transform(pos1, pos2, offset=None):
     Returns:
         Tuple containing:
         - 3x3 rotation matrix
+        - offset position
 
     """
-    rot_mat, direction = compute_rotation_between_vectors(pos1, pos2)
+    rot_mat, direction = compute_rotation_between_vectors(np.asarray(pos1), np.asarray(pos2))
     if offset is not None:
-        offset_pos = pos1 + offset * direction
+        offset_pos = np.asarray(pos1) + offset * direction
     else:
         offset_pos = 0
     return rot_mat, offset_pos
