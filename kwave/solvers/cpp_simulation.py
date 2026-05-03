@@ -9,7 +9,6 @@ import shutil
 import stat
 import subprocess
 import tempfile
-import warnings
 
 import numpy as np
 
@@ -36,10 +35,6 @@ class CppSimulation:
         self.pml_alpha = pml_alpha  # per-dimension tuple
         self.use_sg = use_sg
         self.ndim = kgrid.dim
-
-        from kwave.solvers.validation import warn_cpp_alpha_mode_unsupported
-
-        warn_cpp_alpha_mode_unsupported(medium.alpha_mode, stacklevel=3)
 
     def prepare(self, data_path=None):
         """Write HDF5 input file. Returns (input_file, output_file)."""
