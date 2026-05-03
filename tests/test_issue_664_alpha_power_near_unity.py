@@ -268,8 +268,12 @@ def test_legacy_cpp_unaffected_when_alpha_mode_unset(alpha_power, tmp_path):
             execution_options=eo,
         )
     except subprocess.CalledProcessError as e:
-        if "Library not loaded" in (e.stderr or "") or "image not found" in (e.stderr or ""):
-            pytest.skip(f"C++ binary missing system libraries: {e.stderr.splitlines()[0] if e.stderr else e}")
+        # macOS dyld:  "Library not loaded" / "image not found"
+        # Linux ld.so: "error while loading shared libraries"
+        # Windows:     "system error" / DLL missing dialog
+        msg = e.stderr or ""
+        if any(s in msg for s in ("Library not loaded", "image not found", "error while loading shared libraries")):
+            pytest.skip(f"C++ binary missing system libraries: {msg.splitlines()[0] if msg else e}")
         raise
 
     p = np.asarray(sensor_data["p"])
