@@ -50,38 +50,39 @@ from a clean slate.
 ## Why we moved to a cloud machine
 
 Local development was on an Intel Mac (x86_64) but the only bundled C++
-binary in `kwave/bin/darwin/` is `arm64`. Architecture mismatch — installing
-brew deps doesn't help. We can't reproduce the bug locally.
+binary in `kwave/bin/darwin/` is `arm64`. Architecture mismatch — we
+can't run the binary at all on the dev laptop, even with brew deps.
 
-A Linux GPU droplet gives us the user's exact path: CUDA binary +
-`is_gpu_simulation=True` + `kspaceFirstOrder2D` (legacy entry). Default
-to the **GPU + legacy** combination — that is the user's repro and the
-primary thing we need to fix.
+The user's repro uses GPU (`is_gpu_simulation=True`), but the suspected
+bug is in the **Python-side HDF5 serializer**
+(`save_to_disk_func.py`) — the same code path feeds both the OMP and
+CUDA binaries. So a **Linux x86_64 CPU droplet** is sufficient for the
+diagnostic and fix work; we use OMP there. GPU only matters for the
+final acceptance test reproducing the user's literal scenario.
 
 ## What to do next
 
-### Step 1 — flip the smoke test to GPU+legacy and confirm the bug
+### Step 1 — confirm the bug reproduces on the droplet (OMP)
 
-The current smoke test exercises OMP. Update it (or parametrize) so the
-primary case is `is_gpu_simulation=True`:
+The smoke test already targets OMP (`is_gpu_simulation=False`). Just
+run it:
 
 ```bash
 git checkout fix-alpha-mode-near-unity
 uv sync --extra all
-# Edit tests/test_issue_664_alpha_power_near_unity.py:
-#   execution_options = SimulationExecutionOptions(is_gpu_simulation=True, show_sim_log=False)
 uv run pytest tests/test_issue_664_alpha_power_near_unity.py -v
 ```
 
-All three parametrized cases should fail with NaNs. If they pass, the
-bug depends on heterogeneity / source geometry / sensor mask shape that
-got minimized away. Walk back toward the user's verbatim repro
-(re-introduce density variation, ring-shape sensor mask, kSource.p
-tone-burst from the issue body) until NaNs appear, then re-minimize.
+All three parametrized cases should fail with NaNs. If they pass, two
+possibilities:
 
-Once GPU+legacy reliably NaNs, also run the OMP path. If both fail, the
-bug is in shared serialization (`save_to_disk_func.py`) — most likely.
-If only GPU fails, the bug is in CUDA-specific dispatch.
+- **Minimization went too far.** The user's full scenario uses
+  heterogeneous sound speed, density variation, and a ring sensor mask;
+  any of those could be the trigger. Walk back toward the verbatim
+  repro from the issue body until NaNs appear, then re-minimize.
+- **The bug is CUDA-specific.** Less likely (shared serialization
+  path), but possible if the CUDA dispatch reads a field the OMP
+  dispatch ignores. Park this for the GPU acceptance test (Step 6).
 
 ### Step 2 — A/B legacy vs modern API
 
@@ -91,7 +92,7 @@ entry point:
 ```python
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 result = kspaceFirstOrder(kgrid, medium, source, sensor,
-                          backend="cpp", device="gpu", pml_inside=True)
+                          backend="cpp", device="cpu", pml_inside=True)
 ```
 
 Two outcomes matter:
@@ -163,11 +164,22 @@ Top suspects in priority order:
 
 Once unit tests pass, paste the user's full code from the issue body
 (Shepp-Logan phantom, 512-element ring transducer, gausspulse) into a
-script and run it on the droplet. Assert no NaN. Ideally compare a few
-sensor traces against MATLAB. Save it as
-`tests/test_issue_664_user_repro.py` with `@pytest.mark.slow` so it
-doesn't run in the default suite but is reproducible. This is the final
-"yes, the user's actual problem is fixed" gate.
+script and run it. Assert no NaN. Ideally compare a few sensor traces
+against MATLAB. Save it as `tests/test_issue_664_user_repro.py` with
+`@pytest.mark.slow` so it doesn't run in the default suite but is
+reproducible.
+
+The user's original code uses `is_gpu_simulation=True`. Since the CPU
+droplet has no GPU, run this acceptance test in two places:
+
+1. **CPU droplet, OMP**: change `is_gpu_simulation=False` to confirm
+   the fix works on the OMP dispatch.
+2. **GPU machine** (when available — DigitalOcean, Lambda, RunPod,
+   etc.): run the user's exact code unchanged (`is_gpu_simulation=True`)
+   to close the loop on their literal scenario.
+
+This is the final "yes, the user's actual problem is fixed" gate. Both
+must pass.
 
 ## Things to avoid
 
