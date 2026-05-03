@@ -420,13 +420,16 @@ class Simulation:
     def _init_absorption(self):
         """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
 
+        Disabled (``alpha_coeff = 0`` or ``alpha_mode = 'no_absorption'``) sets
+        ``tau = 0`` so the contribution drops out of the equation of state.
         Stokes (``alpha_power == 2``) sets ``nabla1 = None`` — ``_diff`` treats that
-        as the identity operator, collapsing the term to ``tau * rho0 * div_u``
+        as the identity operator, so the term collapses to ``tau * rho0 * div_u``
         without an FFT round-trip.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
-        self._has_absorption = _is_enabled(getattr(self.medium, "alpha_coeff", 0)) and alpha_mode != "no_absorption"
-        if not self._has_absorption:
+        if not _is_enabled(getattr(self.medium, "alpha_coeff", 0)) or alpha_mode == "no_absorption":
+            self.tau = 0
+            self.nabla1 = None
             return
         alpha_power = self._alpha_power()
         alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
@@ -441,18 +444,18 @@ class Simulation:
     def _init_dispersion(self):
         """Set ``self.eta`` and ``self.nabla2`` for the power-law dispersion term.
 
-        Disabled when ``alpha_mode`` is ``no_absorption``/``no_dispersion`` —
+        Disabled (``alpha_mode = 'no_absorption'``/``'no_dispersion'`` or Stokes)
+        sets ``eta = 0`` so the contribution drops out of the equation of state.
         ``tan(pi*y/2)`` is the singular factor that blows up as ``alpha_power → 1``,
         so ``no_dispersion`` is the safe path near unity.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         absorbing = _is_enabled(getattr(self.medium, "alpha_coeff", 0))
-        self._has_dispersion = absorbing and alpha_mode not in ("no_absorption", "no_dispersion")
-        if not self._has_dispersion:
-            return
-        alpha_power = self._alpha_power()
-        if abs(alpha_power - 2.0) < 1e-10:  # Stokes has no dispersion term (tan(pi) ≈ 0)
-            self._has_dispersion = False
+        alpha_power = self._alpha_power() if absorbing else None
+        is_stokes = alpha_power is not None and abs(alpha_power - 2.0) < 1e-10
+        if not absorbing or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
+            self.eta = 0
+            self.nabla2 = None
             return
         alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
         alpha_np = db2neper(alpha_coeff, alpha_power)
@@ -460,11 +463,14 @@ class Simulation:
         self.nabla2 = self._fractional_laplacian(alpha_power - 1)
 
     def _init_nonlinearity(self):
-        """Set ``self.BonA`` for the nonlinearity term."""
+        """Set ``self.BonA`` for the nonlinearity term. ``None`` means disabled.
+
+        ``None`` (rather than 0) is the sentinel because the nonlinear ``rho``-update
+        factor ``(2ρ + ρ₀)/ρ₀`` is multiplicative — it must be exactly ``1.0`` in the
+        linear case, which a zero coefficient cannot encode.
+        """
         BonA_raw = getattr(self.medium, "BonA", 0)
-        self._has_nonlinearity = _is_enabled(BonA_raw)
-        if self._has_nonlinearity:
-            self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA")
+        self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA") if _is_enabled(BonA_raw) else None
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -623,7 +629,7 @@ class Simulation:
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i) * nl_factor, with PML
-        nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if self._has_nonlinearity else 1.0
+        nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if self.BonA is not None else 1.0
         div_u_total = xp.zeros(self.grid_shape, dtype=float)
         for i in range(self.ndim):
             pml = self.pml_list[i]
@@ -634,9 +640,9 @@ class Simulation:
 
         # Equation of state:  p = c0² · (ρ + absorption − dispersion + nonlinearity)
         rho_total = sum(self.rho_split)
-        absorption = self.tau * self._diff(self.rho0 * div_u_total, self.nabla1) if self._has_absorption else 0
-        dispersion = self.eta * self._diff(rho_total, self.nabla2) if self._has_dispersion else 0
-        nonlinearity = self.BonA * rho_total**2 / (2 * self.rho0) if self._has_nonlinearity else 0
+        absorption = self.tau * self._diff(self.rho0 * div_u_total, self.nabla1)
+        dispersion = self.eta * self._diff(rho_total, self.nabla2)
+        nonlinearity = self.BonA * rho_total**2 / (2 * self.rho0) if self.BonA is not None else 0
         self.p = self.c0_sq * (rho_total + absorption - dispersion + nonlinearity)
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
