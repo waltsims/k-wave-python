@@ -406,50 +406,68 @@ class Simulation:
                 self.op_div_list.append(1j * k * self.kappa)
 
     def _setup_physics_operators(self):
-        """Build absorption, dispersion, and nonlinearity operators."""
-        xp = self.xp
+        """Initialize absorption, dispersion, and nonlinearity coefficients."""
+        alpha_np, alpha_power = self._alpha_neper_and_power()
+        self._init_absorption(alpha_np, alpha_power)
+        self._init_dispersion(alpha_np, alpha_power)
+        self._init_nonlinearity()
 
-        # Absorption/dispersion.  ``medium.alpha_mode`` selectively disables terms:
-        #   'no_absorption' → both terms off (matches MATLAB k-Wave)
-        #   'no_dispersion' → only dispersion off; this is the documented escape
-        #                     hatch for the tan(pi*y/2) singularity at alpha_power == 1
-        #                     (issue #664).
-        alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
+    def _alpha_neper_and_power(self):
+        """Compute ``(alpha_np, alpha_power)`` once for both absorption and dispersion.
+
+        Returns ``(None, None)`` when absorption is disabled (``alpha_coeff = 0``).
+        Otherwise expands ``alpha_coeff`` to the grid and converts dB -> Np using
+        ``db2neper``.
+        """
+        from kwave.utils.conversion import db2neper
+
+        if not _is_enabled(getattr(self.medium, "alpha_coeff", 0)):
+            return None, None
+        alpha_power = float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        return db2neper(alpha_coeff, alpha_power), alpha_power
+
+    def _init_absorption(self, alpha_np, alpha_power):
+        """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
+
+        ``tau is None`` means the term is disabled (``alpha_coeff = 0`` or
+        ``alpha_mode = 'no_absorption'``).  Stokes (``alpha_power == 2``) keeps
+        ``nabla1 = None`` -- ``_diff`` treats that as the identity operator, so the
+        term collapses to ``tau * rho0 * div_u`` without an FFT round-trip.
+        """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
-        if not _is_enabled(alpha_coeff_raw) or alpha_mode == "no_absorption":
-            self._absorption = lambda div_u: 0
-            self._dispersion = lambda rho: 0
+        if alpha_np is None or alpha_mode == "no_absorption":
+            self.tau = None
+            self.nabla1 = None
+            return
+        if abs(alpha_power - 2.0) < 1e-10:  # Stokes
+            self.tau = -2 * alpha_np * self.c0
+            self.nabla1 = None
         else:
-            alpha_coeff = _expand_to_grid(alpha_coeff_raw, self.grid_shape, xp, "alpha_coeff")
-            alpha_power = float(xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
-            alpha_np = 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
+            self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
+            self.nabla1 = self._fractional_laplacian(alpha_power - 2)
 
-            if abs(alpha_power - 2.0) < 1e-10:  # Stokes
-                self._absorption = lambda div_u: -2 * alpha_np * self.c0 * self.rho0 * div_u
-                self._dispersion = lambda rho: 0
-            else:  # Power-law with fractional Laplacian
-                tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-                nabla1 = self._fractional_laplacian(alpha_power - 2)
-                # Fractional Laplacian already includes full k-space structure; no kappa needed
-                self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
+    def _init_dispersion(self, alpha_np, alpha_power):
+        """Set ``self.eta`` and ``self.nabla2`` for the power-law dispersion term.
 
-                if alpha_mode == "no_dispersion":
-                    self._dispersion = lambda rho: 0
-                else:
-                    eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
-                    nabla2 = self._fractional_laplacian(alpha_power - 1)
-                    self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
+        ``eta is None`` means the term is disabled (``alpha_mode = 'no_absorption'``,
+        ``'no_dispersion'``, or Stokes).  ``tan(pi*y/2)`` is the singular factor that
+        blows up as ``alpha_power -> 1``, so ``no_dispersion`` is the safe path near
+        unity (issue #664).
+        """
+        alpha_mode = getattr(self.medium, "alpha_mode", None)
+        is_stokes = alpha_power is not None and abs(alpha_power - 2.0) < 1e-10
+        if alpha_np is None or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
+            self.eta = None
+            self.nabla2 = None
+            return
+        self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
+        self.nabla2 = self._fractional_laplacian(alpha_power - 1)
 
-        # Nonlinearity
+    def _init_nonlinearity(self):
+        """Set ``self.BonA`` for the nonlinearity term. ``None`` means disabled."""
         BonA_raw = getattr(self.medium, "BonA", 0)
-        self._has_nonlinearity = _is_enabled(BonA_raw)
-        if not self._has_nonlinearity:
-            self._nonlinearity = lambda rho: 0
-            self._nonlinear_factor = lambda rho: 1.0
-        else:
-            BonA = _expand_to_grid(BonA_raw, self.grid_shape, xp, "BonA")
-            self._nonlinearity = lambda rho: BonA * rho**2 / (2 * self.rho0)
-            self._nonlinear_factor = lambda rho: (2 * rho + self.rho0) / self.rho0
+        self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA") if _is_enabled(BonA_raw) else None
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -607,9 +625,9 @@ class Simulation:
             self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * grad_p_i)
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
-        # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
-        # Only compute rho_total before the loop when nonlinearity needs it
-        nl_factor = self._nonlinear_factor(sum(self.rho_split)) if self._has_nonlinearity else 1.0
+        # Mass conservation: drho_i/dt = -rho0 * div_i(u_i) * nl_factor, with PML
+        has_nonlinearity = self.BonA is not None
+        nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if has_nonlinearity else 1.0
         div_u_total = xp.zeros(self.grid_shape, dtype=float)
         for i in range(self.ndim):
             pml = self.pml_list[i]
@@ -618,8 +636,12 @@ class Simulation:
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
             self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
+        # Equation of state:  p = c0^2 * (rho + absorption - dispersion + nonlinearity)
         rho_total = sum(self.rho_split)
-        self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
+        absorption = self.tau * self._diff(self.rho0 * div_u_total, self.nabla1) if self.tau is not None else 0
+        dispersion = self.eta * self._diff(rho_total, self.nabla2) if self.eta is not None else 0
+        nonlinearity = self.BonA * rho_total**2 / (2 * self.rho0) if has_nonlinearity else 0
+        self.p = self.c0_sq * (rho_total + absorption - dispersion + nonlinearity)
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
         # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)
@@ -682,7 +704,11 @@ class Simulation:
 
         For gradient/divergence ops, kappa is pre-multiplied at setup.
         For fractional Laplacian ops (absorption/dispersion), kappa is not needed.
+        ``op=None`` is the identity operator and short-circuits the FFT round-trip
+        (used by the Stokes absorption path, where ``nabla1`` is structurally 1).
         """
+        if op is None:
+            return f
         xp = self.xp
         return xp.real(xp.fft.ifftn(op * xp.fft.fftn(f)))
 
