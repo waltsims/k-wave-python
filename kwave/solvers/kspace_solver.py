@@ -409,9 +409,14 @@ class Simulation:
         """Build absorption, dispersion, and nonlinearity operators."""
         xp = self.xp
 
-        # Absorption/dispersion
+        # Absorption/dispersion.  ``medium.alpha_mode`` selectively disables terms:
+        #   'no_absorption' → both terms off (matches MATLAB k-Wave)
+        #   'no_dispersion' → only dispersion off; this is the documented escape
+        #                     hatch for the tan(pi*y/2) singularity at alpha_power == 1
+        #                     (issue #664).
         alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
-        if not _is_enabled(alpha_coeff_raw):
+        alpha_mode = getattr(self.medium, "alpha_mode", None)
+        if not _is_enabled(alpha_coeff_raw) or alpha_mode == "no_absorption":
             self._absorption = lambda div_u: 0
             self._dispersion = lambda rho: 0
         else:
@@ -424,12 +429,16 @@ class Simulation:
                 self._dispersion = lambda rho: 0
             else:  # Power-law with fractional Laplacian
                 tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-                eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
                 nabla1 = self._fractional_laplacian(alpha_power - 2)
-                nabla2 = self._fractional_laplacian(alpha_power - 1)
                 # Fractional Laplacian already includes full k-space structure; no kappa needed
                 self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
-                self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
+
+                if alpha_mode == "no_dispersion":
+                    self._dispersion = lambda rho: 0
+                else:
+                    eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
+                    nabla2 = self._fractional_laplacian(alpha_power - 1)
+                    self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
 
         # Nonlinearity
         BonA_raw = getattr(self.medium, "BonA", 0)

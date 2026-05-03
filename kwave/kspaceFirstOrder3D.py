@@ -210,6 +210,11 @@ def kspaceFirstOrder3D(
 
         return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 
+    from kwave.utils.checks import check_alpha_mode_cpp_compatible, warn_alpha_power_near_unity_cpp
+
+    check_alpha_mode_cpp_compatible(medium)
+    warn_alpha_power_near_unity_cpp(medium)
+
     # Currently we only support binary execution, meaning all simulations must be saved to disk.
     if not simulation_options.save_to_disk:
         if execution_options.is_gpu_simulation:
