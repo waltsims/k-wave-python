@@ -1,10 +1,23 @@
 import logging
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional, Union
 
 import numpy as np
 
 import kwave.utils.checks
+from kwave.enums import AlphaMode
+
+
+def _to_alpha_mode(value):
+    """Normalize a value to AlphaMode. Accepts None, AlphaMode, or a valid string."""
+    if value is None or isinstance(value, AlphaMode):
+        return value
+    try:
+        return AlphaMode(value)
+    except (ValueError, TypeError):
+        raise ValueError(
+            f"medium.alpha_mode must be an AlphaMode enum value or one of " f"'no_absorption', 'no_dispersion', 'stokes', got {value!r}"
+        ) from None
 
 
 @dataclass
@@ -20,8 +33,8 @@ class kWaveMedium(object):
     # power law absorption exponent
     alpha_power: np.array = None
     # optional input to force either the absorption or dispersion terms in the equation of state to be excluded;
-    # valid inputs are 'no_absorption' or 'no_dispersion'
-    alpha_mode: np.array = None
+    # valid inputs are AlphaMode.NO_ABSORPTION, AlphaMode.NO_DISPERSION, or the equivalent strings
+    alpha_mode: Optional[Union[AlphaMode, str]] = None
     # frequency domain filter applied to the absorption and dispersion terms in the equation of state
     alpha_filter: np.array = None
     # two element array used to control the sign of absorption and dispersion terms in the equation of state
@@ -43,6 +56,7 @@ class kWaveMedium(object):
 
     def __post_init__(self):
         self.sound_speed = np.atleast_1d(self.sound_speed)
+        self.alpha_mode = _to_alpha_mode(self.alpha_mode)
 
     def check_fields(self, kgrid_shape: np.ndarray) -> None:
         """
@@ -54,13 +68,8 @@ class kWaveMedium(object):
         Returns:
             None
         """
-        # check the absorption mode input is valid
-        if self.alpha_mode is not None:
-            assert self.alpha_mode in [
-                "no_absorption",
-                "no_dispersion",
-                "stokes",
-            ], "medium.alpha_mode must be set to 'no_absorption', 'no_dispersion', or 'stokes'."
+        # re-normalize alpha_mode in case it was reassigned as a plain string post-construction
+        self.alpha_mode = _to_alpha_mode(self.alpha_mode)
 
         # check the absorption filter input is valid
         if self.alpha_filter is not None and not (self.alpha_filter.shape == kgrid_shape).all():
