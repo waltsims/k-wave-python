@@ -153,6 +153,47 @@ def test_legacy_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
         )
 
 
+@pytest.mark.parametrize("alpha_power", [0.97, 1.03])
+def test_modern_api_warns_when_alpha_mode_unset_near_unity(alpha_power, tmp_path):
+    """``kspaceFirstOrder(..., backend='cpp')`` must warn when alpha_power is near 1
+    even with the default ``alpha_mode=None`` — the silent-NaN path the original
+    issue reporter hit before they discovered the ``no_dispersion`` escape hatch.
+    """
+    N = Vector([64, 64])
+    dx = Vector([0.1e-3, 0.1e-3])
+    kgrid = kWaveGrid(N, dx)
+    kgrid.makeTime(1500)
+    medium = kWaveMedium(
+        sound_speed=1500 * np.ones(tuple(N)),
+        density=1000 * np.ones(tuple(N)),
+        alpha_coeff=0.5 * np.ones(tuple(N)),
+        alpha_power=alpha_power,
+        # alpha_mode left at default (None)
+    )
+    assert medium.alpha_mode is None
+    source = kSource()
+    source.p_mask = np.zeros(tuple(N), dtype=bool)
+    source.p_mask[N.x // 2, N.y // 2] = True
+    t = kgrid.t_array.squeeze()
+    source.p = (np.sin(2 * np.pi * 1e6 * t) * np.exp(-((t - 5e-7) ** 2) / (2e-7) ** 2))[np.newaxis, :]
+    sensor = kSensor(mask=np.ones(tuple(N), dtype=bool))
+
+    with pytest.warns(UserWarning, match="dispersion-singular"):
+        kspaceFirstOrder(
+            kgrid=kgrid,
+            medium=medium,
+            source=deepcopy(source),
+            sensor=sensor,
+            backend="cpp",
+            device="cpu",
+            pml_inside=True,
+            smooth_p0=False,
+            save_only=True,
+            data_path=str(tmp_path),
+            quiet=True,
+        )
+
+
 @pytest.mark.parametrize("alpha_power", [0.96, 0.99, 1.005, 1.04])
 def test_warn_helper_fires_in_singular_range(alpha_power):
     """``warn_alpha_power_near_unity_cpp`` must warn for ``alpha_power`` in [0.95, 1.05]."""
