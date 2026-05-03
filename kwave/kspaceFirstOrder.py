@@ -210,9 +210,10 @@ def kspaceFirstOrder(
 
     elif backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
-        from kwave.utils.checks import check_alpha_mode_cpp_compatible
+        from kwave.utils.checks import check_alpha_mode_cpp_compatible, warn_alpha_power_near_unity_cpp
 
         check_alpha_mode_cpp_compatible(medium)
+        warn_alpha_power_near_unity_cpp(medium)
 
         if not use_kspace:
             warnings.warn(

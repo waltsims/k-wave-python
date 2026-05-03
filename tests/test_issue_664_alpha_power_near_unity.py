@@ -153,6 +153,35 @@ def test_legacy_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
         )
 
 
+@pytest.mark.parametrize("alpha_power", [0.96, 0.99, 1.005, 1.04])
+def test_warn_helper_fires_in_singular_range(alpha_power):
+    """``warn_alpha_power_near_unity_cpp`` must warn for ``alpha_power`` in [0.95, 1.05]."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    with pytest.warns(UserWarning, match="dispersion-singular"):
+        warn_alpha_power_near_unity_cpp(medium)
+
+
+@pytest.mark.parametrize("alpha_power", [0.5, 0.94, 1.06, 1.5, 2.0])
+def test_warn_helper_silent_outside_singular_range(alpha_power, recwarn):
+    """``warn_alpha_power_near_unity_cpp`` must stay silent outside [0.95, 1.05]."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    warn_alpha_power_near_unity_cpp(medium)
+    assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
+
+
+def test_warn_helper_silent_when_no_absorption(recwarn):
+    """``warn_alpha_power_near_unity_cpp`` must stay silent when ``alpha_coeff`` is zero/unset."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    warn_alpha_power_near_unity_cpp(kWaveMedium(sound_speed=1500.0, density=1000.0))
+    warn_alpha_power_near_unity_cpp(kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.0, alpha_power=1.0))
+    assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
+
+
 @pytest.mark.parametrize("alpha_power", [1.5, 1.1])
 def test_legacy_cpp_unaffected_when_alpha_mode_unset(alpha_power, tmp_path):
     """Default path (no alpha_mode) must still dispatch normally to the C++ binary.

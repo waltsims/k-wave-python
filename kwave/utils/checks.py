@@ -127,6 +127,7 @@ def is_number(value: Any) -> bool:
 
 
 _CPP_INCOMPATIBLE_ALPHA_MODES = ("no_absorption", "no_dispersion")
+_ALPHA_POWER_DISPERSION_SINGULAR_RANGE = (0.95, 1.05)
 
 
 def check_alpha_mode_cpp_compatible(medium) -> None:
@@ -145,6 +146,34 @@ def check_alpha_mode_cpp_compatible(medium) -> None:
             "full power-law absorption + dispersion, which produces NaN output for alpha_power "
             "near 1. Use kspaceFirstOrder() from kwave.kspaceFirstOrder with backend='python' "
             "to honor alpha_mode."
+        )
+
+
+def warn_alpha_power_near_unity_cpp(medium) -> None:
+    """Warn when ``alpha_power`` is near 1 with absorption enabled on the C++ backend.
+
+    The dispersion coefficient ``η = 2 α c₀^y · tan(π y / 2)`` blows up as ``y → 1``
+    and the C++ binary (float32 internally) returns NaN well before the formal
+    singularity (issue #664).  The user's escape hatch on the Python backend is
+    ``alpha_mode='no_dispersion'``; the C++ binary has no equivalent.
+    """
+    import warnings
+
+    alpha_coeff = getattr(medium, "alpha_coeff", None)
+    alpha_power = getattr(medium, "alpha_power", None)
+    if alpha_coeff is None or alpha_power is None:
+        return
+    if not np.any(np.asarray(alpha_coeff) > 0):
+        return
+    y = float(np.asarray(alpha_power).flat[0])
+    lo, hi = _ALPHA_POWER_DISPERSION_SINGULAR_RANGE
+    if lo <= y <= hi:
+        warnings.warn(
+            f"medium.alpha_power={y} with absorption is in the dispersion-singular range "
+            f"[{lo}, {hi}] on the C++ backend; tan(pi*y/2) overflows in float32 and the "
+            "binary may return NaN (issue #664). Use kspaceFirstOrder() with "
+            "backend='python' and medium.alpha_mode='no_dispersion' to skip the singular term.",
+            stacklevel=3,
         )
 
 
