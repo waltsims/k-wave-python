@@ -41,10 +41,11 @@ from a clean slate.
 
 - Tree equals master.
 - One new test file: `tests/test_issue_664_alpha_power_near_unity.py`
-  (commit `0f9dc04`). Smoke test that runs the C++ OMP binary and asserts
-  no NaN for `alpha_power` in {0.97, 1.01, 1.03}. Skips cleanly when the
-  binary can't launch (missing libs, wrong arch).
-- No fix yet. The smoke test is expected to fail in CI on master.
+  (commit `0f9dc04`). Smoke test that currently runs the **OMP** binary
+  with `is_gpu_simulation=False` and asserts no NaN for `alpha_power` in
+  {0.97, 1.01, 1.03}. Skips cleanly when the binary can't launch.
+- No fix yet. The smoke test is expected to fail when the binary is
+  reachable.
 
 ## Why we moved to a cloud machine
 
@@ -52,63 +53,135 @@ Local development was on an Intel Mac (x86_64) but the only bundled C++
 binary in `kwave/bin/darwin/` is `arm64`. Architecture mismatch — installing
 brew deps doesn't help. We can't reproduce the bug locally.
 
-Linux droplet (with NVIDIA GPU) gives:
-- x86_64 OMP binary that runs natively.
-- CUDA binary for matching the user's GPU repro literally.
-- A real iteration loop.
+A Linux GPU droplet gives us the user's exact path: CUDA binary +
+`is_gpu_simulation=True` + `kspaceFirstOrder2D` (legacy entry). Default
+to the **GPU + legacy** combination — that is the user's repro and the
+primary thing we need to fix.
 
 ## What to do next
 
-### Step 1 — confirm the bug reproduces on the droplet
+### Step 1 — flip the smoke test to GPU+legacy and confirm the bug
+
+The current smoke test exercises OMP. Update it (or parametrize) so the
+primary case is `is_gpu_simulation=True`:
 
 ```bash
 git checkout fix-alpha-mode-near-unity
 uv sync --extra all
+# Edit tests/test_issue_664_alpha_power_near_unity.py:
+#   execution_options = SimulationExecutionOptions(is_gpu_simulation=True, show_sim_log=False)
 uv run pytest tests/test_issue_664_alpha_power_near_unity.py -v
 ```
 
-All three parametrized cases should fail with NaNs. If they pass, the bug
-either depends on a heterogeneous medium / different sensor geometry, or
-the minimization went too far. Re-add complexity from the user's original
-report (the issue body has the full code) until it reproduces.
+All three parametrized cases should fail with NaNs. If they pass, the
+bug depends on heterogeneity / source geometry / sensor mask shape that
+got minimized away. Walk back toward the user's verbatim repro
+(re-introduce density variation, ring-shape sensor mask, kSource.p
+tone-burst from the issue body) until NaNs appear, then re-minimize.
 
-### Step 2 — add the HDF5-diff diagnostic test
+Once GPU+legacy reliably NaNs, also run the OMP path. If both fail, the
+bug is in shared serialization (`save_to_disk_func.py`) — most likely.
+If only GPU fails, the bug is in CUDA-specific dispatch.
 
-The smoke test confirms the bug exists but doesn't tell us which byte is
-wrong. The diagnostic approach:
+### Step 2 — A/B legacy vs modern API
 
-1. Have Python write its HDF5 input via `save_to_disk_exit=True`.
-2. Have MATLAB write its HDF5 input via `kspaceFirstOrder2D(..., 'SaveToDisk', filename)`.
-3. Diff the two HDF5 files field by field. The first differing field is the bug.
+Add a parallel test that runs the same scenario through the **modern**
+entry point:
 
-Where to put pieces:
-- MATLAB collector: `tests/matlab_test_data_collectors/matlab_collectors/collect_issue_664.m`.
-  Pattern follows existing `collect_example_parity_2D.m`. CI runs all
-  collectors via `run_all_collectors.m` and caches outputs.
-- Python test: extend `tests/test_issue_664_alpha_power_near_unity.py`
-  with `test_hdf5_input_matches_matlab` that loads both files with `h5py`
-  and compares. Use `np.testing.assert_array_equal` per field; the first
-  failure points at the bug.
+```python
+from kwave.kspaceFirstOrder import kspaceFirstOrder
+result = kspaceFirstOrder(kgrid, medium, source, sensor,
+                          backend="cpp", device="gpu", pml_inside=True)
+```
 
-### Step 3 — investigate the failing field
+Two outcomes matter:
 
-Top suspects (look here first before grep'ing the whole codebase):
+- **Modern is NaN-free, legacy NaNs:** the modern serializer
+  (`kwave/solvers/cpp_simulation.py`) writes the bytes correctly; the
+  legacy serializer (`kwave/kWaveSimulation_helper/save_to_disk_func.py`)
+  doesn't. The fix template is "make legacy match modern." We can also
+  recommend the modern API to the issue reporter as an immediate
+  workaround while the legacy fix lands.
+- **Both NaN:** shared bug deeper in `kwave/utils/io.py` or in the data
+  the simulation builds. Diagnose with HDF5 diff (Step 3) regardless.
 
-- `kwave/kWaveSimulation_helper/save_to_disk_func.py` — main HDF5 writer
-  used by legacy `kspaceFirstOrder2D` (the user's path).
-- `kwave/kWaveSimulation.py:274` — `source_p` property already returns
-  signal *length*, not boolean. Cross-check vs MATLAB's value.
-- `kwave/utils/io.py` — low-level HDF5 write helpers; check dtype/shape
-  conversions.
-- `kwave/solvers/cpp_simulation.py:201` — new-API writer; the previous
-  branch's `p_source_flag` "fix" was here, not in the legacy path.
+Either way, the legacy path needs fixing — the user-facing API in 0.6.x
+still includes `kspaceFirstOrder2D`/`3D` (deprecated but functional).
 
-### Step 4 — fix and verify
+### Step 3 — three-tier testing strategy
 
-Once the diff test pinpoints the field, fix the serializer. Both tests
-(smoke + diff) should go green together. Verify the user's full repro
-from the issue body (Shepp-Logan phantom, ring transducer) also runs
-NaN-free.
+"No NaN" is a low bar. The binary could read garbage and write silent
+garbage. We need three layers:
+
+1. **Smoke test** (already present). *"Is the bug present?"* Runs the
+   binary, asserts no NaN. Cheap, runs in CI.
+2. **HDF5-input diff test** (to add). *"Which byte is wrong?"* Python
+   writes its HDF5 input via `save_to_disk_exit=True`; MATLAB writes the
+   same scenario via `kspaceFirstOrder2D(..., 'SaveToDisk', filename)`;
+   both files are diffed field-by-field with `h5py`. The first differing
+   field pinpoints the bug. Doesn't need the binary — works everywhere.
+3. **Output parity test** (to add). *"Are the values correct?"* Once the
+   smoke test stops NaN'ing, compare numerical output to a MATLAB-run
+   reference (`sensor_data.p` from a MATLAB simulation of the same
+   scenario, captured to `.mat`). Use the same tolerance you'd use for
+   any matlab-parity test in this repo (machine precision on
+   well-specified inputs; loosen if needed).
+
+### Step 4 — drop the MATLAB reference into the existing CI flow
+
+Drop `collect_issue_664.m` into
+`tests/matlab_test_data_collectors/matlab_collectors/`. CI's
+`pytest.yml` job `collect_references` (lines 6–67) automatically picks
+up every `.m` file in that directory, runs them on a MATLAB-licensed
+GitHub runner, caches the output as `collectedValues.tar.gz`, and
+exposes it to every pytest matrix job. **You don't need MATLAB
+installed locally.** Push the `.m` file → CI generates the `.h5`
+reference → diff test runs.
+
+The collector should write *both* the HDF5 input file (for Step 3.2)
+and the simulation output (`sensor_data.p`, for Step 3.3). Pattern
+follows `collect_example_parity_2D.m`.
+
+### Step 5 — investigate the failing field
+
+Top suspects in priority order:
+
+- `kwave/kWaveSimulation_helper/save_to_disk_func.py` — legacy HDF5
+  writer; this is the user's path.
+- `kwave/kWaveSimulation.py:274` — `source_p` property (already returns
+  signal length, not boolean — cross-check vs MATLAB's value for this
+  field name in the HDF5).
+- `kwave/utils/io.py` — low-level HDF5 helpers; check dtype, shape, and
+  Fortran-vs-C-order conversions.
+- `kwave/solvers/cpp_simulation.py:201` — modern-API writer. The earlier
+  branch's `p_source_flag` "fix" was here, **not** in the legacy path,
+  which is one reason that attempt didn't close the issue. If A/B (Step
+  2) shows modern works and legacy doesn't, the diff between these two
+  files is the highest-signal place to start.
+
+### Step 6 — acceptance test from the user's verbatim repro
+
+Once unit tests pass, paste the user's full code from the issue body
+(Shepp-Logan phantom, 512-element ring transducer, gausspulse) into a
+script and run it on the droplet. Assert no NaN. Ideally compare a few
+sensor traces against MATLAB. Save it as
+`tests/test_issue_664_user_repro.py` with `@pytest.mark.slow` so it
+doesn't run in the default suite but is reproducible. This is the final
+"yes, the user's actual problem is fixed" gate.
+
+## Things to avoid
+
+- Don't add a Python-solver `tan(pi*y/2)` validation guard. The bug is
+  in C++ serialization, not in Python's dispersion math. A guard would
+  block the user's config without fixing anything.
+- Don't toggle `getattr(self.medium, ...)` ↔ direct attribute access
+  without thinking about MATLAB interop (`SimpleNamespace` from
+  `simulate_from_dicts`). The flip-flop already happened twice on this
+  branch.
+- Don't force-push this branch. The user prefers history-preserving
+  resets (a forward commit whose tree matches master, as already done).
+- Don't commit large `.h5` reference files directly. Use the existing
+  `matlab_collectors/collectedValues/` cache pattern; CI picks them up.
 
 ## Things to avoid
 
