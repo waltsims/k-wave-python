@@ -1,6 +1,7 @@
 import logging
 import numbers
 import platform
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, List
 
@@ -157,8 +158,6 @@ def warn_alpha_power_near_unity_cpp(medium) -> None:
     singularity (issue #664).  The user's escape hatch on the Python backend is
     ``alpha_mode='no_dispersion'``; the C++ binary has no equivalent.
     """
-    import warnings
-
     alpha_coeff = getattr(medium, "alpha_coeff", None)
     alpha_power = getattr(medium, "alpha_power", None)
     if alpha_coeff is None or alpha_power is None:
