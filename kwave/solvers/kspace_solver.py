@@ -410,14 +410,25 @@ class Simulation:
 
     def _setup_physics_operators(self):
         """Initialize absorption, dispersion, and nonlinearity coefficients."""
-        self._init_absorption()
-        self._init_dispersion()
+        alpha_np, alpha_power = self._alpha_neper_and_power()
+        self._init_absorption(alpha_np, alpha_power)
+        self._init_dispersion(alpha_np, alpha_power)
         self._init_nonlinearity()
 
-    def _alpha_power(self):
-        return float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
+    def _alpha_neper_and_power(self):
+        """Compute ``(α_Np, y)`` once for both absorption and dispersion.
 
-    def _init_absorption(self):
+        Returns ``(None, None)`` when absorption is disabled (``alpha_coeff = 0``).
+        Otherwise expands ``alpha_coeff`` to the grid and converts dB → Np using
+        ``db2neper``.
+        """
+        if not _is_enabled(getattr(self.medium, "alpha_coeff", 0)):
+            return None, None
+        alpha_power = float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        return db2neper(alpha_coeff, alpha_power), alpha_power
+
+    def _init_absorption(self, alpha_np, alpha_power):
         """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
 
         ``tau is None`` means the term is disabled.  Stokes (``alpha_power == 2``)
@@ -425,13 +436,10 @@ class Simulation:
         so the term collapses to ``tau * rho0 * div_u`` without an FFT round-trip.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
-        if not _is_enabled(getattr(self.medium, "alpha_coeff", 0)) or alpha_mode == "no_absorption":
+        if alpha_np is None or alpha_mode == "no_absorption":
             self.tau = None
             self.nabla1 = None
             return
-        alpha_power = self._alpha_power()
-        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
-        alpha_np = db2neper(alpha_coeff, alpha_power)
         if abs(alpha_power - 2.0) < 1e-10:  # Stokes
             self.tau = -2 * alpha_np * self.c0
             self.nabla1 = None
@@ -439,7 +447,7 @@ class Simulation:
             self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
             self.nabla1 = self._fractional_laplacian(alpha_power - 2)
 
-    def _init_dispersion(self):
+    def _init_dispersion(self, alpha_np, alpha_power):
         """Set ``self.eta`` and ``self.nabla2`` for the power-law dispersion term.
 
         ``eta is None`` means the term is disabled (``alpha_mode = 'no_absorption'``,
@@ -448,15 +456,11 @@ class Simulation:
         unity.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
-        absorbing = _is_enabled(getattr(self.medium, "alpha_coeff", 0))
-        alpha_power = self._alpha_power() if absorbing else None
         is_stokes = alpha_power is not None and abs(alpha_power - 2.0) < 1e-10
-        if not absorbing or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
+        if alpha_np is None or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
             self.eta = None
             self.nabla2 = None
             return
-        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
-        alpha_np = db2neper(alpha_coeff, alpha_power)
         self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
         self.nabla2 = self._fractional_laplacian(alpha_power - 1)
 
