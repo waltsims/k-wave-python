@@ -60,6 +60,22 @@ CUDA binaries. So a **Linux x86_64 CPU droplet** is sufficient for the
 diagnostic and fix work; we use OMP there. GPU only matters for the
 final acceptance test reproducing the user's literal scenario.
 
+## Droplet bootstrap
+
+A fresh Ubuntu 24.04 x86_64 droplet is brought up to a working state by:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/waltsims/k-wave-python/fix-alpha-mode-near-unity/plans/issue-664-setup-droplet.sh | bash
+gh auth login
+cd ~/k-wave-python
+claude
+```
+
+The script installs system deps (fftw, hdf5, libomp, build-essential),
+uv, gh, Claude Code via npm, clones the repo, checks out this branch,
+and runs `uv sync --extra all`. C++ binaries auto-download on first
+import. See `plans/issue-664-setup-droplet.sh` for details.
+
 ## What to do next
 
 ### Step 1 — confirm the bug reproduces on the droplet (OMP)
