@@ -130,3 +130,24 @@ def test_cpp_backend_warns_on_alpha_mode(tmp_path):
             save_only=True,
             data_path=str(tmp_path),
         )
+
+
+def test_cpp_backend_skips_near_unity_guard(tmp_path):
+    """C++ backend uses its own dispersion formulation; the Python near-unity guard
+    must not block the call. Otherwise C++ users have no valid escape hatch
+    (alpha_mode='no_dispersion' is silently ignored by the binary)."""
+    kgrid, source, sensor = _make_sim()
+    medium = kWaveMedium(sound_speed=1500, density=1000, alpha_coeff=0.5, alpha_power=0.97)
+
+    # Should not raise — only save_only path is exercised so we don't need the binary.
+    kspaceFirstOrder(
+        kgrid,
+        medium,
+        source,
+        sensor,
+        pml_inside=True,
+        quiet=True,
+        backend="cpp",
+        save_only=True,
+        data_path=str(tmp_path),
+    )

@@ -175,7 +175,7 @@ def kspaceFirstOrder(
 
     from kwave.solvers.validation import validate_simulation
 
-    validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size)
+    validate_simulation(kgrid, medium, source, sensor, pml_size=pml_size, backend=backend)
 
     # --- Shared pre-processing (both backends) ---
 

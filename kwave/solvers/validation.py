@@ -5,9 +5,9 @@ import numpy as np
 from kwave.utils.matrix import num_dim2
 
 
-def validate_simulation(kgrid, medium, source, sensor, *, pml_size):
+def validate_simulation(kgrid, medium, source, sensor, *, pml_size, backend="python"):
     validate_time_stepping(kgrid)
-    validate_medium(medium, kgrid)
+    validate_medium(medium, kgrid, backend=backend)
     validate_pml(pml_size, kgrid)
     validate_cfl(kgrid, medium)
     validate_source(source, kgrid)
@@ -26,7 +26,7 @@ def validate_time_stepping(kgrid):
         raise ValueError(f"kgrid.dt must be > 0, got {kgrid.dt}")
 
 
-def validate_medium(medium, kgrid):
+def validate_medium(medium, kgrid, *, backend="python"):
     c = np.atleast_1d(np.asarray(medium.sound_speed))
     grid_size = int(np.prod(kgrid.N))
     if c.size > 1 and c.size != grid_size:
@@ -47,15 +47,18 @@ def validate_medium(medium, kgrid):
             power = float(np.asarray(medium.alpha_power).flat[0])
             if power < 0 or power > 3:
                 warnings.warn(f"medium.alpha_power={power} is outside typical range [0, 3].", stacklevel=3)
-            alpha_mode = medium.alpha_mode
-            if abs(power - 1.0) < 0.05 and alpha_mode != "no_dispersion":
-                raise ValueError(
-                    f"medium.alpha_power={power} is too close to 1.0. The dispersion term "
-                    f"contains tan(pi*alpha_power/2), which diverges at alpha_power=1. "
-                    f"For backend='python': set medium.alpha_mode='no_dispersion' to disable "
-                    f"the dispersion term. For backend='cpp' or to use both absorption and "
-                    f"dispersion, choose an alpha_power value further from 1.0."
-                )
+            # The Python solver's tan(pi*y/2) dispersion term diverges near y=1.
+            # The C++ binary uses its own dispersion formulation and ignores alpha_mode,
+            # so this guard (and its no_dispersion escape hatch) only applies to Python.
+            if backend == "python":
+                alpha_mode = medium.alpha_mode
+                if abs(power - 1.0) < 0.05 and alpha_mode != "no_dispersion":
+                    raise ValueError(
+                        f"medium.alpha_power={power} is too close to 1.0. The dispersion term "
+                        f"contains tan(pi*alpha_power/2), which diverges at alpha_power=1. "
+                        f"Set medium.alpha_mode='no_dispersion' to disable the dispersion term, "
+                        f"or choose an alpha_power value further from 1.0."
+                    )
 
 
 def validate_pml(pml_size, kgrid):
