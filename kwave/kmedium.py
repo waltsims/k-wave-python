@@ -8,6 +8,18 @@ import kwave.utils.checks
 from kwave.enums import AlphaMode
 
 
+def _to_alpha_mode(value):
+    """Normalize a value to AlphaMode. Accepts None, AlphaMode, or a valid string."""
+    if value is None or isinstance(value, AlphaMode):
+        return value
+    try:
+        return AlphaMode(value)
+    except (ValueError, TypeError):
+        raise ValueError(
+            f"medium.alpha_mode must be an AlphaMode enum value or one of " f"'no_absorption', 'no_dispersion', 'stokes', got {value!r}"
+        ) from None
+
+
 @dataclass
 class kWaveMedium(object):
     # sound speed distribution within the acoustic medium [m/s] | required to be defined
@@ -44,8 +56,7 @@ class kWaveMedium(object):
 
     def __post_init__(self):
         self.sound_speed = np.atleast_1d(self.sound_speed)
-        if isinstance(self.alpha_mode, str) and not isinstance(self.alpha_mode, AlphaMode):
-            self.alpha_mode = AlphaMode(self.alpha_mode)
+        self.alpha_mode = _to_alpha_mode(self.alpha_mode)
 
     def check_fields(self, kgrid_shape: np.ndarray) -> None:
         """
@@ -57,12 +68,8 @@ class kWaveMedium(object):
         Returns:
             None
         """
-        # check the absorption mode input is valid (already normalized to AlphaMode in __post_init__)
-        if self.alpha_mode is not None and not isinstance(self.alpha_mode, AlphaMode):
-            raise ValueError(
-                f"medium.alpha_mode must be an AlphaMode enum value or one of "
-                f"'no_absorption', 'no_dispersion', 'stokes', got {self.alpha_mode!r}"
-            )
+        # re-normalize alpha_mode in case it was reassigned as a plain string post-construction
+        self.alpha_mode = _to_alpha_mode(self.alpha_mode)
 
         # check the absorption filter input is valid
         if self.alpha_filter is not None and not (self.alpha_filter.shape == kgrid_shape).all():
