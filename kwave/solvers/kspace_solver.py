@@ -10,6 +10,8 @@ from types import SimpleNamespace
 import numpy as np
 from tqdm import tqdm
 
+from kwave.utils.conversion import db2neper
+
 try:
     import cupy as cp
 except ImportError:
@@ -420,11 +422,6 @@ class Simulation:
     def _alpha_power(self):
         return float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
 
-    def _alpha_neper(self, alpha_power):
-        """Convert ``medium.alpha_coeff`` from dB/(MHz^y * cm) to Np/(rad/s)^y per unit length."""
-        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
-        return 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
-
     def _init_absorption(self):
         """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
 
@@ -436,7 +433,8 @@ class Simulation:
         if not self._has_absorption:
             return
         alpha_power = self._alpha_power()
-        alpha_np = self._alpha_neper(alpha_power)
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        alpha_np = db2neper(alpha_coeff, alpha_power)
         if abs(alpha_power - 2.0) < 1e-10:  # Stokes
             self.tau = -2 * alpha_np * self.c0
             self.nabla1 = self.xp.ones_like(self._k_mag)
@@ -460,7 +458,8 @@ class Simulation:
         if abs(alpha_power - 2.0) < 1e-10:  # Stokes has no dispersion term (tan(pi) ≈ 0)
             self._has_dispersion = False
             return
-        alpha_np = self._alpha_neper(alpha_power)
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        alpha_np = db2neper(alpha_coeff, alpha_power)
         self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
         self.nabla2 = self._fractional_laplacian(alpha_power - 1)
 
