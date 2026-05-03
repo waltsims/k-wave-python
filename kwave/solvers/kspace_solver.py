@@ -4,6 +4,7 @@ Supports 1D, 2D, and 3D k-space pseudospectral wave propagation.
 
 Design: Simulation class with setup/step separation for debuggability.
 """
+
 from types import SimpleNamespace
 
 import numpy as np
@@ -239,7 +240,7 @@ class Simulation:
                 self._extract = lambda f, _i=idx: f.ravel()[_i]
             else:
                 raise ValueError(
-                    f"Sensor mask shape {mask_arr.shape} is neither binary " f"(numel={grid_numel}) nor Cartesian ({self.ndim}, N_points)"
+                    f"Sensor mask shape {mask_arr.shape} is neither binary (numel={grid_numel}) nor Cartesian ({self.ndim}, N_points)"
                 )
 
         # Parse sensor.record (default matches MATLAB: pressure time-series + final snapshot)
@@ -406,41 +407,69 @@ class Simulation:
                 self.op_div_list.append(1j * k * self.kappa)
 
     def _setup_physics_operators(self):
-        """Build absorption, dispersion, and nonlinearity operators."""
-        xp = self.xp
+        """Build absorption, dispersion, and nonlinearity coefficients.
 
-        # Absorption/dispersion
-        alpha_coeff_raw = getattr(self.medium, "alpha_coeff", 0)
-        if not _is_enabled(alpha_coeff_raw):
-            self._absorption = lambda div_u: 0
-            self._dispersion = lambda rho: 0
+        Each ``_init_*`` method sets coefficient attributes (``tau``/``nabla1``,
+        ``eta``/``nabla2``, ``BonA``) and a ``_has_*`` flag.  ``step()`` applies
+        them with explicit arithmetic — no lambda dispatch.
+        """
+        self._init_absorption()
+        self._init_dispersion()
+        self._init_nonlinearity()
+
+    def _alpha_power(self):
+        return float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
+
+    def _alpha_neper(self, alpha_power):
+        """Convert ``medium.alpha_coeff`` from dB/(MHz^y * cm) to Np/(rad/s)^y per unit length."""
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        return 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
+
+    def _init_absorption(self):
+        """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
+
+        Stokes (``alpha_power == 2``) reuses the same expression with
+        ``nabla1 = 1`` (identity), which collapses to ``tau * rho0 * div_u``.
+        """
+        alpha_mode = getattr(self.medium, "alpha_mode", None)
+        self._has_absorption = _is_enabled(getattr(self.medium, "alpha_coeff", 0)) and alpha_mode != "no_absorption"
+        if not self._has_absorption:
+            return
+        alpha_power = self._alpha_power()
+        alpha_np = self._alpha_neper(alpha_power)
+        if abs(alpha_power - 2.0) < 1e-10:  # Stokes
+            self.tau = -2 * alpha_np * self.c0
+            self.nabla1 = self.xp.ones_like(self._k_mag)
         else:
-            alpha_coeff = _expand_to_grid(alpha_coeff_raw, self.grid_shape, xp, "alpha_coeff")
-            alpha_power = float(xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
-            alpha_np = 100 * alpha_coeff * (1e-6 / (2 * np.pi)) ** alpha_power / (20 * np.log10(np.e))
+            self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
+            self.nabla1 = self._fractional_laplacian(alpha_power - 2)
 
-            if abs(alpha_power - 2.0) < 1e-10:  # Stokes
-                self._absorption = lambda div_u: -2 * alpha_np * self.c0 * self.rho0 * div_u
-                self._dispersion = lambda rho: 0
-            else:  # Power-law with fractional Laplacian
-                tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-                eta = 2 * alpha_np * self.c0**alpha_power * xp.tan(np.pi * alpha_power / 2)
-                nabla1 = self._fractional_laplacian(alpha_power - 2)
-                nabla2 = self._fractional_laplacian(alpha_power - 1)
-                # Fractional Laplacian already includes full k-space structure; no kappa needed
-                self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
-                self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
+    def _init_dispersion(self):
+        """Set ``self.eta`` and ``self.nabla2`` for the power-law dispersion term.
 
-        # Nonlinearity
+        Disabled when ``alpha_mode`` is ``no_absorption``/``no_dispersion`` —
+        ``tan(pi*y/2)`` is the singular factor that blows up as ``alpha_power → 1``,
+        so ``no_dispersion`` is the safe path near unity.
+        """
+        alpha_mode = getattr(self.medium, "alpha_mode", None)
+        absorbing = _is_enabled(getattr(self.medium, "alpha_coeff", 0))
+        self._has_dispersion = absorbing and alpha_mode not in ("no_absorption", "no_dispersion")
+        if not self._has_dispersion:
+            return
+        alpha_power = self._alpha_power()
+        if abs(alpha_power - 2.0) < 1e-10:  # Stokes has no dispersion term (tan(pi) ≈ 0)
+            self._has_dispersion = False
+            return
+        alpha_np = self._alpha_neper(alpha_power)
+        self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
+        self.nabla2 = self._fractional_laplacian(alpha_power - 1)
+
+    def _init_nonlinearity(self):
+        """Set ``self.BonA`` for the nonlinearity term."""
         BonA_raw = getattr(self.medium, "BonA", 0)
         self._has_nonlinearity = _is_enabled(BonA_raw)
-        if not self._has_nonlinearity:
-            self._nonlinearity = lambda rho: 0
-            self._nonlinear_factor = lambda rho: 1.0
-        else:
-            BonA = _expand_to_grid(BonA_raw, self.grid_shape, xp, "BonA")
-            self._nonlinearity = lambda rho: BonA * rho**2 / (2 * self.rho0)
-            self._nonlinear_factor = lambda rho: (2 * rho + self.rho0) / self.rho0
+        if self._has_nonlinearity:
+            self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA")
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -598,9 +627,8 @@ class Simulation:
             self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * grad_p_i)
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
-        # Mass conservation: drho_i/dt = -rho0 * div_i(u_i), with PML
-        # Only compute rho_total before the loop when nonlinearity needs it
-        nl_factor = self._nonlinear_factor(sum(self.rho_split)) if self._has_nonlinearity else 1.0
+        # Mass conservation: drho_i/dt = -rho0 * div_i(u_i) * nl_factor, with PML
+        nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if self._has_nonlinearity else 1.0
         div_u_total = xp.zeros(self.grid_shape, dtype=float)
         for i in range(self.ndim):
             pml = self.pml_list[i]
@@ -609,8 +637,12 @@ class Simulation:
             self.rho_split[i] = pml * (pml * self.rho_split[i] - self.dt * self.rho0 * div_u_i * nl_factor)
             self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
+        # Equation of state:  p = c0² · (ρ + absorption − dispersion + nonlinearity)
         rho_total = sum(self.rho_split)
-        self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
+        absorption = self.tau * self._diff(self.rho0 * div_u_total, self.nabla1) if self._has_absorption else 0
+        dispersion = self.eta * self._diff(rho_total, self.nabla2) if self._has_dispersion else 0
+        nonlinearity = self.BonA * rho_total**2 / (2 * self.rho0) if self._has_nonlinearity else 0
+        self.p = self.c0_sq * (rho_total + absorption - dispersion + nonlinearity)
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
         # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)

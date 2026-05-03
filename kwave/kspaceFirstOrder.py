@@ -211,6 +211,16 @@ def kspaceFirstOrder(
     elif backend == "cpp":
         from kwave.solvers.cpp_simulation import CppSimulation
 
+        alpha_mode = getattr(medium, "alpha_mode", None)
+        if alpha_mode in ("no_absorption", "no_dispersion"):
+            raise ValueError(
+                f"medium.alpha_mode={alpha_mode!r} is not supported with backend='cpp'. "
+                "The C++ binary always applies full power-law absorption + dispersion (the "
+                "alpha_mode flag is not part of its HDF5 input format), so this option is "
+                "silently ignored and produces NaN output for alpha_power near 1. "
+                "Use backend='python' to honor alpha_mode."
+            )
+
         if not use_kspace:
             warnings.warn(
                 "use_kspace=False has no effect with backend='cpp'; the C++ binary always applies k-space correction.",
