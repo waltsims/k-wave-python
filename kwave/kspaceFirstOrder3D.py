@@ -210,15 +210,9 @@ def kspaceFirstOrder3D(
 
         return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
 
-    alpha_mode = getattr(medium, "alpha_mode", None)
-    if alpha_mode in ("no_absorption", "no_dispersion"):
-        raise ValueError(
-            f"medium.alpha_mode={alpha_mode!r} is not supported by the C++ binary. "
-            "The HDF5 input format does not carry alpha_mode, so the binary always applies "
-            "full power-law absorption + dispersion, which produces NaN output for alpha_power "
-            "near 1. Use kspaceFirstOrder() from kwave.kspaceFirstOrder with backend='python' "
-            "to honor alpha_mode."
-        )
+    from kwave.utils.checks import check_alpha_mode_cpp_compatible
+
+    check_alpha_mode_cpp_compatible(medium)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.
     if not simulation_options.save_to_disk:

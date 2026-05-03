@@ -126,6 +126,28 @@ def is_number(value: Any) -> bool:
     return np.issubdtype(np.array(value), np.number)
 
 
+_CPP_INCOMPATIBLE_ALPHA_MODES = ("no_absorption", "no_dispersion")
+
+
+def check_alpha_mode_cpp_compatible(medium) -> None:
+    """Raise ``ValueError`` if ``medium.alpha_mode`` is one the C++ binary cannot honor.
+
+    The C++ HDF5 input format does not carry ``alpha_mode``; the binary always applies
+    full power-law absorption + dispersion.  Near ``alpha_power == 1`` that produces
+    NaN output (issue #664).  ``backend='python'`` (or the legacy pure-Python backend)
+    honors ``alpha_mode``.
+    """
+    alpha_mode = getattr(medium, "alpha_mode", None)
+    if alpha_mode in _CPP_INCOMPATIBLE_ALPHA_MODES:
+        raise ValueError(
+            f"medium.alpha_mode={alpha_mode!r} is not supported by the C++ backend. "
+            "The HDF5 input format does not carry alpha_mode, so the binary always applies "
+            "full power-law absorption + dispersion, which produces NaN output for alpha_power "
+            "near 1. Use kspaceFirstOrder() from kwave.kspaceFirstOrder with backend='python' "
+            "to honor alpha_mode."
+        )
+
+
 def is_unix() -> bool:
     """
     Check whether the current platform is a Unix-like system.

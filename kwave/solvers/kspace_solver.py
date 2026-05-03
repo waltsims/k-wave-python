@@ -409,12 +409,7 @@ class Simulation:
                 self.op_div_list.append(1j * k * self.kappa)
 
     def _setup_physics_operators(self):
-        """Build absorption, dispersion, and nonlinearity coefficients.
-
-        Each ``_init_*`` method sets coefficient attributes (``tau``/``nabla1``,
-        ``eta``/``nabla2``, ``BonA``) and a ``_has_*`` flag.  ``step()`` applies
-        them with explicit arithmetic — no lambda dispatch.
-        """
+        """Initialize absorption, dispersion, and nonlinearity coefficients."""
         self._init_absorption()
         self._init_dispersion()
         self._init_nonlinearity()
@@ -425,8 +420,9 @@ class Simulation:
     def _init_absorption(self):
         """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
 
-        Stokes (``alpha_power == 2``) reuses the same expression with
-        ``nabla1 = 1`` (identity), which collapses to ``tau * rho0 * div_u``.
+        Stokes (``alpha_power == 2``) sets ``nabla1 = None`` — ``_diff`` treats that
+        as the identity operator, collapsing the term to ``tau * rho0 * div_u``
+        without an FFT round-trip.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         self._has_absorption = _is_enabled(getattr(self.medium, "alpha_coeff", 0)) and alpha_mode != "no_absorption"
@@ -437,7 +433,7 @@ class Simulation:
         alpha_np = db2neper(alpha_coeff, alpha_power)
         if abs(alpha_power - 2.0) < 1e-10:  # Stokes
             self.tau = -2 * alpha_np * self.c0
-            self.nabla1 = self.xp.ones_like(self._k_mag)
+            self.nabla1 = None
         else:
             self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
             self.nabla1 = self._fractional_laplacian(alpha_power - 2)
@@ -704,7 +700,11 @@ class Simulation:
 
         For gradient/divergence ops, kappa is pre-multiplied at setup.
         For fractional Laplacian ops (absorption/dispersion), kappa is not needed.
+        ``op=None`` is the identity operator and short-circuits the FFT round-trip
+        (used by the Stokes absorption path, where ``nabla1`` is structurally 1).
         """
+        if op is None:
+            return f
         xp = self.xp
         return xp.real(xp.fft.ifftn(op * xp.fft.fftn(f)))
 
