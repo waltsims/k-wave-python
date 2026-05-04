@@ -172,6 +172,11 @@ class Simulation:
             if resolved not in (np.float32, np.float64):
                 raise ValueError(f"dtype must resolve to float32 or float64, got {resolved.__name__}")
             self._dtype = resolved
+        # Companion complex dtype for FFT outputs.  numpy<2 (np.fft) always upcasts
+        # to complex128 regardless of input precision; we cast back so the rest of
+        # the pipeline stays in self._dtype.  Harmless on numpy 2+ and on cupy
+        # (which already respects input precision).
+        self._complex_dtype = np.complex64 if self._dtype is np.float32 else np.complex128
         # kWaveGrid doesn't have pml_size_x attrs; warn if PML will silently be disabled
         if pml_size is None:
             from kwave.kgrid import kWaveGrid as _KWG
@@ -694,10 +699,10 @@ class Simulation:
 
         # Momentum equation: du_i/dt = -grad_i(p)/rho, with PML
         # Share forward FFT of p across all gradient axes
-        P = xp.fft.fftn(self.p)
+        P = xp.fft.fftn(self.p).astype(self._complex_dtype, copy=False)
         for i in range(self.ndim):
             pml_sg = self.pml_sg_list[i]
-            grad_p_i = xp.real(xp.fft.ifftn(self.op_grad_list[i] * P))
+            grad_p_i = xp.real(xp.fft.ifftn(self.op_grad_list[i] * P)).astype(self._dtype, copy=False)
             self.u[i] = pml_sg * (pml_sg * self.u[i] - self.dt_over_rho0[i] * grad_p_i)
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
@@ -734,7 +739,7 @@ class Simulation:
                 self.sensor_data["p"][:, file_index] = self._extract(self.p)
             for i, a in enumerate("xyz"[: self.ndim]):
                 if f"u{a}" in self.sensor_data:  # non-staggered (collocated with pressure)
-                    shifted = xp.real(xp.fft.ifftn(self.unstagger_ops[i] * xp.fft.fftn(self.u[i])))
+                    shifted = xp.real(xp.fft.ifftn(self.unstagger_ops[i] * xp.fft.fftn(self.u[i]))).astype(self._dtype, copy=False)
                     self.sensor_data[f"u{a}"][:, file_index] = self._extract(shifted)
                 if f"u{a}_staggered" in self.sensor_data:  # raw staggered grid
                     self.sensor_data[f"u{a}_staggered"][:, file_index] = self._extract(self.u[i])
@@ -788,7 +793,7 @@ class Simulation:
         if op is None:
             return f
         xp = self.xp
-        return xp.real(xp.fft.ifftn(op * xp.fft.fftn(f)))
+        return xp.real(xp.fft.ifftn(op * xp.fft.fftn(f))).astype(self._dtype, copy=False)
 
     def _stagger(self, arr, axis):
         """Compute staggered grid values (average neighbors along axis)."""
