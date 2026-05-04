@@ -451,46 +451,85 @@ class Simulation:
         return db2neper(alpha_coeff, alpha_power), alpha_power
 
     def _init_absorption(self, alpha_np, alpha_power):
-        """Set ``self.tau`` and ``self.nabla1`` for the power-law absorption term.
+        """Bind absorption coefficients and the ``step()`` dispatch lambda.
 
-        ``tau is None`` means the term is disabled (``alpha_coeff = 0`` or
-        ``alpha_mode = 'no_absorption'``).  Stokes (``alpha_power == 2``) keeps
-        ``nabla1 = None`` -- ``_diff`` treats that as the identity operator, so the
-        term collapses to ``tau * rho0 * div_u`` without an FFT round-trip.
+        Sets, for introspection by numerical users:
+
+        - ``self.tau`` -- absorption coefficient on the grid, ``None`` if disabled.
+          Stokes uses ``-2 alpha c0``; power-law uses ``-2 alpha c0^(y-1)``.
+        - ``self.nabla1`` -- ``|k|^(y-2)`` fractional-Laplacian operator in
+          k-space, or ``None`` for Stokes / disabled (no FFT round-trip).
+
+        And binds ``self._absorption(div_u)`` for branch-free invocation in
+        ``step()``.  The lambda reads from ``self.tau`` / ``self.nabla1`` so a
+        post-setup tweak (``sim.tau *= 1.1``) is picked up automatically;
+        toggling enabled<->disabled requires re-running setup.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         if alpha_np is None or alpha_mode == "no_absorption":
             self.tau = None
             self.nabla1 = None
-            return
-        if abs(alpha_power - 2.0) < 1e-10:  # Stokes
+            self._absorption = lambda div_u: 0
+        elif abs(alpha_power - 2.0) < 1e-10:  # Stokes
             self.tau = -2 * alpha_np * self.c0
-            self.nabla1 = None
-        else:
+            self.nabla1 = None  # no fractional Laplacian; direct multiply
+            self._absorption = lambda div_u: self.tau * self.rho0 * div_u
+        else:  # full power-law
             self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
             self.nabla1 = self._fractional_laplacian(alpha_power - 2)
+            self._absorption = lambda div_u: self.tau * self._diff(self.rho0 * div_u, self.nabla1)
 
     def _init_dispersion(self, alpha_np, alpha_power):
-        """Set ``self.eta`` and ``self.nabla2`` for the power-law dispersion term.
+        """Bind dispersion coefficients and the ``step()`` dispatch lambda.
 
-        ``eta is None`` means the term is disabled (``alpha_mode = 'no_absorption'``,
-        ``'no_dispersion'``, or Stokes).  ``tan(pi*y/2)`` is the singular factor that
-        blows up as ``alpha_power -> 1``, so ``no_dispersion`` is the safe path near
-        unity (issue #664).
+        Sets, for introspection:
+
+        - ``self.eta`` -- dispersion coefficient ``2 alpha c0^y * tan(pi y / 2)``
+          on the grid, ``None`` if disabled.  ``tan(pi y / 2)`` is the singular
+          factor that blows up as ``alpha_power -> 1`` (issue #664) -- check
+          ``sim.eta`` to see the magnitude near unity.
+        - ``self.nabla2`` -- ``|k|^(y-1)`` fractional-Laplacian operator, or
+          ``None`` if disabled.
+
+        Disabled when ``alpha_coeff = 0``, ``alpha_mode in {'no_absorption',
+        'no_dispersion'}``, or Stokes (``alpha_power == 2``).
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         is_stokes = alpha_power is not None and abs(alpha_power - 2.0) < 1e-10
         if alpha_np is None or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
             self.eta = None
             self.nabla2 = None
-            return
-        self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
-        self.nabla2 = self._fractional_laplacian(alpha_power - 1)
+            self._dispersion = lambda rho: 0
+        else:
+            self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
+            self.nabla2 = self._fractional_laplacian(alpha_power - 1)
+            self._dispersion = lambda rho: self.eta * self._diff(rho, self.nabla2)
 
     def _init_nonlinearity(self):
-        """Set ``self.BonA`` for the nonlinearity term. ``None`` means disabled."""
+        """Bind the nonlinearity coefficient and ``step()`` dispatch lambdas.
+
+        Sets, for introspection:
+
+        - ``self.BonA`` -- nonlinearity parameter B/A on the grid, ``None`` if
+          disabled.
+
+        And binds two callables for branch-free use in ``step()``:
+
+        - ``self._nonlinearity(rho)`` -- the additive nonlinear term in the
+          equation of state.
+        - ``self._nl_factor(rho_split)`` -- the multiplicative factor on the
+          mass-conservation update.  Lossless path returns ``1.0`` without
+          summing ``rho_split``.
+        """
         BonA_raw = getattr(self.medium, "BonA", 0)
-        self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA", dtype=self._dtype) if _is_enabled(BonA_raw) else None
+        if not _is_enabled(BonA_raw):
+            self.BonA = None
+            self._nonlinearity = lambda rho: 0
+            self._nl_factor = lambda rho_split: 1.0
+        else:
+            self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA", dtype=self._dtype)
+            self._nonlinearity = lambda rho: self.BonA * rho**2 / (2 * self.rho0)
+            self._nl_factor = lambda rho_split: (2 * sum(rho_split) + self.rho0) / self.rho0
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -650,8 +689,7 @@ class Simulation:
             self.u[i] = self._source_u_ops[i](self.t, self.u[i])
 
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i) * nl_factor, with PML
-        has_nonlinearity = self.BonA is not None
-        nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if has_nonlinearity else 1.0
+        nl_factor = self._nl_factor(self.rho_split)
         div_u_total = xp.zeros(self.grid_shape, dtype=self._dtype)
         for i in range(self.ndim):
             pml = self.pml_list[i]
@@ -662,10 +700,9 @@ class Simulation:
 
         # Equation of state:  p = c0^2 * (rho + absorption - dispersion + nonlinearity)
         rho_total = sum(self.rho_split)
-        absorption = self.tau * self._diff(self.rho0 * div_u_total, self.nabla1) if self.tau is not None else 0
-        dispersion = self.eta * self._diff(rho_total, self.nabla2) if self.eta is not None else 0
-        nonlinearity = self.BonA * rho_total**2 / (2 * self.rho0) if has_nonlinearity else 0
-        self.p = self.c0_sq * (rho_total + absorption - dispersion + nonlinearity)
+        self.p = self.c0_sq * (
+            rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total)
+        )
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
         # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)
