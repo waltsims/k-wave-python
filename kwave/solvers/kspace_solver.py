@@ -376,23 +376,29 @@ class Simulation:
                 self.pml_list.append(xp.ones(shape, dtype=self._dtype))
                 self.pml_sg_list.append(xp.ones(shape, dtype=self._dtype))
             else:
-                # dimension=2 gives shape (1, N) which we reshape for broadcasting
+                # dimension=2 gives shape (1, N) which we reshape for broadcasting.
+                # get_pml returns float64; cast so the per-step PML multiply doesn't
+                # upcast self.p / self.u (would silently break dtype='single').
                 pml = get_pml(N, dx, self.dt, self.c_ref, pml_size, pml_alpha, staggered=False, dimension=2, xp=xp)
                 pml_sg = get_pml(N, dx, self.dt, self.c_ref, pml_size, pml_alpha, staggered=True, dimension=2, xp=xp)
 
                 shape = [1] * self.ndim
                 shape[axis] = N
-                self.pml_list.append(pml.flatten().reshape(shape))
-                self.pml_sg_list.append(pml_sg.flatten().reshape(shape))
+                self.pml_list.append(pml.flatten().reshape(shape).astype(self._dtype))
+                self.pml_sg_list.append(pml_sg.flatten().reshape(shape).astype(self._dtype))
 
     def _setup_kspace_operators(self):
         """Build k-space gradient/divergence operators for each dimension."""
         xp = self.xp
         self.k_list = []
 
-        # First pass: build k-vectors for each dimension
+        # First pass: build k-vectors for each dimension.
+        # ``fftfreq`` returns float64 by default; cast so the k-space operators
+        # (kappa, op_grad_list, op_div_list, _k_mag) match self._dtype.  Without
+        # this cast, _diff's FFT round-trip with a float64 op upcasts the
+        # float32 field back to float64 -- silently breaking dtype='single'.
         for axis, (N, dx) in enumerate(zip(self.grid_shape, self.spacing)):
-            k = 2 * np.pi * xp.fft.fftfreq(N, d=dx)
+            k = (2 * np.pi * xp.fft.fftfreq(N, d=dx)).astype(self._dtype)
             shape = [1] * self.ndim
             shape[axis] = N
             self.k_list.append(k.reshape(shape))

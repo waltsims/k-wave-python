@@ -45,8 +45,9 @@ _FLOAT32_INPUTS = [np.float32, "float32", "single", np.dtype("f4")]
 
 @pytest.mark.parametrize("dtype_arg", _FLOAT64_INPUTS, ids=lambda x: repr(x))
 def test_python_backend_float64_inputs(dtype_arg):
-    """All float64-equivalent inputs must produce float64 output."""
+    """All float64-equivalent inputs must produce float64 output across every recorded field."""
     kgrid, medium, source, sensor = _build_minimal()
+    sensor.record = ("p", "p_final", "p_max", "p_min", "p_rms")
     result = kspaceFirstOrder(
         kgrid=kgrid,
         medium=medium,
@@ -59,16 +60,23 @@ def test_python_backend_float64_inputs(dtype_arg):
         smooth_p0=False,
         quiet=True,
     )
-    p = np.asarray(result["p"])
-    assert p.dtype == np.float64, f"dtype={dtype_arg!r} produced {p.dtype}, expected float64"
-    assert not np.any(np.isnan(p))
-    assert np.nanmax(np.abs(p)) > 0
+    for field in ("p", "p_final", "p_max", "p_min", "p_rms"):
+        arr = np.asarray(result[field])
+        assert arr.dtype == np.float64, f"dtype={dtype_arg!r}: {field} produced {arr.dtype}, expected float64"
+    assert not np.any(np.isnan(result["p"]))
+    assert np.nanmax(np.abs(result["p"])) > 0
 
 
 @pytest.mark.parametrize("dtype_arg", _FLOAT32_INPUTS, ids=lambda x: repr(x))
 def test_python_backend_float32_inputs(dtype_arg):
-    """All float32-equivalent inputs must produce float32 output."""
+    """All float32-equivalent inputs must produce float32 output across every recorded field.
+
+    Includes p_final + aggregates (p_max/min/rms) — these caught a real dtype-drift bug
+    where k-space operators (kappa, op_grad/div_list) and the PML arrays were float64
+    by default and silently upcast self.p back to float64 mid-step().
+    """
     kgrid, medium, source, sensor = _build_minimal()
+    sensor.record = ("p", "p_final", "p_max", "p_min", "p_rms")
     result = kspaceFirstOrder(
         kgrid=kgrid,
         medium=medium,
@@ -81,10 +89,11 @@ def test_python_backend_float32_inputs(dtype_arg):
         smooth_p0=False,
         quiet=True,
     )
-    p = np.asarray(result["p"])
-    assert p.dtype == np.float32, f"dtype={dtype_arg!r} produced {p.dtype}, expected float32"
-    assert not np.any(np.isnan(p))
-    assert np.nanmax(np.abs(p)) > 0
+    for field in ("p", "p_final", "p_max", "p_min", "p_rms"):
+        arr = np.asarray(result[field])
+        assert arr.dtype == np.float32, f"dtype={dtype_arg!r}: {field} produced {arr.dtype}, expected float32"
+    assert not np.any(np.isnan(result["p"]))
+    assert np.nanmax(np.abs(result["p"])) > 0
 
 
 def test_default_dtype_is_float64():
@@ -117,6 +126,29 @@ def test_invalid_dtype_raises(bad):
             backend="python",
             device="cpu",
             dtype=bad,
+        )
+
+
+def test_torch_like_dtype_gets_helpful_error():
+    """Non-numpy framework dtypes get a hint pointing to numpy equivalents.
+
+    Uses a fake stand-in (`__module__ = "torch"`) to avoid importing torch.
+    """
+    kgrid, medium, source, sensor = _build_minimal()
+
+    class FakeTorchDtype:
+        pass
+
+    FakeTorchDtype.__module__ = "torch"
+    with pytest.raises(ValueError, match=r"torch.*pass the equivalent numpy dtype"):
+        kspaceFirstOrder(
+            kgrid=kgrid,
+            medium=medium,
+            source=deepcopy(source),
+            sensor=sensor,
+            backend="python",
+            device="cpu",
+            dtype=FakeTorchDtype(),
         )
 
 
