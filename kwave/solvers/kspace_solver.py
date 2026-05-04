@@ -133,7 +133,7 @@ class Simulation:
         pml_size=None,
         pml_alpha=None,
         quiet=False,
-        data_cast="off",
+        dtype=None,
     ):
         self.kgrid = kgrid
         self.medium = medium
@@ -145,16 +145,20 @@ class Simulation:
         self.quiet = quiet
         self._pml_size_override = pml_size
         self._pml_alpha_override = pml_alpha
-        # data_cast → numerical precision for state arrays.
-        # "off"/"double" → np.float64 (default, matches MATLAB k-Wave default)
-        # "single"       → np.float32 (faster + half memory; reduces accuracy)
-        if data_cast in ("off", "double"):
+        # Compute precision for state arrays. ``None`` defaults to float64 (matches
+        # MATLAB k-Wave). Only float32 / float64 are validated by the solver.
+        if dtype is None:
             self._dtype = np.float64
-        elif data_cast == "single":
-            self._dtype = np.float32
+        elif dtype in (np.float32, np.float64):
+            self._dtype = dtype
         else:
-            raise ValueError(f"data_cast must be 'off', 'single', or 'double', got {data_cast!r}")
-        self.data_cast = data_cast
+            try:
+                resolved = np.dtype(dtype).type
+            except TypeError as e:
+                raise ValueError(f"dtype must be np.float32 or np.float64 (or string equivalent), got {dtype!r}") from e
+            if resolved not in (np.float32, np.float64):
+                raise ValueError(f"dtype must resolve to float32 or float64, got {resolved.__name__}")
+            self._dtype = resolved
         # kWaveGrid doesn't have pml_size_x attrs; warn if PML will silently be disabled
         if pml_size is None:
             from kwave.kgrid import kWaveGrid as _KWG

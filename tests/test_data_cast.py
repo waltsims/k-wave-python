@@ -1,13 +1,14 @@
-"""Tests for the ``data_cast`` parameter on the modern ``kspaceFirstOrder()`` API.
+"""Tests for the ``dtype`` parameter on the modern ``kspaceFirstOrder()`` API.
 
-Issue #695: expose data_cast on the modern API to control compute precision.
+Issue #695: expose precision control on the modern API.
 
-The Python backend honors ``data_cast``:
-  - ``'off'`` / ``'double'`` -> ``np.float64`` (default)
-  - ``'single'``             -> ``np.float32``
+The Python backend honors ``dtype`` (numpy-style dtype-like input):
+  - ``None`` / ``np.float64`` / ``"float64"`` / ``"double"`` / ``float`` /
+    ``"off"`` (legacy MATLAB alias) → float64 (default)
+  - ``np.float32`` / ``"float32"`` / ``"single"`` → float32
 
-The C++ backend uses fixed internal precision regardless; setting ``data_cast``
-to anything other than ``'off'`` warns.
+The C++ backend uses fixed internal precision regardless; setting ``dtype``
+to anything other than float64 warns.
 """
 from copy import deepcopy
 
@@ -37,9 +38,14 @@ def _build_minimal():
     return kgrid, medium, source, sensor
 
 
-@pytest.mark.parametrize("data_cast,expected_dtype", [("off", np.float64), ("double", np.float64), ("single", np.float32)])
-def test_python_backend_output_dtype_matches_data_cast(data_cast, expected_dtype):
-    """Output ``p`` array dtype must match the precision requested via ``data_cast``."""
+# Cover every input form the resolver should accept.
+_FLOAT64_INPUTS = [None, np.float64, "float64", "double", float, "off", np.dtype("f8")]
+_FLOAT32_INPUTS = [np.float32, "float32", "single", np.dtype("f4")]
+
+
+@pytest.mark.parametrize("dtype_arg", _FLOAT64_INPUTS, ids=lambda x: repr(x))
+def test_python_backend_float64_inputs(dtype_arg):
+    """All float64-equivalent inputs must produce float64 output."""
     kgrid, medium, source, sensor = _build_minimal()
     result = kspaceFirstOrder(
         kgrid=kgrid,
@@ -48,19 +54,41 @@ def test_python_backend_output_dtype_matches_data_cast(data_cast, expected_dtype
         sensor=sensor,
         backend="python",
         device="cpu",
-        data_cast=data_cast,
+        dtype=dtype_arg,
         pml_inside=False,
         smooth_p0=False,
         quiet=True,
     )
     p = np.asarray(result["p"])
-    assert p.dtype == expected_dtype, f"data_cast={data_cast!r} produced {p.dtype}, expected {expected_dtype}"
-    assert not np.any(np.isnan(p)), f"data_cast={data_cast!r} produced NaN output"
-    assert np.nanmax(np.abs(p)) > 0, f"data_cast={data_cast!r} produced trivially zero output"
+    assert p.dtype == np.float64, f"dtype={dtype_arg!r} produced {p.dtype}, expected float64"
+    assert not np.any(np.isnan(p))
+    assert np.nanmax(np.abs(p)) > 0
 
 
-def test_default_data_cast_is_off():
-    """Calling without data_cast must behave the same as data_cast='off' (float64)."""
+@pytest.mark.parametrize("dtype_arg", _FLOAT32_INPUTS, ids=lambda x: repr(x))
+def test_python_backend_float32_inputs(dtype_arg):
+    """All float32-equivalent inputs must produce float32 output."""
+    kgrid, medium, source, sensor = _build_minimal()
+    result = kspaceFirstOrder(
+        kgrid=kgrid,
+        medium=medium,
+        source=deepcopy(source),
+        sensor=sensor,
+        backend="python",
+        device="cpu",
+        dtype=dtype_arg,
+        pml_inside=False,
+        smooth_p0=False,
+        quiet=True,
+    )
+    p = np.asarray(result["p"])
+    assert p.dtype == np.float32, f"dtype={dtype_arg!r} produced {p.dtype}, expected float32"
+    assert not np.any(np.isnan(p))
+    assert np.nanmax(np.abs(p)) > 0
+
+
+def test_default_dtype_is_float64():
+    """Calling without dtype must produce float64 (back-compat with pre-#716 behavior)."""
     kgrid, medium, source, sensor = _build_minimal()
     result = kspaceFirstOrder(
         kgrid=kgrid,
@@ -76,10 +104,11 @@ def test_default_data_cast_is_off():
     assert np.asarray(result["p"]).dtype == np.float64
 
 
-def test_invalid_data_cast_raises():
-    """Unknown data_cast values must raise ValueError, not silently fall through."""
+@pytest.mark.parametrize("bad", [np.float16, np.complex64, "float16", "complex64", "quad", 42, "garbage"])
+def test_invalid_dtype_raises(bad):
+    """Non-float64/float32 dtypes (and unparseable values) must raise ValueError."""
     kgrid, medium, source, sensor = _build_minimal()
-    with pytest.raises(ValueError, match="data_cast"):
+    with pytest.raises(ValueError, match="dtype"):
         kspaceFirstOrder(
             kgrid=kgrid,
             medium=medium,
@@ -87,16 +116,16 @@ def test_invalid_data_cast_raises():
             sensor=sensor,
             backend="python",
             device="cpu",
-            data_cast="quad",  # not a valid option
+            dtype=bad,
         )
 
 
 def test_python_single_vs_double_numerical_agreement():
     """Single and double precision runs must agree to within float32 tolerance.
 
-    Sanity check that data_cast='single' isn't producing garbage. Float32 has
-    ~7 decimal digits, so a relative tolerance of ~1e-5 is reasonable for a
-    short propagation in a uniform medium.
+    Sanity check that float32 runs aren't producing garbage. Float32 has
+    ~7 decimal digits, so a relative tolerance of ~1e-4 is reasonable for
+    a short propagation in a uniform medium.
     """
     kgrid, medium, source, sensor = _build_minimal()
     p_double = np.asarray(
@@ -107,7 +136,7 @@ def test_python_single_vs_double_numerical_agreement():
             sensor=sensor,
             backend="python",
             device="cpu",
-            data_cast="off",
+            dtype=np.float64,
             pml_inside=False,
             smooth_p0=False,
             quiet=True,
@@ -121,24 +150,23 @@ def test_python_single_vs_double_numerical_agreement():
             sensor=sensor,
             backend="python",
             device="cpu",
-            data_cast="single",
+            dtype=np.float32,
             pml_inside=False,
             smooth_p0=False,
             quiet=True,
         )["p"]
     )
-    # Compare relative error on points with non-trivial signal
     scale = np.max(np.abs(p_double))
     abs_err = np.max(np.abs(p_double.astype(np.float64) - p_single.astype(np.float64)))
     assert abs_err / scale < 1e-4, f"single-vs-double max relative error {abs_err / scale:.2e} > 1e-4"
 
 
-def test_cpp_backend_warns_on_non_off_data_cast(tmp_path):
-    """Setting data_cast='single' with backend='cpp' must warn (binary uses fixed precision)."""
+def test_cpp_backend_warns_on_non_float64_dtype(tmp_path):
+    """Setting dtype=np.float32 with backend='cpp' must warn (binary uses fixed precision)."""
     kgrid, medium, source, sensor = _build_minimal()
     import subprocess
 
-    with pytest.warns(UserWarning, match="data_cast.*has no effect.*cpp"):
+    with pytest.warns(UserWarning, match="dtype.*has no effect.*cpp"):
         try:
             kspaceFirstOrder(
                 kgrid=kgrid,
@@ -147,7 +175,7 @@ def test_cpp_backend_warns_on_non_off_data_cast(tmp_path):
                 sensor=sensor,
                 backend="cpp",
                 device="cpu",
-                data_cast="single",
+                dtype=np.float32,
                 pml_inside=False,
                 smooth_p0=False,
                 pml_alpha=10,
@@ -159,8 +187,8 @@ def test_cpp_backend_warns_on_non_off_data_cast(tmp_path):
             pass
 
 
-def test_cpp_backend_silent_on_default_data_cast(tmp_path, recwarn):
-    """data_cast='off' (default) must not warn on the C++ backend."""
+def test_cpp_backend_silent_on_default_dtype(tmp_path, recwarn):
+    """Default dtype (None → float64) must not warn on the C++ backend."""
     kgrid, medium, source, sensor = _build_minimal()
     import subprocess
 
@@ -172,7 +200,7 @@ def test_cpp_backend_silent_on_default_data_cast(tmp_path, recwarn):
             sensor=sensor,
             backend="cpp",
             device="cpu",
-            # data_cast left at default 'off'
+            # dtype left at default
             pml_inside=False,
             smooth_p0=False,
             pml_alpha=10,
@@ -181,4 +209,4 @@ def test_cpp_backend_silent_on_default_data_cast(tmp_path, recwarn):
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
-    assert not any("data_cast" in str(w.message) for w in recwarn.list)
+    assert not any("dtype" in str(w.message) and "has no effect" in str(w.message) for w in recwarn.list)
