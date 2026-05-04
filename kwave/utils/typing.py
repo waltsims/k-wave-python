@@ -2,7 +2,8 @@ import numpy as np
 from beartype.typing import Union
 from jaxtyping import Bool, Complex, Float, Int, Shaped
 
-ArrayLike = Union[
+# Base array-like types: NumPy arrays + scalars + Python numeric scalars.
+_ARRAY_LIKE_TYPES = (
     np.ndarray,  # NumPy array type
     np.bool_,
     np.number,  # NumPy scalar types
@@ -10,7 +11,20 @@ ArrayLike = Union[
     int,
     float,
     complex,  # Python scalar types
-]
+)
+
+# CuPy arrays are accepted by all array-typed APIs when CuPy is installed (GPU backend).
+# When CuPy is missing the tuple is empty and ArrayLike collapses to the NumPy-only form.
+# Subscript-time splats (PEP 646) require Python 3.11+, so we build the Union via
+# ``Union[tuple]`` which works on 3.10.
+try:
+    import cupy as _cp
+
+    _ARRAY_LIKE_TYPES = _ARRAY_LIKE_TYPES + (_cp.ndarray,)
+except ImportError:
+    pass
+
+ArrayLike = Union[_ARRAY_LIKE_TYPES]
 
 ScalarLike = Shaped[ArrayLike, ""]
 
