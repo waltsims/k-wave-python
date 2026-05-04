@@ -704,8 +704,12 @@ class Simulation:
 
         For gradient/divergence ops, kappa is pre-multiplied at setup.
         For fractional Laplacian ops (absorption/dispersion), kappa is not needed.
-        ``op=None`` is the identity operator and short-circuits the FFT round-trip
-        (used by the Stokes absorption path, where ``nabla1`` is structurally 1).
+        ``op=None`` is a true identity (returns ``f`` unchanged) and short-circuits
+        the FFT round-trip.  Used by the Stokes absorption path, which historically
+        applied ``-2 alpha c0 rho0 * div_u`` directly with no fractional Laplacian.
+        Note this is *not* equivalent to ``op=_fractional_laplacian(0)`` -- that
+        operator is ``1`` everywhere except the DC bin, which is forced to ``0``,
+        so it would silently zero out the DC component of ``f``.
         """
         if op is None:
             return f
