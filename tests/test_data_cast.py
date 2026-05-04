@@ -129,6 +129,34 @@ def test_invalid_dtype_raises(bad):
         )
 
 
+def test_python_backend_dtype_preserved_with_nonlinearity():
+    """BonA path must preserve float32 dtype.
+
+    Regression guard for the third dtype-drift bug: ``sum(rho_split)`` in
+    ``_nl_factor`` and the equation-of-state line starts with Python ``int 0``,
+    which under numpy < 2 (NEP 50) promotes float32 to float64.  Fixed by
+    using ``_array_sum`` which starts from the first element.
+    """
+    kgrid, medium, source, sensor = _build_minimal()
+    medium.BonA = 6.0  # water-like nonlinearity
+    sensor.record = ("p", "p_final", "p_max")
+    result = kspaceFirstOrder(
+        kgrid=kgrid,
+        medium=medium,
+        source=deepcopy(source),
+        sensor=sensor,
+        backend="python",
+        device="cpu",
+        dtype=np.float32,
+        pml_inside=False,
+        smooth_p0=False,
+        quiet=True,
+    )
+    for field in ("p", "p_final", "p_max"):
+        arr = np.asarray(result[field])
+        assert arr.dtype == np.float32, f"With nonlinearity, {field} produced {arr.dtype}, expected float32"
+
+
 def test_torch_like_dtype_gets_helpful_error():
     """Non-numpy framework dtypes get a hint pointing to numpy equivalents.
 

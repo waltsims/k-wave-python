@@ -32,6 +32,19 @@ def _to_cpu(x):
     return x.get() if hasattr(x, "get") else x
 
 
+def _array_sum(arrays):
+    """Sum arrays, preserving dtype.
+
+    ``sum(arrays)`` starts from Python ``int 0``; under numpy < 2 (NEP 50)
+    that promotes float32 inputs to float64.  Starting from ``arrays[0]``
+    keeps the result's dtype equal to the elements'.
+    """
+    out = arrays[0]
+    for a in arrays[1:]:
+        out = out + a
+    return out
+
+
 def _expand_to_grid(val, grid_shape, xp, name="parameter", dtype=float):
     if val is None:
         raise ValueError(f"Missing required parameter: {name}")
@@ -529,7 +542,7 @@ class Simulation:
         else:
             self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA", dtype=self._dtype)
             self._nonlinearity = lambda rho: self.BonA * rho**2 / (2 * self.rho0)
-            self._nl_factor = lambda rho_split: (2 * sum(rho_split) + self.rho0) / self.rho0
+            self._nl_factor = lambda rho_split: (2 * _array_sum(rho_split) + self.rho0) / self.rho0
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -699,7 +712,7 @@ class Simulation:
             self.rho_split[i] = self._source_p_ops[i](self.t, self.rho_split[i])
 
         # Equation of state:  p = c0^2 * (rho + absorption - dispersion + nonlinearity)
-        rho_total = sum(self.rho_split)
+        rho_total = _array_sum(self.rho_split)
         self.p = self.c0_sq * (
             rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total)
         )
