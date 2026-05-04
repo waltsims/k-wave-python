@@ -374,11 +374,9 @@ def gaussian(
 
     """
     if magnitude is None:
-        magnitude = (2 * math.pi * variance) ** -0.5
+        magnitude = (2 * np.pi * variance) ** -0.5
 
-    gauss_distr = magnitude * np.exp(-((x - mean) ** 2) / (2 * variance))
-
-    return gauss_distr
+    return magnitude * np.exp(-((x - mean) ** 2) / (2 * variance))
 
 
 def _compute_direction(start_pos: np.ndarray, end_pos: np.ndarray) -> Tuple[np.ndarray, float]:

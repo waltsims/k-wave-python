@@ -676,9 +676,7 @@ class Simulation:
 
         # Equation of state:  p = c0^2 * (rho + absorption - dispersion + nonlinearity)
         rho_total = sum(self.rho_split)
-        self.p = self.c0_sq * (
-            rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total)
-        )
+        self.p = self.c0_sq * (rho_total + self._absorption(div_u_total) - self._dispersion(rho_total) + self._nonlinearity(rho_total))
 
         # At t=0, override equation of state with p0; set u(dt/2) for leapfrog.
         # MATLAB convention (kspaceFirstOrder2D.m line 920): u(dt/2) = +dt/(2*rho) * grad(p0)
