@@ -129,6 +129,33 @@ def test_invalid_dtype_raises(bad):
         )
 
 
+def test_python_backend_dtype_preserved_for_staggered_velocity():
+    """Recorded staggered velocity (``ux_staggered`` etc.) must preserve dtype.
+
+    The staggered-grid extraction goes through ``unstagger_ops * fftn(u)`` ->
+    ``ifftn`` -> ``.real``.  In numpy < 2 ``np.fft.fftn`` returns complex128
+    regardless of input precision, so without an explicit cast the staggered
+    output would silently come back as float64 even when ``dtype=np.float32``.
+    """
+    kgrid, medium, source, sensor = _build_minimal()
+    sensor.record = ("p", "ux_staggered", "uy_staggered")
+    result = kspaceFirstOrder(
+        kgrid=kgrid,
+        medium=medium,
+        source=deepcopy(source),
+        sensor=sensor,
+        backend="python",
+        device="cpu",
+        dtype=np.float32,
+        pml_inside=False,
+        smooth_p0=False,
+        quiet=True,
+    )
+    for field in ("p", "ux_staggered", "uy_staggered"):
+        arr = np.asarray(result[field])
+        assert arr.dtype == np.float32, f"{field} produced {arr.dtype}, expected float32"
+
+
 def test_python_backend_dtype_preserved_with_nonlinearity():
     """BonA path must preserve float32 dtype.
 
