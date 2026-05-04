@@ -96,6 +96,7 @@ def kspaceFirstOrder(
     smooth_p0: bool = True,
     backend: str = "python",
     device: str = "cpu",
+    data_cast: str = "off",
     save_only: bool = False,
     data_path: Optional[str] = None,
     quiet: bool = False,
@@ -142,6 +143,15 @@ def kspaceFirstOrder(
         device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
             selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
             selects the OMP vs CUDA binary.  Default ``"cpu"``.
+        data_cast: Numerical precision for state arrays in the Python backend.
+            ``"off"`` / ``"double"`` use ``np.float64`` (default; matches
+            MATLAB k-Wave's default).  ``"single"`` uses ``np.float32`` --
+            roughly half the memory and faster on most hardware, at the cost
+            of reduced numerical accuracy.  Has no effect on ``backend="cpp"``
+            (the C++ binary uses fixed internal precision regardless of
+            ``data_cast``); a warning is emitted if ``data_cast`` is set to
+            anything other than ``"off"`` with the C++ backend.  Default
+            ``"off"``.
         save_only: When ``True`` (``backend="cpp"`` only), write the HDF5
             input file and return without running the binary.  Useful for
             cluster submission.  Default ``False``.
@@ -167,6 +177,8 @@ def kspaceFirstOrder(
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
     if backend not in ("python", "cpp"):
         raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
+    if data_cast not in ("off", "single", "double"):
+        raise ValueError(f"data_cast must be 'off', 'single', or 'double', got {data_cast!r}")
 
     if isinstance(pml_size, str) and pml_size.lower() == "auto":
         pml_size = tuple(int(x) for x in get_optimal_pml_size(kgrid))
@@ -206,6 +218,7 @@ def kspaceFirstOrder(
             pml_size=pml_size,
             pml_alpha=pml_alpha,
             quiet=quiet,
+            data_cast=data_cast,
         ).run()
 
     elif backend == "cpp":
@@ -214,6 +227,14 @@ def kspaceFirstOrder(
 
         check_alpha_mode_cpp_compatible(medium)
         warn_alpha_power_near_unity_cpp(medium)
+
+        if data_cast not in ("off", "double"):
+            warnings.warn(
+                f"data_cast={data_cast!r} has no effect with backend='cpp'; the C++ binary "
+                "uses fixed internal precision regardless. Use backend='python' to control "
+                "computational precision.",
+                stacklevel=2,
+            )
 
         if not use_kspace:
             warnings.warn(

@@ -32,40 +32,42 @@ def _to_cpu(x):
     return x.get() if hasattr(x, "get") else x
 
 
-def _expand_to_grid(val, grid_shape, xp, name="parameter"):
+def _expand_to_grid(val, grid_shape, xp, name="parameter", dtype=float):
     if val is None:
         raise ValueError(f"Missing required parameter: {name}")
-    arr = xp.array(val, dtype=float).ravel()
+    arr = xp.array(val, dtype=dtype).ravel()
     grid_size = int(np.prod(grid_shape))
     if arr.size == 1:
-        return xp.full(grid_shape, float(arr[0]), dtype=float)
+        return xp.full(grid_shape, arr[0], dtype=dtype)
     if arr.size == grid_size:
         return arr.reshape(grid_shape)
     raise ValueError(f"{name} size {arr.size} incompatible with grid size {grid_size}")
 
 
-def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_size, source_kappa, diff_fn):
+def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_size, source_kappa, diff_fn, dtype=float):
     """Build a source injection operator for one field variable.
 
     Returns a callable (t, field) → field that injects scaled source values.
+    ``dtype`` controls the precision of the source signal buffer (matches the
+    field precision set by ``data_cast``).
     """
     mask = xp.array(mask_raw, dtype=bool).ravel()
     if mask.size == 1:
         mask = xp.full(grid_shape, bool(mask[0]), dtype=bool).ravel()
     n_src = int(xp.sum(mask))
 
-    signal_arr = xp.array(signal_raw, dtype=float)
+    signal_arr = xp.array(signal_raw, dtype=dtype)
     if signal_arr.ndim == 1:
         signal = signal_arr.reshape(1, -1)
     else:
         signal = signal_arr.reshape(-1, signal_arr.shape[-1]) if signal_arr.ndim > 2 else signal_arr
 
-    scaled = signal * xp.atleast_1d(xp.asarray(scale))[:, None]
+    scaled = signal * xp.atleast_1d(xp.asarray(scale, dtype=dtype))[:, None]
     signal_len = scaled.shape[1]
 
     def get_val(t):
         if scaled.shape[0] == 1:
-            return xp.full(n_src, float(scaled[0, t]))
+            return xp.full(n_src, scaled[0, t], dtype=dtype)
         return scaled[:, t]
 
     def dirichlet(t, field):
@@ -76,7 +78,7 @@ def _build_source_op(mask_raw, signal_raw, mode, scale, *, xp, grid_shape, grid_
         return flat.reshape(grid_shape)
 
     # Pre-allocate buffer to avoid per-step allocation
-    _src_buf = xp.zeros(grid_size, dtype=float)
+    _src_buf = xp.zeros(grid_size, dtype=dtype)
 
     def additive_kspace(t, field):
         if t >= signal_len:
@@ -131,6 +133,7 @@ class Simulation:
         pml_size=None,
         pml_alpha=None,
         quiet=False,
+        data_cast="off",
     ):
         self.kgrid = kgrid
         self.medium = medium
@@ -142,6 +145,16 @@ class Simulation:
         self.quiet = quiet
         self._pml_size_override = pml_size
         self._pml_alpha_override = pml_alpha
+        # data_cast → numerical precision for state arrays.
+        # "off"/"double" → np.float64 (default, matches MATLAB k-Wave default)
+        # "single"       → np.float32 (faster + half memory; reduces accuracy)
+        if data_cast in ("off", "double"):
+            self._dtype = np.float64
+        elif data_cast == "single":
+            self._dtype = np.float32
+        else:
+            raise ValueError(f"data_cast must be 'off', 'single', or 'double', got {data_cast!r}")
+        self.data_cast = data_cast
         # kWaveGrid doesn't have pml_size_x attrs; warn if PML will silently be disabled
         if pml_size is None:
             from kwave.kgrid import kWaveGrid as _KWG
@@ -190,9 +203,9 @@ class Simulation:
         self.Nt = int(self.kgrid.Nt)
         self.dt = float(self.kgrid.dt)
 
-        self.c0 = _expand_to_grid(self.medium.sound_speed, self.grid_shape, xp, "sound_speed")
+        self.c0 = _expand_to_grid(self.medium.sound_speed, self.grid_shape, xp, "sound_speed", dtype=self._dtype)
         density = getattr(self.medium, "density", None)
-        self.rho0 = _expand_to_grid(density if density is not None else 1000.0, self.grid_shape, xp, "density")
+        self.rho0 = _expand_to_grid(density if density is not None else 1000.0, self.grid_shape, xp, "density", dtype=self._dtype)
         self.c_ref = float(xp.max(self.c0))
 
         self._setup_sensor_mask()
@@ -356,8 +369,8 @@ class Simulation:
             if pml_size == 0 or pml_alpha == 0:
                 shape = [1] * self.ndim
                 shape[axis] = N
-                self.pml_list.append(xp.ones(shape, dtype=float))
-                self.pml_sg_list.append(xp.ones(shape, dtype=float))
+                self.pml_list.append(xp.ones(shape, dtype=self._dtype))
+                self.pml_sg_list.append(xp.ones(shape, dtype=self._dtype))
             else:
                 # dimension=2 gives shape (1, N) which we reshape for broadcasting
                 pml = get_pml(N, dx, self.dt, self.c_ref, pml_size, pml_alpha, staggered=False, dimension=2, xp=xp)
@@ -424,7 +437,7 @@ class Simulation:
         if not _is_enabled(getattr(self.medium, "alpha_coeff", 0)):
             return None, None
         alpha_power = float(self.xp.array(getattr(self.medium, "alpha_power", 1.5)).flatten()[0])
-        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff")
+        alpha_coeff = _expand_to_grid(self.medium.alpha_coeff, self.grid_shape, self.xp, "alpha_coeff", dtype=self._dtype)
         return db2neper(alpha_coeff, alpha_power), alpha_power
 
     def _init_absorption(self, alpha_np, alpha_power):
@@ -467,7 +480,7 @@ class Simulation:
     def _init_nonlinearity(self):
         """Set ``self.BonA`` for the nonlinearity term. ``None`` means disabled."""
         BonA_raw = getattr(self.medium, "BonA", 0)
-        self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA") if _is_enabled(BonA_raw) else None
+        self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA", dtype=self._dtype) if _is_enabled(BonA_raw) else None
 
     def _setup_source_operators(self):
         """Build time-varying source injection operators.
@@ -521,6 +534,7 @@ class Simulation:
                 grid_size=grid_size,
                 source_kappa=self.source_kappa,
                 diff_fn=self._diff,
+                dtype=self._dtype,
             )
 
         # --- Pressure source (per-axis spacing for non-isotropic grids) ---
@@ -567,10 +581,10 @@ class Simulation:
         """Initialize pressure, velocity, and density fields."""
         xp = self.xp
 
-        self.p = xp.zeros(self.grid_shape, dtype=float)
-        self.u = [xp.zeros(self.grid_shape, dtype=float) for _ in range(self.ndim)]
+        self.p = xp.zeros(self.grid_shape, dtype=self._dtype)
+        self.u = [xp.zeros(self.grid_shape, dtype=self._dtype) for _ in range(self.ndim)]
         # Split density per dimension enables independent PML absorption in each direction
-        self.rho_split = [xp.zeros(self.grid_shape, dtype=float) for _ in range(self.ndim)]
+        self.rho_split = [xp.zeros(self.grid_shape, dtype=self._dtype) for _ in range(self.ndim)]
 
         if self.use_sg:
             self.rho0_staggered = [self._stagger(self.rho0, axis) for axis in range(self.ndim)]
@@ -584,12 +598,12 @@ class Simulation:
         # Sensor data storage (sized based on record_start_index)
         self.sensor_data = {}
         if "p" in self.record:
-            self.sensor_data["p"] = xp.zeros((self.n_sensor_points, self.num_recorded_time_points), dtype=float)
+            self.sensor_data["p"] = xp.zeros((self.n_sensor_points, self.num_recorded_time_points), dtype=self._dtype)
         for a in "xyz"[: self.ndim]:
             for suffix in ("", "_staggered"):
                 v = f"u{a}{suffix}"
                 if v in self.record:
-                    self.sensor_data[v] = xp.zeros((self.n_sensor_points, self.num_recorded_time_points), dtype=float)
+                    self.sensor_data[v] = xp.zeros((self.n_sensor_points, self.num_recorded_time_points), dtype=self._dtype)
 
         # Spectral shift: move velocity from staggered (mid-cell) to collocated (pressure) grid
         self.unstagger_ops = [xp.exp(-1j * self.k_list[ax] * self.spacing[ax] / 2) for ax in range(self.ndim)]
@@ -597,12 +611,12 @@ class Simulation:
         # Initial pressure source (p0)
         p0_raw = getattr(self.source, "p0", 0)
         if _is_enabled(p0_raw):
-            p0 = _expand_to_grid(p0_raw, self.grid_shape, xp, "p0")
+            p0 = _expand_to_grid(p0_raw, self.grid_shape, xp, "p0", dtype=self._dtype)
             if self.smooth_p0 and self.ndim >= 2:
                 from kwave.utils.filters import smooth
 
                 # smooth() is order-agnostic (uses FFT on shape)
-                p0 = xp.asarray(smooth(_to_cpu(p0), restore_max=True))
+                p0 = xp.asarray(smooth(_to_cpu(p0), restore_max=True), dtype=self._dtype)
             self._p0_initial = p0
         else:
             self._p0_initial = None
@@ -628,7 +642,7 @@ class Simulation:
         # Mass conservation: drho_i/dt = -rho0 * div_i(u_i) * nl_factor, with PML
         has_nonlinearity = self.BonA is not None
         nl_factor = (2 * sum(self.rho_split) + self.rho0) / self.rho0 if has_nonlinearity else 1.0
-        div_u_total = xp.zeros(self.grid_shape, dtype=float)
+        div_u_total = xp.zeros(self.grid_shape, dtype=self._dtype)
         for i in range(self.ndim):
             pml = self.pml_list[i]
             div_u_i = self._diff(self.u[i], self.op_div_list[i])
