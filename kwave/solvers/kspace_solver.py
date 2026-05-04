@@ -428,58 +428,84 @@ class Simulation:
         return db2neper(alpha_coeff, alpha_power), alpha_power
 
     def _init_absorption(self, alpha_np, alpha_power):
-        """Bind ``self._absorption(div_u)`` to the configured power-law term.
+        """Bind absorption coefficients and the ``step()`` dispatch lambda.
 
-        Three branches, decided once at setup so ``step()`` can call the bound
-        lambda branch-free:
+        Sets, for introspection by numerical users:
 
-        - disabled (``alpha_coeff = 0`` or ``alpha_mode = 'no_absorption'``):
-          returns ``0`` directly, no FFT.
-        - Stokes (``alpha_power == 2``): ``-2 alpha c0 rho0 * div_u``, no FFT
-          (matches the original direct-multiply Stokes path).
-        - full power-law: ``tau * F^-1[nabla1 * F[rho0 * div_u]]``.
+        - ``self.tau`` -- absorption coefficient on the grid, ``None`` if disabled.
+          Stokes uses ``-2 alpha c0``; power-law uses ``-2 alpha c0^(y-1)``.
+        - ``self.nabla1`` -- ``|k|^(y-2)`` fractional-Laplacian operator in
+          k-space, or ``None`` for Stokes / disabled (no FFT round-trip).
+
+        And binds ``self._absorption(div_u)`` for branch-free invocation in
+        ``step()``.  The lambda reads from ``self.tau`` / ``self.nabla1`` so a
+        post-setup tweak (``sim.tau *= 1.1``) is picked up automatically;
+        toggling enabled<->disabled requires re-running setup.
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         if alpha_np is None or alpha_mode == "no_absorption":
+            self.tau = None
+            self.nabla1 = None
             self._absorption = lambda div_u: 0
         elif abs(alpha_power - 2.0) < 1e-10:  # Stokes
-            tau = -2 * alpha_np * self.c0
-            self._absorption = lambda div_u: tau * self.rho0 * div_u
-        else:
-            tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
-            nabla1 = self._fractional_laplacian(alpha_power - 2)
-            self._absorption = lambda div_u: tau * self._diff(self.rho0 * div_u, nabla1)
+            self.tau = -2 * alpha_np * self.c0
+            self.nabla1 = None  # no fractional Laplacian; direct multiply
+            self._absorption = lambda div_u: self.tau * self.rho0 * div_u
+        else:  # full power-law
+            self.tau = -2 * alpha_np * self.c0 ** (alpha_power - 1)
+            self.nabla1 = self._fractional_laplacian(alpha_power - 2)
+            self._absorption = lambda div_u: self.tau * self._diff(self.rho0 * div_u, self.nabla1)
 
     def _init_dispersion(self, alpha_np, alpha_power):
-        """Bind ``self._dispersion(rho)`` to the configured power-law term.
+        """Bind dispersion coefficients and the ``step()`` dispatch lambda.
+
+        Sets, for introspection:
+
+        - ``self.eta`` -- dispersion coefficient ``2 alpha c0^y * tan(pi y / 2)``
+          on the grid, ``None`` if disabled.  ``tan(pi y / 2)`` is the singular
+          factor that blows up as ``alpha_power -> 1`` (issue #664) -- check
+          ``sim.eta`` to see the magnitude near unity.
+        - ``self.nabla2`` -- ``|k|^(y-1)`` fractional-Laplacian operator, or
+          ``None`` if disabled.
 
         Disabled when ``alpha_coeff = 0``, ``alpha_mode in {'no_absorption',
-        'no_dispersion'}``, or Stokes (``alpha_power == 2``).  ``no_dispersion``
-        is the documented escape hatch for the ``tan(pi*y/2)`` singularity at
-        ``alpha_power -> 1`` (issue #664).
+        'no_dispersion'}``, or Stokes (``alpha_power == 2``).
         """
         alpha_mode = getattr(self.medium, "alpha_mode", None)
         is_stokes = alpha_power is not None and abs(alpha_power - 2.0) < 1e-10
         if alpha_np is None or alpha_mode in ("no_absorption", "no_dispersion") or is_stokes:
+            self.eta = None
+            self.nabla2 = None
             self._dispersion = lambda rho: 0
         else:
-            eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
-            nabla2 = self._fractional_laplacian(alpha_power - 1)
-            self._dispersion = lambda rho: eta * self._diff(rho, nabla2)
+            self.eta = 2 * alpha_np * self.c0**alpha_power * self.xp.tan(np.pi * alpha_power / 2)
+            self.nabla2 = self._fractional_laplacian(alpha_power - 1)
+            self._dispersion = lambda rho: self.eta * self._diff(rho, self.nabla2)
 
     def _init_nonlinearity(self):
-        """Bind ``self._nonlinearity(rho)`` and ``self._nl_factor(rho_split)``.
+        """Bind the nonlinearity coefficient and ``step()`` dispatch lambdas.
 
-        Disabled when ``BonA = 0`` (or unset): both lambdas short-circuit so
-        ``step()`` neither sums ``rho_split`` nor evaluates the nonlinear term.
+        Sets, for introspection:
+
+        - ``self.BonA`` -- nonlinearity parameter B/A on the grid, ``None`` if
+          disabled.
+
+        And binds two callables for branch-free use in ``step()``:
+
+        - ``self._nonlinearity(rho)`` -- the additive nonlinear term in the
+          equation of state.
+        - ``self._nl_factor(rho_split)`` -- the multiplicative factor on the
+          mass-conservation update.  Lossless path returns ``1.0`` without
+          summing ``rho_split``.
         """
         BonA_raw = getattr(self.medium, "BonA", 0)
         if not _is_enabled(BonA_raw):
+            self.BonA = None
             self._nonlinearity = lambda rho: 0
             self._nl_factor = lambda rho_split: 1.0
         else:
-            BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA")
-            self._nonlinearity = lambda rho: BonA * rho**2 / (2 * self.rho0)
+            self.BonA = _expand_to_grid(BonA_raw, self.grid_shape, self.xp, "BonA")
+            self._nonlinearity = lambda rho: self.BonA * rho**2 / (2 * self.rho0)
             self._nl_factor = lambda rho_split: (2 * sum(rho_split) + self.rho0) / self.rho0
 
     def _setup_source_operators(self):
