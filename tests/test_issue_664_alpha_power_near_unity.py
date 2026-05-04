@@ -107,7 +107,7 @@ def test_python_backend_honors_no_dispersion(alpha_power):
     )
 
 
-@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption"])
+@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption", "stokes"])
 def test_modern_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
     """``kspaceFirstOrder(..., backend='cpp')`` must refuse alpha_mode it can't honor."""
     kgrid, medium, source, sensor = _build_repro(0.99, alpha_mode=mode)
@@ -127,7 +127,7 @@ def test_modern_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
         )
 
 
-@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption"])
+@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption", "stokes"])
 def test_legacy_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
     """Legacy ``kspaceFirstOrder2DC`` must refuse alpha_mode it can't honor."""
     kgrid, medium, source, sensor = _build_repro(0.99, alpha_mode=mode)
@@ -223,50 +223,25 @@ def test_warn_helper_silent_when_no_absorption(recwarn):
     assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
 
 
-def test_python_backend_gpu_with_absorption_smoke():
-    """Smoke test: Python solver on GPU with non-trivial absorption must complete.
+def test_warn_helper_handles_array_alpha_power_with_singular_element():
+    """Heterogeneous ``alpha_power`` must trigger the warning if *any* element is singular."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
 
-    Regression guard for the dB->Np conversion path: when the solver runs on GPU,
-    ``alpha_coeff`` is a ``cupy.ndarray``.  ``db2neper`` is ``@beartype``-decorated
-    against ``kt.ArrayLike``; if that union does not include ``cupy.ndarray`` the
-    setup raises ``TypeError`` before the first time step.  Skipped on CPU-only
-    machines (including CI), but catches the regression on any GPU runner.
-    """
-    cp = pytest.importorskip("cupy")
-    if cp.cuda.runtime.getDeviceCount() == 0:
-        pytest.skip("No CUDA device available")
+    # First element is safe (1.5), but the third is in the singular range — must still warn.
+    alpha_power = np.array([1.5, 1.5, 1.0, 1.5])
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    with pytest.warns(UserWarning, match="dispersion-singular"):
+        warn_alpha_power_near_unity_cpp(medium)
 
-    N = Vector([48, 48])
-    dx = Vector([0.1e-3, 0.1e-3])
-    kgrid = kWaveGrid(N, dx)
-    kgrid.makeTime(1500)
-    medium = kWaveMedium(
-        sound_speed=1500 * np.ones(tuple(N)),
-        density=1000 * np.ones(tuple(N)),
-        alpha_coeff=0.5 * np.ones(tuple(N)),
-        alpha_power=1.5,  # default, well away from the dispersion singularity
-    )
-    source = kSource()
-    source.p_mask = np.zeros(tuple(N), dtype=bool)
-    source.p_mask[N.x // 2, N.y // 2] = True
-    t = kgrid.t_array.squeeze()
-    source.p = (np.sin(2 * np.pi * 1e6 * t) * np.exp(-((t - 5e-7) ** 2) / (2e-7) ** 2))[np.newaxis, :]
-    sensor = kSensor(mask=np.ones(tuple(N), dtype=bool))
 
-    result = kspaceFirstOrder(
-        kgrid=kgrid,
-        medium=medium,
-        source=deepcopy(source),
-        sensor=sensor,
-        backend="python",
-        device="gpu",
-        pml_inside=False,
-        smooth_p0=False,
-        quiet=True,
-    )
-    p = np.asarray(result["p"])
-    assert not np.any(np.isnan(p)), "GPU run produced NaN output"
-    assert np.nanmax(np.abs(p)) > 0, "GPU run produced trivially zero output"
+def test_warn_helper_silent_for_array_alpha_power_all_safe(recwarn):
+    """Heterogeneous ``alpha_power`` with no element in the singular range must stay silent."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    alpha_power = np.array([1.5, 1.7, 0.5, 2.0])
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    warn_alpha_power_near_unity_cpp(medium)
+    assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
 
 
 @pytest.mark.parametrize("alpha_power", [1.5, 1.1])
@@ -326,3 +301,49 @@ def test_legacy_cpp_unaffected_when_alpha_mode_unset(alpha_power, tmp_path):
 
     p = np.asarray(sensor_data["p"])
     assert not np.any(np.isnan(p)), f"Default path NaN'd at alpha_power={alpha_power}"
+
+
+def test_python_backend_gpu_with_absorption_smoke():
+    """Smoke test: Python solver on GPU with non-trivial absorption must complete.
+
+    Regression guard for the dB->Np conversion path: when the solver runs on GPU,
+    ``alpha_coeff`` is a ``cupy.ndarray``.  ``db2neper`` is ``@beartype``-decorated
+    against ``kt.ArrayLike``; if that union does not include ``cupy.ndarray`` the
+    setup raises ``TypeError`` before the first time step.  Skipped on CPU-only
+    machines (including CI), but catches the regression on any GPU runner.
+    """
+    cp = pytest.importorskip("cupy")
+    if cp.cuda.runtime.getDeviceCount() == 0:
+        pytest.skip("No CUDA device available")
+
+    N = Vector([48, 48])
+    dx = Vector([0.1e-3, 0.1e-3])
+    kgrid = kWaveGrid(N, dx)
+    kgrid.makeTime(1500)
+    medium = kWaveMedium(
+        sound_speed=1500 * np.ones(tuple(N)),
+        density=1000 * np.ones(tuple(N)),
+        alpha_coeff=0.5 * np.ones(tuple(N)),
+        alpha_power=1.5,  # default, well away from the dispersion singularity
+    )
+    source = kSource()
+    source.p_mask = np.zeros(tuple(N), dtype=bool)
+    source.p_mask[N.x // 2, N.y // 2] = True
+    t = kgrid.t_array.squeeze()
+    source.p = (np.sin(2 * np.pi * 1e6 * t) * np.exp(-((t - 5e-7) ** 2) / (2e-7) ** 2))[np.newaxis, :]
+    sensor = kSensor(mask=np.ones(tuple(N), dtype=bool))
+
+    result = kspaceFirstOrder(
+        kgrid=kgrid,
+        medium=medium,
+        source=deepcopy(source),
+        sensor=sensor,
+        backend="python",
+        device="gpu",
+        pml_inside=False,
+        smooth_p0=False,
+        quiet=True,
+    )
+    p = np.asarray(result["p"])
+    assert not np.any(np.isnan(p)), "GPU run produced NaN output"
+    assert np.nanmax(np.abs(p)) > 0, "GPU run produced trivially zero output"
