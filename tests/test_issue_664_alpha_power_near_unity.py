@@ -107,7 +107,7 @@ def test_python_backend_honors_no_dispersion(alpha_power):
     )
 
 
-@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption"])
+@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption", "stokes"])
 def test_modern_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
     """``kspaceFirstOrder(..., backend='cpp')`` must refuse alpha_mode it can't honor."""
     kgrid, medium, source, sensor = _build_repro(0.99, alpha_mode=mode)
@@ -127,7 +127,7 @@ def test_modern_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
         )
 
 
-@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption"])
+@pytest.mark.parametrize("mode", ["no_dispersion", "no_absorption", "stokes"])
 def test_legacy_api_rejects_alpha_mode_on_cpp_backend(mode, tmp_path):
     """Legacy ``kspaceFirstOrder2DC`` must refuse alpha_mode it can't honor."""
     kgrid, medium, source, sensor = _build_repro(0.99, alpha_mode=mode)
@@ -220,6 +220,27 @@ def test_warn_helper_silent_when_no_absorption(recwarn):
 
     warn_alpha_power_near_unity_cpp(kWaveMedium(sound_speed=1500.0, density=1000.0))
     warn_alpha_power_near_unity_cpp(kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.0, alpha_power=1.0))
+    assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
+
+
+def test_warn_helper_handles_array_alpha_power_with_singular_element():
+    """Heterogeneous ``alpha_power`` must trigger the warning if *any* element is singular."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    # First element is safe (1.5), but the third is in the singular range — must still warn.
+    alpha_power = np.array([1.5, 1.5, 1.0, 1.5])
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    with pytest.warns(UserWarning, match="dispersion-singular"):
+        warn_alpha_power_near_unity_cpp(medium)
+
+
+def test_warn_helper_silent_for_array_alpha_power_all_safe(recwarn):
+    """Heterogeneous ``alpha_power`` with no element in the singular range must stay silent."""
+    from kwave.utils.checks import warn_alpha_power_near_unity_cpp
+
+    alpha_power = np.array([1.5, 1.7, 0.5, 2.0])
+    medium = kWaveMedium(sound_speed=1500.0, density=1000.0, alpha_coeff=0.5, alpha_power=alpha_power)
+    warn_alpha_power_near_unity_cpp(medium)
     assert not any("dispersion-singular" in str(w.message) for w in recwarn.list)
 
 

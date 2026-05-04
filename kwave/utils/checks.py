@@ -129,25 +129,30 @@ def is_number(value: Any) -> bool:
     return np.issubdtype(np.array(value), np.number)
 
 
-_CPP_INCOMPATIBLE_ALPHA_MODES = (AlphaMode.NO_ABSORPTION.value, AlphaMode.NO_DISPERSION.value)
+_CPP_INCOMPATIBLE_ALPHA_MODES = (
+    AlphaMode.NO_ABSORPTION.value,
+    AlphaMode.NO_DISPERSION.value,
+    AlphaMode.STOKES.value,
+)
 _ALPHA_POWER_DISPERSION_SINGULAR_RANGE = (0.95, 1.05)
 
 
 def check_alpha_mode_cpp_compatible(medium) -> None:
-    """Raise ``ValueError`` if ``medium.alpha_mode`` is one the C++ binary cannot honor.
+    """Raise ``ValueError`` if ``medium.alpha_mode`` is set on the C++ backend.
 
-    The C++ HDF5 input format does not carry ``alpha_mode``; the binary always applies
-    full power-law absorption + dispersion.  Near ``alpha_power == 1`` that produces
-    NaN output (issue #664).  ``backend='python'`` (or the legacy pure-Python backend)
-    honors ``alpha_mode``.
+    The C++ HDF5 input format does not carry ``alpha_mode`` at all; the binary
+    always applies full power-law absorption + dispersion.  Any non-default mode
+    (``no_absorption``, ``no_dispersion``, ``stokes``) would be silently ignored
+    — the same class of bug that allowed the original NaN report (issue #664).
+    ``backend='python'`` (or the legacy pure-Python backend) honors ``alpha_mode``.
     """
     alpha_mode = getattr(medium, "alpha_mode", None)
     if alpha_mode in _CPP_INCOMPATIBLE_ALPHA_MODES:
         raise ValueError(
             f"medium.alpha_mode={alpha_mode!r} is not supported by the C++ backend. "
-            "The HDF5 input format does not carry alpha_mode, so the binary always applies "
-            "full power-law absorption + dispersion, which produces NaN output for alpha_power "
-            "near 1. Use kspaceFirstOrder() from kwave.kspaceFirstOrder with backend='python' "
+            "The HDF5 input format does not carry alpha_mode, so the binary would "
+            "silently apply full power-law absorption + dispersion regardless. Use "
+            "kspaceFirstOrder() from kwave.kspaceFirstOrder with backend='python' "
             "to honor alpha_mode."
         )
 
@@ -159,6 +164,9 @@ def warn_alpha_power_near_unity_cpp(medium) -> None:
     and the C++ binary (float32 internally) returns NaN well before the formal
     singularity (issue #664).  The user's escape hatch on the Python backend is
     ``alpha_mode='no_dispersion'``; the C++ binary has no equivalent.
+
+    Fires if *any* element of ``alpha_power`` falls in the singular range — handles
+    heterogeneous media as well as the typical scalar case.
     """
     alpha_coeff = getattr(medium, "alpha_coeff", None)
     alpha_power = getattr(medium, "alpha_power", None)
@@ -166,11 +174,13 @@ def warn_alpha_power_near_unity_cpp(medium) -> None:
         return
     if not np.any(np.asarray(alpha_coeff) > 0):
         return
-    y = float(np.asarray(alpha_power).flat[0])
+    y_arr = np.asarray(alpha_power, dtype=float)
     lo, hi = _ALPHA_POWER_DISPERSION_SINGULAR_RANGE
-    if lo <= y <= hi:
+    in_range = (lo <= y_arr) & (y_arr <= hi)
+    if np.any(in_range):
+        offender = float(y_arr[in_range].flat[0])
         warnings.warn(
-            f"medium.alpha_power={y} with absorption is in the dispersion-singular range "
+            f"medium.alpha_power={offender} with absorption is in the dispersion-singular range "
             f"[{lo}, {hi}] on the C++ backend; tan(pi*y/2) overflows in float32 and the "
             "binary may return NaN (issue #664). Use kspaceFirstOrder() with "
             "backend='python' and medium.alpha_mode='no_dispersion' to skip the singular term.",
