@@ -24,7 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py==3.15.1",
+    "h5py==3.16.0",
     "scipy==1.15.3",
     "opencv-python==4.13.0.92",
     "deepdiff==9.0.0",
