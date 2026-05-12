@@ -9,7 +9,12 @@ from kwave.solvers.cpp_simulation import CppSimulation
 
 
 class TestResolveBinaryPath:
-    """Tests for CppSimulation._resolve_binary_path()."""
+    """Tests for CppSimulation._resolve_binary_path().
+
+    Note: _resolve_binary_path() is responsible only for locating the binary.
+    Making it executable (chmod +x) is done in _execute() after the path is
+    resolved, keeping the two concerns separate.
+    """
 
     # ------------------------------------------------------------------
     # Custom binary_path provided by the caller
@@ -75,3 +80,27 @@ class TestResolveBinaryPath:
         with patch("kwave.BINARY_PATH", tmp_path), patch("kwave.PLATFORM", "darwin"):
             with pytest.raises(ValueError, match="not supported on macOS"):
                 CppSimulation._resolve_binary_path("gpu")
+
+    # ------------------------------------------------------------------
+    # Executable permission is set by _execute() after path resolution
+    # ------------------------------------------------------------------
+
+    def test_execute_makes_binary_executable(self, tmp_path, monkeypatch):
+        """_execute() sets the executable bit on the resolved binary."""
+        import subprocess
+
+        binary = tmp_path / "kspaceFirstOrder-OMP"
+        binary.write_bytes(b"")
+        # Remove executable bit so we can verify _execute() sets it
+        binary.chmod(binary.stat().st_mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+        assert not (binary.stat().st_mode & stat.S_IEXEC)
+
+        # Patch _resolve_binary_path so it returns our binary without querying kwave paths
+        monkeypatch.setattr(CppSimulation, "_resolve_binary_path", staticmethod(lambda device, binary_path=None: binary))
+        # Patch subprocess.run so no real process is spawned
+        monkeypatch.setattr(subprocess, "run", lambda *a, **kw: None)
+
+        sim = CppSimulation.__new__(CppSimulation)
+        sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
+
+        assert binary.stat().st_mode & stat.S_IEXEC
