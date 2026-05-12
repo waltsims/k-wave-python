@@ -313,7 +313,7 @@ class CppSimulation:
         return 1  # Power-law
 
     @staticmethod
-    def _resolve_binary_path(device: str, binary_path=None) -> Path:
+    def _resolve_binary_path(device: str, binary_path: str | None = None) -> Path:
         """Resolve the path to the C++ k-Wave binary.
 
         When *binary_path* is provided the caller's custom binary is used and

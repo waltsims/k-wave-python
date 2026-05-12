@@ -1,5 +1,6 @@
 """Unit tests for CppSimulation._resolve_binary_path."""
 import stat
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -87,8 +88,6 @@ class TestResolveBinaryPath:
 
     def test_execute_makes_binary_executable(self, tmp_path, monkeypatch):
         """_execute() sets the executable bit on the resolved binary."""
-        import subprocess
-
         binary = tmp_path / "kspaceFirstOrder-OMP"
         binary.write_bytes(b"")
         # Remove executable bit so we can verify _execute() sets it
