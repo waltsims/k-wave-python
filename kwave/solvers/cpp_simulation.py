@@ -334,13 +334,13 @@ class CppSimulation:
             ValueError: When ``device="gpu"`` is requested on macOS where no
                 CUDA binary is available.
         """
-        import kwave
-
         if binary_path is not None:
             resolved = Path(binary_path)
             if not resolved.exists():
                 raise FileNotFoundError(f"Custom C++ binary not found at {resolved}.")
             return resolved
+
+        import kwave
 
         binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
         resolved = kwave.BINARY_PATH / binary_name
