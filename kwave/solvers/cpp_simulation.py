@@ -312,21 +312,47 @@ class CppSimulation:
             return 2  # Stokes
         return 1  # Power-law
 
-    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
-        """Run the C++ k-Wave binary."""
+    @staticmethod
+    def _resolve_binary_path(device: str, binary_path=None) -> Path:
+        """Resolve the path to the C++ k-Wave binary.
+
+        When *binary_path* is provided the caller's custom binary is used and
+        verified to exist.  Otherwise the bundled binary is selected based on
+        *device* (``"gpu"`` → CUDA, anything else → OMP) and verified to exist.
+
+        Args:
+            device: ``"cpu"`` or ``"gpu"``.
+            binary_path: Optional path to a custom binary.  When ``None`` the
+                bundled binary that ships with ``k-wave-data`` is used.
+
+        Returns:
+            Resolved :class:`~pathlib.Path` pointing at the binary.
+
+        Raises:
+            FileNotFoundError: When the binary does not exist at the resolved
+                path.
+            ValueError: When ``device="gpu"`` is requested on macOS where no
+                CUDA binary is available.
+        """
         import kwave
 
         if binary_path is not None:
-            binary_path = Path(binary_path)
-            if not binary_path.exists():
-                raise FileNotFoundError(f"Custom C++ binary not found at {binary_path}.")
-        else:
-            binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
-            binary_path = kwave.BINARY_PATH / binary_name
-            if not binary_path.exists():
-                if kwave.PLATFORM == "darwin" and device == "gpu":
-                    raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
-                raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
+            resolved = Path(binary_path)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Custom C++ binary not found at {resolved}.")
+            return resolved
+
+        binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
+        resolved = kwave.BINARY_PATH / binary_name
+        if not resolved.exists():
+            if kwave.PLATFORM == "darwin" and device == "gpu":
+                raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
+            raise FileNotFoundError(f"C++ binary not found at {resolved}. Install with: pip install k-wave-data")
+        return resolved
+
+    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
+        """Run the C++ k-Wave binary."""
+        binary_path = self._resolve_binary_path(device, binary_path)
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
         # Build command-line options
