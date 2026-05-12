@@ -70,5 +70,7 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
             kwargs["num_threads"] = opts.num_threads
         if opts.device_num is not None:
             kwargs["device_num"] = opts.device_num
+        if opts._binary_path is not None:
+            kwargs["binary_path"] = opts._binary_path
 
     return kwargs

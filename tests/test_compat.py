@@ -71,6 +71,11 @@ class TestExecutionOptions:
         kwargs = options_to_kwargs(execution_options=opts)
         assert kwargs["device_num"] == 1
 
+    def test_binary_path(self):
+        opts = SimulationExecutionOptions(is_gpu_simulation=False, backend="OMP", binary_path="./kspaceFirstOrder-OMP")
+        kwargs = options_to_kwargs(execution_options=opts)
+        assert kwargs.get("binary_path") == "./kspaceFirstOrder-OMP"
+
 
 class TestCombined:
     def test_both_options(self):

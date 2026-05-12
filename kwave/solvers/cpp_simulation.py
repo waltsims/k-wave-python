@@ -9,6 +9,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+from pathlib import Path
 
 import numpy as np
 
@@ -48,14 +49,14 @@ class CppSimulation:
         self._write_hdf5(input_file)
         return input_file, output_file
 
-    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None):
+    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None, binary_path=None):
         import warnings
 
         cleanup = data_path is None
         input_file, output_file = self.prepare(data_path=data_path)
         data_dir = os.path.dirname(input_file)
         try:
-            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, binary_path=binary_path)
             result = self._parse_output(output_file)
             result = self._fix_output_order(result)
             return result
@@ -311,16 +312,21 @@ class CppSimulation:
             return 2  # Stokes
         return 1  # Power-law
 
-    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug):
+    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
         """Run the C++ k-Wave binary."""
         import kwave
 
-        binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
-        binary_path = kwave.BINARY_PATH / binary_name
-        if not binary_path.exists():
-            if kwave.PLATFORM == "darwin" and device == "gpu":
-                raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
-            raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
+        if binary_path is not None:
+            binary_path = Path(binary_path)
+            if not binary_path.exists():
+                raise FileNotFoundError(f"Custom C++ binary not found at {binary_path}.")
+        else:
+            binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
+            binary_path = kwave.BINARY_PATH / binary_name
+            if not binary_path.exists():
+                if kwave.PLATFORM == "darwin" and device == "gpu":
+                    raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
+                raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
         binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
         # Build command-line options
