@@ -102,6 +102,7 @@ def kspaceFirstOrder(
     debug: bool = False,
     num_threads: Optional[int] = None,
     device_num: Optional[int] = None,
+    binary_path: Optional[str] = None,
 ) -> dict:
     """Run a k-Wave simulation.
 
@@ -154,6 +155,9 @@ def kspaceFirstOrder(
         num_threads: Thread count for the C++ OMP binary.  ``None`` uses all
             available cores.  Default ``None``.
         device_num: GPU device index for CUDA execution.  Default ``None``.
+        binary_path: Path to a custom C++ binary.  When ``None`` (default),
+            the binary bundled with ``k-wave-data`` is used.  Only applies
+            when ``backend="cpp"``.
 
     Returns:
         dict: Recorded sensor data keyed by field name (e.g.
@@ -247,7 +251,7 @@ def kspaceFirstOrder(
             if not pml_inside:
                 result["pml_size"] = pml_size
             return result
-        result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path)
+        result = cpp_sim.run(device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, data_path=data_path, binary_path=binary_path)
 
     # --- Post-processing: strip PML from full-grid fields ---
 

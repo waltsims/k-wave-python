@@ -9,6 +9,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+from pathlib import Path
 
 import numpy as np
 
@@ -48,14 +49,14 @@ class CppSimulation:
         self._write_hdf5(input_file)
         return input_file, output_file
 
-    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None):
+    def run(self, *, device="cpu", num_threads=None, device_num=None, quiet=False, debug=False, data_path=None, binary_path=None):
         import warnings
 
         cleanup = data_path is None
         input_file, output_file = self.prepare(data_path=data_path)
         data_dir = os.path.dirname(input_file)
         try:
-            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug)
+            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, binary_path=binary_path)
             result = self._parse_output(output_file)
             result = self._fix_output_order(result)
             return result
@@ -311,17 +312,48 @@ class CppSimulation:
             return 2  # Stokes
         return 1  # Power-law
 
-    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug):
-        """Run the C++ k-Wave binary."""
+    @staticmethod
+    def _resolve_binary_path(device: str, binary_path: str | None = None) -> Path:
+        """Resolve the path to the C++ k-Wave binary.
+
+        When *binary_path* is provided the caller's custom binary is used and
+        verified to exist.  Otherwise the bundled binary is selected based on
+        *device* (``"gpu"`` → CUDA, anything else → OMP) and verified to exist.
+
+        Args:
+            device: ``"cpu"`` or ``"gpu"``.
+            binary_path: Optional path to a custom binary.  When ``None`` the
+                bundled binary that ships with ``k-wave-data`` is used.
+
+        Returns:
+            Resolved :class:`~pathlib.Path` pointing at the binary.
+
+        Raises:
+            FileNotFoundError: When the binary does not exist at the resolved
+                path.
+            ValueError: When ``device="gpu"`` is requested on macOS where no
+                CUDA binary is available.
+        """
+        if binary_path is not None:
+            resolved = Path(binary_path)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Custom C++ binary not found at {resolved}.")
+            return resolved
+
         import kwave
 
         binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
-        binary_path = kwave.BINARY_PATH / binary_name
-        if not binary_path.exists():
+        resolved = kwave.BINARY_PATH / binary_name
+        if not resolved.exists():
             if kwave.PLATFORM == "darwin" and device == "gpu":
                 raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
-            raise FileNotFoundError(f"C++ binary not found at {binary_path}. Install with: pip install k-wave-data")
-        binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
+            raise FileNotFoundError(f"C++ binary not found at {resolved}. Install with: pip install k-wave-data")
+        return resolved
+
+    def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
+        """Run the C++ k-Wave binary."""
+        resolved = self._resolve_binary_path(device, binary_path)
+        resolved.chmod(resolved.stat().st_mode | stat.S_IEXEC)
 
         # Build command-line options
         options = ["-i", input_file, "-o", output_file]
@@ -336,7 +368,7 @@ class CppSimulation:
         elif debug:
             options.extend(["--verbose", "2"])
 
-        command = [str(binary_path)] + options
+        command = [str(resolved)] + options
         try:
             subprocess.run(command, capture_output=quiet, text=True, check=True)
         except subprocess.CalledProcessError as e:
