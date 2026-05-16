@@ -1,6 +1,12 @@
 import os
 from pathlib import Path
 
+import matplotlib
+
+# Select a non-interactive backend before any module imports pyplot (test_voxel_plot_*
+# below relies on this — kwave.utils.plot imports matplotlib.pyplot at module load).
+matplotlib.use("Agg")
+
 import numpy as np
 import pytest
 
@@ -423,9 +429,6 @@ def test_trim_zeros():
 
 def test_voxel_plot_axis_limits_match_input_shape():
     """Regression for #501: x/y/z axis limits must follow input array shape (not be swapped)."""
-    import matplotlib
-
-    matplotlib.use("Agg", force=True)
     import matplotlib.pyplot as plt
 
     mat = np.zeros((4, 8, 12), dtype=np.float64)
