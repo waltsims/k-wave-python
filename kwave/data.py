@@ -140,8 +140,10 @@ class SimulationResult:
     pml_z_size: int
     axisymmetric_flag: bool
 
-    # Pressure fields (optional - based on sensor.record)
-    p_raw: Optional[np.ndarray] = None
+    # Pressure fields (optional - based on sensor.record). Field names match
+    # the user-facing sensor.record keys, not the binary's HDF5 dataset names
+    # (e.g. sensor.record=("p",) → result.p; binary dataset is "p_raw").
+    p: Optional[np.ndarray] = None
     p_max: Optional[np.ndarray] = None
     p_min: Optional[np.ndarray] = None
     p_rms: Optional[np.ndarray] = None
@@ -149,15 +151,19 @@ class SimulationResult:
     p_min_all: Optional[np.ndarray] = None
     p_final: Optional[np.ndarray] = None
 
-    # Velocity fields (optional - based on sensor.record)
-    u_raw: Optional[np.ndarray] = None
+    # Velocity fields (optional - based on sensor.record). `u` is the
+    # collocated (pressure-grid) velocity; `u_staggered` is the mid-cell
+    # variant. The legacy C++ binary inverts this naming (its "u" is
+    # mid-cell and "u_non_staggered" is collocated); from_dotdict
+    # translates so the user-facing API always uses the modern convention.
+    u: Optional[np.ndarray] = None
     u_max: Optional[np.ndarray] = None
     u_min: Optional[np.ndarray] = None
     u_rms: Optional[np.ndarray] = None
     u_max_all: Optional[np.ndarray] = None
     u_min_all: Optional[np.ndarray] = None
     u_final: Optional[np.ndarray] = None
-    u_non_staggered_raw: Optional[np.ndarray] = None
+    u_staggered: Optional[np.ndarray] = None
 
     # Intensity fields (optional - based on sensor.record)
     I_avg: Optional[np.ndarray] = None
@@ -213,23 +219,27 @@ class SimulationResult:
             pml_y_size=int(data.get("pml_y_size", 0)),
             pml_z_size=int(data.get("pml_z_size", 0)),
             axisymmetric_flag=bool(data.get("axisymmetric_flag", False)),
-            # Pressure fields
-            p_raw=data.get("p_raw"),
+            # Pressure fields — the binary writes HDF5 datasets named after
+            # sensor.record keys (e.g. /p, /p_max, /p_final), not the --p_raw
+            # CLI flag name, so we look up by the user-facing names.
+            p=data.get("p"),
             p_max=data.get("p_max"),
             p_min=data.get("p_min"),
             p_rms=data.get("p_rms"),
             p_max_all=data.get("p_max_all"),
             p_min_all=data.get("p_min_all"),
             p_final=data.get("p_final"),
-            # Velocity fields
-            u_raw=data.get("u_raw"),
+            # Velocity fields. Legacy C++ binary names are inverted vs the
+            # modern user-facing convention: binary's `u` is mid-cell
+            # (staggered), binary's `u_non_staggered` is collocated.
+            u=data.get("u_non_staggered"),
             u_max=data.get("u_max"),
             u_min=data.get("u_min"),
             u_rms=data.get("u_rms"),
             u_max_all=data.get("u_max_all"),
             u_min_all=data.get("u_min_all"),
             u_final=data.get("u_final"),
-            u_non_staggered_raw=data.get("u_non_staggered_raw"),
+            u_staggered=data.get("u"),
             # Intensity fields
             I_avg=data.get("I_avg"),
             I=data.get("I"),
