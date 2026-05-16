@@ -3,50 +3,42 @@
 [![Support](https://img.shields.io/discord/1234942672418897960?style=flat&logo=discord)](https://discord.gg/your-invite-code)
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/waltsims/k-wave-python/master)
 
-This project is a Python implementation of v1.4.0 of the [MATLAB toolbox k-Wave](http://www.k-wave.org/) as well as an
-interface to the pre-compiled v1.3 of k-Wave simulation binaries, which support NVIDIA sm 5.0 (Maxwell) to sm 9.0a (Hopper) GPUs.
+A Python implementation of [k-Wave](http://www.k-wave.org/) — an acoustics toolbox for time-domain simulation of acoustic wave fields. Includes a pure NumPy/CuPy solver (`backend="python"`) and an interface to the pre-compiled k-Wave C++ binaries (`backend="cpp"`) with NVIDIA GPU support (sm 5.0–9.0a).
 
 ## Mission
 
-With this project, we hope to increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations
-for medical imaging, algorithmic prototyping, and testing. Many tools and methods of [k-Wave](http://www.k-wave.org/) can
-be found here, but this project has and will continue to diverge from the original [k-Wave](http://www.k-wave.org/) APIs
-to leverage pythonic practices.
+Increase the accessibility and reproducibility of [k-Wave](http://www.k-wave.org/) simulations for medical imaging, algorithmic prototyping, and testing.
 
 ## Getting started
 
 ![](_static/example_bmode.png)
 
-A large [collection of examples](../examples/) exists to get started with k-wave-python. All examples can be run in Google Colab notebooks with a few clicks. One can begin with e.g. the [B-mode reconstruction example notebook](https://colab.research.google.com/github/waltsims/k-wave-python/blob/HEAD/examples/us_bmode_linear_transducer/us_bmode_linear_transducer.ipynb).
+A [collection of examples](../examples/) covers common simulation scenarios. Run any example locally:
 
-This example file steps through the process of:
- 1. Generating a simulation medium
- 2. Configuring a transducer
- 3. Running the simulation
- 4. Reconstructing the simulation
+```bash
+uv run examples/ivp_homogeneous_medium.py
+```
+
+No GPU required — all examples run on CPU with NumPy.
 
 ## Installation
 
-To install the most recent build of k-Wave-python from PyPI, run:
+Using [uv](https://docs.astral.sh/uv/) (recommended):
+
+```bash
+uv add k-wave-python
+```
+
+Or with pip:
 
 ```bash
 pip install k-wave-python
 ```
-> **Note for MacOS:**
-> 
-> k-wave-python offers initial support for MacOS, but you will need to install the following dependencies using the [brew package manager](https://docs.brew.sh/Installation) along with the Python package:
-> ```bash
-> brew install fftw hdf5 zlib libomp
-> ```
-After installing the Python package, the required binaries will be downloaded and installed the first time you run a
-simulation.
 
 ## Development
 
-If you're enjoying k-Wave-python and want to contribute, development instructions can be
-found [here](https://k-wave-python.readthedocs.io/en/latest/development/development_environment.html).
+Development instructions can be found [here](https://k-wave-python.readthedocs.io/en/latest/development/development_environment.html).
 
 ## Related Projects
 
@@ -63,7 +55,7 @@ The documentation for k-wave-python can be found [here](https://k-wave-python.re
 ## Citation
 ```bibtex
 @software{k-Wave-Python,
-author = {Yagubbbayli, Farid and Sinden, David and Simson, Walter},
+author = {Yagubbayli, Farid and Sinden, David and Simson, Walter},
 license = {GPL-3.0},
 title = {{k-Wave-Python}},
 url = {https://github.com/waltsims/k-wave-python}
@@ -71,4 +63,4 @@ url = {https://github.com/waltsims/k-wave-python}
 ```
 ## Contact
 
-e-mail [wsimson@stanford.edu](mailto:wsimson@stanford.edu).
+e-mail [walter.a.simson@gmail.com](mailto:walter.a.simson@gmail.com).

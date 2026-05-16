@@ -138,20 +138,27 @@ Sensors specify where we record the acoustic data:
 Step 5: Run the Simulation
 --------------------------
 
-Now we combine all four components and run the simulation:
+Now we combine all four components and run:
 
 .. code-block:: python
 
-   from kwave import kspaceFirstOrder2D
-   
-   # Run the simulation
-   sensor_data = kspaceFirstOrder2D(
-       grid=grid,
-       medium=medium, 
-       source=source,
-       sensor=sensor,
-       simulation_options={'PMLInside': False, 'PlotSim': False}
+   from kwave.kspaceFirstOrder import kspaceFirstOrder
+
+   # Run with the NumPy/CuPy backend in Python
+   sensor_data = kspaceFirstOrder(
+       grid, medium, source, sensor,
+       pml_inside=False,
+       quiet=True,
    )
+
+.. note::
+
+   ``kspaceFirstOrder()`` is the unified entry point introduced in v0.6.0.
+   It auto-detects dimensionality from the grid and replaces the legacy
+   ``kspaceFirstOrder2D`` / ``3D`` functions. See :doc:`/get_started/new_api`
+   for details.
+
+   The legacy functions still work but emit warnings.
 
 Step 6: Visualize Results
 -------------------------
@@ -180,29 +187,7 @@ What Just Happened?
 3. When waves reach the boundary sensors, pressure is recorded
 4. The result shows the acoustic wavefront arriving at different sensors over time
 
-Next Steps: Explore Real Applications
-------------------------------------
+Next Steps
+----------
 
-Now that you understand the four-component structure, explore these examples to see how the same framework applies to different applications:
-
-**Beginner Examples** (start here):
-
-- :ghfile:`Photoacoustic Waveforms <examples/ivp_photoacoustic_waveforms/README.md>` - See how 2D and 3D wave propagation differs
-- :ghfile:`Defining Transducers <examples/us_defining_transducer/README.md>` - Learn about ultrasound transducers
-
-**Medical Imaging Applications**:
-
-- :ghfile:`B-mode Linear Transducer <examples/us_bmode_linear_transducer/README.md>` - Full B-mode ultrasound imaging pipeline
-- :ghfile:`2D FFT Line Sensor <examples/pr_2D_FFT_line_sensor/README.md>` - Photoacoustic image reconstruction
-
-**Advanced Transducer Modeling**:
-
-- :ghfile:`Array as Source <examples/at_array_as_source/README.md>` - Complex array transducers without staircasing
-- :ghfile:`Focused Bowl 3D <examples/at_focused_bowl_3D/README.md>` - Focused ultrasound applications
-
-**Acoustic Field Analysis**:
-
-- :ghfile:`Beam Patterns <examples/us_beam_patterns/README.md>` - Understand beam formation and focusing
-- :ghfile:`Focused Detector 2D <examples/sd_focussed_detector_2D/README.md>` - Sensor directivity effects
-
-Each example builds on the same four-component framework but demonstrates different aspects of acoustic simulation. The key insight is that no matter how complex the application, every k-Wave simulation follows this same logical structure.
+Explore the :doc:`/examples_guide` to see the four-component framework applied to different problems — from heterogeneous media to beam steering, Doppler effects, and image reconstruction.
