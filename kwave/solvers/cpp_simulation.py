@@ -352,8 +352,8 @@ class CppSimulation:
 
     def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
         """Run the C++ k-Wave binary."""
-        binary_path = self._resolve_binary_path(device, binary_path)
-        binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
+        resolved = self._resolve_binary_path(device, binary_path)
+        resolved.chmod(resolved.stat().st_mode | stat.S_IEXEC)
 
         # Build command-line options
         options = ["-i", input_file, "-o", output_file]
@@ -368,7 +368,7 @@ class CppSimulation:
         elif debug:
             options.extend(["--verbose", "2"])
 
-        command = [str(binary_path)] + options
+        command = [str(resolved)] + options
         try:
             subprocess.run(command, capture_output=quiet, text=True, check=True)
         except subprocess.CalledProcessError as e:

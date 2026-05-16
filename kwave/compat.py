@@ -70,10 +70,8 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
             kwargs["num_threads"] = opts.num_threads
         if opts.device_num is not None:
             kwargs["device_num"] = opts.device_num
-        # Use _binary_path (not the property) because the property always resolves
-        # a non-None default (kwave.BINARY_PATH / binary_name), making it impossible
-        # to distinguish "user-set custom path" from "auto-resolved default" via the
-        # public API.
+        # Read _binary_path directly: the property auto-resolves to a default,
+        # so it can't distinguish a user-set path from one.
         if opts._binary_path is not None:
             kwargs["binary_path"] = opts._binary_path
 
