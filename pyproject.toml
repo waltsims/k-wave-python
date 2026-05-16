@@ -29,7 +29,7 @@ dependencies = [
     "opencv-python==4.13.0.92",
     "deepdiff==9.0.0",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.8",
+    "matplotlib==3.10.9",
     "beartype==0.22.9",
     "jaxtyping==0.3.7",
     "deprecated>=1.2.14",
@@ -45,10 +45,10 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 [project.optional-dependencies]
 test = ["pytest",
         "pytest-xdist",
-        "coverage==7.13.5",
+        "coverage==7.14.0",
         "phantominator",
         "testfixtures==8.3.0",
-        "requests==2.33.1"]
+        "requests==2.34.0"]
 example = ["gdown==6.0.0"]
 docs = [ "sphinx<9",
     "sphinx-mdinclude==0.6.2",
