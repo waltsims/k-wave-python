@@ -12,19 +12,19 @@ def create_absorption_variables(kgrid: kWaveGrid, medium: kWaveMedium, equation_
     # define the lossy derivative operators and proportionality coefficients
     """
     Selects and returns absorption and dispersion operators and coefficients for the given medium based on the equation of state.
-    
+
     Parameters:
         kgrid (kWaveGrid): Grid object providing wavenumber array via `kgrid.k`.
         medium (kWaveMedium): Medium properties used to compute absorption/dispersion coefficients.
         equation_of_state (str): One of `"absorbing"`, `"stokes"`, or `"lossless"` determining which variables to produce.
-    
+
     Returns:
         tuple: (nabla1, nabla2, tau, eta)
             - nabla1: First-order absorption operator or `None` when not applicable.
             - nabla2: Dispersion operator or `None` when not applicable.
             - tau: Absorbing coefficient or `None` when not applicable.
             - eta: Dispersive coefficient or `None` when not applicable.
-    
+
     Behavior:
         - "absorbing": returns (nabla1, nabla2, tau, eta) computed for an absorbing medium.
         - "stokes": returns (None, None, tau, None) where `tau` is the Stokes absorbing coefficient.
