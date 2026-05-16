@@ -1,4 +1,4 @@
-kwave.enums module
+enums
 ==================
 
 .. automodule:: kwave.enums

@@ -1,4 +1,6 @@
-kwave.options module
+.. _kwave-options-module:
+
+options
 ====================
 
 .. automodule:: kwave.options

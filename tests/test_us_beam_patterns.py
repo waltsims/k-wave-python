@@ -27,7 +27,7 @@ from tests.diff_utils import compare_against_ref
 
 def test_us_beam_patterns():
     # simulation settings
-    DATA_CAST = "single"  # set to 'single' or 'gpuArray-single' to speed up computations
+    DATA_CAST = "single"  # set to 'single' to speed up computations
     MASK_PLANE = "xy"  # set to 'xy' or 'xz' to generate the beam pattern in different planes
     USE_STATISTICS = True  # set to true to compute the rms or peak beam patterns, set to false to compute the harmonic beam patterns
 

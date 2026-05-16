@@ -1,5 +1,5 @@
-kwave.kWaveSimulation\_helper.display\_simulation\_params module
-================================================================
+display_simulation_params
+=========================
 
 .. automodule:: kwave.kWaveSimulation_helper.display_simulation_params
    :members:

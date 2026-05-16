@@ -1,4 +1,4 @@
-kwave.utils package
+utils
 ===================
 
 Submodules

@@ -1,4 +1,4 @@
-kwave.kspaceFirstOrder2D module
+kspaceFirstOrder2D
 ===============================
 
 .. automodule:: kwave.kspaceFirstOrder2D

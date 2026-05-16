@@ -1,4 +1,6 @@
-kwave.kWaveSimulation\_helper package
+.. _kwave-kWaveSimulation_helper-package:
+
+kWaveSimulation_helper
 =====================================
 
 Submodules

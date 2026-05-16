@@ -9,7 +9,7 @@ from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-__version__ = "0.4.1"
+__version__ = "0.6.1"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
@@ -58,7 +58,7 @@ URL_DICT = {
     },
     "darwin": {
         "cuda": [],
-        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc2/{EXECUTABLE_PREFIX}OMP"],
+        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc3/{EXECUTABLE_PREFIX}OMP"],
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }

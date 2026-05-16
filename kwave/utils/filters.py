@@ -569,31 +569,45 @@ def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Opti
     assert isinstance(restore_max, bool)
     assert isinstance(window_type, str)
 
-    # get the grid size
+    # get the grid size, squeezing singleton dimensions to match MATLAB's
+    # grid_size(grid_size == 1) = [] convention
+    original_shape = a.shape
     grid_size = a.shape
 
-    # remove singleton dimensions
     if num_dim2(a) != len(grid_size):
-        grid_size = np.squeeze(grid_size)
+        a = np.squeeze(a)
+        grid_size = a.shape  # tuple, possibly (N,) for 1D
 
     # use a symmetric filter for odd grid sizes, and a non-symmetric filter for
     # even grid sizes to ensure the DC component of the window has a value of
     # unity
-    window_symmetry = (np.array(grid_size) % 2).astype(bool)
+    gs_arr = np.atleast_1d(np.array(grid_size))
+    window_symmetry = (gs_arr % 2).astype(bool)
+    if window_symmetry.size == 1:
+        window_symmetry = bool(window_symmetry)
+
+    # get_win expects int for 1D, tuple for 2D/3D
+    if len(grid_size) == 1:
+        grid_size = grid_size[0]
 
     # get the window, taking the absolute value to discard machine precision
     # negative values
     from .signals import get_win
 
-    win, _ = get_win(grid_size, type_=window_type, rotation=DEF_USE_ROTATION, symmetric=window_symmetry)
+    use_rotation = DEF_USE_ROTATION and np.ndim(a) > 1
+    win, _ = get_win(grid_size, type_=window_type, rotation=use_rotation, symmetric=window_symmetry)
     win = np.abs(win)
 
-    # rotate window if input mat is (1, N)
-    if a.shape[0] == 1:  # is row?
-        win = win.T
+    # ensure window matches squeezed array dimensions
+    if win.ndim != np.ndim(a):
+        win = win.reshape(a.shape)
 
     # apply the filter
     a_sm = np.real(np.fft.ifftn(np.fft.fftn(a) * np.fft.ifftshift(win)))
+
+    # restore original shape if input had singleton dimensions
+    if a_sm.shape != original_shape:
+        a_sm = a_sm.reshape(original_shape)
 
     # restore magnitude if required
     if restore_max:

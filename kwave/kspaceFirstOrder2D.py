@@ -1,3 +1,4 @@
+import warnings
 from typing import Union
 
 import numpy as np
@@ -200,8 +201,26 @@ def kspaceFirstOrder2D(
     kwave.reconstruction.TimeReversal : Class for time reversal image reconstruction
     kspaceFirstOrder3D : 3D version of this simulation function
     """
+    warnings.warn(
+        "kspaceFirstOrder2D is deprecated. Use kspaceFirstOrder() from "
+        "kwave.kspaceFirstOrder instead. See kwave.compat.options_to_kwargs() "
+        "for migrating options.",
+        FutureWarning,
+        stacklevel=2,
+    )
+
     # start the timer and store the start time
     TicToc.tic()
+
+    if execution_options.is_python_backend:
+        from kwave.solvers.native import run_python_backend
+
+        return run_python_backend(kgrid, medium, source, sensor, simulation_options, execution_options)
+
+    from kwave.utils.checks import check_alpha_mode_cpp_compatible, warn_alpha_power_near_unity_cpp
+
+    check_alpha_mode_cpp_compatible(medium)
+    warn_alpha_power_near_unity_cpp(medium)
 
     # Currently we only support binary execution, meaning all simulations must be saved to disk.
     if not simulation_options.save_to_disk:

@@ -211,9 +211,7 @@ class SimulationOptions(object):
                 * data_cast: String input of the data type that variables are cast to before computation.
                              For example, setting to 'single' will speed up the computation time
                              (due to the improved efficiency of fftn and ifftn for this data type) at the expense
-                             of a loss in precision. This variable is also useful for utilising GPU parallelisation
-                             through libraries such as the Parallel Computing Toolbox
-                             by setting 'data_cast' to 'gpuArray-single' (default = 'off').
+                             of a loss in precision (default = 'off').
                 * data_recast: Boolean controlling whether the output data is cast back to double precision.
                                If set to false, sensor_data will be returned in
                                the data format set using the 'data_cast' option.

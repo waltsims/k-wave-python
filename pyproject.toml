@@ -11,10 +11,10 @@ license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
-    { name = "Walter Simson", email = "walter.simson@tum.de"}
+    { name = "Walter Simson", email = "walter.a.simson@gmail.com"}
 ]
 maintainers = [
-    { name = "Walter Simson", email = "walter.simson@tum.de" },
+    { name = "Walter Simson", email = "walter.a.simson@gmail.com" },
     { name = "Farid Yagubbayli", email = "farid.yagubbayli@tum.de" },
     { name = "David Sinden", email = "david.sinden@mevis.fraunhofer.de" }
 ]
@@ -24,15 +24,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "h5py==3.13.0",
-    "scipy==1.15.2",
-    "opencv-python==4.11.0.86",
-    "deepdiff==8.4.2",
+    "h5py==3.16.0",
+    "scipy==1.15.3",
+    "opencv-python==4.13.0.92",
+    "deepdiff==9.0.0",
     "numpy>=1.22.2,<2.3.0",
-    "matplotlib==3.10.3",
-    "beartype==0.20.2",
-    "jaxtyping==0.3.2",
-    "deprecated>=1.2.14"
+    "matplotlib==3.10.9",
+    "beartype==0.22.9",
+    "jaxtyping==0.3.7",
+    "deprecated>=1.2.14",
+    "tqdm>=4.60"
 ]
 
 [project.urls]
@@ -43,17 +44,19 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 
 [project.optional-dependencies]
 test = ["pytest",
-        "coverage==7.8.0",
+        "pytest-xdist",
+        "coverage==7.14.0",
         "phantominator",
         "testfixtures==8.3.0",
-        "requests==2.32.3"]
-example = ["gdown==5.2.0"]
-docs = [ "sphinx-mdinclude==0.6.2",
+        "requests==2.34.0"]
+example = ["gdown==6.0.0"]
+docs = [ "sphinx<9",
+    "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-tabs==3.4.7",
-    "sphinx-toolbox==3.8.0",
-    "furo==2024.8.6"]
-dev = ["pre-commit==4.2.0"]
+    "sphinx-tabs==3.4.5",
+    "sphinx-toolbox==4.1.2",
+    "furo==2025.12.19"]
+dev = ["pre-commit==4.6.0"]
 
 [tool.hatch.version]
 path = "kwave/__init__.py"
@@ -79,6 +82,7 @@ exclude = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: MATLAB-reference integration tests (require collected values)"]
 filterwarnings = [
     "error::DeprecationWarning",
     "error::PendingDeprecationWarning",
@@ -118,3 +122,8 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 "kwave/options/__init__.py" = ["F401"]
 # Fix in the future => E731: Do not assign a `lambda` expression, use a `def`
 "kwave/utils/mapgen.py" = ["E731"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]

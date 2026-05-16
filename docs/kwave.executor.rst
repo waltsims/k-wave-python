@@ -1,4 +1,4 @@
-kwave.executor module
+executor
 =====================
 
 .. automodule:: kwave.executor

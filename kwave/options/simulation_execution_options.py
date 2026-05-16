@@ -1,15 +1,24 @@
 import os
 import warnings
+from logging import getLogger
 from pathlib import Path
 from typing import Optional, Union
 
 from kwave import BINARY_DIR, PLATFORM
 from kwave.ksensor import kSensor
 
+logger = getLogger(__name__)
+
 
 class SimulationExecutionOptions:
     """
     A class to manage and configure the execution options for k-Wave simulations.
+
+    Attributes:
+        backend: Execution backend to use. Options:
+            - "OMP": C++ OpenMP binary (default for CPU)
+            - "CUDA": C++ CUDA binary (default for GPU)
+            - "python": Pure Python/CuPy solver (no external binaries required)
     """
 
     def __init__(
@@ -27,7 +36,13 @@ class SimulationExecutionOptions:
         verbose_level: int = 0,
         auto_chunking: Optional[bool] = True,
         show_sim_log: bool = True,
+        checkpoint_interval: Optional[int] = None,  # [seconds]
+        checkpoint_timesteps: Optional[int] = None,  # [timestep integer]
+        checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
+        backend: Optional[str] = None,  # "OMP", "CUDA", or "python"
     ):
+        self._num_threads_explicit = num_threads is not None
+        self.backend = backend
         self.is_gpu_simulation = is_gpu_simulation
         self._binary_path = binary_path
         self._binary_name = binary_name
@@ -41,6 +56,18 @@ class SimulationExecutionOptions:
         self.verbose_level = verbose_level
         self.auto_chunking = auto_chunking
         self.show_sim_log = show_sim_log
+        self.checkpoint_interval = checkpoint_interval
+        self.checkpoint_timesteps = checkpoint_timesteps
+        self.checkpoint_file = checkpoint_file
+
+        if self.checkpoint_file is not None:
+            if self.checkpoint_interval is None and self.checkpoint_timesteps is None:
+                raise ValueError("One of checkpoint_interval or checkpoint_timesteps must be set when checkpoint_file is set.")
+
+    @property
+    def num_threads_explicit(self) -> bool:
+        """True if user explicitly set num_threads (vs auto-detected cpu_count)."""
+        return self._num_threads_explicit
 
     @property
     def num_threads(self) -> Union[int, str]:
@@ -79,6 +106,21 @@ class SimulationExecutionOptions:
         if not (isinstance(value, int) and 0 <= value <= 2):
             raise ValueError("Verbose level must be between 0 and 2")
         self._verbose_level = value
+
+    @property
+    def backend(self) -> Optional[str]:
+        return self._backend
+
+    @backend.setter
+    def backend(self, value: Optional[str]):
+        valid_backends = [None, "OMP", "CUDA", "python"]
+        if value not in valid_backends:
+            raise ValueError(f"Backend must be one of {valid_backends}, got '{value}'")
+        self._backend = value
+
+    @property
+    def is_python_backend(self) -> bool:
+        return self._backend == "python"
 
     @property
     def is_gpu_simulation(self) -> Optional[bool]:
@@ -164,6 +206,47 @@ class SimulationExecutionOptions:
             raise ValueError("Device number must be non-negative")
         self._device_num = value
 
+    @property
+    def checkpoint_interval(self) -> Optional[int]:
+        return self._checkpoint_interval
+
+    @checkpoint_interval.setter
+    def checkpoint_interval(self, value: Optional[int]):
+        if value is not None:
+            if not isinstance(value, int) or value < 0:
+                raise ValueError("Checkpoint interval must be a positive integer")
+        self._checkpoint_interval = value
+
+    @property
+    def checkpoint_timesteps(self) -> Optional[int]:
+        return self._checkpoint_timesteps
+
+    @checkpoint_timesteps.setter
+    def checkpoint_timesteps(self, value: Optional[int]):
+        if value is not None:
+            if not isinstance(value, int) or value < 0:
+                raise ValueError("Checkpoint timesteps must be a positive integer")
+        self._checkpoint_timesteps = value
+
+    @property
+    def checkpoint_file(self) -> Optional[Path]:
+        if self._checkpoint_file is None:
+            return None
+        return self._checkpoint_file
+
+    @checkpoint_file.setter
+    def checkpoint_file(self, value: Optional[Path | str]):
+        if value is not None:
+            if not isinstance(value, (str, Path)):
+                raise ValueError("Checkpoint file must be a string or Path object.")
+            if isinstance(value, str):
+                value = Path(value)
+            if not value.parent.is_dir():
+                raise FileNotFoundError(f"Checkpoint folder {value.parent} does not exist.")
+            if value.suffix != ".h5":
+                raise ValueError(f"Checkpoint file {value} must have .h5 extension.")
+        self._checkpoint_file = value
+
     def as_list(self, sensor: kSensor) -> list[str]:
         options_list = []
 
@@ -178,6 +261,17 @@ class SimulationExecutionOptions:
         if self.verbose_level > 0:
             options_list.append("--verbose")
             options_list.append(str(self.verbose_level))
+
+        if (self.checkpoint_interval is not None or self.checkpoint_timesteps is not None) and self.checkpoint_file is not None:
+            if self.checkpoint_timesteps is not None:
+                options_list.append("--checkpoint_timesteps")
+                options_list.append(str(self.checkpoint_timesteps))
+            if self.checkpoint_interval is not None:
+                options_list.append("--checkpoint_interval")
+                options_list.append(str(self.checkpoint_interval))
+
+            options_list.append("--checkpoint_file")
+            options_list.append(str(self.checkpoint_file))
 
         record_options_map = {
             "p": "p_raw",
