@@ -35,9 +35,9 @@ def voxel_plot(mat, axis_tight=False, color=(1, 1, 0.4), transparency=0.8):
 
     if not axis_tight:
         sz = mat.shape
-        ax.set_xlim([0.5, sz[2] + 0.5])
+        ax.set_xlim([0.5, sz[0] + 0.5])
         ax.set_ylim([0.5, sz[1] + 0.5])
-        ax.set_zlim([0.5, sz[0] + 0.5])
+        ax.set_zlim([0.5, sz[2] + 0.5])
 
     # Show the plot
     plt.show()
