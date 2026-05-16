@@ -82,6 +82,40 @@ def _strip_pml(result, pml_size, ndim, suffixes=_FULL_GRID_SUFFIXES):
     }
 
 
+def _resolve_dtype(value):
+    """Normalize a dtype-like input to ``np.float32`` or ``np.float64``.
+
+    Accepts numpy dtypes/types (``np.float32``, ``np.float64``), strings
+    (``"float32"`` etc., plus MATLAB aliases ``"single"`` / ``"double"``),
+    Python ``float``, ``None`` (default → float64), and the legacy MATLAB
+    ``"off"`` alias for float64.  Anything that resolves to a non-float32 /
+    non-float64 dtype raises ``ValueError`` — the solver isn't validated
+    for ``float16`` / complex dtypes.
+
+    Cupy dtypes (``cp.float32``, ``cp.float64``) work for free because cupy
+    re-exports numpy's scalar types.  Torch / JAX dtypes are not accepted —
+    they live in different ecosystems and don't translate via ``np.dtype()``;
+    the error message points the user at the equivalent numpy dtype.
+    """
+    if value is None or value == "off":
+        return np.float64
+    try:
+        resolved = np.dtype(value).type
+    except TypeError as e:
+        framework = getattr(type(value), "__module__", "").split(".")[0]
+        hint = ""
+        if framework in ("torch", "jax", "jaxlib", "tensorflow"):
+            hint = f" {framework}.dtype objects aren't supported; pass the equivalent numpy dtype (np.float32 / np.float64)."
+        raise ValueError(
+            f"dtype must be a numpy dtype, type, or string (e.g. 'float32', 'single'), got {value!r}.{hint}"
+        ) from e
+    if resolved is np.float32:
+        return np.float32
+    if resolved is np.float64:
+        return np.float64
+    raise ValueError(f"dtype must resolve to float32 or float64; got {resolved.__name__} from {value!r}")
+
+
 def kspaceFirstOrder(
     kgrid: kWaveGrid,
     medium: kWaveMedium,
@@ -96,6 +130,7 @@ def kspaceFirstOrder(
     smooth_p0: bool = True,
     backend: str = "python",
     device: str = "cpu",
+    dtype=None,
     save_only: bool = False,
     data_path: Optional[str] = None,
     quiet: bool = False,
@@ -143,6 +178,24 @@ def kspaceFirstOrder(
         device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
             selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
             selects the OMP vs CUDA binary.  Default ``"cpu"``.
+        dtype: Numerical precision for state arrays in the Python backend.
+            Accepts dtype-like input — a numpy dtype (``np.float32``,
+            ``np.float64``; cupy aliases like ``cp.float32`` work since cupy
+            re-exports numpy's scalar types), a string (``"float32"``,
+            ``"float64"``, ``"single"``, ``"double"``), a Python type
+            (``float``), or ``None`` for the default (float64).  The
+            MATLAB-style alias ``"off"`` is accepted as a synonym for
+            float64 to ease migration from the legacy
+            ``SimulationOptions.data_cast``.  Torch / JAX dtypes are not
+            accepted; pass the numpy equivalent (e.g. ``np.float32`` for
+            ``torch.float32``).
+            ``np.float32`` uses roughly half the memory and is faster on
+            most hardware, at the cost of reduced numerical accuracy.
+            Only ``float32`` and ``float64`` are supported; other dtypes
+            raise ``ValueError``.  Has no effect on ``backend="cpp"`` (the
+            C++ binary uses fixed internal precision regardless); a warning
+            is emitted if ``dtype`` resolves to anything other than float64
+            with the C++ backend.  Default ``None`` (float64).
         save_only: When ``True`` (``backend="cpp"`` only), write the HDF5
             input file and return without running the binary.  Useful for
             cluster submission.  Default ``False``.
@@ -171,6 +224,7 @@ def kspaceFirstOrder(
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
     if backend not in ("python", "cpp"):
         raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
+    dtype = _resolve_dtype(dtype)
 
     if isinstance(pml_size, str) and pml_size.lower() == "auto":
         pml_size = tuple(int(x) for x in get_optimal_pml_size(kgrid))
@@ -210,6 +264,7 @@ def kspaceFirstOrder(
             pml_size=pml_size,
             pml_alpha=pml_alpha,
             quiet=quiet,
+            dtype=dtype,
         ).run()
 
     elif backend == "cpp":
@@ -218,6 +273,14 @@ def kspaceFirstOrder(
 
         check_alpha_mode_cpp_compatible(medium)
         warn_alpha_power_near_unity_cpp(medium)
+
+        if dtype is not np.float64:
+            warnings.warn(
+                f"dtype={np.dtype(dtype).name!r} has no effect with backend='cpp'; the C++ binary "
+                "uses fixed internal precision regardless. Use backend='python' to control "
+                "computational precision.",
+                stacklevel=2,
+            )
 
         if not use_kspace:
             warnings.warn(
