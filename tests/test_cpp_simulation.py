@@ -1,6 +1,7 @@
 """Unit tests for CppSimulation._resolve_binary_path."""
 import stat
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -65,6 +66,7 @@ class TestResolveBinaryPath:
             with pytest.raises(ValueError, match="not supported on macOS"):
                 CppSimulation._resolve_binary_path("gpu")
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not honor Unix executable bits")
     def test_execute_makes_binary_executable(self, tmp_path, monkeypatch):
         binary = tmp_path / "kspaceFirstOrder-OMP"
         binary.write_bytes(b"")
