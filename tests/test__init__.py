@@ -49,7 +49,7 @@ def test_download_sets_executable_bit(tmp_path, monkeypatch):
 
     monkeypatch.setattr(kwave, "BINARY_PATH", tmp_path)
 
-    test_url = list(kwave.URL_DICT[kwave.PLATFORM].values())[0][0]
+    test_url = next(urls[0] for urls in kwave.URL_DICT[kwave.PLATFORM].values() if urls)
     filename = test_url.rsplit("/", 1)[-1]
 
     def fake_urlretrieve(url, dest):
@@ -79,7 +79,7 @@ def test_existing_non_executable_binary_is_healed(tmp_path, monkeypatch):
 
     monkeypatch.setattr(kwave, "BINARY_PATH", tmp_path)
 
-    test_url = list(kwave.URL_DICT[kwave.PLATFORM].values())[0][0]
+    test_url = next(urls[0] for urls in kwave.URL_DICT[kwave.PLATFORM].values() if urls)
     filename = test_url.rsplit("/", 1)[-1]
     binary_filepath = _seed_binary(tmp_path, filename, test_url, mode=0o644)
     pre_mode = os.stat(binary_filepath).st_mode
