@@ -95,5 +95,29 @@ def test_existing_non_executable_binary_is_healed(tmp_path, monkeypatch):
     assert post_mode & stat.S_IXOTH, "other exec bit not healed on cache hit"
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="exec bit is meaningless on Windows")
+def test_ensure_executable_swallows_permission_error(tmp_path, monkeypatch, caplog):
+    """If the binary lives on a read-only filesystem or is owned by another
+    user, os.chmod raises PermissionError. _ensure_executable must not let
+    that abort `import kwave` — log a warning and continue."""
+    import kwave
+
+    filepath = tmp_path / "kspaceFirstOrder-test"
+    filepath.write_bytes(b"x")
+    filepath.chmod(0o644)
+
+    def deny(*args, **kwargs):
+        raise PermissionError("Operation not permitted")
+
+    monkeypatch.setattr(kwave.os, "chmod", deny)
+
+    with caplog.at_level("WARNING"):
+        kwave._ensure_executable(str(filepath))
+
+    assert any("Permission denied" in rec.message or "executable bit" in rec.message for rec in caplog.records), (
+        "expected a warning log when chmod fails"
+    )
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

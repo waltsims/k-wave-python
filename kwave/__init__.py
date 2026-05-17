@@ -87,8 +87,18 @@ def _ensure_executable(binary_filepath) -> None:
         return
     current_mode = os.stat(binary_filepath).st_mode
     desired_mode = current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-    if current_mode != desired_mode:
+    if current_mode == desired_mode:
+        return
+    try:
         os.chmod(binary_filepath, desired_mode)
+    except PermissionError:
+        # Read-only filesystem or wrong ownership — don't abort import.
+        # The user can chmod +x manually or reinstall into a writable location.
+        logging.warning(
+            "kwave: cannot set executable bit on %s — backend='cpp' may fail with "
+            "Permission denied. Run `chmod +x` manually or reinstall.",
+            binary_filepath,
+        )
 
 
 def _is_binary_present(binary_name: str, binary_type: str) -> bool:
