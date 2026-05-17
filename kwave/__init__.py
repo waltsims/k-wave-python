@@ -15,7 +15,10 @@ __version__ = "0.6.1"
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
 BINARY_VERSION = "v1.4.0"
-PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
+# Windows OMP build switched compiler/OpenMP/FFT stack in v1.4.0 and now needs different
+# runtime DLLs than v1.3.0 ships; pin windows OMP to v1.3.0 until the build packages its
+# own DLLs (or links statically). Tracked in kspacefirstorder-unified#14.
+WINDOWS_OMP_VERSION = "v1.3.0"
 PLATFORM = platform.system().lower()
 
 if PLATFORM not in ["linux", "windows", "darwin"]:
@@ -57,11 +60,12 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
+    version = WINDOWS_OMP_VERSION if architecture == "omp" else BINARY_VERSION
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
     if architecture == "omp":
         specific_filenames += WINDOWS_DLLS
-    release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
-    return release_urls
+    base = f"{URL_BASE}kspaceFirstOrder-{architecture.upper()}-{PLATFORM.lower()}/releases/download/{version}/"
+    return [base + filename for filename in specific_filenames]
 
 
 URL_DICT = {
