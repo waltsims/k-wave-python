@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import platform
+import stat
 from pathlib import Path
 from typing import List
 from urllib.request import urlretrieve
@@ -176,6 +177,9 @@ def download_binaries(system_os: str, bin_type: str):
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
             urlretrieve(url, binary_filepath)
+            if PLATFORM != "windows":
+                current_mode = os.stat(binary_filepath).st_mode
+                os.chmod(binary_filepath, current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
