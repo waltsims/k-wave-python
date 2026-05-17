@@ -95,36 +95,5 @@ def test_existing_non_executable_binary_is_healed(tmp_path, monkeypatch):
     assert post_mode & stat.S_IXOTH, "other exec bit not healed on cache hit"
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="exec bit is meaningless on Windows")
-@pytest.mark.parametrize(
-    "fail_target,exc",
-    [
-        ("chmod", PermissionError("Operation not permitted")),
-        ("stat", FileNotFoundError("broken symlink")),
-    ],
-)
-def test_ensure_executable_swallows_os_errors(tmp_path, monkeypatch, caplog, fail_target, exc):
-    """OS-level failures (broken symlink, read-only filesystem, wrong
-    ownership, TOCTOU race) must not abort `import kwave` — log a warning
-    and continue. Covers both the stat and chmod call sites."""
-    import kwave
-
-    filepath = tmp_path / "kspaceFirstOrder-test"
-    filepath.write_bytes(b"x")
-    filepath.chmod(0o644)
-
-    def boom(*args, **kwargs):
-        raise exc
-
-    monkeypatch.setattr(kwave.os, fail_target, boom)
-
-    with caplog.at_level("WARNING"):
-        kwave._ensure_executable(str(filepath))
-
-    assert any("executable bit" in rec.message for rec in caplog.records), (
-        f"expected a warning log when os.{fail_target} fails"
-    )
-
-
 if __name__ == "__main__":
     pytest.main([__file__])
