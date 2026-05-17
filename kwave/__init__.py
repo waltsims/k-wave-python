@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import platform
+import warnings
 from pathlib import Path
 from typing import List
 from urllib.request import urlretrieve
@@ -19,6 +20,18 @@ PLATFORM = platform.system().lower()
 
 if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
+
+# darwin C++ binary is arm64-only; universal2 coverage tracked for v0.6.5
+DARWIN_BINARY_ARCH = "arm64"
+_darwin_unsupported = PLATFORM == "darwin" and platform.machine() != DARWIN_BINARY_ARCH
+if _darwin_unsupported:
+    warnings.warn(
+        f"k-wave-python's macOS C++ binary is {DARWIN_BINARY_ARCH}-only. "
+        f"Detected {platform.machine()} — the C++ backend (backend='cpp') will not run on this machine. "
+        "Use backend='python' instead. Universal2 (Intel + Apple Silicon) coverage is tracked for v0.6.5.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
 # TODO: deprecate in 0.5.0
@@ -58,7 +71,11 @@ URL_DICT = {
     },
     "darwin": {
         "cuda": [],
-        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
+        "omp": (
+            []
+            if _darwin_unsupported
+            else [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"]
+        ),
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
