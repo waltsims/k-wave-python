@@ -9,11 +9,18 @@ import pytest
 
 
 def test__init():
-    with pytest.raises(NotImplementedError):
-        with patch("platform.system", lambda: "Unknown"):
-            import kwave
+    import kwave
 
-            importlib.reload(kwave)
+    try:
+        with pytest.raises(NotImplementedError):
+            with patch("platform.system", lambda: "Unknown"):
+                importlib.reload(kwave)
+    finally:
+        # The failed reload above left kwave.PLATFORM = "unknown" in module
+        # state (line where PLATFORM is set ran before the NotImplementedError).
+        # Reload once more without the patch so subsequent tests see a valid
+        # PLATFORM / URL_DICT pair.
+        importlib.reload(kwave)
 
 
 def _seed_binary(binary_path, binary_name, url, *, mode=0o644):
