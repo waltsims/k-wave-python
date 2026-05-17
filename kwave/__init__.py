@@ -78,6 +78,19 @@ def _hash_file(filepath: str) -> str:
     return md5.hexdigest()
 
 
+def _ensure_executable(binary_filepath) -> None:
+    # Self-heal the executable bit on Linux/macOS. urlretrieve creates files
+    # at 0644, and prior versions of this package didn't fix that up, so users
+    # upgrading with a cached non-executable binary on disk would otherwise
+    # stay stuck (the cache check below returns True and skips re-download).
+    if PLATFORM == "windows":
+        return
+    current_mode = os.stat(binary_filepath).st_mode
+    desired_mode = current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    if current_mode != desired_mode:
+        os.chmod(binary_filepath, desired_mode)
+
+
 def _is_binary_present(binary_name: str, binary_type: str) -> bool:
     binary_filepath = BINARY_PATH / binary_name
     binary_file_exists = os.path.exists(binary_filepath)
@@ -106,6 +119,8 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
     latest_urls = URL_DICT[PLATFORM][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
+
+    _ensure_executable(binary_filepath)
 
     # No need to check `version` field for now
     # because we version is already present in the URL
@@ -177,9 +192,7 @@ def download_binaries(system_os: str, bin_type: str):
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
             urlretrieve(url, binary_filepath)
-            if PLATFORM != "windows":
-                current_mode = os.stat(binary_filepath).st_mode
-                os.chmod(binary_filepath, current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            _ensure_executable(binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
