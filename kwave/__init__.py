@@ -93,7 +93,7 @@ def _ensure_executable(binary_filepath) -> None:
         if current_mode == desired_mode:
             return
         os.chmod(binary_filepath, desired_mode)
-    except OSError:
+    except OSError:  # pragma: no cover - defensive; degrades to warning, never fatal
         # Don't abort import. The user can chmod +x manually or reinstall
         # into a writable location.
         logging.warning(
