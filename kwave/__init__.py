@@ -13,7 +13,7 @@ __version__ = "0.6.1"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
-BINARY_VERSION = "v1.3.0"
+BINARY_VERSION = "v1.4.0"
 PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
 PLATFORM = platform.system().lower()
 
@@ -53,12 +53,12 @@ def get_windows_release_urls(architecture: str) -> list:
 
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     "darwin": {
         "cuda": [],
-        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc3/{EXECUTABLE_PREFIX}OMP"],
+        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
