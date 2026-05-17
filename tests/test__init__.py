@@ -96,26 +96,33 @@ def test_existing_non_executable_binary_is_healed(tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="exec bit is meaningless on Windows")
-def test_ensure_executable_swallows_permission_error(tmp_path, monkeypatch, caplog):
-    """If the binary lives on a read-only filesystem or is owned by another
-    user, os.chmod raises PermissionError. _ensure_executable must not let
-    that abort `import kwave` — log a warning and continue."""
+@pytest.mark.parametrize(
+    "fail_target,exc",
+    [
+        ("chmod", PermissionError("Operation not permitted")),
+        ("stat", FileNotFoundError("broken symlink")),
+    ],
+)
+def test_ensure_executable_swallows_os_errors(tmp_path, monkeypatch, caplog, fail_target, exc):
+    """OS-level failures (broken symlink, read-only filesystem, wrong
+    ownership, TOCTOU race) must not abort `import kwave` — log a warning
+    and continue. Covers both the stat and chmod call sites."""
     import kwave
 
     filepath = tmp_path / "kspaceFirstOrder-test"
     filepath.write_bytes(b"x")
     filepath.chmod(0o644)
 
-    def deny(*args, **kwargs):
-        raise PermissionError("Operation not permitted")
+    def boom(*args, **kwargs):
+        raise exc
 
-    monkeypatch.setattr(kwave.os, "chmod", deny)
+    monkeypatch.setattr(kwave.os, fail_target, boom)
 
     with caplog.at_level("WARNING"):
         kwave._ensure_executable(str(filepath))
 
-    assert any("Permission denied" in rec.message or "executable bit" in rec.message for rec in caplog.records), (
-        "expected a warning log when chmod fails"
+    assert any("executable bit" in rec.message for rec in caplog.records), (
+        f"expected a warning log when os.{fail_target} fails"
     )
 
 
