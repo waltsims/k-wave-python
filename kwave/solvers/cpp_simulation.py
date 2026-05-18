@@ -4,6 +4,7 @@ Clean C++ backend for kspaceFirstOrder().
 Handles HDF5 serialization and C++ binary execution without
 depending on kWaveSimulation or the legacy options classes.
 """
+
 import os
 import shutil
 import stat
@@ -46,6 +47,11 @@ class CppSimulation:
         input_file = os.path.join(data_path, "kwave_input.h5")
         output_file = os.path.join(data_path, "kwave_output.h5")
 
+        if os.path.exists(input_file):
+            raise FileExistsError(
+                f"{input_file!r} already exists. Delete it or choose a different data_path to avoid overwriting previous simulation inputs."
+            )
+
         self._write_hdf5(input_file)
         return input_file, output_file
 
@@ -56,7 +62,16 @@ class CppSimulation:
         input_file, output_file = self.prepare(data_path=data_path)
         data_dir = os.path.dirname(input_file)
         try:
-            self._execute(input_file, output_file, device=device, num_threads=num_threads, device_num=device_num, quiet=quiet, debug=debug, binary_path=binary_path)
+            self._execute(
+                input_file,
+                output_file,
+                device=device,
+                num_threads=num_threads,
+                device_num=device_num,
+                quiet=quiet,
+                debug=debug,
+                binary_path=binary_path,
+            )
             result = self._parse_output(output_file)
             result = self._fix_output_order(result)
             return result
