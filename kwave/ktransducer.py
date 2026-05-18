@@ -715,6 +715,9 @@ class NotATransducer(kSensor):
                     )
                     * apodization[element_index]
                 )
+            else:
+                # No delay — still apply apodization weight
+                sensor_data[element_index, :] *= apodization[element_index]
 
         # Form the line summing across the elements
         line = np.sum(sensor_data, axis=0)
