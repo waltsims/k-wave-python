@@ -91,3 +91,15 @@ class TestCombined:
     def test_none_options(self):
         kwargs = options_to_kwargs()
         assert kwargs == {}
+
+    def test_default_data_path_not_forwarded(self):
+        # Before fix: data_path defaulted to gettempdir() and was always forwarded,
+        # so every run targeted /tmp/kwave_input.h5 and crashed on the second call.
+        kwargs = options_to_kwargs(simulation_options=SimulationOptions())
+        assert "data_path" not in kwargs
+
+    def test_custom_data_path_is_forwarded(self, tmp_path):
+        opts = SimulationOptions()
+        opts.data_path = str(tmp_path)
+        kwargs = options_to_kwargs(simulation_options=opts)
+        assert kwargs["data_path"] == str(tmp_path)
