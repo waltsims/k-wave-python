@@ -157,30 +157,30 @@ Combined release: C-order migration, example restructure, parity tests, docs cle
 
 ### v0.6.2 — Binary refresh (sm_120 / Blackwell)
 
-**Goal:** Ship `kwave/__init__.py` URL pins that point at the v1.4.0 upstream binaries (sm_120 / Blackwell support). This is a thin release: no Python-side code changes, just pin bumps and a CHANGELOG entry.
+**Goal:** Ship `kwave/__init__.py` URL pins that point at fixed upstream binaries with sm_120 / Blackwell support, the macOS HDF5 ABI refresh, and the macOS fast-math fix.
 
-**Background:** The unified build pipeline (`kspacefirstorder-unified` @ `02026d05`) produced 5 binary artifacts on 2026-05-16. CUDA archs now include `sm_75;80;86;87;89;90;90a;100;120`. The 5-mirror release flow is itself being retired — see waltsims/kspacefirstorder-unified#13 for the consolidation that obviates a manual runbook.
+**What actually shipped (retrospective):** v1.4.0 had to be revoked due to packaging regressions and a numerical bug. v0.6.2 ships against **v1.4.1** instead. Summary:
 
-**Release sequencing (do in order):**
-1. **Tag `v1.4.0` on `kspacefirstorder-unified` @ `02026d05`** — provenance pointer ("this SHA produced the v1.4.0 binaries"). Diff vs current HEAD is doc-only.
-2. **Tag `v1.4.0` on each of the 5 mirror repos** with the corresponding artifact:
-   - `kspaceFirstOrder-CUDA-linux` ← `kspaceFirstOrder-cuda-linux-13.0.0/kspaceFirstOrder-CUDA`
-   - `kspaceFirstOrder-CUDA-windows` ← `kspaceFirstOrder-cuda-windows-13.0.0/kspaceFirstOrder-CUDA.exe`
-   - `kspaceFirstOrder-OMP-linux` ← `kspaceFirstOrder-openmp-linux-ubuntu-latest/kspaceFirstOrder-OMP`
-   - `kspaceFirstOrder-OMP-windows` ← `kspaceFirstOrder-openmp-windows-windows-latest/kspaceFirstOrder-OMP.exe`
-   - `k-wave-omp-darwin` ← `kspaceFirstOrder-openmp-darwin-macos-latest/kspaceFirstOrder-OMP` (arm64-only — see v0.6.5)
-3. In `kwave/__init__.py`, collapse the per-platform version pins (`v1.3.0`, `v1.3.1`, `v0.3.0rc3`) into a single `BINARY_VERSION = "v1.4.0"` used by all five URLs. Open the k-wave-python PR.
-4. Verify on a real Blackwell GPU (cc @aconesac or Brno team for RTX 5070 Ti).
-5. Close issues [#656](https://github.com/waltsims/k-wave-python/issues/656) and [#622](https://github.com/waltsims/k-wave-python/issues/622) on release.
-6. **Bonus close for [#661](https://github.com/waltsims/k-wave-python/issues/661) (macOS HDF5 ABI):** the new darwin OMP binary links `libhdf5.320.dylib` (current Homebrew ABI) — verified with `strings` on the artifact. If a current-Homebrew macOS smoke test runs clean, close #661 referencing the v1.4.0 `k-wave-omp-darwin` release.
+- **Linux binaries** — `v1.4.1` rebuilt with static CUDA + cufft + FFTW + libstdc++ on ubuntu-22.04 (glibc 2.35 floor), restoring the plug-and-play property the legacy Makefile build had. Permanent regression guard added via `scripts/check-linux-binary-deps.sh` in the unified repo. Fixed in [kspacefirstorder-unified#15](https://github.com/waltsims/kspacefirstorder-unified/issues/15) and [#16](https://github.com/waltsims/kspacefirstorder-unified/pull/16).
+- **macOS OMP** — `v1.4.1` picks up the fast-math fix ([k-wave-omp-darwin#4](https://github.com/waltsims/k-wave-omp-darwin/pull/4)) that prevents NaNs in absorbing-media simulations on arm64. ABI refresh (`libhdf5.320.dylib`) preserved from v1.4.0; closes [#661](https://github.com/waltsims/k-wave-python/issues/661).
+- **Windows OMP + CUDA** — both pinned to **v1.3.0** for this release. v1.4.x windows builds switched compiler/OpenMP/FFT/CUDA-runtime stacks but neither bundles its runtime DLLs. v1.3.0 binaries are self-contained with the Intel-era DLL bundle (shipped via `WINDOWS_DLLS` with the OMP request and used by both `.exe` files since they share `kwave/bin/windows/`). OMP DLL bundling fix landed in [kspacefirstorder-unified#14](https://github.com/waltsims/kspacefirstorder-unified/issues/14) (awaiting production validation); CUDA bundling tracked in [kspacefirstorder-unified#17](https://github.com/waltsims/kspacefirstorder-unified/issues/17). Pin gets flipped in v0.6.3 once both windows flavors are validated end-to-end.
+- **Chmod fix** — independent fix for `download_binaries` not setting the exec bit on Linux/macOS, surfaced during v0.6.2 validation on Colab ([#741](https://github.com/waltsims/k-wave-python/pull/741)).
+- **Intel Mac guard** — `kwave/__init__.py` now emits a `RuntimeWarning` and skips the darwin OMP download on `darwin` x86_64, since the v1.4.x darwin binary is arm64-only. Universal2 coverage remains tracked in v0.6.5.
 
-**Out of scope:** Darwin x86_64 (Intel Mac) coverage — the v1.4.0 OMP-darwin binary is arm64-only, which is a regression vs. older Intel-era releases. Tracked separately in v0.6.5.
+**Closes:** [#622](https://github.com/waltsims/k-wave-python/issues/622), [#656](https://github.com/waltsims/k-wave-python/issues/656), [#661](https://github.com/waltsims/k-wave-python/issues/661), [#738](https://github.com/waltsims/k-wave-python/issues/738), [#740](https://github.com/waltsims/k-wave-python/issues/740).
+
+**Out of scope:** Darwin x86_64 (Intel Mac) coverage — v1.4.x OMP-darwin is arm64-only. Tracked in v0.6.5.
 
 ---
 
-### v0.6.3 — Tier 2 Features + Examples
+### v0.6.3 — Tier 2 Features + Examples + Windows binary pin flips
 
-**Goal:** Add solver features needed by Tier 2 examples, port those examples.
+**Goal:** Add solver features needed by Tier 2 examples, port those examples, and flip the Windows binary pins to v1.4.x once both flavors are validated.
+
+**Windows binary pin flips (carried over from v0.6.2):**
+- **Validate `v1.4.1` windows-OMP** end-to-end on a Windows machine (smoke + small simulation). Bundle landed in [kspacefirstorder-unified#14](https://github.com/waltsims/kspacefirstorder-unified/issues/14); CI smoke passes; runtime sim not yet confirmed.
+- **Fix `v1.4.x` windows-CUDA DLL packaging** in [kspacefirstorder-unified#17](https://github.com/waltsims/kspacefirstorder-unified/issues/17) — same DLL-bundling pattern as windows-omp, plus CUDA runtime DLLs (`cudart64_*.dll`, `cufft64_*.dll`) from `$env:CUDA_PATH\bin`.
+- Once both validated: drop `WINDOWS_OMP_VERSION` + `WINDOWS_CUDA_VERSION` pins in `kwave/__init__.py` (both use `BINARY_VERSION`). Likely also: refactor `WINDOWS_DLLS` into per-architecture lists since OMP and CUDA need slightly different MSVC redist + runtime deps.
 
 **Features to add:**
 - **Time-reversal reconstruction** — needed by PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
@@ -220,6 +220,20 @@ Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate sol
 **Future Mac topics (post-1.0, separate releases):**
 - **CUDA on macOS:** Not feasible — Apple dropped NVIDIA driver support after macOS 10.13. The `darwin/cuda` slot in `URL_DICT` will stay empty indefinitely.
 - **Metal / MPS backend for the Python solver:** Would unlock Apple Silicon GPU acceleration for the `backend="python"` path via something like `mlx` or PyTorch's MPS. Scope is the Python solver, not the C++ binary — best fit is the v2.x performance phase.
+
+---
+
+## Binary distribution maintenance (no fixed version)
+
+Work on the upstream binary side that doesn't need its own k-wave-python release — it gets picked up by whatever version bump happens to be in flight.
+
+### Mirror consolidation (kspacefirstorder-unified#13)
+
+Collapse the 5 per-platform mirror repos (`kspaceFirstOrder-{CUDA,OMP}-{linux,windows}` + `k-wave-omp-darwin`) into the unified repo. Each cross-cutting change currently lands ~2-3× (proven by v1.4.0 / v1.4.1 taking ~12 PRs across repos); the consolidation retires that overhead. Cross-linked from k-wave-python#738 — flip `URL_DICT` to point at unified once the consolidation lands. Best fit for v1.5.0 or alongside whichever release first benefits.
+
+### Static-link Windows binaries (v1.5 follow-up)
+
+The v0.6.2 ship used the **bundle** approach for Windows OMP (DLLs alongside the .exe) because static-linking on Windows MSVC is more complex (`/MT` for CRT, vcpkg static port for FFTW, `VCOMP140` static linking is awkward, may need LLVM OpenMP). The Linux fix in unified#15 already uses static linking; Windows should follow once the broader v1.5 static-linking discipline is in scope. Track alongside mirror consolidation since both are "tidy up the binary pipeline" work.
 
 ---
 
