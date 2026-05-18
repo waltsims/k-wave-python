@@ -10,6 +10,16 @@ import pytest
 from kwave.solvers.cpp_simulation import CppSimulation
 
 
+class TestPrepare:
+    def test_raises_when_input_already_exists(self, tmp_path):
+        # Before fix: h5py raised a cryptic ValueError('name already exists')
+        # instead of a clear FileExistsError.
+        (tmp_path / "kwave_input.h5").write_bytes(b"")
+        sim = CppSimulation.__new__(CppSimulation)
+        with pytest.raises(FileExistsError, match="already exists"):
+            sim.prepare(data_path=str(tmp_path))
+
+
 class TestResolveBinaryPath:
     """Tests for CppSimulation._resolve_binary_path().
 
