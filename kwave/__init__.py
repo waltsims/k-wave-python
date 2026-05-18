@@ -11,15 +11,20 @@ from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
-BINARY_VERSION = "v1.4.0"
-# Windows OMP build switched compiler/OpenMP/FFT stack in v1.4.0 and now needs different
-# runtime DLLs than v1.3.0 ships; pin windows OMP to v1.3.0 until the build packages its
-# own DLLs (or links statically). Tracked in kspacefirstorder-unified#14.
+BINARY_VERSION = "v1.4.1"
+# Pin both Windows binaries to v1.3.0. v1.4.x windows builds switched compiler /
+# OpenMP / FFT / CUDA runtime stacks and neither v1.4.x release ships its runtime
+# DLLs (cufft, cudart, vcomp, vcruntime140_1, fftw3f, etc.). v1.3.0 binaries are
+# self-contained with their Intel-era DLL bundle (listed in WINDOWS_DLLS below,
+# downloaded with the OMP request and used by both .exe files since they share
+# kwave/bin/windows/). OMP DLL bundling is fixed in kspacefirstorder-unified#14
+# (awaiting validation); CUDA DLL bundling is tracked in kspacefirstorder-unified#17.
 WINDOWS_OMP_VERSION = "v1.3.0"
+WINDOWS_CUDA_VERSION = "v1.3.0"
 PLATFORM = platform.system().lower()
 
 if PLATFORM not in ["linux", "windows", "darwin"]:
@@ -61,7 +66,7 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
-    version = WINDOWS_OMP_VERSION if architecture == "omp" else BINARY_VERSION
+    version = WINDOWS_OMP_VERSION if architecture == "omp" else WINDOWS_CUDA_VERSION
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
     if architecture == "omp":
         specific_filenames += WINDOWS_DLLS
@@ -77,9 +82,7 @@ URL_DICT = {
     "darwin": {
         "cuda": [],
         "omp": (
-            []
-            if _darwin_unsupported
-            else [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"]
+            [] if _darwin_unsupported else [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"]
         ),
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
