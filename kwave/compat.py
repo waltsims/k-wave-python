@@ -39,7 +39,13 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
         kwargs["use_kspace"] = opts.use_kspace
         kwargs["smooth_p0"] = opts.smooth_p0
         if opts.data_path is not None:
-            kwargs["data_path"] = opts.data_path
+            import os
+            from tempfile import gettempdir
+
+            normalized_data_path = os.path.realpath(os.path.normpath(os.fspath(opts.data_path)))
+            normalized_tempdir = os.path.realpath(os.path.normpath(os.fspath(gettempdir())))
+            if normalized_data_path != normalized_tempdir:
+                kwargs["data_path"] = opts.data_path
         if opts.save_to_disk_exit:
             kwargs["save_only"] = True
 
@@ -70,5 +76,9 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
             kwargs["num_threads"] = opts.num_threads
         if opts.device_num is not None:
             kwargs["device_num"] = opts.device_num
+        # Read _binary_path directly: the property auto-resolves to a default,
+        # so it can't distinguish a user-set path from one.
+        if opts._binary_path is not None:
+            kwargs["binary_path"] = opts._binary_path
 
     return kwargs

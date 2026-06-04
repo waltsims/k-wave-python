@@ -3,22 +3,44 @@ import json
 import logging
 import os
 import platform
+import stat
+import warnings
 from pathlib import Path
 from typing import List
 from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
-BINARY_VERSION = "v1.3.0"
-PREFIX = f"{URL_BASE}kspaceFirstOrder-{{}}-{{}}/releases/download/{BINARY_VERSION}/"
+BINARY_VERSION = "v1.4.1"
+# Pin both Windows binaries to v1.3.0. v1.4.x windows builds switched compiler /
+# OpenMP / FFT / CUDA runtime stacks and neither v1.4.x release ships its runtime
+# DLLs (cufft, cudart, vcomp, vcruntime140_1, fftw3f, etc.). v1.3.0 binaries are
+# self-contained with their Intel-era DLL bundle (listed in WINDOWS_DLLS below,
+# downloaded with the OMP request and used by both .exe files since they share
+# kwave/bin/windows/). OMP DLL bundling is fixed in kspacefirstorder-unified#14
+# (awaiting validation); CUDA DLL bundling is tracked in kspacefirstorder-unified#17.
+WINDOWS_OMP_VERSION = "v1.3.0"
+WINDOWS_CUDA_VERSION = "v1.3.0"
 PLATFORM = platform.system().lower()
 
 if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
+
+# darwin C++ binary is arm64-only; universal2 coverage tracked for v0.6.5
+DARWIN_BINARY_ARCH = "arm64"
+_darwin_unsupported = PLATFORM == "darwin" and platform.machine() != DARWIN_BINARY_ARCH
+if _darwin_unsupported:
+    warnings.warn(
+        f"k-wave-python's macOS C++ binary is {DARWIN_BINARY_ARCH}-only. "
+        f"Detected {platform.machine()} — the C++ backend (backend='cpp') will not run on this machine. "
+        "Use backend='python' instead. Universal2 (Intel + Apple Silicon) coverage is tracked for v0.6.5.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 # TODO: install directly in to /bin/ directory system directory is no longer needed
 # TODO: deprecate in 0.5.0
@@ -44,21 +66,24 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def get_windows_release_urls(architecture: str) -> list:
+    version = WINDOWS_OMP_VERSION if architecture == "omp" else WINDOWS_CUDA_VERSION
     specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
     if architecture == "omp":
         specific_filenames += WINDOWS_DLLS
-    release_urls = [PREFIX.format(architecture.upper(), PLATFORM.lower()) + filename for filename in specific_filenames]
-    return release_urls
+    base = f"{URL_BASE}kspaceFirstOrder-{architecture.upper()}-{PLATFORM.lower()}/releases/download/{version}/"
+    return [base + filename for filename in specific_filenames]
 
 
 URL_DICT = {
     "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/v1.3.1/{EXECUTABLE_PREFIX}CUDA"],
+        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}CUDA"],
         "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
     },
     "darwin": {
         "cuda": [],
-        "omp": [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/v0.3.0rc3/{EXECUTABLE_PREFIX}OMP"],
+        "omp": (
+            [] if _darwin_unsupported else [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"]
+        ),
     },
     "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
 }
@@ -75,6 +100,31 @@ def _hash_file(filepath: str) -> str:
                 break
             md5.update(data)
     return md5.hexdigest()
+
+
+def _ensure_executable(binary_filepath) -> None:
+    # Self-heal the executable bit on Linux/macOS. urlretrieve creates files
+    # at 0644, and prior versions of this package didn't fix that up, so users
+    # upgrading with a cached non-executable binary on disk would otherwise
+    # stay stuck (the cache check below returns True and skips re-download).
+    # Any OS-level failure here (broken symlink, read-only FS, wrong ownership,
+    # TOCTOU race) is degraded to a warning so it never aborts `import kwave`.
+    if PLATFORM == "windows":
+        return
+    try:
+        current_mode = os.stat(binary_filepath).st_mode
+        desired_mode = current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+        if current_mode == desired_mode:
+            return
+        os.chmod(binary_filepath, desired_mode)
+    except OSError:  # pragma: no cover - defensive; degrades to warning, never fatal
+        # Don't abort import. The user can chmod +x manually or reinstall
+        # into a writable location.
+        logging.warning(
+            "kwave: cannot set executable bit on %s — backend='cpp' may fail with "
+            "Permission denied. Run `chmod +x` manually or reinstall.",
+            binary_filepath,
+        )
 
 
 def _is_binary_present(binary_name: str, binary_type: str) -> bool:
@@ -105,6 +155,8 @@ def _is_binary_present(binary_name: str, binary_type: str) -> bool:
     latest_urls = URL_DICT[PLATFORM][binary_type]
     if existing_metadata["url"] not in latest_urls:
         return False
+
+    _ensure_executable(binary_filepath)
 
     # No need to check `version` field for now
     # because we version is already present in the URL
@@ -176,6 +228,7 @@ def download_binaries(system_os: str, bin_type: str):
         try:
             binary_filepath = os.path.join(BINARY_PATH, filename)
             urlretrieve(url, binary_filepath)
+            _ensure_executable(binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
 
         except TimeoutError:
