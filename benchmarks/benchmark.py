@@ -17,6 +17,7 @@ from typing import Any, Callable
 
 from benchmarks.helpers import (
     BenchmarkOptions,
+    PeakMemorySampler,
     build_case,
     default_output_path,
     grid_sizes,
@@ -25,6 +26,7 @@ from benchmarks.helpers import (
     rolling_average,
     save_results,
     store_case_result,
+    validate_memory_bytes,
 )
 from kwave.kspaceFirstOrder import kspaceFirstOrder
 
@@ -39,6 +41,8 @@ def run(
     quiet: bool = True,
     solver: Callable[..., Any] | None = None,
     timer: Callable[[], float] = perf_counter,
+    memory_reader: Callable[[], float] = peak_memory_bytes,
+    memory_sampling_interval: float = 0.05,
 ) -> dict[str, Any]:
     solver = kspaceFirstOrder if solver is None else solver
     cases = grid_sizes(options)
@@ -57,32 +61,52 @@ def run(
         "error_message": "",
     }
     if options.report_mem_usage:
+        try:
+            validate_memory_bytes(memory_reader())
+        except Exception as exc:
+            raise ValueError("report_mem_usage is not supported on this platform") from exc
         result["mem_usage"] = []
 
-    for nx, ny, nz, scale in cases:
+    for case_index, (nx, ny, nz, scale) in enumerate(cases):
         loop_time = 0.0
         loop_mem_usage = 0.0
         try:
             kgrid, medium, source, sensor = build_case(options, nx, ny, nz, scale)
             for loop_num in range(1, options.num_averages + 1):
-                start = timer()
-                solver(
-                    kgrid,
-                    medium,
-                    source,
-                    sensor,
-                    backend=backend,
-                    device=device,
-                    quiet=quiet,
-                    pml_size=options.pml_size,
-                    pml_inside=options.pml_inside,
-                    smooth_p0=False,
-                )
-                elapsed_time = timer() - start
-                loop_time = rolling_average(loop_time, elapsed_time, loop_num)
                 if options.report_mem_usage:
-                    loop_mem_usage = rolling_average(loop_mem_usage, peak_memory_bytes(), loop_num)
-                store_case_result(result, nx * ny * nz, loop_time, loop_mem_usage, options.report_mem_usage)
+                    with PeakMemorySampler(memory_reader, memory_sampling_interval) as memory_sampler:
+                        start = timer()
+                        solver(
+                            kgrid,
+                            medium,
+                            source,
+                            sensor,
+                            backend=backend,
+                            device=device,
+                            quiet=quiet,
+                            pml_size=options.pml_size,
+                            pml_inside=options.pml_inside,
+                            smooth_p0=False,
+                        )
+                        elapsed_time = timer() - start
+                    loop_mem_usage = rolling_average(loop_mem_usage, memory_sampler.peak_bytes, loop_num)
+                else:
+                    start = timer()
+                    solver(
+                        kgrid,
+                        medium,
+                        source,
+                        sensor,
+                        backend=backend,
+                        device=device,
+                        quiet=quiet,
+                        pml_size=options.pml_size,
+                        pml_inside=options.pml_inside,
+                        smooth_p0=False,
+                    )
+                    elapsed_time = timer() - start
+                loop_time = rolling_average(loop_time, elapsed_time, loop_num)
+                store_case_result(result, case_index, nx * ny * nz, loop_time, loop_mem_usage, options.report_mem_usage)
                 save_results(path, result)
         except Exception as exc:
             result["error_reached"] = True

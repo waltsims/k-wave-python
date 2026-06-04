@@ -92,6 +92,74 @@ def test_run_aggregates_timings_and_saves_json_file(tmp_path: Path):
     assert saved["options"]["start_size"] == 8
 
 
+def test_run_keeps_distinct_cases_with_the_same_total_grid_points(tmp_path: Path):
+    options = small_options(
+        x_scale_array=(1, 2),
+        y_scale_array=(2, 1),
+        z_scale_array=(1, 1),
+    )
+    output_path = tmp_path / "benchmark.json"
+    times = iter([0.0, 1.0, 1.0, 3.0])
+    shapes = []
+
+    def fake_solver(kgrid, *args, **kwargs):
+        shapes.append(tuple(kgrid.N))
+        return {"p": np.zeros((1, 1))}
+
+    result = run(options, output_path=output_path, solver=fake_solver, timer=lambda: next(times))
+
+    assert shapes == [(8, 16, 8), (16, 8, 8)]
+    assert result["comp_size"] == [8 * 16 * 8, 16 * 8 * 8]
+    assert result["comp_time"] == [pytest.approx(1.0), pytest.approx(2.0)]
+
+    saved = json.loads(output_path.read_text())
+    assert saved["comp_size"] == [8 * 16 * 8, 16 * 8 * 8]
+    assert saved["comp_time"] == [pytest.approx(1.0), pytest.approx(2.0)]
+
+
+def test_start_size_must_be_positive():
+    with pytest.raises(ValueError, match="start_size must be positive"):
+        small_options(start_size=0)
+
+
+def test_run_reports_memory_usage_and_saves_valid_json(tmp_path: Path):
+    options = small_options(report_mem_usage=True, num_averages=2)
+    output_path = tmp_path / "benchmark.json"
+    times = iter([0.0, 1.0, 1.0, 3.0])
+    memory_samples = iter([512.0, 1024.0, 2048.0, 4096.0, 8192.0])
+
+    def fake_solver(*args, **kwargs):
+        return {"p": np.zeros((1, 1))}
+
+    result = run(
+        options,
+        max_cases=1,
+        output_path=output_path,
+        solver=fake_solver,
+        timer=lambda: next(times),
+        memory_reader=lambda: next(memory_samples),
+        memory_sampling_interval=0,
+    )
+
+    assert result["mem_usage"] == [pytest.approx(5120.0)]
+
+    saved = json.loads(output_path.read_text())
+    assert saved["mem_usage"] == [pytest.approx(5120.0)]
+
+
+def test_report_memory_usage_fails_before_writing_when_unavailable(tmp_path: Path):
+    options = small_options(report_mem_usage=True)
+    output_path = tmp_path / "benchmark.json"
+
+    def unsupported_memory_reader():
+        raise RuntimeError("memory unavailable")
+
+    with pytest.raises(ValueError, match="report_mem_usage is not supported"):
+        run(options, max_cases=1, output_path=output_path, memory_reader=unsupported_memory_reader)
+
+    assert not output_path.exists()
+
+
 def test_run_saves_partial_results_after_solver_error(tmp_path: Path):
     options = small_options()
     output_path = tmp_path / "benchmark.json"

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import math
+import os
 import platform
+import subprocess
+import threading
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -47,6 +51,8 @@ class BenchmarkOptions:
             raise ValueError("scale arrays must have the same length")
         if self.number_time_points <= 0 or self.num_averages <= 0:
             raise ValueError("number_time_points and num_averages must be positive")
+        if self.start_size <= 0:
+            raise ValueError("start_size must be positive")
         if self.number_sensor_points <= 1:
             raise ValueError("number_sensor_points must be greater than 1")
 
@@ -123,17 +129,20 @@ def rolling_average(previous_average: float, new_value: float, count: int) -> fl
     return (previous_average * (count - 1) + new_value) / count
 
 
-def store_case_result(result: dict[str, Any], comp_size: int, comp_time: float, mem_usage: float, report_mem_usage: bool) -> None:
-    if len(result["comp_size"]) == 0 or result["comp_size"][-1] != comp_size:
+def store_case_result(
+    result: dict[str, Any], case_index: int, comp_size: int, comp_time: float, mem_usage: float, report_mem_usage: bool
+) -> None:
+    if case_index == len(result["comp_size"]):
         result["comp_size"].append(comp_size)
         result["comp_time"].append(comp_time)
         if report_mem_usage:
             result["mem_usage"].append(mem_usage)
         return
 
-    result["comp_time"][-1] = comp_time
+    result["comp_size"][case_index] = comp_size
+    result["comp_time"][case_index] = comp_time
     if report_mem_usage:
-        result["mem_usage"][-1] = mem_usage
+        result["mem_usage"][case_index] = mem_usage
 
 
 def save_results(path: Path, result: dict[str, Any]) -> None:
@@ -148,7 +157,7 @@ def save_results(path: Path, result: dict[str, Any]) -> None:
     }
     if "mem_usage" in result:
         payload["mem_usage"] = [float(usage) for usage in result["mem_usage"]]
-    path.write_text(json.dumps(payload, indent=2) + "\n")
+    path.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
 
 def options_payload(options: BenchmarkOptions, backend: str, device: str) -> dict[str, Any]:
@@ -166,13 +175,112 @@ def options_payload(options: BenchmarkOptions, backend: str, device: str) -> dic
     return payload
 
 
-def peak_memory_bytes() -> float:
-    try:
-        import resource
-    except ImportError:
-        return float("nan")
+def validate_memory_bytes(value: float) -> float:
+    memory_bytes = float(value)
+    if not math.isfinite(memory_bytes) or memory_bytes < 0:
+        raise ValueError("memory usage must be a finite non-negative value")
+    return memory_bytes
 
-    usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    if platform.system().lower() == "darwin":
-        return float(usage)
-    return float(usage * 1024)
+
+def _linux_current_memory_bytes() -> float:
+    pages = int(Path("/proc/self/statm").read_text().split()[1])
+    return float(pages * os.sysconf("SC_PAGE_SIZE"))
+
+
+def _ps_current_memory_bytes() -> float:
+    completed = subprocess.run(
+        ["ps", "-o", "rss=", "-p", str(os.getpid())],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return float(int(completed.stdout.strip()) * 1024)
+
+
+def _windows_current_memory_bytes() -> float:
+    import ctypes
+    from ctypes import wintypes
+
+    class ProcessMemoryCounters(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    counters = ProcessMemoryCounters()
+    counters.cb = ctypes.sizeof(ProcessMemoryCounters)
+    handle = ctypes.windll.kernel32.GetCurrentProcess()
+    if not ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
+        raise RuntimeError("could not read process memory usage")
+    return float(counters.WorkingSetSize)
+
+
+def peak_memory_bytes() -> float:
+    system = platform.system().lower()
+    if system == "linux":
+        try:
+            return validate_memory_bytes(_linux_current_memory_bytes())
+        except (OSError, ValueError, IndexError):
+            return validate_memory_bytes(_ps_current_memory_bytes())
+    if system == "darwin":
+        return validate_memory_bytes(_ps_current_memory_bytes())
+    if system == "windows":
+        return validate_memory_bytes(_windows_current_memory_bytes())
+
+    raise RuntimeError("report_mem_usage is not supported on this platform")
+
+
+class PeakMemorySampler:
+    def __init__(self, reader: Callable[[], float] = peak_memory_bytes, interval: float = 0.05):
+        self._reader = reader
+        self._interval = interval
+        self._peak_bytes = 0.0
+        self._error: Exception | None = None
+        self._lock = threading.Lock()
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    @property
+    def peak_bytes(self) -> float:
+        with self._lock:
+            return self._peak_bytes
+
+    def __enter__(self) -> PeakMemorySampler:
+        self._record_sample()
+        if self._interval > 0:
+            self._thread = threading.Thread(target=self._sample_until_stopped, daemon=True)
+            self._thread.start()
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: Any) -> None:
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join()
+        try:
+            self._record_sample()
+        except Exception as exc:
+            if exc_type is None:
+                raise exc
+        if exc_type is None and self._error is not None:
+            raise self._error
+
+    def _sample_until_stopped(self) -> None:
+        while not self._stop_event.wait(self._interval):
+            try:
+                self._record_sample()
+            except Exception as exc:
+                self._error = exc
+                self._stop_event.set()
+
+    def _record_sample(self) -> None:
+        memory_bytes = validate_memory_bytes(self._reader())
+        with self._lock:
+            self._peak_bytes = max(self._peak_bytes, memory_bytes)
