@@ -11,7 +11,7 @@ from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-__version__ = "0.6.3"
+__version__ = "0.6.3rc1"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
