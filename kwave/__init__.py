@@ -83,29 +83,25 @@ ARCHITECTURES = ["omp", "cuda"]
 
 
 def _platform_binary_url(platform_name: str, architecture: str) -> list:
-    """Return the URL list for a given backend on the given platform.
+    """URLs for a backend on a given platform from the unified v1.4.2+ release.
 
-    Takes ``platform_name`` explicitly rather than reading the module-level
-    ``PLATFORM`` so ``URL_DICT`` is correct for every OS key, not just the
-    current host's.
+    Takes ``platform_name`` explicitly so ``URL_DICT`` is correct for every OS
+    key, not just the host's. ``_darwin_unsupported`` only suppresses URLs
+    when actually running on darwin — building ``URL_DICT["darwin"]`` from a
+    Linux host still yields the canonical darwin asset URL.
     """
-    if platform_name == "darwin":
-        # _darwin_unsupported is only meaningful when actually running on
-        # darwin; building URL_DICT["darwin"] from a Linux host should still
-        # produce the canonical darwin asset URL.
-        if architecture == "cuda" or (platform_name == PLATFORM and _darwin_unsupported):
-            return []
-        return [_UNIFIED_RELEASE_URL + f"{EXECUTABLE_PREFIX}OMP-darwin"]
-    if platform_name == "linux":
-        suffix = "CUDA-linux" if architecture == "cuda" else "OMP-linux"
-        return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + suffix]
-    # Windows: .exe + (only for OMP) the shared runtime DLL bundle. Both
-    # backends use the same DLLs, so we attach them once to OMP and skip
-    # them on the CUDA entry — otherwise install_binaries would download
-    # all 21 DLLs twice (once per backend) on first install.
-    exe_suffix = "CUDA-windows.exe" if architecture == "cuda" else "OMP-windows.exe"
-    dll_urls = [_UNIFIED_RELEASE_URL + dll for dll in WINDOWS_DLLS] if architecture == "omp" else []
-    return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + exe_suffix] + dll_urls
+    if architecture == "cuda" and platform_name == "darwin":
+        return []
+    if platform_name == "darwin" and platform_name == PLATFORM and _darwin_unsupported:
+        return []
+    backend = "CUDA" if architecture == "cuda" else "OMP"
+    ext = ".exe" if platform_name == "windows" else ""
+    exe_url = f"{_UNIFIED_RELEASE_URL}{EXECUTABLE_PREFIX}{backend}-{platform_name}{ext}"
+    # Shared runtime DLLs ship with the OMP entry only — both backends find
+    # them at the same BINARY_PATH, so attaching to both would download the
+    # full 21-DLL bundle twice on first install.
+    dll_urls = [_UNIFIED_RELEASE_URL + dll for dll in WINDOWS_DLLS] if platform_name == "windows" and architecture == "omp" else []
+    return [exe_url] + dll_urls
 
 
 URL_DICT = {plat: {arch: _platform_binary_url(plat, arch) for arch in ARCHITECTURES} for plat in ["linux", "darwin", "windows"]}
@@ -114,26 +110,16 @@ URL_DICT = {plat: {arch: _platform_binary_url(plat, arch) for arch in ARCHITECTU
 def _local_filename(asset_name: str) -> str:
     """Map a unified-release asset name to the local install filename.
 
-    The unified release v1.4.2+ tags platform binaries with explicit
-    suffixes (``kspaceFirstOrder-CUDA-linux``, ``kspaceFirstOrder-OMP-windows.exe``)
-    to disambiguate them in the asset list. Consumer code (``_resolve_binary_path``,
-    tests, ``BINARY_PATH``-relative lookups) expects the bare backend name
-    (``kspaceFirstOrder-CUDA``, ``kspaceFirstOrder-OMP``, plus ``.exe`` on Windows).
-    Strip the platform suffix so the downloaded file lands at the path the
-    rest of the package expects.
-
-    Non-prefixed assets (DLLs, etc.) pass through unchanged.
+    The unified release tags platform binaries with the platform name
+    (e.g. ``kspaceFirstOrder-CUDA-linux``, ``kspaceFirstOrder-OMP-windows.exe``)
+    to disambiguate them in the GitHub asset list. Consumer code expects the
+    bare backend name (``kspaceFirstOrder-CUDA``, ``kspaceFirstOrder-OMP``,
+    plus ``.exe`` on Windows). Non-prefixed assets (DLLs, etc.) pass through.
     """
     if not asset_name.startswith(EXECUTABLE_PREFIX):
-        return asset_name  # DLL or other shared asset — ship under its own name
-    rest = asset_name[len(EXECUTABLE_PREFIX) :]  # e.g. "CUDA-linux" or "OMP-windows.exe"
-    backend, _, suffix = rest.partition("-")
-    if not suffix:
-        return asset_name  # already bare (no platform tag)
-    # Preserve any file extension carried in the platform suffix (".exe" on Windows)
-    ext = ""
-    if "." in suffix:
-        ext = "." + suffix.split(".", 1)[1]
+        return asset_name
+    backend = asset_name.split("-", 2)[1]
+    ext = ".exe" if asset_name.endswith(".exe") else ""
     return f"{EXECUTABLE_PREFIX}{backend}{ext}"
 
 
