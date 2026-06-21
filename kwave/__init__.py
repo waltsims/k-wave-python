@@ -82,21 +82,59 @@ EXECUTABLE_PREFIX = "kspaceFirstOrder-"
 ARCHITECTURES = ["omp", "cuda"]
 
 
-def _platform_binary_url(architecture: str) -> list:
-    """Return the URL list for a given backend on the current platform."""
-    if PLATFORM == "darwin":
-        if _darwin_unsupported or architecture == "cuda":
+def _platform_binary_url(platform_name: str, architecture: str) -> list:
+    """Return the URL list for a given backend on the given platform.
+
+    Takes ``platform_name`` explicitly rather than reading the module-level
+    ``PLATFORM`` so ``URL_DICT`` is correct for every OS key, not just the
+    current host's.
+    """
+    if platform_name == "darwin":
+        # _darwin_unsupported is only meaningful when actually running on
+        # darwin; building URL_DICT["darwin"] from a Linux host should still
+        # produce the canonical darwin asset URL.
+        if architecture == "cuda" or (platform_name == PLATFORM and _darwin_unsupported):
             return []
         return [_UNIFIED_RELEASE_URL + f"{EXECUTABLE_PREFIX}OMP-darwin"]
-    if PLATFORM == "linux":
+    if platform_name == "linux":
         suffix = "CUDA-linux" if architecture == "cuda" else "OMP-linux"
         return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + suffix]
-    # Windows: the .exe plus the shared runtime DLL bundle
+    # Windows: .exe + (only for OMP) the shared runtime DLL bundle. Both
+    # backends use the same DLLs, so we attach them once to OMP and skip
+    # them on the CUDA entry — otherwise install_binaries would download
+    # all 21 DLLs twice (once per backend) on first install.
     exe_suffix = "CUDA-windows.exe" if architecture == "cuda" else "OMP-windows.exe"
-    return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + exe_suffix] + [_UNIFIED_RELEASE_URL + dll for dll in WINDOWS_DLLS]
+    dll_urls = [_UNIFIED_RELEASE_URL + dll for dll in WINDOWS_DLLS] if architecture == "omp" else []
+    return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + exe_suffix] + dll_urls
 
 
-URL_DICT = {os: {arch: _platform_binary_url(arch) for arch in ARCHITECTURES} for os in ["linux", "darwin", "windows"]}
+URL_DICT = {plat: {arch: _platform_binary_url(plat, arch) for arch in ARCHITECTURES} for plat in ["linux", "darwin", "windows"]}
+
+
+def _local_filename(asset_name: str) -> str:
+    """Map a unified-release asset name to the local install filename.
+
+    The unified release v1.4.2+ tags platform binaries with explicit
+    suffixes (``kspaceFirstOrder-CUDA-linux``, ``kspaceFirstOrder-OMP-windows.exe``)
+    to disambiguate them in the asset list. Consumer code (``_resolve_binary_path``,
+    tests, ``BINARY_PATH``-relative lookups) expects the bare backend name
+    (``kspaceFirstOrder-CUDA``, ``kspaceFirstOrder-OMP``, plus ``.exe`` on Windows).
+    Strip the platform suffix so the downloaded file lands at the path the
+    rest of the package expects.
+
+    Non-prefixed assets (DLLs, etc.) pass through unchanged.
+    """
+    if not asset_name.startswith(EXECUTABLE_PREFIX):
+        return asset_name  # DLL or other shared asset — ship under its own name
+    rest = asset_name[len(EXECUTABLE_PREFIX) :]  # e.g. "CUDA-linux" or "OMP-windows.exe"
+    backend, _, suffix = rest.partition("-")
+    if not suffix:
+        return asset_name  # already bare (no platform tag)
+    # Preserve any file extension carried in the platform suffix (".exe" on Windows)
+    ext = ""
+    if "." in suffix:
+        ext = "." + suffix.split(".", 1)[1]
+    return f"{EXECUTABLE_PREFIX}{backend}{ext}"
 
 
 def _hash_file(filepath: str) -> str:
@@ -182,8 +220,8 @@ def binaries_present() -> bool:
     """
     binary_list = []
     for binary_type in ARCHITECTURES:
-        for binary_name in URL_DICT[PLATFORM][binary_type]:
-            binary_list.append((binary_name.split("/")[-1], binary_type))
+        for url in URL_DICT[PLATFORM][binary_type]:
+            binary_list.append((_local_filename(url.split("/")[-1]), binary_type))
 
     missing_binaries: List[str] = []
 
@@ -226,10 +264,12 @@ def download_binaries(system_os: str, bin_type: str):
 
     """
     for url in URL_DICT[system_os][bin_type]:
-        # Extract the file name from the GitHub release URL
-        binary_version, filename = url.split("/")[-2:]
+        # Extract the asset name from the GitHub release URL, then map it to
+        # the local install filename consumer code expects (see _local_filename).
+        binary_version, asset_name = url.split("/")[-2:]
+        filename = _local_filename(asset_name)
 
-        logging.log(logging.INFO, f"Downloading {filename} to {BINARY_PATH}...")
+        logging.log(logging.INFO, f"Downloading {asset_name} -> {filename} in {BINARY_PATH}...")
 
         # Create the directory if it does not yet exist
         os.makedirs(BINARY_PATH, exist_ok=True)
