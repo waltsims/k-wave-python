@@ -9,10 +9,15 @@ Maxwell/Pascal/Volta).
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
+import sys
+import threading
 
 _MIN_COMPUTE_CAPABILITY_CACHE: tuple[tuple[int, int] | None, bool] = (None, False)
+_MIN_COMPUTE_CAPABILITY_LOCK = threading.Lock()
+_KWAVE_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _query_nvidia_smi() -> list[tuple[int, int]] | None:
@@ -58,22 +63,48 @@ def get_min_compute_capability() -> tuple[int, int] | None:
     """Return the lowest (major, minor) compute capability across visible NVIDIA GPUs.
 
     Returns None if nvidia-smi is unavailable, returns no devices, or fails to parse.
-    Result is cached after first call.
+    Result is cached after first call; thread-safe via double-checked locking.
     """
     global _MIN_COMPUTE_CAPABILITY_CACHE
     cached_value, cached = _MIN_COMPUTE_CAPABILITY_CACHE
     if cached:
         return cached_value
 
-    caps = _query_nvidia_smi()
-    if not caps:
-        # None (failure) or [] (no devices) both collapse to None.
-        result: tuple[int, int] | None = None
-    else:
-        result = min(caps)
+    with _MIN_COMPUTE_CAPABILITY_LOCK:
+        # Re-check inside the lock: another thread may have populated the cache
+        # while we were waiting on it.
+        cached_value, cached = _MIN_COMPUTE_CAPABILITY_CACHE
+        if cached:
+            return cached_value
 
-    _MIN_COMPUTE_CAPABILITY_CACHE = (result, True)
-    return result
+        caps = _query_nvidia_smi()
+        if not caps:
+            # None (failure) or [] (no devices) both collapse to None.
+            result: tuple[int, int] | None = None
+        else:
+            result = min(caps)
+
+        _MIN_COMPUTE_CAPABILITY_CACHE = (result, True)
+        return result
+
+
+def user_warning_stacklevel(initial: int = 2) -> int:
+    """Walk the call stack from ``initial`` upward, returning the first depth that
+    lands outside the kwave package.
+
+    Pass the result to ``warnings.warn(..., stacklevel=...)`` so the warning is
+    attributed to the user's code rather than an internal library frame.
+    ``initial=2`` matches the conventional default (skip the warn-emitting helper
+    itself and start at its caller).
+    """
+    frame = sys._getframe(initial)
+    level = initial
+    while frame is not None:
+        if not os.path.abspath(frame.f_code.co_filename).startswith(_KWAVE_PACKAGE_ROOT + os.sep):
+            return level
+        frame = frame.f_back
+        level += 1
+    return initial
 
 
 def _reset_compute_capability_cache() -> None:
@@ -82,4 +113,5 @@ def _reset_compute_capability_cache() -> None:
     Intended for use in tests; not part of the public API.
     """
     global _MIN_COMPUTE_CAPABILITY_CACHE
-    _MIN_COMPUTE_CAPABILITY_CACHE = (None, False)
+    with _MIN_COMPUTE_CAPABILITY_LOCK:
+        _MIN_COMPUTE_CAPABILITY_CACHE = (None, False)

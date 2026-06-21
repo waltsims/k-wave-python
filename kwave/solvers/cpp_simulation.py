@@ -19,7 +19,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
-from kwave.utils.cuda import get_min_compute_capability
+from kwave.utils.cuda import get_min_compute_capability, user_warning_stacklevel
 from kwave.utils.io import write_attributes, write_matrix
 from kwave.utils.matrix import num_dim2
 
@@ -394,7 +394,7 @@ class CppSimulation:
             f"  - Build the C++ backend from source with CUDA Toolkit 12.x.\n"
             f"The simulation will continue but will likely fail with 'no kernel image is available for execution on the device'.",
             RuntimeWarning,
-            stacklevel=2,
+            stacklevel=user_warning_stacklevel(),
         )
 
     def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
