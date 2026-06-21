@@ -10,6 +10,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -18,8 +19,13 @@ from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
 from kwave.ksensor import kSensor
 from kwave.ksource import kSource
+from kwave.utils.cuda import get_min_compute_capability
 from kwave.utils.io import write_attributes, write_matrix
 from kwave.utils.matrix import num_dim2
+
+# Minimum CUDA compute capability supported by the bundled C++ binary.
+# CUDA Toolkit 13.0 removed Maxwell/Pascal/Volta (sm < 7.5).
+_MIN_SUPPORTED_COMPUTE_CAPABILITY = (7, 5)
 
 # Source injection mode mapping (shared by pressure and velocity sources)
 _SOURCE_MODE_MAP = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
@@ -365,10 +371,39 @@ class CppSimulation:
             raise FileNotFoundError(f"C++ binary not found at {resolved}. Install with: pip install k-wave-data")
         return resolved
 
+    @staticmethod
+    def _warn_if_unsupported_gpu() -> None:
+        """Emit a RuntimeWarning when the host GPU is below the supported compute capability.
+
+        Silent when ``nvidia-smi`` is unavailable (None) — the binary may still
+        work via PTX JIT or the user may have a custom CUDA setup.
+        """
+        cc = get_min_compute_capability()
+        if cc is None:
+            return
+        if cc >= _MIN_SUPPORTED_COMPUTE_CAPABILITY:
+            return
+
+        major, minor = cc
+        min_major, min_minor = _MIN_SUPPORTED_COMPUTE_CAPABILITY
+        warnings.warn(
+            f"k-wave-python's CUDA binary requires compute capability >= {min_major}.{min_minor} (Turing or newer). "
+            f"Detected GPU has compute capability {major}.{minor}, which is not supported. "
+            f"CUDA Toolkit 13.0 removed Maxwell, Pascal, and Volta support. Either:\n"
+            f"  - Use backend='python' instead (NumPy/CuPy works on every CUDA-capable GPU), or\n"
+            f"  - Build the C++ backend from source with CUDA Toolkit 12.x.\n"
+            f"The simulation will continue but will likely fail with 'no kernel image is available for execution on the device'.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
     def _execute(self, input_file, output_file, *, device, num_threads, device_num, quiet, debug, binary_path=None):
         """Run the C++ k-Wave binary."""
         resolved = self._resolve_binary_path(device, binary_path)
         resolved.chmod(resolved.stat().st_mode | stat.S_IEXEC)
+
+        if device == "gpu":
+            self._warn_if_unsupported_gpu()
 
         # Build command-line options
         options = ["-i", input_file, "-o", output_file]
