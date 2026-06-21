@@ -3,6 +3,7 @@ import json
 import os
 import stat
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -50,9 +51,15 @@ def test_download_sets_executable_bit(tmp_path, monkeypatch):
     monkeypatch.setattr(kwave, "BINARY_PATH", tmp_path)
 
     test_url = next(urls[0] for urls in kwave.URL_DICT[kwave.PLATFORM].values() if urls)
-    filename = test_url.rsplit("/", 1)[-1]
+    created = {}
 
     def fake_urlretrieve(url, dest):
+        # Capture the actual destination chosen by download_binaries instead
+        # of re-deriving it from the URL — the unified release v1.4.2+ tags
+        # assets with a platform suffix (e.g. -linux) that the package
+        # strips when computing the local install filename, so URL-tail
+        # inference is no longer correct (and never should have been).
+        created["dest"] = dest
         with open(dest, "wb") as f:
             f.write(b"fake-binary-payload")
         os.chmod(dest, 0o644)
@@ -62,7 +69,7 @@ def test_download_sets_executable_bit(tmp_path, monkeypatch):
 
     kwave.download_binaries(kwave.PLATFORM, "test")
 
-    binary_filepath = tmp_path / filename
+    binary_filepath = Path(created["dest"])
     assert binary_filepath.exists()
     mode = os.stat(binary_filepath).st_mode
     assert mode & stat.S_IXUSR, "owner exec bit not set after download"

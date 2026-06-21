@@ -45,11 +45,11 @@ Bug-tracker = "https://github.com/waltsims/k-wave-python/issues"
 [project.optional-dependencies]
 test = ["pytest",
         "pytest-xdist",
-        "coverage==7.14.0",
+        "coverage==7.14.1",
         "phantominator",
         "testfixtures==8.3.0",
         "requests==2.34.2"]
-example = ["gdown==6.0.0"]
+example = ["gdown==6.1.0"]
 docs = [ "sphinx<9",
     "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
