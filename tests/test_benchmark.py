@@ -184,25 +184,37 @@ def test_options_post_init_rejects_invalid_geometry(kwargs, expected_match):
         small_options(**kwargs)
 
 
-def test_cpp_backend_uses_child_sampler_via_factory(tmp_path: Path):
-    """For backend='cpp', the subprocess sampler factory is used (not PeakMemorySampler)."""
-    options = small_options(report_mem_usage=True, num_averages=2)
-    output_path = tmp_path / "benchmark.json"
-    times = iter([0.0, 1.0, 1.0, 3.0])
+def test_cpp_backend_shares_child_sampler_across_iterations(tmp_path: Path):
+    """For backend='cpp', the factory is called ONCE per grid (not per iteration).
 
-    sampler_calls = []
+    ChildPeakMemorySampler's baseline must be captured once per grid because
+    ru_maxrss is cumulative — re-baselining per iteration would silently
+    zero the reported delta (Greptile P1 on the original implementation).
+    """
+    options = small_options(report_mem_usage=True, num_averages=3)
+    output_path = tmp_path / "benchmark.json"
+    times = iter([0.0, 1.0, 1.0, 3.0, 3.0, 7.0])
+
+    constructed: list[object] = []
+    enter_count = 0
 
     class FakeChildSampler:
+        def __init__(self):
+            constructed.append(self)
+            self._peak = 0
+
         def __enter__(self):
-            sampler_calls.append("enter")
+            nonlocal enter_count
+            enter_count += 1
             return self
 
         def __exit__(self, *exc):
-            sampler_calls.append("exit")
+            # Simulate cumulative growth: peak grows by 1 KB each iteration.
+            self._peak += 1024
 
         @property
         def peak_bytes(self) -> float:
-            return float(1024 * len(sampler_calls))  # arbitrary but deterministic
+            return float(self._peak)
 
     def fake_solver(*args, **kwargs):
         return {"p": np.zeros((1, 1))}
@@ -217,9 +229,13 @@ def test_cpp_backend_uses_child_sampler_via_factory(tmp_path: Path):
         mem_sampler_factory=FakeChildSampler,
     )
 
-    # Two loop iterations × (enter, exit). The early-startup probe just
-    # constructs a sampler to verify the factory works; it doesn't enter.
-    assert sampler_calls == ["enter", "exit", "enter", "exit"]
+    # max_cases=1 grid → factory called twice: once at the startup probe,
+    # once for the actual grid loop. NOT once per iteration.
+    assert len(constructed) == 2, f"factory called {len(constructed)} times; expected 2 (1 probe + 1 grid)"
+    # num_averages=3 iterations on that one grid → 3 enter/exit pairs on the SAME instance.
+    assert enter_count == 3
+    # The actively-used sampler grew monotonically to 3 KB.
+    assert constructed[1].peak_bytes == pytest.approx(3072.0)
     assert "mem_usage" in result and len(result["mem_usage"]) == 1
 
 

@@ -264,19 +264,27 @@ peak_memory_bytes = current_memory_bytes
 
 
 class ChildPeakMemorySampler:
-    """Capture the peak RSS of child processes spawned during the ``with`` block.
+    """Capture the peak RSS of child processes spawned during the sampler's lifetime.
 
     Use this for ``backend="cpp"`` benchmark runs where the simulation work
     happens in a subprocess — ``PeakMemorySampler`` only sees the Python
     parent's RSS and reports a number that has nothing to do with the C++
     process's actual footprint.
 
-    Implementation: ``resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`` is the
-    cumulative max across all reaped children, so we record before/after and
-    return the increment. On Linux ``ru_maxrss`` is reported in kilobytes; on
-    macOS it's in bytes (per BSD historical convention). Windows has no
-    equivalent in ``resource`` — the sampler raises ``NotImplementedError``
-    on Windows so the caller can refuse the combination cleanly.
+    **Lifetime model — use ONE instance per grid size, enter/exit per iteration.**
+    ``resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`` is a monotonically
+    non-decreasing cumulative max across *all* reaped children since the
+    parent process started, so capturing a baseline at each ``__enter__``
+    would yield ``delta == 0`` for any iteration after the first when the
+    workload is uniform. Instead the baseline is captured at construction
+    and ``peak_bytes`` returns growth since then; reuse the same instance
+    across all iterations of a grid size so the answer reflects the peak
+    for that grid's runs, not a per-iteration delta that's always zero.
+
+    On Linux ``ru_maxrss`` is reported in kilobytes; on macOS it's in bytes
+    (per BSD historical convention). Windows has no equivalent in
+    ``resource`` — the sampler raises ``NotImplementedError`` on Windows so
+    the caller can refuse the combination cleanly.
     """
 
     def __init__(self) -> None:
@@ -286,23 +294,25 @@ class ChildPeakMemorySampler:
                 "(resource.RUSAGE_CHILDREN is POSIX-only). "
                 "Use backend='python' to measure simulation memory on Windows."
             )
-        self._before = 0
-        self._after = 0
-
-    def __enter__(self) -> ChildPeakMemorySampler:
         import resource  # POSIX-only; gated by the Windows check above
 
-        self._before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        self._baseline = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        self._latest = self._baseline
+
+    def __enter__(self) -> ChildPeakMemorySampler:
+        # No-op: ru_maxrss is cumulative across the lifetime of the parent,
+        # so re-capturing a baseline at every iteration would silently
+        # collapse the reported delta to zero. Baseline is fixed at __init__.
         return self
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: Any) -> None:
         import resource
 
-        self._after = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        self._latest = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
 
     @property
     def peak_bytes(self) -> float:
-        delta = max(0, self._after - self._before)
+        delta = max(0, self._latest - self._baseline)
         # ru_maxrss units differ by platform (Linux: KB, macOS: bytes).
         if platform.system().lower() == "linux":
             return float(delta * 1024)

@@ -94,9 +94,15 @@ def run(
         loop_mem_usage = 0.0
         try:
             kgrid, medium, source, sensor = build_case(options, nx, ny, nz, scale)
+            # cpp backend: ChildPeakMemorySampler's baseline must be captured
+            # once per grid (ru_maxrss is cumulative — re-baselining per
+            # iteration would silently zero the delta). Python backend's
+            # PeakMemorySampler is per-iteration by design.
+            grid_sampler = sampler_factory() if (options.report_mem_usage and backend == "cpp") else None
             for loop_num in range(1, options.num_averages + 1):
                 if options.report_mem_usage:
-                    with sampler_factory() as memory_sampler:
+                    memory_cm = grid_sampler if grid_sampler is not None else sampler_factory()
+                    with memory_cm as memory_sampler:
                         start = timer()
                         solver(
                             kgrid,
