@@ -55,6 +55,12 @@ class BenchmarkOptions:
             raise ValueError("start_size must be positive")
         if self.number_sensor_points <= 1:
             raise ValueError("number_sensor_points must be greater than 1")
+        if self.domain_size <= 0:
+            raise ValueError("domain_size must be positive")
+        if self.sensor_radius <= 0:
+            raise ValueError("sensor_radius must be positive")
+        if self.pml_size < 0:
+            raise ValueError("pml_size must be non-negative")
 
     @property
     def dtype(self) -> type[np.floating[Any]]:
@@ -84,12 +90,15 @@ def build_case(options: BenchmarkOptions, nx: int, ny: int, nz: int, scale: int)
     rho0 = dtype(1000)
     alpha_coeff = dtype(0.75)
     alpha_power = dtype(1.5)
-    bon_a = dtype(6)
 
     if options.heterogeneous_media:
         sound_speed = c0 * np.ones((nx, ny, nz), dtype=dtype)
+        # MATLAB: sound_speed(1:Nx/4, :, :)  →  Python: [:nx//4, :, :] (head slice, no -1).
         sound_speed[: nx // 4, :, :] = c0 * dtype(1.2)
         density = rho0 * np.ones((nx, ny, nz), dtype=dtype)
+        # MATLAB: density(:, Ny/4:end, :)  →  Python: [:, ny//4-1:, :] (tail slice — the
+        # -1 converts MATLAB's 1-indexed inclusive start to Python's 0-indexed start).
+        # max(..., 0) guards tiny grids where ny//4 - 1 would be negative.
         density[:, max(ny // 4 - 1, 0) :, :] = rho0 * dtype(1.2)
     else:
         sound_speed = np.array(c0, dtype=dtype)
@@ -100,10 +109,14 @@ def build_case(options: BenchmarkOptions, nx: int, ny: int, nz: int, scale: int)
         medium.alpha_coeff = alpha_coeff
         medium.alpha_power = alpha_power
     if options.nonlinear_media:
-        medium.BonA = bon_a
+        medium.BonA = dtype(6)
 
     source = kSource()
+    # make_ball treats the supplied center as 1-indexed internally (mapgen.py),
+    # so passing nx//2 (= MATLAB's Nx/2 1-indexed value) yields the same centroid.
     source.p0 = dtype(10) * make_ball(Vector([nx, ny, nz]), Vector([nx // 2, ny // 2, nz // 2]), 2 * scale)
+    # smooth() upcasts to float64 via the FFT path even when given float32;
+    # the trailing .astype(dtype) restores user-requested precision.
     source.p0 = smooth(source.p0.astype(dtype, copy=False), restore_max=True).astype(dtype, copy=False)
 
     sensor_mask = make_cart_sphere(options.sensor_radius, options.number_sensor_points)
@@ -223,7 +236,14 @@ def _windows_current_memory_bytes() -> float:
     return float(counters.WorkingSetSize)
 
 
-def peak_memory_bytes() -> float:
+def current_memory_bytes() -> float:
+    """Return the current resident-set-size of THIS Python process, in bytes.
+
+    Note: this returns the *current* RSS at the moment of the call, not a
+    historical peak (despite ``ru_maxrss``-style fields existing on most
+    platforms). Use ``PeakMemorySampler`` to track peak-over-time, or
+    ``ChildPeakMemorySampler`` for subprocess (``backend="cpp"``) measurement.
+    """
     system = platform.system().lower()
     if system == "linux":
         try:
@@ -238,8 +258,59 @@ def peak_memory_bytes() -> float:
     raise RuntimeError("report_mem_usage is not supported on this platform")
 
 
+# Back-compat alias — the old name is misleading but kept so external callers
+# (and any pre-merge benchmark JSON tooling) don't break.
+peak_memory_bytes = current_memory_bytes
+
+
+class ChildPeakMemorySampler:
+    """Capture the peak RSS of child processes spawned during the ``with`` block.
+
+    Use this for ``backend="cpp"`` benchmark runs where the simulation work
+    happens in a subprocess — ``PeakMemorySampler`` only sees the Python
+    parent's RSS and reports a number that has nothing to do with the C++
+    process's actual footprint.
+
+    Implementation: ``resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`` is the
+    cumulative max across all reaped children, so we record before/after and
+    return the increment. On Linux ``ru_maxrss`` is reported in kilobytes; on
+    macOS it's in bytes (per BSD historical convention). Windows has no
+    equivalent in ``resource`` — the sampler raises ``NotImplementedError``
+    on Windows so the caller can refuse the combination cleanly.
+    """
+
+    def __init__(self) -> None:
+        if platform.system().lower() == "windows":
+            raise NotImplementedError(
+                "ChildPeakMemorySampler is not supported on Windows "
+                "(resource.RUSAGE_CHILDREN is POSIX-only). "
+                "Use backend='python' to measure simulation memory on Windows."
+            )
+        self._before = 0
+        self._after = 0
+
+    def __enter__(self) -> ChildPeakMemorySampler:
+        import resource  # POSIX-only; gated by the Windows check above
+
+        self._before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: Any) -> None:
+        import resource
+
+        self._after = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+
+    @property
+    def peak_bytes(self) -> float:
+        delta = max(0, self._after - self._before)
+        # ru_maxrss units differ by platform (Linux: KB, macOS: bytes).
+        if platform.system().lower() == "linux":
+            return float(delta * 1024)
+        return float(delta)
+
+
 class PeakMemorySampler:
-    def __init__(self, reader: Callable[[], float] = peak_memory_bytes, interval: float = 0.05):
+    def __init__(self, reader: Callable[[], float] = current_memory_bytes, interval: float = 0.05):
         self._reader = reader
         self._interval = interval
         self._peak_bytes = 0.0

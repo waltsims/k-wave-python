@@ -1,10 +1,12 @@
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
 from benchmarks.benchmark import BenchmarkOptions, build_case, grid_sizes, run
+from benchmarks.helpers import ChildPeakMemorySampler, current_memory_bytes, peak_memory_bytes
 
 
 def small_options(**overrides):
@@ -158,6 +160,93 @@ def test_report_memory_usage_fails_before_writing_when_unavailable(tmp_path: Pat
         run(options, max_cases=1, output_path=output_path, memory_reader=unsupported_memory_reader)
 
     assert not output_path.exists()
+
+
+def test_peak_memory_bytes_is_back_compat_alias_for_current_memory_bytes():
+    # The old name was misleading (Linux/macOS/Windows readers return current
+    # RSS, not historical peak). Keep the alias so external benchmark tooling
+    # that imported the old name doesn't break.
+    assert peak_memory_bytes is current_memory_bytes
+
+
+@pytest.mark.parametrize(
+    "kwargs, expected_match",
+    [
+        ({"domain_size": 0}, "domain_size must be positive"),
+        ({"domain_size": -1e-3}, "domain_size must be positive"),
+        ({"sensor_radius": 0}, "sensor_radius must be positive"),
+        ({"sensor_radius": -1}, "sensor_radius must be positive"),
+        ({"pml_size": -1}, "pml_size must be non-negative"),
+    ],
+)
+def test_options_post_init_rejects_invalid_geometry(kwargs, expected_match):
+    with pytest.raises(ValueError, match=expected_match):
+        small_options(**kwargs)
+
+
+def test_cpp_backend_uses_child_sampler_via_factory(tmp_path: Path):
+    """For backend='cpp', the subprocess sampler factory is used (not PeakMemorySampler)."""
+    options = small_options(report_mem_usage=True, num_averages=2)
+    output_path = tmp_path / "benchmark.json"
+    times = iter([0.0, 1.0, 1.0, 3.0])
+
+    sampler_calls = []
+
+    class FakeChildSampler:
+        def __enter__(self):
+            sampler_calls.append("enter")
+            return self
+
+        def __exit__(self, *exc):
+            sampler_calls.append("exit")
+
+        @property
+        def peak_bytes(self) -> float:
+            return float(1024 * len(sampler_calls))  # arbitrary but deterministic
+
+    def fake_solver(*args, **kwargs):
+        return {"p": np.zeros((1, 1))}
+
+    result = run(
+        options,
+        backend="cpp",
+        max_cases=1,
+        output_path=output_path,
+        solver=fake_solver,
+        timer=lambda: next(times),
+        mem_sampler_factory=FakeChildSampler,
+    )
+
+    # Two loop iterations × (enter, exit). The early-startup probe just
+    # constructs a sampler to verify the factory works; it doesn't enter.
+    assert sampler_calls == ["enter", "exit", "enter", "exit"]
+    assert "mem_usage" in result and len(result["mem_usage"]) == 1
+
+
+def test_cpp_backend_reports_clear_error_when_child_sampler_unsupported(tmp_path: Path):
+    """Windows + cpp + report_mem_usage should raise a clear error at startup."""
+    options = small_options(report_mem_usage=True)
+    output_path = tmp_path / "benchmark.json"
+
+    def unsupported_sampler_factory():
+        raise NotImplementedError("ChildPeakMemorySampler is not supported on Windows (resource.RUSAGE_CHILDREN is POSIX-only).")
+
+    with pytest.raises(ValueError, match="not supported on Windows"):
+        run(
+            options,
+            backend="cpp",
+            max_cases=1,
+            output_path=output_path,
+            mem_sampler_factory=unsupported_sampler_factory,
+        )
+    # Failed-fast, before writing the output file.
+    assert not output_path.exists()
+
+
+def test_child_peak_memory_sampler_refuses_on_windows():
+    with patch("benchmarks.helpers.platform.system", return_value="Windows"):
+        with pytest.raises(NotImplementedError, match="not supported on Windows"):
+            ChildPeakMemorySampler()
 
 
 def test_run_saves_partial_results_after_solver_error(tmp_path: Path):

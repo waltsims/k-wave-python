@@ -17,12 +17,13 @@ from typing import Any, Callable
 
 from benchmarks.helpers import (
     BenchmarkOptions,
+    ChildPeakMemorySampler,
     PeakMemorySampler,
     build_case,
+    current_memory_bytes,
     default_output_path,
     grid_sizes,
     options_payload,
-    peak_memory_bytes,
     rolling_average,
     save_results,
     store_case_result,
@@ -41,8 +42,9 @@ def run(
     quiet: bool = True,
     solver: Callable[..., Any] | None = None,
     timer: Callable[[], float] = perf_counter,
-    memory_reader: Callable[[], float] = peak_memory_bytes,
+    memory_reader: Callable[[], float] = current_memory_bytes,
     memory_sampling_interval: float = 0.05,
+    mem_sampler_factory: Callable[[], Any] | None = None,
 ) -> dict[str, Any]:
     solver = kspaceFirstOrder if solver is None else solver
     cases = grid_sizes(options)
@@ -50,6 +52,17 @@ def run(
         if max_cases <= 0:
             raise ValueError("max_cases must be positive")
         cases = cases[:max_cases]
+
+    # Sampler picks itself based on backend: cpp runs the simulation in a
+    # subprocess, so Python-process RSS sampling is meaningless — use
+    # getrusage(RUSAGE_CHILDREN) instead. Override via mem_sampler_factory
+    # for tests.
+    def _default_sampler_factory() -> Any:
+        if backend == "cpp":
+            return ChildPeakMemorySampler()
+        return PeakMemorySampler(memory_reader, memory_sampling_interval)
+
+    sampler_factory = mem_sampler_factory or _default_sampler_factory
 
     path = default_output_path(options) if output_path is None else Path(output_path)
     result: dict[str, Any] = {
@@ -61,10 +74,19 @@ def run(
         "error_message": "",
     }
     if options.report_mem_usage:
+        # Probe early so unsupported combinations (e.g. Windows + cpp) fail
+        # before any output file is written.
         try:
-            validate_memory_bytes(memory_reader())
-        except Exception as exc:
-            raise ValueError("report_mem_usage is not supported on this platform") from exc
+            sampler_factory()
+        except NotImplementedError as exc:
+            raise ValueError(str(exc)) from exc
+        if backend != "cpp":
+            # For python backend, also probe the reader so platform-missing
+            # /proc or ps surfaces here rather than mid-simulation.
+            try:
+                validate_memory_bytes(memory_reader())
+            except Exception as exc:
+                raise ValueError("report_mem_usage is not supported on this platform") from exc
         result["mem_usage"] = []
 
     for case_index, (nx, ny, nz, scale) in enumerate(cases):
@@ -74,7 +96,7 @@ def run(
             kgrid, medium, source, sensor = build_case(options, nx, ny, nz, scale)
             for loop_num in range(1, options.num_averages + 1):
                 if options.report_mem_usage:
-                    with PeakMemorySampler(memory_reader, memory_sampling_interval) as memory_sampler:
+                    with sampler_factory() as memory_sampler:
                         start = timer()
                         solver(
                             kgrid,

@@ -17,6 +17,10 @@ The default benchmark uses:
 
 By default, this can run for a long time and may stop once memory limits are reached.
 
+> **`data_cast="single"` for `backend="cpp"`**: the C++ binary serializes inputs as `float32` regardless of the Python-side dtype, so `data_cast="single"` is a no-op for the cpp backend and `data_cast="off"` (default) is silently downcast at the serialize step. The flag is only meaningful for `backend="python"`, where it actually drives FFT precision.
+
+> **`--report-mem-usage` and backend choice**: for `backend="python"` (in-process), memory usage is the Python process's peak RSS — sampled by a background thread during each simulation. For `backend="cpp"` (subprocess), the C++ binary runs in a separate process, so Python-process RSS doesn't reflect its footprint. The benchmark uses `getrusage(RUSAGE_CHILDREN)` on Linux/macOS to record the cpp subprocess's peak RSS; on Windows this combination is unsupported and `report_mem_usage` will refuse `backend="cpp"` at startup with a clear error. (Note: the MATLAB original `benchmark.m` only ever exercised the in-process `kspaceFirstOrder3D` solver, so the equivalent question — measuring the subprocess `kspaceFirstOrder3DC` backend — didn't come up there.)
+
 ## Usage
 
 Run a small smoke benchmark:
