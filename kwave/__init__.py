@@ -45,23 +45,26 @@ BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
 BINARY_DIR = BINARY_PATH  # add alias for BINARY_PATH for now
 
 
-# Windows runtime DLLs shipped alongside both .exe files in the unified release.
-# Same DLL set works for both backends: the CUDA build's copy is canonical when
-# a shared dep (HDF5/zlib/szip/MSVC CRT) is built with a slightly newer MSVC
-# than the OMP build (per release-on-tag.yml staging logic). FIXME(0.6.3-rc):
-# verify this list against the actual v1.4.2 release asset manifest once
-# kspacefirstorder-unified publishes — names below are derived from the
-# release-on-tag.yml staging step and may need a final-mile sync.
+# Windows runtime DLLs shipped alongside both .exe files in the unified v1.4.2
+# release. The full bundle is downloaded for either backend selection because we
+# don't know at install time which the user will invoke. Verified against the
+# v1.4.2 release asset manifest (21 DLLs).
 WINDOWS_DLLS = [
-    # CUDA runtime (CUDA 13.0)
+    # CUDA runtime (CUDA 13.0 — used by the CUDA backend)
     "cudart64_13.dll",
     "cufft64_12.dll",
-    # HDF5 + szip + zlib (from vcpkg, used by both backends)
+    # FFTW3 (used by the OMP backend)
+    "fftw3.dll",
+    "fftw3f.dll",
+    "fftw3l.dll",
+    # HDF5 + szip + zlib (from vcpkg; used by both backends)
     "aec.dll",
     "hdf5.dll",
     "hdf5_hl.dll",
     "szip.dll",
     "zlib1.dll",
+    # OpenMP runtime (used by the OMP backend)
+    "vcomp140.dll",
     # MSVC CRT (Concurrency Runtime + C++ stdlib + C runtime)
     "concrt140.dll",
     "msvcp140.dll",
