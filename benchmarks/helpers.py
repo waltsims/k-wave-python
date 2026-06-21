@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import platform
-import subprocess
 import threading
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -12,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
+import psutil
 
 import kwave
 from kwave.data import Vector
@@ -195,67 +194,17 @@ def validate_memory_bytes(value: float) -> float:
     return memory_bytes
 
 
-def _linux_current_memory_bytes() -> float:
-    pages = int(Path("/proc/self/statm").read_text().split()[1])
-    return float(pages * os.sysconf("SC_PAGE_SIZE"))
 
-
-def _ps_current_memory_bytes() -> float:
-    completed = subprocess.run(
-        ["ps", "-o", "rss=", "-p", str(os.getpid())],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return float(int(completed.stdout.strip()) * 1024)
-
-
-def _windows_current_memory_bytes() -> float:
-    import ctypes
-    from ctypes import wintypes
-
-    class ProcessMemoryCounters(ctypes.Structure):
-        _fields_ = [
-            ("cb", wintypes.DWORD),
-            ("PageFaultCount", wintypes.DWORD),
-            ("PeakWorkingSetSize", ctypes.c_size_t),
-            ("WorkingSetSize", ctypes.c_size_t),
-            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
-            ("QuotaPagedPoolUsage", ctypes.c_size_t),
-            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
-            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
-            ("PagefileUsage", ctypes.c_size_t),
-            ("PeakPagefileUsage", ctypes.c_size_t),
-        ]
-
-    counters = ProcessMemoryCounters()
-    counters.cb = ctypes.sizeof(ProcessMemoryCounters)
-    handle = ctypes.windll.kernel32.GetCurrentProcess()
-    if not ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
-        raise RuntimeError("could not read process memory usage")
-    return float(counters.WorkingSetSize)
 
 
 def current_memory_bytes() -> float:
     """Return the current resident-set-size of THIS Python process, in bytes.
 
     Note: this returns the *current* RSS at the moment of the call, not a
-    historical peak (despite ``ru_maxrss``-style fields existing on most
-    platforms). Use ``PeakMemorySampler`` to track peak-over-time, or
+    historical peak. Use ``PeakMemorySampler`` to track peak-over-time, or
     ``ChildPeakMemorySampler`` for subprocess (``backend="cpp"``) measurement.
     """
-    system = platform.system().lower()
-    if system == "linux":
-        try:
-            return validate_memory_bytes(_linux_current_memory_bytes())
-        except (OSError, ValueError, IndexError):
-            return validate_memory_bytes(_ps_current_memory_bytes())
-    if system == "darwin":
-        return validate_memory_bytes(_ps_current_memory_bytes())
-    if system == "windows":
-        return validate_memory_bytes(_windows_current_memory_bytes())
-
-    raise RuntimeError("report_mem_usage is not supported on this platform")
+    return validate_memory_bytes(psutil.Process().memory_info().rss)
 
 
 # Back-compat alias — the old name is misleading but kept so external callers
