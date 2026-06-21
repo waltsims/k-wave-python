@@ -4,7 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/k-wave-python/badge/?version=latest)](https://k-wave-python.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/waltsims/k-wave-python/graph/badge.svg?token=6ofwtPiDNG)](https://codecov.io/gh/waltsims/k-wave-python)
 
-A Python implementation of [k-Wave](http://www.k-wave.org/) — an acoustics toolbox for time-domain simulation of acoustic wave fields. Includes a pure NumPy/CuPy solver (`backend="python"`) and an interface to the pre-compiled k-Wave C++ binaries (`backend="cpp"`) with NVIDIA GPU support from Maxwell through Blackwell (sm 5.0–9.0a, sm 12.0).
+A Python implementation of [k-Wave](http://www.k-wave.org/) — an acoustics toolbox for time-domain simulation of acoustic wave fields. Includes a pure NumPy/CuPy solver (`backend="python"`, supports any CUDA-capable GPU) and an interface to the pre-compiled k-Wave C++ binaries (`backend="cpp"`) with NVIDIA GPU support for compute capability 7.5 (Turing) and newer — covers every consumer/datacenter GPU since 2018, including all shipping Blackwell variants (B200/GB200, B300/GB300, Jetson Thor, RTX 50xx, RTX PRO 6000 Blackwell, GB10/DGX Spark).
 
 ## Mission
 
@@ -35,6 +35,16 @@ Or with pip:
 ```bash
 pip install k-wave-python
 ```
+
+### Older GPUs (Maxwell, Pascal, Volta)
+
+The `backend="cpp"` binaries shipped in v0.6.3+ require compute capability 7.5 (Turing) or newer. CUDA Toolkit 13.0 removed offline-compilation support for older architectures, so the following hardware is not covered by the bundled binaries:
+
+- **Maxwell** (GTX 9xx, Titan X Maxwell, Tesla M-series, Jetson Nano)
+- **Pascal** (GTX 10xx, P100, P40, Titan X(p)/Xp, Jetson TX2)
+- **Volta** (V100, Titan V, Quadro GV100, Jetson AGX Xavier)
+
+Use `backend="python"` instead (NumPy/CuPy works on every CUDA-capable GPU), or build the C++ backend from source against CUDA Toolkit 12.x.
 
 ## Development
 
