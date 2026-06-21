@@ -11,20 +11,17 @@ from urllib.request import urlretrieve
 
 # Test installation with:
 # python3 -m pip install -i https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ k-Wave-python==0.3.0
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 # Constants and Configurations
 URL_BASE = "https://github.com/waltsims/"
-BINARY_VERSION = "v1.4.1"
-# Pin both Windows binaries to v1.3.0. v1.4.x windows builds switched compiler /
-# OpenMP / FFT / CUDA runtime stacks and neither v1.4.x release ships its runtime
-# DLLs (cufft, cudart, vcomp, vcruntime140_1, fftw3f, etc.). v1.3.0 binaries are
-# self-contained with their Intel-era DLL bundle (listed in WINDOWS_DLLS below,
-# downloaded with the OMP request and used by both .exe files since they share
-# kwave/bin/windows/). OMP DLL bundling is fixed in kspacefirstorder-unified#14
-# (awaiting validation); CUDA DLL bundling is tracked in kspacefirstorder-unified#17.
-WINDOWS_OMP_VERSION = "v1.3.0"
-WINDOWS_CUDA_VERSION = "v1.3.0"
+BINARY_VERSION = "v1.4.2"
+# Single unified release hosts every platform binary + Windows runtime DLL
+# (consolidated from 5 mirror repos in v1.4.2; see kspacefirstorder-unified#13).
+# One version pin, one set of assets, one source-tree SHA. CUDA binary covers
+# compute capability 7.5+ (Turing through every Blackwell variant: B200/GB200,
+# B300/GB300, Jetson Thor, RTX 50xx, RTX PRO 6000 Blackwell, GB10/DGX Spark).
+_UNIFIED_RELEASE_URL = f"{URL_BASE}kspacefirstorder-unified/releases/download/{BINARY_VERSION}/"
 PLATFORM = platform.system().lower()
 
 if PLATFORM not in ["linux", "windows", "darwin"]:
@@ -48,45 +45,55 @@ BINARY_PATH = Path(__file__).parent / "bin" / PLATFORM
 BINARY_DIR = BINARY_PATH  # add alias for BINARY_PATH for now
 
 
+# Windows runtime DLLs shipped alongside both .exe files in the unified release.
+# Same DLL set works for both backends: the CUDA build's copy is canonical when
+# a shared dep (HDF5/zlib/szip/MSVC CRT) is built with a slightly newer MSVC
+# than the OMP build (per release-on-tag.yml staging logic). FIXME(0.6.3-rc):
+# verify this list against the actual v1.4.2 release asset manifest once
+# kspacefirstorder-unified publishes — names below are derived from the
+# release-on-tag.yml staging step and may need a final-mile sync.
 WINDOWS_DLLS = [
-    "cufft64_10.dll",
+    # CUDA runtime (CUDA 13.0)
+    "cudart64_13.dll",
+    "cufft64_12.dll",
+    # HDF5 + szip + zlib (from vcpkg, used by both backends)
+    "aec.dll",
     "hdf5.dll",
     "hdf5_hl.dll",
-    "libiomp5md.dll",
-    "libmmd.dll",
-    "msvcp140.dll",
-    "svml_dispmd.dll",
     "szip.dll",
+    "zlib1.dll",
+    # MSVC CRT (Concurrency Runtime + C++ stdlib + C runtime)
+    "concrt140.dll",
+    "msvcp140.dll",
+    "msvcp140_1.dll",
+    "msvcp140_2.dll",
+    "msvcp140_atomic_wait.dll",
+    "msvcp140_codecvt_ids.dll",
+    "vccorlib140.dll",
     "vcruntime140.dll",
-    "zlib.dll",
+    "vcruntime140_1.dll",
+    "vcruntime140_threads.dll",
 ]
 
 EXECUTABLE_PREFIX = "kspaceFirstOrder-"
 ARCHITECTURES = ["omp", "cuda"]
 
 
-def get_windows_release_urls(architecture: str) -> list:
-    version = WINDOWS_OMP_VERSION if architecture == "omp" else WINDOWS_CUDA_VERSION
-    specific_filenames = [EXECUTABLE_PREFIX + architecture + ".exe"]
-    if architecture == "omp":
-        specific_filenames += WINDOWS_DLLS
-    base = f"{URL_BASE}kspaceFirstOrder-{architecture.upper()}-{PLATFORM.lower()}/releases/download/{version}/"
-    return [base + filename for filename in specific_filenames]
+def _platform_binary_url(architecture: str) -> list:
+    """Return the URL list for a given backend on the current platform."""
+    if PLATFORM == "darwin":
+        if _darwin_unsupported or architecture == "cuda":
+            return []
+        return [_UNIFIED_RELEASE_URL + f"{EXECUTABLE_PREFIX}OMP-darwin"]
+    if PLATFORM == "linux":
+        suffix = "CUDA-linux" if architecture == "cuda" else "OMP-linux"
+        return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + suffix]
+    # Windows: the .exe plus the shared runtime DLL bundle
+    exe_suffix = "CUDA-windows.exe" if architecture == "cuda" else "OMP-windows.exe"
+    return [_UNIFIED_RELEASE_URL + EXECUTABLE_PREFIX + exe_suffix] + [_UNIFIED_RELEASE_URL + dll for dll in WINDOWS_DLLS]
 
 
-URL_DICT = {
-    "linux": {
-        "cuda": [URL_BASE + f"kspaceFirstOrder-CUDA-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}CUDA"],
-        "omp": [URL_BASE + f"kspaceFirstOrder-OMP-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"],
-    },
-    "darwin": {
-        "cuda": [],
-        "omp": (
-            [] if _darwin_unsupported else [URL_BASE + f"k-wave-omp-{PLATFORM}/releases/download/{BINARY_VERSION}/{EXECUTABLE_PREFIX}OMP"]
-        ),
-    },
-    "windows": {architecture: get_windows_release_urls(architecture) for architecture in ARCHITECTURES},
-}
+URL_DICT = {os: {arch: _platform_binary_url(arch) for arch in ARCHITECTURES} for os in ["linux", "darwin", "windows"]}
 
 
 def _hash_file(filepath: str) -> str:
