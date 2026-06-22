@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
-import psutil
 
 import kwave
 from kwave.data import Vector
@@ -203,7 +202,14 @@ def current_memory_bytes() -> float:
     Note: this returns the *current* RSS at the moment of the call, not a
     historical peak. Use ``PeakMemorySampler`` to track peak-over-time, or
     ``ChildPeakMemorySampler`` for subprocess (``backend="cpp"``) measurement.
+
+    ``psutil`` is imported lazily so importing the benchmarks package (e.g.
+    during pytest collection) doesn't require the ``[benchmark]`` extra to
+    be installed. Only callers that actually take a memory measurement
+    need ``psutil``; tests inject their own readers via ``memory_reader=``.
     """
+    import psutil  # noqa: PLC0415 — intentionally lazy; see docstring
+
     return validate_memory_bytes(psutil.Process().memory_info().rss)
 
 
