@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from benchmarks.benchmark import BenchmarkOptions, build_case, grid_sizes, run
-from benchmarks.helpers import ChildPeakMemorySampler, current_memory_bytes, peak_memory_bytes
+from benchmarks.helpers import ChildPeakMemorySampler
 
 
 def small_options(**overrides):
@@ -162,13 +162,6 @@ def test_report_memory_usage_fails_before_writing_when_unavailable(tmp_path: Pat
     assert not output_path.exists()
 
 
-def test_peak_memory_bytes_is_back_compat_alias_for_current_memory_bytes():
-    # The old name was misleading (Linux/macOS/Windows readers return current
-    # RSS, not historical peak). Keep the alias so external benchmark tooling
-    # that imported the old name doesn't break.
-    assert peak_memory_bytes is current_memory_bytes
-
-
 @pytest.mark.parametrize(
     "kwargs, expected_match",
     [
@@ -184,58 +177,64 @@ def test_options_post_init_rejects_invalid_geometry(kwargs, expected_match):
         small_options(**kwargs)
 
 
-def test_cpp_backend_shares_child_sampler_across_iterations(tmp_path: Path):
-    """For backend='cpp', the factory is called ONCE per grid (not per iteration).
+class _FakeChildSampler:
+    """Test-only stand-in for ChildPeakMemorySampler. Records construction
+    and enter/exit counts so we can assert the "one instance per grid,
+    N enter/exits per grid" lifetime model is honored."""
 
-    ChildPeakMemorySampler's baseline must be captured once per grid because
-    ru_maxrss is cumulative — re-baselining per iteration would silently
-    zero the reported delta (Greptile P1 on the original implementation).
-    """
+    instances: list = []
+    enter_count = 0
+
+    def __init__(self):
+        type(self).instances.append(self)
+        self._peak = 0
+
+    def __enter__(self):
+        type(self).enter_count += 1
+        return self
+
+    def __exit__(self, *exc):
+        # Simulate cumulative growth: peak grows by 1 KB each iteration.
+        self._peak += 1024
+
+    @property
+    def peak_bytes(self) -> float:
+        return float(self._peak)
+
+    @classmethod
+    def reset(cls):
+        cls.instances = []
+        cls.enter_count = 0
+
+
+def test_cpp_backend_shares_child_sampler_across_iterations(tmp_path: Path):
+    """For backend='cpp', one ChildPeakMemorySampler is constructed per grid
+    (NOT per iteration). ru_maxrss is cumulative; re-baselining per iter
+    would silently zero the delta (Greptile P1 on the original impl)."""
+    _FakeChildSampler.reset()
     options = small_options(report_mem_usage=True, num_averages=3)
     output_path = tmp_path / "benchmark.json"
     times = iter([0.0, 1.0, 1.0, 3.0, 3.0, 7.0])
 
-    constructed: list[object] = []
-    enter_count = 0
-
-    class FakeChildSampler:
-        def __init__(self):
-            constructed.append(self)
-            self._peak = 0
-
-        def __enter__(self):
-            nonlocal enter_count
-            enter_count += 1
-            return self
-
-        def __exit__(self, *exc):
-            # Simulate cumulative growth: peak grows by 1 KB each iteration.
-            self._peak += 1024
-
-        @property
-        def peak_bytes(self) -> float:
-            return float(self._peak)
-
     def fake_solver(*args, **kwargs):
         return {"p": np.zeros((1, 1))}
 
-    result = run(
-        options,
-        backend="cpp",
-        max_cases=1,
-        output_path=output_path,
-        solver=fake_solver,
-        timer=lambda: next(times),
-        mem_sampler_factory=FakeChildSampler,
-    )
+    with patch("benchmarks.benchmark.ChildPeakMemorySampler", _FakeChildSampler):
+        result = run(
+            options,
+            backend="cpp",
+            max_cases=1,
+            output_path=output_path,
+            solver=fake_solver,
+            timer=lambda: next(times),
+        )
 
-    # max_cases=1 grid → factory called twice: once at the startup probe,
-    # once for the actual grid loop. NOT once per iteration.
-    assert len(constructed) == 2, f"factory called {len(constructed)} times; expected 2 (1 probe + 1 grid)"
+    # max_cases=1 grid → constructed twice: once at the startup probe, once
+    # for the actual grid loop. NOT once per iteration.
+    assert len(_FakeChildSampler.instances) == 2
     # num_averages=3 iterations on that one grid → 3 enter/exit pairs on the SAME instance.
-    assert enter_count == 3
-    # The actively-used sampler grew monotonically to 3 KB.
-    assert constructed[1].peak_bytes == pytest.approx(3072.0)
+    assert _FakeChildSampler.enter_count == 3
+    assert _FakeChildSampler.instances[1].peak_bytes == pytest.approx(3072.0)
     assert "mem_usage" in result and len(result["mem_usage"]) == 1
 
 
@@ -244,23 +243,19 @@ def test_cpp_backend_reports_clear_error_when_child_sampler_unsupported(tmp_path
     options = small_options(report_mem_usage=True)
     output_path = tmp_path / "benchmark.json"
 
-    def unsupported_sampler_factory():
+    def raises_not_implemented(*args, **kwargs):
         raise NotImplementedError("ChildPeakMemorySampler is not supported on Windows (resource.RUSAGE_CHILDREN is POSIX-only).")
 
-    with pytest.raises(ValueError, match="not supported on Windows"):
-        run(
-            options,
-            backend="cpp",
-            max_cases=1,
-            output_path=output_path,
-            mem_sampler_factory=unsupported_sampler_factory,
-        )
+    with patch("benchmarks.benchmark.ChildPeakMemorySampler", raises_not_implemented):
+        with pytest.raises(ValueError, match="not supported on Windows"):
+            run(options, backend="cpp", max_cases=1, output_path=output_path)
     # Failed-fast, before writing the output file.
     assert not output_path.exists()
 
 
 def test_child_peak_memory_sampler_refuses_on_windows():
-    with patch("benchmarks.helpers.platform.system", return_value="Windows"):
+    # Patch the module-level _PLATFORM constant (computed at import time).
+    with patch("benchmarks.helpers._PLATFORM", "windows"):
         with pytest.raises(NotImplementedError, match="not supported on Windows"):
             ChildPeakMemorySampler()
 

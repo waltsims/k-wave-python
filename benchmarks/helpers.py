@@ -10,8 +10,23 @@ from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
+import psutil
 
 import kwave
+
+# Platform constants are computed once at import: Windows determines whether
+# ChildPeakMemorySampler can construct at all; the ru_maxrss unit differs
+# between Linux (kilobytes) and macOS (bytes, per BSD convention).
+_PLATFORM = platform.system().lower()
+_RU_MAXRSS_UNIT_BYTES = 1024 if _PLATFORM == "linux" else 1
+
+# resource is POSIX-only — gated behind the Windows refusal in
+# ChildPeakMemorySampler.__init__. Import lazily so importing helpers on
+# Windows doesn't fail at module load (the rest of the module is portable).
+if _PLATFORM != "windows":
+    import resource as _resource
+else:
+    _resource = None  # type: ignore[assignment]
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
 from kwave.kmedium import kWaveMedium
@@ -196,26 +211,21 @@ def validate_memory_bytes(value: float) -> float:
 
 
 
+# Module-level Process handle: psutil.Process.__init__ opens /proc/<pid>/stat
+# on Linux to validate + cache create_time, so constructing per call adds a
+# real syscall every poll. PeakMemorySampler ticks every 50 ms by default —
+# reuse one Process instance instead.
+_THIS_PROCESS = psutil.Process()
+
+
 def current_memory_bytes() -> float:
     """Return the current resident-set-size of THIS Python process, in bytes.
 
-    Note: this returns the *current* RSS at the moment of the call, not a
-    historical peak. Use ``PeakMemorySampler`` to track peak-over-time, or
+    Returns the *current* RSS at the moment of the call, not a historical
+    peak. Use ``PeakMemorySampler`` to track peak-over-time, or
     ``ChildPeakMemorySampler`` for subprocess (``backend="cpp"``) measurement.
-
-    ``psutil`` is imported lazily so importing the benchmarks package (e.g.
-    during pytest collection) doesn't require the ``[benchmark]`` extra to
-    be installed. Only callers that actually take a memory measurement
-    need ``psutil``; tests inject their own readers via ``memory_reader=``.
     """
-    import psutil  # noqa: PLC0415 — intentionally lazy; see docstring
-
-    return validate_memory_bytes(psutil.Process().memory_info().rss)
-
-
-# Back-compat alias — the old name is misleading but kept so external callers
-# (and any pre-merge benchmark JSON tooling) don't break.
-peak_memory_bytes = current_memory_bytes
+    return validate_memory_bytes(_THIS_PROCESS.memory_info().rss)
 
 
 class ChildPeakMemorySampler:
@@ -243,16 +253,16 @@ class ChildPeakMemorySampler:
     """
 
     def __init__(self) -> None:
-        if platform.system().lower() == "windows":
+        if _PLATFORM == "windows":
             raise NotImplementedError(
                 "ChildPeakMemorySampler is not supported on Windows "
                 "(resource.RUSAGE_CHILDREN is POSIX-only). "
-                "Use backend='python' to measure simulation memory on Windows."
+                "Subprocess memory measurement on Windows would require "
+                "polling psutil.Process(child_pid) — blocked by Executor.run_simulation "
+                "not exposing the subprocess.Popen handle to the benchmark layer."
             )
-        import resource  # POSIX-only; gated by the Windows check above
-
-        self._baseline = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
-        self._latest = self._baseline
+        self._baseline = _resource.getrusage(_resource.RUSAGE_CHILDREN).ru_maxrss
+        self._peak_bytes = 0.0
 
     def __enter__(self) -> ChildPeakMemorySampler:
         # No-op: ru_maxrss is cumulative across the lifetime of the parent,
@@ -261,17 +271,12 @@ class ChildPeakMemorySampler:
         return self
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: Any) -> None:
-        import resource
-
-        self._latest = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        delta = max(0, _resource.getrusage(_resource.RUSAGE_CHILDREN).ru_maxrss - self._baseline)
+        self._peak_bytes = float(delta * _RU_MAXRSS_UNIT_BYTES)
 
     @property
     def peak_bytes(self) -> float:
-        delta = max(0, self._latest - self._baseline)
-        # ru_maxrss units differ by platform (Linux: KB, macOS: bytes).
-        if platform.system().lower() == "linux":
-            return float(delta * 1024)
-        return float(delta)
+        return self._peak_bytes
 
 
 class PeakMemorySampler:

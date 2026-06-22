@@ -44,7 +44,6 @@ def run(
     timer: Callable[[], float] = perf_counter,
     memory_reader: Callable[[], float] = current_memory_bytes,
     memory_sampling_interval: float = 0.05,
-    mem_sampler_factory: Callable[[], Any] | None = None,
 ) -> dict[str, Any]:
     solver = kspaceFirstOrder if solver is None else solver
     cases = grid_sizes(options)
@@ -52,17 +51,6 @@ def run(
         if max_cases <= 0:
             raise ValueError("max_cases must be positive")
         cases = cases[:max_cases]
-
-    # Sampler picks itself based on backend: cpp runs the simulation in a
-    # subprocess, so Python-process RSS sampling is meaningless — use
-    # getrusage(RUSAGE_CHILDREN) instead. Override via mem_sampler_factory
-    # for tests.
-    def _default_sampler_factory() -> Any:
-        if backend == "cpp":
-            return ChildPeakMemorySampler()
-        return PeakMemorySampler(memory_reader, memory_sampling_interval)
-
-    sampler_factory = mem_sampler_factory or _default_sampler_factory
 
     path = default_output_path(options) if output_path is None else Path(output_path)
     result: dict[str, Any] = {
@@ -75,18 +63,18 @@ def run(
     }
     if options.report_mem_usage:
         # Probe early so unsupported combinations (e.g. Windows + cpp) fail
-        # before any output file is written.
+        # before any output file is written. cpp probes the sampler class
+        # (Windows refusal happens in __init__); python probes the reader
+        # so platform-missing /proc or ps surfaces here, not mid-simulation.
         try:
-            sampler_factory()
+            if backend == "cpp":
+                ChildPeakMemorySampler()
+            else:
+                validate_memory_bytes(memory_reader())
         except NotImplementedError as exc:
             raise ValueError(str(exc)) from exc
-        if backend != "cpp":
-            # For python backend, also probe the reader so platform-missing
-            # /proc or ps surfaces here rather than mid-simulation.
-            try:
-                validate_memory_bytes(memory_reader())
-            except Exception as exc:
-                raise ValueError("report_mem_usage is not supported on this platform") from exc
+        except Exception as exc:
+            raise ValueError("report_mem_usage is not supported on this platform") from exc
         result["mem_usage"] = []
 
     for case_index, (nx, ny, nz, scale) in enumerate(cases):
@@ -98,10 +86,10 @@ def run(
             # once per grid (ru_maxrss is cumulative — re-baselining per
             # iteration would silently zero the delta). Python backend's
             # PeakMemorySampler is per-iteration by design.
-            grid_sampler = sampler_factory() if (options.report_mem_usage and backend == "cpp") else None
+            grid_sampler = ChildPeakMemorySampler() if (options.report_mem_usage and backend == "cpp") else None
             for loop_num in range(1, options.num_averages + 1):
                 if options.report_mem_usage:
-                    memory_cm = grid_sampler if grid_sampler is not None else sampler_factory()
+                    memory_cm = grid_sampler if grid_sampler is not None else PeakMemorySampler(memory_reader, memory_sampling_interval)
                     with memory_cm as memory_sampler:
                         start = timer()
                         solver(
