@@ -30,7 +30,7 @@ Reference runtimes for the 3D scaling benchmark in [`benchmarks/benchmark.py`](.
 |---------|-----------------------|-------------------|-----|------|------|----------|
 | python  | Linux                 | CPU               | —   | —    | —    | —        |
 | python  | Linux                 | NVIDIA GPU        | —   | —    | —    | —        |
-| python  | macOS (Apple Silicon) | CPU               | —   | —    | —    | —        |
+| python  | macOS (Apple Silicon) | CPU               | 81  | —    | —    | Apple M1, 8 GB |
 | python  | Windows               | CPU               | —   | —    | —    | —        |
 | python  | Windows               | NVIDIA GPU        | —   | —    | —    | —        |
 | cpp     | Linux                 | CPU (OMP)         | —   | —    | —    | —        |
