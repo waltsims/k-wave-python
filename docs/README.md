@@ -22,6 +22,25 @@ uv run examples/ivp_homogeneous_medium.py
 
 No GPU required — all examples run on CPU with NumPy.
 
+## Benchmarks
+
+Reference runtimes for the 3D scaling benchmark in [`benchmarks/benchmark.py`](../benchmarks/README.md). Values are total elapsed seconds for a single default run (3D initial-value problem, heterogeneous absorbing medium, 1000 timesteps, averaged over 3 repeats).
+
+| Backend | OS                    | Accelerator       | 64³ | 128³ | 256³ | Hardware |
+|---------|-----------------------|-------------------|-----|------|------|----------|
+| python  | Linux                 | CPU               | —   | —    | —    | —        |
+| python  | Linux                 | NVIDIA GPU        | —   | —    | —    | —        |
+| python  | macOS (Apple Silicon) | CPU               | —   | —    | —    | —        |
+| python  | Windows               | CPU               | —   | —    | —    | —        |
+| python  | Windows               | NVIDIA GPU        | —   | —    | —    | —        |
+| cpp     | Linux                 | CPU (OMP)         | —   | —    | —    | —        |
+| cpp     | Linux                 | NVIDIA GPU (CUDA) | —   | —    | —    | —        |
+| cpp     | macOS (Apple Silicon) | CPU (OMP)         | —   | —    | —    | —        |
+| cpp     | Windows               | CPU (OMP)         | —   | —    | —    | —        |
+| cpp     | Windows               | NVIDIA GPU (CUDA) | —   | —    | —    | —        |
+
+Contributions welcome — open a PR filling a row with your k-wave-python version, and (for `cpp` backend) `BINARY_VERSION`. See [`benchmarks/README.md`](../benchmarks/README.md) for the reproducer command.
+
 ## Installation
 
 Using [uv](https://docs.astral.sh/uv/) (recommended):
