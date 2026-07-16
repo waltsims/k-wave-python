@@ -48,8 +48,10 @@ test = ["pytest",
         "coverage==7.15.1",
         "phantominator",
         "testfixtures==8.3.0",
-        "requests==2.34.2"]
+        "requests==2.34.2",
+        "psutil>=5.9"]
 example = ["gdown==6.1.0"]
+benchmark = ["psutil>=5.9"]
 docs = [ "sphinx<9",
     "sphinx-mdinclude==0.6.2",
     "sphinx-copybutton==0.5.2",
