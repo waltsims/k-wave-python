@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 import numpy as np
 import pytest
 
+from kwave.data import SimulationResult
 from kwave.executor import Executor
 from kwave.utils.dotdictionary import dotdict
 
@@ -62,9 +63,8 @@ class TestExecutor(unittest.TestCase):
             "p_final": two_d_output,
             "p_max_all": three_d_output,
         }
-        self.mock_dict = MagicMock()
-        self.mock_dict.__getitem__.side_effect = self.mock_dict_values.__getitem__
-        self.mock_dict.__contains__.side_effect = self.mock_dict_values.__contains__
+        # Use a real dictionary instead of a mock
+        self.mock_dict = self.mock_dict_values.copy()
 
     def tearDown(self):
         # Stop patchers
@@ -108,7 +108,7 @@ class TestExecutor(unittest.TestCase):
         mock_print.assert_has_calls(expected_calls, any_order=False)
 
         # Check that sensor_data is returned correctly
-        self.assertEqual(sensor_data, dotdict())
+        self.assertIsInstance(sensor_data, SimulationResult)
 
     def test_run_simulation_success(self):
         """Test running the simulation successfully."""
@@ -128,7 +128,7 @@ class TestExecutor(unittest.TestCase):
             expected_command, env=self.execution_options.env_vars, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
         self.mock_proc.communicate.assert_called_once()
-        self.assertEqual(sensor_data, dotdict())
+        self.assertIsInstance(sensor_data, SimulationResult)
 
     def test_run_simulation_failure(self):
         """Test handling a simulation failure."""
@@ -179,6 +179,16 @@ class TestExecutor(unittest.TestCase):
         self.mock_proc.returncode = 0
         self.simulation_options.pml_inside = False
 
+        # Create a mock that tracks calls before being replaced
+        original_two_d_output = MagicMock()
+        original_two_d_output.ndim = 2
+        original_three_d_output = MagicMock()
+        original_three_d_output.ndim = 3
+
+        # Update the mock dict to use these tracking mocks
+        self.mock_dict["p_final"] = original_two_d_output
+        self.mock_dict["p_max_all"] = original_three_d_output
+
         # Instantiate the Executor
         executor = Executor(self.execution_options, self.simulation_options)
 
@@ -186,21 +196,32 @@ class TestExecutor(unittest.TestCase):
         with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
             sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
-        # because pml is outside, the output should be cropped
-        two_d_output = sensor_data["p_final"]
-        two_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18)))
-        three_d_output = sensor_data["p_max_all"]
-        three_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18), slice(2, 18)))
+        # Verify that sensor_data is a SimulationResult
+        self.assertIsInstance(sensor_data, SimulationResult)
 
-        # check that the other fields are changed
-        for field in self.mock_dict_values.keys():
+        # Verify that the original mock objects were called for cropping
+        original_two_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18)))
+        original_three_d_output.__getitem__.assert_called_once_with((slice(2, 18), slice(2, 18), slice(2, 18)))
+
+        # check that the other fields are unchanged
+        for field in self.mock_dict.keys():
             if field not in ["p_final", "p_max_all"]:
-                self.assertEqual(sensor_data[field], self.mock_dict_values[field])
+                self.assertEqual(sensor_data[field], self.mock_dict[field])
 
     def test_sensor_data_cropping_with_pml_inside(self):
         """If pml is inside, no field should be cropped."""
         self.mock_proc.returncode = 0
 
+        # Create a mock that tracks calls before being replaced
+        original_two_d_output = MagicMock()
+        original_two_d_output.ndim = 2
+        original_three_d_output = MagicMock()
+        original_three_d_output.ndim = 3
+
+        # Update the mock dict to use these tracking mocks
+        self.mock_dict["p_final"] = original_two_d_output
+        self.mock_dict["p_max_all"] = original_three_d_output
+
         # Instantiate the Executor
         executor = Executor(self.execution_options, self.simulation_options)
 
@@ -208,16 +229,18 @@ class TestExecutor(unittest.TestCase):
         with patch.object(executor, "parse_executable_output", return_value=self.mock_dict):
             sensor_data = executor.run_simulation("input.h5", "output.h5", ["options"])
 
-        # because pml is inside, the output should not be cropped
-        two_d_output = sensor_data["p_final"]
-        two_d_output.__getitem__.assert_not_called()
-        three_d_output = sensor_data["p_max_all"]
-        three_d_output.__getitem__.assert_not_called()
+        # Verify that sensor_data is a SimulationResult
+        self.assertIsInstance(sensor_data, SimulationResult)
 
-        # check that the other fields are changed
-        for field in self.mock_dict_values.keys():
+        # because pml is inside, the output should not be cropped
+        # The mock objects should not have been called for cropping
+        original_two_d_output.__getitem__.assert_not_called()
+        original_three_d_output.__getitem__.assert_not_called()
+
+        # check that the other fields are unchanged
+        for field in self.mock_dict.keys():
             if field not in ["p_final", "p_max_all"]:
-                self.assertEqual(sensor_data[field], self.mock_dict_values[field])
+                self.assertEqual(sensor_data[field], self.mock_dict[field])
 
     def test_executor_file_not_found_on_non_darwin(self):
         # Configure the mock path object

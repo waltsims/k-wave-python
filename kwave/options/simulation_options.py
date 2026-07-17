@@ -47,10 +47,6 @@ class SimulationOptions(object):
     """
     Args:
         axisymmetric: Flag that indicates whether axisymmetric simulation is used
-        cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given.
-                     If set to 'nearest' and more than one Cartesian point maps to the same grid point,
-                     duplicated data points are discarded and sensor_data will be returned
-                     with less points than that specified by sensor.mask (default = 'linear').
         pml_inside: put the PML inside the grid defined by the user
         pml_alpha: Absorption within the perfectly matched layer in Nepers per grid point (default = 2).
         save_to_disk: save the input data to a HDF5 file
@@ -85,7 +81,6 @@ class SimulationOptions(object):
     """
 
     simulation_type: SimulationType = SimulationType.FLUID
-    cart_interp: str = "linear"
     pml_inside: bool = True
     pml_alpha: float = 2.0
     save_to_disk: bool = False
@@ -203,9 +198,6 @@ class SimulationOptions(object):
             elastic_code: Flag that indicates whether elastic simulation is used
             **kwargs: Dictionary that holds following optional simulation properties:
 
-                * cart_interp: Interpolation mode used to extract the pressure when a Cartesian sensor mask is given.
-                               If set to 'nearest', duplicated data points are discarded and sensor_data
-                               will be returned with fewer points than specified by sensor.mask (default = 'linear').
                 * create_log: Boolean controlling whether the command line output is saved using the diary function
                               with a date and time stamped filename (default = false).
                 * data_cast: String input of the data type that variables are cast to before computation.
