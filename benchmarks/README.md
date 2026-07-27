@@ -17,6 +17,21 @@ The default benchmark uses:
 
 By default, this can run for a long time and may stop once memory limits are reached.
 
+## Reference Runtimes
+
+Values are total elapsed seconds for a single default run (3D initial-value problem, heterogeneous absorbing medium, 1000 timesteps, averaged over 3 repeats).
+
+| Backend | OS                    | Accelerator | 64³ | 128³ | 256³ | Hardware |
+|---------|-----------------------|-------------|-----|------|------|----------|
+| python  | Linux                 | CPU         | —   | —    | —    | —        |
+| python  | macOS (Apple Silicon) | CPU         | 81  | —    | —    | Apple M1, 8 GB |
+| python  | Windows               | CPU         | —   | —    | —    | —        |
+| cpp     | Linux                 | CPU (OMP)   | —   | —    | —    | —        |
+| cpp     | macOS (Apple Silicon) | CPU (OMP)   | —   | —    | —    | —        |
+| cpp     | Windows               | CPU (OMP)   | —   | —    | —    | —        |
+
+Contributions welcome — open a PR filling a row with your k-wave-python version, and (for `cpp` backend) `BINARY_VERSION`.
+
 ## Usage
 
 Run a small smoke benchmark:
