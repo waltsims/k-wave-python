@@ -39,7 +39,7 @@ Reference runtimes for the 3D scaling benchmark in [`benchmarks/benchmark.py`](.
 | cpp     | Windows               | CPU (OMP)         | 0.6.3rc1     | v1.4.2         | 18  | 157  | 1243 | GCP n1-highmem-8, 8 vCPU |
 | cpp     | Windows               | NVIDIA GPU (CUDA) | 0.6.3rc1     | v1.4.2         | 2   | 8    | 57   | NVIDIA T4, 15 GB (GCP n1-highmem-8) |
 
-The C++ rows use the bundled `BINARY_VERSION` `v1.4.2`; Python rows do not use a C++ binary. Contributions welcome — open a PR filling a row with your k-wave-python version and, for the `cpp` backend, `BINARY_VERSION`. See [`benchmarks/README.md`](../benchmarks/README.md) for the reproducer command.
+Contributions welcome — open a PR filling a row with your k-wave-python version, and (for `cpp` backend) `BINARY_VERSION`. See [`benchmarks/README.md`](../benchmarks/README.md) for the reproducer command.
 
 ## Installation
 
