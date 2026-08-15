@@ -26,20 +26,20 @@ No GPU required — all examples run on CPU with NumPy.
 
 Reference runtimes for the 3D scaling benchmark in [`benchmarks/benchmark.py`](../benchmarks/README.md). Values are total elapsed seconds for a single default run (3D initial-value problem, heterogeneous absorbing medium, 1000 timesteps, averaged over 3 repeats).
 
-| Backend | OS                    | Accelerator       | 64³ | 128³ | 256³ | Hardware |
-|---------|-----------------------|-------------------|-----|------|------|----------|
-| python  | Linux                 | CPU               | —   | —    | —    | —        |
-| python  | Linux                 | NVIDIA GPU        | —   | —    | —    | —        |
-| python  | macOS (Apple Silicon) | CPU               | 81  | —    | —    | Apple M1, 8 GB |
-| python  | Windows               | CPU               | —   | —    | —    | —        |
-| python  | Windows               | NVIDIA GPU        | —   | —    | —    | —        |
-| cpp     | Linux                 | CPU (OMP)         | —   | —    | —    | —        |
-| cpp     | Linux                 | NVIDIA GPU (CUDA) | —   | —    | —    | —        |
-| cpp     | macOS (Apple Silicon) | CPU (OMP)         | —   | —    | —    | —        |
-| cpp     | Windows               | CPU (OMP)         | —   | —    | —    | —        |
-| cpp     | Windows               | NVIDIA GPU (CUDA) | —   | —    | —    | —        |
+| Backend | OS                    | Accelerator       | k-wave-python | BINARY_VERSION | 64³ | 128³ | 256³ | Hardware |
+|---------|-----------------------|-------------------|---------------|----------------|-----|------|------|----------|
+| python  | Linux                 | CPU               | 0.6.3rc1     | —              | 127 | —    | —    | GCP n1-highmem-8, 8 vCPU |
+| python  | Linux                 | NVIDIA GPU        | 0.6.3rc1     | —              | 6   | 71   | 382  | NVIDIA T4, 15 GB (GCP n1-highmem-8) |
+| python  | macOS (Apple Silicon) | CPU               | —            | —              | 81  | —    | —    | Apple M1, 8 GB |
+| python  | Windows               | CPU               | 0.6.3rc1     | —              | 341 | —    | —    | GCP n1-highmem-8, 8 vCPU |
+| python  | Windows               | NVIDIA GPU        | 0.6.3rc1     | —              | 6   | 44   | 751  | NVIDIA T4, 15 GB (GCP n1-highmem-8) |
+| cpp     | Linux                 | CPU (OMP)         | 0.6.3rc1     | v1.4.2         | 6   | 46   | 669  | GCP n1-highmem-8, 8 vCPU |
+| cpp     | Linux                 | NVIDIA GPU (CUDA) | 0.6.3rc1     | v1.4.2         | 2   | 7    | 51   | NVIDIA T4, 15 GB (GCP n1-highmem-8) |
+| cpp     | macOS (Apple Silicon) | CPU (OMP)         | 0.6.3rc1     | v1.4.2         | —   | —    | —    | —        |
+| cpp     | Windows               | CPU (OMP)         | 0.6.3rc1     | v1.4.2         | 18  | 157  | 1243 | GCP n1-highmem-8, 8 vCPU |
+| cpp     | Windows               | NVIDIA GPU (CUDA) | 0.6.3rc1     | v1.4.2         | 2   | 8    | 57   | NVIDIA T4, 15 GB (GCP n1-highmem-8) |
 
-Contributions welcome — open a PR filling a row with your k-wave-python version, and (for `cpp` backend) `BINARY_VERSION`. See [`benchmarks/README.md`](../benchmarks/README.md) for the reproducer command.
+The C++ rows use the bundled `BINARY_VERSION` `v1.4.2`; Python rows do not use a C++ binary. Contributions welcome — open a PR filling a row with your k-wave-python version and, for the `cpp` backend, `BINARY_VERSION`. See [`benchmarks/README.md`](../benchmarks/README.md) for the reproducer command.
 
 ## Installation
 
