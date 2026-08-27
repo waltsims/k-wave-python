@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 
@@ -119,3 +119,128 @@ class FlexibleVector(object):
         assert len(self.data) <= 2
         self.data.append(val)
         return self
+
+
+@dataclass
+class SimulationResult:
+    """
+    Structured return type for kWave simulation results.
+
+    Contains all possible fields that can be returned by the kWave C++ binaries.
+    Fields are populated based on the sensor.record configuration.
+    """
+
+    # Grid information (always present)
+    Nx: int
+    Ny: int
+    Nz: int
+    Nt: int
+    pml_x_size: int
+    pml_y_size: int
+    pml_z_size: int
+    axisymmetric_flag: bool
+
+    # Pressure fields (optional - based on sensor.record). Field names match
+    # the user-facing sensor.record keys, not the binary's HDF5 dataset names
+    # (e.g. sensor.record=("p",) → result.p; binary dataset is "p_raw").
+    p: Optional[np.ndarray] = None
+    p_max: Optional[np.ndarray] = None
+    p_min: Optional[np.ndarray] = None
+    p_rms: Optional[np.ndarray] = None
+    p_max_all: Optional[np.ndarray] = None
+    p_min_all: Optional[np.ndarray] = None
+    p_final: Optional[np.ndarray] = None
+
+    # Velocity fields (optional - based on sensor.record). `u` is the
+    # collocated (pressure-grid) velocity; `u_staggered` is the mid-cell
+    # variant. The legacy C++ binary inverts this naming (its "u" is
+    # mid-cell and "u_non_staggered" is collocated); from_dotdict
+    # translates so the user-facing API always uses the modern convention.
+    u: Optional[np.ndarray] = None
+    u_max: Optional[np.ndarray] = None
+    u_min: Optional[np.ndarray] = None
+    u_rms: Optional[np.ndarray] = None
+    u_max_all: Optional[np.ndarray] = None
+    u_min_all: Optional[np.ndarray] = None
+    u_final: Optional[np.ndarray] = None
+    u_staggered: Optional[np.ndarray] = None
+
+    # Intensity fields (optional - based on sensor.record)
+    I_avg: Optional[np.ndarray] = None
+    I: Optional[np.ndarray] = None
+
+    def __getitem__(self, key: str):
+        """
+        Enable dictionary-style access for backward compatibility.
+
+        Args:
+            key: Field name to access
+
+        Returns:
+            Value of the field
+
+        Raises:
+            KeyError: If the field does not exist
+        """
+        if hasattr(self, key):
+            return getattr(self, key)
+        raise KeyError(f"'{key}' field not found in SimulationResult")
+
+    def __contains__(self, key: str) -> bool:
+        """
+        Enable dictionary-style membership testing for backward compatibility.
+
+        Args:
+            key: Field name to check
+
+        Returns:
+            True if the field exists, False otherwise
+        """
+        return hasattr(self, key)
+
+    @classmethod
+    def from_dotdict(cls, data: dict) -> "SimulationResult":
+        """
+        Create SimulationResult from dotdict returned by parse_executable_output.
+
+        Args:
+            data: Dictionary containing simulation results from HDF5 file
+
+        Returns:
+            SimulationResult instance with all available fields populated
+        """
+        return cls(
+            # Grid information
+            Nx=int(data.get("Nx", 0)),
+            Ny=int(data.get("Ny", 0)),
+            Nz=int(data.get("Nz", 0)),
+            Nt=int(data.get("Nt", 0)),
+            pml_x_size=int(data.get("pml_x_size", 0)),
+            pml_y_size=int(data.get("pml_y_size", 0)),
+            pml_z_size=int(data.get("pml_z_size", 0)),
+            axisymmetric_flag=bool(data.get("axisymmetric_flag", False)),
+            # Pressure fields — the binary writes HDF5 datasets named after
+            # sensor.record keys (e.g. /p, /p_max, /p_final), not the --p_raw
+            # CLI flag name, so we look up by the user-facing names.
+            p=data.get("p"),
+            p_max=data.get("p_max"),
+            p_min=data.get("p_min"),
+            p_rms=data.get("p_rms"),
+            p_max_all=data.get("p_max_all"),
+            p_min_all=data.get("p_min_all"),
+            p_final=data.get("p_final"),
+            # Velocity fields. Legacy C++ binary names are inverted vs the
+            # modern user-facing convention: binary's `u` is mid-cell
+            # (staggered), binary's `u_non_staggered` is collocated.
+            u=data.get("u_non_staggered"),
+            u_max=data.get("u_max"),
+            u_min=data.get("u_min"),
+            u_rms=data.get("u_rms"),
+            u_max_all=data.get("u_max_all"),
+            u_min_all=data.get("u_min_all"),
+            u_final=data.get("u_final"),
+            u_staggered=data.get("u"),
+            # Intensity fields
+            I_avg=data.get("I_avg"),
+            I=data.get("I"),
+        )

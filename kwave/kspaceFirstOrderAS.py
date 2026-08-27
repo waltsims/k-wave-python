@@ -1,9 +1,10 @@
 import logging
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 from numpy.fft import ifftshift
 
+from kwave.data import SimulationResult
 from kwave.enums import DiscreteCosine
 from kwave.executor import Executor
 from kwave.kgrid import kWaveGrid
@@ -30,7 +31,7 @@ def kspaceFirstOrderASC(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> Optional[SimulationResult]:
     """
     Axisymmetric time-domain simulation of wave propagation using C++ code.
 
@@ -89,7 +90,7 @@ def kspaceFirstOrderAS(
     medium: kWaveMedium,
     simulation_options: SimulationOptions,
     execution_options: SimulationExecutionOptions,
-):
+) -> Optional[SimulationResult]:
     """
     Axisymmetric time-domain simulation of wave propagation.
 
@@ -158,7 +159,7 @@ def kspaceFirstOrderAS(
     if simulation_options.simulation_type is not SimulationType.AXISYMMETRIC:
         logging.log(
             logging.WARN,
-            "simulation type is not set to axisymmetric while using kSapceFirstOrderAS. " "Setting simulation type to axisymmetric.",
+            "simulation type is not set to axisymmetric while using kSapceFirstOrderAS. Setting simulation type to axisymmetric.",
         )
         simulation_options.simulation_type = SimulationType.AXISYMMETRIC
 
@@ -296,7 +297,7 @@ def kspaceFirstOrderAS(
 
     # option to run simulations without the spatial staggered grid is not
     # supported for the axisymmetric code
-    assert options.use_sg, "Optional input " "UseSG" " is not supported for axisymmetric simulations."
+    assert options.use_sg, "Optional input UseSG is not supported for axisymmetric simulations."
 
     # =========================================================================
     # SAVE DATA TO DISK FOR RUNNING SIMULATION EXTERNAL TO MATLAB
