@@ -56,6 +56,7 @@ class BenchmarkOptions:
     pml_size: int = 10
     pml_inside: bool = True
     report_mem_usage: bool = False
+    cpp_binary: str | None = None
 
     def __post_init__(self) -> None:
         if self.data_cast not in {"off", "single"}:

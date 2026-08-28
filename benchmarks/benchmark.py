@@ -44,7 +44,11 @@ def run(
     timer: Callable[[], float] = perf_counter,
     memory_reader: Callable[[], float] = current_memory_bytes,
     memory_sampling_interval: float = 0.05,
+    cpp_binary: str | None = None,
 ) -> dict[str, Any]:
+    """
+    Run the benchmark.
+    """
     solver = kspaceFirstOrder if solver is None else solver
     cases = grid_sizes(options)
     if max_cases is not None:
@@ -61,6 +65,11 @@ def run(
         "error_reached": False,
         "error_message": "",
     }
+
+    # If the run() caller provided a cpp_binary override, record it in the saved options
+    if cpp_binary is not None:
+        result["options"]["cpp_binary"] = cpp_binary
+
     if options.report_mem_usage:
         # Probe early so unsupported combinations (e.g. Windows + cpp) fail
         # before any output file is written. cpp probes the sampler class
@@ -103,6 +112,7 @@ def run(
                             pml_size=options.pml_size,
                             pml_inside=options.pml_inside,
                             smooth_p0=False,
+                            binary_path=cpp_binary,
                         )
                         elapsed_time = timer() - start
                     loop_mem_usage = rolling_average(loop_mem_usage, memory_sampler.peak_bytes, loop_num)
@@ -119,6 +129,7 @@ def run(
                         pml_size=options.pml_size,
                         pml_inside=options.pml_inside,
                         smooth_p0=False,
+                        binary_path=cpp_binary,
                     )
                     elapsed_time = timer() - start
                 loop_time = rolling_average(loop_time, elapsed_time, loop_num)
@@ -144,6 +155,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output-path", type=Path, default=None)
     parser.add_argument("--report-mem-usage", action="store_true")
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--cpp-binary", type=str, default=None, help="Path to a custom C++ binary to use for backend=cpp")
     return parser.parse_args()
 
 
@@ -154,6 +166,7 @@ def main() -> int:
         num_averages=args.num_averages,
         number_time_points=args.number_time_points,
         report_mem_usage=args.report_mem_usage,
+        cpp_binary=args.cpp_binary,
     )
     result = run(
         benchmark_options,
@@ -162,6 +175,7 @@ def main() -> int:
         max_cases=args.max_cases,
         output_path=args.output_path,
         quiet=not args.verbose,
+        cpp_binary=args.cpp_binary,
     )
     print(f"Benchmark results saved to {result['output_path']}")
     if result["error_reached"]:
