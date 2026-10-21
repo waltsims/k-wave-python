@@ -1,8 +1,6 @@
 
 import numpy as np
 
-from kwave.kgrid import kWaveGrid
-
 
 def bioheat_exact(
     T0,
@@ -16,10 +14,14 @@ def bioheat_exact(
     """
     Fourier solution of Pennes' bioheat equation for a constant source.
 
+    Assumes periodic boundary conditions: opposite edges of each axis
+    are connected by the Fourier representation.
+
     Uses NumPy on the CPU or CuPy on the GPU. Does not require PyTorch.
 
-    Equation:
-        dT/dt = D * Laplacian(T) - P * (T - Ta) + S
+    Equation
+    --------
+    dT/dt = D * Laplacian(T) - P * (T - Ta) + S
 
     Parameters
     ----------
@@ -38,12 +40,13 @@ def bioheat_exact(
     device : {"cpu", "gpu"}
         NumPy CPU execution or CuPy GPU execution.
     return_numpy : bool
-        Return a NumPy array on the CPU, including when device="gpu".
+        Return a NumPy array, including when device="gpu".
 
     Returns
     -------
     numpy.ndarray or cupy.ndarray
-        Temperature field at time t.
+        Temperature field at time t. By default, the returned array
+        uses the selected backend.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError("device must be 'cpu' or 'gpu'.")
@@ -58,7 +61,8 @@ def bioheat_exact(
             ) from exc
 
         try:
-            cp.cuda.runtime.getDeviceCount()
+            if cp.cuda.runtime.getDeviceCount() < 1:
+                raise RuntimeError("No usable CUDA GPU was found for CuPy.")
         except cp.cuda.runtime.CUDARuntimeError as exc:
             raise RuntimeError(
                 "No usable CUDA GPU was found for CuPy."
@@ -68,50 +72,56 @@ def bioheat_exact(
     else:
         xp = np
 
-    T0_np = np.asarray(T0)
+    # Convert fields using the selected backend. In GPU mode, existing
+    # CuPy arrays stay on the GPU and can be reused as inputs.
+    T0_arr = xp.asarray(T0, dtype=xp.float64)
 
-    if T0_np.ndim not in (1, 2, 3) or T0_np.size <= 1:
+    if T0_arr.ndim not in (1, 2, 3) or T0_arr.size <= 1:
         raise ValueError("T0 must be a non-scalar 1D, 2D, or 3D array.")
 
-    S_np = np.asarray(S)
-    source_is_zero = S_np.ndim == 0 and S_np.item() == 0
+    S_arr = xp.asarray(S, dtype=xp.float64)
+    source_is_zero = S_arr.ndim == 0 and S_arr.item() == 0
 
-    if not source_is_zero and S_np.shape != T0_np.shape:
+    if source_is_zero:
+        S_arr = None
+    elif S_arr.ndim == 0 or S_arr.shape != T0_arr.shape:
         raise ValueError("S must be zero or have the same shape as T0.")
 
-    material = np.asarray(material, dtype=float).ravel()
-    if material.size != 3:
+    # Material parameters and grid spacing are small CPU-side metadata.
+    material_arr = np.asarray(material, dtype=float).ravel()
+
+    if material_arr.size != 3:
         raise ValueError("material must contain [D, P, Ta].")
 
-    D, P, Ta = map(float, material)
+    D, P, Ta = map(float, material_arr)
 
-    if not np.all(np.isfinite(material)) or D < 0 or P < 0:
-        raise ValueError("Material parameters must be finite; D and P must be non-negative.")
+    if not np.all(np.isfinite(material_arr)) or D < 0 or P < 0:
+        raise ValueError(
+            "Material parameters must be finite; D and P must be non-negative."
+        )
 
     t = float(t)
     if not np.isfinite(t) or t < 0:
         raise ValueError("t must be finite and non-negative.")
 
     if np.isscalar(dx):
-        spacing = [float(dx)] * T0_np.ndim
+        spacing = [float(dx)] * T0_arr.ndim
     else:
         spacing = np.asarray(dx, dtype=float).ravel().tolist()
 
-    if len(spacing) != T0_np.ndim:
-        raise ValueError(f"dx must be a scalar or contain {T0_np.ndim} values.")
+    if len(spacing) != T0_arr.ndim:
+        raise ValueError(
+            f"dx must be a scalar or contain {T0_arr.ndim} values."
+        )
 
     if not np.all(np.isfinite(spacing)) or any(d <= 0 for d in spacing):
         raise ValueError("Grid spacing must be finite and positive.")
-
-    # Transfer fields to the selected array backend.
-    T0_arr = xp.asarray(T0_np, dtype=xp.float64)
-    S_arr = None if source_is_zero else xp.asarray(S_np, dtype=xp.float64)
 
     # Build squared angular wavenumber magnitude in FFT ordering.
     # No fftshift/ifftshift is required with fftfreq.
     k_axes = [
         2.0 * np.pi * xp.fft.fftfreq(n, d=d)
-        for n, d in zip(T0_np.shape, spacing)
+        for n, d in zip(T0_arr.shape, spacing)
     ]
 
     k_mesh = xp.meshgrid(*k_axes, indexing="ij")
@@ -120,8 +130,7 @@ def bioheat_exact(
     denominator = D * k_squared + P
     decay = xp.exp(-denominator * t)
 
-    # Stable evaluation of (1 - exp(-a*t)) / a.
-    # Handle a == 0 explicitly.
+    # Stable evaluation of (1 - exp(-a*t)) / a, including a == 0.
     nonzero = denominator != 0
     safe_denominator = xp.where(nonzero, denominator, 1.0)
     Q = xp.where(
@@ -130,7 +139,7 @@ def bioheat_exact(
         t,
     )
 
-    # Fourier solution.
+    # Fourier solution for T - Ta.
     T0_fft = xp.fft.fftn(T0_arr - Ta)
 
     if S_arr is None:
