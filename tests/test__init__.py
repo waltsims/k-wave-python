@@ -144,5 +144,59 @@ def test_failed_optional_mlx_download_does_not_abort(tmp_path, monkeypatch):
         kwave.download_binaries(kwave.PLATFORM, "omp")
 
 
+def _fake_release(tmp_path, monkeypatch, fail_assets):
+    """Point kwave at a fake release with an OMP binary and a two-file MLX bundle; assets in fail_assets 404."""
+    from urllib.error import HTTPError
+
+    import kwave
+
+    base = "https://example.invalid/releases/download/v9.9.9/"
+    url_dict = {
+        kwave.PLATFORM: {
+            "omp": [base + "kspaceFirstOrder-OMP-darwin"],
+            "mlx": [base + "kspaceFirstOrder-MLX-darwin", base + "mlx.metallib"],
+        }
+    }
+    downloads = []
+
+    def fake_urlretrieve(url, dest):
+        downloads.append(url.rsplit("/", 1)[-1])
+        if url.rsplit("/", 1)[-1] in fail_assets:
+            raise HTTPError(url, 404, "Not Found", None, None)
+        Path(dest).write_bytes(b"payload-" + url.encode())
+
+    monkeypatch.setattr(kwave, "BINARY_PATH", tmp_path)
+    monkeypatch.setattr(kwave, "URL_DICT", url_dict)
+    monkeypatch.setattr(kwave, "ARCHITECTURES", ["omp", "mlx"])
+    monkeypatch.setattr(kwave, "urlretrieve", fake_urlretrieve)
+    return downloads
+
+
+def test_cached_omp_is_not_downloaded_again_when_mlx_is_missing(tmp_path, monkeypatch):
+    """A missing optional MLX bundle must not re-download (or require the network for) a valid cached OMP binary."""
+    import kwave
+
+    downloads = _fake_release(tmp_path, monkeypatch, fail_assets={"kspaceFirstOrder-MLX-darwin", "mlx.metallib"})
+    kwave.install_binaries()
+    assert (tmp_path / "kspaceFirstOrder-OMP").exists()
+    assert not kwave.binaries_present()  # MLX still missing
+
+    downloads.clear()
+    kwave.install_binaries()  # second import: OMP is cached and valid
+    assert "kspaceFirstOrder-OMP-darwin" not in downloads
+    assert downloads == ["kspaceFirstOrder-MLX-darwin"]
+
+
+def test_incomplete_mlx_bundle_is_removed(tmp_path, monkeypatch):
+    """If mlx.metallib fails after the MLX executable was downloaded, the unusable executable must not stay installed."""
+    import kwave
+
+    _fake_release(tmp_path, monkeypatch, fail_assets={"mlx.metallib"})
+    kwave.download_binaries(kwave.PLATFORM, "mlx")
+    assert not (tmp_path / "kspaceFirstOrder-MLX").exists()
+    assert not (tmp_path / "kspaceFirstOrder-MLX_metadata.json").exists()
+    assert not (tmp_path / "mlx.metallib").exists()
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

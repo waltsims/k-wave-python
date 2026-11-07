@@ -10,6 +10,8 @@ from kwave.options.simulation_execution_options import SimulationExecutionOption
 
 OMP_BINARY_NAME = "kspaceFirstOrder-OMP{}".format(".exe" if PLATFORM == "windows" else "")
 CUDA_BINARY_NAME = "kspaceFirstOrder-CUDA{}".format(".exe" if PLATFORM == "windows" else "")
+# macOS has no CUDA: the default GPU binary there is the MLX (Apple Silicon) one
+GPU_BINARY_NAME = "kspaceFirstOrder-MLX" if PLATFORM == "darwin" else CUDA_BINARY_NAME
 
 
 class TestSimulationExecutionOptions(unittest.TestCase):
@@ -73,11 +75,17 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         options = self.default_options
         options.is_gpu_simulation = True
         self.assertTrue(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, CUDA_BINARY_NAME)
+        self.assertEqual(options.binary_name, GPU_BINARY_NAME)
 
         options.is_gpu_simulation = False
         self.assertFalse(options.is_gpu_simulation)
         self.assertEqual(options.binary_name, OMP_BINARY_NAME)
+
+    def test_mlx_backend_selects_mlx_binary(self):
+        """backend="MLX" alone (without is_gpu_simulation=True) must select the MLX binary."""
+        options = SimulationExecutionOptions(backend="MLX")
+        self.assertFalse(options.is_gpu_simulation)
+        self.assertEqual(options.binary_name, "kspaceFirstOrder-MLX")
 
     def test_device_num_setter_invalid(self):
         """Test setting an invalid device number."""

@@ -143,7 +143,10 @@ class SimulationExecutionOptions:
             if self.is_gpu_simulation is None:
                 raise ValueError("`is_gpu_simulation` must be set to either True or False before determining the binary name.")
 
-            if self.is_gpu_simulation:
+            if self.backend == "MLX":
+                # explicit choice of the Apple Silicon GPU binary
+                self._binary_name = "kspaceFirstOrder-MLX"
+            elif self.is_gpu_simulation:
                 # macOS has no CUDA: the GPU binary runs on the Apple Silicon GPU through MLX (Metal)
                 self._binary_name = "kspaceFirstOrder-MLX" if PLATFORM == "darwin" else "kspaceFirstOrder-CUDA"
             else:

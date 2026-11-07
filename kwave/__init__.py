@@ -250,6 +250,19 @@ def _record_binary_metadata(binary_version: str, binary_filepath: str, binary_ur
         json.dump(metadata, outfile, indent=4)
 
 
+def _remove_installed_binaries(system_os: str, bin_type: str) -> None:
+    """Remove every local file (and its metadata) of a backend, e.g. after an incomplete download of a bundle."""
+    for url in URL_DICT[system_os][bin_type]:
+        filename = _local_filename(url.split("/")[-1])
+        for path in (BINARY_PATH / filename, BINARY_PATH / f"{filename}_metadata.json"):
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                pass
+            except OSError:  # pragma: no cover - defensive
+                logging.warning(f"Could not remove {path}; please delete it manually.")
+
+
 def download_binaries(system_os: str, bin_type: str):
     """
     Download binary from release url
@@ -267,6 +280,10 @@ def download_binaries(system_os: str, bin_type: str):
         binary_version, asset_name = url.split("/")[-2:]
         filename = _local_filename(asset_name)
 
+        # Keep valid cached files: a missing optional backend must not force (network) re-downloads of the others.
+        if system_os == PLATFORM and _is_binary_present(filename, bin_type):
+            continue
+
         logging.log(logging.INFO, f"Downloading {asset_name} -> {filename} in {BINARY_PATH}...")
 
         # Create the directory if it does not yet exist
@@ -282,7 +299,9 @@ def download_binaries(system_os: str, bin_type: str):
         except URLError as e:
             if bin_type not in OPTIONAL_ARCHITECTURES:
                 raise
-            # e.g. the pinned release does not ship this backend yet: keep the other backends usable.
+            # e.g. the pinned release does not ship this backend yet: keep the other backends usable. A partial
+            # bundle (e.g. the MLX executable without mlx.metallib) cannot run, so remove what is already there.
+            _remove_installed_binaries(system_os, bin_type)
             logging.warning(f"Could not download {asset_name} ({e}); the {bin_type.upper()} backend will not be available.")
             return
 
