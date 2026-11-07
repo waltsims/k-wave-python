@@ -82,10 +82,11 @@ class TestSimulationExecutionOptions(unittest.TestCase):
         self.assertEqual(options.binary_name, OMP_BINARY_NAME)
 
     def test_mlx_backend_selects_mlx_binary(self):
-        """backend="MLX" alone (without is_gpu_simulation=True) must select the MLX binary."""
-        options = SimulationExecutionOptions(backend="MLX")
-        self.assertFalse(options.is_gpu_simulation)
-        self.assertEqual(options.binary_name, "kspaceFirstOrder-MLX")
+        """backend="MLX" alone (without is_gpu_simulation=True) must select the MLX binary (a macOS-only backend)."""
+        with patch("kwave.options.simulation_execution_options.PLATFORM", "darwin"):
+            options = SimulationExecutionOptions(backend="MLX")
+            self.assertFalse(options.is_gpu_simulation)
+            self.assertEqual(options.binary_name, "kspaceFirstOrder-MLX")
 
     def test_device_num_setter_invalid(self):
         """Test setting an invalid device number."""
