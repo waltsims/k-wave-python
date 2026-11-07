@@ -7,6 +7,7 @@ import stat
 import warnings
 from pathlib import Path
 from typing import List
+from urllib.error import URLError
 from urllib.request import urlretrieve
 
 # Test installation with:
@@ -78,8 +79,15 @@ WINDOWS_DLLS = [
     "vcruntime140_threads.dll",
 ]
 
+# Metal kernels of the MLX GPU binary (Apple Silicon). The darwin MLX binary links MLX statically and loads
+# this file from its own directory, so it is downloaded next to it.
+MLX_METALLIB = "mlx.metallib"
+
 EXECUTABLE_PREFIX = "kspaceFirstOrder-"
-ARCHITECTURES = ["omp", "cuda"]
+# GPU backend per platform: CUDA on Linux/Windows, MLX (Metal) on macOS/Apple Silicon.
+ARCHITECTURES = ["omp", "cuda", "mlx"]
+# Backends whose binaries are optional: a failed download only disables that backend instead of aborting `import kwave`.
+OPTIONAL_ARCHITECTURES = ["mlx"]
 
 
 def _platform_binary_url(platform_name: str, architecture: str) -> list:
@@ -92,11 +100,15 @@ def _platform_binary_url(platform_name: str, architecture: str) -> list:
     """
     if architecture == "cuda" and platform_name == "darwin":
         return []
+    if architecture == "mlx" and platform_name != "darwin":
+        return []
     if platform_name == "darwin" and platform_name == PLATFORM and _darwin_unsupported:
         return []
-    backend = "CUDA" if architecture == "cuda" else "OMP"
+    backend = {"cuda": "CUDA", "mlx": "MLX"}.get(architecture, "OMP")
     ext = ".exe" if platform_name == "windows" else ""
     exe_url = f"{_UNIFIED_RELEASE_URL}{EXECUTABLE_PREFIX}{backend}-{platform_name}{ext}"
+    if architecture == "mlx":
+        return [exe_url, _UNIFIED_RELEASE_URL + MLX_METALLIB]
     # Shared runtime DLLs ship with the OMP entry only — both backends find
     # them at the same BINARY_PATH, so attaching to both would download the
     # full 21-DLL bundle twice on first install.
@@ -238,6 +250,19 @@ def _record_binary_metadata(binary_version: str, binary_filepath: str, binary_ur
         json.dump(metadata, outfile, indent=4)
 
 
+def _remove_installed_binaries(system_os: str, bin_type: str) -> None:
+    """Remove every local file (and its metadata) of a backend, e.g. after an incomplete download of a bundle."""
+    for url in URL_DICT[system_os][bin_type]:
+        filename = _local_filename(url.split("/")[-1])
+        for path in (BINARY_PATH / filename, BINARY_PATH / f"{filename}_metadata.json"):
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                pass
+            except OSError:  # pragma: no cover - defensive
+                logging.warning(f"Could not remove {path}; please delete it manually.")
+
+
 def download_binaries(system_os: str, bin_type: str):
     """
     Download binary from release url
@@ -255,6 +280,10 @@ def download_binaries(system_os: str, bin_type: str):
         binary_version, asset_name = url.split("/")[-2:]
         filename = _local_filename(asset_name)
 
+        # Keep valid cached files: a missing optional backend must not force (network) re-downloads of the others.
+        if system_os == PLATFORM and _is_binary_present(filename, bin_type):
+            continue
+
         logging.log(logging.INFO, f"Downloading {asset_name} -> {filename} in {BINARY_PATH}...")
 
         # Create the directory if it does not yet exist
@@ -266,6 +295,15 @@ def download_binaries(system_os: str, bin_type: str):
             urlretrieve(url, binary_filepath)
             _ensure_executable(binary_filepath)
             _record_binary_metadata(binary_version=binary_version, binary_filepath=binary_filepath, binary_url=url, filename=filename)
+
+        except URLError as e:
+            if bin_type not in OPTIONAL_ARCHITECTURES:
+                raise
+            # e.g. the pinned release does not ship this backend yet: keep the other backends usable. A partial
+            # bundle (e.g. the MLX executable without mlx.metallib) cannot run, so remove what is already there.
+            _remove_installed_binaries(system_os, bin_type)
+            logging.warning(f"Could not download {asset_name} ({e}); the {bin_type.upper()} backend will not be available.")
+            return
 
         except TimeoutError:
             logging.log(

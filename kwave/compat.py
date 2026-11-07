@@ -54,7 +54,7 @@ def options_to_kwargs(simulation_options=None, execution_options=None):
         if opts.backend == "python":
             kwargs["backend"] = "python"
             kwargs["device"] = "gpu" if opts.is_gpu_simulation else "cpu"
-        elif opts.backend == "CUDA":
+        elif opts.backend in ("CUDA", "MLX"):
             kwargs["backend"] = "cpp"
             kwargs["device"] = "gpu"
         elif opts.backend == "OMP":
