@@ -70,10 +70,17 @@ class TestResolveBinaryPath:
             with pytest.raises(FileNotFoundError, match="pip install k-wave-data"):
                 CppSimulation._resolve_binary_path("gpu")
 
-    def test_default_gpu_on_macos_raises_value_error(self, tmp_path):
-        # macOS + gpu must raise before the binary-existence check.
+    def test_default_gpu_on_macos_selects_mlx_binary(self, tmp_path):
+        mlx_binary = tmp_path / "kspaceFirstOrder-MLX"
+        mlx_binary.write_text("#!/bin/sh\n")
         with patch("kwave.BINARY_PATH", tmp_path), patch("kwave.PLATFORM", "darwin"):
-            with pytest.raises(ValueError, match="not supported on macOS"):
+            resolved = CppSimulation._resolve_binary_path("gpu")
+        assert resolved.name == "kspaceFirstOrder-MLX"
+
+    def test_default_gpu_on_macos_missing_mlx_raises_value_error(self, tmp_path):
+        # macOS + gpu without the MLX binary (e.g. Intel Mac) must raise a ValueError pointing to device='cpu'.
+        with patch("kwave.BINARY_PATH", tmp_path), patch("kwave.PLATFORM", "darwin"):
+            with pytest.raises(ValueError, match="kspaceFirstOrder-MLX not found"):
                 CppSimulation._resolve_binary_path("gpu")
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not honor Unix executable bits")

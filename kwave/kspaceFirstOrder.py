@@ -177,7 +177,8 @@ def kspaceFirstOrder(
             the compiled C++ binary.  Default ``"python"``.
         device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
             selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
-            selects the OMP vs CUDA binary.  Default ``"cpu"``.
+            selects the OMP vs GPU binary (CUDA on Linux/Windows,
+            MLX on macOS with Apple Silicon).  Default ``"cpu"``.
         dtype: Numerical precision for state arrays in the Python backend.
             Accepts dtype-like input — a numpy dtype (``np.float32``,
             ``np.float64``; cupy aliases like ``cp.float32`` work since cupy
@@ -207,7 +208,7 @@ def kspaceFirstOrder(
         debug: Print detailed diagnostic output.  Default ``False``.
         num_threads: Thread count for the C++ OMP binary.  ``None`` uses all
             available cores.  Default ``None``.
-        device_num: GPU device index for CUDA execution.  Default ``None``.
+        device_num: GPU device index for CUDA/MLX execution.  Default ``None``.
         binary_path: Path to a custom C++ binary.  When ``None`` (default),
             the binary bundled with ``k-wave-data`` is used.  Only applies
             when ``backend="cpp"``.
