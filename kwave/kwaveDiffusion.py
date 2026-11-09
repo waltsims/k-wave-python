@@ -175,6 +175,17 @@ class kWaveDiffusion:
     implemented here because those require the k-Wave DTT operators.
     """
 
+    def _is_uniform(self, value):
+
+        value = self.xp.asarray(value)
+    
+        if value.size == 0:
+            return False
+    
+        return bool(
+            self.xp.all(value == value.flat[0])
+        )
+
     def __init__(
         self,
         kgrid,
@@ -268,11 +279,18 @@ class kWaveDiffusion:
         # Determine whether medium is heterogeneous
         # ------------------------------------------------------------
 
+        self.flag_homogeneous_diffusion = (
+            self._is_uniform(self.diffusion_p1)
+            and self._is_uniform(self.diffusion_p2)
+        )
+        
+        self.flag_homogeneous_perfusion = (
+            self._is_uniform(self.perfusion_coeff)
+        )
+
         self.flag_homogeneous = (
-            self.diffusion_p1.size == 1
-            and self.diffusion_p2.size == 1
-            and self.perfusion_coeff.size == 1
-            and self.blood_ambient_temperature.size == 1
+            self.flag_homogeneous_diffusion
+            and self.flag_homogeneous_perfusion
         )
 
         # ------------------------------------------------------------
@@ -516,7 +534,7 @@ class kWaveDiffusion:
         return arr
 
     def _setup_diffusion(self, medium):
-
+        
         # ------------------------------------------------------------
         # Either D or rho/c/K
         # ------------------------------------------------------------
@@ -532,6 +550,11 @@ class kWaveDiffusion:
                 medium.diffusion_coeff,
                 "diffusion_coeff",
             )
+
+            if bool(self.xp.any(self.diffusion_p2 < 0)):
+                raise ValueError(
+                    "diffusion_coeff must be non-negative."
+                )
 
         else:
 
@@ -560,6 +583,17 @@ class kWaveDiffusion:
                 medium.thermal_conductivity,
                 "thermal_conductivity",
             )
+
+            if bool(self.xp.any(density <= 0)):
+                raise ValueError("density must be positive.")
+            
+            if bool(self.xp.any(specific_heat <= 0)):
+                raise ValueError("specific_heat must be positive.")
+            
+            if bool(self.xp.any(conductivity <= 0)):
+                raise ValueError(
+                    "thermal_conductivity must be positive."
+                )
 
             self.diffusion_p1 = (
                 1.0 / (density * specific_heat)
@@ -673,57 +707,52 @@ class kWaveDiffusion:
 
     # ==================================================================
 
+    
     def _setup_source(self, source):
-        """
-        Q is retained in W/m^3.
-
-        If Q is supplied, the update term is:
-
-            Q / (rho * c)
-
-        when rho*c is known.
-
-        When diffusion_coeff was supplied, density and specific_heat
-        are therefore required for physical Q scaling.
-        """
-
+    
         if source.Q is None:
             source.Q = 0.0
-
-        if bool(self.xp.all(
-            self.xp.asarray(source.Q) == 0
-        )):
-            return
-
-        # If density and specific heat are available,
-        # calculate 1/A.
-        if (
+    
+        has_material_properties = (
             self.medium.density is not None
             and self.medium.specific_heat is not None
-        ):
-
+        )
+    
+        if has_material_properties:
+    
             density = self._as_field(
                 self.medium.density,
                 "density",
             )
-
+    
             specific_heat = self._as_field(
                 self.medium.specific_heat,
                 "specific_heat",
             )
-
+    
+            if bool(self.xp.any(density <= 0)):
+                raise ValueError("density must be positive.")
+    
+            if bool(self.xp.any(specific_heat <= 0)):
+                raise ValueError(
+                    "specific_heat must be positive."
+                )
+    
             self.q_scale_factor = (
                 1.0 / (density * specific_heat)
             )
-
+    
         else:
-
-            # MATLAB requires these properties whenever Q
-            # is defined.
-            raise ValueError(
-                "density and specific_heat must be supplied "
-                "when source.Q is nonzero."
-            )
+    
+            self.q_scale_factor = None
+    
+            if bool(self.xp.any(
+                self.xp.asarray(source.Q) != 0
+            )):
+                raise ValueError(
+                    "density and specific_heat must be "
+                    "supplied when source.Q is nonzero."
+                )
 
     # ==================================================================
     # REFERENCE COEFFICIENT
@@ -970,34 +999,37 @@ class kWaveDiffusion:
 
     def _source_update(self, kappa):
 
-        if np.isscalar(self.Q):
-
-            if self.Q == 0:
+        Q = self.xp.asarray(
+            self.Q,
+            dtype=self.dtype,
+        )
+    
+        if Q.ndim == 0:
+            if Q.item() == 0:
                 return 0.0
-
-        else:
-
-            if bool(self.xp.all(self.Q == 0)):
-                return 0.0
-
-        Q_ft = self.FT(self.Q)
-
+    
+            Q = self.xp.full(
+                self.shape,
+                Q.item(),
+                dtype=self.dtype,
+            )
+    
+        elif not bool(self.xp.any(Q != 0)):
+            return 0.0
+    
+        if self.q_scale_factor is None:
+            raise ValueError(
+                "A nonzero heat source requires density "
+                "and specific_heat."
+            )
+    
+        Q_ft = self.FT(Q)
+    
         result = self.IT(
             kappa * Q_ft
         )
-
-        # Physical source:
-        #
-        # Q / A
-        #
-        # where A = rho*c
-
-        result = (
-            self.q_scale_factor
-            * result
-        )
-
-        return result
+    
+        return self.q_scale_factor * result
 
     # ==================================================================
     # PERFUSION TERM
@@ -1093,73 +1125,50 @@ class kWaveDiffusion:
 
         where the derivative operators contain sqrt(kappa).
         """
-
+        
         T_ft = self.FT(self.T)
-
+        
         d_term = 0.0
-
-        # ------------------------------------------------------------
-        # X
-        # ------------------------------------------------------------
-
-        temp_x = self.IT(
+        
+        # X direction
+        temp_x = self.xp.fft.ifftn(
             deriv_x * T_ft
         )
-
-        flux_x = (
-            self.diffusion_p2
-            * temp_x
-        )
-
-        d_term = d_term + self.IT(
-            deriv_x
-            * self.FT(flux_x)
-        )
-
-        # ------------------------------------------------------------
-        # Y
-        # ------------------------------------------------------------
-
+        
+        flux_x = self.diffusion_p2 * temp_x
+        
+        d_term += self.xp.fft.ifftn(
+            deriv_x * self.FT(flux_x)
+        ).real
+        
+        # Y direction
         if self.dim >= 2:
-
-            temp_y = self.IT(
+        
+            temp_y = self.xp.fft.ifftn(
                 deriv_y * T_ft
             )
-
-            flux_y = (
-                self.diffusion_p2
-                * temp_y
-            )
-
-            d_term = d_term + self.IT(
-                deriv_y
-                * self.FT(flux_y)
-            )
-
-        # ------------------------------------------------------------
-        # Z
-        # ------------------------------------------------------------
-
+        
+            flux_y = self.diffusion_p2 * temp_y
+        
+            d_term += self.xp.fft.ifftn(
+                deriv_y * self.FT(flux_y)
+            ).real
+        
+        # Z direction
         if self.dim >= 3:
-
-            temp_z = self.IT(
+        
+            temp_z = self.xp.fft.ifftn(
                 deriv_z * T_ft
             )
+        
+            flux_z = self.diffusion_p2 * temp_z
+        
+            d_term += self.xp.fft.ifftn(
+                deriv_z * self.FT(flux_z)
+            ).real
+        
+        return self.diffusion_p1 * d_term
 
-            flux_z = (
-                self.diffusion_p2
-                * temp_z
-            )
-
-            d_term = d_term + self.IT(
-                deriv_z
-                * self.FT(flux_z)
-            )
-
-        return (
-            self.diffusion_p1
-            * d_term
-        )
 
     # ==================================================================
     # TIME STEP
@@ -1200,6 +1209,8 @@ class kWaveDiffusion:
             raise ValueError(
                 "dt must be positive."
             )
+
+        sensor_start = self.time_steps_taken
 
         if self.display_updates:
 
@@ -1335,34 +1346,39 @@ class kWaveDiffusion:
 
             if self.num_sensor_points > 0:
 
-                values = self.T.ravel(
-                    order="C"
-                )[
-                    self.sensor_mask_index
-                ]
+                required_steps = sensor_start + Nt
 
-                if self.sensor_data is None:
+                if (
+                    self.sensor_data is None
+                    or self.sensor_data.shape[1] < required_steps
+                ):
+
+                    old_data = self.sensor_data
 
                     self.sensor_data = self.xp.empty(
                         (
                             self.num_sensor_points,
-                            Nt,
+                            required_steps,
                         ),
                         dtype=self.dtype,
                     )
 
+                    if old_data is not None:
+                        self.sensor_data[:, :old_data.shape[1]] = old_data
+
+                values = self.T.ravel(order="C")[
+                    self.sensor_mask_index
+                ]
+
                 self.sensor_data[
                     :,
-                    t_index,
+                    sensor_start + t_index,
                 ] = values
 
         self.time_steps_taken += Nt
 
         if self.display_updates:
-
-            print(
-                "Simulation completed."
-            )
+            print("Simulation completed.")
 
         return self.T
 
@@ -1480,6 +1496,32 @@ class kWaveDiffusion:
         )
 
         P = self.perfusion_coeff
+        
+        # Uncorrected explicit diffusion/perfusion update.
+        #
+        # Applies when k-space correction is disabled or the
+        # reference coefficients are zero.
+        
+        if (
+            not self.use_kspace
+            or (
+                self.diffusion_coeff_ref == 0
+                and self.perfusion_coeff_ref == 0
+            )
+        ):
+        
+            max_rate = float(
+                self.xp.max(
+                    diffusion_coeff * self.k_squared
+                    + P
+                ).item()
+            )
+        
+            if max_rate <= 0:
+                return np.inf
+        
+            return 2.0 / max_rate
+
 
         # ------------------------------------------------------------
         # No perfusion
