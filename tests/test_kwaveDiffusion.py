@@ -1,120 +1,347 @@
+
 import numpy as np
+import pytest
 
 from kwave.kgrid import kWaveGrid
-from kwaveDiffusion import DiffusionMedium, DiffusionSource, kWaveDiffusion
 
-
-# ----------------------------------------------------------------------
-# Grid
-# ----------------------------------------------------------------------
-
-Nx, Ny, Nz = 64, 64, 64
-dx = 0.5e-3
-
-kgrid = kWaveGrid([Nx, Ny, Nz], [dx, dx, dx])
-
-
-# ----------------------------------------------------------------------
-# Initial temperature and heat source
-# ----------------------------------------------------------------------
-
-T0 = np.full((Nx, Ny, Nz), 37.0, dtype=np.float64)
-
-S = np.zeros_like(T0)
-
-# Small spherical-ish heating region
-cx, cy, cz = Nx // 2, Ny // 2, Nz // 2
-radius = 5
-
-x, y, z = np.indices(T0.shape)
-
-mask = (
-    (x - cx)**2
-    + (y - cy)**2
-    + (z - cz)**2
-    <= radius**2
-)
-
-S[mask] = 1.0  # K/s
-
-# The solver accepts volumetric heat deposition Q [W/m^3].
-# Convert the desired temperature source S [K/s] using rho * cp.
-rho = 1000.0       # kg/m^3
-cp = 4000.0        # J/(kg K)
-Q = S * rho * cp
-
-
-# ----------------------------------------------------------------------
-# Material properties
-# ----------------------------------------------------------------------
-
-D = 1.4e-7         # m^2/s
-P = 0.01           # 1/s
-Ta = 37.0          # degC
-
-medium = DiffusionMedium(
-    diffusion_coeff=D,
-    density=rho,
-    specific_heat=cp,
-    perfusion_coeff=P,
-    blood_ambient_temperature=Ta,
-)
-
-source = DiffusionSource(
-    T0=T0,
-    Q=Q,
+from kwave.kwaveDiffusion import (
+    DiffusionMedium,
+    DiffusionSource,
+    kWaveDiffusion,
 )
 
 
-# ----------------------------------------------------------------------
-# CPU / CUDA selection
-# ----------------------------------------------------------------------
+@pytest.fixture
+def grid():
+    N = 32
+    dx = 0.5e-3
+    return kWaveGrid([N], [dx])
 
-# Uses CUDA when CuPy and a CUDA device are available; otherwise CPU.
-try:
-    import cupy as cp
+def to_numpy(value):
 
-    device = "gpu" if cp.cuda.runtime.getDeviceCount() > 0 else "cpu"
-except (ImportError, RuntimeError):
-    device = "cpu"
+    if hasattr(value, "get"):
+        return value.get()
 
-print(f"Using device: {device}")
+    return np.asarray(value)
+
+def test_uniform_heating(grid):
+
+    rho = 1000.0
+    specific_heat = 4000.0
+
+    heating_rate = 1.0
+    dt = 2.0
+
+    medium = DiffusionMedium(
+        diffusion_coeff=1.4e-7,
+        density=rho,
+        specific_heat=specific_heat,
+    )
+
+    source = DiffusionSource(
+        T0=37.0,
+        Q=heating_rate * rho * specific_heat,
+    )
+
+    solver = kWaveDiffusion(
+        grid,
+        medium,
+        source,
+        use_kspace=True,
+        display_updates=False,
+    )
+
+    T = to_numpy(solver.take_time_step(1, dt))
+
+    expected = 37.0 + heating_rate * dt
+
+    np.testing.assert_allclose(
+        T,
+        expected,
+        rtol=1e-10,
+        atol=1e-10,
+    )
 
 
-# ----------------------------------------------------------------------
-# Run simulation
-# ----------------------------------------------------------------------
+def test_fourier_mode_decay(grid):
 
-t = 20.0  # total simulation time [s]
+    N = 32
+    dx = 0.5e-3
 
-solver = kWaveDiffusion(
-    kgrid,
-    medium,
-    source,
-    use_kspace=True,
-    dtype=np.float64,
-    display_updates=True,
-    device=device,
-)
+    D = 1.4e-7
 
-# A single k-space-corrected time step advances the homogeneous
-# solution over the full interval.
-T = solver.take_time_step(
-    Nt=1,
-    dt=t,
-)
+    x = np.arange(N)
+
+    mode = 3
+
+    T0 = (
+        37.0
+        + np.cos(2.0 * np.pi * mode * x / N)
+    )
+
+    medium = DiffusionMedium(
+        diffusion_coeff=D,
+    )
+
+    source = DiffusionSource(T0=T0)
+
+    solver = kWaveDiffusion(
+        grid,
+        medium,
+        source,
+        use_kspace=True,
+        display_updates=False,
+    )
+
+    dt = 2.0
+
+    T = to_numpy(solver.take_time_step(1, dt))
+
+    k = 2.0 * np.pi * mode / (N * dx)
+
+    expected = (
+        37.0
+        + np.cos(2.0 * np.pi * mode * x / N)
+        * np.exp(-D * k**2 * dt)
+    )
+
+    np.testing.assert_allclose(
+        T,
+        expected,
+        rtol=1e-9,
+        atol=1e-9,
+    )
 
 
-# ----------------------------------------------------------------------
-# Results
-# ----------------------------------------------------------------------
+def test_scalar_and_constant_array_agree(grid):
 
-# Convert to NumPy for reporting/plotting when running on CUDA.
-T = cp.asnumpy(T)
+    N = 32
 
-print("Temperature shape:", T.shape)
-print("Minimum temperature:", T.min(), "degC")
-print("Maximum temperature:", T.max(), "degC")
-print("Maximum temperature rise:", T.max() - T0.max(), "degC")
-print("Maximum CEM43:", cp.asnumpy(solver.cem43).max())
-print("Lesion volume:", cp.asnumpy(solver.lesion_size), "m^3")
+    D = 1.4e-7
+
+    T0 = 37.0 + np.cos(
+        2.0 * np.pi * 3 * np.arange(N) / N
+    )
+
+    source = DiffusionSource(T0=T0)
+
+    solver_scalar = kWaveDiffusion(
+        grid,
+        DiffusionMedium(diffusion_coeff=D),
+        source,
+        display_updates=False,
+    )
+
+    solver_array = kWaveDiffusion(
+        grid,
+        DiffusionMedium(
+            diffusion_coeff=np.full(N, D)
+        ),
+        source,
+        display_updates=False,
+    )
+
+    T_scalar = solver_scalar.take_time_step(1, 2.0)
+    T_array = solver_array.take_time_step(1, 2.0)
+
+    np.testing.assert_allclose(
+        T_scalar,
+        T_array,
+        rtol=1e-10,
+        atol=1e-10,
+    )
+
+
+def test_sensor_recording_multiple_calls(grid):
+
+    N = 32
+
+    mask = np.zeros(N)
+    mask[[5, 10, 15]] = 1
+
+    medium = DiffusionMedium(
+        diffusion_coeff=1.4e-7,
+    )
+
+    source = DiffusionSource(T0=37.0)
+
+    solver = kWaveDiffusion(
+        grid,
+        medium,
+        source,
+        sensor=mask,
+        display_updates=False,
+    )
+
+    to_numpy(solver.take_time_step(1, 0.1))
+    to_numpy(solver.take_time_step(2, 0.1))
+
+    assert solver.sensor_data.shape == (3, 3)
+    assert solver.time_steps_taken == 3
+
+
+def test_zero_source_can_be_activated(grid):
+
+    rho = 1000.0
+    specific_heat = 4000.0
+
+    medium = DiffusionMedium(
+        diffusion_coeff=1.4e-7,
+        density=rho,
+        specific_heat=specific_heat,
+    )
+
+    source = DiffusionSource(
+        T0=37.0,
+        Q=0.0,
+    )
+
+    solver = kWaveDiffusion(
+        grid,
+        medium,
+        source,
+        display_updates=False,
+    )
+
+    solver.Q = 1.0e6
+
+    T = to_numpy(solver.take_time_step(1, 1.0))
+
+    assert np.max(T) > 37.0
+
+
+def test_dt_limit_uncorrected(grid):
+
+    D = 1.4e-7
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(diffusion_coeff=D),
+        DiffusionSource(T0=37.0),
+        use_kspace=False,
+        display_updates=False,
+    )
+
+    assert np.isfinite(solver.dt_limit)
+    assert solver.dt_limit > 0
+
+def test_nyquist_mode_decay(grid):
+
+    N = 32
+    D = 1.4e-7
+
+    x = np.arange(N)
+
+    T0 = 37.0 + (-1.0) ** x
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(
+            diffusion_coeff=np.full(N, D)
+        ),
+        DiffusionSource(T0=T0),
+        display_updates=False,
+    )
+
+    T = to_numpy(solver.take_time_step(1, 2.0))
+
+    k_nyquist = np.pi / grid.dx
+
+    expected = (
+        37.0
+        + (-1.0) ** x
+        * np.exp(-D * k_nyquist**2 * 2.0)
+    )
+
+    np.testing.assert_allclose(
+        T,
+        expected,
+        rtol=1e-8,
+        atol=1e-8,
+    )
+
+def test_dt_limit_zero_reference(grid):
+
+    D = 1.4e-7
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(
+            diffusion_coeff=D,
+            diffusion_coeff_ref=0.0,
+        ),
+        DiffusionSource(T0=37.0),
+        use_kspace=True,
+        display_updates=False,
+    )
+
+    expected = 2.0 / (
+        D * np.max(solver.k) ** 2
+    )
+
+    np.testing.assert_allclose(
+        solver.dt_limit,
+        expected,
+        rtol=1e-10,
+    )
+
+def test_cpu_backend(grid):
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(
+            diffusion_coeff=1.4e-7,
+        ),
+        DiffusionSource(T0=37.0),
+        device="cpu",
+        display_updates=False,
+    )
+
+    T = to_numpy(solver.take_time_step(1, 1.0))
+
+    assert isinstance(T, np.ndarray)
+
+    assert np.all(np.isfinite(T))
+
+def test_temperature_remains_constant(grid):
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(
+            diffusion_coeff=1.4e-7,
+        ),
+        DiffusionSource(T0=37.0),
+        display_updates=False,
+    )
+
+    T = to_numpy(solver.take_time_step(10, 0.1))
+
+    np.testing.assert_allclose(
+        T,
+        37.0,
+        atol=1e-12,
+    )
+
+def test_heterogeneous_diffusion_changes_temperature(grid):
+
+    N = 32
+    D = np.full(N, 1.4e-7)
+    D[8:16] = 2.8e-7
+
+    x = np.arange(N)
+
+    T0 = 37.0 + np.cos(
+        2.0 * np.pi * 3 * x / N
+    )
+
+    solver = kWaveDiffusion(
+        grid,
+        DiffusionMedium(diffusion_coeff=D),
+        DiffusionSource(T0=T0),
+        display_updates=False,
+    )
+
+    T = to_numpy(solver.take_time_step(1, 2.0))
+
+    assert np.all(np.isfinite(T))
+    assert not np.allclose(T, T0)
