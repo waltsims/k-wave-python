@@ -97,3 +97,86 @@ def test_gpu_result_can_be_reused():
 
     cp.testing.assert_allclose(T1, 37.1)
     cp.testing.assert_allclose(T2, 37.2)
+
+def test_uniform_temperature_perfusion():
+    T0 = np.full((8, 8), 70.0)
+    Ta = 37.0
+    P = 0.02
+    t = 10.0
+
+    result = bioheat_exact(
+        T0=T0,
+        S=0,
+        material=[1.2e-7, P, Ta],
+        dx=1e-3,
+        t=t,
+    )
+
+    expected = Ta + (70.0 - Ta) * np.exp(-P * t)
+
+    np.testing.assert_allclose(
+        result, expected, rtol=1e-12, atol=1e-12
+    )
+
+def test_uniform_source_with_perfusion():
+    T0 = np.full((8, 8), 37.0)
+    S = np.full((8, 8), 2.5)
+
+    P = 0.02
+    Ta = 37.0
+    t = 10.0
+
+    result = bioheat_exact(
+        T0=T0,
+        S=S,
+        material=[1.2e-7, P, Ta],
+        dx=1e-3,
+        t=t,
+    )
+
+    expected = Ta + (2.5 / P) * (1.0 - np.exp(-P * t))
+
+    np.testing.assert_allclose(
+        result, expected, rtol=1e-12, atol=1e-12
+    )
+
+def test_gpu_matches_cpu():
+    cp = pytest.importorskip("cupy")
+
+    try:
+        if cp.cuda.runtime.getDeviceCount() < 1:
+            pytest.skip("No CUDA GPU available")
+        cp.zeros(1).sum().item()
+    except cp.cuda.CUDARuntimeError:
+        pytest.skip("No usable CUDA GPU available")
+
+    rng = np.random.default_rng(42)
+
+    T0 = rng.uniform(20, 80, (16, 16, 16))
+    S = rng.uniform(0, 2, (16, 16, 16))
+
+    material = [1.2e-7, 0.002, 37.0]
+    dx = (0.5e-3, 0.5e-3, 1e-3)
+
+    T_cpu = bioheat_exact(
+        T0=T0,
+        S=S,
+        material=material,
+        dx=dx,
+        t=5.0,
+        device="cpu",
+    )
+
+    T_gpu = bioheat_exact(
+        T0=cp.asarray(T0),
+        S=cp.asarray(S),
+        material=material,
+        dx=dx,
+        t=5.0,
+        device="gpu",
+        return_numpy=True,
+    )
+
+    np.testing.assert_allclose(
+        T_gpu, T_cpu, rtol=1e-10, atol=1e-10
+    )
