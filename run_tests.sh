@@ -8,4 +8,4 @@ docker run -it \
   --volume "$(pwd)":$project_dir_in_container \
   --workdir $project_dir_in_container \
   $image_name \
-  pytest    # run pytest
+  pytest "$@"
