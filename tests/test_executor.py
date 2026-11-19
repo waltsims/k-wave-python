@@ -255,9 +255,7 @@ class TestExecutor(unittest.TestCase):
         del os.environ["KWAVE_FORCE_CPU"]
 
     def test_executor_gpu_cuda_failure_darwin(self):
-        expected_error_msg = (
-            "GPU simulations are currently not supported on MacOS. Try running the simulation on CPU by setting is_gpu_simulation=False."
-        )
+        expected_error_msg = "GPU simulations on macOS require Apple Silicon and the MLX binary"
         # Configure the mock path object
         mock_binary_path = MagicMock(spec=Path)
         mock_binary_path.chmod.side_effect = FileNotFoundError

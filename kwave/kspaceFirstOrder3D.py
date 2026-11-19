@@ -34,6 +34,8 @@ def kspaceFirstOrder3DG(
     This function provides a blind interface to the C++/CUDA version of kspaceFirstOrder3D
     (called kspaceFirstOrder-CUDA). The function works by saving the input files to disk,
     running the C++/CUDA simulation, and loading the output files back into Python.
+    On macOS with Apple Silicon, the MLX port of the same code (kspaceFirstOrder-MLX) is used
+    instead, running on the Apple GPU through Metal.
 
     Parameters:
     -----------

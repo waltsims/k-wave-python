@@ -33,7 +33,8 @@ def kspace_first_order_2d_gpu(
     2D time-domain simulation of wave propagation on a GPU using C++ CUDA code.
 
     This function provides a blind interface to the C++/CUDA version of kspaceFirstOrder2D
-    (called kspaceFirstOrder-CUDA). The function works by saving the input files to disk,
+    (called kspaceFirstOrder-CUDA; kspaceFirstOrder-MLX on macOS with Apple Silicon).
+    The function works by saving the input files to disk,
     running the C++/CUDA simulation, and loading the output files back into Python.
 
     Parameters:

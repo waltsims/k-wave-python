@@ -339,7 +339,8 @@ class CppSimulation:
 
         When *binary_path* is provided the caller's custom binary is used and
         verified to exist.  Otherwise the bundled binary is selected based on
-        *device* (``"gpu"`` → CUDA, anything else → OMP) and verified to exist.
+        *device* (``"gpu"`` → CUDA, or MLX on macOS; anything else → OMP) and
+        verified to exist.
 
         Args:
             device: ``"cpu"`` or ``"gpu"``.
@@ -352,8 +353,8 @@ class CppSimulation:
         Raises:
             FileNotFoundError: When the binary does not exist at the resolved
                 path.
-            ValueError: When ``device="gpu"`` is requested on macOS where no
-                CUDA binary is available.
+            ValueError: When ``device="gpu"`` is requested on macOS and the MLX
+                binary is not available (e.g. on an Intel Mac).
         """
         if binary_path is not None:
             resolved = Path(binary_path)
@@ -363,11 +364,18 @@ class CppSimulation:
 
         import kwave
 
-        binary_name = "kspaceFirstOrder-CUDA" if device == "gpu" else "kspaceFirstOrder-OMP"
+        if device == "gpu":
+            # macOS has no CUDA: use the MLX binary, which runs on the Apple Silicon GPU (Metal)
+            binary_name = "kspaceFirstOrder-MLX" if kwave.PLATFORM == "darwin" else "kspaceFirstOrder-CUDA"
+        else:
+            binary_name = "kspaceFirstOrder-OMP"
         resolved = kwave.BINARY_PATH / binary_name
         if not resolved.exists():
             if kwave.PLATFORM == "darwin" and device == "gpu":
-                raise ValueError("GPU simulations are not supported on macOS. Use device='cpu'.")
+                raise ValueError(
+                    f"GPU binary {binary_name} not found at {resolved}. GPU simulations on macOS require Apple Silicon "
+                    "and the MLX binary from the k-wave-python binary release. Use device='cpu' otherwise."
+                )
             raise FileNotFoundError(f"C++ binary not found at {resolved}. Install with: pip install k-wave-data")
         return resolved
 
@@ -402,7 +410,7 @@ class CppSimulation:
         resolved = self._resolve_binary_path(device, binary_path)
         resolved.chmod(resolved.stat().st_mode | stat.S_IEXEC)
 
-        if device == "gpu":
+        if device == "gpu" and not resolved.name.startswith("kspaceFirstOrder-MLX"):
             self._warn_if_unsupported_gpu()
 
         # Build command-line options
