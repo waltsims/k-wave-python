@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "k-Wave-python"
 dynamic = ["version"]
-description = "Acoustics toolbox for time domain acoustic and ultrasound simulations in complex and tissue-realistic media."
+description = "Acoustics toolbox for time-domain acoustic and ultrasound simulations in complex and tissue-realistic media."
 readme = "docs/README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
