@@ -390,7 +390,8 @@ class Simulation:
                 pml_alpha = float(self._pml_alpha_override[axis])
             else:
                 pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
-            self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
+            # Crop by the PML thickness even when pml_alpha == 0: callers pad the grid by pml_size regardless of absorption
+            self.pml_sizes.append(pml_size)
 
             if pml_size == 0 or pml_alpha == 0:
                 shape = [1] * self.ndim

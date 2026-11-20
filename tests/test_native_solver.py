@@ -631,3 +631,25 @@ class TestLegacyPythonBridgePml:
         # C++ runs in single precision
         np.testing.assert_allclose(python["p"], cpp_p, rtol=0, atol=1e-4 * np.max(np.abs(cpp_p)))
         np.testing.assert_allclose(python["p_final"], cpp_p_final, rtol=0, atol=1e-3 * np.max(np.abs(cpp_p_final)))
+
+    @pytest.mark.parametrize("shape,pml_alpha", [((32, 30), 0.0), ((32, 30), [0.0, 2.0]), ((24, 22, 20), 0.0)])
+    def test_pml_outside_final_fields_cropped_without_absorption(self, shape, pml_alpha):
+        """pml_inside=False pads by pml_size whatever pml_alpha is, so *_final must be cropped by pml_size too."""
+        from kwave.options.simulation_options import SimulationOptions
+
+        pml_size = [4] * len(shape)
+        legacy = self._legacy(shape, SimulationOptions(pml_inside=False, pml_size=pml_size, pml_alpha=pml_alpha, smooth_p0=False))
+        unified = kspaceFirstOrder(
+            *self._setup(shape),
+            backend="python",
+            pml_inside=False,
+            pml_size=tuple(pml_size),
+            pml_alpha=pml_alpha,
+            smooth_p0=False,
+            quiet=True,
+        )
+        for result in (legacy, unified):
+            assert result["p_final"].shape == shape
+            for axis in "xyz"[: len(shape)]:
+                assert result[f"u{axis}_final"].shape == shape
+        np.testing.assert_array_equal(legacy["p_final"], unified["p_final"])
