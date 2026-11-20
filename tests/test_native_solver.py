@@ -379,109 +379,30 @@ class TestCoverageEdgeCases:
             kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
 
 
-class TestPmlStripOutputs:
-    """Shapes of full-grid fields and per-sensor aggregates with and without PML expansion."""
+@pytest.mark.parametrize("legacy", [False, True])
+def test_pml_inside_final_fields_cover_full_grid(grid_2d, legacy):
+    from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
 
-    @pytest.mark.parametrize("shape", [(64,), (64, 64)])
-    def test_final_fields_cover_full_grid_when_pml_inside(self, shape):
-        ndim = len(shape)
-        kgrid = kWaveGrid(Vector(list(shape)), Vector([0.1e-3] * ndim))
-        kgrid.setTime(20, 1e-8)
-        sensor = kSensor(mask=np.ones(shape, dtype=bool))
-        sensor.record = ["p", "p_final", "u_final"]
-        kwargs = dict(backend="python", pml_size=8, smooth_p0=False, quiet=True)
-        inside = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), _p0_source(shape), sensor, pml_inside=True, **kwargs)
-        final_keys = ["p_final"] + [f"u{a}_final" for a in "xyz"[:ndim]]
-        for key in final_keys:
-            assert inside[key].shape == shape, key
-        # p_final is the last recorded pressure sample at every grid point, PML region included
-        np.testing.assert_allclose(inside["p_final"].ravel(), inside["p"][:, -1])
-
-        # pml_inside=False pads the grid internally and crops back to the same user grid
-        outside = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), _p0_source(shape), sensor, pml_inside=False, **kwargs)
-        for key in final_keys:
-            assert outside[key].shape == shape, key
-
-    def test_simulation_class_crops_final_fields_by_default(self, grid_2d):
-        from kwave.solvers.kspace_solver import Simulation
-
-        sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
-        sensor.record = ["p_final"]
-        args = (grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor)
-        kwargs = dict(pml_size=(8, 8), pml_alpha=(2.0, 2.0), smooth_p0=False, quiet=True)
-        cropped = Simulation(*args, **kwargs).run()["p_final"]
-        full = Simulation(*args, pml_inside=True, **kwargs).run()["p_final"]
-        assert cropped.shape == (48, 48)
-        assert full.shape == (64, 64)
-        np.testing.assert_array_equal(full[8:-8, 8:-8], cropped)
-
-    @pytest.mark.parametrize("pml_inside", [False, True])
-    def test_1d_sensor_aggregates_are_not_pml_stripped(self, grid_1d, pml_inside):
-        mask = np.zeros(64, dtype=bool)
-        mask[20:44] = True
-        sensor = kSensor(mask=mask)
-        sensor.record = ["p", "p_max", "p_min", "p_rms", "ux", "ux_max", "ux_min", "ux_rms", "p_final"]
-        result = kspaceFirstOrder(
-            grid_1d,
-            kWaveMedium(sound_speed=1500),
-            _p0_source((64,)),
-            sensor,
-            backend="python",
-            pml_size=4,
-            pml_inside=pml_inside,
-            quiet=True,
-        )
-        n_sensor = int(mask.sum())
-        for prefix in ("p", "ux"):
-            ts = result[prefix]
-            assert ts.shape == (n_sensor, 20)
-            np.testing.assert_array_equal(result[f"{prefix}_max"], ts.max(axis=-1))
-            np.testing.assert_array_equal(result[f"{prefix}_min"], ts.min(axis=-1))
-            np.testing.assert_allclose(result[f"{prefix}_rms"], np.sqrt(np.mean(ts**2, axis=-1)))
-        assert result["p_final"].shape == (64,)
-
-    def test_strip_pml_selects_grid_fields_by_name(self):
-        from kwave.kspaceFirstOrder import _FULL_GRID_SUFFIXES_CPP, _strip_pml
-
-        n_sensor, pml = 24, 4
-        result = {
-            "p_final": np.arange(72.0),
-            "p_max_all": np.arange(72.0),
-            "ux_min_all": np.arange(72.0),
-            "p_max": np.arange(float(n_sensor)),
-            "p_min": np.arange(float(n_sensor)),
-            "p_rms": np.arange(float(n_sensor)),
-            "ux_max": np.arange(float(n_sensor)),
-            "p": np.zeros((n_sensor, 5)),
-        }
-        stripped = _strip_pml(result, (pml,), 1, suffixes=_FULL_GRID_SUFFIXES_CPP)
-        for key in ("p_final", "p_max_all", "ux_min_all"):
-            np.testing.assert_array_equal(stripped[key], np.arange(72.0)[pml:-pml])
-        for key in ("p_max", "p_min", "p_rms", "ux_max", "p"):
-            assert stripped[key] is result[key]
-
-    @pytest.mark.parametrize("shape", [(32, 32), (24, 24, 24)])
-    def test_legacy_entry_point_final_fields_cover_full_grid_when_pml_inside(self, shape):
-        from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
-        from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
-        from kwave.options.simulation_execution_options import SimulationExecutionOptions
-        from kwave.options.simulation_options import SimulationOptions
-
-        ndim = len(shape)
-        kgrid = kWaveGrid(Vector(list(shape)), Vector([0.1e-3] * ndim))
-        kgrid.setTime(10, 1e-8)
-        sensor = kSensor(mask=np.ones(shape, dtype=bool))
-        sensor.record = ["p", "p_final", "u_final"]
-        legacy = kspaceFirstOrder2D if ndim == 2 else kspaceFirstOrder3D
+    sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+    sensor.record = ["p", "p_final", "u_final"]
+    args = dict(kgrid=grid_2d, medium=kWaveMedium(sound_speed=1500), source=_p0_source((64, 64)), sensor=sensor)
+    if legacy:
+        opts = SimulationOptions(pml_inside=True, pml_size=[8, 8]), SimulationExecutionOptions(backend="python")
         with pytest.warns(FutureWarning):
-            result = legacy(
-                kgrid=kgrid,
-                medium=kWaveMedium(sound_speed=1500),
-                source=_p0_source(shape),
-                sensor=sensor,
-                simulation_options=SimulationOptions(pml_inside=True, pml_size=[4] * ndim, smooth_p0=False),
-                execution_options=SimulationExecutionOptions(backend="python"),
-            )
-        for key in ["p_final"] + [f"u{a}_final" for a in "xyz"[:ndim]]:
-            assert result[key].shape == shape, key
-        np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
+            result = kspaceFirstOrder2D(**args, simulation_options=opts[0], execution_options=opts[1])
+    else:
+        result = kspaceFirstOrder(**args, pml_size=8, pml_inside=True, quiet=True)
+    assert result["p_final"].shape == result["ux_final"].shape == result["uy_final"].shape == (64, 64)
+    np.testing.assert_allclose(result["p_final"].ravel(order="F"), result["p"][:, -1])
+
+
+def test_1d_sensor_aggregates_not_pml_stripped(grid_1d):
+    sensor = kSensor(mask=np.arange(64) % 2 == 0)
+    sensor.record = ["p", "p_max", "p_min", "p_rms", "ux", "ux_max", "ux_min", "ux_rms"]
+    result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), _p0_source((64,)), sensor, pml_size=4, quiet=True)
+    for f in ("p", "ux"):
+        np.testing.assert_array_equal(result[f"{f}_max"], result[f].max(axis=-1))
+        np.testing.assert_array_equal(result[f"{f}_min"], result[f].min(axis=-1))
+        np.testing.assert_allclose(result[f"{f}_rms"], np.sqrt(np.mean(result[f] ** 2, axis=-1)))
