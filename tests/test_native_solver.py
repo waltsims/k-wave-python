@@ -485,3 +485,149 @@ class TestPmlStripOutputs:
         for key in ["p_final"] + [f"u{a}_final" for a in "xyz"[:ndim]]:
             assert result[key].shape == shape, key
         np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
+
+
+class TestLegacyPythonBridgePml:
+    """kspaceFirstOrder2D/3D with the Python backend: PML sizing and pml_inside=False grid padding."""
+
+    @staticmethod
+    def _setup(shape, source_kind="p0", sensor_kind="binary"):
+        ndim = len(shape)
+        kgrid = kWaveGrid(Vector(list(shape)), Vector([0.1e-3] * ndim))
+        kgrid.setTime(60, 1.5e-8)
+        sound_speed = 1500 * np.ones(shape)
+        sound_speed[: shape[0] // 3] = 1800  # heterogeneous up to the grid edge, so edge extension matters
+        density = 1000 * np.ones(shape)
+        density[..., shape[-1] // 2 :] = 1200
+        medium = kWaveMedium(sound_speed=sound_speed, density=density)
+        source = kSource()
+        if source_kind == "p0":
+            source.p0 = np.zeros(shape)
+            source.p0[tuple(s // 2 + 2 for s in shape)] = 1.0
+            source.p0[(3,) * ndim] = 0.5
+        else:
+            source.p_mask = np.zeros(shape, dtype=bool)
+            source.p_mask[(4,) + tuple(s // 2 for s in shape[1:])] = True
+            source.p_mask[(shape[0] - 3,) + tuple(s // 2 - 3 for s in shape[1:])] = True
+            signal = np.sin(2 * np.pi * 1e6 * np.arange(kgrid.Nt) * kgrid.dt)
+            source.p = np.vstack([signal, -0.5 * signal])
+        if sensor_kind == "binary":
+            mask = np.zeros(shape, dtype=bool)
+            mask[2, 1::5] = True
+            mask[shape[0] - 2] = True
+            sensor = kSensor(mask=mask)
+        else:
+            sensor = kSensor(mask=np.array([[-0.8e-3, 0.3e-3, 1.0e-3], [0.5e-3, -0.9e-3, 0.2e-3], [0.1e-3, 0.4e-3, -0.6e-3]])[:ndim])
+        sensor.record = ["p", "p_final", "u_final"]
+        return kgrid, medium, source, sensor
+
+    @staticmethod
+    def _legacy(shape, simulation_options, execution_options=None, **setup_kwargs):
+        from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+        from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+        from kwave.options.simulation_execution_options import SimulationExecutionOptions
+
+        kgrid, medium, source, sensor = TestLegacyPythonBridgePml._setup(shape, **setup_kwargs)
+        legacy = kspaceFirstOrder2D if len(shape) == 2 else kspaceFirstOrder3D
+        if execution_options is None:
+            execution_options = SimulationExecutionOptions(backend="python")
+        with pytest.warns(FutureWarning):
+            return legacy(
+                kgrid=kgrid,
+                medium=medium,
+                source=source,
+                sensor=sensor,
+                simulation_options=simulation_options,
+                execution_options=execution_options,
+            )
+
+    @pytest.mark.parametrize("shape", [(32, 30), (24, 22, 20)])
+    @pytest.mark.parametrize("pml_inside", [True, False])
+    def test_scalar_pml_size(self, shape, pml_inside):
+        from kwave.options.simulation_options import SimulationOptions
+
+        scalar = self._legacy(shape, SimulationOptions(pml_inside=pml_inside, pml_size=4, smooth_p0=False))
+        per_axis = self._legacy(shape, SimulationOptions(pml_inside=pml_inside, pml_size=[4] * len(shape), smooth_p0=False))
+        assert scalar["p_final"].shape == shape
+        for key in per_axis:
+            np.testing.assert_array_equal(scalar[key], per_axis[key])
+
+    @pytest.mark.parametrize("shape,pml_size", [((32, 30), [4, 6]), ((24, 22, 20), [4, 5, 6])])
+    @pytest.mark.parametrize("source_kind,sensor_kind", [("p0", "binary"), ("p0", "cartesian"), ("p", "binary")])
+    def test_pml_outside_matches_unified_api(self, shape, pml_size, source_kind, sensor_kind):
+        """pml_inside=False pads medium, source masks and sensor mask exactly like kspaceFirstOrder()."""
+        from kwave.options.simulation_options import SimulationOptions
+
+        setup_kwargs = dict(source_kind=source_kind, sensor_kind=sensor_kind)
+        legacy = self._legacy(shape, SimulationOptions(pml_inside=False, pml_size=pml_size, smooth_p0=False), **setup_kwargs)
+        unified = kspaceFirstOrder(
+            *self._setup(shape, **setup_kwargs), backend="python", pml_inside=False, pml_size=tuple(pml_size), smooth_p0=False, quiet=True
+        )
+        assert set(legacy) == set(unified)
+        assert legacy["p_final"].shape == shape
+        for key in unified:
+            np.testing.assert_array_equal(legacy[key], unified[key], err_msg=key)
+
+    def test_pml_outside_differs_from_pml_inside(self):
+        """With the PML outside the grid, a source next to the boundary is no longer damped by the PML."""
+        from kwave.options.simulation_options import SimulationOptions
+
+        shape = (32, 30)
+        outside = self._legacy(shape, SimulationOptions(pml_inside=False, pml_size=[6, 6], smooth_p0=False))
+        inside = self._legacy(shape, SimulationOptions(pml_inside=True, pml_size=[6, 6], smooth_p0=False))
+        assert outside["p"].shape == inside["p"].shape
+        assert np.max(np.abs(outside["p"] - inside["p"])) > 1e-3 * np.max(np.abs(outside["p"]))
+
+    def test_pml_outside_smooths_p0_before_padding(self):
+        """Legacy k-Wave smooths p0 on the user's grid, then pads it (kWaveSimulation.smooth_and_enlarge)."""
+        from kwave.options.simulation_options import SimulationOptions
+        from kwave.utils.filters import smooth
+
+        shape = (32, 30)
+        legacy = self._legacy(shape, SimulationOptions(pml_inside=False, pml_size=[4, 6], smooth_p0=True))
+        kgrid, medium, source, sensor = self._setup(shape)
+        source.p0 = smooth(source.p0, restore_max=True)
+        expected = kspaceFirstOrder(
+            kgrid, medium, source, sensor, backend="python", pml_inside=False, pml_size=(4, 6), smooth_p0=False, quiet=True
+        )
+        for key in expected:
+            np.testing.assert_array_equal(legacy[key], expected[key], err_msg=key)
+
+    @pytest.mark.parametrize("shape,pml_size", [((40, 36), [6, 6]), ((24, 22, 20), [4, 5, 6])])
+    def test_pml_outside_matches_legacy_cpp(self, shape, pml_size):
+        """End to end against the C++ binary: same options, PML outside, smoothed p0, heterogeneous medium."""
+        import subprocess
+
+        from kwave.options.simulation_execution_options import SimulationExecutionOptions
+        from kwave.options.simulation_options import SimulationOptions
+
+        cpp_execution = SimulationExecutionOptions(is_gpu_simulation=False, verbose_level=0)
+        try:
+            binary_available = os.path.exists(cpp_execution.binary_path)
+        except ValueError:
+            binary_available = False
+        if not binary_available:
+            pytest.skip("C++ binary not available")
+        try:
+            cpp = self._legacy(
+                shape,
+                SimulationOptions(pml_inside=False, pml_size=pml_size, smooth_p0=True, save_to_disk=True, data_cast="single"),
+                execution_options=cpp_execution,
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            pytest.skip(f"C++ binary not runnable: {exc}")
+        python = self._legacy(shape, SimulationOptions(pml_inside=False, pml_size=pml_size, smooth_p0=True))
+
+        # Legacy C++ output: p is (Nt, n_sensor) with sensor points in F order, p_final has reversed axes
+        mask = np.asarray(self._setup(shape)[3].mask, dtype=bool)
+        c_rank = np.zeros(shape, dtype=int)
+        c_rank[mask] = np.arange(mask.sum())
+        f_to_c = np.argsort(c_rank.flatten(order="F")[mask.flatten(order="F")])
+        cpp_p = np.asarray(cpp["p"]).T[f_to_c]
+        cpp_p_final = np.asarray(cpp["p_final"]).T
+
+        assert python["p"].shape == cpp_p.shape
+        assert python["p_final"].shape == cpp_p_final.shape == shape
+        # C++ runs in single precision
+        np.testing.assert_allclose(python["p"], cpp_p, rtol=0, atol=1e-4 * np.max(np.abs(cpp_p)))
+        np.testing.assert_allclose(python["p_final"], cpp_p_final, rtol=0, atol=1e-3 * np.max(np.abs(cpp_p_final)))
