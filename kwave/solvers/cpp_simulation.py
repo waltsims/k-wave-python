@@ -21,7 +21,6 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.cuda import get_min_compute_capability, user_warning_stacklevel
 from kwave.utils.io import write_attributes, write_matrix
-from kwave.utils.matrix import num_dim2
 
 # Minimum CUDA compute capability supported by the bundled C++ binary.
 # CUDA Toolkit 13.0 removed Maxwell/Pascal/Volta (sm < 7.5).
@@ -293,7 +292,7 @@ class CppSimulation:
             write_matrix(filepath, p_data, "p_source_input")
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
-            write_matrix(filepath, np.array(int(num_dim2(p_data) > 1), dtype=np.uint64), "p_source_many")
+            write_matrix(filepath, np.array(int(p_data.shape[0] > 1), dtype=np.uint64), "p_source_many")
 
         if has_ux or has_uy or has_uz:
             u_mask_arr = np.asarray(source.u_mask)
@@ -316,7 +315,7 @@ class CppSimulation:
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
             # validate_source() ensures all velocity components agree on single vs many
             # (vel_data is the last written component, after any per-point expansion)
-            write_matrix(filepath, np.array(int(num_dim2(vel_data) > 1), dtype=np.uint64), "u_source_many")
+            write_matrix(filepath, np.array(int(vel_data.shape[0] > 1), dtype=np.uint64), "u_source_many")
 
         # File attributes
         write_attributes(filepath)
