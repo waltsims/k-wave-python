@@ -459,3 +459,29 @@ class TestPmlStripOutputs:
             np.testing.assert_array_equal(stripped[key], np.arange(72.0)[pml:-pml])
         for key in ("p_max", "p_min", "p_rms", "ux_max", "p"):
             assert stripped[key] is result[key]
+
+    @pytest.mark.parametrize("shape", [(32, 32), (24, 24, 24)])
+    def test_legacy_entry_point_final_fields_cover_full_grid_when_pml_inside(self, shape):
+        from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+        from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+        from kwave.options.simulation_execution_options import SimulationExecutionOptions
+        from kwave.options.simulation_options import SimulationOptions
+
+        ndim = len(shape)
+        kgrid = kWaveGrid(Vector(list(shape)), Vector([0.1e-3] * ndim))
+        kgrid.setTime(10, 1e-8)
+        sensor = kSensor(mask=np.ones(shape, dtype=bool))
+        sensor.record = ["p", "p_final", "u_final"]
+        legacy = kspaceFirstOrder2D if ndim == 2 else kspaceFirstOrder3D
+        with pytest.warns(FutureWarning):
+            result = legacy(
+                kgrid=kgrid,
+                medium=kWaveMedium(sound_speed=1500),
+                source=_p0_source(shape),
+                sensor=sensor,
+                simulation_options=SimulationOptions(pml_inside=True, pml_size=[4] * ndim, smooth_p0=False),
+                execution_options=SimulationExecutionOptions(backend="python"),
+            )
+        for key in ["p_final"] + [f"u{a}_final" for a in "xyz"[:ndim]]:
+            assert result[key].shape == shape, key
+        np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
