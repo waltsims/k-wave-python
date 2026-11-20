@@ -64,16 +64,28 @@ def _signal(many):
     return (1.0 + np.arange(n_src))[:, None] * base[None, :]
 
 
-def _source(field, mode, many):
+def _signal_f_order(many):
+    """``_signal`` with per-point rows (C-order of the mask, the unified API's convention)
+    rearranged to the F-order of ``*_source_index``; a single series is unchanged."""
+    signal = _signal(many)
+    if not many:
+        return signal
+    mask = _mask()
+    f_points = np.unravel_index(np.flatnonzero(mask.flatten(order="F")), N, order="F")
+    return signal[np.searchsorted(np.flatnonzero(mask), np.ravel_multi_index(f_points, N))]
+
+
+def _source(field, mode, many, signal=None):
+    signal = _signal(many) if signal is None else signal
     source = kSource()
     if field == "p":
         source.p_mask = _mask()
-        source.p = _signal(many)
+        source.p = signal
         source.p_mode = mode
     else:
         source.u_mask = _mask()
         for component in field.split("+"):
-            setattr(source, component, _signal(many))
+            setattr(source, component, signal)
         source.u_mode = mode
     return source
 
@@ -124,7 +136,8 @@ def _write_legacy(field, mode, heterogeneous, many, tmp_path):
     kspaceFirstOrder2D(
         kgrid=_kgrid(),
         medium=_medium(heterogeneous),
-        source=_source(field, mode, many),
+        # the legacy path takes per-point rows in F-order (MATLAB convention)
+        source=_source(field, mode, many, signal=_signal_f_order(many)),
         sensor=kSensor(mask=np.ones(N, dtype=bool)),
         simulation_options=SimulationOptions(
             pml_inside=True,
@@ -162,7 +175,7 @@ def test_source_input_is_scaled(field, mode, heterogeneous, many, tmp_path):
 
     n_src = int(_mask().sum())
     applied = _per_point(written[f"{field}_source_input"], n_src)
-    expected = np.broadcast_to(_signal(many), (n_src, NT)) * _expected_scale(field, mode, heterogeneous)[:, None]
+    expected = np.broadcast_to(_signal_f_order(many), (n_src, NT)) * _expected_scale(field, mode, heterogeneous)[:, None]
 
     np.testing.assert_allclose(applied, expected, rtol=1e-5)
     assert int(written[f"{prefix}_source_mode"]) == MODE_FLAG[mode]

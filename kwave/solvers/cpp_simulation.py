@@ -289,7 +289,7 @@ class CppSimulation:
                 p_scale = 1.0 / (ndim * self._source_sound_speed(p_mask_idx) ** 2)
             else:
                 p_scale = 2.0 * dt / (ndim * self._source_sound_speed(p_mask_idx) * dx)
-            p_data = self._scale_source_signal(source.p, p_scale)
+            p_data = self._scale_source_signal(source.p, p_scale, self._c_to_f_source_order(p_mask_arr, grid_shape))
             write_matrix(filepath, p_data, "p_source_input")
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
@@ -307,10 +307,11 @@ class CppSimulation:
             # The binary expects pre-scaled sources: force sources are scaled by
             # 2*c0*dt/d_i (per-axis spacing); dirichlet sources are written as-is.
             u_c0 = self._source_sound_speed(u_mask_idx)
+            u_order = self._c_to_f_source_order(u_mask_arr, grid_shape)
             for vel, flag, d_i in [("ux", has_ux, dx), ("uy", has_uy, dy), ("uz", has_uz, dz)]:
                 if flag:
                     u_scale = 1.0 if u_mode == "dirichlet" else 2.0 * u_c0 * dt / d_i
-                    vel_data = self._scale_source_signal(getattr(source, vel), u_scale)
+                    vel_data = self._scale_source_signal(getattr(source, vel), u_scale, u_order)
                     write_matrix(filepath, vel_data, f"{vel}_source_input")
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
@@ -336,15 +337,31 @@ class CppSimulation:
         return c0_src
 
     @staticmethod
-    def _scale_source_signal(signal, scale):
+    def _c_to_f_source_order(mask, grid_shape):
+        """Row permutation taking per-point source signals from C-order to F-order.
+
+        ``source.p`` / ``source.u*`` hold one row per source point in the C-order
+        (row-major) of the mask's nonzero points, as the Python backend applies
+        them.  The binary pairs row k with entry k of ``*_source_index``, which
+        is in F-order, so ``signal[perm]`` is what must be written.
+        """
+        points = np.argwhere(np.asarray(mask).reshape(grid_shape) != 0)
+        return np.lexsort(points.T)  # last axis is the primary key -> F-order
+
+    @staticmethod
+    def _scale_source_signal(signal, scale, order=None):
         """Scale a time-varying source signal (n_series, Nt) to the units the binary expects.
 
-        ``scale`` is a scalar or one value per source point.  With a per-point
-        scale, a single time series shared by all source points is expanded to
-        one (individually scaled) series per point.
+        ``scale`` is a scalar or one value per source point (in the F-order of
+        the source index).  With a per-point scale, a single time series shared
+        by all source points is expanded to one (individually scaled) series per
+        point.  ``order`` (see ``_c_to_f_source_order``) reorders one-row-per-point
+        signals to the F-order of the source index before scaling.
         """
         signal = np.atleast_2d(np.asarray(signal, dtype=np.float64))
         signal = signal.reshape(-1, signal.shape[-1])
+        if order is not None and signal.shape[0] > 1 and signal.shape[0] == len(order):
+            signal = signal[order]
         if np.ndim(scale) > 0:
             scale = np.asarray(scale, dtype=np.float64)[:, None]
         return (signal * scale).astype(np.float32)
