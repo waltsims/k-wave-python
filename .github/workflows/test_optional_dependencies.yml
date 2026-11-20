@@ -17,10 +17,10 @@ jobs:
                 extra_requirements: [ "test", "examples", "docs", "dev", "all" ]
         runs-on: ${{matrix.os}}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
             # Pull the cache based on the hash value
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@v7
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: 'pip'
