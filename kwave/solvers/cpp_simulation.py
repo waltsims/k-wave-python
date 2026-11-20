@@ -88,13 +88,20 @@ class CppSimulation:
                     warnings.warn(f"Could not clean up temp directory {data_dir!r}: {exc}", RuntimeWarning, stacklevel=2)
 
     _FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+    # Fields the C++ binary samples at the sensor points on every recorded time step.
+    _TIME_SERIES_FIELDS = ("p", "ux", "uy", "uz", "ux_non_staggered", "uy_non_staggered", "uz_non_staggered")
+    # Fields the C++ binary aggregates over time at the sensor points (one value per point).
+    _SENSOR_AGGREGATE_SUFFIXES = ("_max", "_min", "_rms")
 
     def _fix_output_order(self, result):
         """Convert C++ output from F-order to C-order.
 
         The C++ binary writes arrays in Fortran order.  HDF5/h5py reads them
         with reversed dimensions.  We fix full-grid fields via transpose and
-        reorder sensor time-series rows from F-indexed to C-indexed.
+        reorder sensor rows from F-indexed to C-indexed.
+
+        Expects the layout produced by :meth:`_parse_output`: time-series as
+        ``(n_sensor, Nt)`` and per-sensor aggregates as ``(n_sensor,)``.
         """
         ndim = self.ndim
         grid_shape = tuple(int(n) for n in self.kgrid.N)
@@ -107,7 +114,9 @@ class CppSimulation:
             if is_grid and val.ndim == ndim:
                 result[key] = val.transpose(tuple(range(ndim - 1, -1, -1)))
 
-        # 2. Reorder sensor time-series from F-indexed to C-indexed rows
+        # 2. Reorder sensor points (axis 0) from F-indexed to C-indexed.
+        #    Fields are selected by name, never by comparing array sizes:
+        #    n_sensor may be smaller than, equal to, or larger than Nt.
         if self.sensor is None or self.sensor.mask is None:
             mask = np.ones(grid_shape, dtype=bool)
         else:
@@ -123,12 +132,12 @@ class CppSimulation:
             for key, val in result.items():
                 if not isinstance(val, np.ndarray):
                     continue
-                is_grid = any(key.endswith(s) for s in self._FULL_GRID_SUFFIXES)
-                if is_grid:
-                    continue
-                if val.ndim == 2 and val.shape[0] == n_sensor:
-                    result[key] = val[perm]
-                elif val.ndim == 1 and val.shape[0] == n_sensor:
+                is_time_series = key in self._TIME_SERIES_FIELDS and val.ndim == 2
+                # ndim >= 2 here, so a 1-D "_max"/"_min"/"_rms" field is per-sensor, not full-grid
+                is_sensor_aggregate = key.endswith(self._SENSOR_AGGREGATE_SUFFIXES) and val.ndim == 1
+                if is_time_series or is_sensor_aggregate:
+                    if val.shape[0] != n_sensor:
+                        raise ValueError(f"C++ output {key!r} has {val.shape[0]} sensor points, expected {n_sensor} from the sensor mask.")
                     result[key] = val[perm]
 
         return result
@@ -494,9 +503,28 @@ class CppSimulation:
                 raise subprocess.CalledProcessError(e.returncode, e.cmd, e.stdout, e.stderr) from e
             raise
 
-    @staticmethod
-    def _parse_output(output_file):
-        """Parse HDF5 output file into result dict."""
-        from kwave.executor import Executor
+    @classmethod
+    def _parse_output(cls, output_file):
+        """Parse HDF5 output file into result dict.
 
-        return Executor.parse_executable_output(output_file)
+        Sensor fields are oriented from the known on-disk layout rather than
+        guessed from array sizes.  For an index sensor mask the C++ binary
+        writes (as seen by h5py) time-series as ``(1, Nt_recorded, n_sensor)``
+        and per-sensor aggregates as ``(1, 1, n_sensor)``; these are returned
+        as ``(n_sensor, Nt_recorded)`` and ``(n_sensor,)``.  Singleton axes
+        are kept, so one sensor point or one time step stays 2-D.  Everything
+        else is squeezed.
+        """
+        import h5py
+
+        result = {}
+        with h5py.File(output_file, "r") as f:
+            for key in f.keys():
+                data = f[f"/{key}"][:]
+                if data.ndim == 3 and data.shape[0] == 1 and key in cls._TIME_SERIES_FIELDS:
+                    result[key] = np.ascontiguousarray(data[0].T)
+                elif data.ndim == 3 and data.shape[:2] == (1, 1) and key.endswith(cls._SENSOR_AGGREGATE_SUFFIXES):
+                    result[key] = data.reshape(-1)
+                else:
+                    result[key] = data.squeeze()
+        return result
