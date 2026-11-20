@@ -123,8 +123,10 @@ class TestFixOutputOrder:
         on_disk = 100 * np.sort(f_idx[mask]) + np.arange(Nt)[:, None]  # (Nt, n_sensor), value = 100 * point + step
         with h5py.File(tmp_path / "out.h5", "w") as f:
             f["p"] = on_disk[None].astype(np.float32)
+            f["p_max"] = np.sort(f_idx[mask])[None, None].astype(np.float32)  # per-sensor aggregate, (1, 1, n_sensor)
         result = sim._fix_output_order(sim._parse_output(tmp_path / "out.h5"))
         np.testing.assert_array_equal(result["p"], 100 * f_idx[mask][:, None] + np.arange(Nt))
+        np.testing.assert_array_equal(result["p_max"], f_idx[mask])
 
 
 # ---------------------------------------------------------------------------
