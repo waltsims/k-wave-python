@@ -653,3 +653,14 @@ class TestLegacyPythonBridgePml:
             for axis in "xyz"[: len(shape)]:
                 assert result[f"u{axis}_final"].shape == shape
         np.testing.assert_array_equal(legacy["p_final"], unified["p_final"])
+
+    @pytest.mark.parametrize("shape", [(32, 30), (24, 22, 20)])
+    @pytest.mark.parametrize("make_sensor", [lambda: None, lambda: kSensor(mask=None)], ids=["no_sensor", "no_mask"])
+    def test_pml_outside_without_sensor_mask_records_user_grid_only(self, shape, make_sensor):
+        """No sensor mask means "record everywhere" on the user's grid, not on the PML padding around it."""
+        kgrid, medium, source, _ = self._setup(shape)
+        kwargs = dict(backend="python", pml_size=4, smooth_p0=False, quiet=True)
+        outside = kspaceFirstOrder(kgrid, medium, source, make_sensor(), pml_inside=False, **kwargs)
+        explicit = kspaceFirstOrder(kgrid, medium, source, kSensor(mask=np.ones(shape, dtype=bool)), pml_inside=False, **kwargs)
+        assert outside["p"].shape == (int(np.prod(shape)), kgrid.Nt)
+        np.testing.assert_array_equal(outside["p"], explicit["p"])

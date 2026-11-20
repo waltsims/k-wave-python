@@ -59,11 +59,16 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     # s_mask intentionally excluded — stress sources are not yet implemented (raises NotImplementedError)
     expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
 
-    expanded_sensor = sensor
-    if sensor is not None and getattr(sensor, "mask", None) is not None:
-        if not _is_cartesian_mask(sensor.mask, kgrid.dim):
-            expanded_sensor = copy.copy(sensor)
-            expanded_sensor.mask = expand_matrix(np.asarray(sensor.mask), list(pml_size), 0)
+    if sensor is None or getattr(sensor, "mask", None) is None:
+        # No mask means "record everywhere": that is the user's grid, not the PML padding around it
+        expanded_sensor = kSensor() if sensor is None else copy.copy(sensor)
+        user_shape = tuple(int(n) for n in kgrid.N)
+        expanded_sensor.mask = expand_matrix(np.ones(user_shape, dtype=bool), list(pml_size), 0)
+    elif not _is_cartesian_mask(sensor.mask, kgrid.dim):
+        expanded_sensor = copy.copy(sensor)
+        expanded_sensor.mask = expand_matrix(np.asarray(sensor.mask), list(pml_size), 0)
+    else:
+        expanded_sensor = sensor
 
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
