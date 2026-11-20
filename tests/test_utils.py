@@ -10,9 +10,11 @@ matplotlib.use("Agg")
 import numpy as np
 import pytest
 
+from kwave.data import Vector
+from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
-from kwave.utils.interp import get_bli
+from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.plot import voxel_plot
@@ -439,3 +441,15 @@ def test_voxel_plot_axis_limits_match_input_shape():
     assert ax.get_ylim() == (0.5, 8.5)
     assert ax.get_zlim() == (0.5, 12.5)
     plt.close("all")
+
+
+@pytest.mark.parametrize("interp, offset", [("linear", 0.0), ("nearest", -0.25)])
+def test_interp_cart_data_linear_field(interp, offset):
+    """Regression for #572: data linear in x is reproduced exactly by two-point linear interpolation."""
+    kgrid = kWaveGrid(Vector([8, 8]), Vector([1.0, 1.0]))
+    cart_x = np.arange(2.75, -4, -1.0)  # on the line y = 0, offset 0.25 below the grid points, unsorted
+    t = np.array([1.0, -2.0, 0.5])
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[[1, 3, 6], 4] = True
+    out = interp_cart_data(kgrid, np.outer(2 * cart_x + 1, t), np.vstack([cart_x, 0 * cart_x]), mask, interp=interp)
+    assert np.allclose(out, np.outer(2 * (kgrid.x_vec.ravel()[[1, 3, 6]] + offset) + 1, t))
