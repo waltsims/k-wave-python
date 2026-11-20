@@ -36,10 +36,14 @@ jobs:
           path: k-wave
           ref: v1.4.0
       - name: setup MATLAB
-        uses: matlab-actions/setup-matlab@v1
+        uses: matlab-actions/setup-matlab@v3
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
+        with:
+          products: >
+            Signal_Processing_Toolbox
+            Image_Processing_Toolbox
       - name: run reference generation
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v3
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: |
