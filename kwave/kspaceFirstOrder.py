@@ -219,6 +219,14 @@ def kspaceFirstOrder(
         All time-series are ``(n_sensor, Nt)`` with sensor points in
         C-flattened order.  Use :func:`reshape_to_grid` to recover spatial
         structure for full-grid masks.
+
+        Velocity naming (``backend="python"``) differs from MATLAB k-Wave:
+        ``"u"`` / ``"ux"`` and ``"u_non_staggered"`` / ``"ux_non_staggered"``
+        are the velocity at the pressure grid points (MATLAB
+        ``'u_non_staggered'``), while ``"u_staggered"`` / ``"ux_staggered"``
+        is the velocity on the staggered grid (MATLAB ``'u'``).  Both are at
+        the staggered time ``t + dt/2``.  Unsupported ``sensor.record``
+        fields raise ``ValueError``.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
