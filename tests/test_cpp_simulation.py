@@ -99,10 +99,11 @@ class TestResolveBinaryPath:
         assert binary.stat().st_mode & stat.S_IEXEC
 
 
+@pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
 @pytest.mark.parametrize("field, mode", [(f, m) for f in ("p", "ux", "uy") for m in ("additive", "dirichlet")])
-def test_source_scaled_for_binary(field, mode, tmp_path):
+def test_source_scaled_for_binary(field, mode, sig, tmp_path):
     # The binary expects pre-scaled sources (kspaceFirstOrder_scaleSourceTerms), with c0 taken per source point (#785).
-    N, (dx, dy), dt, sig = (16, 12), (1e-4, 1.5e-4), 1e-8, np.arange(1.0, 6.0)
+    N, (dx, dy), dt = (16, 12), (1e-4, 1.5e-4), 1e-8
     kgrid = kWaveGrid(N, (dx, dy))
     kgrid.setTime(sig.size, dt)
     c0, mask = np.full(N, 1500.0), np.zeros(N, bool)
@@ -118,6 +119,7 @@ def test_source_scaled_for_binary(field, mode, tmp_path):
     out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=c0), source, kSensor(mask=mask), **kwargs)
     with h5py.File(out["input_file"]) as f:
         np.testing.assert_allclose(np.squeeze(f[f"{field}_source_input"]).T, np.squeeze(sig * scale), rtol=1e-6)
+        assert f[f"{field[0]}_source_many"][()].item() == (np.size(scale) > 1)  # one row per point once expanded
 
 
 @pytest.mark.parametrize("field", ["p", "ux"])
