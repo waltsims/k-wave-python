@@ -110,6 +110,24 @@ class TestFixOutputOrder:
         # 1D: ndim=1, so p_max (ndim=1) is treated as full-grid and transposed (no-op for 1D)
         assert fixed["p_max"].shape == (8,)
 
+    @pytest.mark.parametrize("Nt", [25, 6, 4, 1])  # n_sensor (6) <, ==, > Nt; Nt = 1 keeps the time axis
+    def test_time_series_is_n_sensor_by_nt(self, Nt, tmp_path):
+        """Issue #760: (1, Nt, n_sensor) on disk, F-ordered sensors -> (n_sensor, Nt), C-ordered sensors."""
+        import h5py
+
+        grid_shape = (4, 5)
+        mask = np.zeros(grid_shape, dtype=bool)
+        mask[1:3, 1:4] = True
+        sim = self._make_sim(grid_shape, sensor_mask=mask)
+        f_idx = np.arange(20).reshape(grid_shape, order="F")  # F-order linear index of each grid point
+        on_disk = 100 * np.sort(f_idx[mask]) + np.arange(Nt)[:, None]  # (Nt, n_sensor), value = 100 * point + step
+        with h5py.File(tmp_path / "out.h5", "w") as f:
+            f["p"] = on_disk[None].astype(np.float32)
+            f["p_max"] = np.sort(f_idx[mask])[None, None].astype(np.float32)  # per-sensor aggregate, (1, 1, n_sensor)
+        result = sim._fix_output_order(sim._parse_output(tmp_path / "out.h5"))
+        np.testing.assert_array_equal(result["p"], 100 * f_idx[mask][:, None] + np.arange(Nt))
+        np.testing.assert_array_equal(result["p_max"], f_idx[mask])
+
 
 # ---------------------------------------------------------------------------
 # reshape_to_grid helper
