@@ -5,8 +5,15 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import h5py
+import numpy as np
 import pytest
 
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.solvers.cpp_simulation import CppSimulation
 
 
@@ -90,3 +97,26 @@ class TestResolveBinaryPath:
         sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
 
         assert binary.stat().st_mode & stat.S_IEXEC
+
+
+@pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
+@pytest.mark.parametrize("field, mode", [(f, m) for f in ("p", "ux", "uy") for m in ("additive", "dirichlet")])
+def test_source_scaled_for_binary(field, mode, sig, tmp_path):
+    # The binary expects pre-scaled sources (kspaceFirstOrder_scaleSourceTerms), with c0 taken per source point (#785).
+    N, (dx, dy), dt = (16, 12), (1e-4, 1.5e-4), 1e-8
+    kgrid = kWaveGrid(N, (dx, dy))
+    kgrid.setTime(sig.size, dt)
+    c0, mask = np.full(N, 1500.0), np.zeros(N, bool)
+    c0[:, 6:], mask[4, [3, 9]] = 1800.0, True  # one source point on each side of the interface
+    source = kSource()
+    setattr(source, f"{field[0]}_mask", mask)
+    setattr(source, f"{field[0]}_mode", mode)
+    setattr(source, field, sig[None])
+    c = np.array([[1500.0], [1800.0]])
+    additive = {"p": 2 * dt / (2 * c * dx), "ux": 2 * c * dt / dx, "uy": 2 * c * dt / dy}
+    scale = additive[field] if mode == "additive" else 1 / (2 * c**2) if field == "p" else 1
+    kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
+    out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=c0), source, kSensor(mask=mask), **kwargs)
+    with h5py.File(out["input_file"]) as f:
+        np.testing.assert_allclose(np.squeeze(f[f"{field}_source_input"]).T, np.squeeze(sig * scale), rtol=1e-6)
+        assert f[f"{field[0]}_source_many"][()].item() == (np.size(scale) > 1)  # one row per point once expanded
