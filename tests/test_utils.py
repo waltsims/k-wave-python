@@ -15,7 +15,7 @@ from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
 from kwave.utils.interp import get_bli, interp_cart_data
-from kwave.utils.mapgen import fit_power_law_params, power_law_kramers_kronig
+from kwave.utils.mapgen import fit_power_law_params, make_bowl, make_multi_bowl, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.plot import voxel_plot
 from kwave.utils.signals import add_noise, gradient_spect, tone_burst
@@ -441,6 +441,16 @@ def test_voxel_plot_axis_limits_match_input_shape():
     assert ax.get_ylim() == (0.5, 8.5)
     assert ax.get_zlim() == (0.5, 12.5)
     plt.close("all")
+
+
+@pytest.mark.parametrize("cast", [list, np.array], ids=["list", "ndarray"])
+def test_make_multi_bowl_list_and_integer_inputs(cast):
+    """Regression for #469: list / integer-array inputs are accepted and match make_bowl."""
+    N, pos, radius, diameter, focus = Vector([64, 64, 64]), [(19, 19, 31), (48, 48, 31)], [20, 15], [15, 21], (31, 31, 31)
+    bowls, _ = make_multi_bowl(N, cast(pos), cast(radius), cast(diameter), cast([focus]))
+    expected = [make_bowl(N, Vector(p), float(r), d, Vector(focus)) for p, r, d in zip(pos, radius, diameter)]
+    assert np.array_equal(bowls, sum(expected))
+    assert expected[1].any()  # bounding box ends exactly on the grid edge
 
 
 @pytest.mark.parametrize("interp, offset", [("linear", 0.0), ("nearest", -0.25)])
