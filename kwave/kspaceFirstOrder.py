@@ -68,7 +68,9 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-_FULL_GRID_SUFFIXES = ("_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+# Fields returned over the whole grid.  Plain ``_max`` / ``_min`` / ``_rms`` are per-sensor
+# aggregates of shape (n_sensor,), not grid fields, so they must never be PML-stripped.
+_FULL_GRID_SUFFIXES = ("_max_all", "_min_all", "_rms_all")
 # Python solver pre-strips _final fields; C++ binary does not
 _FULL_GRID_SUFFIXES_CPP = ("_final",) + _FULL_GRID_SUFFIXES
 
@@ -162,11 +164,12 @@ def kspaceFirstOrder(
             Scalar or per-dimension tuple.  Default ``2.0``.
         pml_inside: When ``False`` (default), the grid is automatically
             expanded by ``2 * pml_size`` so the PML sits outside the user
-            domain; full-grid output fields (``_final``, ``_max``, etc.)
+            domain; full-grid output fields (``_final``, ``_max_all``, etc.)
             are cropped back to the original size.  When ``True``, the PML
             occupies the outermost grid points of the user-supplied grid,
             which saves memory but means PML absorption will modify field
-            values near the domain boundary.
+            values near the domain boundary; full-grid output fields are
+            returned over the whole user grid, PML region included.
         use_sg: Use a staggered grid for velocity fields.  Default ``True``.
         use_kspace: Apply the k-space correction to the time-stepping scheme.
             Default ``True``.
@@ -268,6 +271,7 @@ def kspaceFirstOrder(
             smooth_p0=False,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
+            pml_inside=pml_inside,
             quiet=quiet,
             dtype=dtype,
         ).run()
