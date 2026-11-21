@@ -2105,15 +2105,15 @@ def make_bowl(
     if z1 < 0:
         bowl_sm = bowl_sm[:, :, abs(z1) :]
         z1 = 0
-    if x2 >= grid_size[0]:
+    if x2 > grid_size[0]:
         to_delete = x2 - grid_size[0]
         bowl_sm = bowl_sm[:-to_delete, :, :]
         x2 = grid_size[0]
-    if y2 >= grid_size[1]:
+    if y2 > grid_size[1]:
         to_delete = y2 - grid_size[1]
         bowl_sm = bowl_sm[:, :-to_delete, :]
         y2 = grid_size[1]
-    if z2 >= grid_size[2]:
+    if z2 > grid_size[2]:
         to_delete = z2 - grid_size[2]
         bowl_sm = bowl_sm[:, :, :-to_delete]
         z2 = grid_size[2]
@@ -2126,30 +2126,44 @@ def make_bowl(
 
 def make_multi_bowl(
     grid_size: Vector,
-    bowl_pos: List[Tuple[int, int]],
-    radius: int,
-    diameter: int,
-    focus_pos: Tuple[int, int],
+    bowl_pos: Union[np.ndarray, List[Tuple[int, int, int]]],
+    radius: Union[int, float, List[Union[int, float]], np.ndarray],
+    diameter: Union[int, List[int], np.ndarray],
+    focus_pos: Union[np.ndarray, Tuple[int, int, int], List[Tuple[int, int, int]]],
     binary: bool = False,
     remove_overlap: bool = False,
-) -> Tuple[np.ndarray, List[np.ndarray]]:
+) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Generates a multi-bowl mask for an image given the size of the grid, the positions of the bowls,
-    the radius of each bowl, the diameter of the bowls, and the position of the focus.
+    Generates a multi-bowl mask for a 3D grid given the size of the grid, the positions of the bowls,
+    the radius of curvature of each bowl, the diameter of the bowls, and the position of the focus.
 
     Args:
-        grid_size: The size of the grid (assumed to be square).
-        bowl_pos: A list of tuples containing the (x, y) coordinates of the center of each bowl.
-        radius: The radius of each bowl.
-        diameter: The diameter of the bowls.
-        focus_pos: The (x, y) coordinates of the focus.
+        grid_size: The size of the grid, [Nx, Ny, Nz], in grid points.
+        bowl_pos: The (x, y, z) grid coordinates of the centre of the rear surface of each bowl,
+            given as an array (or list of tuples) with one row per bowl, i.e. of shape (N, 3).
+        radius: The radius of curvature of each bowl in grid points. Either a single value used for
+            all bowls, or one value per bowl.
+        diameter: The aperture diameter of each bowl in grid points (must be odd). Either a single
+            value used for all bowls, or one value per bowl.
+        focus_pos: The (x, y, z) grid coordinates of any point on the beam axis of each bowl. Either
+            a single position used for all bowls, or an array of shape (N, 3) with one row per bowl.
         binary: Whether to return a binary mask (default: False).
         remove_overlap: Whether to remove overlap between the bowls (default: False).
 
     Returns:
-        bowls:
-        bowls_labeled:
+        bowls: A mask of the bowls, with the same shape as the grid.
+        bowls_labelled: A mask of the bowls where the grid points of each bowl are set to the index of the bowl.
+
+    Raises:
+        ValueError: If bowl_pos does not have 3 columns, or if the number of entries in radius or
+            diameter is neither one nor the number of bowls.
     """
+
+    # accept lists / tuples / scalars as well as numpy arrays
+    bowl_pos = np.atleast_2d(np.asarray(bowl_pos))
+    focus_pos = np.atleast_2d(np.asarray(focus_pos))
+    radius = np.atleast_1d(np.asarray(radius))
+    diameter = np.atleast_1d(np.asarray(diameter))
 
     # check inputs
     if bowl_pos.shape[-1] != 3:
@@ -2190,26 +2204,23 @@ def make_multi_bowl(
         logging.log(logging.INFO, f"Creating bowl {bowl_index} of {bowl_pos.shape[0]} ... ")
 
         # get parameters for current bowl
-        if bowl_pos.shape[0] > 1:
-            bowl_pos_k = bowl_pos[bowl_index]
-        else:
-            bowl_pos_k = bowl_pos
-        bowl_pos_k = Vector(bowl_pos_k)
+        bowl_pos_k = Vector(bowl_pos[bowl_index])
 
+        # make_bowl expects a python scalar for the radius
         if len(radius) > 1:
-            radius_k = radius[bowl_index]
+            radius_k = float(radius[bowl_index])
         else:
-            radius_k = radius
+            radius_k = float(radius[0])
 
         if len(diameter) > 1:
             diameter_k = diameter[bowl_index]
         else:
-            diameter_k = diameter
+            diameter_k = diameter[0]
 
         if focus_pos.shape[0] > 1:
             focus_pos_k = focus_pos[bowl_index]
         else:
-            focus_pos_k = focus_pos
+            focus_pos_k = focus_pos[0]
         focus_pos_k = Vector(focus_pos_k)
 
         # create new bowl
