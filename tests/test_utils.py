@@ -453,3 +453,13 @@ def test_interp_cart_data_linear_field(interp, offset):
     mask[[1, 3, 6], 4] = True
     out = interp_cart_data(kgrid, np.outer(2 * cart_x + 1, t), np.vstack([cart_x, 0 * cart_x]), mask, interp=interp)
     assert np.allclose(out, np.outer(2 * (kgrid.x_vec.ravel()[[1, 3, 6]] + offset) + 1, t))
+
+
+def test_interp_cart_data_linear_coincident_points():
+    """Two sensor points on the same grid point (both distances zero) must not give NaN."""
+    kgrid = kWaveGrid(Vector([8, 8]), Vector([1.0, 1.0]))
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[[1, 3, 6], 4] = True
+    x = np.repeat(kgrid.x_vec.ravel()[[1, 3, 6]], 2)  # every sensor point duplicated, exactly on the grid
+    out = interp_cart_data(kgrid, x[:, None] * np.ones(3), np.vstack([x, 0 * x]), mask, interp="linear")
+    assert np.allclose(out, x[::2, None])

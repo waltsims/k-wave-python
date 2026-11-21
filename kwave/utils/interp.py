@@ -267,7 +267,7 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             first, second = np.argsort(dist, kind="stable")[:2]
 
             # linearly interpolate between the two closest points, weighted by distance
-            perc = dist[second] / (dist[first] + dist[second])
+            perc = dist[second] / (dist[first] + dist[second]) if dist[second] else 1.0  # coincident points
             binary_sensor_data[point_index, :] = perc * cart_sensor_data[first, :] + (1 - perc) * cart_sensor_data[second, :]
 
         else:
