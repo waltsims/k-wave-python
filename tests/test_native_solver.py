@@ -377,3 +377,17 @@ class TestCoverageEdgeCases:
         kgrid.makeTime(1500)
         with pytest.raises(ValueError, match="device"):
             kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
+
+
+@pytest.mark.parametrize("record", [["u", "u_non_staggered"], ["u_split_field"], ["p", "ux_nonstaggered"]])
+def test_velocity_record_fields(grid_2d, record):
+    """u_non_staggered is an alias of u; unsupported or misspelt record fields raise instead of being dropped."""
+    sensor = kSensor(mask=np.ones((64, 64), dtype=bool), record=record)
+    args = grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)), sensor
+    if "u" not in record:
+        with pytest.raises(ValueError, match=record[-1]):
+            kspaceFirstOrder(*args, backend="python", quiet=True)
+        return
+    result = kspaceFirstOrder(*args, backend="python", quiet=True)
+    for a in "xy":
+        assert np.any(result[f"u{a}"]) and np.array_equal(result[f"u{a}_non_staggered"], result[f"u{a}"])
