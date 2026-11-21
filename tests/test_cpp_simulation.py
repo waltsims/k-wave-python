@@ -122,8 +122,9 @@ def test_source_scaled_for_binary(field, mode, sig, tmp_path):
         assert f[f"{field[0]}_source_many"][()].item() == (np.size(scale) > 1)  # one row per point once expanded
 
 
+@pytest.mark.parametrize("flat", [False, True])  # a C-ravelled mask is the same mask
 @pytest.mark.parametrize("field", ["p", "ux"])
-def test_source_rows_follow_written_index(field, tmp_path):
+def test_source_rows_follow_written_index(field, flat, tmp_path):
     # One row per source point is given in C-order of the mask; the binary pairs row k with entry k of the F-order index.
     N = (8, 8)
     kgrid = kWaveGrid(N, (1e-4, 1e-4))
@@ -131,7 +132,7 @@ def test_source_rows_follow_written_index(field, tmp_path):
     mask = np.zeros(N, bool)
     mask[[2, 4], [5, 3]] = True  # C-order: (2,5), (4,3); F-order: (4,3), (2,5)
     source = kSource()
-    setattr(source, f"{field[0]}_mask", mask)
+    setattr(source, f"{field[0]}_mask", mask.ravel() if flat else mask)
     setattr(source, field, np.flatnonzero(mask)[:, None] * np.ones(4))  # each row holds its point's C linear index
     kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
     out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500.0), source, kSensor(mask=mask), **kwargs)
@@ -139,3 +140,15 @@ def test_source_rows_follow_written_index(field, tmp_path):
         idx, rows = np.ravel(f[f"{field[0]}_source_index"]) - 1, np.squeeze(f[f"{field}_source_input"]).T[:, 0]
     expected = np.ravel_multi_index(np.unravel_index(idx, N, order="F"), N)
     np.testing.assert_allclose(rows / rows[0], expected / expected[0], rtol=1e-6)
+
+
+def test_velocity_components_share_row_count(tmp_path):
+    # The binary has a single u_source_many, so a shared series is expanded when another component is per-point.
+    kgrid = kWaveGrid((8, 8), (1e-4, 1e-4))
+    kgrid.setTime(4, 1e-8)
+    source, mask = kSource(), np.eye(8, dtype=bool) & (np.arange(8) < 2)
+    source.u_mask, source.ux, source.uy = mask, np.ones((1, 4)), np.ones((2, 1))
+    kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
+    out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500.0), source, kSensor(mask=mask), **kwargs)
+    with h5py.File(out["input_file"]) as f:
+        assert f["ux_source_input"].shape[-1] == f["uy_source_input"].shape[-1] == 2 and f["u_source_many"][()].item() == 1

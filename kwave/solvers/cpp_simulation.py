@@ -279,7 +279,7 @@ class CppSimulation:
                     "Cartesian source masks (p_mask) are not supported by the cpp backend. "
                     "Use a binary (grid-shaped) mask or switch to backend='python'."
                 )
-            p_mask_idx = np.where(p_mask_arr.flatten(order="F") != 0)[0] + 1
+            p_mask_idx = np.where(p_mask_arr.reshape(grid_shape).flatten(order="F") != 0)[0] + 1
             p_mode = getattr(source, "p_mode", None) or "additive"
             # The binary expects pre-scaled sources: pressure is converted to density
             # (1/c0^2) and split across the ndim density components (1/ndim); mass
@@ -301,22 +301,24 @@ class CppSimulation:
                     "Cartesian source masks (u_mask) are not supported by the cpp backend. "
                     "Use a binary (grid-shaped) mask or switch to backend='python'."
                 )
-            u_mask_idx = np.where(u_mask_arr.flatten(order="F") != 0)[0] + 1
+            u_mask_idx = np.where(u_mask_arr.reshape(grid_shape).flatten(order="F") != 0)[0] + 1
             u_mode = getattr(source, "u_mode", None) or "additive"
             # The binary expects pre-scaled sources: force sources are scaled by
             # 2*c0*dt/d_i (per-axis spacing); dirichlet sources are written as-is.
             u_c0 = self._source_sound_speed(u_mask_idx)
             u_order = self._c_to_f_source_order(u_mask_arr, grid_shape)
+            u_data = {}
             for vel, flag, d_i in [("ux", has_ux, dx), ("uy", has_uy, dy), ("uz", has_uz, dz)]:
                 if flag:
                     u_scale = 1.0 if u_mode == "dirichlet" else 2.0 * u_c0 * dt / d_i
-                    vel_data = self._scale_source_signal(getattr(source, vel), u_scale, u_order)
-                    write_matrix(filepath, vel_data, f"{vel}_source_input")
+                    u_data[vel] = self._scale_source_signal(getattr(source, vel), u_scale, u_order)
+            # the binary has one u_source_many for all components, so they share a row count
+            n_rows = max(map(len, u_data.values()))
+            for vel, vel_data in u_data.items():
+                write_matrix(filepath, np.broadcast_to(vel_data, (n_rows, vel_data.shape[1])), f"{vel}_source_input")
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
-            # validate_source() ensures all velocity components agree on single vs many
-            # (vel_data is the last written component, after any per-point expansion)
-            write_matrix(filepath, np.array(int(vel_data.shape[0] > 1), dtype=np.uint64), "u_source_many")
+            write_matrix(filepath, np.array(int(n_rows > 1), dtype=np.uint64), "u_source_many")
 
         # File attributes
         write_attributes(filepath)
