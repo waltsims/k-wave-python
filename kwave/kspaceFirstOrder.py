@@ -174,7 +174,8 @@ def kspaceFirstOrder(
             staircasing artifacts.  Default ``True``.
         backend: Simulation engine.  ``"python"`` runs a pure-Python /
             NumPy / CuPy solver; ``"cpp"`` serializes to HDF5 and invokes
-            the compiled C++ binary.  Default ``"python"``.
+            the compiled C++ binary (2D and 3D only; 1D grids raise
+            ``ValueError``).  Default ``"python"``.
         device: ``"cpu"`` or ``"gpu"``.  For ``backend="python"`` this
             selects NumPy (cpu) vs CuPy (gpu).  For ``backend="cpp"`` it
             selects the OMP vs CUDA binary.  Default ``"cpu"``.
@@ -227,6 +228,10 @@ def kspaceFirstOrder(
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")
     if backend not in ("python", "cpp"):
         raise ValueError(f"Unknown backend: {backend!r}. Use 'python' or 'cpp'.")
+    if backend == "cpp" and kgrid.dim == 1:
+        raise ValueError(
+            "backend='cpp' does not support 1D simulations; the C++ binary only handles 2D and 3D grids. Use backend='python' instead."
+        )
     dtype = _resolve_dtype(dtype)
 
     if isinstance(pml_size, str) and pml_size.lower() == "auto":
