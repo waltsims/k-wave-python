@@ -31,7 +31,7 @@ def _is_cartesian_mask(mask, ndim):
     return arr.ndim == 2 and arr.shape[0] == ndim
 
 
-def _expand_obj(obj, attrs, pml_size, edge_val=None):
+def _expand_obj(obj, attrs, pml_size, shape, edge_val=None):
     """Shallow-copy obj and expand grid-shaped array attributes via expand_matrix.
 
     Scalars (size == 1) are intentionally skipped — they broadcast to any grid
@@ -44,6 +44,7 @@ def _expand_obj(obj, attrs, pml_size, edge_val=None):
         if val is not None:
             arr = np.asarray(val)
             if arr.size > 1:  # scalar/homogeneous values broadcast — skip
+                arr = arr.reshape(shape) if arr.size == np.prod(shape) else arr  # flattened grid-sized input
                 setattr(out, attr, expand_matrix(arr, exp_coeff, edge_val))
     return out
 
@@ -54,21 +55,27 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
 
-    expanded_medium = _expand_obj(medium, ("sound_speed", "sound_speed_ref", "density", "alpha_coeff", "BonA"), pml_size)
-    expanded_medium = _expand_obj(expanded_medium, ("alpha_filter",), pml_size, edge_val=0)  # zero-pad, not edge-extend
+    expanded_medium = _expand_obj(medium, ("sound_speed", "sound_speed_ref", "density", "alpha_coeff", "BonA"), pml_size, kgrid.N)
+    expanded_medium = _expand_obj(expanded_medium, ("alpha_filter",), pml_size, kgrid.N, edge_val=0)  # zero-pad, not edge-extend
     # s_mask intentionally excluded — stress sources are not yet implemented (raises NotImplementedError)
-    expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
+    expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, kgrid.N, edge_val=0)
 
-    expanded_sensor = sensor
-    if sensor is not None and getattr(sensor, "mask", None) is not None:
-        if not _is_cartesian_mask(sensor.mask, kgrid.dim):
-            expanded_sensor = copy.copy(sensor)
-            expanded_sensor.mask = expand_matrix(np.asarray(sensor.mask), list(pml_size), 0)
+    if sensor is None or getattr(sensor, "mask", None) is None:
+        # No mask means "record everywhere": that is the user's grid, not the PML padding around it
+        expanded_sensor = kSensor() if sensor is None else copy.copy(sensor)
+        user_shape = tuple(int(n) for n in kgrid.N)
+        expanded_sensor.mask = expand_matrix(np.ones(user_shape, dtype=bool), list(pml_size), 0)
+    elif not _is_cartesian_mask(sensor.mask, kgrid.dim):
+        expanded_sensor = _expand_obj(sensor, ("mask",), pml_size, kgrid.N, edge_val=0)
+    else:
+        expanded_sensor = sensor
 
     return expanded_kgrid, expanded_medium, expanded_source, expanded_sensor
 
 
-_FULL_GRID_SUFFIXES = ("_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
+# Fields returned over the whole grid.  Plain ``_max`` / ``_min`` / ``_rms`` are per-sensor
+# aggregates of shape (n_sensor,), not grid fields, so they must never be PML-stripped.
+_FULL_GRID_SUFFIXES = ("_max_all", "_min_all", "_rms_all")
 # Python solver pre-strips _final fields; C++ binary does not
 _FULL_GRID_SUFFIXES_CPP = ("_final",) + _FULL_GRID_SUFFIXES
 
@@ -162,11 +169,12 @@ def kspaceFirstOrder(
             Scalar or per-dimension tuple.  Default ``2.0``.
         pml_inside: When ``False`` (default), the grid is automatically
             expanded by ``2 * pml_size`` so the PML sits outside the user
-            domain; full-grid output fields (``_final``, ``_max``, etc.)
+            domain; full-grid output fields (``_final``, ``_max_all``, etc.)
             are cropped back to the original size.  When ``True``, the PML
             occupies the outermost grid points of the user-supplied grid,
             which saves memory but means PML absorption will modify field
-            values near the domain boundary.
+            values near the domain boundary; full-grid output fields are
+            returned over the whole user grid, PML region included.
         use_sg: Use a staggered grid for velocity fields.  Default ``True``.
         use_kspace: Apply the k-space correction to the time-stepping scheme.
             Default ``True``.
@@ -268,6 +276,7 @@ def kspaceFirstOrder(
             smooth_p0=False,
             pml_size=pml_size,
             pml_alpha=pml_alpha,
+            pml_inside=pml_inside,
             quiet=quiet,
             dtype=dtype,
         ).run()
