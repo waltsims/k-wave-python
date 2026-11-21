@@ -428,10 +428,15 @@ def test_legacy_pml_outside_matches_unified(shape, pml_alpha, smooth_p0, amp):
     args, source, flat = dict(kgrid=kgrid, medium=kWaveMedium(sound_speed=1500), sensor=sensor), _p0_source(shape), kSource()
     source.p0 *= amp
     flat.p0 = source.p0.ravel() if len(shape) == 2 else source.p0  # a flattened p0 is reshaped to the grid
+    flat_sensor = kSensor(mask=sensor.mask.ravel() if len(shape) == 2 else sensor.mask)  # so is a flattened sensor mask
+    flat_sensor.record = sensor.record
     options = SimulationOptions(pml_inside=False, pml_size=4, pml_alpha=pml_alpha, smooth_p0=smooth_p0)  # scalar pml_size
     with pytest.warns(FutureWarning):
         legacy = (kspaceFirstOrder2D if len(shape) == 2 else kspaceFirstOrder3D)(
-            **args, source=flat, simulation_options=options, execution_options=SimulationExecutionOptions(backend="python")
+            **dict(args, sensor=flat_sensor),
+            source=flat,
+            simulation_options=options,
+            execution_options=SimulationExecutionOptions(backend="python"),
         )
     if smooth_p0 and amp:  # legacy smooths p0 on the user grid, before padding; an all-zero p0 is left alone
         source.p0 = smooth(source.p0, restore_max=True)

@@ -66,8 +66,7 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
         user_shape = tuple(int(n) for n in kgrid.N)
         expanded_sensor.mask = expand_matrix(np.ones(user_shape, dtype=bool), list(pml_size), 0)
     elif not _is_cartesian_mask(sensor.mask, kgrid.dim):
-        expanded_sensor = copy.copy(sensor)
-        expanded_sensor.mask = expand_matrix(np.asarray(sensor.mask), list(pml_size), 0)
+        expanded_sensor = _expand_obj(sensor, ("mask",), pml_size, kgrid.N, edge_val=0)
     else:
         expanded_sensor = sensor
 
