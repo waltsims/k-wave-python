@@ -110,7 +110,7 @@ class TestFixOutputOrder:
         # 1D: ndim=1, so p_max (ndim=1) is treated as full-grid and transposed (no-op for 1D)
         assert fixed["p_max"].shape == (8,)
 
-    @pytest.mark.parametrize("Nt", [25, 6, 4])  # n_sensor (6) <, ==, > Nt
+    @pytest.mark.parametrize("Nt", [25, 6, 4, 1])  # n_sensor (6) <, ==, > Nt; Nt = 1 keeps the time axis
     def test_time_series_is_n_sensor_by_nt(self, Nt, tmp_path):
         """Issue #760: (1, Nt, n_sensor) on disk, F-ordered sensors -> (n_sensor, Nt), C-ordered sensors."""
         import h5py
