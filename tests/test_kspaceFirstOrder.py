@@ -57,6 +57,28 @@ class TestErrors:
         with pytest.raises(ValueError, match="Unknown backend"):
             kspaceFirstOrder(kgrid, medium, source, sensor, backend="unknown")
 
+    @pytest.mark.parametrize("source_kind", ["p0", "p"])
+    @pytest.mark.parametrize("save_only", [True, False])
+    def test_cpp_backend_rejects_1d(self, source_kind, save_only, tmp_path):
+        """The C++ binary is 2D/3D only: 1D must fail early with a clear message, before any file is written."""
+        kgrid = kWaveGrid(Vector([64]), Vector([0.1e-3]))
+        kgrid.setTime(20, 1e-8)
+        source = kSource()
+        if source_kind == "p0":
+            source.p0 = np.zeros(64)
+            source.p0[32] = 1.0
+        else:
+            source.p_mask = np.zeros(64)
+            source.p_mask[32] = 1
+            source.p = np.sin(0.3 * np.arange(20))[None, :]
+        sensor = kSensor(mask=np.ones(64, dtype=bool))
+
+        with pytest.raises(ValueError, match="backend='cpp' does not support 1D simulations"):
+            kspaceFirstOrder(
+                kgrid, kWaveMedium(sound_speed=1500), source, sensor, backend="cpp", save_only=save_only, data_path=str(tmp_path)
+            )
+        assert list(tmp_path.iterdir()) == []
+
     def test_python_backend_runs(self, sim_2d):
         kgrid, medium, source, sensor = sim_2d
         result = kspaceFirstOrder(kgrid, medium, source, sensor, backend="python")
