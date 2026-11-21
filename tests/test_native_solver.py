@@ -387,7 +387,9 @@ def test_pml_inside_final_fields_cover_full_grid(grid_2d, legacy):
 
     sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
     sensor.record = ["p", "p_final", "u_final"]
-    args = dict(kgrid=grid_2d, medium=kWaveMedium(sound_speed=1500), source=_p0_source((64, 64)), sensor=sensor)
+    source = _p0_source((64, 64))
+    source.p0 = np.roll(source.p0, 9, axis=0)
+    args = dict(kgrid=grid_2d, medium=kWaveMedium(sound_speed=1500), source=source, sensor=sensor)
     if legacy:
         opts = SimulationOptions(pml_inside=True, pml_size=[8, 8]), SimulationExecutionOptions(backend="python")
         with pytest.warns(FutureWarning):
@@ -395,7 +397,7 @@ def test_pml_inside_final_fields_cover_full_grid(grid_2d, legacy):
     else:
         result = kspaceFirstOrder(**args, pml_size=8, pml_inside=True, quiet=True)
     assert result["p_final"].shape == result["ux_final"].shape == result["uy_final"].shape == (64, 64)
-    np.testing.assert_allclose(result["p_final"].ravel(order="F"), result["p"][:, -1])
+    np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
 
 
 def test_1d_sensor_aggregates_not_pml_stripped(grid_1d):
