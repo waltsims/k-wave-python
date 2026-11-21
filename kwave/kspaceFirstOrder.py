@@ -31,7 +31,7 @@ def _is_cartesian_mask(mask, ndim):
     return arr.ndim == 2 and arr.shape[0] == ndim
 
 
-def _expand_obj(obj, attrs, pml_size, edge_val=None):
+def _expand_obj(obj, attrs, pml_size, shape, edge_val=None):
     """Shallow-copy obj and expand grid-shaped array attributes via expand_matrix.
 
     Scalars (size == 1) are intentionally skipped — they broadcast to any grid
@@ -44,6 +44,7 @@ def _expand_obj(obj, attrs, pml_size, edge_val=None):
         if val is not None:
             arr = np.asarray(val)
             if arr.size > 1:  # scalar/homogeneous values broadcast — skip
+                arr = arr.reshape(shape) if arr.size == np.prod(shape) else arr  # flattened grid-sized input
                 setattr(out, attr, expand_matrix(arr, exp_coeff, edge_val))
     return out
 
@@ -54,10 +55,10 @@ def _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size):
     expanded_kgrid = kWaveGrid(new_N, kgrid.spacing)
     expanded_kgrid.setTime(kgrid.Nt, kgrid.dt)
 
-    expanded_medium = _expand_obj(medium, ("sound_speed", "sound_speed_ref", "density", "alpha_coeff", "BonA"), pml_size)
-    expanded_medium = _expand_obj(expanded_medium, ("alpha_filter",), pml_size, edge_val=0)  # zero-pad, not edge-extend
+    expanded_medium = _expand_obj(medium, ("sound_speed", "sound_speed_ref", "density", "alpha_coeff", "BonA"), pml_size, kgrid.N)
+    expanded_medium = _expand_obj(expanded_medium, ("alpha_filter",), pml_size, kgrid.N, edge_val=0)  # zero-pad, not edge-extend
     # s_mask intentionally excluded — stress sources are not yet implemented (raises NotImplementedError)
-    expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, edge_val=0)
+    expanded_source = _expand_obj(source, ("p0", "p_mask", "u_mask"), pml_size, kgrid.N, edge_val=0)
 
     if sensor is None or getattr(sensor, "mask", None) is None:
         # No mask means "record everywhere": that is the user's grid, not the PML padding around it

@@ -10,7 +10,7 @@ from kwave.solvers.kspace_solver import Simulation
 def _per_axis(value, ndim, cast):
     """Expand a legacy scalar / 1-element / per-axis option to one value per axis.
 
-    Mirrors ``SimulationOptions.option_factory``: a full per-axis sequence is used as given,
+    Mirrors ``SimulationOptions.option_factory`` for ``pml_size``: a full per-axis sequence is used as given,
     anything shorter applies its first element to every axis.
     """
     values = [cast(v) for v in np.atleast_1d(value).ravel()]
@@ -26,7 +26,8 @@ def run_python_backend(kgrid, medium, source, sensor, simulation_options, execut
     pml_size = simulation_options.pml_size
     pml_size = (20,) * kgrid.dim if pml_size is None else _per_axis(pml_size, kgrid.dim, int)
     pml_alpha = getattr(simulation_options, "pml_alpha", None)
-    pml_alpha = (2.0,) * kgrid.dim if pml_alpha is None else _per_axis(pml_alpha, kgrid.dim, float)
+    pml_alpha = np.atleast_1d(2.0 if pml_alpha is None else pml_alpha).astype(float).ravel()
+    pml_alpha = tuple(pml_alpha[[0, len(pml_alpha) // 2, -1][: kgrid.dim]].tolist())  # as option_factory: x, middle, last
     # pml_inside=True: the PML occupies the user's grid and *_final fields cover the whole grid.
     # pml_inside=False: pad the grid so the PML sits outside it, exactly as kspaceFirstOrder() does;
     # the solver then crops *_final fields back to the user's grid.
@@ -34,12 +35,12 @@ def run_python_backend(kgrid, medium, source, sensor, simulation_options, execut
     ndim = kgrid.dim
     smooth_p0 = getattr(simulation_options, "smooth_p0", True)
     if not pml_inside:
-        if smooth_p0 and getattr(source, "p0", None) is not None and np.size(source.p0) > 1:
+        if smooth_p0 and getattr(source, "p0", None) is not None and np.size(source.p0) > 1 and np.any(source.p0):
             # Legacy k-Wave smooths p0 on the user's grid *before* padding it (see kWaveSimulation.smooth_and_enlarge)
             from kwave.utils.filters import smooth
 
             source = copy.copy(source)
-            source.p0 = smooth(np.asarray(source.p0, dtype=float), restore_max=True)
+            source.p0 = smooth(np.asarray(source.p0, dtype=float).reshape(kgrid.N), restore_max=True)
             smooth_p0 = False
         kgrid, medium, source, sensor = _expand_for_pml_outside(kgrid, medium, source, sensor, pml_size)
     result = Simulation(
