@@ -5,10 +5,10 @@ import numpy as np
 from kwave.utils.matrix import num_dim2
 
 
-def validate_simulation(kgrid, medium, source, sensor, *, pml_size):
+def validate_simulation(kgrid, medium, source, sensor, *, pml_size, pml_inside=True):
     validate_time_stepping(kgrid)
     validate_medium(medium, kgrid)
-    validate_pml(pml_size, kgrid)
+    validate_pml(pml_size, kgrid, pml_inside=pml_inside)
     validate_cfl(kgrid, medium)
     validate_source(source, kgrid)
     validate_sensor(sensor, kgrid)
@@ -49,12 +49,13 @@ def validate_medium(medium, kgrid):
                 warnings.warn(f"medium.alpha_power={power} is outside typical range [0, 3].", stacklevel=3)
 
 
-def validate_pml(pml_size, kgrid):
+def validate_pml(pml_size, kgrid, *, pml_inside=True):
     for i in range(kgrid.dim):
         N, pml = int(kgrid.N[i]), int(pml_size[i])
         if pml < 0:
             raise ValueError(f"pml_size[{i}] must be non-negative, got {pml}")
-        if 2 * pml >= N:
+        # the size limit only applies when the PML occupies the user grid
+        if pml_inside and 2 * pml >= N:
             raise ValueError(f"pml_size[{i}]={pml} is too large for grid size N[{i}]={N} (2*pml must be < N).")
 
 
