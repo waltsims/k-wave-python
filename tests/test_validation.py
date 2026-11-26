@@ -61,6 +61,10 @@ class TestPmlValidation:
         with pytest.raises(ValueError, match="too large"):
             validate_pml((40, 20), kgrid_2d)
 
+    def test_large_pml_allowed_outside(self, kgrid_2d):
+        # PML added outside the grid is not limited by the user grid size
+        validate_pml((40, 20), kgrid_2d, pml_inside=False)
+
     def test_valid_pml(self, kgrid_2d):
         validate_pml((20, 20), kgrid_2d)
 
