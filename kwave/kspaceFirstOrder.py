@@ -292,16 +292,6 @@ def kspaceFirstOrder(
                 "use_kspace=False has no effect with backend='cpp'; the C++ binary always applies k-space correction.",
                 stacklevel=2,
             )
-        if sensor is not None and getattr(sensor, "record", None) is not None:
-            warnings.warn(
-                "sensor.record is not yet supported for backend='cpp'; the C++ binary will record its default fields.",
-                stacklevel=2,
-            )
-        if sensor is not None and getattr(sensor, "record_start_index", 1) != 1:
-            warnings.warn(
-                "sensor.record_start_index is not yet supported for backend='cpp'; the C++ binary records from the first time step.",
-                stacklevel=2,
-            )
 
         # Convert Cartesian sensor mask to binary grid (cpp binary requires binary masks)
         if sensor is not None and sensor.mask is not None and _is_cartesian_mask(sensor.mask, kgrid.dim):
@@ -315,7 +305,7 @@ def kspaceFirstOrder(
             if data_path is None:
                 raise ValueError("data_path must be provided when save_only=True (the HDF5 files must persist for cluster submission).")
             input_file, output_file = cpp_sim.prepare(data_path=data_path)
-            result = {"input_file": input_file, "output_file": output_file}
+            result = {"input_file": input_file, "output_file": output_file, "binary_flags": cpp_sim.flags}
             if not pml_inside:
                 result["pml_size"] = pml_size
             return result

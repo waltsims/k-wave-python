@@ -3,6 +3,7 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -87,6 +88,32 @@ class TestResolveBinaryPath:
         monkeypatch.setattr(subprocess, "run", lambda *a, **kw: None)
 
         sim = CppSimulation.__new__(CppSimulation)
+        sim.flags = []
         sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
 
         assert binary.stat().st_mode & stat.S_IEXEC
+
+
+@pytest.mark.parametrize(
+    "record, start, flags",
+    [
+        (None, 1, ["--p_raw", "-s", "1"]),
+        (["p_max"], 1, ["--p_max", "-s", "1"]),
+        (["p", "p_max", "p_min"], 5, ["--p_max", "--p_min", "--p_raw", "-s", "5"]),
+        (["u", "ux_staggered", "uy_final"], 1, ["--u_final", "--u_non_staggered_raw", "--u_raw", "-s", "1"]),
+    ],
+)
+def test_record_flags(record, start, flags, monkeypatch):
+    """Issue #809: sensor.record / record_start_index become binary output flags."""
+    sensor = SimpleNamespace(mask=None, record=record, record_start_index=start)
+    sim = CppSimulation(SimpleNamespace(dim=2), None, None, sensor, pml_size=(2, 2), pml_alpha=(2, 2))
+    monkeypatch.setattr(CppSimulation, "_resolve_binary_path", staticmethod(lambda device, binary_path=None: Path(sys.executable)))
+    monkeypatch.setattr(subprocess, "run", lambda command, **kw: setattr(sim, "command", command))
+    sim._execute("in.h5", "out.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
+    assert sim.command[5:] == flags
+
+
+@pytest.mark.parametrize("field", ["u_max", "ux_rms", "I", "I_avg", "u_max_all"])
+def test_unsupported_record_field_raises(field):
+    with pytest.raises(ValueError, match=f"{field}.*backend='python'"):
+        CppSimulation(SimpleNamespace(dim=2), None, None, SimpleNamespace(record=["p", field]), pml_size=(2, 2), pml_alpha=(2, 2))

@@ -6,6 +6,7 @@ depending on kWaveSimulation or the legacy options classes.
 """
 
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -30,6 +31,22 @@ _MIN_SUPPORTED_COMPUTE_CAPABILITY = (7, 5)
 # Source injection mode mapping (shared by pressure and velocity sources)
 _SOURCE_MODE_MAP = {"dirichlet": 0, "additive-no-correction": 1, "additive": 2}
 
+# sensor.record field (Python-backend naming: "u" is non-staggered) -> binary output flag
+_RECORD_FLAGS = {"p": "--p_raw", "u": "--u_non_staggered_raw", "u_staggered": "--u_raw", "u_final": "--u_final"}
+_RECORD_FLAGS |= {k: f"--{k}" for k in ("p_max", "p_min", "p_rms", "p_final", "p_max_all", "p_min_all")}
+# binary dataset -> Python-backend field name
+_RENAME = {f"u{a}{old}": f"u{a}{new}" for a in "xyz" for old, new in (("", "_staggered"), ("_non_staggered", ""))}
+
+
+def _record_flags(sensor):
+    record = getattr(sensor, "record", None) or ["p"]
+    record = [record] if isinstance(record, str) else record
+    if bad := [r for r in record if re.sub("^u[xyz]", "u", r) not in _RECORD_FLAGS]:
+        raise ValueError(f"sensor.record fields {bad} are not supported by backend='cpp'; use backend='python'.")
+    flags = sorted({_RECORD_FLAGS[re.sub("^u[xyz]", "u", r)] for r in record})
+    start = getattr(sensor, "record_start_index", None)
+    return flags + ["-s", str(1 if start is None else start)]  # 1-based, as in the Python backend
+
 
 class CppSimulation:
     """Serialize simulation to HDF5 and run the C++ k-Wave binary."""
@@ -43,6 +60,7 @@ class CppSimulation:
         self.pml_alpha = pml_alpha  # per-dimension tuple
         self.use_sg = use_sg
         self.ndim = kgrid.dim
+        self.flags = _record_flags(sensor)
 
     def prepare(self, data_path=None):
         """Write HDF5 input file. Returns (input_file, output_file)."""
@@ -90,7 +108,7 @@ class CppSimulation:
 
     _FULL_GRID_SUFFIXES = ("_final", "_max", "_min", "_rms", "_max_all", "_min_all", "_rms_all")
     # Fields the C++ binary samples at the sensor points on every recorded time step.
-    _TIME_SERIES_FIELDS = ("p", "ux", "uy", "uz", "ux_non_staggered", "uy_non_staggered", "uz_non_staggered")
+    _TIME_SERIES_FIELDS = ("p", *_RENAME, *_RENAME.values())
     # Fields the C++ binary aggregates over time at the sensor points (one value per point).
     _SENSOR_AGGREGATE_SUFFIXES = ("_max", "_min", "_rms")
 
@@ -415,7 +433,7 @@ class CppSimulation:
             self._warn_if_unsupported_gpu()
 
         # Build command-line options
-        options = ["-i", input_file, "-o", output_file]
+        options = ["-i", input_file, "-o", output_file, *self.flags]
         if num_threads is not None:
             options.extend(["-t", str(num_threads)])
         if device_num is not None:
@@ -453,11 +471,11 @@ class CppSimulation:
         result = {}
         with h5py.File(output_file, "r") as f:
             for key in f.keys():
-                data = f[f"/{key}"][:]
+                data, name = f[f"/{key}"][:], _RENAME.get(key, key)
                 if data.ndim == 3 and data.shape[0] == 1 and key in cls._TIME_SERIES_FIELDS:
-                    result[key] = np.ascontiguousarray(data[0].T)
+                    result[name] = np.ascontiguousarray(data[0].T)
                 elif data.ndim == 3 and data.shape[:2] == (1, 1) and key.endswith(cls._SENSOR_AGGREGATE_SUFFIXES):
-                    result[key] = data.reshape(-1)
+                    result[name] = data.reshape(-1)
                 else:
-                    result[key] = data.squeeze()
+                    result[name] = data.squeeze()
         return result
