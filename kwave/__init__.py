@@ -27,14 +27,14 @@ PLATFORM = platform.system().lower()
 if PLATFORM not in ["linux", "windows", "darwin"]:
     raise NotImplementedError(f"k-wave-python is currently unsupported on this operating system: {PLATFORM}.")
 
-# darwin C++ binary is arm64-only; universal2 coverage tracked for v0.6.5
+# darwin C++ binary is arm64-only; universal2 coverage tracked for v0.6.6
 DARWIN_BINARY_ARCH = "arm64"
 _darwin_unsupported = PLATFORM == "darwin" and platform.machine() != DARWIN_BINARY_ARCH
 if _darwin_unsupported:
     warnings.warn(
         f"k-wave-python's macOS C++ binary is {DARWIN_BINARY_ARCH}-only. "
         f"Detected {platform.machine()} — the C++ backend (backend='cpp') will not run on this machine. "
-        "Use backend='python' instead. Universal2 (Intel + Apple Silicon) coverage is tracked for v0.6.5.",
+        "Use backend='python' instead. Universal2 (Intel + Apple Silicon) coverage is tracked for v0.6.6.",
         RuntimeWarning,
         stacklevel=2,
     )
