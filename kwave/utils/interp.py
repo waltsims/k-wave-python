@@ -9,7 +9,6 @@ from scipy.signal import resample
 
 from .conversion import grid2cart
 from .data import scale_time
-from .matrix import sort_rows
 from .tictoc import TicToc
 
 
@@ -224,7 +223,9 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
                              (default = 'nearest')
 
     Returns:
-        array of time-series corresponding to the sensor positions given by binary_sensor_mask
+        array of time-series corresponding to the sensor positions given by binary_sensor_mask.
+        The rows follow the row-major (C) ordering of the active points in binary_sensor_mask,
+        i.e. the order returned by grid2cart.
 
     """
 
@@ -262,18 +263,12 @@ def interp_cart_data(kgrid, cart_sensor_data, cart_sensor_mask, binary_sensor_ma
             binary_sensor_data[point_index, :] = cart_sensor_data[dist_min_index, :]
 
         elif interp == "linear":
-            # raise NotImplementedError
-            # append the distance information onto the data set
-            cart_sensor_data_ro = cart_sensor_data
-            np.append(cart_sensor_data_ro, dist[:, None], axis=1)
-            new_col_pos = -1
+            # find the two measured data points that are closest
+            first, second = np.argsort(dist, kind="stable")[:2]
 
-            # reorder the data set based on distance information
-            cart_sensor_data_ro = sort_rows(cart_sensor_data_ro, new_col_pos)
-
-            # linearly interpolate between the two closest points
-            perc = cart_sensor_data_ro[2, new_col_pos] / (cart_sensor_data_ro[1, new_col_pos] + cart_sensor_data_ro[2, new_col_pos])
-            binary_sensor_data[point_index, :] = perc * cart_sensor_data_ro[1, :] + (1 - perc) * cart_sensor_data_ro[2, :]
+            # linearly interpolate between the two closest points, weighted by distance
+            perc = dist[second] / (dist[first] + dist[second]) if dist[second] else 1.0  # coincident points
+            binary_sensor_data[point_index, :] = perc * cart_sensor_data[first, :] + (1 - perc) * cart_sensor_data[second, :]
 
         else:
             raise ValueError("Unknown interpolation option.")

@@ -609,24 +609,17 @@ class Simulation:
                 dtype=self._dtype,
             )
 
-        # --- Pressure source (per-axis spacing for non-isotropic grids) ---
+        # --- Pressure source ---
         p_mask = getattr(self.source, "p_mask", 0)
         p_signal = getattr(self.source, "p", 0)
         p_mode = getattr(self.source, "p_mode", None) or "additive"
         n_rho_splits = self.ndim  # pressure splits evenly across density components
         if _is_enabled(p_mask) and _is_enabled(p_signal):
             c0_src = source_scale(p_mask, self.c0)
-            if p_mode == "dirichlet":
-                scale = 1.0 / (n_rho_splits * c0_src**2)
-                op = build_op(p_mask, p_signal, p_mode, scale)
-                self._source_p_ops = [op] * self.ndim
-            else:
-                # Per-axis: rho_i += source.p * 2*dt / (n_rho_splits * c0 * d_i)
-                self._source_p_ops = []
-                for i in range(self.ndim):
-                    di = self.spacing[i]
-                    scale_i = 2 * self.dt / (n_rho_splits * c0_src * di)
-                    self._source_p_ops.append(build_op(p_mask, p_signal, p_mode, scale_i))
+            # kspaceFirstOrder_scaleSourceTerms: dx is used for every density split, also when dx != dy
+            dirichlet = p_mode == "dirichlet"
+            scale = 1.0 / (n_rho_splits * c0_src**2) if dirichlet else 2 * self.dt / (n_rho_splits * c0_src * self.spacing[0])
+            self._source_p_ops = [build_op(p_mask, p_signal, p_mode, scale)] * self.ndim
         else:
             self._source_p_ops = [_noop_source] * self.ndim
 
