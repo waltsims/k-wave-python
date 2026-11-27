@@ -37,18 +37,23 @@ _RECORD_FLAGS |= {k: f"--{k}" for k in ("p_max", "p_min", "p_rms", "p_final", "p
 _RENAME = {f"u{a}{old}": f"u{a}{new}" for a in "xyz" for old, new in (("", "_staggered"), ("_non_staggered", ""))}
 
 
-def _record_flags(sensor):
+def _record_flags(sensor, Nt):
     record = getattr(sensor, "record", None) or ["p"]
     record = [record] if isinstance(record, str) else record
     if bad := [r for r in record if re.sub("^u[xyz]", "u", r) not in _RECORD_FLAGS]:
         raise ValueError(f"sensor.record fields {bad} are not supported by backend='cpp'; use backend='python'.")
     flags = sorted({_RECORD_FLAGS[re.sub("^u[xyz]", "u", r)] for r in record})
     start = getattr(sensor, "record_start_index", None)
-    return flags + ["-s", str(1 if start is None else start)]  # 1-based, as in the Python backend
+    start = 1 if start is None else int(start)  # 1-based, as in the Python backend
+    if not 1 <= start <= Nt:
+        raise ValueError(f"sensor.record_start_index must be between 1 and Nt ({Nt}), got {start}")
+    return flags + ["-s", str(start)]
 
 
 class CppSimulation:
     """Serialize simulation to HDF5 and run the C++ k-Wave binary."""
+
+    flags = ()  # binary output flags; set from sensor.record in __init__
 
     def __init__(self, kgrid, medium, source, sensor, *, pml_size, pml_alpha, use_sg=True):
         self.kgrid = kgrid
@@ -59,7 +64,7 @@ class CppSimulation:
         self.pml_alpha = pml_alpha  # per-dimension tuple
         self.use_sg = use_sg
         self.ndim = kgrid.dim
-        self.flags = _record_flags(sensor)
+        self.flags = _record_flags(sensor, int(kgrid.Nt))
 
     def prepare(self, data_path=None):
         """Write HDF5 input file. Returns (input_file, output_file)."""

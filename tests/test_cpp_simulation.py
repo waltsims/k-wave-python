@@ -95,7 +95,6 @@ class TestResolveBinaryPath:
         monkeypatch.setattr(subprocess, "run", lambda *a, **kw: None)
 
         sim = CppSimulation.__new__(CppSimulation)
-        sim.flags = []
         sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
 
         assert binary.stat().st_mode & stat.S_IEXEC
@@ -113,17 +112,17 @@ class TestResolveBinaryPath:
 def test_record_flags(record, start, flags, monkeypatch):
     """Issue #809: sensor.record / record_start_index become binary output flags."""
     sensor = SimpleNamespace(mask=None, record=record, record_start_index=start)
-    sim = CppSimulation(SimpleNamespace(dim=2), None, None, sensor, pml_size=(2, 2), pml_alpha=(2, 2))
+    sim = CppSimulation(SimpleNamespace(dim=2, Nt=9), None, None, sensor, pml_size=(2, 2), pml_alpha=(2, 2))
     monkeypatch.setattr(CppSimulation, "_resolve_binary_path", staticmethod(lambda device, binary_path=None: Path(sys.executable)))
     monkeypatch.setattr(subprocess, "run", lambda command, **kw: setattr(sim, "command", command))
     sim._execute("in.h5", "out.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
     assert sim.command[5:] == flags
 
 
-@pytest.mark.parametrize("field", ["u_max", "ux_rms", "I", "I_avg", "u_max_all"])
-def test_unsupported_record_field_raises(field):
-    with pytest.raises(ValueError, match=f"{field}.*backend='python'"):
-        CppSimulation(SimpleNamespace(dim=2), None, None, SimpleNamespace(record=["p", field]), pml_size=(2, 2), pml_alpha=(2, 2))
+@pytest.mark.parametrize("sensor, match", [(dict(record=["p", f]), f"{f}.*backend='python'") for f in ("u_max", "ux_rms", "I", "I_avg", "u_max_all")] + [(dict(record_start_index=s), "record_start_index") for s in (0, 10)])  # fmt: skip
+def test_unsupported_record_raises(sensor, match):
+    with pytest.raises(ValueError, match=match):
+        CppSimulation(SimpleNamespace(dim=2, Nt=9), None, None, SimpleNamespace(**sensor), pml_size=(2, 2), pml_alpha=(2, 2))
 
 
 @pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
