@@ -161,18 +161,10 @@ def scale_pressure_source_nonuniform_grid(source_p, kgrid, c0, N, dt, p_source_p
             + z_size * (zn[1:-1, 1:-1, 2:] - zn[1:-1, 1:-1, 0:-2]) / 6
         )
 
-    # compute and apply scale parameter
-    for p_index in range(source_p.size[0]):
-        if c0.size == 1:
-            # compute the scale parameter based on the homogeneous sound speed
-            source_p[p_index, :] = source_p[p_index, :] * (2 * dt / (N * c0 * grid_point_sep[p_source_pos_index[p_index]]))
-
-        else:
-            # compute the scale parameter based on the sound speed at that position
-            source_p[p_index, :] = source_p[p_index, :] * (
-                2 * dt / (N * c0[p_source_pos_index[p_index]] * grid_point_sep[p_source_pos_index[p_index]])
-            )
-    return source_p
+    # compute and apply scale parameter (c0 at each source position; indices are 1-based, column-major)
+    ind = p_source_pos_index[: len(source_p)] - 1
+    c0 = c0 if c0.size == 1 else c0.ravel(order="F")[ind]
+    return source_p * (2 * dt / (N * c0 * grid_point_sep.ravel(order="F")[ind]))
 
 
 def scale_pressure_source_uniform_grid(source_p, c0, N, dx, dt, p_source_pos_index):
@@ -229,9 +221,8 @@ def scale_stress_source(source, c0, is_source_exists, is_p0_exists, source_val, 
 
             else:
                 # compute the scale parameter separately for each source
-                # position based on the sound speed at that position
-                s_index = range(source_val.size[0])
-                source_val[s_index, :] = source_val[s_index, :] * (2 * dt * c0[s_source_pos_index[s_index]] / (N * dx))
+                # position based on the sound speed at that position (indices are 1-based, column-major)
+                source_val = source_val * (2 * dt * c0.ravel(order="F")[s_source_pos_index[: len(source_val)] - 1] / (N * dx))
     return source_val
 
 
@@ -319,9 +310,8 @@ def scale_velocity_source(is_source, source_u_mode, source_val, c0, dt, u_source
         source_val = source_val * (2 * c0 * dt / d_direction)
     else:
         # compute the scale parameter separately for each source position
-        # based on the sound speed at that position
-        u_index = range(source_val.size[0])
-        source_val[u_index, :] = source_val[u_index, :] * (2 * c0[u_source_pos_index[u_index]] * dt / d_direction)
+        # based on the sound speed at that position (indices are 1-based, column-major)
+        source_val = source_val * (2 * c0.ravel(order="F")[u_source_pos_index[: len(source_val)] - 1] * dt / d_direction)
     return source_val
 
 
@@ -357,17 +347,10 @@ def scale_velocity_source_nonuniform(is_source, source_u_mode, kgrid, source_val
     # assuming there are no source points in the PML)
     grid_point_sep[1:-1, :, :] = x_size * (xn[2:, :, :] - xn[1:-2, :, :]) / 2
 
-    # compute and apply scale parameter
-    for u_index in range(source_val.size[0]):
-        if c0.size == 1:
-            # compute the scale parameter based on the homogeneous sound speed
-            source_val[u_index, :] = source_val[u_index, :] * (2 * c0 * dt / (grid_point_sep[u_source_pos_index[u_index]]))
-        else:
-            # compute the scale parameter based on the sound speed at that position
-            source_val[u_index, :] = source_val[u_index, :] * (
-                2 * c0[u_source_pos_index[u_index]] * dt / (grid_point_sep[u_source_pos_index[u_index]])
-            )
-    return source_val
+    # compute and apply scale parameter (c0 at each source position; indices are 1-based, column-major)
+    ind = u_source_pos_index[: len(source_val)] - 1
+    c0 = c0 if c0.size == 1 else c0.ravel(order="F")[ind]
+    return source_val * (2 * c0 * dt / grid_point_sep.ravel(order="F")[ind])
 
 
 def scale_transducer_source(is_transducer_source, transducer_input_signal, c0, dt, dx, u_source_pos_index):
