@@ -124,6 +124,8 @@ def test_record_flags(record, start, flags, monkeypatch):
 def test_unsupported_record_field_raises(field):
     with pytest.raises(ValueError, match=f"{field}.*backend='python'"):
         CppSimulation(SimpleNamespace(dim=2), None, None, SimpleNamespace(record=["p", field]), pml_size=(2, 2), pml_alpha=(2, 2))
+
+
 @pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
 @pytest.mark.parametrize("field, mode", [(f, m) for f in ("p", "ux", "uy") for m in ("additive", "dirichlet")])
 def test_source_scaled_for_binary(field, mode, sig, tmp_path):
