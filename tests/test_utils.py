@@ -11,9 +11,10 @@ import numpy as np
 import pytest
 
 from kwave.data import Vector
+from kwave.kgrid import kWaveGrid
 from kwave.utils.conversion import db2neper, neper2db
 from kwave.utils.filters import apply_filter, extract_amp_phase, spect
-from kwave.utils.interp import get_bli
+from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, make_bowl, make_multi_bowl, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
 from kwave.utils.plot import voxel_plot
@@ -450,3 +451,25 @@ def test_make_multi_bowl_list_and_integer_inputs(cast):
     expected = [make_bowl(N, Vector(p), float(r), d, Vector(focus)) for p, r, d in zip(pos, radius, diameter)]
     assert np.array_equal(bowls, sum(expected))
     assert expected[1].any()  # bounding box ends exactly on the grid edge
+
+
+@pytest.mark.parametrize("interp, offset", [("linear", 0.0), ("nearest", -0.25)])
+def test_interp_cart_data_linear_field(interp, offset):
+    """Regression for #572: data linear in x is reproduced exactly by two-point linear interpolation."""
+    kgrid = kWaveGrid(Vector([8, 8]), Vector([1.0, 1.0]))
+    cart_x = np.arange(2.75, -4, -1.0)  # on the line y = 0, offset 0.25 below the grid points, unsorted
+    t = np.array([1.0, -2.0, 0.5])
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[[1, 3, 6], 4] = True
+    out = interp_cart_data(kgrid, np.outer(2 * cart_x + 1, t), np.vstack([cart_x, 0 * cart_x]), mask, interp=interp)
+    assert np.allclose(out, np.outer(2 * (kgrid.x_vec.ravel()[[1, 3, 6]] + offset) + 1, t))
+
+
+def test_interp_cart_data_linear_coincident_points():
+    """Two sensor points on the same grid point (both distances zero) must not give NaN."""
+    kgrid = kWaveGrid(Vector([8, 8]), Vector([1.0, 1.0]))
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[[1, 3, 6], 4] = True
+    x = np.repeat(kgrid.x_vec.ravel()[[1, 3, 6]], 2)  # every sensor point duplicated, exactly on the grid
+    out = interp_cart_data(kgrid, x[:, None] * np.ones(3), np.vstack([x, 0 * x]), mask, interp="linear")
+    assert np.allclose(out, x[::2, None])
