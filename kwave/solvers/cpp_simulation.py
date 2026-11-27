@@ -21,7 +21,6 @@ from kwave.ksensor import kSensor
 from kwave.ksource import kSource
 from kwave.utils.cuda import get_min_compute_capability, user_warning_stacklevel
 from kwave.utils.io import write_attributes, write_matrix
-from kwave.utils.matrix import num_dim2
 
 # Minimum CUDA compute capability supported by the bundled C++ binary.
 # CUDA Toolkit 13.0 removed Maxwell/Pascal/Volta (sm < 7.5).
@@ -274,8 +273,6 @@ class CppSimulation:
         if has_p0:
             write_matrix(filepath, np.asarray(source.p0, dtype=np.float32), "p0_source_input")
         if has_p:
-            p_data = np.asarray(source.p, dtype=np.float32)
-            write_matrix(filepath, p_data, "p_source_input")
             p_mask_arr = np.asarray(source.p_mask)
             if p_mask_arr.ndim == 2 and p_mask_arr.shape[0] == ndim:
                 raise ValueError(
@@ -283,15 +280,19 @@ class CppSimulation:
                     "Use a binary (grid-shaped) mask or switch to backend='python'."
                 )
             p_mask_idx = np.where(p_mask_arr.flatten(order="F") != 0)[0] + 1
+            p_mode = getattr(source, "p_mode", None) or "additive"
+            # The binary expects pre-scaled sources: pressure is converted to density
+            # (1/c0^2) and split across the ndim density components (1/ndim); mass
+            # sources are additionally scaled by 2*dt*c0/dx for the time step.
+            if p_mode == "dirichlet":
+                p_scale = 1.0 / (ndim * self._source_sound_speed(p_mask_idx) ** 2)
+            else:
+                p_scale = 2.0 * dt / (ndim * self._source_sound_speed(p_mask_idx) * dx)
+            p_data = self._scale_source_signal(source.p, p_scale)
+            write_matrix(filepath, p_data, "p_source_input")
             write_matrix(filepath, p_mask_idx.astype(np.uint64).reshape(-1, 1), "p_source_index")
-            p_mode = getattr(source, "p_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(p_mode, 2), dtype=np.uint64), "p_source_mode")
-            write_matrix(filepath, np.array(int(num_dim2(p_data) > 1), dtype=np.uint64), "p_source_many")
-
-        for vel, flag in [("ux", has_ux), ("uy", has_uy), ("uz", has_uz)]:
-            if flag:
-                vel_data = np.asarray(getattr(source, vel), dtype=np.float32)
-                write_matrix(filepath, vel_data, f"{vel}_source_input")
+            write_matrix(filepath, np.array(int(p_data.shape[0] > 1), dtype=np.uint64), "p_source_many")
 
         if has_ux or has_uy or has_uz:
             u_mask_arr = np.asarray(source.u_mask)
@@ -301,15 +302,51 @@ class CppSimulation:
                     "Use a binary (grid-shaped) mask or switch to backend='python'."
                 )
             u_mask_idx = np.where(u_mask_arr.flatten(order="F") != 0)[0] + 1
+            u_mode = getattr(source, "u_mode", None) or "additive"
+            # The binary expects pre-scaled sources: force sources are scaled by
+            # 2*c0*dt/d_i (per-axis spacing); dirichlet sources are written as-is.
+            u_c0 = self._source_sound_speed(u_mask_idx)
+            for vel, flag, d_i in [("ux", has_ux, dx), ("uy", has_uy, dy), ("uz", has_uz, dz)]:
+                if flag:
+                    u_scale = 1.0 if u_mode == "dirichlet" else 2.0 * u_c0 * dt / d_i
+                    vel_data = self._scale_source_signal(getattr(source, vel), u_scale)
+                    write_matrix(filepath, vel_data, f"{vel}_source_input")
             write_matrix(filepath, u_mask_idx.astype(np.uint64).reshape(-1, 1), "u_source_index")
-            u_mode = getattr(source, "u_mode", "additive")
             write_matrix(filepath, np.array(_SOURCE_MODE_MAP.get(u_mode, 2), dtype=np.uint64), "u_source_mode")
             # validate_source() ensures all velocity components agree on single vs many
-            first_vel = next(getattr(source, v) for v in ["ux", "uy", "uz"] if getattr(source, v, None) is not None)
-            write_matrix(filepath, np.array(int(num_dim2(first_vel) > 1), dtype=np.uint64), "u_source_many")
+            # (vel_data is the last written component, after any per-point expansion)
+            write_matrix(filepath, np.array(int(vel_data.shape[0] > 1), dtype=np.uint64), "u_source_many")
 
         # File attributes
         write_attributes(filepath)
+
+    def _source_sound_speed(self, mask_idx):
+        """Sound speed at the source points (1-based F-order indices, as written to the file).
+
+        Returns a scalar when the sound speed is the same at every source point,
+        otherwise one value per source point.
+        """
+        c0 = np.asarray(self.medium.sound_speed, dtype=np.float64)
+        if c0.size == 1:
+            return float(c0.flat[0])
+        c0_src = c0.flatten(order="F")[np.asarray(mask_idx) - 1]
+        if c0_src.size and np.all(c0_src == c0_src[0]):
+            return float(c0_src[0])
+        return c0_src
+
+    @staticmethod
+    def _scale_source_signal(signal, scale):
+        """Scale a time-varying source signal (n_series, Nt) to the units the binary expects.
+
+        ``scale`` is a scalar or one value per source point.  With a per-point
+        scale, a single time series shared by all source points is expanded to
+        one (individually scaled) series per point.
+        """
+        signal = np.atleast_2d(np.asarray(signal, dtype=np.float64))
+        signal = signal.reshape(-1, signal.shape[-1])
+        if np.ndim(scale) > 0:
+            scale = np.asarray(scale, dtype=np.float64)[:, None]
+        return (signal * scale).astype(np.float32)
 
     def _compute_staggered_density(self, rho0):
         """Compute staggered grid density by averaging neighbors.
