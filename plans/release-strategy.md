@@ -12,9 +12,10 @@ This release strategy brings the unified solver architecture to fruition.
 | **0.6.0** | Python Solver + Unified API + Deprecation | Python solver, `kspaceFirstOrder()` kwargs, Future warnings |
 | **0.6.1** | C-order + Examples + Docs | C-order migration, 29 examples ported, 47 parity tests, docs cleanup |
 | **0.6.2** | Binary refresh (sm_120 / Blackwell) | Bump URL pins to upstream v1.4.0 binaries with NVIDIA Blackwell support; closes #656, #622 |
-| **0.6.3** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
-| **0.6.4** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
-| **0.6.5** | Broader Darwin coverage | Universal2 (arm64 + x86_64) OpenMP binary; restores Intel Mac support |
+| **0.6.3** | Bug fixes + Windows binary pin flips | Backend-parity fixes from reported issues; unified v1.4.2 binaries on all platforms |
+| **0.6.4** | Tier 2 Features + Examples | Time-reversal, rect sensors, sound_speed_ref, port Tier 2 examples |
+| **0.6.5** | Axisymmetric Support | Axisymmetric solver in new API, port AS examples |
+| **0.6.6** | Broader Darwin coverage | Universal2 (arm64 + x86_64) OpenMP binary; restores Intel Mac support |
 | **0.7.0** | CLI (`kwp`) | Command-line interface for running simulations |
 | **1.0.0** | Clean Release | Remove deprecated code. Simple, readable, fast. |
 | **2.0.0** | Performance & Scale | nanobind CUDA, MPI, Devito, multi-GPU |
@@ -165,22 +166,41 @@ Combined release: C-order migration, example restructure, parity tests, docs cle
 - **macOS OMP** — `v1.4.1` picks up the fast-math fix ([k-wave-omp-darwin#4](https://github.com/waltsims/k-wave-omp-darwin/pull/4)) that prevents NaNs in absorbing-media simulations on arm64. ABI refresh (`libhdf5.320.dylib`) preserved from v1.4.0; closes [#661](https://github.com/waltsims/k-wave-python/issues/661).
 - **Windows OMP + CUDA** — both pinned to **v1.3.0** for this release. v1.4.x windows builds switched compiler/OpenMP/FFT/CUDA-runtime stacks but neither bundles its runtime DLLs. v1.3.0 binaries are self-contained with the Intel-era DLL bundle (shipped via `WINDOWS_DLLS` with the OMP request and used by both `.exe` files since they share `kwave/bin/windows/`). OMP DLL bundling fix landed in [kspacefirstorder-unified#14](https://github.com/waltsims/kspacefirstorder-unified/issues/14) (awaiting production validation); CUDA bundling tracked in [kspacefirstorder-unified#17](https://github.com/waltsims/kspacefirstorder-unified/issues/17). Pin gets flipped in v0.6.3 once both windows flavors are validated end-to-end.
 - **Chmod fix** — independent fix for `download_binaries` not setting the exec bit on Linux/macOS, surfaced during v0.6.2 validation on Colab ([#741](https://github.com/waltsims/k-wave-python/pull/741)).
-- **Intel Mac guard** — `kwave/__init__.py` now emits a `RuntimeWarning` and skips the darwin OMP download on `darwin` x86_64, since the v1.4.x darwin binary is arm64-only. Universal2 coverage remains tracked in v0.6.5.
+- **Intel Mac guard** — `kwave/__init__.py` now emits a `RuntimeWarning` and skips the darwin OMP download on `darwin` x86_64, since the v1.4.x darwin binary is arm64-only. Universal2 coverage remains tracked in v0.6.6.
 
 **Closes:** [#622](https://github.com/waltsims/k-wave-python/issues/622), [#656](https://github.com/waltsims/k-wave-python/issues/656), [#661](https://github.com/waltsims/k-wave-python/issues/661), [#738](https://github.com/waltsims/k-wave-python/issues/738), [#740](https://github.com/waltsims/k-wave-python/issues/740).
 
-**Out of scope:** Darwin x86_64 (Intel Mac) coverage — v1.4.x OMP-darwin is arm64-only. Tracked in v0.6.5.
+**Out of scope:** Darwin x86_64 (Intel Mac) coverage — v1.4.x OMP-darwin is arm64-only. Tracked in v0.6.6.
 
 ---
 
-### v0.6.3 — Tier 2 Features + Examples + Windows binary pin flips
+### v0.6.3 — Bug fixes + Windows binary pin flips
 
-**Goal:** Add solver features needed by Tier 2 examples, port those examples, and flip the Windows binary pins to v1.4.x once both flavors are validated.
+**Goal:** Ship the binary work that was ready in `v0.6.3rc1` together with the bug fixes reported since v0.6.2. The Tier 2 features originally planned here moved to v0.6.4.
 
-**Windows binary pin flips (carried over from v0.6.2):**
-- **Validate `v1.4.1` windows-OMP** end-to-end on a Windows machine (smoke + small simulation). Bundle landed in [kspacefirstorder-unified#14](https://github.com/waltsims/kspacefirstorder-unified/issues/14); CI smoke passes; runtime sim not yet confirmed.
-- **Fix `v1.4.x` windows-CUDA DLL packaging** in [kspacefirstorder-unified#17](https://github.com/waltsims/kspacefirstorder-unified/issues/17) — same DLL-bundling pattern as windows-omp, plus CUDA runtime DLLs (`cudart64_*.dll`, `cufft64_*.dll`) from `$env:CUDA_PATH\bin`.
-- Once both validated: drop `WINDOWS_OMP_VERSION` + `WINDOWS_CUDA_VERSION` pins in `kwave/__init__.py` (both use `BINARY_VERSION`). Likely also: refactor `WINDOWS_DLLS` into per-architecture lists since OMP and CUDA need slightly different MSVC redist + runtime deps.
+**Binaries (in `v0.6.3rc1`):**
+- All platforms download from the unified `kspacefirstorder-unified` v1.4.2 release; the Windows OMP/CUDA pins and the five per-platform mirror repos are gone ([kspacefirstorder-unified#13](https://github.com/waltsims/kspacefirstorder-unified/issues/13)).
+- Runtime warning when the GPU compute capability is below 7.5.
+
+**Backend parity (`kspaceFirstOrder()`, `backend="cpp"` vs `backend="python"`):**
+- cpp sensor time series are `(n_sensor, Nt)` in C-order sensor order (#760, #806).
+- cpp time-varying sources are scaled before writing, and per-point signals follow the source-index order (#785).
+- cpp honours `sensor.record` and `record_start_index` (#809); 1D raises a clear error.
+- cpp staggered density no longer wraps around at the last grid plane (#808).
+- Python additive pressure sources use `dx` for every density split, as MATLAB and the binary do.
+- Python `*_final` fields cover the full grid with `pml_inside=True`; 1D sensor aggregates are not PML-stripped.
+- Python accepts `u_non_staggered`; unsupported `sensor.record` fields raise instead of being dropped.
+
+**Legacy path and utilities:**
+- Legacy Python bridge: scalar `pml_size`, `pml_inside=False` padding.
+- Legacy source scaling with per-voxel signals in heterogeneous media (#807).
+- `interp_cart_data` linear mode (#572, part), `make_multi_bowl` inputs (#469), zero-phase `filter_time_series` (#810), phased-array example axes (#522).
+
+**Infrastructure:** CI repaired (MATLAB reference collection, link check); Dependabot grouped and tracking GitHub Actions.
+
+### v0.6.4 — Tier 2 Features + Examples
+
+**Goal:** Add solver features needed by Tier 2 examples and port those examples.
 
 **Features to add:**
 - **Time-reversal reconstruction** — needed by PR examples (`pr_2D_TR_*`, `pr_3D_TR_*`)
@@ -199,13 +219,13 @@ Combined release: C-order migration, example restructure, parity tests, docs cle
 - Remove unused MATLAB collector infrastructure if parity tests replace it
 - Audit `kWaveSimulation_helper/` — delete helpers superseded by `kspaceFirstOrder()`
 
-### v0.6.4 — Axisymmetric Support
+### v0.6.5 — Axisymmetric Support
 
 Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate solver — wrapper around `kspaceFirstOrder()` with radial symmetry terms added to the wave equation.
 
 ---
 
-### v0.6.5 — Broader Darwin coverage (Intel + Apple Silicon)
+### v0.6.6 — Broader Darwin coverage (Intel + Apple Silicon)
 
 **Goal:** Restore Intel Mac support for the OpenMP binary. The v1.4.0 release shipped a Mach-O `arm64`-only OMP binary (`kspaceFirstOrder-OMP` in `k-wave-omp-darwin` v1.4.0), which excludes every Intel Mac. Pre-2020 hardware is still the majority of macOS users in academic settings, and even on newer Apple Silicon machines x86_64 coverage is useful for Rosetta-only third-party stacks.
 
@@ -227,9 +247,9 @@ Axisymmetric = dimensionality reduction (3D→2D or 2D→1D). Not a separate sol
 
 Work on the upstream binary side that doesn't need its own k-wave-python release — it gets picked up by whatever version bump happens to be in flight.
 
-### Mirror consolidation (kspacefirstorder-unified#13)
+### Mirror consolidation (kspacefirstorder-unified#13) — done in v0.6.3
 
-Collapse the 5 per-platform mirror repos (`kspaceFirstOrder-{CUDA,OMP}-{linux,windows}` + `k-wave-omp-darwin`) into the unified repo. Each cross-cutting change currently lands ~2-3× (proven by v1.4.0 / v1.4.1 taking ~12 PRs across repos); the consolidation retires that overhead. Cross-linked from k-wave-python#738 — flip `URL_DICT` to point at unified once the consolidation lands. Best fit for v1.5.0 or alongside whichever release first benefits.
+The 5 per-platform mirror repos were collapsed into the unified repo with binary release v1.4.2; `URL_DICT` in `kwave/__init__.py` points at it.
 
 ### Static-link Windows binaries (v1.5 follow-up)
 
@@ -341,11 +361,11 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 - Weekly example runner (`run-examples.yml`)
 - `matlab_parity` marker for selective runs
 
-**v0.6.2 (Tier 2 features):**
+**v0.6.4 (Tier 2 features):**
 - Parity tests for time-reversal, rect sensors, etc.
 - CuPy GPU validation
 
-**v0.6.3 (axisymmetric):**
+**v0.6.5 (axisymmetric):**
 - MATLAB reference tests for `at_circular_piston_AS`, `at_focused_bowl_AS`
 
 ---
@@ -355,10 +375,11 @@ result = kspaceFirstOrder(kgrid, medium, source, sensor,
 1. ~~v0.5.0~~ ✅ Stabilize master
 2. ~~v0.6.0~~ ✅ Python solver + unified API + deprecations
 3. ~~v0.6.1~~ ✅ C-order + examples + docs cleanup
-4. **Next:** v0.6.2 — Binary refresh (sm_120 / Blackwell)
-5. **Then:** v0.6.3 — Tier 2 features + examples
-6. **Then:** v0.6.4 — Axisymmetric support
-7. **Then:** v0.6.5 — Broader Darwin coverage (universal2 OMP)
-8. **Then:** v0.7.0 — CLI (`kwp`)
-9. **Then:** v1.0.0 — Clean release (delete deprecated code)
-10. **Post-1.0:** Performance & scale based on profiling
+4. ~~v0.6.2~~ ✅ Binary refresh (sm_120 / Blackwell)
+5. **Next:** v0.6.3 — Bug fixes + Windows binary pin flips
+6. **Then:** v0.6.4 — Tier 2 features + examples
+7. **Then:** v0.6.5 — Axisymmetric support
+8. **Then:** v0.6.6 — Broader Darwin coverage (universal2 OMP)
+9. **Then:** v0.7.0 — CLI (`kwp`)
+10. **Then:** v1.0.0 — Clean release (delete deprecated code)
+11. **Post-1.0:** Performance & scale based on profiling
