@@ -391,6 +391,8 @@ def test_velocity_record_fields(grid_2d, record):
     result = kspaceFirstOrder(*args, backend="python", quiet=True)
     for a in "xy":
         assert np.any(result[f"u{a}"]) and np.array_equal(result[f"u{a}_non_staggered"], result[f"u{a}"])
+
+
 def test_pressure_source_scaled_by_dx_on_anisotropic_grid():
     """MATLAB / C++ convention: an additive pressure source adds 2*dt/(N*c0*dx) to every density split, also when dx != dy."""
     N, (dx, dy), dt, c0 = (16, 12), (1e-4, 1.5e-4), 1e-8, 1500.0
