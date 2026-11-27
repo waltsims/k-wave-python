@@ -184,6 +184,15 @@ def test_apply_filter_lowpass():
     pass
 
 
+def test_apply_filter_zero_phase():
+    # band-limited pulse well inside the pass band: zero-phase output overlays the input, causal output is delayed by N/2
+    t = np.arange(400)
+    x = (np.exp(-(((t - 200) / 25) ** 2)) * np.sin(0.06 * np.pi * t))[None]
+    zero_phase, causal = (apply_filter(x, fs=1e7, cutoff_f=2e6, filter_type="LowPass", zero_phase=zp) for zp in (True, False))
+    assert np.allclose(zero_phase, x, atol=1e-3)
+    assert np.argmax(np.correlate(causal[0], x[0], "full")) - (t.size - 1) == 36
+
+
 def test_apply_filter_highpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=1e7, filter_type="HighPass")

@@ -532,13 +532,12 @@ def apply_filter(
             hw = (-1 * np.ones((1, len(hw))) ** (np.arange(1, len(hw) + 1))) * hw
 
         # add some zeros to allow the reverse (zero phase) filtering room to work
-        L = signal.size  # length of original input signal
         filtered_signal = np.hstack([np.zeros((1, N)), signal]).squeeze()
 
         # apply the filter
         filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal)
         if zero_phase:
-            filtered_signal = np.fliplr(lfilter(hw.squeeze(), 1, filtered_signal[np.arange(L + N, 1, -1)]))
+            filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal[::-1])[::-1]
 
         # remove the part of the signal corresponding to the added zeros
         filtered_signal = filtered_signal[N:]
