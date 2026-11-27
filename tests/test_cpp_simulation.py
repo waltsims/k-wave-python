@@ -5,8 +5,15 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import h5py
+import numpy as np
 import pytest
 
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksensor import kSensor
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.solvers.cpp_simulation import CppSimulation
 
 
@@ -90,3 +97,58 @@ class TestResolveBinaryPath:
         sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
 
         assert binary.stat().st_mode & stat.S_IEXEC
+
+
+@pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
+@pytest.mark.parametrize("field, mode", [(f, m) for f in ("p", "ux", "uy") for m in ("additive", "dirichlet")])
+def test_source_scaled_for_binary(field, mode, sig, tmp_path):
+    # The binary expects pre-scaled sources (kspaceFirstOrder_scaleSourceTerms), with c0 taken per source point (#785).
+    N, (dx, dy), dt = (16, 12), (1e-4, 1.5e-4), 1e-8
+    kgrid = kWaveGrid(N, (dx, dy))
+    kgrid.setTime(sig.size, dt)
+    c0, mask = np.full(N, 1500.0), np.zeros(N, bool)
+    c0[:, 6:], mask[4, [3, 9]] = 1800.0, True  # one source point on each side of the interface
+    source = kSource()
+    setattr(source, f"{field[0]}_mask", mask)
+    setattr(source, f"{field[0]}_mode", mode)
+    setattr(source, field, sig[None])
+    c = np.array([[1500.0], [1800.0]])
+    additive = {"p": 2 * dt / (2 * c * dx), "ux": 2 * c * dt / dx, "uy": 2 * c * dt / dy}
+    scale = additive[field] if mode == "additive" else 1 / (2 * c**2) if field == "p" else 1
+    kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
+    out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=c0), source, kSensor(mask=mask), **kwargs)
+    with h5py.File(out["input_file"]) as f:
+        np.testing.assert_allclose(np.squeeze(f[f"{field}_source_input"]).T, np.squeeze(sig * scale), rtol=1e-6)
+        assert f[f"{field[0]}_source_many"][()].item() == (np.size(scale) > 1)  # one row per point once expanded
+
+
+@pytest.mark.parametrize("flat", [False, True])  # a C-ravelled mask is the same mask
+@pytest.mark.parametrize("field", ["p", "ux"])
+def test_source_rows_follow_written_index(field, flat, tmp_path):
+    # One row per source point is given in C-order of the mask; the binary pairs row k with entry k of the F-order index.
+    N = (8, 8)
+    kgrid = kWaveGrid(N, (1e-4, 1e-4))
+    kgrid.setTime(4, 1e-8)
+    mask = np.zeros(N, bool)
+    mask[[2, 4], [5, 3]] = True  # C-order: (2,5), (4,3); F-order: (4,3), (2,5)
+    source = kSource()
+    setattr(source, f"{field[0]}_mask", mask.ravel() if flat else mask)
+    setattr(source, field, np.flatnonzero(mask)[:, None] * np.ones(4))  # each row holds its point's C linear index
+    kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
+    out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500.0), source, kSensor(mask=mask), **kwargs)
+    with h5py.File(out["input_file"]) as f:
+        idx, rows = np.ravel(f[f"{field[0]}_source_index"]) - 1, np.squeeze(f[f"{field}_source_input"]).T[:, 0]
+    expected = np.ravel_multi_index(np.unravel_index(idx, N, order="F"), N)
+    np.testing.assert_allclose(rows / rows[0], expected / expected[0], rtol=1e-6)
+
+
+def test_velocity_components_share_row_count(tmp_path):
+    # The binary has a single u_source_many, so a shared series is expanded when another component is per-point.
+    kgrid = kWaveGrid((8, 8), (1e-4, 1e-4))
+    kgrid.setTime(4, 1e-8)
+    source, mask = kSource(), np.eye(8, dtype=bool) & (np.arange(8) < 2)
+    source.u_mask, source.ux, source.uy = mask, np.ones((1, 4)), np.ones((2, 1))
+    kwargs = dict(backend="cpp", save_only=True, data_path=str(tmp_path), pml_inside=True, pml_size=2)
+    out = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500.0), source, kSensor(mask=mask), **kwargs)
+    with h5py.File(out["input_file"]) as f:
+        assert f["ux_source_input"].shape[-1] == f["uy_source_input"].shape[-1] == 2 and f["u_source_many"][()].item() == 1
