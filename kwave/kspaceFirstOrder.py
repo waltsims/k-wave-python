@@ -220,6 +220,9 @@ def kspaceFirstOrder(
         All time-series are ``(n_sensor, Nt)`` with sensor points in
         C-flattened order.  Use :func:`reshape_to_grid` to recover spatial
         structure for full-grid masks.
+
+        With ``backend="python"``, ``"u"`` is MATLAB's ``'u_non_staggered'`` and ``"u_staggered"`` is MATLAB's
+        ``'u'``; both are at the staggered time ``t - dt/2``.  Unsupported ``sensor.record`` fields raise ``ValueError``.
     """
     if device not in ("cpu", "gpu"):
         raise ValueError(f"device must be 'cpu' or 'gpu', got {device!r}")

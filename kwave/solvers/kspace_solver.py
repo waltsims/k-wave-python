@@ -290,7 +290,8 @@ class Simulation:
             self.record.update(f"u{a}_staggered" for a in "xyz"[: self.ndim])
 
         # Expand shorthand velocity keys: u_max → ux_max, uy_max, uz_max
-        for suffix in ("_max", "_min", "_rms", "_final"):
+        # ("u_non_staggered" is MATLAB's name for what this solver records as "ux", "uy", "uz")
+        for suffix in ("_max", "_min", "_rms", "_final", "_non_staggered"):
             if f"u{suffix}" in self.record:
                 self.record.discard(f"u{suffix}")
                 self.record.update(f"u{a}{suffix}" for a in "xyz"[: self.ndim])
@@ -304,12 +305,25 @@ class Simulation:
                 self.record.discard("I_avg")
                 self.record.update(f"I{a}_avg" for a in "xyz"[: self.ndim])
 
+        # Reject fields the solver would otherwise silently drop (e.g. "u_split_field", "p_max_all")
+        axes = "xyz"[: self.ndim]
+        supported = {"p", "p_max", "p_min", "p_rms", "p_final"}
+        supported.update(f"u{a}{s}" for a in axes for s in ("", "_staggered", "_non_staggered", "_max", "_min", "_rms", "_final"))
+        supported.update(f"I{a}{s}" for a in axes for s in ("", "_avg"))
+        unsupported = sorted(str(k) for k in self.record - supported)
+        if unsupported:
+            shorthands = {"u", "u_staggered", "u_non_staggered", "u_max", "u_min", "u_rms", "u_final", "I", "I_avg"}
+            raise ValueError(
+                f"Unsupported sensor.record field(s) for the Python backend ({self.ndim}D): {unsupported}. "
+                f"Supported fields: {sorted(supported | shorthands)}"
+            )
+
         # Snapshot of what the user actually requested (after shorthand expansion)
         self._requested_record = set(self.record)
 
-        # Add internal dependencies: aggregates need base time-series, intensity needs p + u
+        # Add internal dependencies: aggregates and the non-staggered alias need base time-series, intensity needs p + u
         for key in list(self.record):
-            for suffix in ("_max", "_min", "_rms"):
+            for suffix in ("_max", "_min", "_rms", "_non_staggered"):
                 if key.endswith(suffix):
                     self.record.add(key[: -len(suffix)])
         if any(k.startswith("I") for k in self._requested_record):
@@ -757,6 +771,9 @@ class Simulation:
         for k in list(self.sensor_data):
             result[k] = _to_cpu(self.sensor_data.pop(k))
         result.update(_compute_aggregates(result, self.ndim, self.record))
+        for a in "xyz"[: self.ndim]:
+            if f"u{a}_non_staggered" in self._requested_record:
+                result[f"u{a}_non_staggered"] = result[f"u{a}"]
         if "p" in result and any(f"u{a}" in result for a in "xyz"):
             if any(k.startswith("I") for k in self._requested_record):
                 result.update(acoustic_intensity(result))
