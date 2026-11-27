@@ -321,8 +321,19 @@ class CppSimulation:
         interpolation internally, so this is only used as the initial estimate.
         For full physical accuracy with heterogeneous density, consider using
         spectral interpolation (FFT-based shift) instead.
+
+        On the last plane along each axis there is no neighbour at +1/2, so
+        rho0 is kept there (as in MATLAB k-Wave) instead of wrapping around to
+        the first plane.
         """
-        return [0.5 * (rho0 + np.roll(rho0, -1, axis=axis)) for axis in range(self.ndim)]
+        staggered = []
+        for axis in range(self.ndim):
+            rho0_sg = 0.5 * (rho0 + np.roll(rho0, -1, axis=axis))
+            last = [slice(None)] * rho0.ndim
+            last[axis] = -1
+            rho0_sg[tuple(last)] = rho0[tuple(last)]
+            staggered.append(rho0_sg)
+        return staggered
 
     def _get_absorbing_flag(self):
         """Determine absorption type: 0=lossless, 1=power-law, 2=stokes."""
