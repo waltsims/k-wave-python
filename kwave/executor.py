@@ -26,7 +26,8 @@ class Executor:
         if not binary_path.exists():
             if kwave.PLATFORM == "darwin" and self.execution_options.is_gpu_simulation:
                 raise ValueError(
-                    "GPU simulations are currently not supported on MacOS. "
+                    f"GPU binary not found at {binary_path}. GPU simulations on macOS require Apple Silicon "
+                    "and the MLX binary (kspaceFirstOrder-MLX). "
                     "Try running the simulation on CPU by setting is_gpu_simulation=False."
                 )
             raise FileNotFoundError(f"Binary not found at {binary_path}")

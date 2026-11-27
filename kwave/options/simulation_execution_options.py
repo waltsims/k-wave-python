@@ -17,7 +17,8 @@ class SimulationExecutionOptions:
     Attributes:
         backend: Execution backend to use. Options:
             - "OMP": C++ OpenMP binary (default for CPU)
-            - "CUDA": C++ CUDA binary (default for GPU)
+            - "CUDA": C++ CUDA binary (default for GPU on Linux/Windows)
+            - "MLX": C++ MLX binary for the Apple Silicon GPU (default for GPU on macOS)
             - "python": Pure Python/CuPy solver (no external binaries required)
     """
 
@@ -39,7 +40,7 @@ class SimulationExecutionOptions:
         checkpoint_interval: Optional[int] = None,  # [seconds]
         checkpoint_timesteps: Optional[int] = None,  # [timestep integer]
         checkpoint_file: Optional[Path | str] = None,  # [path to hdf5 file]
-        backend: Optional[str] = None,  # "OMP", "CUDA", or "python"
+        backend: Optional[str] = None,  # "OMP", "CUDA", "MLX", or "python"
     ):
         self._num_threads_explicit = num_threads is not None
         self.backend = backend
@@ -113,7 +114,7 @@ class SimulationExecutionOptions:
 
     @backend.setter
     def backend(self, value: Optional[str]):
-        valid_backends = [None, "OMP", "CUDA", "python"]
+        valid_backends = [None, "OMP", "CUDA", "MLX", "python"]
         if value not in valid_backends:
             raise ValueError(f"Backend must be one of {valid_backends}, got '{value}'")
         self._backend = value
@@ -136,14 +137,18 @@ class SimulationExecutionOptions:
 
     @property
     def binary_name(self) -> str:
-        valid_binary_names = ["kspaceFirstOrder-OMP", "kspaceFirstOrder-CUDA"]
+        valid_binary_names = ["kspaceFirstOrder-OMP", "kspaceFirstOrder-CUDA", "kspaceFirstOrder-MLX"]
         if self._binary_name is None:
             # set default binary name based on GPU simulation value
             if self.is_gpu_simulation is None:
                 raise ValueError("`is_gpu_simulation` must be set to either True or False before determining the binary name.")
 
-            if self.is_gpu_simulation:
-                self._binary_name = "kspaceFirstOrder-CUDA"
+            if self.backend == "MLX":
+                # explicit choice of the Apple Silicon GPU binary
+                self._binary_name = "kspaceFirstOrder-MLX"
+            elif self.is_gpu_simulation:
+                # macOS has no CUDA: the GPU binary runs on the Apple Silicon GPU through MLX (Metal)
+                self._binary_name = "kspaceFirstOrder-MLX" if PLATFORM == "darwin" else "kspaceFirstOrder-CUDA"
             else:
                 self._binary_name = "kspaceFirstOrder-OMP"
 
