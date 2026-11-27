@@ -5,8 +5,14 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import h5py
+import numpy as np
 import pytest
 
+from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
+from kwave.ksource import kSource
+from kwave.kspaceFirstOrder import kspaceFirstOrder
 from kwave.solvers.cpp_simulation import CppSimulation
 
 
@@ -18,6 +24,22 @@ class TestPrepare:
         sim = CppSimulation.__new__(CppSimulation)
         with pytest.raises(FileExistsError, match="already exists"):
             sim.prepare(data_path=str(tmp_path))
+
+
+def test_staggered_density_keeps_rho0_on_last_plane(tmp_path):
+    # Before fix: np.roll averaged the last plane along each axis with the first one.
+    rho0 = np.full((16, 12), 1000.0)
+    rho0[0], rho0[:, 0] = 2000.0, 3000.0
+    kgrid = kWaveGrid(rho0.shape, (1e-4, 1e-4))
+    kgrid.makeTime(1500)
+    source = kSource()
+    source.p0 = np.ones(rho0.shape)
+    medium = kWaveMedium(1500, density=rho0)
+    kspaceFirstOrder(kgrid, medium, source, backend="cpp", save_only=True, pml_size=4, pml_inside=True, data_path=str(tmp_path))
+    with h5py.File(tmp_path / "kwave_input.h5") as f:
+        sgx, sgy = f["rho0_sgx"][0].T, f["rho0_sgy"][0].T  # stored transposed
+    assert np.array_equal(sgx[-1], rho0[-1]) and np.array_equal(sgx[:-1], (rho0[:-1] + rho0[1:]) / 2)
+    assert np.array_equal(sgy[:, -1], rho0[:, -1]) and np.array_equal(sgy[:, :-1], (rho0[:, :-1] + rho0[:, 1:]) / 2)
 
 
 class TestResolveBinaryPath:

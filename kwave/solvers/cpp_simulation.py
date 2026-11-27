@@ -312,17 +312,8 @@ class CppSimulation:
         write_attributes(filepath)
 
     def _compute_staggered_density(self, rho0):
-        """Compute staggered grid density by averaging neighbors.
-
-        Returns a list of ndim staggered density arrays (one per active axis).
-
-        TODO: This uses np.roll (spatial averaging) which matches the legacy
-        save_to_disk_func behavior. The C++ binary computes its own spectral
-        interpolation internally, so this is only used as the initial estimate.
-        For full physical accuracy with heterogeneous density, consider using
-        spectral interpolation (FFT-based shift) instead.
-        """
-        return [0.5 * (rho0 + np.roll(rho0, -1, axis=axis)) for axis in range(self.ndim)]
+        """Density at the staggered points (mean of each voxel and its next neighbour); the last plane keeps rho0, as in MATLAB k-Wave."""
+        return [rho0 + 0.5 * np.diff(rho0, axis=axis, append=np.take(rho0, [-1], axis)) for axis in range(self.ndim)]
 
     def _get_absorbing_flag(self):
         """Determine absorption type: 0=lossless, 1=power-law, 2=stokes."""
