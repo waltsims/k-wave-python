@@ -377,3 +377,15 @@ class TestCoverageEdgeCases:
         kgrid.makeTime(1500)
         with pytest.raises(ValueError, match="device"):
             kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
+
+
+def test_pressure_source_scaled_by_dx_on_anisotropic_grid():
+    """MATLAB / C++ convention: an additive pressure source adds 2*dt/(N*c0*dx) to every density split, also when dx != dy."""
+    N, (dx, dy), dt, c0 = (16, 12), (1e-4, 1.5e-4), 1e-8, 1500.0
+    kgrid = kWaveGrid(N, (dx, dy))
+    kgrid.setTime(1, dt)
+    source, mask = kSource(), np.zeros(N, bool)
+    mask[8, 6] = True
+    source.p_mask, source.p, source.p_mode = mask, np.ones((1, 1)), "additive-no-correction"
+    result = kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=c0), source, kSensor(mask=mask), pml_inside=True, pml_size=2, quiet=True)
+    np.testing.assert_allclose(result["p"], 2 * c0 * dt / dx)
