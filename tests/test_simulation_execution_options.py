@@ -266,43 +266,20 @@ class TestSimulationExecutionOptions(unittest.TestCase):
 
     def test_initialization_with_invalid_checkpoint_options(self):
         """Test initialization with invalid checkpoint options."""
-
-        # Test with valid checkpoint_file but unset checkpoint_timesteps and checkpoint_interval
         with TemporaryDirectory() as temp_dir:
             checkpoint_file = Path(temp_dir) / "checkpoint.h5"
+
+            # Test with invalid checkpoint_file type
+            with self.assertRaises(ValueError):
+                SimulationExecutionOptions(checkpoint_file=12345, checkpoint_timesteps=10)
+
+            # Test with both checkpoint options - should raise ValueError
+            with self.assertRaises(ValueError):
+                SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_interval=20, checkpoint_file=checkpoint_file)
+
+            # Test with just checkpoint_file (should raise ValueError)
             with self.assertRaises(ValueError):
                 SimulationExecutionOptions(checkpoint_file=checkpoint_file)
-
-        # Test with invalid checkpoint_file type
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(checkpoint_file=12345, checkpoint_timesteps=10)
-
-        # Test with invalid checkpoint_timesteps
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(checkpoint_timesteps=-1, checkpoint_file="checkpoint.h5")
-
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(checkpoint_timesteps="not_an_integer", checkpoint_file="checkpoint.h5")
-
-        # Test with invalid checkpoint_interval
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(checkpoint_interval=-1, checkpoint_file="checkpoint.h5")
-
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(checkpoint_interval="not_an_integer", checkpoint_file="checkpoint.h5")
-
-        # Test with invalid checkpoint_file
-        with self.assertRaises(ValueError):
-            SimulationExecutionOptions(
-                checkpoint_interval=10,
-                checkpoint_file="checkpoint.txt",  # Wrong extension
-            )
-
-        with self.assertRaises(FileNotFoundError):
-            SimulationExecutionOptions(
-                checkpoint_interval=10,
-                checkpoint_file="nonexistent_dir/checkpoint.h5",  # Non-existent directory
-            )
 
     def test_initialization_with_valid_checkpoint_options(self):
         """Test initialization with valid checkpoint options."""
@@ -319,11 +296,86 @@ class TestSimulationExecutionOptions(unittest.TestCase):
             self.assertEqual(options.checkpoint_interval, 20)
             self.assertEqual(options.checkpoint_file, checkpoint_file)
 
-            # Test with both checkpoint options - should be valid
-            options = SimulationExecutionOptions(checkpoint_timesteps=10, checkpoint_interval=20, checkpoint_file=checkpoint_file)
-            self.assertEqual(options.checkpoint_timesteps, 10)
-            self.assertEqual(options.checkpoint_interval, 20)
-            self.assertEqual(options.checkpoint_file, checkpoint_file)
+    def test_checkpoint_interval_validation(self):
+        """Test validation of checkpoint_interval property."""
+        options = self.default_options
+
+        # Test valid values
+        options.checkpoint_interval = 100
+        self.assertEqual(options.checkpoint_interval, 100)
+
+        # Test invalid values
+        with self.assertRaises(ValueError):
+            options.checkpoint_interval = 0
+        with self.assertRaises(ValueError):
+            options.checkpoint_interval = -1
+        with self.assertRaises(ValueError):
+            options.checkpoint_interval = "invalid"
+        with self.assertRaises(ValueError):
+            options.checkpoint_interval = 1.5
+
+    def test_checkpoint_timesteps_validation(self):
+        """Test validation of checkpoint_timesteps property."""
+        options = self.default_options
+
+        # Test valid values
+        options.checkpoint_timesteps = 0
+        self.assertEqual(options.checkpoint_timesteps, 0)
+        options.checkpoint_timesteps = 100
+        self.assertEqual(options.checkpoint_timesteps, 100)
+
+        # Test invalid values
+        with self.assertRaises(ValueError):
+            options.checkpoint_timesteps = -1
+        with self.assertRaises(ValueError):
+            options.checkpoint_timesteps = "invalid"
+        with self.assertRaises(ValueError):
+            options.checkpoint_timesteps = 1.5
+
+    def test_checkpoint_file_validation(self):
+        """Test validation of checkpoint file path."""
+        options = self.default_options
+
+        # Test with non-existent directory
+        with self.assertRaises(FileNotFoundError) as cm:
+            options.checkpoint_file = "invalid/path/checkpoint.h5"
+        expected_folder = str(Path("invalid") / "path")
+        self.assertEqual(str(cm.exception), f"Checkpoint folder {expected_folder} does not exist.")
+
+        # Test with temporary directory
+        with TemporaryDirectory() as temp_dir:
+            # Test invalid file extension
+            invalid_file = Path(temp_dir) / "checkpoint.txt"
+            with self.assertRaises(ValueError) as cm:
+                options.checkpoint_file = invalid_file
+            self.assertEqual(str(cm.exception), f"Checkpoint file {invalid_file} must have .h5 extension.")
+
+            # Test valid file path
+            valid_file = Path(temp_dir) / "checkpoint.h5"
+            options.checkpoint_file = valid_file
+            self.assertEqual(options.checkpoint_file, valid_file)
+
+        # Test invalid type
+        with self.assertRaises(ValueError) as cm:
+            options.checkpoint_file = 123
+        self.assertEqual(str(cm.exception), "Checkpoint file must be a string or Path object.")
+
+    def test_checkpoint_file_required_when_parameters_set(self):
+        """Test that checkpoint file is required when checkpoint parameters are set."""
+        options = self.default_options
+
+        # Test with checkpoint_interval
+        options.checkpoint_interval = 10
+        with self.assertRaises(ValueError) as cm:
+            options.validate()
+        self.assertEqual(str(cm.exception), "`checkpoint_file` must be set when `checkpoint_interval` or `checkpoint_timesteps` is set.")
+
+        # Test with checkpoint_timesteps
+        options.checkpoint_interval = None
+        options.checkpoint_timesteps = 10
+        with self.assertRaises(ValueError) as cm:
+            options.validate()
+        self.assertEqual(str(cm.exception), "`checkpoint_file` must be set when `checkpoint_interval` or `checkpoint_timesteps` is set.")
 
 
 if __name__ == "__main__":
