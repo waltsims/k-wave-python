@@ -31,5 +31,7 @@ jobs:
             --exclude "https://www.gnu.org"
             --exclude "https://fsf.org"
             --exclude "http://www.k-wave.org"
+            --exclude "https://openincolab.com"
+            --exclude "https://nightly.link/waltsims/k-wave-python/"
             "**/*.md" "**/*.rst"
           fail: true
