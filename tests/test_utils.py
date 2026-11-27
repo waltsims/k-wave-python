@@ -202,6 +202,16 @@ def test_apply_filter_highpass():
     pass
 
 
+@pytest.mark.parametrize("filter_type, cutoff_f, kept", [("HighPass", 3e5, [0, 0, 1]), ("BandPass", [1e5, 3e5], [0, 1, 0])])
+def test_apply_filter_tones(filter_type, cutoff_f, kept):
+    fs, freqs = 1e6, np.array([2e4, 2e5, 4e5])  # tones below, inside and above the 1e5-3e5 band
+    t = np.arange(2000) / fs
+    filtered = apply_filter(np.sin(2 * np.pi * freqs[:, None] * t).sum(0)[None], fs, cutoff_f, filter_type)
+    assert filtered.shape == (1, t.size)
+    amps = 2 * abs(np.exp(-2j * np.pi * freqs[:, None] * t[500:1500]) @ filtered[0, 500:1500]) / 1000
+    assert np.allclose(amps, kept, atol=0.02)
+
+
 def test_apply_filter_bandpass():
     test_signal = tone_burst(sample_freq=10_000_000, signal_freq=2.5 * 1_000_000, num_cycles=2, envelope="Gaussian")
     filtered_signal = apply_filter(test_signal, fs=1e7, cutoff_f=[5e6, 1e7], filter_type="BandPass")

@@ -529,7 +529,7 @@ def apply_filter(
 
         # modify to make a high_pass filter
         if high_pass:
-            hw = (-1 * np.ones((1, len(hw))) ** (np.arange(1, len(hw) + 1))) * hw
+            hw = (-1.0) ** np.arange(1, len(hw) + 1) * hw
 
         # add some zeros to allow the reverse (zero phase) filtering room to work
         L = signal.size  # length of original input signal
@@ -543,7 +543,7 @@ def apply_filter(
         # remove the part of the signal corresponding to the added zeros
         filtered_signal = filtered_signal[N:]
 
-    return filtered_signal[np.newaxis]
+    return np.atleast_2d(filtered_signal)
 
 
 def smooth(a: np.ndarray, restore_max: Optional[bool] = False, window_type: Optional[str] = "Blackman") -> np.ndarray:
