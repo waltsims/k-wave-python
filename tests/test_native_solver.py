@@ -408,6 +408,8 @@ def test_1d_sensor_aggregates_not_pml_stripped(grid_1d):
         np.testing.assert_array_equal(result[f"{f}_max"], result[f].max(axis=-1))
         np.testing.assert_array_equal(result[f"{f}_min"], result[f].min(axis=-1))
         np.testing.assert_allclose(result[f"{f}_rms"], np.sqrt(np.mean(result[f] ** 2, axis=-1)))
+
+
 def test_pressure_source_scaled_by_dx_on_anisotropic_grid():
     """MATLAB / C++ convention: an additive pressure source adds 2*dt/(N*c0*dx) to every density split, also when dx != dy."""
     N, (dx, dy), dt, c0 = (16, 12), (1e-4, 1.5e-4), 1e-8, 1500.0
