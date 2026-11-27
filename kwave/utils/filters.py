@@ -538,7 +538,8 @@ def apply_filter(
         # apply the filter
         filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal)
         if zero_phase:
-            filtered_signal = np.fliplr(lfilter(hw.squeeze(), 1, filtered_signal[np.arange(L + N, 1, -1)]))
+            # filter the time-reversed signal and reverse the result (MATLAB: fliplr(filter(hw, 1, x(end:-1:1))))
+            filtered_signal = lfilter(hw.squeeze(), 1, filtered_signal[::-1])[::-1]
 
         # remove the part of the signal corresponding to the added zeros
         filtered_signal = filtered_signal[N:]
