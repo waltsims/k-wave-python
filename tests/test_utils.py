@@ -12,8 +12,9 @@ import pytest
 
 from kwave.data import Vector
 from kwave.kgrid import kWaveGrid
+from kwave.kmedium import kWaveMedium
 from kwave.utils.conversion import db2neper, neper2db
-from kwave.utils.filters import apply_filter, extract_amp_phase, spect
+from kwave.utils.filters import apply_filter, extract_amp_phase, filter_time_series, spect
 from kwave.utils.interp import get_bli, interp_cart_data
 from kwave.utils.mapgen import fit_power_law_params, make_bowl, make_multi_bowl, power_law_kramers_kronig
 from kwave.utils.matrix import gradient_fd, num_dim, resize, trim_zeros
@@ -209,6 +210,30 @@ def test_apply_filter_bandpass():
     expected_signal = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert ((abs(filtered_signal - expected_signal)) < 0.0001).all()
     pass
+
+
+def test_apply_filter_zero_phase():
+    # symmetric pulse with zero padding on both sides: a zero-phase filter keeps it symmetric and does not delay it
+    fs = 1e7
+    n = np.arange(401)
+    test_signal = (np.exp(-(((n - 200) / 8.0) ** 2)) * np.cos(2 * np.pi * 1e6 * (n - 200) / fs))[np.newaxis]
+    filtered = apply_filter(test_signal, fs=fs, cutoff_f=2e6, filter_type="LowPass", zero_phase=True)
+    assert filtered.shape == test_signal.shape
+    assert np.allclose(filtered, filtered[:, ::-1], atol=1e-12)
+    assert np.argmax(np.abs(filtered)) == 200
+    causal = apply_filter(test_signal, fs=fs, cutoff_f=2e6, filter_type="LowPass", zero_phase=False)
+    assert np.argmax(np.abs(causal)) > 200  # the causal filter delays the pulse
+
+
+def test_filter_time_series_zero_phase():
+    kgrid = kWaveGrid([64], [1e-4])
+    kgrid.makeTime(1500.0)
+    medium = kWaveMedium(sound_speed=1500.0)
+    t = np.arange(int(kgrid.Nt)) * float(kgrid.dt)
+    signal = np.sin(2 * np.pi * 1e6 * t)[np.newaxis]
+    filtered = filter_time_series(kgrid, medium, signal, zerophase=True)
+    assert filtered.shape == signal.shape
+    assert np.all(np.isfinite(filtered))
 
 
 def test_fit_power_law_params():
