@@ -15,7 +15,7 @@ jobs:
     outputs:
       example_paths: ${{ steps.find-examples.outputs.examples }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: find-examples
         run: |
           # Find ported examples (exclude legacy/ and hidden files)
@@ -33,7 +33,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install system dependencies
         run: |
@@ -41,7 +41,7 @@ jobs:
           sudo apt-get install -y ffmpeg
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'  # Matches requires-python from pyproject.toml
           cache: 'pip'

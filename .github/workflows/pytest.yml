@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: k-Wave-python
       # Calculate hash value that will be used as a cache key
@@ -21,7 +21,7 @@ jobs:
           echo "MATLAB_REFS_HASH=$MATLAB_REFS_HASH" >> $GITHUB_OUTPUT
       # Pull cache if exists, otherwise cache will be created at the specified path
       - name: Cache collected references
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         id: matlab-refs-cache
         env:
           cache-name: cache-matlab-references
@@ -29,7 +29,7 @@ jobs:
             key: ${{ steps.matlab-refs-hash.outputs.MATLAB_REFS_HASH }}
             path: ./collectedValues.tar.gz
       - name: Checkout reference k-Wave repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           repository: ucl-bug/k-wave
@@ -54,7 +54,7 @@ jobs:
             cd k-Wave-python/tests/matlab_test_data_collectors;
             run_all_collectors;
       - name: Compress generated references
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         if: ${{ steps.matlab-refs-cache.outputs.cache-hit != 'true' }}
         with:
           command: c
@@ -64,7 +64,7 @@ jobs:
           outPath: collectedValues.tar.gz
       - name: Upload reference values artifact
         id: artifact-upload-step
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: matlab_reference_test_values
           path: collectedValues.tar.gz
@@ -80,10 +80,10 @@ jobs:
         python-version: [ "3.10", "3.11", "3.12", "3.13" ]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Pull the cache based on the hash value
       - name: Cache collected references
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         id: cache-matlab-refs
         env:
           cache-name: cache-matlab-references
@@ -94,7 +94,7 @@ jobs:
             enableCrossOsArchive: true
       # Now we have the references archive available in this job, proceed by unpacking it
       - name: unpack collectedValues
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         with:
           command: x
           cwd: ./tests/matlab_test_data_collectors/python_testers/
@@ -103,7 +103,7 @@ jobs:
         run: |
           ls ./tests/matlab_test_data_collectors/python_testers/
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -117,7 +117,7 @@ jobs:
         run: |
           coverage xml
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           env_vars: ${{matrix.os}},${{ matrix.python-version }}
           fail_ci_if_error: true

@@ -5,5 +5,5 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: astral-sh/ruff-action@v1
+      - uses: actions/checkout@v7
+      - uses: astral-sh/ruff-action@v3
