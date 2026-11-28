@@ -24,6 +24,9 @@ jobs:
             --verbose
             --no-progress
             --max-concurrency 20
+            --accept "100..=103,200..=299,429"
+            --max-retries 5
+            --retry-wait-time 10
             --exclude-path "docs/get_started/legacy_licenses/"
             --exclude-link-local
             --exclude "https://doi.org/"
@@ -35,3 +38,6 @@ jobs:
             --exclude "https://nightly.link/waltsims/k-wave-python/"
             "**/*.md" "**/*.rst"
           fail: true
+        env:
+          # authenticated requests to github.com links get a much higher rate limit
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
