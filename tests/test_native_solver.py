@@ -379,6 +379,82 @@ class TestCoverageEdgeCases:
             kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
 
 
+@pytest.mark.parametrize("legacy", [False, True])
+def test_pml_inside_final_fields_cover_full_grid(grid_2d, legacy):
+    from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
+
+    sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+    sensor.record = ["p", "p_final", "u_final"]
+    source = _p0_source((64, 64))
+    source.p0 = np.roll(source.p0, 9, axis=0)
+    args = dict(kgrid=grid_2d, medium=kWaveMedium(sound_speed=1500), source=source, sensor=sensor)
+    if legacy:
+        opts = SimulationOptions(pml_inside=True, pml_size=[8, 8]), SimulationExecutionOptions(backend="python")
+        with pytest.warns(FutureWarning):
+            result = kspaceFirstOrder2D(**args, simulation_options=opts[0], execution_options=opts[1])
+    else:
+        result = kspaceFirstOrder(**args, pml_size=8, pml_inside=True, quiet=True)
+    assert result["p_final"].shape == result["ux_final"].shape == result["uy_final"].shape == (64, 64)
+    np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
+
+
+def test_1d_sensor_aggregates_not_pml_stripped(grid_1d):
+    sensor = kSensor(mask=np.arange(64) % 2 == 0)
+    sensor.record = ["p", "p_max", "p_min", "p_rms", "ux", "ux_max", "ux_min", "ux_rms"]
+    result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), _p0_source((64,)), sensor, pml_size=4, quiet=True)
+    for f in ("p", "ux"):
+        np.testing.assert_array_equal(result[f"{f}_max"], result[f].max(axis=-1))
+        np.testing.assert_array_equal(result[f"{f}_min"], result[f].min(axis=-1))
+        np.testing.assert_allclose(result[f"{f}_rms"], np.sqrt(np.mean(result[f] ** 2, axis=-1)))
+
+
+@pytest.mark.parametrize(
+    "shape,pml_alpha,smooth_p0,amp",
+    [((32, 30), 2.0, False, 1), ((32, 30), 0.0, True, 1), ((32, 30), 2.0, True, 0), ((24, 22, 20), [0.0, 2.0], False, 1)],
+)
+def test_legacy_pml_outside_matches_unified(shape, pml_alpha, smooth_p0, amp):
+    from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+    from kwave.kspaceFirstOrder3D import kspaceFirstOrder3D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
+    from kwave.utils.filters import smooth
+
+    kgrid = kWaveGrid(Vector(list(shape)), Vector([0.1e-3] * len(shape)))
+    kgrid.setTime(20, 1e-8)
+    sensor = kSensor(mask=np.arange(np.prod(shape)).reshape(shape) % 7 == 0)
+    sensor.record = ["p", "p_final", "u_final"]
+    args, source, flat = dict(kgrid=kgrid, medium=kWaveMedium(sound_speed=1500), sensor=sensor), _p0_source(shape), kSource()
+    source.p0 *= amp
+    flat.p0 = source.p0.ravel() if len(shape) == 2 else source.p0  # a flattened p0 is reshaped to the grid
+    flat_sensor = kSensor(mask=sensor.mask.ravel() if len(shape) == 2 else sensor.mask)  # so is a flattened sensor mask
+    flat_sensor.record = sensor.record
+    options = SimulationOptions(pml_inside=False, pml_size=4, pml_alpha=pml_alpha, smooth_p0=smooth_p0)  # scalar pml_size
+    with pytest.warns(FutureWarning):
+        legacy = (kspaceFirstOrder2D if len(shape) == 2 else kspaceFirstOrder3D)(
+            **dict(args, sensor=flat_sensor),
+            source=flat,
+            simulation_options=options,
+            execution_options=SimulationExecutionOptions(backend="python"),
+        )
+    if smooth_p0 and amp:  # legacy smooths p0 on the user grid, before padding; an all-zero p0 is left alone
+        source.p0 = smooth(source.p0, restore_max=True)
+    unified = kspaceFirstOrder(**args, source=source, pml_size=4, pml_alpha=pml_alpha, smooth_p0=False, quiet=True)
+    assert legacy["p_final"].shape == legacy["ux_final"].shape == shape  # cropped by pml_size even where pml_alpha == 0
+    for key in unified:
+        np.testing.assert_array_equal(legacy[key], unified[key], err_msg=key)
+
+
+@pytest.mark.parametrize("sensor", [None, kSensor()], ids=["no_sensor", "no_mask"])
+def test_pml_outside_without_mask_records_user_grid(grid_2d, sensor):
+    args = (grid_2d, kWaveMedium(sound_speed=1500), _p0_source((64, 64)))
+    full = kSensor(mask=np.ones((64, 64), dtype=bool))
+    np.testing.assert_array_equal(
+        kspaceFirstOrder(*args, sensor, pml_size=4, quiet=True)["p"], kspaceFirstOrder(*args, full, pml_size=4, quiet=True)["p"]
+    )
+
+
 def test_pressure_source_scaled_by_dx_on_anisotropic_grid():
     """MATLAB / C++ convention: an additive pressure source adds 2*dt/(N*c0*dx) to every density split, also when dx != dy."""
     N, (dx, dy), dt, c0 = (16, 12), (1e-4, 1.5e-4), 1e-8, 1500.0

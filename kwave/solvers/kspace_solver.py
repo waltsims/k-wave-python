@@ -145,6 +145,7 @@ class Simulation:
         smooth_p0=True,
         pml_size=None,
         pml_alpha=None,
+        pml_inside=False,
         quiet=False,
         dtype=None,
     ):
@@ -158,6 +159,9 @@ class Simulation:
         self.quiet = quiet
         self._pml_size_override = pml_size
         self._pml_alpha_override = pml_alpha
+        # True: the PML is part of the caller's grid, so ``*_final`` fields are returned over the full grid.
+        # False: the caller padded the grid for the PML, so ``*_final`` fields are cropped to the interior.
+        self.pml_inside = pml_inside
         # Compute precision for state arrays. ``None`` defaults to float64 (matches
         # MATLAB k-Wave). Only float32 / float64 are validated by the solver.
         if dtype is None:
@@ -386,7 +390,8 @@ class Simulation:
                 pml_alpha = float(self._pml_alpha_override[axis])
             else:
                 pml_alpha = float(getattr(self.kgrid, f"pml_alpha_{name}", 0))
-            self.pml_sizes.append(pml_size if pml_alpha != 0 else 0)
+            # Crop by the PML thickness even when pml_alpha == 0: callers pad the grid by pml_size regardless of absorption
+            self.pml_sizes.append(pml_size)
 
             if pml_size == 0 or pml_alpha == 0:
                 shape = [1] * self.ndim
@@ -760,8 +765,9 @@ class Simulation:
         if "p" in result and any(f"u{a}" in result for a in "xyz"):
             if any(k.startswith("I") for k in self._requested_record):
                 result.update(acoustic_intensity(result))
-        # Final-state snapshots: interior grid (excluding PML) at last timestep
-        interior = tuple(slice(s, N - s if s else None) for s, N in zip(self.pml_sizes, self.grid_shape))
+        # Final-state snapshots at last timestep: full grid if the PML is inside the user grid, else interior (excluding PML)
+        pml_crop = (0,) * self.ndim if self.pml_inside else self.pml_sizes
+        interior = tuple(slice(s, N - s if s else None) for s, N in zip(pml_crop, self.grid_shape))
         if "p_final" in self._requested_record:
             result["p_final"] = _to_cpu(self.p[interior].copy())
         if any(f"u{a}_final" in self._requested_record for a in "xyz"):

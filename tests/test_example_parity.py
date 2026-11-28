@@ -110,7 +110,7 @@ def _run_with_binary_sensor(setup_fn, ndim, record=None):
 
 
 def _pml_crop(ndim):
-    """PML crop slices for p_final."""
+    """PML crop slices for p_final (pml_inside=True returns the full grid; compare the interior only)."""
     pml = PML_SIZE[ndim]
     return tuple(slice(pml, -pml) for _ in range(ndim))
 
@@ -184,7 +184,7 @@ class TestStandardExamples:
         if ndim == 1:
             matlab_pf = matlab_pf.ravel()
         matlab_pf = matlab_pf[_pml_crop(ndim)]
-        _assert_close(np.asarray(result["p_final"]), matlab_pf, "p_final", pf_thresh)
+        _assert_close(np.asarray(result["p_final"])[_pml_crop(ndim)], matlab_pf, "p_final", pf_thresh)
 
 
 # ---------------------------------------------------------------------------
@@ -209,7 +209,7 @@ class TestIVPRecordingParticleVelocity:
 
     def test_p_final(self, scenario):
         result, ref, shape = scenario
-        _assert_close(np.asarray(result["p_final"]), ref["p_final"][_pml_crop(2)], "p_final")
+        _assert_close(np.asarray(result["p_final"])[_pml_crop(2)], ref["p_final"][_pml_crop(2)], "p_final")
 
     def test_ux(self, scenario):
         result, ref, shape = scenario
@@ -278,7 +278,7 @@ class TestNAOptimisingPerformance:
     def test_p_final(self, scenario):
         result, ref = scenario
         _assert_close(
-            np.asarray(result["p_final"]),
+            np.asarray(result["p_final"])[_pml_crop(2)],
             ref["p_final"][_pml_crop(2)],
             "p_final",
         )
@@ -336,7 +336,7 @@ class TestNASourceSmoothing:
     @pytest.mark.parametrize("label", ["no_window", "hanning", "blackman"])
     def test_p_final(self, scenario, label):
         results, ref = scenario
-        py_pf = np.asarray(results[label]["p_final"])
+        py_pf = np.asarray(results[label]["p_final"])[_pml_crop(1)]
         mat_pf = ref[f"p_final_{label}"]
         mat_pf = mat_pf[_pml_crop(1)]
         _assert_close(py_pf, mat_pf, f"p_final_{label}", thresh=THRESH_TVSP)
