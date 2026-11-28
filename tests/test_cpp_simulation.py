@@ -3,6 +3,7 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import h5py
@@ -97,6 +98,31 @@ class TestResolveBinaryPath:
         sim._execute("input.h5", "output.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
 
         assert binary.stat().st_mode & stat.S_IEXEC
+
+
+@pytest.mark.parametrize(
+    "record, start, flags",
+    [
+        (None, 1, ["--p_raw", "-s", "1"]),
+        (["p_max"], 1, ["--p_max", "-s", "1"]),
+        (["p", "p_max", "p_min"], 5, ["--p_max", "--p_min", "--p_raw", "-s", "5"]),
+        (["u", "ux_staggered", "uy_final"], 1, ["--u_final", "--u_non_staggered_raw", "--u_raw", "-s", "1"]),
+    ],
+)
+def test_record_flags(record, start, flags, monkeypatch):
+    """Issue #809: sensor.record / record_start_index become binary output flags."""
+    sensor = SimpleNamespace(mask=None, record=record, record_start_index=start)
+    sim = CppSimulation(SimpleNamespace(dim=2, Nt=9), None, None, sensor, pml_size=(2, 2), pml_alpha=(2, 2))
+    monkeypatch.setattr(CppSimulation, "_resolve_binary_path", staticmethod(lambda device, binary_path=None: Path(sys.executable)))
+    monkeypatch.setattr(subprocess, "run", lambda command, **kw: setattr(sim, "command", command))
+    sim._execute("in.h5", "out.h5", device="cpu", num_threads=None, device_num=None, quiet=False, debug=False)
+    assert sim.command[5:] == flags
+
+
+@pytest.mark.parametrize("sensor, match", [(dict(record=["p", f]), f"{f}.*backend='python'") for f in ("u_max", "ux_rms", "I", "I_avg", "u_max_all")] + [(dict(record_start_index=s), "record_start_index") for s in (0, 10)])  # fmt: skip
+def test_unsupported_record_raises(sensor, match):
+    with pytest.raises(ValueError, match=match):
+        CppSimulation(SimpleNamespace(dim=2, Nt=9), None, None, SimpleNamespace(**sensor), pml_size=(2, 2), pml_alpha=(2, 2))
 
 
 @pytest.mark.parametrize("sig", [np.arange(1.0, 6.0), np.ones(1)])  # incl. a one-sample signal, expanded to (n_points, 1)
