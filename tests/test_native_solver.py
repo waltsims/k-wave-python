@@ -379,6 +379,37 @@ class TestCoverageEdgeCases:
             kspaceFirstOrder(kgrid, kWaveMedium(sound_speed=1500), kSource(), device="tpu")
 
 
+@pytest.mark.parametrize("legacy", [False, True])
+def test_pml_inside_final_fields_cover_full_grid(grid_2d, legacy):
+    from kwave.kspaceFirstOrder2D import kspaceFirstOrder2D
+    from kwave.options.simulation_execution_options import SimulationExecutionOptions
+    from kwave.options.simulation_options import SimulationOptions
+
+    sensor = kSensor(mask=np.ones((64, 64), dtype=bool))
+    sensor.record = ["p", "p_final", "u_final"]
+    source = _p0_source((64, 64))
+    source.p0 = np.roll(source.p0, 9, axis=0)
+    args = dict(kgrid=grid_2d, medium=kWaveMedium(sound_speed=1500), source=source, sensor=sensor)
+    if legacy:
+        opts = SimulationOptions(pml_inside=True, pml_size=[8, 8]), SimulationExecutionOptions(backend="python")
+        with pytest.warns(FutureWarning):
+            result = kspaceFirstOrder2D(**args, simulation_options=opts[0], execution_options=opts[1])
+    else:
+        result = kspaceFirstOrder(**args, pml_size=8, pml_inside=True, quiet=True)
+    assert result["p_final"].shape == result["ux_final"].shape == result["uy_final"].shape == (64, 64)
+    np.testing.assert_allclose(result["p_final"].ravel(), result["p"][:, -1])
+
+
+def test_1d_sensor_aggregates_not_pml_stripped(grid_1d):
+    sensor = kSensor(mask=np.arange(64) % 2 == 0)
+    sensor.record = ["p", "p_max", "p_min", "p_rms", "ux", "ux_max", "ux_min", "ux_rms"]
+    result = kspaceFirstOrder(grid_1d, kWaveMedium(sound_speed=1500), _p0_source((64,)), sensor, pml_size=4, quiet=True)
+    for f in ("p", "ux"):
+        np.testing.assert_array_equal(result[f"{f}_max"], result[f].max(axis=-1))
+        np.testing.assert_array_equal(result[f"{f}_min"], result[f].min(axis=-1))
+        np.testing.assert_allclose(result[f"{f}_rms"], np.sqrt(np.mean(result[f] ** 2, axis=-1)))
+
+
 def test_pressure_source_scaled_by_dx_on_anisotropic_grid():
     """MATLAB / C++ convention: an additive pressure source adds 2*dt/(N*c0*dx) to every density split, also when dx != dy."""
     N, (dx, dy), dt, c0 = (16, 12), (1e-4, 1.5e-4), 1e-8, 1500.0

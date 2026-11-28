@@ -27,4 +27,6 @@ def run_python_backend(kgrid, medium, source, sensor, simulation_options, execut
         smooth_p0=getattr(simulation_options, "smooth_p0", True),
         pml_size=tuple(pml_size),
         pml_alpha=tuple(pml_alpha),
+        # The legacy bridge never pads the grid, so with pml_inside=True the *_final fields must cover the whole grid
+        pml_inside=getattr(simulation_options, "pml_inside", False),
     ).run()

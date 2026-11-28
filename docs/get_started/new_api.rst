@@ -91,7 +91,9 @@ boundary.  Three controls:
 
 By default (``pml_inside=False``), the grid is automatically expanded so
 the PML sits outside your domain.  Full-grid output fields (``_final``,
-``_max``, etc.) are cropped back to the original size.
+``_max_all``, etc.) are cropped back to the original size.  With
+``pml_inside=True`` they are returned over the whole grid you supplied,
+PML region included.
 
 Save-Only Mode (Cluster Submission)
 ------------------------------------
